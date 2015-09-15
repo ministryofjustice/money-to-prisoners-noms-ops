@@ -4,6 +4,7 @@ from django.test import SimpleTestCase
 from django.core.urlresolvers import reverse
 
 from moj_auth.tests.utils import generate_tokens
+from .data import VALID_FILE_PATH, EXPECTED_VALID_LOCATIONS
 
 
 class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
@@ -38,3 +39,20 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
 
     def test_requires_login_dashboard(self):
         self.check_login_redirect(reverse('dashboard'))
+
+    def test_requires_login_upload(self):
+        self.check_login_redirect(reverse('location_file_upload'))
+
+    @mock.patch('prisoner_location_admin.forms.api_client')
+    def test_location_file_upload(self, mock_api_client):
+        self.login()
+
+        conn = mock_api_client.get_connection().prisoner_locations
+        conn.post.return_value = 200
+
+        with open(VALID_FILE_PATH) as f:
+            response = self.client.post(reverse('location_file_upload'),
+                                        {'location_file': f})
+
+        conn.post.assert_called_with(EXPECTED_VALID_LOCATIONS)
+        self.assertRedirects(response, reverse('dashboard'))
