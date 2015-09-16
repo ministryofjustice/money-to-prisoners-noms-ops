@@ -2,9 +2,10 @@ from unittest import mock
 
 from django.test import SimpleTestCase
 from django.core.urlresolvers import reverse
-
+from slumber.exceptions import HttpClientError
 from moj_auth.tests.utils import generate_tokens
-from .data import VALID_FILE_PATH, EXPECTED_VALID_LOCATIONS
+
+from . import generate_testable_location_data, get_csv_data_as_file
 
 
 class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
@@ -50,9 +51,30 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
         conn = mock_api_client.get_connection().prisoner_locations
         conn.post.return_value = 200
 
-        with open(VALID_FILE_PATH) as f:
-            response = self.client.post(reverse('location_file_upload'),
-                                        {'location_file': f})
+        file_data, expected_data = generate_testable_location_data()
 
-        conn.post.assert_called_with(EXPECTED_VALID_LOCATIONS)
+        response = self.client.post(
+            reverse('location_file_upload'),
+            {'location_file': get_csv_data_as_file(file_data)}
+        )
+
+        conn.post.assert_called_with(expected_data)
         self.assertRedirects(response, reverse('dashboard'))
+
+    @mock.patch('prisoner_location_admin.forms.api_client')
+    def test_location_file_upload_api_error_displays_message(self, mock_api_client):
+        self.login()
+
+        api_error_message = "Bad Request"
+
+        conn = mock_api_client.get_connection().prisoner_locations
+        conn.post.side_effect = HttpClientError(content=api_error_message)
+
+        file_data, _ = generate_testable_location_data()
+
+        response = self.client.post(
+            reverse('location_file_upload'),
+            {'location_file': get_csv_data_as_file(file_data)}
+        )
+
+        self.assertContains(response, api_error_message)

@@ -3,7 +3,7 @@ import io
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from slumber.exceptions import SlumberHttpBaseException
+from slumber.exceptions import HttpClientError
 
 from moj_auth import api_client
 
@@ -24,7 +24,7 @@ class LocationFileUploadForm(forms.Form):
         for row in location_reader:
             if len(row) != EXPECTED_ROW_LENGTH:
                 raise forms.ValidationError(
-                    _("Row has %s values, should have %s: %s"
+                    _("Row has %s columns, should have %s: %s"
                         % (len(row), EXPECTED_ROW_LENGTH, row)))
 
             locations.append({
@@ -45,5 +45,5 @@ class LocationFileUploadForm(forms.Form):
 
         try:
             client.prisoner_locations.post(locations)
-        except SlumberHttpBaseException as e:
+        except HttpClientError as e:
             raise forms.ValidationError(e.content)
