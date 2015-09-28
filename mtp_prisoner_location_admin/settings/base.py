@@ -13,6 +13,14 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import sys
+import json
+
+from os.path import abspath, join, dirname
+
+here = lambda *x: join(abspath(dirname(__file__)), *x)
+PROJECT_ROOT = here("..")
+root = lambda *x: join(abspath(PROJECT_ROOT), *x)
+bower_dir = lambda *x: join(json.load(open(root('..', '.bowerrc')))['directory'], *x)
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
@@ -22,6 +30,8 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -33,8 +43,15 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'prisoner_location_admin',
 )
+
+PROJECT_APPS = (
+    'moj_utils',
+    'widget_tweaks',
+    'prisoner_location_admin'
+)
+
+INSTALLED_APPS += PROJECT_APPS
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -51,7 +68,11 @@ ROOT_URLCONF = 'mtp_prisoner_location_admin.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['mtp_prisoner_location_admin/templates'],
+        'DIRS': [
+            root('templates'),
+            bower_dir('mojular', 'templates'),
+            bower_dir('money-to-prisoners-common', 'templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -59,6 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'moj_utils.context_processors.debug',
             ],
         },
     },
@@ -92,6 +114,13 @@ USE_TZ = True
 
 STATIC_ROOT = 'static'
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    root('assets'),
+    bower_dir(),
+    bower_dir('mojular', 'assets'),
+    bower_dir('govuk-template', 'assets'),
+    bower_dir('money-to-prisoners-common', 'assets')
+]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

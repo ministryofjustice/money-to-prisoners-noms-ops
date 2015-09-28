@@ -1,0 +1,32 @@
+{
+  "name": "money-to-prisoners-prisoner-location-admin",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ministryofjustice/money-to-prisoners-prisoner-location-admin"
+  },
+  "bugs": {
+    "url": "https://github.com/ministryofjustice/money-to-prisoners-prisoner-location-admin/issues"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "config": {
+    "unsafe-perm": true
+  },
+  "scripts": {
+    "start": "./node_modules/gulp/bin/gulp.js serve",
+    "postinstall": "./node_modules/bower/bin/bower --allow-root install"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "bower": "latest",
+    "browser-sync": "^2.9.3",
+    "gulp": "^3.9.0",
+    "main-bower-files": "^2.9.0",
+    "nconf": "^0.7.2",
+    "yargs": "^3.24.0",
+    "money-to-prisoners-gulp-tasks": "ministryofjustice/money-to-prisoners-gulp-tasks#0.1.0"
+  }
+}
