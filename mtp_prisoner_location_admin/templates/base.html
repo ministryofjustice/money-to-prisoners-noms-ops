@@ -1,7 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head></head>
-<body>
-{% block content %}{% endblock %}
-</body>
-</html>
+{% extends 'mtp_base.html' %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Prisoner Location Admin" %}{% endblock %}
+
+{% block proposition %}{% trans "Prisoner Location Admin" %}{% endblock %}

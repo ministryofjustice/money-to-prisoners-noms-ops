@@ -5,6 +5,9 @@ staticfiles/
 media/
 .build
 
+# Sass-cache
+*.sass-cache/
+
 # sublime stuff
 *.sublime-workspace
 *.sublime-project
@@ -17,6 +20,12 @@ venv/
 
 # Ignore settings/local.py
 */settings/local.py
+
+# Node Stuff
+node_modules
+
+mtp_prisoner_location_admin/assets-src/bower_components
+mtp_prisoner_location_admin/assets/
 
 # Docker make targets
 .dev_django_container

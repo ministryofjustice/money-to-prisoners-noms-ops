@@ -1,9 +1,5 @@
-{% extends "base.html" %}
+{% extends 'auth/login.html' %}{% load i18n %}
 
-{% block content %}
-<form action="{% url "login" %}" method="post">
-	{% csrf_token %}
-	{{ form }}
-	<input type="submit" value="Submit" />
-</form>
+{% block auth_title %}
+  {% trans 'Upload Prisoner Locations' %}
 {% endblock %}
