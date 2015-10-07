@@ -32,6 +32,10 @@ class LocationFileUploadFormTestCase(SimpleTestCase):
         form = LocationFileUploadForm(request.POST, request.FILES, request=request)
 
         self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors['location_file'],
+            ["Row has 2 columns, should have 3: ['A1234GY', '1997-9-2']"]
+        )
 
     def test_location_file_empty_file_invalid(self):
         request = self.factory.post(
@@ -41,3 +45,7 @@ class LocationFileUploadFormTestCase(SimpleTestCase):
         form = LocationFileUploadForm(request.POST, request.FILES, request=request)
 
         self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors['location_file'],
+            ["The submitted file is empty."]
+        )
