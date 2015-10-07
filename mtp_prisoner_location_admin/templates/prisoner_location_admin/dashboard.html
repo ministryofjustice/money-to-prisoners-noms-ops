@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block content %}
+<a href="{% url "location_file_upload" %}">{% trans "Updata Prisoner Locations" %}</a>
 {% endblock %}
