@@ -81,6 +81,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'moj_utils.context_processors.debug',
+                'moj_utils.context_processors.analytics',
             ],
         },
     },
@@ -134,6 +135,8 @@ API_CLIENT_SECRET = os.environ.get('API_CLIENT_SECRET', 'prisoner-locations')
 API_URL = os.environ.get('API_URL', 'http://localhost:8000')
 
 OAUTHLIB_INSECURE_TRANSPORT = True
+
+GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', None)
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
