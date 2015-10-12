@@ -7,7 +7,7 @@ from slumber.exceptions import HttpClientError
 
 from moj_auth import api_client
 
-EXPECTED_ROW_LENGTH = 3
+EXPECTED_ROW_LENGTH = 4
 
 
 class LocationFileUploadForm(forms.Form):
@@ -28,9 +28,10 @@ class LocationFileUploadForm(forms.Form):
                         % (len(row), EXPECTED_ROW_LENGTH, row)))
 
             locations.append({
-                'prisoner_number': row[0],
-                'prisoner_dob': row[1],
-                'prison': row[2]
+                'prisoner_name': row[0],
+                'prisoner_number': row[1],
+                'prisoner_dob': row[2],
+                'prison': row[3],
             })
 
         if len(locations) == 0:
