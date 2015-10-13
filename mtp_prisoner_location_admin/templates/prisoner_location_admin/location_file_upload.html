@@ -1,9 +1,17 @@
 {% extends "base.html" %}
+{% load i18n staticfiles %}
 
 {% block content %}
-<form action="{% url "location_file_upload" %}" method="post" enctype="multipart/form-data">
+<h1>{% trans "Upload Location File" %}</h1>
+<form action="{% url "location_file_upload" %}"
+			method="post"
+			enctype="multipart/form-data"
+			class="js-uploadSubmit">
 	{% csrf_token %}
+	<label for="id_location_file">{% trans "Choose file to upload" %}</label>
+	<br/>
 	{{ form }}
-	<input type="submit" value="Submit" />
+	<br/>
+	<input type="submit" value="{% trans "Upload file" %}" class="button" data-value-uploading="{% trans "Uploading" %}"/>
 </form>
 {% endblock %}
