@@ -11,7 +11,7 @@ EXPECTED_ROW_LENGTH = 4
 
 
 class LocationFileUploadForm(forms.Form):
-    location_file = forms.FileField(required=True)
+    location_file = forms.FileField(required=True, label='')
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
