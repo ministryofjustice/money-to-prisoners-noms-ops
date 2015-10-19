@@ -23,6 +23,7 @@ venv/
 
 # Node Stuff
 node_modules
+npm-debug.log
 
 mtp_prisoner_location_admin/assets-src/bower_components
 mtp_prisoner_location_admin/assets/
