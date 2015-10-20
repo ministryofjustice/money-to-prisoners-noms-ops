@@ -29,6 +29,43 @@ var sharedSteps = function(){
   });
 
   /**
+   * Choose a CSV file to upload
+   *
+   * Usage: When I select a valid file to upload
+   * Usage: When I select an invalid file to upload
+   * @params {string} valid "a valid" if the file to be uploaded is valid
+   */
+  this.When(/^I select (a valid|an invalid) CSV file to upload$/, function(valid, next) {
+    var fileName = valid === 'a valid' ? 'valid.csv' : 'invalid.csv';
+    browser
+      .chooseFile('#id_location_file',
+        process.cwd() + '/test/features/' + fileName, next);
+  });
+
+  /**
+   * Submit an upload form
+   *
+   * Usage: When I submit the upload form
+   */
+  this.When(/^I submit the form$/, function(next) {
+    browser.submitForm('form.js-uploadSubmit', next);
+  });
+
+  /**
+   * Check if a link exists
+   *
+   * Usage: Then I should see a "Click here" link to  "/file.txt"
+   * @params {string} linkText the text of the link
+   * @params {string} linkTarget the text of the link's target
+   */
+  this.Then(/^I should see a "([^"]+)" link to "([^"]+)"$/, function (linkText, linkTarget, next) {
+    browser
+      .getSource('body')
+      .should.eventually.contain('<a href="' + linkTarget + '/">' + linkText + '</a>')
+      .and.notify(next);
+  });
+
+  /**
    * Check the current body content contains
    * supplied text
    *
