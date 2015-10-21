@@ -5,10 +5,5 @@ Feature: Signing in
 
   Scenario: Successful sign in
     Given I am on the "Sign in" page
-    When I sign in with "test_prison_1" and "test_prison_1"
-    Then I should see "Logged in as test_prison_1"
-
-  Scenario: Unsuccessful sign in
-    Given I am on the "Sign in" page
-    When I sign in with "doesnt_exist" and "doesnt_exist"
-    Then I should see "There was a problem submitting the form"
+    When I sign in with "prisoner_location_admin" and "prisoner_location_admin"
+    Then I should see "Logged in as prisoner_location_admin"
