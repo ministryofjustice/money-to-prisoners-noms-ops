@@ -7,7 +7,7 @@ Feature: Uploading
   Scenario: go to the upload page
     Given I am signed in
     And I go to the "Upload" page
-    Then I should see "Upload Location File"
+    Then I should see "Upload location file"
 
   Scenario: upload a valid file
     Given I am signed in

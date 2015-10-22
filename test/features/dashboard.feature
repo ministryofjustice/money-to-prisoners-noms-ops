@@ -6,4 +6,4 @@ Feature: Signing in
   Scenario: Go to the upload page
     Given I am signed in
     And I go to the "Dashboard" page
-    Then I should see a "Update Prisoner Locations" link to "/upload"
+    Then I should see a "Update prisoner locations" link to "/upload"
