@@ -38,9 +38,6 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
         }
         self.assertRedirects(response, redirect_url)
 
-    def test_requires_login_dashboard(self):
-        self.check_login_redirect(reverse('dashboard'))
-
     def test_requires_login_upload(self):
         self.check_login_redirect(reverse('location_file_upload'))
 
@@ -59,7 +56,7 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
         )
 
         conn.post.assert_called_with(expected_data)
-        self.assertRedirects(response, reverse('dashboard'))
+        self.assertRedirects(response, reverse('location_file_upload'))
 
     @mock.patch('prisoner_location_admin.forms.api_client')
     def test_location_file_upload_api_error_displays_message(self, mock_api_client):

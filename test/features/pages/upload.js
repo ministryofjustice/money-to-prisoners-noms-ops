@@ -13,7 +13,7 @@ var UploadPage = function (client) {
 
   this.get = function (callback) {
     client
-      .url('/upload')
+      .url('/')
       .call(callback);
   };
 
