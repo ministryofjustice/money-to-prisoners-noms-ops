@@ -10,7 +10,7 @@ from .forms import LocationFileUploadForm
 class LocationFileUploadView(FormView):
     template_name = 'prisoner_location_admin/location_file_upload.html'
     form_class = LocationFileUploadForm
-    success_url = reverse_lazy('dashboard')
+    success_url = reverse_lazy('location_file_upload')
 
     def get_form_kwargs(self):
         kwargs = super(LocationFileUploadView, self).get_form_kwargs()

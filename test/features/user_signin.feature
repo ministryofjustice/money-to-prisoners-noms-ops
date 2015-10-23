@@ -7,3 +7,4 @@ Feature: Signing in
     Given I am on the "Sign in" page
     When I sign in with "prisoner_location_admin" and "prisoner_location_admin"
     Then I should see "Logged in as prisoner_location_admin"
+    And I should see "Upload location file"
