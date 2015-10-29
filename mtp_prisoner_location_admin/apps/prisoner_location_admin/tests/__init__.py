@@ -7,9 +7,9 @@ from django.utils.crypto import get_random_string
 TEST_PRISONS = ['048', '067', '054']
 
 
-def get_csv_data_as_file(data):
+def get_csv_data_as_file(data, filename='example.csv'):
     return SimpleUploadedFile(
-        'example.csv',
+        filename,
         bytes(data, 'utf-8'),
         content_type='text/csv'
     )

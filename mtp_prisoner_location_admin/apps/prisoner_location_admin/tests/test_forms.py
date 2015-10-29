@@ -49,3 +49,18 @@ class LocationFileUploadFormTestCase(SimpleTestCase):
             form.errors['location_file'],
             ["The submitted file is empty."]
         )
+
+    def test_location_file_not_csv_invalid(self):
+        file_data, _ = generate_testable_location_data()
+
+        request = self.factory.post(
+            reverse('location_file_upload'),
+            {'location_file': get_csv_data_as_file(file_data, 'badfile.exe')}
+        )
+        form = LocationFileUploadForm(request.POST, request.FILES, request=request)
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors['location_file'],
+            ["Uploaded file must be a CSV"]
+        )
