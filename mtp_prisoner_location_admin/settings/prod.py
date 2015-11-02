@@ -14,3 +14,9 @@ ALLOWED_HOSTS = [
     '.dsd.io',
     '.service.gov.uk'
 ]
+
+# security tightening
+SECURE_SSL_REDIRECT = True  # also done at nginx level
+SECURE_HSTS_SECONDS = 300
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
