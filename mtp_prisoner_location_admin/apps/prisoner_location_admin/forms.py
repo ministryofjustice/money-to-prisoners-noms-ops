@@ -19,13 +19,17 @@ class LocationFileUploadForm(forms.Form):
 
     def clean_location_file(self):
         locations = []
+
+        if not self.cleaned_data['location_file'].name.endswith('.csv'):
+            raise forms.ValidationError(_("Uploaded file must be a CSV"))
+
         location_reader = csv.reader(
             io.StringIO(self.cleaned_data['location_file'].read().decode('utf-8')))
         for row in location_reader:
             if len(row) != EXPECTED_ROW_LENGTH:
                 raise forms.ValidationError(
-                    _("Row has %s columns, should have %s: %s"
-                        % (len(row), EXPECTED_ROW_LENGTH, row)))
+                    _("Row has %s columns, should have %s: %s")
+                    % (len(row), EXPECTED_ROW_LENGTH, row))
 
             locations.append({
                 'prisoner_name': row[0],
