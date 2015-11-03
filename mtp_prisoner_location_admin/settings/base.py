@@ -20,7 +20,9 @@ from os.path import abspath, join, dirname
 here = lambda *x: join(abspath(dirname(__file__)), *x)
 PROJECT_ROOT = here("..")
 root = lambda *x: join(abspath(PROJECT_ROOT), *x)
-bower_dir = lambda *x: join(json.load(open(root('..', '.bowerrc')))['directory'], *x)
+with open(root('..', '.bowerrc')) as _bowerrc:
+    _bower_path = json.load(_bowerrc)['directory']
+bower_dir = lambda *x: join(_bower_path, *x)
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
@@ -89,6 +91,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mtp_prisoner_location_admin.wsgi.application'
 
+# security tightening
+# some overridden in prod/docker settings where SSL is ensured
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = False
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
