@@ -20,14 +20,14 @@
     "test-init": "./node_modules/.bin/selenium-standalone install",
     "test-headless": "./node_modules/.bin/wdio test/wdio.headless.conf.js",
     "test-wip": "./node_modules/.bin/wdio test/wdio.wip.conf.js",
-    "postinstall": "./node_modules/bower/bin/bower --allow-root install"
+    "postinstall": "./node_modules/.bin/bower --allow-root install"
   },
   "license": "MIT",
   "dependencies": {
     "bower": "latest",
     "gulp": "^3.9.0",
     "main-bower-files": "^2.9.0",
-    "money-to-prisoners-gulp-tasks": "ministryofjustice/money-to-prisoners-gulp-tasks#0.1.0",
+    "money-to-prisoners-gulp-tasks": "ministryofjustice/money-to-prisoners-gulp-tasks#0.1.1",
     "nconf": "^0.7.2"
   },
   "devDependencies": {
