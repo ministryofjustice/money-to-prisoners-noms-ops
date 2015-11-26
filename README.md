@@ -81,4 +81,4 @@ visit http://**boot2docker ip**:3000/
 Make sure you have a version of the [API](https://github.com/ministryofjustice/money-to-prisoners-api) server
 running on port 8000.
 
-You should be able to log into the app using the following credentials: *prisoner_location_admin / prisoner_location_admin*
+You should be able to log into the app using the following credentials: *prisoner-location-admin / prisoner-location-admin*
