@@ -14,4 +14,5 @@ urlpatterns = [
         }, name='logout'
     ),
     url(r'^', include('prisoner_location_admin.urls')),
+    url(r'^', include('feedback.urls')),
 ]
