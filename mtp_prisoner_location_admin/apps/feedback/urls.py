@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import url
 from zendesk_tickets import views
 
@@ -7,6 +8,7 @@ urlpatterns = [
             'template_name': 'feedback/submit_feedback.html',
             'success_redirect_url': '',
             'subject': 'MTP Prisoner Location Admin Feedback',
-            'tags': ['feedback', 'mtp', 'prisoner-location-admin']
+            'tags': ['feedback', 'mtp', 'prisoner-location-admin',
+                     settings.ENVIRONMENT]
         }, name='submit_ticket'),
 ]
