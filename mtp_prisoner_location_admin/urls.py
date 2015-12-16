@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from django.core.urlresolvers import reverse_lazy
 
 from moj_auth import views
-from moj_utils.views import HealthcheckView, PingJsonView
+from moj_irat.views import HealthcheckView, PingJsonView
 
 urlpatterns = [
     url(r'^login/$', views.login, {
