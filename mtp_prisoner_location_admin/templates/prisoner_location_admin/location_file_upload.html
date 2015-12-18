@@ -3,6 +3,9 @@
 
 {% block content %}
 <h1>{% trans "Upload location file" %}</h1>
+
+{% include "includes/message_box.html" %}
+
 <form action="{% url "location_file_upload" %}"
       method="post"
       enctype="multipart/form-data"
