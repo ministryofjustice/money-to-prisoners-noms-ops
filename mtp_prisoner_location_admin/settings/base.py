@@ -30,6 +30,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.contenttypes',
+    'django.contrib.auth',
 )
 PROJECT_APPS = (
     'moj_utils',
