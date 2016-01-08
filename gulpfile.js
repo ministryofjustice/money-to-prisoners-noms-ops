@@ -29,8 +29,7 @@ var paths = {
   src: appBase + 'assets-src/',
   dest: appBase + 'assets/',
   govukElements: 'node_modules/mojular-govuk-elements/',
-  common: 'node_modules/money-to-prisoners-common/assets/',
-  hopscotchHighlight: 'node_modules/hopscotch-highlight/src/'
+  common: 'node_modules/money-to-prisoners-common/assets/'
 };
 
 var mojularLoadPaths = require('mojular/sass-paths')([
@@ -41,9 +40,7 @@ var mojularLoadPaths = require('mojular/sass-paths')([
 function getLoadPaths () {
   var paths = [
    'node_modules/money-to-prisoners-common/assets/scss',
-   'node_modules/breakpoint-sass/stylesheets',
-   'node_modules/hopscotch/dist/css',
-   'node_modules/hopscotch-highlight/src/stylesheets'
+   'node_modules/breakpoint-sass/stylesheets'
  ];
 
  return paths;
@@ -108,8 +105,7 @@ gulp.task('images', ['clean:images'], getTask('images', {
   src: [
     paths.src + 'images/**/*',
     paths.govukElements + 'images/**/*',
-    paths.common + 'images/**/*',
-    paths.hopscotchHighlight + 'images/**/*'
+    paths.common + 'images/**/*'
   ],
   dest: paths.dest + 'images'
 }));

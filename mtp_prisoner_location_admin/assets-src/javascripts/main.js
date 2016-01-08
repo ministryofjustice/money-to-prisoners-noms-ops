@@ -1,4 +1,4 @@
-/* globals require, console */
+/* globals require */
 
 (function() {
   'use strict';
@@ -11,7 +11,6 @@
       require('mojular-moj-elements'),
       require('dialog'),
       require('batch-validation'),
-      require('feature-tour'),
       require('messages'),
       require('print'),
       require('polyfills'),

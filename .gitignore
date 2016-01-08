@@ -2,6 +2,7 @@
 include/
 lib/
 staticfiles/
+static/
 media/
 .build
 
@@ -25,7 +26,6 @@ venv/
 node_modules
 npm-debug.log
 
-mtp_prisoner_location_admin/assets-src/bower_components
 mtp_prisoner_location_admin/assets/
 
 # Docker make targets
@@ -33,3 +33,7 @@ mtp_prisoner_location_admin/assets/
 
 # failed test screenshots
 test/errorshots/
+
+# testing log
+ghostdriver.log
+
