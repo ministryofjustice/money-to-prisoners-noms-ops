@@ -1,11 +1,14 @@
 import csv
 import io
+import logging
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from slumber.exceptions import HttpClientError
 
 from moj_auth import api_client
+
+logger = logging.getLogger()
 
 EXPECTED_ROW_LENGTH = 4
 
@@ -51,4 +54,7 @@ class LocationFileUploadForm(forms.Form):
         try:
             client.prisoner_locations.post(locations)
         except HttpClientError as e:
+            logger.exception('Prisoner locations failed to upload')
             raise forms.ValidationError(e.content)
+
+        logger.info('Prisoner locations updated')
