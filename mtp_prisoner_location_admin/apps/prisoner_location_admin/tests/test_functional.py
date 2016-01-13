@@ -20,7 +20,7 @@ class FunctionalTestCase(LiveServerTestCase):
     def setUp(self):
         path = './node_modules/phantomjs/lib/phantom/bin/phantomjs'
         self.driver = webdriver.PhantomJS(executable_path=path)
-        self.driver.set_window_size(1000,1000)
+        self.driver.set_window_size(1000, 1000)
 
     def tearDown(self):
         self.driver.quit()
@@ -84,7 +84,6 @@ class UploadTests(FunctionalTestCase):
 
     def test_upload_invalid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
-        cwd = os.path.dirname(os.path.realpath(__file__))
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'invalid.csv'))
         el.submit()
         self.assertIn('Row has 5 columns, should have 4', self.driver.page_source)
