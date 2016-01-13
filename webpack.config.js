@@ -17,7 +17,7 @@ module.exports = {
     ],
     noParse: [
       /\.\/node_modules\/checked-polyfill\/checked-polyfill\.js$/
-   ]
+    ]
   },
   resolve: {
     root: [

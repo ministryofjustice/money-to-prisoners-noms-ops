@@ -1,7 +1,6 @@
 *.pyc
 include/
 lib/
-staticfiles/
 static/
 media/
 .build
@@ -26,6 +25,7 @@ venv/
 node_modules
 npm-debug.log
 
+# App assets
 mtp_prisoner_location_admin/assets/
 
 # Docker make targets
@@ -36,4 +36,3 @@ test/errorshots/
 
 # testing log
 ghostdriver.log
-
