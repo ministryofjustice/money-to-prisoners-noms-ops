@@ -1,14 +1,18 @@
+# do not run docker-compose directly, see README.md
+
+# NB: this is only used for local development
+# see Dockerfile for deployed version
+
 django:
   build: .
-  command: >
-    /bin/bash -c "
-    pip install -r requirements/dev.txt &&
-    python manage.py runserver 0.0.0.0:8003"
+  command: make start
   volumes:
-    - .:/app
-    - /tmp/pip_download_cache/:/tmp/pip_download_cache
+  # - .:/app
+    - /tmp/pip_download_cache:/root/.cache/pip
   ports:
     - "8003:8003"
   environment:
-    PIP_DOWNLOAD_CACHE: /tmp/pip_download_cache/
-    API_URL: http://localhost:8000
+    ENV: local
+    DEBUG: "True"
+    DJANGO_SECRET_KEY: CHANGE_ME
+    API_URL: http://${HOST_MACHINE_IP}:8000

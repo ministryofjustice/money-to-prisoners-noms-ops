@@ -10,6 +10,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mtp_prisoner_location_admin.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mtp_prisoner_location_admin.settings.docker')
 
 application = get_wsgi_application()
