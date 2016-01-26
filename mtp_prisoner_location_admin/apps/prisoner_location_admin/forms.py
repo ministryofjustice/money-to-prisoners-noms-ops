@@ -8,7 +8,7 @@ from slumber.exceptions import HttpClientError
 
 from moj_auth import api_client
 
-logger = logging.getLogger()
+logger = logging.getLogger('mtp')
 
 EXPECTED_ROW_LENGTH = 4
 
