@@ -22,8 +22,9 @@ class LocationFileUploadFormTestCase(SimpleTestCase):
         self.assertTrue(form.is_valid())
 
     def test_location_file_short_row_length_invalid(self):
-        file_data, _ = generate_testable_location_data()
-        file_data += '\nJohn Smith,A1234GY,1997-9-2'
+        file_data, _ = generate_testable_location_data(
+            extra_row='A1234GY,Smith,John,2/9/1997 00:00'
+        )
 
         request = self.factory.post(
             reverse('location_file_upload'),
@@ -34,7 +35,7 @@ class LocationFileUploadFormTestCase(SimpleTestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors['location_file'],
-            ["Row has 3 columns, should have 4: ['John Smith', 'A1234GY', '1997-9-2']"]
+            ["Row has 4 columns, should have 5: ['A1234GY', 'Smith', 'John', '2/9/1997 00:00']"]
         )
 
     def test_location_file_empty_file_invalid(self):
