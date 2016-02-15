@@ -6,6 +6,7 @@ import re
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+from form_error_reporting import GARequestErrorReportingMixin
 from slumber.exceptions import HttpClientError
 
 from moj_auth import api_client
@@ -19,7 +20,7 @@ DOB_PATTERN = re.compile(
 DATE_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
 
 
-class LocationFileUploadForm(forms.Form):
+class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
     location_file = forms.FileField(required=True, label='')
 
     def __init__(self, *args, **kwargs):
