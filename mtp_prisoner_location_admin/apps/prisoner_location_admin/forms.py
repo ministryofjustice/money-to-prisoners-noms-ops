@@ -87,11 +87,21 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
     def update_locations(self):
         locations = self.cleaned_data['location_file']
         client = api_client.get_connection(self.request)
+        user = self.request.user
+        username = user.user_data.get('username', 'Unknown')
+        user_description = user.get_full_name
+        if user_description:
+            user_description += ' (%s)' % username
+        else:
+            user_description = username
 
         try:
             client.prisoner_locations.post(locations)
         except HttpClientError as e:
-            logger.exception('Prisoner locations failed to upload')
+            logger.exception('Prisoner locations update by %s failed!' % user_description)
             raise forms.ValidationError(e.content)
 
-        logger.info('Prisoner locations updated')
+        logger.info('%d prisoner locations updated successfully by %s' % (
+            len(locations),
+            user_description,
+        ))
