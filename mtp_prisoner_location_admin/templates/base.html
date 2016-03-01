@@ -10,3 +10,9 @@
 {% block page_title %}{% trans "Prisoner location admin" %}{% endblock %}
 
 {% block proposition %}{% trans "Prisoner location admin" %}{% endblock %}
+
+{% block user_menu %}
+<span>
+  <a href="{% url 'password_change' %}">{% trans "Change password" %}</a>
+</span>
+{% endblock %}
