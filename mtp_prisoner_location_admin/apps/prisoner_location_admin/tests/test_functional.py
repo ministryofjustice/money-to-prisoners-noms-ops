@@ -125,7 +125,13 @@ class UploadTests(FunctionalTestCase):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'invalid.csv'))
         el.submit()
-        self.assertIn('Row has 5 columns, should have 4', self.driver.page_source)
+        self.assertIn('Row has 4 columns, should have 5', self.driver.page_source)
+
+    def test_upload_empty_file(self):
+        el = self.driver.find_element_by_xpath('//input[@type="file"]')
+        el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'empty.csv'))
+        el.submit()
+        self.assertIn('Location file does not seem to contain any valid rows', self.driver.page_source)
 
     def test_submit_file_upload_without_selecting_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
