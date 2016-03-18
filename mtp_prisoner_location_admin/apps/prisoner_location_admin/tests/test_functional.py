@@ -1,82 +1,20 @@
-import glob
-import logging
 import os
-import socket
-import unittest
-from urllib.parse import urlparse
 
-from django.conf import settings
-from django.test import LiveServerTestCase
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-
-logger = logging.getLogger('mtp')
+from mtp_utils.test_utils.functional_tests import FunctionalTestCase
 
 
-@unittest.skipUnless('RUN_FUNCTIONAL_TESTS' in os.environ, 'functional tests are disabled')
-class FunctionalTestCase(LiveServerTestCase):
+class PrisonerLocationAdminTestCase(FunctionalTestCase):
     """
-    Base class to define common methods to test subclasses below
+    Base class for all prisoner-location-admin functional tests
     """
-
-    @classmethod
-    def _databases_names(cls, include_mirrors=True):
-        # this app has no databases
-        return []
-
-    def setUp(self):
-        web_driver = os.environ.get('WEBDRIVER', 'phantomjs')
-        if web_driver == 'firefox':
-            fp = webdriver.FirefoxProfile()
-            fp.set_preference('browser.startup.homepage', 'about:blank')
-            fp.set_preference('startup.homepage_welcome_url', 'about:blank')
-            fp.set_preference('startup.homepage_welcome_url.additional', 'about:blank')
-            self.driver = webdriver.Firefox(firefox_profile=fp)
-        elif web_driver == 'chrome':
-            paths = glob.glob('node_modules/selenium-standalone/.selenium/chromedriver/*-chromedriver')
-            paths = filter(lambda path: os.path.isfile(path) and os.access(path, os.X_OK),
-                           paths)
-            try:
-                self.driver = webdriver.Chrome(executable_path=next(paths))
-            except StopIteration:
-                self.fail('Cannot find Chrome driver')
-        else:
-            path = './node_modules/phantomjs/lib/phantom/bin/phantomjs'
-            self.driver = webdriver.PhantomJS(executable_path=path)
-
-        self.driver.set_window_size(1000, 1000)
-
-    def tearDown(self):
-        self.driver.quit()
-
-    def load_test_data(self):
-        logger.info('Reloading test data')
-        try:
-            with socket.socket() as sock:
-                sock.connect((
-                    urlparse(settings.API_URL).netloc.split(':')[0],
-                    os.environ.get('CONTROLLER_PORT', 8800)
-                ))
-                sock.sendall(b'load_test_data')
-                response = sock.recv(1024).strip()
-                if response != b'done':
-                    logger.error('Test data not reloaded!')
-        except OSError:
-            logger.exception('Error communicating with test server controller socket')
-
-    def login(self, username, password):
-        self.driver.get(self.live_server_url)
-        login_field = self.driver.find_element_by_id('id_username')
-        login_field.send_keys(username)
-        password_field = self.driver.find_element_by_id('id_password')
-        password_field.send_keys(password + Keys.RETURN)
+    accessibility_scope_selector = '#content'
 
     def login_and_go_to(self, link_text):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
         self.driver.find_element_by_partial_link_text(link_text).click()
 
 
-class LoginTests(FunctionalTestCase):
+class LoginTests(PrisonerLocationAdminTestCase):
     """
     Tests for Login page
     """
@@ -94,16 +32,16 @@ class LoginTests(FunctionalTestCase):
 
     def test_good_login(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
-        self.assertEquals(self.driver.current_url, self.live_server_url + '/')
-        self.assertIn('Upload location file', self.driver.page_source)
+        self.assertCurrentUrl('/')
+        self.assertInSource('Upload location file')
 
     def test_logout(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
         self.driver.find_element_by_link_text('Sign out').click()
-        self.assertEqual(self.driver.current_url.split('?')[0], self.live_server_url + '/login/')
+        self.assertCurrentUrl('/login/')
 
 
-class UploadTests(FunctionalTestCase):
+class UploadTests(PrisonerLocationAdminTestCase):
     """
     Tests for Upload functionality
     """
@@ -113,27 +51,27 @@ class UploadTests(FunctionalTestCase):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
 
     def test_checking_upload_page(self):
-        self.assertIn('Upload location file', self.driver.page_source)
+        self.assertInSource('Upload location file')
 
     def test_upload_valid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'valid.csv'))
         el.submit()
-        self.assertIn('File uploaded successfully!', self.driver.page_source)
+        self.assertInSource('File uploaded successfully!')
 
     def test_upload_invalid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'invalid.csv'))
         el.submit()
-        self.assertIn('Row has 4 columns, should have 5', self.driver.page_source)
+        self.assertInSource('Row has 4 columns, should have 5')
 
     def test_upload_empty_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'empty.csv'))
         el.submit()
-        self.assertIn('Location file does not seem to contain any valid rows', self.driver.page_source)
+        self.assertInSource('Location file does not seem to contain any valid rows')
 
     def test_submit_file_upload_without_selecting_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.submit()
-        self.assertIn('This field is required', self.driver.page_source)
+        self.assertInSource('This field is required')
