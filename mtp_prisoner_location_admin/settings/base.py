@@ -118,6 +118,9 @@ LOGGING = {
             'format': '%(asctime)s [%(levelname)s] %(message)s',
             'datefmt': '%Y-%m-%dT%H:%M:%S',
         },
+        'elk': {
+            '()': 'mtp_utils.logging.ELKFormatter'
+        },
     },
     'handlers': {
         'null': {
@@ -127,7 +130,7 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+            'formatter': 'simple' if ENVIRONMENT == 'local' else 'elk',
         },
         'mail_admins': {
             'level': 'ERROR',
