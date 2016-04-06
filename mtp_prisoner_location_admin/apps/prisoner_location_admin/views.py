@@ -2,7 +2,7 @@ from django.views.generic.edit import FormView
 from django.core.urlresolvers import reverse_lazy
 from django import forms
 from django.contrib import messages
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ungettext
 
 from .forms import LocationFileUploadForm
 
@@ -19,9 +19,13 @@ class LocationFileUploadView(FormView):
 
     def form_valid(self, form):
         try:
-            form.update_locations()
-            messages.add_message(self.request, messages.SUCCESS,
-                                 _('File uploaded successfully!'))
+            location_count = form.update_locations()
+            message = ungettext(
+                '%d prisoner location updated successfully',
+                '%d prisoner locations updated successfully',
+                location_count
+            ) % location_count
+            messages.add_message(self.request, messages.SUCCESS, message)
             return super(LocationFileUploadView, self).form_valid(form)
         except forms.ValidationError as e:
             form.add_error(None, e)

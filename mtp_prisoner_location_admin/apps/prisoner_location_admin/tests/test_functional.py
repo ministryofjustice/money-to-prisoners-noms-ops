@@ -57,7 +57,7 @@ class UploadTests(PrisonerLocationAdminTestCase):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'valid.csv'))
         el.submit()
-        self.assertInSource('File uploaded successfully!')
+        self.assertInSource('316 prisoner locations updated successfully')
 
     def test_upload_invalid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
