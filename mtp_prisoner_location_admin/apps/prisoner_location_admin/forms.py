@@ -101,7 +101,14 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
             logger.exception('Prisoner locations update by %s failed!' % user_description)
             raise forms.ValidationError(e.content)
 
+        location_count = len(locations)
         logger.info('%d prisoner locations updated successfully by %s' % (
-            len(locations),
+            location_count,
             user_description,
-        ))
+        ), extra={
+            'elk_fields': {
+                '@fields.prisoner_location_count': location_count,
+                '@fields.username': username,
+            }
+        })
+        return location_count
