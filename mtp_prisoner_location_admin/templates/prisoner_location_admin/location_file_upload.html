@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n staticfiles %}
+{% load i18n %}
 
 {% block content %}
 <h1>{% trans "Upload location file" %}</h1>
@@ -11,10 +11,17 @@
       enctype="multipart/form-data"
       class="js-uploadSubmit">
   {% csrf_token %}
-  <div class="form-group Upload">
-    <label class="form-label" for="id_location_file">{% trans "Choose file to upload" %}</label>
-    {{ form }}
-  </div>
+
+  {% include 'mtp_utils/forms/error-summary.html' with form=form only %}
+
+  {% with field=form.location_file %}
+    <div class="form-group Upload {% if field.errors %}error{% endif %}">
+      {% include 'mtp_utils/forms/field-label.html' with field=field only %}
+      {% include 'mtp_utils/forms/field-errors.html' with field=field only %}
+      {{ field }}
+    </div>
+  {% endwith %}
+
   <div class="form-group">
     <input type="submit" value="{% trans "Upload file" %}" class="button" data-value-uploading="{% trans "Uploading" %}"/>
   </div>
