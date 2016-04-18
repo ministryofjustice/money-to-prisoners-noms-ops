@@ -21,7 +21,7 @@ DATE_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
 
 
 class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
-    location_file = forms.FileField(required=True, label='')
+    location_file = forms.FileField(label=_('Choose file to upload'))
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
