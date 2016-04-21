@@ -1,6 +1,6 @@
 import os
 
-from mtp_utils.test_utils.functional_tests import FunctionalTestCase
+from mtp_common.test_utils.functional_tests import FunctionalTestCase
 
 
 class PrisonerLocationAdminTestCase(FunctionalTestCase):

@@ -35,7 +35,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
 )
 PROJECT_APPS = (
-    'mtp_utils',
+    'mtp_common',
     'widget_tweaks',
     'prisoner_location_admin',
     'zendesk_tickets'
@@ -95,7 +95,6 @@ TEMPLATES = [
             get_project_dir('templates'),
             get_project_dir('node_modules'),
             get_project_dir('../node_modules/mojular-templates'),
-            get_project_dir('../node_modules/money-to-prisoners-common/templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -104,8 +103,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'mtp_utils.context_processors.analytics',
-                'mtp_utils.context_processors.app_environment',
+                'mtp_common.context_processors.analytics',
+                'mtp_common.context_processors.app_environment',
             ],
         },
     },
@@ -121,7 +120,7 @@ LOGGING = {
             'datefmt': '%Y-%m-%dT%H:%M:%S',
         },
         'elk': {
-            '()': 'mtp_utils.logging.ELKFormatter'
+            '()': 'mtp_common.logging.ELKFormatter'
         },
     },
     'handlers': {
@@ -170,7 +169,7 @@ if os.environ.get('SENTRY_DSN'):
     LOGGING['root']['handlers'].append('sentry')
     LOGGING['loggers']['mtp']['handlers'].append('sentry')
 
-TEST_RUNNER = 'mtp_utils.test_utils.runner.TestRunner'
+TEST_RUNNER = 'mtp_common.test_utils.runner.TestRunner'
 
 # authentication
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
