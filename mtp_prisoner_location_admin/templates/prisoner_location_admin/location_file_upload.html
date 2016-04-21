@@ -4,7 +4,7 @@
 {% block content %}
 <h1>{% trans "Upload location file" %}</h1>
 
-{% include "includes/message_box.html" %}
+{% include "mtp_common/includes/message_box.html" %}
 
 <form action="{% url "location_file_upload" %}"
       method="post"
@@ -12,12 +12,12 @@
       class="js-uploadSubmit">
   {% csrf_token %}
 
-  {% include 'mtp_utils/forms/error-summary.html' with form=form only %}
+  {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
   {% with field=form.location_file %}
     <div class="form-group Upload {% if field.errors %}error{% endif %}">
-      {% include 'mtp_utils/forms/field-label.html' with field=field only %}
-      {% include 'mtp_utils/forms/field-errors.html' with field=field only %}
+      {% include 'mtp_common/forms/field-label.html' with field=field only %}
+      {% include 'mtp_common/forms/field-errors.html' with field=field only %}
       {{ field }}
     </div>
   {% endwith %}
