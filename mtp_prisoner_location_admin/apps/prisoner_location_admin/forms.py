@@ -30,15 +30,17 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
     def clean_location_file(self):
         locations = []
 
-        if not self.cleaned_data['location_file'].name.endswith('.csv'):
+        if not self.cleaned_data['location_file'].name.lower().endswith('.csv'):
             raise forms.ValidationError(_('Uploaded file must be a CSV'))
 
-        location_reader = csv.reader(
-            io.StringIO(self.cleaned_data['location_file'].read().decode('utf-8')))
+        try:
+            location_file = io.StringIO(self.cleaned_data['location_file'].read().decode('utf-8'))
+        except UnicodeDecodeError:
+            raise forms.ValidationError(_('Cannot read CSV file'))
 
         first_row = True
         invalid_row = None
-        for row in location_reader:
+        for row in csv.reader(location_file):
             # skip header row
             if first_row:
                 first_row = False
