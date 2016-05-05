@@ -14,9 +14,11 @@
 
   {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
+  <p>{% trans 'Please note that the uploaded prisoner locations will replace all those currently stored in the system.' %}</p>
+
   {% with field=form.location_file %}
     <div class="form-group Upload {% if field.errors %}error{% endif %}">
-      {% include 'mtp_common/forms/field-label.html' with field=field only %}
+      <div class="screenreader-only">{% include 'mtp_common/forms/field-label.html' with field=field only %}</div>
       {% include 'mtp_common/forms/field-errors.html' with field=field only %}
       {{ field }}
     </div>
