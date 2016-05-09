@@ -21,13 +21,14 @@
 
 
   {% with field=form.location_file %}
-  <div class="form-group {% if field.errors %}error{% endif %}"><span class="upload-filename"></span><label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="upload-choose button button-secondary">{% trans 'Choose file' %}</label>
+  <div class="form-group {% if field.errors %}error{% endif %}">
     {% include 'mtp_common/forms/field-errors.html' with field=field only %}
+    <span class="upload-filename"></span><label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="upload-choose button button-secondary">{% trans 'Choose file' %}</label>
     {{ field }}
   </div>
   {% endwith %}
   <div class="form-group upload-control">
-    <input type="submit" value="{% trans "Upload file" %}" class="button" disabled="disabled"/>
+    <input type="submit" value="{% trans "Upload file" %}" class="button"/>
   </div>
   <p class="upload-otherfilelink"><a href=".">{% trans 'Upload another file' %}</a></p>
 </form>

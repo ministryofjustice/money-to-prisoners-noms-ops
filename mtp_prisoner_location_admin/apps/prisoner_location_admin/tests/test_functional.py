@@ -61,15 +61,13 @@ class UploadTests(PrisonerLocationAdminTestCase):
 
     def test_checking_upload_page(self):
         self.assertInSource('Upload location file')
-        self.assertInSource('Use this page to upload a prisoner location file in CSV format (.csv).')
+        self.assertInSource('Use this page to upload a prisoner location file in CSV format (.csv)')
         self.assertCssProperty('.upload-otherfilelink', 'display', 'none')
-        self.assertFalse(self.driver.find_element_by_css_selector('input[type=submit]').is_enabled())
 
     def test_upload_valid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'valid.csv'))
         self.assertInSource('Change file')
-        self.assertTrue(self.driver.find_element_by_css_selector('input[type=submit]').is_enabled())
         el.submit()
         self.assertInSource('316 prisoner locations updated successfully')
         self.assertCssProperty('.upload-otherfilelink', 'display', 'block')
