@@ -9,23 +9,27 @@
 <form action="{% url "location_file_upload" %}"
       method="post"
       enctype="multipart/form-data"
-      class="js-uploadSubmit">
+      class="upload-form">
   {% csrf_token %}
 
   {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+  <div class="form-group">
+    {% trans 'Use this page to upload a prisoner location file in CSV format (.csv)' %}
+  </div>
 
-  <p>{% trans 'Please note that the uploaded prisoner locations will replace all those currently stored in the system.' %}</p>
+  <div class="form-group panel-indent panel-border-wide">{% trans 'Please note that the uploaded prisoner locations will replace all those currently stored in the system.' %}</div>
+
 
   {% with field=form.location_file %}
-    <div class="form-group Upload {% if field.errors %}error{% endif %}">
-      <div class="screenreader-only">{% include 'mtp_common/forms/field-label.html' with field=field only %}</div>
-      {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-      {{ field }}
-    </div>
-  {% endwith %}
-
-  <div class="form-group">
-    <input type="submit" value="{% trans "Upload file" %}" class="button" data-value-uploading="{% trans "Uploading" %}"/>
+  <div class="form-group {% if field.errors %}error{% endif %}"><span class="upload-filename"></span><label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="upload-choose button button-secondary">{% trans 'Choose file' %}</label>
+    {% include 'mtp_common/forms/field-errors.html' with field=field only %}
+    {{ field }}
   </div>
+  {% endwith %}
+  <div class="form-group upload-control">
+    <input type="submit" value="{% trans "Upload file" %}" class="button" disabled="disabled"/>
+  </div>
+  <p class="upload-otherfilelink"><a href=".">{% trans 'Upload another file' %}</a></p>
 </form>
+
 {% endblock %}

@@ -9,7 +9,8 @@
     .use([
       require('mojular-govuk-elements'),
       require('mojular-moj-elements'),
-      require('polyfills')
+      require('polyfills'),
+      require('upload')
     ])
     .init();
 }());

@@ -14,6 +14,15 @@ class PrisonerLocationAdminTestCase(FunctionalTestCase):
         self.driver.find_element_by_partial_link_text(link_text).click()
 
 
+class ErrorTests(PrisonerLocationAdminTestCase):
+    """
+    Tests for general errors
+    """
+    def test_404(self):
+        self.driver.get(self.live_server_url + '/unknown-page/')
+        self.assertInSource('Page not found')
+
+
 class LoginTests(PrisonerLocationAdminTestCase):
     """
     Tests for Login page
@@ -22,13 +31,12 @@ class LoginTests(PrisonerLocationAdminTestCase):
     def test_title(self):
         self.driver.get(self.live_server_url)
         heading = self.driver.find_element_by_tag_name('h1')
-        self.assertEquals('Upload prisoner locations', heading.text)
-        self.assertEquals('48px', heading.value_of_css_property('font-size'))
+        self.assertEqual('Upload prisoner locations', heading.text)
+        self.assertEqual('48px', heading.value_of_css_property('font-size'))
 
     def test_bad_login(self):
         self.login('prisoner-location-admin', 'bad-password')
-        self.assertIn('There was a problem submitting the form',
-                      self.driver.page_source)
+        self.assertInSource('There was a problem')
 
     def test_good_login(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
@@ -49,15 +57,22 @@ class UploadTests(PrisonerLocationAdminTestCase):
     def setUp(self):
         super().setUp()
         self.login('prisoner-location-admin', 'prisoner-location-admin')
+        self.driver.execute_script('document.getElementById("id_location_file").style.left = 0')
 
     def test_checking_upload_page(self):
         self.assertInSource('Upload location file')
+        self.assertInSource('Use this page to upload a prisoner location file in CSV format (.csv).')
+        self.assertCssProperty('.upload-otherfilelink', 'display', 'none')
+        self.assertFalse(self.driver.find_element_by_css_selector('input[type=submit]').is_enabled())
 
     def test_upload_valid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'valid.csv'))
+        self.assertInSource('Change file')
+        self.assertTrue(self.driver.find_element_by_css_selector('input[type=submit]').is_enabled())
         el.submit()
         self.assertInSource('316 prisoner locations updated successfully')
+        self.assertCssProperty('.upload-otherfilelink', 'display', 'block')
 
     def test_upload_invalid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')

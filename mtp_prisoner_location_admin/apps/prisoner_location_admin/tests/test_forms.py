@@ -48,7 +48,7 @@ class LocationFileUploadFormTestCase(SimpleTestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors['location_file'],
-            ["The submitted file is empty."]
+            ["The submitted file is empty"]
         )
 
     def test_location_file_not_csv_invalid(self):
