@@ -2,15 +2,15 @@ from unittest import mock
 
 from django.test import SimpleTestCase
 from django.core.urlresolvers import reverse
+from mtp_common.auth.test_utils import generate_tokens
 from slumber.exceptions import HttpClientError
-from moj_auth.tests.utils import generate_tokens
 
 from . import generate_testable_location_data, get_csv_data_as_file
 
 
 class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
 
-    @mock.patch('moj_auth.backends.api_client')
+    @mock.patch('mtp_common.auth.backends.api_client')
     def login(self, mock_api_client):
         mock_api_client.authenticate.return_value = {
             'pk': 5,

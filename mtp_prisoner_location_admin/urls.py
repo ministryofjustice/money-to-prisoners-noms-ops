@@ -4,40 +4,40 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
 from django.views.generic import RedirectView
 
-from moj_auth import views
 from moj_irat.views import HealthcheckView, PingJsonView
+from mtp_common.auth import views as auth_views
 
 urlpatterns = [
     url(
-        r'^login/$', views.login, {
+        r'^login/$', auth_views.login, {
             'template_name': 'mtp_auth/login.html',
         }, name='login'),
     url(
-        r'^logout/$', views.logout, {
+        r'^logout/$', auth_views.logout, {
             'template_name': 'mtp_auth/login.html',
             'next_page': reverse_lazy('login'),
         }, name='logout'
     ),
     url(
-        r'^password_change/$', views.password_change, {
+        r'^password_change/$', auth_views.password_change, {
             'template_name': 'mtp_common/auth/password_change.html',
             'cancel_url': reverse_lazy('location_file_upload'),
         }, name='password_change'
     ),
     url(
-        r'^password_change_done/$', views.password_change_done, {
+        r'^password_change_done/$', auth_views.password_change_done, {
             'template_name': 'mtp_common/auth/password_change_done.html',
             'cancel_url': reverse_lazy('location_file_upload'),
         }, name='password_change_done'
     ),
     url(
-        r'^reset-password/$', views.reset_password, {
+        r'^reset-password/$', auth_views.reset_password, {
             'template_name': 'mtp_common/auth/reset-password.html',
             'cancel_url': reverse_lazy('location_file_upload'),
         }, name='reset_password'
     ),
     url(
-        r'^reset-password-done/$', views.reset_password_done, {
+        r'^reset-password-done/$', auth_views.reset_password_done, {
             'template_name': 'mtp_common/auth/reset-password-done.html',
             'cancel_url': reverse_lazy('location_file_upload'),
         }, name='reset_password_done'
