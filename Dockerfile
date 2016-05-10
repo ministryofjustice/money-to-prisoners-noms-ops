@@ -17,7 +17,7 @@ RUN apt-get update && \
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 WORKDIR /app
-RUN mkdir -p /app/mtp_prisoner_location_admin/assets
+RUN mkdir -p /app/mtp_noms_ops/assets
 RUN mkdir -p /app/static
 
 RUN npm install npm -g

@@ -9,8 +9,8 @@
 *.sublime-project
 
 # project
-mtp_prisoner_location_admin/settings/local.py
-mtp_prisoner_location_admin/assets/
+mtp_noms_ops/settings/local.py
+mtp_noms_ops/assets/
 node_modules/
 static/
 venv/

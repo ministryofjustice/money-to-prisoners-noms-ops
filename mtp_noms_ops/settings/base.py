@@ -1,5 +1,5 @@
 """
-Django settings for mtp_prisoner_location_admin project.
+Django settings for mtp_noms_ops project.
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 get_project_dir = partial(join, BASE_DIR)
 
-APP = 'prisoner-location-admin'
+APP = 'noms-ops'
 ENVIRONMENT = os.environ.get('ENV', 'local')
 APP_BUILD_DATE = os.environ.get('APP_BUILD_DATE')
 APP_GIT_COMMIT = os.environ.get('APP_GIT_COMMIT')
@@ -43,8 +43,8 @@ PROJECT_APPS = (
 INSTALLED_APPS += PROJECT_APPS
 
 
-WSGI_APPLICATION = 'mtp_prisoner_location_admin.wsgi.application'
-ROOT_URLCONF = 'mtp_prisoner_location_admin.urls'
+WSGI_APPLICATION = 'mtp_noms_ops.wsgi.application'
+ROOT_URLCONF = 'mtp_noms_ops.urls'
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

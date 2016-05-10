@@ -26,7 +26,7 @@ node_modules
 npm-debug.log
 
 # App assets
-mtp_prisoner_location_admin/assets/
+mtp_noms_ops/assets/
 
 # Docker make targets
 .dev_django_container

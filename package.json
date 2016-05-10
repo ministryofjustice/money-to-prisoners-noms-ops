@@ -1,13 +1,13 @@
 {
-  "name": "money-to-prisoners-prisoner-location-admin",
+  "name": "money-to-prisoners-noms-ops",
   "description": "Prisoner Location Admin UI for Money to Prisoners",
   "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ministryofjustice/money-to-prisoners-prisoner-location-admin"
+    "url": "https://github.com/ministryofjustice/money-to-prisoners-noms-ops"
   },
   "bugs": {
-    "url": "https://github.com/ministryofjustice/money-to-prisoners-prisoner-location-admin/issues"
+    "url": "https://github.com/ministryofjustice/money-to-prisoners-noms-ops/issues"
   },
   "engines": {
     "node": "0.10.x"

@@ -35,7 +35,7 @@ while [[ $# > 1 ]]; do
 done
 
 COMMAND=$1
-APP=prisoner_location_admin
+APP=noms_ops
 VIRTUAL_ENV_DIR=venv
 NODE_MODULES=node_modules
 

@@ -1,5 +1,5 @@
 # app defaults
-app=prisoner_location_admin
+app=noms_ops
 port=8003
 browsersync_port=3003
 browsersync_ui_port=3033
