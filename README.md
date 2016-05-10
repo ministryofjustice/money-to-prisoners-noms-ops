@@ -1,9 +1,6 @@
-# Money to Prisoners Prisoner Location Admin
+# Money to Prisoners NOMS Ops
 
-[![Dependency Status](https://img.shields.io/david/ministryofjustice/money-to-prisoners-prisoner-location-admin.svg?style=flat-square&label=NPM%20deps)](https://david-dm.org/ministryofjustice/money-to-prisoners-prisoner-location-admin)
-[![devDependency Status](https://img.shields.io/david/dev/ministryofjustice/money-to-prisoners-prisoner-location-admin.svg?style=flat-square&label=NPM%20devDeps)](https://david-dm.org/ministryofjustice/money-to-prisoners-prisoner-location-admin#info=devDependencies)
-
-The Prisoner Location Admin UI for the Money to Prisoners Project
+The NOMS Ops UI for the Money to Prisoners Project
 
 
 ## Running locally
@@ -36,7 +33,7 @@ and you should eventually be able to connect to the local server.
 
 You should be able to log into the cash book app using following credentials:
 
-- *prisoner-location-admin / prisoner-location-admin*
+- *noms-ops / noms-ops*
 
 ## Developing
 

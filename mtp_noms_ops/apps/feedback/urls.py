@@ -10,8 +10,8 @@ urlpatterns = [
             'form_class': EmailTicketForm,
             'template_name': 'feedback/submit_feedback.html',
             'success_redirect_url': reverse_lazy('feedback_success'),
-            'subject': 'MTP Prisoner Location Admin Feedback',
-            'tags': ['feedback', 'mtp', 'prisoner-location-admin',
+            'subject': 'MTP Noms Ops Feedback',
+            'tags': ['feedback', 'mtp', 'noms-ops',
                      settings.ENVIRONMENT]
         }, name='submit_ticket'),
     url(r'^feedback/success/$', views.success,

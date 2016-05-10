@@ -1,5 +1,5 @@
 """
-WSGI config for mtp_prisoner_location_admin project.
+WSGI config for mtp_noms_ops project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -10,6 +10,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mtp_prisoner_location_admin.settings.docker')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mtp_noms_ops.settings.docker')
 
 application = get_wsgi_application()

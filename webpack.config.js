@@ -4,11 +4,11 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: {
-    app: './mtp_prisoner_location_admin/assets-src/javascripts/main.js',
+    app: './mtp_noms_ops/assets-src/javascripts/main.js',
     polyfills: ['JSON2', 'html5shiv']
   },
   output: {
-    path: './mtp_prisoner_location_admin/assets/scripts',
+    path: './mtp_noms_ops/assets/scripts',
     filename: '[name].bundle.js'
   },
   module: {
