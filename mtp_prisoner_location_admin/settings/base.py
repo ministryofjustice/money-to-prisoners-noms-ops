@@ -48,8 +48,8 @@ ROOT_URLCONF = 'mtp_prisoner_location_admin.urls'
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'moj_auth.csrf.CsrfViewMiddleware',
-    'moj_auth.middleware.AuthenticationMiddleware',
+    'mtp_common.auth.csrf.CsrfViewMiddleware',
+    'mtp_common.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -66,7 +66,7 @@ SESSION_COOKIE_SECURE = False
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = False
-CSRF_FAILURE_VIEW = 'moj_auth.csrf.csrf_failure'
+CSRF_FAILURE_VIEW = 'mtp_common.auth.csrf.csrf_failure'
 
 
 # Database
@@ -176,7 +176,7 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 AUTHENTICATION_BACKENDS = (
-    'moj_auth.backends.MojBackend',
+    'mtp_common.auth.backends.MojBackend',
 )
 
 

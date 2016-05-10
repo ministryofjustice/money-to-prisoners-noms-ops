@@ -7,9 +7,8 @@ import re
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
+from mtp_common.auth import api_client
 from slumber.exceptions import HttpClientError
-
-from moj_auth import api_client
 
 logger = logging.getLogger('mtp')
 
