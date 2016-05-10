@@ -20,7 +20,10 @@ DATE_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
 
 
 class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
-    location_file = forms.FileField(label=_('Choose file to upload'))
+    location_file = forms.FileField(label=_('Choose file to upload'),
+                                    error_messages={
+                                        'required': _('Please choose a file'),
+                                    })
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -35,7 +38,7 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
         try:
             location_file = io.StringIO(self.cleaned_data['location_file'].read().decode('utf-8'))
         except UnicodeDecodeError:
-            raise forms.ValidationError(_('Cannot read CSV file'))
+            raise forms.ValidationError(_('Can’t read CSV file'))
 
         first_row = True
         invalid_row = None
@@ -52,10 +55,7 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
             # raise error as short/long row found before end of file
             # (as we expect some non-data rows at the end, but not in the middle)
             if invalid_row is not None:
-                raise forms.ValidationError(
-                    _('Row has %s columns, should have %s: %s')
-                    % (len(invalid_row), EXPECTED_ROW_LENGTH, invalid_row)
-                )
+                raise forms.ValidationError(_('The file has the wrong number of columns'))
 
             # parse dob
             m = DOB_PATTERN.match(row[3])
@@ -81,7 +81,7 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
 
         if len(locations) == 0:
             raise forms.ValidationError(
-                _('Location file does not seem to contain any valid rows'))
+                _('The file doesn’t contain valid rows'))
 
         return locations
 

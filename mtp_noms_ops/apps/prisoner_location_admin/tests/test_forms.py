@@ -35,7 +35,7 @@ class LocationFileUploadFormTestCase(SimpleTestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors['location_file'],
-            ["Row has 4 columns, should have 5: ['A1234GY', 'Smith', 'John', '2/9/1997 00:00']"]
+            ['The file has the wrong number of columns']
         )
 
     def test_location_file_empty_file_invalid(self):

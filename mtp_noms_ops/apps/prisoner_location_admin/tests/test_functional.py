@@ -76,15 +76,15 @@ class UploadTests(PrisonerLocationAdminTestCase):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'invalid.csv'))
         el.submit()
-        self.assertInSource('Row has 4 columns, should have 5')
+        self.assertInSource('The file has the wrong number of columns')
 
     def test_upload_empty_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'empty.csv'))
         el.submit()
-        self.assertInSource('Location file does not seem to contain any valid rows')
+        self.assertInSource('The file doesn’t contain valid rows')
 
     def test_submit_file_upload_without_selecting_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.submit()
-        self.assertInSource('This field is required')
+        self.assertInSource('Please choose a file')
