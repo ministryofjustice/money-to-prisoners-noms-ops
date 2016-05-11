@@ -196,8 +196,8 @@ def find_api_url():
     return 'http://%s:%s' % (host_machine_ip, api_port)
 
 
-API_CLIENT_ID = 'prisoner-locations'
-API_CLIENT_SECRET = os.environ.get('API_CLIENT_SECRET', 'prisoner-locations')
+API_CLIENT_ID = 'noms-ops'
+API_CLIENT_SECRET = os.environ.get('API_CLIENT_SECRET', 'noms-ops')
 API_URL = os.environ.get('API_URL', find_api_url())
 
 LOGIN_URL = 'login'
