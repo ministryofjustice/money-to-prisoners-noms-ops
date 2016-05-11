@@ -90,7 +90,7 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
         client = api_client.get_connection(self.request)
         user = self.request.user
         username = user.user_data.get('username', 'Unknown')
-        user_description = user.get_full_name
+        user_description = user.get_full_name()
         if user_description:
             user_description += ' (%s)' % username
         else:

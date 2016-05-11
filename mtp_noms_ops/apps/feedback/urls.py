@@ -5,7 +5,7 @@ from zendesk_tickets import views
 from zendesk_tickets.forms import EmailTicketForm
 
 urlpatterns = [
-    url(r'^feedback/$', views.ticket,
+    url(r'^$', views.ticket,
         {
             'form_class': EmailTicketForm,
             'template_name': 'feedback/submit_feedback.html',
@@ -14,7 +14,7 @@ urlpatterns = [
             'tags': ['feedback', 'mtp', 'noms-ops',
                      settings.ENVIRONMENT]
         }, name='submit_ticket'),
-    url(r'^feedback/success/$', views.success,
+    url(r'^success/$', views.success,
         {
             'template_name': 'mtp_common/feedback/success.html',
         }, name='feedback_success'),

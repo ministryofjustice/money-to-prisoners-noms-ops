@@ -18,7 +18,8 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
             'user_data': {
                 'first_name': 'Sam',
                 'last_name': 'Hall',
-                'username': 'shall'
+                'username': 'shall',
+                'permissions': ['prison.add_prisonerlocation'],
             }
         }
 
@@ -62,7 +63,7 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
     def test_location_file_upload_api_error_displays_message(self, mock_api_client):
         self.login()
 
-        api_error_message = "Bad Request"
+        api_error_message = 'Bad Request'
 
         conn = mock_api_client.get_connection().prisoner_locations
         conn.post.side_effect = HttpClientError(content=api_error_message)

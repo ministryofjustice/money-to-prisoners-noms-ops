@@ -1,5 +1,6 @@
 import os
 
+from django.core.urlresolvers import reverse
 from mtp_common.test_utils.functional_tests import FunctionalTestCase
 
 
@@ -8,10 +9,6 @@ class PrisonerLocationAdminTestCase(FunctionalTestCase):
     Base class for all prisoner-location-admin functional tests
     """
     accessibility_scope_selector = '#content'
-
-    def login_and_go_to(self, link_text):
-        self.login('prisoner-location-admin', 'prisoner-location-admin')
-        self.driver.find_element_by_partial_link_text(link_text).click()
 
 
 class ErrorTests(PrisonerLocationAdminTestCase):
@@ -31,7 +28,7 @@ class LoginTests(PrisonerLocationAdminTestCase):
     def test_title(self):
         self.driver.get(self.live_server_url)
         heading = self.driver.find_element_by_tag_name('h1')
-        self.assertEqual('Upload prisoner locations', heading.text)
+        self.assertEqual('NOMS admin', heading.text)
         self.assertEqual('48px', heading.value_of_css_property('font-size'))
 
     def test_bad_login(self):
@@ -40,13 +37,13 @@ class LoginTests(PrisonerLocationAdminTestCase):
 
     def test_good_login(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
-        self.assertCurrentUrl('/')
+        self.assertCurrentUrl(reverse('location_file_upload'))
         self.assertInSource('Upload location file')
 
     def test_logout(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
         self.driver.find_element_by_link_text('Sign out').click()
-        self.assertCurrentUrl('/login/')
+        self.assertCurrentUrl(reverse('login'))
 
 
 class UploadTests(PrisonerLocationAdminTestCase):

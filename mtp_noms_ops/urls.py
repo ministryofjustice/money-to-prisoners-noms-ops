@@ -2,12 +2,27 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.views.generic import RedirectView
-
 from moj_irat.views import HealthcheckView, PingJsonView
 from mtp_common.auth import views as auth_views
+from mtp_common.auth.exceptions import Unauthorized
+
+
+def redirect_to_start(request):
+    if request.user.has_perm('prison.add_prisonerlocation'):
+        return redirect(reverse_lazy('location_file_upload'))
+    if request.user.has_perms(['credit.view_credit', 'payment.view_payment', 'transaction.view_transaction']):
+        return redirect(reverse_lazy('security_dashboard'))
+    raise Unauthorized()
+
 
 urlpatterns = [
+    url(r'^$', redirect_to_start, name='redirect_to_start'),
+    url(r'^prisoner-location/', include('prisoner_location_admin.urls')),
+    url(r'^security-dashboard/', include('security.urls')),
+    url(r'^feedback/', include('feedback.urls')),
+
     url(
         r'^login/$', auth_views.login, {
             'template_name': 'mtp_auth/login.html',
@@ -21,30 +36,27 @@ urlpatterns = [
     url(
         r'^password_change/$', auth_views.password_change, {
             'template_name': 'mtp_common/auth/password_change.html',
-            'cancel_url': reverse_lazy('location_file_upload'),
+            'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='password_change'
     ),
     url(
         r'^password_change_done/$', auth_views.password_change_done, {
             'template_name': 'mtp_common/auth/password_change_done.html',
-            'cancel_url': reverse_lazy('location_file_upload'),
+            'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='password_change_done'
     ),
     url(
         r'^reset-password/$', auth_views.reset_password, {
             'template_name': 'mtp_common/auth/reset-password.html',
-            'cancel_url': reverse_lazy('location_file_upload'),
+            'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='reset_password'
     ),
     url(
         r'^reset-password-done/$', auth_views.reset_password_done, {
             'template_name': 'mtp_common/auth/reset-password-done.html',
-            'cancel_url': reverse_lazy('location_file_upload'),
+            'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='reset_password_done'
     ),
-
-    url(r'^', include('prisoner_location_admin.urls')),
-    url(r'^', include('feedback.urls')),
 
     url(r'^ping.json$', PingJsonView.as_view(
         build_date_key='APP_BUILD_DATE',
