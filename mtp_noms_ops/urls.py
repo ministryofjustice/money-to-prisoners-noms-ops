@@ -44,6 +44,7 @@ urlpatterns = [
     ),
 
     url(r'^', include('prisoner_location_admin.urls')),
+    url(r'^', include('security.urls')),
     url(r'^', include('feedback.urls')),
 
     url(r'^ping.json$', PingJsonView.as_view(
