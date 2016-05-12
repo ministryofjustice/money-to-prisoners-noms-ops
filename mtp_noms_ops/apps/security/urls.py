@@ -1,9 +1,10 @@
 from django.conf.urls import url
 
 from . import required_permissions, views
-from permissions import login_required
+from mtp_noms_ops.view_utils import user_test
+
 
 urlpatterns = [
-    url(r'^$', login_required(required_permissions)(views.SecurityDashboardView.as_view()),
+    url(r'^$', user_test(required_permissions)(views.SecurityDashboardView.as_view()),
         name='security_dashboard'),
 ]

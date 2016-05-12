@@ -17,7 +17,7 @@ def redirect_to_start(request):
         return redirect(reverse_lazy('location_file_upload'))
     if request.user.has_perms(security_permissions):
         return redirect(reverse_lazy('security_dashboard'))
-    raise Unauthorized()
+    raise Unauthorized()  # middleware causes user to be logged-out
 
 
 urlpatterns = [
