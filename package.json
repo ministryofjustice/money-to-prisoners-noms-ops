@@ -1,6 +1,6 @@
 {
   "name": "money-to-prisoners-noms-ops",
-  "description": "Prisoner Location Admin UI for Money to Prisoners",
+  "description": "NOMS Admin UI for Money to Prisoners",
   "version": "0.1.0",
   "repository": {
     "type": "git",

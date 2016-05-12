@@ -25,7 +25,7 @@ class LocationFileUploadView(FormView):
                 '%d prisoner locations updated successfully',
                 location_count
             ) % location_count
-            messages.add_message(self.request, messages.SUCCESS, message)
+            messages.success(self.request, message)
             return super(LocationFileUploadView, self).form_valid(form)
         except forms.ValidationError as e:
             form.add_error(None, e)
