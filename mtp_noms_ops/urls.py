@@ -8,11 +8,14 @@ from moj_irat.views import HealthcheckView, PingJsonView
 from mtp_common.auth import views as auth_views
 from mtp_common.auth.exceptions import Unauthorized
 
+from prisoner_location_admin import required_permissions as prisoner_location_permissions
+from security import required_permissions as security_permissions
+
 
 def redirect_to_start(request):
-    if request.user.has_perm('prison.add_prisonerlocation'):
+    if request.user.has_perms(prisoner_location_permissions):
         return redirect(reverse_lazy('location_file_upload'))
-    if request.user.has_perms(['credit.view_credit', 'payment.view_payment', 'transaction.view_transaction']):
+    if request.user.has_perms(security_permissions):
         return redirect(reverse_lazy('security_dashboard'))
     raise Unauthorized()
 
