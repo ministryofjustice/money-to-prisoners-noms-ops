@@ -9,7 +9,7 @@
 
 {% block after_main_js %}
   {{ block.super }}
-  <!-- {{ request.resolver_match.url_name }} -->
+  <!-- {% if request.resolver_match.namespace %}{{ request.resolver_match.namespace }}:{% endif %}{{ request.resolver_match.url_name }} -->
 {% endblock %}
 
 {% block page_title %}{% trans "NOMS admin" %}{% endblock %}
