@@ -7,6 +7,11 @@
   {% sentry_js %}
 {% endblock %}
 
+{% block after_main_js %}
+  {{ block.super }}
+  <!-- {{ request.resolver_match.url_name }} -->
+{% endblock %}
+
 {% block page_title %}{% trans "NOMS admin" %}{% endblock %}
 
 {% block proposition %}{% trans "NOMS admin" %}{% endblock %}

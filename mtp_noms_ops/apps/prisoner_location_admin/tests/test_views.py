@@ -1,15 +1,15 @@
 from unittest import mock
 
-from django.test import SimpleTestCase
 from django.core.urlresolvers import reverse
+from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
 from slumber.exceptions import HttpClientError
 
 from . import generate_testable_location_data, get_csv_data_as_file
+from prisoner_location_admin import required_permissions
 
 
 class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
-
     @mock.patch('mtp_common.auth.backends.api_client')
     def login(self, mock_api_client):
         mock_api_client.authenticate.return_value = {
@@ -19,7 +19,7 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
                 'first_name': 'Sam',
                 'last_name': 'Hall',
                 'username': 'shall',
-                'permissions': ['prison.add_prisonerlocation'],
+                'permissions': required_permissions,
             }
         }
 
@@ -28,8 +28,8 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
             data={'username': 'shall', 'password': 'pass'},
             follow=True
         )
-
         self.assertEqual(response.status_code, 200)
+        return response
 
     def check_login_redirect(self, attempted_url):
         response = self.client.get(attempted_url)
@@ -41,6 +41,16 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
 
     def test_requires_login_upload(self):
         self.check_login_redirect(reverse('location_file_upload'))
+
+    def test_can_access_prisoner_location_admin(self):
+        response = self.login()
+        self.assertContains(response, '<!-- location_file_upload -->')
+
+    def test_cannot_access_security_dashboard(self):
+        self.login()
+        response = self.client.get(reverse('security_dashboard'), follow=True)
+        self.assertNotContains(response, '<!-- security_dashboard -->')
+        self.assertContains(response, '<!-- location_file_upload -->')
 
     @mock.patch('prisoner_location_admin.forms.api_client')
     def test_location_file_upload(self, mock_api_client):
