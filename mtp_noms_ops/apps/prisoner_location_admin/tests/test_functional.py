@@ -3,7 +3,7 @@ import os
 from mtp_common.test_utils.functional_tests import FunctionalTestCase
 
 
-class PrisonerLocationAdminTestCase(FunctionalTestCase):
+class NomsOpsTestCase(FunctionalTestCase):
     """
     Base class for all prisoner-location-admin functional tests
     """
@@ -14,7 +14,7 @@ class PrisonerLocationAdminTestCase(FunctionalTestCase):
         self.driver.find_element_by_partial_link_text(link_text).click()
 
 
-class ErrorTests(PrisonerLocationAdminTestCase):
+class ErrorTests(NomsOpsTestCase):
     """
     Tests for general errors
     """
@@ -23,7 +23,7 @@ class ErrorTests(PrisonerLocationAdminTestCase):
         self.assertInSource('Page not found')
 
 
-class LoginTests(PrisonerLocationAdminTestCase):
+class LoginTests(NomsOpsTestCase):
     """
     Tests for Login page
     """
@@ -49,7 +49,7 @@ class LoginTests(PrisonerLocationAdminTestCase):
         self.assertCurrentUrl('/login/')
 
 
-class UploadTests(PrisonerLocationAdminTestCase):
+class UploadTests(NomsOpsTestCase):
     """
     Tests for Upload functionality
     """
@@ -88,3 +88,18 @@ class UploadTests(PrisonerLocationAdminTestCase):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.submit()
         self.assertInSource('Please choose a file')
+
+
+class SecurityDashboardTests(NomsOpsTestCase):
+    """
+    Tests for the Security Dashboard
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.login('prisoner-location-admin', 'prisoner-location-admin')
+        self.driver.get(self.live_server_url + '/security-dashboard/')
+
+    def test_page_loads(self):
+        self.assertInSource('Unknown sender')
+        self.assertEqual(self.driver.page_title, 'NOMS admin')
