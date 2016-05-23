@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+  <header class="ContentHeader">
+    <a href="?{{ form.query_string }}" class="ContentHeader-back">{% trans 'Back' %}</a>
+    <h1>{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <div class="grid-row">
+    <div class="column-third">
+      {% include 'security/form.html' with view=view form=form only %}
+    </div>
+    <div class="column-two-thirds">
+      {% block results_list %}
+        {% for group in form.get_object_list %}
+
+          <table id="GroupedResults-{{ forloop.counter }}">
+            <caption>
+              {% block group_title %}{% endblock %}
+            </caption>
+            <thead>
+              <tr>{% block group_header_row %}{% endblock %}</tr>
+            </thead>
+            <tbody>
+              {% block group_results %}{% endblock %}
+            </tbody>
+          </table>
+
+        {% empty %}
+
+          <p>{% trans 'No results' %}</p>
+
+        {% endfor %}
+      {% endblock %}
+    </div>
+  </div>
+
+  {% include 'security/pagination.html' with page_count=form.page_count page_range=form.page_range query_string=form.query_string %}
+
+{% endblock content %}

@@ -16,14 +16,14 @@ def redirect_to_start(request):
     if request.user.has_perms(prisoner_location_permissions):
         return redirect(reverse_lazy('location_file_upload'))
     if request.user.has_perms(security_permissions):
-        return redirect(reverse_lazy('security_dashboard'))
+        return redirect(reverse_lazy('security:dashboard'))
     raise Unauthorized()  # middleware causes user to be logged-out
 
 
 urlpatterns = [
     url(r'^$', redirect_to_start, name='redirect_to_start'),
     url(r'^prisoner-location/', include('prisoner_location_admin.urls')),
-    url(r'^security-dashboard/', include('security.urls')),
+    url(r'^security-dashboard/', include('security.urls', namespace='security')),
     url(r'^feedback/', include('feedback.urls')),
 
     url(

@@ -1,0 +1,39 @@
+{% extends 'security/grouped-results.html' %}
+{% load i18n %}
+{% load security %}
+
+{% block group_title %}
+  {% trans 'Prisoner' %}:
+  {{ group.prisoner_name }}
+  ({{ group.prisoner_number }})
+
+  <span>{% trans 'Total' %}: £{{ group.credit_total|currency }}</span>
+{% endblock %}
+
+{% block group_header_row %}
+  <th>{% trans 'Sender' %}</th>
+  <th>{% trans 'No. of payments' %}</th>
+  <th>{% trans 'Total value (£)' %}</th>
+  <th>{% trans 'Details' %}</th>
+{% endblock %}
+
+{% block group_results %}
+  {% for sender in group.senders %}
+    <tr>
+      <td>
+        {{ sender.sender_name }}
+        {% if sender.sender_sort_code or sender.sender_account_number %}
+          <br>
+          {{ sender.sender_sort_code|format_sort_code }}
+          {{ sender.sender_account_number }}
+          {% if sender.sender_roll_number %}
+            / {{ sender.sender_roll_number }}
+          {% endif %}
+        {% endif %}
+      </td>
+      <td>{{ sender.credit_count }}</td>
+      <td>{{ sender.credit_total|currency }}</td>
+      <td><a href="{% get_credits_list_url view form group sender %}&amp;back={% serialise_back_url request %}">{% trans 'View' %}</a></td>
+    </tr>
+  {% endfor %}
+{% endblock %}

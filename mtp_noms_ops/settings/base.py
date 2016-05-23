@@ -38,6 +38,7 @@ PROJECT_APPS = (
     'mtp_common',
     'widget_tweaks',
     'prisoner_location_admin',
+    'security',
     'zendesk_tickets'
 )
 INSTALLED_APPS += PROJECT_APPS

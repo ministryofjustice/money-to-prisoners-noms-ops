@@ -1,0 +1,18 @@
+{% load i18n %}
+
+{% if page_count > 1 %}
+  <ol>
+    {% for page in page_range %}
+      <li>
+        {% if not page %}
+          …
+        {% else %}
+          <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ page }}">
+            <span class="screenreader-only">{% trans 'Page' %}</span>
+            {{ page }}
+          </a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+{% endif %}
