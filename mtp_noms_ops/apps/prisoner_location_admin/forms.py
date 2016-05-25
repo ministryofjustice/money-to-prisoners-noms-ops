@@ -20,7 +20,7 @@ DATE_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
 
 
 class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
-    location_file = forms.FileField(label=_('Choose file to upload'),
+    location_file = forms.FileField(label=_('Location file'),
                                     error_messages={
                                         'required': _('Please choose a file'),
                                     })
