@@ -7,7 +7,7 @@ from django.views.generic import FormView
 from mtp_common.auth.api_client import get_connection
 
 from mtp_noms_ops.view_utils import make_page_range
-from security.forms import SenderGroupedForm, PrisonerGroupedForm, UnknownSendersForm, CreditsForm
+from security.forms import SenderGroupedForm, PrisonerGroupedForm, CreditsForm
 
 
 def dashboard_view(request):
@@ -138,19 +138,6 @@ class PrisonerGroupedView(GroupedSecurityView):
             if value and key in self.sender_identifiers
         })
         return query_dict
-
-
-class UnknownSendersView(GroupedSecurityView):
-    """
-    Show list of unknown senders
-    """
-    title = _('Search by unknown sender')
-    results_template_name = 'security/grouped-results.html'
-    credits_view = 'security:unknown_senders_credits'
-    form_class = UnknownSendersForm
-
-    def get_credit_row_query_dict(self, group, row):
-        return {}
 
 
 class CreditsView(SecurityView):
