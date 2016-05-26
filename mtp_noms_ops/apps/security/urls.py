@@ -18,10 +18,6 @@ urlpatterns = [
         name='prisoner_grouped'),
     url(r'^prisoner-grouped/$', security_test(views.PrisonerGroupedView.as_view(listing_credits=True)),
         name='prisoner_grouped_credits'),
-    url(r'^unknown-senders/$', security_test(views.UnknownSendersView.as_view()),
-        name='unknown_senders'),
-    url(r'^unknown-senders/$', security_test(views.UnknownSendersView.as_view(listing_credits=True)),
-        name='unknown_senders_credits'),
     url(r'^credits/$', security_test(views.CreditsView.as_view()),
         name='credits'),
 ]

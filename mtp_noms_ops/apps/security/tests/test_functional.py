@@ -18,5 +18,5 @@ class SecurityDashboardTests(SecurityDashboardTestCase):
         self.login('security-staff', 'security-staff')
 
     def test_login_redirects_to_security_dashboard(self):
-        self.assertInSource('unknown sender')
+        self.assertInSource('Search by sender')
         self.assertEqual(self.driver.title, 'NOMS admin')

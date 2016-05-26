@@ -189,11 +189,6 @@ class PrisonerGroupedForm(SecurityForm):
         return self.client.credits.prisoners
 
 
-class UnknownSendersForm(SecurityForm):
-    def get_api_endpoint(self):
-        return self.client.credits
-
-
 class CreditsForm(SecurityForm):
     def get_api_endpoint(self):
         return self.client.credits
