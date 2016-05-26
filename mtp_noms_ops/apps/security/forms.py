@@ -1,5 +1,7 @@
 import collections
+import enum
 from math import ceil
+import re
 from urllib.parse import urlencode
 
 from django import forms
@@ -32,6 +34,16 @@ def get_prisons_and_regions(client, session):
     return prisons_and_regions
 
 
+def validate_amount(amount):
+    if not re.match(r'^£?\d+(\.\d\d)?$', amount):
+        raise ValidationError(_('Invalid amount'), code='invalid')
+
+
+def validate_prisoner_number(prisoner_number):
+    if not re.match(r'^[a-z]\d\d\d\d[a-z]{2}$', prisoner_number, flags=re.I):
+        raise ValidationError(_('Invalid prisoner number'), code='invalid')
+
+
 def validate_range_field(field_name, bound_ordering_msg):
     def inner(cls):
         lower = field_name + '_0'
@@ -59,7 +71,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     """
     page = forms.IntegerField(min_value=1)
     page_size = 20
-    ordering = forms.CharField(label=_('Sort by'), required=False)
     received_at_0 = forms.DateField(label=_('Start date'), required=False)
     received_at_1 = forms.DateField(label=_('Finish date'), required=False)
 
@@ -189,6 +200,100 @@ class PrisonerGroupedForm(SecurityForm):
         return self.client.credits.prisoners
 
 
+class AmountPattern(enum.Enum):
+    not_integral = _('Non-integer amount')
+    not_multiple_5 = _('Not a multiple of £5')
+    not_multiple_10 = _('Not a multiple of £10')
+    gte_100 = _('£100 or more')
+
+    @classmethod
+    def get_choices(cls):
+        return [(choice.name, choice.value) for choice in cls]
+
+    @classmethod
+    def get_filters(cls, amount_pattern):
+        filters = {}
+        try:
+            amount_pattern = cls[amount_pattern]
+            if amount_pattern == cls.not_integral:
+                filters['exclude_amount__endswith'] = '00'
+            elif amount_pattern == cls.not_multiple_5:
+                filters['exclude_amount__regex'] = '(500|000)$'
+            elif amount_pattern == cls.not_multiple_10:
+                filters['exclude_amount__endswith'] = '000'
+            elif amount_pattern == cls.gte_100:
+                filters['amount__gte'] = '10000'
+        except KeyError:
+            pass
+        return filters
+
+
 class CreditsForm(SecurityForm):
+    ordering = forms.ChoiceField(label=_('Sort by'), required=False,
+                                 initial='-received_at',
+                                 choices=[
+                                     ('-received_at', _('Received date')),
+                                     ('-amount', _('Amount')),
+                                     ('prisoner_number', _('Prisoner number')),
+                                     ('prisoner_name', _('Prisoner name')),
+                                 ])
+
+    amount = forms.CharField(label=_('Amount (exact)'), validators=[validate_amount], required=False)
+    amount_pattern = forms.ChoiceField(label=_('Amount pattern'), choices=AmountPattern.get_choices(), required=False)
+    amount_pence = forms.IntegerField(label=_('Amount pence part'), min_value=0, max_value=99, required=False)
+
+    prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
+    prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
+    prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
+    prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
+    prison_gender = forms.ChoiceField(label=_('Prisoner gender'), required=False,
+                                      choices=[('m', _('Male')), ('f', _('Female'))])
+
+    sender_name = forms.CharField(label=_('Sender name'), required=False)
+    sender_sort_code = forms.CharField(label=_('Sender sort code'), required=False)
+    sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
+    sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
+
+    def __init__(self, request, **kwargs):
+        super().__init__(request, **kwargs)
+        prisons_and_regions = get_prisons_and_regions(self.client, request.session)
+        self['prison'].field.choices = prisons_and_regions['prisons']
+        self['prison_region'].field.choices = prisons_and_regions['regions']
+
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if amount:
+            amount = amount.lstrip('£')
+            if '.' in amount:
+                amount = amount.replace('.', '')
+            else:
+                amount += '00'
+        return amount
+
+    def clean_prisoner_number(self):
+        prisoner_number = self.cleaned_data.get('prisoner_number')
+        if prisoner_number:
+            return prisoner_number.upper()
+        return prisoner_number
+
+    def clean_sender_sort_code(self):
+        sender_sort_code = self.cleaned_data.get('sender_sort_code')
+        if sender_sort_code:
+            sender_sort_code = sender_sort_code.replace('-', '')
+        return sender_sort_code
+
     def get_api_endpoint(self):
         return self.client.credits
+
+    def get_query_data(self):
+        query_data = super().get_query_data()
+
+        amount_pence = query_data.pop('amount_pence', None)
+        if amount_pence is not None:
+            query_data['amount__endswith'] = '%02d' % amount_pence
+
+        amount_pattern = query_data.pop('amount_pattern', None)
+        if amount_pattern:
+            query_data.update(AmountPattern.get_filters(amount_pattern))
+
+        return query_data

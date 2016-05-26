@@ -180,3 +180,53 @@ class PrisonerListTestCase(SecurityViewTestCase):
             self.assertIn(sender['sender_name'], response_content)
             if sender['sender_account_number']:
                 self.assertIn(sender['sender_account_number'], response_content)
+
+
+class CreditsListTestCase(SecurityViewTestCase):
+    view_name = 'security:credits'
+
+    @mock.patch('security.forms.get_connection')
+    def test_displays_results(self, mocked_connection):
+        response_data = {
+            'count': 2,
+            'previous': None,
+            'next': 'http://localhost:8000/credits/?limit=20&offset=20&ordering=-amount',
+            'results': [
+                {
+                    'id': 1,
+                    'source': 'online',
+                    'amount': 23000,
+                    'intended_recipient': 'GEORGE MELLEY',
+                    'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
+                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+                    'sender_name': None,
+                    'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
+                    'resolution': 'credited',
+                    'owner': None, 'owner_name': None,
+                    'received_at': '2016-05-25T20:24:00Z', 'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,
+                },
+                {
+                    'id': 2,
+                    'source': 'bank_transfer',
+                    'amount': 27500,
+                    'intended_recipient': None,
+                    'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
+                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+                    'sender_name': 'HEIDENREICH X',
+                    'sender_sort_code': '219657', 'sender_account_number': '88447894', 'sender_roll_number': '',
+                    'resolution': 'credited',
+                    'owner': None, 'owner_name': None,
+                    'received_at': '2016-05-22T23:00:00Z', 'credited_at': '2016-05-23T01:10:00Z', 'refunded_at': None,
+                },
+            ]
+        }
+        mocked_connection().credits.get.return_value = response_data
+
+        self.login()
+        response = self.client.post(reverse(self.view_name), {'page': '1', 'ordering': '-amount'})
+        self.assertContains(response, 'GEORGE MELLEY')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('A1413AE', response_content)
+        self.assertIn('275.00', response_content)
+        self.assertIn('Bank transfer', response_content)
+        self.assertIn('Debit card', response_content)
