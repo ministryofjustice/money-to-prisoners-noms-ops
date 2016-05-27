@@ -79,7 +79,7 @@ class GroupedSecurityView(SecurityView):
             'query_string': query_string.urlencode(),
             'credits': data.get('results', []),
         }
-        return render(request, 'security/credits-list.html', context)
+        return render(request, 'security/grouped-results-details.html', context)
 
     def get_credits_row_query_string(self, form, group, row):
         query_string = QueryDict(form.query_string, mutable=True)
@@ -145,5 +145,10 @@ class CreditsView(SecurityView):
     Open-ended search view
     """
     title = _('Search by details')
-    results_template_name = 'security/credits-list.html'
+    results_template_name = 'security/credits-results.html'
     form_class = CreditsForm
+
+    def form_valid(self, form):
+        context = self.get_context_data(form=form)
+        context['credits'] = form.get_object_list()
+        return render(self.request, self.results_template_name, context)
