@@ -10,7 +10,7 @@
       require('mojular-govuk-elements'),
       require('mojular-moj-elements'),
       require('polyfills'),
-      require('show-hide'),
+      require('collapsing-table'),
       require('upload')
     ])
     .init();

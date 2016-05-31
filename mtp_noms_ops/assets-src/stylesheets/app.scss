@@ -21,4 +21,28 @@ form .form-group .form-hint {
   h3 {
     margin-top: 0;
   }
+
+  table {
+    width: 100%;
+    margin-bottom: 1.5em;
+    font-size: 0.7em;
+
+    thead th {
+      border-top: 0;
+    }
+  }
+}
+
+.CollapsingTableHeader {
+  background: #CDE2B7;
+  font-weight: normal;
+
+  .GroupedResults-sender-details {
+    line-height: 1em;
+    text-align: right;
+
+    small {
+      font-size: 0.75em;
+    }
+  }
 }

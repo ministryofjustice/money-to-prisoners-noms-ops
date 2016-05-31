@@ -66,6 +66,6 @@ def serialise_back_url(request):
 @register.simple_tag
 def unserialise_back_url(request):
     try:
-        return base64.b64decode(request.GET['back']).decode('utf-8')
+        return base64.b64decode(request.GET['return_to']).decode('utf-8')
     except (KeyError, ValueError):
         return reverse('security_dashboard')

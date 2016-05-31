@@ -4,8 +4,10 @@
 
 {% block group_title %}
   {% trans 'Prisoner' %}:
-  {{ group.prisoner_name }}
-  ({{ group.prisoner_number }})
+  <strong>
+    {{ group.prisoner_name }}
+    ({{ group.prisoner_number }})
+  </strong>
 {% endblock %}
 
 {% block group_header_row %}
@@ -17,7 +19,7 @@
 
 {% block group_results %}
   {% for sender in group.senders %}
-    <tr>
+    <tr {% if not forloop.counter|divisibleby:2 %}class="odd"{% endif %}>
       <td>
         {{ sender.sender_name }}
         {% if sender.sender_sort_code or sender.sender_account_number %}
@@ -31,10 +33,12 @@
       </td>
       <td>{{ sender.credit_count }}</td>
       <td>{{ sender.credit_total|currency }}</td>
-      <td><a href="{% get_credits_list_url view form group sender %}&amp;back={% serialise_back_url request %}">{% trans 'View' %}</a></td>
+      {% blocktrans with sender_name=sender.sender_name asvar detail_title %}Sent from {{ sender_name }}{% endblocktrans %}
+      <td><a href="{% get_credits_list_url view form group sender %}&amp;detail_title={{ detail_title|urlencode }}&amp;return_to={% serialise_back_url request %}">{% trans 'View' %}</a></td>
     </tr>
   {% endfor %}
-  <tr>
+
+  <tr {% if group.senders|length|divisibleby:2 %}class="odd"{% endif %}>
     <td>{% trans 'Total credits' %}</td>
     <td>{{ group.credit_count }}</td>
     <td colspan="2">{{ group.credit_total|currency }}</td>
