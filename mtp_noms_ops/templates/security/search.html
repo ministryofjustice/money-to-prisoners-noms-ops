@@ -9,5 +9,7 @@
 
   {% include 'mtp_common/includes/message_box.html' %}
 
+  {{ view.intro_text }}
+
   {% include 'security/form.html' with view=view form=form only %}
 {% endblock content %}
