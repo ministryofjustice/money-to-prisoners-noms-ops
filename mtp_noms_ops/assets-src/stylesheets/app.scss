@@ -3,3 +3,22 @@
 $images-dir: '/static/images/';
 
 @import 'mtp';
+
+form .form-group .form-hint {
+  margin-top: 0;
+}
+
+.UpdateFilterForm {
+  padding-bottom: 1em;
+  background: $grey-3;
+
+  h3 {
+    margin-top: 1em;
+  }
+}
+
+.ResultsList {
+  h3 {
+    margin-top: 0;
+  }
+}

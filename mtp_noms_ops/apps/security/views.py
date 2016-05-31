@@ -99,6 +99,7 @@ class SenderGroupedView(GroupedSecurityView):
     """
     title = _('Search by sender')
     intro_text = _('Use this search to find payments sent to multiple prisoners')
+    form_template_name = 'security/sender-grouped-form.html'
     results_template_name = 'security/sender-grouped.html'
     credits_view = 'security:sender_grouped_credits'
     form_class = SenderGroupedForm

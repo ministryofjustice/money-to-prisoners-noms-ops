@@ -6,8 +6,6 @@
   {% trans 'Prisoner' %}:
   {{ group.prisoner_name }}
   ({{ group.prisoner_number }})
-
-  <span>{% trans 'Total' %}: £{{ group.credit_total|currency }}</span>
 {% endblock %}
 
 {% block group_header_row %}
@@ -36,4 +34,9 @@
       <td><a href="{% get_credits_list_url view form group sender %}&amp;back={% serialise_back_url request %}">{% trans 'View' %}</a></td>
     </tr>
   {% endfor %}
+  <tr>
+    <td>{% trans 'Total credits' %}</td>
+    <td>{{ group.credit_count }}</td>
+    <td colspan="2">{{ group.credit_total|currency }}</td>
+  </tr>
 {% endblock %}

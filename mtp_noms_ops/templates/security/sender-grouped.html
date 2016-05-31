@@ -4,19 +4,23 @@
 
 {% block group_title %}
   {% trans 'Sender' %}:
-  {{ group.sender_name }}
-  {{ group.sender_sort_code|format_sort_code }}
-  {{ group.sender_account_number }}
-  {% if group.sender_roll_number %}
-    / {{ group.sender_roll_number }}
-  {% endif %}
-
-  <span>{% trans 'Total' %}: £{{ group.credit_total|currency }}</span>
+  <strong>
+    {{ group.sender_name }}
+    <span>
+      {{ group.sender_sort_code|format_sort_code }}
+      {% if group.sender_account_number %}
+        <br>
+        {{ group.sender_account_number }}
+      {% endif %}
+      {% if group.sender_roll_number %}
+        / {{ group.sender_roll_number }}
+      {% endif %}
+    </span>
+  </strong>
 {% endblock %}
 
 {% block group_header_row %}
-  <th>{% trans 'Prisoner number' %}</th>
-  <th>{% trans 'Prisoner name' %}</th>
+  <th colspan="2">{% trans 'Prisoner' %}</th>
   <th>{% trans 'Prison' %}</th>
   <th>{% trans 'No. of payments' %}</th>
   <th>{% trans 'Total value (£)' %}</th>
@@ -38,4 +42,9 @@
       <td><a href="{% get_credits_list_url view form group prisoner %}&amp;back={% serialise_back_url request %}">{% trans 'View' %}</a></td>
     </tr>
   {% endfor %}
+  <tr>
+    <td colspan="3"><span title="{% trans 'Excludes payments that could not be credited to a prisoner' %}">{% trans 'Total credits' %}</span></td>
+    <td>{{ group.credit_count }}</td>
+    <td colspan="2">{{ group.credit_total|currency }}</td>
+  </tr>
 {% endblock %}

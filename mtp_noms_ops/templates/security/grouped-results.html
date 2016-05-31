@@ -9,35 +9,52 @@
 
   {% include 'mtp_common/includes/message_box.html' %}
 
-  <div class="grid-row">
-    <div class="column-third">
-      {% include 'security/form.html' with view=view form=form only %}
+  <form method="get">
+    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+
+    <input type="hidden" name="page" value="1">
+
+    <div class="grid-row">
+      <aside class="UpdateFilterForm column-third">
+        <h3>{% trans 'Edit your search' %}</h3>
+
+        {% include view.form_template_name|default:'security/form.html' with view=view form=form only %}
+
+        <div class="form-group">
+          <button type="submit" class="button">{% trans 'Update search' %}</button>
+        </div>
+      </aside>
+
+      <div class="ResultsList column-two-thirds">
+        <h3>{% trans 'Results' %}</h3>
+        {% include 'mtp_common/forms/field.html' with field=form.ordering only %}
+
+        {% block results_list %}
+          {% for group in form.get_object_list %}
+
+            <table id="GroupedResults-{{ forloop.counter }}">
+              <caption>
+                {% block group_title %}{% endblock %}
+              </caption>
+              <thead>
+                <tr>{% block group_header_row %}{% endblock %}</tr>
+              </thead>
+              <tbody>
+                {% block group_results %}{% endblock %}
+              </tbody>
+            </table>
+
+          {% empty %}
+
+            <p>{% trans 'No matching credits found' %}</p>
+
+          {% endfor %}
+        {% endblock %}
+
+        {% include 'security/pagination.html' with page_count=form.page_count page_range=form.page_range query_string=form.query_string %}
+      </div>
     </div>
-    <div class="column-two-thirds">
-      {% block results_list %}
-        {% for group in form.get_object_list %}
 
-          <table id="GroupedResults-{{ forloop.counter }}">
-            <caption>
-              {% block group_title %}{% endblock %}
-            </caption>
-            <thead>
-              <tr>{% block group_header_row %}{% endblock %}</tr>
-            </thead>
-            <tbody>
-              {% block group_results %}{% endblock %}
-            </tbody>
-          </table>
-
-        {% empty %}
-
-          <p>{% trans 'No results' %}</p>
-
-        {% endfor %}
-      {% endblock %}
-    </div>
-  </div>
-
-  {% include 'security/pagination.html' with page_count=form.page_count page_range=form.page_range query_string=form.query_string %}
+  </form>
 
 {% endblock content %}
