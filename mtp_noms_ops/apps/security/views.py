@@ -19,6 +19,8 @@ class SecurityView(FormView):
     Base view for retrieving security-related searches
     Allows form submission via GET (using page parameter as the flag)
     """
+    title = NotImplemented
+    intro_text = NotImplemented
     template_name = 'security/search.html'
     results_template_name = NotImplemented
 
@@ -96,6 +98,8 @@ class SenderGroupedView(GroupedSecurityView):
     Show list of senders who sent to multiple prisoners
     """
     title = _('Search by sender')
+    intro_text = _('Use this search to find payments sent to multiple prisoners')
+    form_template_name = 'security/sender-grouped-form.html'
     results_template_name = 'security/sender-grouped.html'
     credits_view = 'security:sender_grouped_credits'
     form_class = SenderGroupedForm
@@ -122,6 +126,7 @@ class PrisonerGroupedView(GroupedSecurityView):
     Show list of prisoners who received from multiple senders
     """
     title = _('Search by prisoner')
+    intro_text = _('Use this search to find payments sent to prisoners from multiple senders')
     results_template_name = 'security/prisoner-grouped.html'
     credits_view = 'security:prisoner_grouped_credits'
     form_class = PrisonerGroupedForm
@@ -145,6 +150,7 @@ class CreditsView(SecurityView):
     Open-ended search view
     """
     title = _('Search by details')
+    intro_text = _('Use this search to list payments based on various filters')
     results_template_name = 'security/credits-results.html'
     form_class = CreditsForm
 

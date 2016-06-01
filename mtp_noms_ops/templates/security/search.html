@@ -9,5 +9,18 @@
 
   {% include 'mtp_common/includes/message_box.html' %}
 
-  {% include 'security/form.html' with view=view form=form only %}
+  {{ view.intro_text }}
+
+  <form method="get">
+    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+
+    <input type="hidden" name="page" value="1">
+
+    {% include view.form_template_name|default:'security/form.html' with view=view form=form only %}
+
+    <div class="form-group">
+      <button type="submit" class="button">{% trans 'Search' %}</button>
+    </div>
+  </form>
+
 {% endblock content %}

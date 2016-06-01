@@ -121,7 +121,7 @@ class SenderListTestCase(SecurityViewTestCase):
         response = self.client.post(reverse(self.view_name), {'page': '1'})
         self.assertContains(response, 'MAISIE NOLAN')
         response_content = response.content.decode(response.charset)
-        self.assertIn('£410.00', response_content)
+        self.assertIn('410.00', response_content)
         self.assertIn('Unknown prisoner', response_content)
         for prisoner in response_data['results'][0]['prisoners']:
             if not prisoner['prisoner_number']:
@@ -175,7 +175,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
         self.assertContains(response, 'JAMES HALLS')
         response_content = response.content.decode(response.charset)
         self.assertIn('A1409AE', response_content)
-        self.assertIn('£310.00', response_content)
+        self.assertIn('310.00', response_content)
         for sender in response_data['results'][0]['senders']:
             self.assertIn(sender['sender_name'], response_content)
             if sender['sender_account_number']:

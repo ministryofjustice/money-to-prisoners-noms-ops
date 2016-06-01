@@ -72,7 +72,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     page = forms.IntegerField(min_value=1)
     page_size = 20
     received_at_0 = forms.DateField(label=_('Start date'), required=False)
-    received_at_1 = forms.DateField(label=_('Finish date'), required=False)
+    received_at_1 = forms.DateField(label=_('End date'), required=False)
 
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
@@ -136,7 +136,7 @@ class SenderGroupedForm(SecurityForm):
     #                          required=False)
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
-    sender_sort_code = forms.CharField(label=_('Sender sort code'), required=False)
+    sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('eg 01-23-45'), required=False)
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
 
@@ -250,7 +250,7 @@ class CreditsForm(SecurityForm):
                                       choices=[('m', _('Male')), ('f', _('Female'))])
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
-    sender_sort_code = forms.CharField(label=_('Sender sort code'), required=False)
+    sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('eg 01-23-45'), required=False)
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
 

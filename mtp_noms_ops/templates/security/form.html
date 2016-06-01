@@ -1,16 +1,5 @@
-{% load i18n %}
-
-<form method="get">
-  {% include 'mtp_common/forms/error-summary.html' with form=form only %}
-
-  <input type="hidden" name="page" value="1">
-  {% for field in form %}
-    {% if field.name != 'page' %}
-      {% include 'mtp_common/forms/field.html' with field=field only %}
-    {% endif %}
-  {% endfor %}
-
-  <div class="form-group">
-    <button type="submit" class="button">{% trans 'Search' %}</button>
-  </div>
-</form>
+{% for field in form %}
+  {% if field.name != 'page' and field.name != 'ordering' %}
+    {% include 'mtp_common/forms/field.html' with field=field only %}
+  {% endif %}
+{% endfor %}

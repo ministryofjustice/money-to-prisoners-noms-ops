@@ -1,22 +1,30 @@
 {% extends 'security/grouped-results.html' %}
 {% load i18n %}
+{% load mtp_common %}
 {% load security %}
 
 {% block group_title %}
   {% trans 'Sender' %}:
-  {{ group.sender_name }}
-  {{ group.sender_sort_code|format_sort_code }}
-  {{ group.sender_account_number }}
-  {% if group.sender_roll_number %}
-    / {{ group.sender_roll_number }}
-  {% endif %}
-
-  <span>{% trans 'Total' %}: £{{ group.credit_total|currency }}</span>
+  <strong>{{ group.sender_name|default:_('Unknown sender name') }}</strong>
+  <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
+    {% stripwhitespace %}
+      {{ group.sender_sort_code|format_sort_code }}
+      {% if group.sender_account_number %}
+        <br>
+        {% if group.sender_roll_number %}
+          <small>
+            {{ group.sender_account_number }}/{{ group.sender_roll_number }}
+          </small>
+        {% else %}
+          {{ group.sender_account_number }}
+        {% endif %}
+      {% endif %}
+    {% endstripwhitespace %}
+  </span>
 {% endblock %}
 
 {% block group_header_row %}
-  <th>{% trans 'Prisoner number' %}</th>
-  <th>{% trans 'Prisoner name' %}</th>
+  <th colspan="2">{% trans 'Prisoner' %}</th>
   <th>{% trans 'Prison' %}</th>
   <th>{% trans 'No. of payments' %}</th>
   <th>{% trans 'Total value (£)' %}</th>
@@ -25,17 +33,25 @@
 
 {% block group_results %}
   {% for prisoner in group.prisoners %}
-    <tr>
+    <tr {% if not forloop.counter|divisibleby:2 %}class="odd"{% endif %}>
       {% if not prisoner.prisoner_number %}
         <td colspan="3">{% trans 'Unknown prisoner, refunded' %}</td>
+        {% blocktrans asvar detail_title %}Rejected prisoner reference{% endblocktrans %}
       {% else %}
         <td>{{ prisoner.prisoner_number }}</td>
         <td>{{ prisoner.prisoner_name }}</td>
         <td>{{ prisoner.prison_name }}</td>
+        {% blocktrans with prisoner_number=prisoner.prisoner_number prisoner_name=prisoner.prisoner_name asvar detail_title %}Sent to {{ prisoner_name }} ({{ prisoner_number }}){% endblocktrans %}
       {% endif %}
       <td>{{ prisoner.credit_count }}</td>
       <td>{{ prisoner.credit_total|currency }}</td>
-      <td><a href="{% get_credits_list_url view form group prisoner %}&amp;back={% serialise_back_url request %}">{% trans 'View' %}</a></td>
+      <td><a href="{% get_credits_list_url view form group prisoner %}&amp;detail_title={{ detail_title|urlencode }}&amp;return_to={% serialise_back_url request %}">{% trans 'View' %}</a></td>
     </tr>
   {% endfor %}
+
+  <tr {% if group.prisoners|length|divisibleby:2 %}class="odd"{% endif %}>
+    <td colspan="3"><span title="{% trans 'Excludes payments that could not be credited to a prisoner' %}">{% trans 'Total credits' %}</span></td>
+    <td>{{ group.credit_count }}</td>
+    <td colspan="2">{{ group.credit_total|currency }}</td>
+  </tr>
 {% endblock %}

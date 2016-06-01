@@ -3,3 +3,46 @@
 $images-dir: '/static/images/';
 
 @import 'mtp';
+
+form .form-group .form-hint {
+  margin-top: 0;
+}
+
+.UpdateFilterForm {
+  padding-bottom: 1em;
+  background: $grey-3;
+
+  h3 {
+    margin-top: 1em;
+  }
+}
+
+.ResultsList {
+  h3 {
+    margin-top: 0;
+  }
+
+  table {
+    width: 100%;
+    margin-bottom: 1.5em;
+    font-size: 0.7em;
+
+    thead th {
+      border-top: 0;
+    }
+  }
+}
+
+.CollapsingTableHeader {
+  background: #CDE2B7;
+  font-weight: normal;
+
+  .GroupedResults-sender-details {
+    line-height: 1em;
+    text-align: right;
+
+    small {
+      font-size: 0.75em;
+    }
+  }
+}
