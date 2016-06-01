@@ -10,8 +10,9 @@
   {% include 'mtp_common/includes/message_box.html' %}
 
   {{ view.intro_text }}
+  <p class="panel-indent panel-border-wide">{% trans 'All fields above are optional' %}</p>
 
-  <form method="get">
+  <form method="get" class="SearchFormWrapper">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
     <input type="hidden" name="page" value="1">
@@ -23,4 +24,4 @@
     </div>
   </form>
 
-{% endblock content %}
+{% endblock %}

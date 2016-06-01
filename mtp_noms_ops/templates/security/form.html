@@ -1,5 +1,7 @@
-{% for field in form %}
-  {% if field.name != 'page' and field.name != 'ordering' %}
-    {% include 'mtp_common/forms/field.html' with field=field only %}
-  {% endif %}
-{% endfor %}
+<div class="SecurityForm">
+  {% for field in form %}
+    {% if field.name != 'page' and field.name != 'ordering' %}
+      {% include 'mtp_common/forms/field.html' with field=field only %}
+    {% endif %}
+  {% endfor %}
+</div>

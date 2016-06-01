@@ -11,7 +11,9 @@
       require('mojular-moj-elements'),
       require('polyfills'),
       require('collapsing-table'),
-      require('upload')
+      require('upload'),
+      
+      require('security-forms')
     ])
     .init();
 }());

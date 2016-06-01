@@ -71,8 +71,8 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     """
     page = forms.IntegerField(min_value=1)
     page_size = 20
-    received_at_0 = forms.DateField(label=_('Start date'), required=False)
-    received_at_1 = forms.DateField(label=_('End date'), required=False)
+    received_at_0 = forms.DateField(label=_('Received since'), help_text=_('eg 01/06/2016'), required=False)
+    received_at_1 = forms.DateField(label=_('Received before'), help_text=_('eg 01/06/2016'), required=False)
 
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
@@ -125,12 +125,12 @@ class SenderGroupedForm(SecurityForm):
                                      ('sender_name', _('Sender name')),
                                  ])
 
-    prisoner_count_0 = forms.IntegerField(label=_('Minimum prisoners'), required=False, min_value=1)
-    prisoner_count_1 = forms.IntegerField(label=_('Maximum prisoners'), required=False, min_value=1)
-    credit_count_0 = forms.IntegerField(label=_('Minimum credits'), required=False, min_value=1)
-    credit_count_1 = forms.IntegerField(label=_('Maximum credits'), required=False, min_value=1)
-    credit_total_0 = forms.IntegerField(label=_('Minimum total'), required=False)
-    credit_total_1 = forms.IntegerField(label=_('Maximum total'), required=False)
+    prisoner_count_0 = forms.IntegerField(label=_('Minimum prisoners sent to'), required=False, min_value=1)
+    prisoner_count_1 = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
+    credit_count_0 = forms.IntegerField(label=_('Minimum credits sent'), required=False, min_value=1)
+    credit_count_1 = forms.IntegerField(label=_('Maximum credits sent'), required=False, min_value=1)
+    credit_total_0 = forms.IntegerField(label=_('Minimum total sent'), required=False)
+    credit_total_1 = forms.IntegerField(label=_('Maximum total sent'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
     #                          required=False)
@@ -175,12 +175,12 @@ class PrisonerGroupedForm(SecurityForm):
                                      ('prisoner_number', _('Prisoner number')),
                                  ])
 
-    sender_count_0 = forms.IntegerField(label=_('Minimum senders'), required=False, min_value=1)
-    sender_count_1 = forms.IntegerField(label=_('Maximum senders'), required=False, min_value=1)
-    credit_count_0 = forms.IntegerField(label=_('Minimum credits'), required=False, min_value=1)
-    credit_count_1 = forms.IntegerField(label=_('Maximum credits'), required=False, min_value=1)
-    credit_total_0 = forms.IntegerField(label=_('Minimum total'), required=False)
-    credit_total_1 = forms.IntegerField(label=_('Maximum total'), required=False)
+    sender_count_0 = forms.IntegerField(label=_('Minimum senders received from'), required=False, min_value=1)
+    sender_count_1 = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)
+    credit_count_0 = forms.IntegerField(label=_('Minimum credits received'), required=False, min_value=1)
+    credit_count_1 = forms.IntegerField(label=_('Maximum credits received'), required=False, min_value=1)
+    credit_total_0 = forms.IntegerField(label=_('Minimum total received'), required=False)
+    credit_total_1 = forms.IntegerField(label=_('Maximum total received'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
     #                          required=False)
