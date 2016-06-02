@@ -65,10 +65,15 @@ class GroupedSecurityView(SecurityView):
                 raise ValueError
         except (KeyError, ValueError):
             page = 1
+
         query_string = QueryDict(mutable=True)
         for key, value in filters.items():
             if value:
                 query_string[key] = value
+        query_string = query_string.urlencode()
+
+        filters.pop('return_to', None)
+        filters.pop('detail_title', None)
         offset = (page - 1) * self.page_size
         data = client.credits.get(offset=offset, limit=self.page_size, **filters)
         count = data['count']
@@ -78,7 +83,7 @@ class GroupedSecurityView(SecurityView):
             'page': page,
             'page_count': page_count,
             'page_range': make_page_range(page, page_count),
-            'query_string': query_string.urlencode(),
+            'query_string': query_string,
             'credits': data.get('results', []),
         }
         return render(request, 'security/grouped-results-details.html', context)
