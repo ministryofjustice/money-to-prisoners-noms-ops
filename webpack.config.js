@@ -25,6 +25,7 @@ module.exports = {
       __dirname + '/node_modules/mojular-moj-elements/node_modules'
     ],
     modulesDirectories: [
+      './mtp_noms_ops/assets-src/javascripts/modules',
       'node_modules',
       'node_modules/money-to-prisoners-common/assets/javascripts/modules'
     ],
