@@ -50,6 +50,7 @@ class UploadTests(PrisonerLocationAdminTestCase):
     """
     Tests for Upload functionality
     """
+    auto_load_test_data = True
 
     def setUp(self):
         super().setUp()
