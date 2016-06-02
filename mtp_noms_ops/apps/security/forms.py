@@ -74,6 +74,8 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     received_at_0 = forms.DateField(label=_('Received since'), help_text=_('eg 01/06/2016'), required=False)
     received_at_1 = forms.DateField(label=_('Received before'), help_text=_('eg 01/06/2016'), required=False)
 
+    extra_filters = {}
+
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
         self.request = request
@@ -98,7 +100,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         end_point = self.get_api_endpoint()
         page = self.cleaned_data['page']
         offset = (page - 1) * self.page_size
-        data = end_point.get(offset=offset, limit=self.page_size, **self.get_query_data())
+        filters = self.get_query_data()
+        filters.update(self.extra_filters)
+        data = end_point.get(offset=offset, limit=self.page_size, **filters)
         count = data['count']
         self.page_count = int(ceil(count / self.page_size))
         return data.get('results', [])
@@ -144,6 +148,10 @@ class SenderGroupedForm(SecurityForm):
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_gender = forms.ChoiceField(label=_('Prisoner gender'), required=False,
                                       choices=(('m', _('Male')), ('f', _('Female'))))
+
+    extra_filters = {
+        'include_invalid': 'True'
+    }
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)

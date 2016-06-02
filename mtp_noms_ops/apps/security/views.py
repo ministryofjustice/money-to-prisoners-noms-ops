@@ -72,9 +72,10 @@ class GroupedSecurityView(SecurityView):
                 query_string[key] = value
         query_string = query_string.urlencode()
 
+        offset = (page - 1) * self.page_size
         filters.pop('return_to', None)
         filters.pop('detail_title', None)
-        offset = (page - 1) * self.page_size
+        filters.update(self.form_class.extra_filters)
         data = client.credits.get(offset=offset, limit=self.page_size, **filters)
         count = data['count']
         page_count = int(ceil(count / self.page_size))
@@ -115,8 +116,8 @@ class SenderGroupedView(GroupedSecurityView):
             for key, value in group.items()
             if value and key in self.sender_identifiers
         }
-        if not row['prisoner_number']:
-            query_dict['status'] = 'refundable'  # TODO
+        if not row['prison_name']:
+            query_dict['prison__isnull'] = 'True'
         else:
             query_dict.update({
                 key: value
