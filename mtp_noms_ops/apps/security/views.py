@@ -1,7 +1,7 @@
 from math import ceil
 
 from django.http import QueryDict
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from mtp_common.auth.api_client import get_connection
@@ -46,10 +46,11 @@ class SecurityView(FormView):
 class GroupedSecurityView(SecurityView):
     listing_credits = False
     credits_view = NotImplemented
+    credits_template_name = NotImplemented
     page_size = 20
 
-    sender_identifiers = ('sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number')
-    prisoner_identifiers = ('prisoner_number',)
+    sender_keys = ('sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number')
+    prisoner_keys = ('prisoner_name', 'prisoner_number')
 
     def get(self, request, *args, **kwargs):
         if not self.listing_credits:
@@ -65,11 +66,17 @@ class GroupedSecurityView(SecurityView):
                 raise ValueError
         except (KeyError, ValueError):
             page = 1
+
         query_string = QueryDict(mutable=True)
         for key, value in filters.items():
             if value:
                 query_string[key] = value
+        query_string = query_string.urlencode()
+
         offset = (page - 1) * self.page_size
+        filters.pop('prisoner_name', None)  # this should not be used to identify prisoners
+        filters.pop('return_to', None)  # this is for navigation not filtering
+        filters.update(self.form_class.extra_filters)
         data = client.credits.get(offset=offset, limit=self.page_size, **filters)
         count = data['count']
         page_count = int(ceil(count / self.page_size))
@@ -78,10 +85,10 @@ class GroupedSecurityView(SecurityView):
             'page': page,
             'page_count': page_count,
             'page_range': make_page_range(page, page_count),
-            'query_string': query_string.urlencode(),
+            'query_string': query_string,
             'credits': data.get('results', []),
         }
-        return render(request, 'security/grouped-results-details.html', context)
+        return render(request, self.credits_template_name, context)
 
     def get_credits_row_query_string(self, form, group, row):
         query_string = QueryDict(form.query_string, mutable=True)
@@ -101,22 +108,28 @@ class SenderGroupedView(GroupedSecurityView):
     intro_text = _('Use this search to find payments sent to multiple prisoners')
     form_template_name = 'security/sender-grouped-form.html'
     results_template_name = 'security/sender-grouped.html'
+    credits_template_name = 'security/sender-grouped-credits.html'
     credits_view = 'security:sender_grouped_credits'
     form_class = SenderGroupedForm
+
+    def get_credits_view(self, request):
+        if not any(bool(request.GET.get(key)) for key in self.sender_keys):
+            return redirect('security:dashboard')
+        return super().get_credits_view(request)
 
     def get_credit_row_query_dict(self, group, row):
         query_dict = {
             key: value
             for key, value in group.items()
-            if value and key in self.sender_identifiers
+            if value and key in self.sender_keys
         }
-        if not row['prisoner_number']:
-            query_dict['status'] = 'refundable'  # TODO
+        if not row['prison_name']:
+            query_dict['prison__isnull'] = 'True'
         else:
             query_dict.update({
                 key: value
                 for key, value in row.items()
-                if value and key in self.prisoner_identifiers
+                if value and key in self.prisoner_keys
             })
         return query_dict
 
@@ -128,19 +141,25 @@ class PrisonerGroupedView(GroupedSecurityView):
     title = _('Search by prisoner')
     intro_text = _('Use this search to find payments sent to prisoners from multiple senders')
     results_template_name = 'security/prisoner-grouped.html'
+    credits_template_name = 'security/prisoner-grouped-credits.html'
     credits_view = 'security:prisoner_grouped_credits'
     form_class = PrisonerGroupedForm
+
+    def get_credits_view(self, request):
+        if not any(bool(request.GET.get(key)) for key in self.prisoner_keys):
+            return redirect('security:dashboard')
+        return super().get_credits_view(request)
 
     def get_credit_row_query_dict(self, group, row):
         query_dict = {
             key: value
             for key, value in group.items()
-            if value and key in self.prisoner_identifiers
+            if value and key in self.prisoner_keys
         }
         query_dict.update({
             key: value
             for key, value in row.items()
-            if value and key in self.sender_identifiers
+            if value and key in self.sender_keys
         })
         return query_dict
 
@@ -151,7 +170,7 @@ class CreditsView(SecurityView):
     """
     title = _('Search by details')
     intro_text = _('Use this search to list payments based on various filters')
-    results_template_name = 'security/credits-results.html'
+    results_template_name = 'security/credits.html'
     form_class = CreditsForm
 
     def form_valid(self, form):

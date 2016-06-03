@@ -4,7 +4,7 @@
 
 {% block content %}
   <header class="ContentHeader">
-    <a href="{% url 'security:dashboard' %}" class="ContentHeader-back">{% trans 'Home' %}</a>
+    <a href="{% url 'security:dashboard' %}" class="ContentHeader-back">{% trans 'Dashboard' %}</a>
     <h1>{{ view.title }}</h1>
   </header>
 
@@ -47,12 +47,12 @@
             {% for credit in credits|parse_date_fields %}
               <tr>
                 <td>
-                  {{ credit.prisoner_name }}
+                  {{ credit.prisoner_name|default_if_none:'—' }}
                   {% if credit.prisoner_number %}
                     (<a href="{% url 'security:credits' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a>)
                   {% endif %}
                 </td>
-                <td>{{ credit.prison_name }}</td>
+                <td>{{ credit.prison_name|default_if_none:'—' }}</td>
                 <td>{{ credit.intended_recipient|default:'' }}</td>
                 <td>{{ credit.amount|currency }}</td>
                 <td>
