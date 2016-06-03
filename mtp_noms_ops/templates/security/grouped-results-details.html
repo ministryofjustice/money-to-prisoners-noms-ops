@@ -32,13 +32,13 @@
               {% if credit.source == 'online' %}
                 {{ credit.intended_recipient }}
               {% else %}
-                {{ credit.prisoner_name }}
+                {{ credit.prisoner_name|default_if_none:'—' }}
                 {% if credit.prisoner_number %}
                   (<a href="{% url 'security:credits' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a>)
                 {% endif %}
               {% endif %}
             </td>
-            <td>{{ credit.prison_name }}</td>
+            <td>{{ credit.prison_name|default_if_none:'—' }}</td>
             <td>{{ credit.amount|currency }}</td>
             <td>
               {% if credit.source == 'online' %}
