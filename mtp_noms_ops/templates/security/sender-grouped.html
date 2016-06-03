@@ -1,4 +1,4 @@
-{% extends 'security/grouped-results.html' %}
+{% extends 'security/grouped.html' %}
 {% load i18n %}
 {% load mtp_common %}
 {% load security %}
@@ -36,16 +36,14 @@
     <tr {% if not forloop.counter|divisibleby:2 %}class="odd"{% endif %}>
       {% if not prisoner.prisoner_number %}
         <td colspan="3">{% trans 'Unknown prisoner, refunded' %}</td>
-        {% blocktrans asvar detail_title %}Rejected prisoner reference{% endblocktrans %}
       {% else %}
         <td>{{ prisoner.prisoner_number }}</td>
         <td>{{ prisoner.prisoner_name }}</td>
         <td>{{ prisoner.prison_name }}</td>
-        {% blocktrans with prisoner_number=prisoner.prisoner_number prisoner_name=prisoner.prisoner_name asvar detail_title %}Sent to {{ prisoner_name }} ({{ prisoner_number }}){% endblocktrans %}
       {% endif %}
       <td>{{ prisoner.credit_count }}</td>
       <td>{{ prisoner.credit_total|currency }}</td>
-      <td><a href="{% get_credits_list_url view form group prisoner %}&amp;detail_title={{ detail_title|urlencode }}&amp;return_to={% serialise_back_url request %}">{% trans 'View' %}</a></td>
+      <td><a href="{% get_credits_list_url view form group prisoner %}&amp;return_to={% serialise_back_url request %}">{% trans 'View' %}</a></td>
     </tr>
   {% endfor %}
 

@@ -1,0 +1,13 @@
+{% extends 'security/grouped-credits.html' %}
+{% load i18n %}
+{% load security %}
+
+{% block credit_group_title %}
+  {% credit_group_title_for_sender as credit_group_title %}
+  {{ credit_group_title|default:view.title }}
+{% endblock %}
+
+{% block group_title %}
+  {% trans 'Sent to' %}:
+  <strong>{{ request.GET.prisoner_number|default:_('Unknown prisoner') }}</strong>
+{% endblock %}

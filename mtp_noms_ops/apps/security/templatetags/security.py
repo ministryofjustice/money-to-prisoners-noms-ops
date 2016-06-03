@@ -5,6 +5,9 @@ from django import template
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime, parse_date
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext
 
 register = template.Library()
 
@@ -69,3 +72,31 @@ def unserialise_back_url(request):
         return base64.b64decode(request.GET['return_to']).decode('utf-8')
     except (KeyError, ValueError):
         return reverse('security_dashboard')
+
+
+@register.simple_tag(takes_context=True)
+def credit_group_title_for_sender(context):
+    request = context.get('request')
+    if not request:
+        return ''
+
+    sender_name = request.GET.get('sender_name')
+    if sender_name:
+        credit_group_title = gettext('Sender %(sender_name)s') % {'sender_name': sender_name}
+    else:
+        credit_group_title = gettext('Unknown sender')
+
+    sender_sort_code = request.GET.get('sender_sort_code', '')
+    if sender_sort_code:
+        sender_sort_code = format_sort_code(sender_sort_code)
+    sender_account_number = request.GET.get('sender_account_number', '')
+    sender_roll_number = request.GET.get('sender_roll_number', '')
+    if sender_account_number and sender_roll_number:
+        sender_account_number = '%s/%s' % (sender_account_number, sender_roll_number)
+    sender_account = ('%s %s' % (sender_sort_code, sender_account_number)).strip()
+    if sender_account:
+        credit_group_title = escape(credit_group_title)
+        sender_account = escape(sender_account)
+        credit_group_title = mark_safe('%s<br>\n<small>%s</small>' % (credit_group_title, sender_account))
+
+    return credit_group_title

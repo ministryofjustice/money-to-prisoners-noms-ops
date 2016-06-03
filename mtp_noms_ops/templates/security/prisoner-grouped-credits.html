@@ -1,0 +1,16 @@
+{% extends 'security/grouped-credits.html' %}
+{% load i18n %}
+
+{% block credit_group_title %}
+  {% if request.GET.prisoner_number %}
+    {% blocktrans trimmed with prisoner_number=request.GET.prisoner_number asvar credit_group_title %}
+      Prisoner {{ prisoner_number }}
+    {% endblocktrans %}
+  {% endif %}
+  {{ credit_group_title|default:view.title }}
+{% endblock %}
+
+{% block group_title %}
+  {% trans 'Received from' %}:
+  <strong>{{ request.GET.sender_name|default:_('Unknown sender') }}</strong>
+{% endblock %}

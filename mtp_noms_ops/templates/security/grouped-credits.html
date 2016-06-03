@@ -5,7 +5,7 @@
 {% block content %}
   <header class="ContentHeader">
     <a href="{% unserialise_back_url request %}" class="ContentHeader-back ContentHeader-arrow">{% trans 'Back' %}</a>
-    <h1>{{ view.title }}</h1>
+    <h1>{% block credit_group_title %}{{ view.title }}{% endblock %}</h1>
   </header>
 
   {% include 'mtp_common/includes/message_box.html' %}
@@ -13,7 +13,7 @@
   <div class="ResultsList">
     <table class="CollapsingTable">
       <caption class="CollapsingTableHeader" data-collapse-text="{% trans 'Collapse' %}" data-expand-text="{% trans 'Expand' %}">
-        {{ request.GET.detail_title|default:'Credits' }}
+        {% block group_title %}{% endblock %}
       </caption>
       <thead>
         <tr>

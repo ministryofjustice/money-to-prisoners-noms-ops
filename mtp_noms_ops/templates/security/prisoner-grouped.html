@@ -1,4 +1,4 @@
-{% extends 'security/grouped-results.html' %}
+{% extends 'security/grouped.html' %}
 {% load i18n %}
 {% load security %}
 
@@ -33,8 +33,7 @@
       </td>
       <td>{{ sender.credit_count }}</td>
       <td>{{ sender.credit_total|currency }}</td>
-      {% blocktrans with sender_name=sender.sender_name asvar detail_title %}Sent from {{ sender_name }}{% endblocktrans %}
-      <td><a href="{% get_credits_list_url view form group sender %}&amp;detail_title={{ detail_title|urlencode }}&amp;return_to={% serialise_back_url request %}">{% trans 'View' %}</a></td>
+      <td><a href="{% get_credits_list_url view form group sender %}&amp;return_to={% serialise_back_url request %}">{% trans 'View' %}</a></td>
     </tr>
   {% endfor %}
 

@@ -46,6 +46,7 @@ class SecurityView(FormView):
 class GroupedSecurityView(SecurityView):
     listing_credits = False
     credits_view = NotImplemented
+    credits_template_name = NotImplemented
     page_size = 20
 
     sender_identifiers = ('sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number')
@@ -74,7 +75,6 @@ class GroupedSecurityView(SecurityView):
 
         offset = (page - 1) * self.page_size
         filters.pop('return_to', None)
-        filters.pop('detail_title', None)
         filters.update(self.form_class.extra_filters)
         data = client.credits.get(offset=offset, limit=self.page_size, **filters)
         count = data['count']
@@ -87,7 +87,7 @@ class GroupedSecurityView(SecurityView):
             'query_string': query_string,
             'credits': data.get('results', []),
         }
-        return render(request, 'security/grouped-results-details.html', context)
+        return render(request, self.credits_template_name, context)
 
     def get_credits_row_query_string(self, form, group, row):
         query_string = QueryDict(form.query_string, mutable=True)
@@ -107,6 +107,7 @@ class SenderGroupedView(GroupedSecurityView):
     intro_text = _('Use this search to find payments sent to multiple prisoners')
     form_template_name = 'security/sender-grouped-form.html'
     results_template_name = 'security/sender-grouped.html'
+    credits_template_name = 'security/sender-grouped-credits.html'
     credits_view = 'security:sender_grouped_credits'
     form_class = SenderGroupedForm
 
@@ -134,6 +135,7 @@ class PrisonerGroupedView(GroupedSecurityView):
     title = _('Search by prisoner')
     intro_text = _('Use this search to find payments sent to prisoners from multiple senders')
     results_template_name = 'security/prisoner-grouped.html'
+    credits_template_name = 'security/prisoner-grouped-credits.html'
     credits_view = 'security:prisoner_grouped_credits'
     form_class = PrisonerGroupedForm
 
@@ -157,7 +159,7 @@ class CreditsView(SecurityView):
     """
     title = _('Search by details')
     intro_text = _('Use this search to list payments based on various filters')
-    results_template_name = 'security/credits-results.html'
+    results_template_name = 'security/credits.html'
     form_class = CreditsForm
 
     def form_valid(self, form):
