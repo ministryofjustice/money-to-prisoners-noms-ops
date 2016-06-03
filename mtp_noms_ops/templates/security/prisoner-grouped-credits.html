@@ -1,16 +1,31 @@
 {% extends 'security/grouped-credits.html' %}
 {% load i18n %}
+{% load mtp_common %}
+{% load security %}
 
 {% block credit_group_title %}
+  {{ request.GET.prisoner_name|default:_('Unknown prisoners, refunded') }}
   {% if request.GET.prisoner_number %}
-    {% blocktrans trimmed with prisoner_number=request.GET.prisoner_number asvar credit_group_title %}
-      Prisoner {{ prisoner_number }}
-    {% endblocktrans %}
+    ({{ request.GET.prisoner_number }})
   {% endif %}
-  {{ credit_group_title|default:view.title }}
 {% endblock %}
 
 {% block group_title %}
   {% trans 'Received from' %}:
-  <strong>{{ request.GET.sender_name|default:_('Unknown sender') }}</strong>
+  <strong>{{ request.GET.sender_name|default:_('Unknown sender name') }}</strong>
+  <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
+    {% stripwhitespace %}
+      {{ request.GET.sender_sort_code|format_sort_code }}
+      {% if request.GET.sender_account_number %}
+        <br>
+        {% if request.GET.sender_roll_number %}
+          <small>
+            {{ request.GET.sender_account_number }}/{{ request.GET.sender_roll_number }}
+          </small>
+        {% else %}
+          {{ request.GET.sender_account_number }}
+        {% endif %}
+      {% endif %}
+    {% endstripwhitespace %}
+  </span>
 {% endblock %}

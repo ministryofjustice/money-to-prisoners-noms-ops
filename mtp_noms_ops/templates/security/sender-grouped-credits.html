@@ -4,10 +4,15 @@
 
 {% block credit_group_title %}
   {% credit_group_title_for_sender as credit_group_title %}
-  {{ credit_group_title|default:view.title }}
+  {{ credit_group_title|default:_('Unknown sender') }}
 {% endblock %}
 
 {% block group_title %}
   {% trans 'Sent to' %}:
-  <strong>{{ request.GET.prisoner_number|default:_('Unknown prisoner') }}</strong>
+  <strong>
+    {{ request.GET.prisoner_name|default:_('Unknown prisoners, refunded') }}
+    {% if request.GET.prisoner_number %}
+      ({{ request.GET.prisoner_number }})
+    {% endif %}
+  </strong>
 {% endblock %}
