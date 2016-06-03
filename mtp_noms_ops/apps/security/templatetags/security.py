@@ -71,7 +71,7 @@ def unserialise_back_url(request):
     try:
         return base64.b64decode(request.GET['return_to']).decode('utf-8')
     except (KeyError, ValueError):
-        return reverse('security_dashboard')
+        return reverse('security:dashboard')
 
 
 @register.simple_tag(takes_context=True)

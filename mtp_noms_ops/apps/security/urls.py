@@ -16,7 +16,7 @@ urlpatterns = [
         name='sender_grouped_credits'),
     url(r'^prisoner-grouped/$', security_test(views.PrisonerGroupedView.as_view()),
         name='prisoner_grouped'),
-    url(r'^prisoner-grouped/$', security_test(views.PrisonerGroupedView.as_view(listing_credits=True)),
+    url(r'^prisoner-grouped/credits/$', security_test(views.PrisonerGroupedView.as_view(listing_credits=True)),
         name='prisoner_grouped_credits'),
     url(r'^credits/$', security_test(views.CreditsView.as_view()),
         name='credits'),

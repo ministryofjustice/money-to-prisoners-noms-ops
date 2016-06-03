@@ -1,7 +1,7 @@
 from math import ceil
 
 from django.http import QueryDict
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from mtp_common.auth.api_client import get_connection
@@ -111,6 +111,11 @@ class SenderGroupedView(GroupedSecurityView):
     credits_view = 'security:sender_grouped_credits'
     form_class = SenderGroupedForm
 
+    def get_credits_view(self, request):
+        if not any(bool(request.GET.get(key)) for key in self.sender_identifiers):
+            return redirect('security:dashboard')
+        return super().get_credits_view(request)
+
     def get_credit_row_query_dict(self, group, row):
         query_dict = {
             key: value
@@ -138,6 +143,11 @@ class PrisonerGroupedView(GroupedSecurityView):
     credits_template_name = 'security/prisoner-grouped-credits.html'
     credits_view = 'security:prisoner_grouped_credits'
     form_class = PrisonerGroupedForm
+
+    def get_credits_view(self, request):
+        if not any(bool(request.GET.get(key)) for key in self.prisoner_identifiers):
+            return redirect('security:dashboard')
+        return super().get_credits_view(request)
 
     def get_credit_row_query_dict(self, group, row):
         query_dict = {
