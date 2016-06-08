@@ -7,3 +7,13 @@
     width: 10em;
   }
 }
+
+.PrisonerGroupedForm {
+  #id_prisoner_name {
+    width: 100%;
+    max-width: 16em;
+  }
+  #id_prisoner_number {
+    width: 10em;
+  }
+}

@@ -193,6 +193,9 @@ class PrisonerGroupedForm(SecurityForm):
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
     #                          required=False)
 
+    prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
+    prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
+
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_gender = forms.ChoiceField(label=_('Prisoner gender'), required=False,

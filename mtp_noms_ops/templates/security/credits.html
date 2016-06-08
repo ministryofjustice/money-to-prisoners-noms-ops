@@ -19,7 +19,7 @@
       <aside class="ResultsFormWrapper column-third">
         <h3>{% trans 'Edit your search' %}</h3>
 
-        {% include view.form_template_name|default:'security/form.html' with view=view form=form only %}
+        {% include view.form_template_name with view=view form=form only %}
 
         <div class="form-group">
           <button type="submit" class="button">{% trans 'Update search' %}</button>

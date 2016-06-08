@@ -10,14 +10,14 @@
   {% include 'mtp_common/includes/message_box.html' %}
 
   {{ view.intro_text }}
-  <p class="panel-indent panel-border-wide">{% trans 'All fields above are optional' %}</p>
+  <p class="panel-indent panel-border-wide">{% trans 'All fields are optional' %}</p>
 
   <form method="get" class="SearchFormWrapper">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
     <input type="hidden" name="page" value="1">
 
-    {% include view.form_template_name|default:'security/form.html' with view=view form=form only %}
+    {% include view.form_template_name with view=view form=form only %}
 
     <div class="form-group">
       <button type="submit" class="button">{% trans 'Search' %}</button>

@@ -22,6 +22,7 @@ class SecurityView(FormView):
     title = NotImplemented
     intro_text = NotImplemented
     template_name = 'security/search.html'
+    form_template_name = 'security/form.html'
     results_template_name = NotImplemented
 
     def get_form_kwargs(self):
@@ -140,6 +141,7 @@ class PrisonerGroupedView(GroupedSecurityView):
     """
     title = _('Search by prisoner')
     intro_text = _('Use this search to find payments sent to prisoners from multiple senders')
+    form_template_name = 'security/prisoner-grouped-form.html'
     results_template_name = 'security/prisoner-grouped.html'
     credits_template_name = 'security/prisoner-grouped-credits.html'
     credits_view = 'security:prisoner_grouped_credits'
