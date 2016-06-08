@@ -81,6 +81,7 @@ class SecurityFormTestCase(unittest.TestCase):
         expected_data = {
             'page': 1,
             'ordering': '',
+            'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_gender': '',
             'received_at_0': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
@@ -95,6 +96,7 @@ class SecurityFormTestCase(unittest.TestCase):
         expected_data = {
             'page': 1,
             'ordering': '-credit_total',
+            'prisoner_number': '', 'prisoner_name': '',
             'prison': 'IXB', 'prison_region': '', 'prison_gender': '',
             'received_at_0': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
