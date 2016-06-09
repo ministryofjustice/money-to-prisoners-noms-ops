@@ -73,7 +73,7 @@
           </tbody>
         </table>
 
-        {% include 'security/pagination.html' with page_count=form.page_count page_range=form.page_range query_string=form.query_string %}
+        {% include 'security/pagination.html' with page=form.page.value page_count=form.page_count page_range=form.page_range query_string=form.query_string %}
       </div>
     </div>
 

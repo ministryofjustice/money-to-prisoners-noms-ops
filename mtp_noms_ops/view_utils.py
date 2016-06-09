@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse_lazy
 
@@ -11,12 +13,14 @@ def user_test(permissions):
     return decorator
 
 
-def make_page_range(page, page_count):
+def make_page_range(page, page_count, end_padding=2, page_padding=2):
     if page_count < 7:
         return range(1, page_count + 1)
-    pages = sorted(set([1, 2] +
-                       [page - 1, page, page + 1] +
-                       [page_count - 1, page_count]))
+    pages = sorted(set(chain(
+        range(1, end_padding + 2),
+        range(page - page_padding, page + page_padding + 1),
+        range(page_count - end_padding, page_count + 1),
+    )))
     pages_with_ellipses = []
     last_page = 0
     for page in pages:

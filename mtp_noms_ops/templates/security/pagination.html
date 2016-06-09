@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% if page_count > 1 %}
-  <ol>
+  <ul class="Pagination print-hidden">
     {% for page in page_range %}
       <li>
         {% if not page %}
@@ -14,5 +14,9 @@
         {% endif %}
       </li>
     {% endfor %}
-  </ol>
+  </ul>
+
+  <p class="Pagination-print-description">
+    {% blocktrans %}Page {{ page }} of {{ page_count }}.{% endblocktrans %}
+  </p>
 {% endif %}
