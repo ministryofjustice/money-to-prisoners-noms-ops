@@ -123,10 +123,10 @@ class SenderGroupedForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Sort by'), required=False,
                                  initial='-prisoner_count',
                                  choices=[
-                                     ('-prisoner_count', _('Number of prisoners')),
-                                     ('-credit_count', _('Number of payments')),
-                                     ('-credit_total', _('Total sent')),
-                                     ('sender_name', _('Sender name')),
+                                     ('-prisoner_count', _('Number of prisoners (high to low)')),
+                                     ('-credit_count', _('Number of payments (high to low)')),
+                                     ('-credit_total', _('Total sent (high to low)')),
+                                     ('sender_name', _('Sender name (A to Z)')),
                                  ])
 
     prisoner_count_0 = forms.IntegerField(label=_('Minimum prisoners sent to'), required=False, min_value=1)
@@ -176,11 +176,11 @@ class PrisonerGroupedForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Sort by'), required=False,
                                  initial='-sender_count',
                                  choices=[
-                                     ('-sender_count', _('Number of senders')),
-                                     ('-credit_count', _('Number of payments')),
-                                     ('-credit_total', _('Total sent')),
-                                     ('prisoner_name', _('Prisoner name')),
-                                     ('prisoner_number', _('Prisoner number')),
+                                     ('-sender_count', _('Number of senders (high to low)')),
+                                     ('-credit_count', _('Number of payments (high to low)')),
+                                     ('-credit_total', _('Total received (high to low)')),
+                                     ('prisoner_name', _('Prisoner name (A to Z)')),
+                                     ('prisoner_number', _('Prisoner number (A to Z)')),
                                  ])
 
     sender_count_0 = forms.IntegerField(label=_('Minimum senders received from'), required=False, min_value=1)
@@ -243,10 +243,10 @@ class CreditsForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Sort by'), required=False,
                                  initial='-received_at',
                                  choices=[
-                                     ('-received_at', _('Received date')),
-                                     ('-amount', _('Amount')),
-                                     ('prisoner_number', _('Prisoner number')),
-                                     ('prisoner_name', _('Prisoner name')),
+                                     ('-received_at', _('Received date (newest to oldest)')),
+                                     ('-amount', _('Amount sent (high to low)')),
+                                     ('prisoner_name', _('Prisoner name (A to Z)')),
+                                     ('prisoner_number', _('Prisoner number (A to Z)')),
                                  ])
 
     amount = forms.CharField(label=_('Amount (exact)'), validators=[validate_amount], required=False)
