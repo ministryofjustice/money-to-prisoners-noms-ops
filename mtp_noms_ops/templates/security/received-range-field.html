@@ -1,31 +1,29 @@
 {% load i18n %}
 
 <div class="form-range-field form-group">
-  <span class="form-label">{% trans 'Total sent (£)' %}</span>
+  <span class="form-label">{% trans 'Date received' %}</span>
 
   <div class="grid-row">
-    {% with field=form.credit_total_0 %}
+    {% with field=form.received_at_0 %}
       <div class="column-half">
         <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}error{% endif %}">
           <label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="form-label">{% trans 'From' %}</label>
           {% include 'mtp_common/forms/field-errors.html' with field=field only %}
           {% include 'mtp_common/forms/field-help-text.html' with field=field only %}
-          <input id="{{ field.id_for_label }}" class="form-control" name="{{ field.html_name }}" value="{{ field.value|default_if_none:'' }}" type="{{ field.field.widget.input_type|default:'text' }}" min="0" />
+          <input id="{{ field.id_for_label }}" class="form-control" name="{{ field.html_name }}" value="{{ field.value|date:'d/m/Y'|default:field.value|default_if_none:'' }}" type="{{ field.field.widget.input_type|default:'text' }}" />
         </div>
       </div>
     {% endwith %}
 
-    {% with field=form.credit_total_1 %}
+    {% with field=form.received_at_1 %}
       <div class="column-half">
         <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}error{% endif %}">
           <label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="form-label">{% trans 'To' %}</label>
           {% include 'mtp_common/forms/field-errors.html' with field=field only %}
           {% include 'mtp_common/forms/field-help-text.html' with field=field only %}
-          <input id="{{ field.id_for_label }}" class="form-control" name="{{ field.html_name }}" value="{{ field.value|default_if_none:'' }}" type="{{ field.field.widget.input_type|default:'text' }}" min="0" />
+          <input id="{{ field.id_for_label }}" class="form-control" name="{{ field.html_name }}" value="{{ field.value|date:'d/m/Y'|default:field.value|default_if_none:'' }}" type="{{ field.field.widget.input_type|default:'text' }}" />
         </div>
       </div>
     {% endwith %}
   </div>
 </div>
-
-{% include 'security/received-range-field.html' %}
