@@ -1,0 +1,14 @@
+a.muted-link {
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media print {
+    &:after {
+      content: '';
+    }
+  }
+}
