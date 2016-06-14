@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from . import required_permissions, views
-from mtp_noms_ops.view_utils import user_test
+from mtp_noms_ops.utils import user_test
 
 security_test = user_test(required_permissions)
 

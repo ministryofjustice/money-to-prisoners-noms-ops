@@ -3,6 +3,16 @@ from itertools import chain
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse_lazy
 
+from prisoner_location_admin import required_permissions as prisoner_location_permissions
+from security import required_permissions as security_permissions
+
+
+class UserPermissionMiddleware:
+    @classmethod
+    def process_request(cls, request):
+        request.can_access_prisoner_location = request.user.has_perms(prisoner_location_permissions)
+        request.can_access_security = request.user.has_perms(security_permissions)
+
 
 def user_test(permissions):
     def decorator(view):

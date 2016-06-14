@@ -8,14 +8,11 @@ from moj_irat.views import HealthcheckView, PingJsonView
 from mtp_common.auth import views as auth_views
 from mtp_common.auth.exceptions import Unauthorized
 
-from prisoner_location_admin import required_permissions as prisoner_location_permissions
-from security import required_permissions as security_permissions
-
 
 def redirect_to_start(request):
-    if request.user.has_perms(prisoner_location_permissions):
+    if request.can_access_prisoner_location:
         return redirect(reverse_lazy('location_file_upload'))
-    if request.user.has_perms(security_permissions):
+    if request.can_access_security:
         return redirect(reverse_lazy('security:dashboard'))
     raise Unauthorized()  # middleware causes user to be logged-out
 

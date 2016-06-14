@@ -1,6 +1,6 @@
 import unittest
 
-from mtp_noms_ops.view_utils import make_page_range
+from mtp_noms_ops.utils import make_page_range
 from security.templatetags.security import currency, format_sort_code
 
 
