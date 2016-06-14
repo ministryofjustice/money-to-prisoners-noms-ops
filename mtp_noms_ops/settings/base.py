@@ -95,6 +95,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             get_project_dir('templates'),
+            get_project_dir('assets/templates'),
             get_project_dir('node_modules'),
             get_project_dir('../node_modules/mojular-templates'),
         ],

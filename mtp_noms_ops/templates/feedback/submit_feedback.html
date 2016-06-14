@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block content %}
+{% block inner_content %}
 <header class="ContentHeader">
   <a href="{% url 'location_file_upload' %}" class="ContentHeader-back">{% trans 'Home' %}</a>
-  <h1>{% trans 'Your feedback' %}</h1>
+  <h1 class="heading-xlarge">{% trans 'Your feedback' %}</h1>
 </header>
 
 <form action="." method="post" id="send-feedback">
@@ -23,7 +23,7 @@
       </div>
     {% endwith %}
 
-    <h2>{% trans 'Do you want a reply?' %}</h2>
+    <h2 class="heading-medium">{% trans 'Do you want a reply?' %}</h2>
     <p>{% trans 'Enter your email address if you’d like a reply. We won’t use it for anything else.' %}</p>
 
     {% include 'mtp_common/forms/field.html' with field=form.contact_email only %}

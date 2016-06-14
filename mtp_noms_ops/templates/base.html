@@ -7,7 +7,7 @@
   {% sentry_js %}
 {% endblock %}
 
-{% block after_main_js %}
+{% block body_end %}
   {{ block.super }}
   <!-- {% if request.resolver_match.namespace %}{{ request.resolver_match.namespace }}:{% endif %}{{ request.resolver_match.url_name }} -->
 {% endblock %}
