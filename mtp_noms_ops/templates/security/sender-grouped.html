@@ -33,7 +33,7 @@
 
 {% block group_results %}
   {% for prisoner in group.prisoners %}
-    <tr {% if not forloop.counter|divisibleby:2 %}class="odd"{% endif %}>
+    <tr>
       {% if not prisoner.prisoner_number %}
         <td colspan="3">{% trans 'Cannot be credited' %}</td>
       {% else %}
@@ -55,7 +55,7 @@
     </tr>
   {% endfor %}
 
-  <tr {% if group.prisoners|length|divisibleby:2 %}class="odd"{% endif %}>
+  <tr class="no-border">
     <td colspan="3"><span title="{% trans 'Excludes payments that could not be credited to a prisoner' %}">{% trans 'Total credits' %}</span></td>
     <td>{{ group.credit_count }}</td>
     <td colspan="2">{{ group.credit_total|currency }}</td>
