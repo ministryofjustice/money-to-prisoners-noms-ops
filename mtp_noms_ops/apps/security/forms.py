@@ -35,8 +35,9 @@ def get_prisons_and_regions(client, session):
 
 
 def insert_blank_option(choices, title=_('Select an option')):
-    choices.insert(0, ('', title))
-    return choices
+    new_choices = [('', title)]
+    new_choices.extend(choices)
+    return new_choices
 
 
 def validate_amount(amount):
