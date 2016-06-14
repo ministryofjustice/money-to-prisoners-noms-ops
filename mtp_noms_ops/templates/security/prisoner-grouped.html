@@ -33,7 +33,15 @@
       </td>
       <td>{{ sender.credit_count }}</td>
       <td>{{ sender.credit_total|currency }}</td>
-      <td><a href="{% get_credits_list_url view form group sender %}&amp;return_to={% serialise_back_url request %}">{% trans 'View' %}</a></td>
+      <td>
+        <a href="{% get_credits_list_url view form group sender %}&amp;return_to={% serialise_back_url request %}"
+           class="CreditDetailLink print-hidden"
+           data-show-title="{% trans 'Show' %}"
+           data-hide-title="{% trans 'Hide' %}"
+           data-loading-title="{% trans 'Loading…' %}">
+          {% trans 'Show' %}
+        </a>
+      </td>
     </tr>
   {% endfor %}
 

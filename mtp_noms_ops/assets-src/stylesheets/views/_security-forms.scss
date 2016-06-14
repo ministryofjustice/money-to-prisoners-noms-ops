@@ -75,3 +75,26 @@
     }
   }
 }
+
+.CreditDetailRow {
+  // credit detail tables that are loaded inline
+
+  table {
+    margin-bottom: 0;
+    border: 1px solid $grey-1;
+    font-size: 0.85em;
+  }
+  table & td {
+    padding: 0 1px 1em 1em;
+  }
+}
+tbody tr.CreditDetailRow table {
+  th, td {
+    background: #ededed;
+  }
+}
+tbody tr.odd.CreditDetailRow table {
+  th, td {
+    background: #fff;
+  }
+}
