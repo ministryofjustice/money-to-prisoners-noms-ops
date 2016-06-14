@@ -126,7 +126,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_gender': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'amount': '', 'amount_pattern': '', 'amount_pence': None,
+            'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
         }
         form = CreditsForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
@@ -143,7 +143,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_gender': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'amount': '', 'amount_pattern': '', 'amount_pence': None,
+            'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
         }
         form = CreditsForm(self.request, data={'page': '1', 'ordering': '-amount', 'received_at_0': '26/5/2016'})
         self.assertTrue(form.is_valid())

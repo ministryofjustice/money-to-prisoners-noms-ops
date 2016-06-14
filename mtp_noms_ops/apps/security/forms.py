@@ -96,7 +96,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             if field.name == 'page':
                 continue
             value = self.cleaned_data.get(field.name)
-            if not value:
+            if value is None or isinstance(value, str) and len(value) == 0:
                 continue
             data[field.name] = value
         return data
@@ -225,27 +225,38 @@ class AmountPattern(enum.Enum):
     not_multiple_5 = _('Not a multiple of £5')
     not_multiple_10 = _('Not a multiple of £10')
     gte_100 = _('£100 or more')
+    exact = _('Exact amount')
+    pence = _('Exact pence part')
 
     @classmethod
     def get_choices(cls):
         return [(choice.name, choice.value) for choice in cls]
 
     @classmethod
-    def get_filters(cls, amount_pattern):
-        filters = {}
+    def update_query_data(cls, query_data):
+        amount_pattern = query_data.pop('amount_pattern', None)
         try:
             amount_pattern = cls[amount_pattern]
-            if amount_pattern == cls.not_integral:
-                filters['exclude_amount__endswith'] = '00'
-            elif amount_pattern == cls.not_multiple_5:
-                filters['exclude_amount__regex'] = '(500|000)$'
-            elif amount_pattern == cls.not_multiple_10:
-                filters['exclude_amount__endswith'] = '000'
-            elif amount_pattern == cls.gte_100:
-                filters['amount__gte'] = '10000'
         except KeyError:
-            pass
-        return filters
+            return
+
+        amount_exact = query_data.pop('amount_exact', None)
+        amount_pence = query_data.pop('amount_pence', None)
+
+        if amount_pattern == cls.not_integral:
+            query_data['exclude_amount__endswith'] = '00'
+        elif amount_pattern == cls.not_multiple_5:
+            query_data['exclude_amount__regex'] = '(500|000)$'
+        elif amount_pattern == cls.not_multiple_10:
+            query_data['exclude_amount__endswith'] = '000'
+        elif amount_pattern == cls.gte_100:
+            query_data['amount__gte'] = '10000'
+        elif amount_pattern == cls.exact:
+            query_data['amount'] = amount_exact
+        elif amount_pattern == cls.pence:
+            query_data['amount__endswith'] = '%02d' % amount_pence
+        else:
+            raise NotImplementedError
 
 
 class CreditsForm(SecurityForm):
@@ -258,9 +269,10 @@ class CreditsForm(SecurityForm):
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
                                  ])
 
-    amount = forms.CharField(label=_('Amount (exact)'), validators=[validate_amount], required=False)
-    amount_pattern = forms.ChoiceField(label=_('Amount pattern'), choices=AmountPattern.get_choices(), required=False)
-    amount_pence = forms.IntegerField(label=_('Amount pence part'), min_value=0, max_value=99, required=False)
+    amount_pattern = forms.ChoiceField(label=_('Amount sent'), required=False,
+                                       choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
+    amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
+    amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 
     prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
@@ -285,15 +297,25 @@ class CreditsForm(SecurityForm):
         self['prison_region'].field.choices = insert_blank_option(prisons_and_regions['regions'],
                                                                   title=_('All regions'))
 
-    def clean_amount(self):
-        amount = self.cleaned_data.get('amount')
-        if amount:
-            amount = amount.lstrip('£')
-            if '.' in amount:
-                amount = amount.replace('.', '')
+    def clean_amount_exact(self):
+        amount_exact = self.cleaned_data.get('amount_exact')
+        if amount_exact:
+            amount_exact = amount_exact.lstrip('£')
+            if '.' in amount_exact:
+                amount_exact = amount_exact.replace('.', '')
             else:
-                amount += '00'
-        return amount
+                amount_exact += '00'
+        elif self.cleaned_data.get('amount_pattern') == 'exact':
+            raise ValidationError(_('This field is required for the selected amount pattern'),
+                                  code='required')
+        return amount_exact
+
+    def clean_amount_pence(self):
+        amount_pence = self.cleaned_data.get('amount_pence')
+        if amount_pence is None and self.cleaned_data.get('amount_pattern') == 'pence':
+            raise ValidationError(_('This field is required for the selected amount pattern'),
+                                  code='required')
+        return amount_pence
 
     def clean_prisoner_number(self):
         prisoner_number = self.cleaned_data.get('prisoner_number')
@@ -312,13 +334,5 @@ class CreditsForm(SecurityForm):
 
     def get_query_data(self):
         query_data = super().get_query_data()
-
-        amount_pence = query_data.pop('amount_pence', None)
-        if amount_pence is not None:
-            query_data['amount__endswith'] = '%02d' % amount_pence
-
-        amount_pattern = query_data.pop('amount_pattern', None)
-        if amount_pattern:
-            query_data.update(AmountPattern.get_filters(amount_pattern))
-
+        AmountPattern.update_query_data(query_data)
         return query_data
