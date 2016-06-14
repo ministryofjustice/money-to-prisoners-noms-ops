@@ -34,6 +34,11 @@ def get_prisons_and_regions(client, session):
     return prisons_and_regions
 
 
+def insert_blank_option(choices, title=_('Select an option')):
+    choices.insert(0, ('', title))
+    return choices
+
+
 def validate_amount(amount):
     if not re.match(r'^£?\d+(\.\d\d)?$', amount):
         raise ValidationError(_('Invalid amount'), code='invalid')
@@ -156,8 +161,10 @@ class SenderGroupedForm(SecurityForm):
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
         prisons_and_regions = get_prisons_and_regions(self.client, request.session)
-        self['prison'].field.choices = prisons_and_regions['prisons']
-        self['prison_region'].field.choices = prisons_and_regions['regions']
+        self['prison'].field.choices = insert_blank_option(prisons_and_regions['prisons'],
+                                                           title=_('All prisons'))
+        self['prison_region'].field.choices = insert_blank_option(prisons_and_regions['regions'],
+                                                                  title=_('All regions'))
 
     def clean_sender_sort_code(self):
         sender_sort_code = self.cleaned_data.get('sender_sort_code')
@@ -204,8 +211,10 @@ class PrisonerGroupedForm(SecurityForm):
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
         prisons_and_regions = get_prisons_and_regions(self.client, request.session)
-        self['prison'].field.choices = prisons_and_regions['prisons']
-        self['prison_region'].field.choices = prisons_and_regions['regions']
+        self['prison'].field.choices = insert_blank_option(prisons_and_regions['prisons'],
+                                                           title=_('All prisons'))
+        self['prison_region'].field.choices = insert_blank_option(prisons_and_regions['regions'],
+                                                                  title=_('All regions'))
 
     def get_api_endpoint(self):
         return self.client.credits.prisoners
@@ -271,8 +280,10 @@ class CreditsForm(SecurityForm):
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
         prisons_and_regions = get_prisons_and_regions(self.client, request.session)
-        self['prison'].field.choices = prisons_and_regions['prisons']
-        self['prison_region'].field.choices = prisons_and_regions['regions']
+        self['prison'].field.choices = insert_blank_option(prisons_and_regions['prisons'],
+                                                           title=_('All prisons'))
+        self['prison_region'].field.choices = insert_blank_option(prisons_and_regions['regions'],
+                                                                  title=_('All regions'))
 
     def clean_amount(self):
         amount = self.cleaned_data.get('amount')

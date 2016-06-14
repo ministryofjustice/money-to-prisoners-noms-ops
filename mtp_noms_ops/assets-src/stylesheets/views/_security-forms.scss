@@ -7,6 +7,10 @@
     width: 6em;
   }
 
+  select.form-control {
+    width: auto;
+  }
+
   @media (max-width: 639px) {
     .form-control {
       width: 100%;

@@ -3,6 +3,8 @@
 <div class="SecurityForm CreditsForm">
   {% include 'security/received-range-field.html' %}
 
+  {% include 'security/select-field.html' with field=form.prison %}
+
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
 
