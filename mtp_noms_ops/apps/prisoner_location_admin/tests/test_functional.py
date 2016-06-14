@@ -45,6 +45,13 @@ class LoginTests(PrisonerLocationAdminTestCase):
         self.driver.find_element_by_link_text('Sign out').click()
         self.assertCurrentUrl(reverse('login'))
 
+    def test_superuser_can_see_security_link(self):
+        self.login('admin', 'admin')
+        prisoner_location_url = reverse('location_file_upload')
+        security_url = reverse('security:dashboard')
+        self.assertCurrentUrl(prisoner_location_url)
+        self.assertInSource(security_url)
+
 
 class UploadTests(PrisonerLocationAdminTestCase):
     """

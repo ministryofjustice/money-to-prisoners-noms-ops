@@ -12,12 +12,22 @@
   <!-- {% if request.resolver_match.namespace %}{{ request.resolver_match.namespace }}:{% endif %}{{ request.resolver_match.url_name }} -->
 {% endblock %}
 
-{% block page_title %}{% trans "NOMS admin" %}{% endblock %}
+{% block page_title %}{% trans 'NOMS admin' %}{% endblock %}
 
-{% block proposition %}{% trans "NOMS admin" %}{% endblock %}
+{% block proposition %}{% trans 'NOMS admin' %}{% endblock %}
 
 {% block user_menu %}
-<span>
-  <a href="{% url 'password_change' %}">{% trans "Change password" %}</a>
-</span>
+  <span>
+    <a href="{% url 'password_change' %}">{% trans 'Change password' %}</a>
+  </span>
+
+  {% if request.can_access_prisoner_location and request.can_access_security %}
+    <span>
+      {% if request.resolver_match.namespace == 'security' %}
+        <a href="{% url 'location_file_upload' %}">{% trans 'Prisoner location upload' %}</a>
+      {% else %}
+        <a href="{% url 'security:dashboard' %}">{% trans 'Security dashboard' %}</a>
+      {% endif %}
+    </span>
+  {% endif %}
 {% endblock %}

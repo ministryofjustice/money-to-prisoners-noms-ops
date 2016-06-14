@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_connection
 
-from mtp_noms_ops.view_utils import make_page_range
+from mtp_noms_ops.utils import make_page_range
 
 
 def get_prisons_and_regions(client, session):
