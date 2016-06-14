@@ -172,6 +172,7 @@ class CreditsView(SecurityView):
     """
     title = _('Search by details')
     intro_text = _('Use this search to list payments based on various filters')
+    form_template_name = 'security/credits-form.html'
     results_template_name = 'security/credits.html'
     form_class = CreditsForm
 

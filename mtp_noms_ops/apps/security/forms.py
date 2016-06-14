@@ -265,6 +265,9 @@ class CreditsForm(SecurityForm):
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
 
+    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
+    #                          required=False)
+
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
         prisons_and_regions = get_prisons_and_regions(self.client, request.session)
