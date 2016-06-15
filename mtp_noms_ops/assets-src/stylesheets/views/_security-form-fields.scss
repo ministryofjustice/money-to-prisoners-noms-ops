@@ -16,4 +16,6 @@
 
 #id_amount_exact-wrapper, #id_amount_pence-wrapper {
   display: none;
+  padding-left: 15px;
+  border-left: 10px solid $grey-2;
 }
