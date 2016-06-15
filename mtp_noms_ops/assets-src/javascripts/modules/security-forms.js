@@ -56,6 +56,9 @@ exports.SecurityForms = {
 
         $creditList.find('caption').remove();
         $creditList.find('.CollapsingTable').removeClass('CollapsingTable');
+        $creditList.find('tr th:first-of-type, tr td:first-of-type').each(function() {
+          $(this).remove();
+        });
         $thisRow.find('td').each(function () {
           columns += parseInt($(this).attr('colspan') || '1', 10);
         });

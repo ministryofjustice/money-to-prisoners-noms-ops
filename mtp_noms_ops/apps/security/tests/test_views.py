@@ -122,7 +122,7 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertContains(response, 'MAISIE NOLAN')
         response_content = response.content.decode(response.charset)
         self.assertIn('410.00', response_content)
-        self.assertIn('Unknown prisoner', response_content)
+        self.assertIn('Cannot be credited', response_content)
         for prisoner in response_data['results'][0]['prisoners']:
             if not prisoner['prisoner_number']:
                 continue

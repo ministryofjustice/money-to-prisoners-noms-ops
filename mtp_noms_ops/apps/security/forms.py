@@ -270,7 +270,7 @@ class CreditsForm(SecurityForm):
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
                                  ])
 
-    amount_pattern = forms.ChoiceField(label=_('Amount sent'), required=False,
+    amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
                                        choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
     amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
     amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)

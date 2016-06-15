@@ -17,8 +17,11 @@
       </caption>
       <thead>
         <tr>
-          <th>{% trans 'Intended recipient' %}</th>
+          <th>{% trans 'Prisoner' %}</th>
           <th>{% trans 'Prison' %}</th>
+          <th title="{% trans 'As specified by sender in reference generator form' %}">
+            {% trans 'Intended recipient' %}
+          </th>
           <th>{% trans 'Amount (£)' %}</th>
           <th>{% trans 'Payment method' %}</th>
           <th>{% trans 'Date received' %}</th>
@@ -29,16 +32,13 @@
         {% for credit in credits|parse_date_fields %}
           <tr>
             <td>
-              {% if credit.source == 'online' %}
-                {{ credit.intended_recipient }}
-              {% else %}
-                {{ credit.prisoner_name|default_if_none:'—' }}
-                {% if credit.prisoner_number %}
-                  (<a href="{% url 'security:credits' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a>)
-                {% endif %}
+              {{ credit.prisoner_name|default_if_none:'—' }}
+              {% if credit.prisoner_number %}
+                (<a href="{% url 'security:credits' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a>)
               {% endif %}
             </td>
             <td>{{ credit.prison_name|default_if_none:'—' }}</td>
+            <td>{{ credit.intended_recipient|default:'—' }}</td>
             <td>{{ credit.amount|currency }}</td>
             <td>
               {% if credit.source == 'online' %}

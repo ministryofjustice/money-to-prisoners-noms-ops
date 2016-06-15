@@ -35,7 +35,7 @@
   {% for prisoner in group.prisoners %}
     <tr {% if not forloop.counter|divisibleby:2 %}class="odd"{% endif %}>
       {% if not prisoner.prisoner_number %}
-        <td colspan="3">{% trans 'Unknown prisoners, refunded' %}</td>
+        <td colspan="3">{% trans 'Cannot be credited' %}</td>
       {% else %}
         <td>{{ prisoner.prisoner_number }}</td>
         <td>{{ prisoner.prisoner_name }}</td>
