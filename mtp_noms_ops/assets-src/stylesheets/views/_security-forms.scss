@@ -1,6 +1,5 @@
 .SecurityForm {
   overflow: hidden;
-  margin-bottom: 2em;
   padding-left: 1px;
 
   .form-control {
@@ -19,7 +18,6 @@
 
   .form-range-field {
     width: 15em;
-    margin-top: 1.15789em;
     float: left;
     clear: left;
 
@@ -51,6 +49,11 @@
     width: 100%;
     margin-bottom: 1.5em;
 
+    th, td {
+      padding: 0.5em;
+      font-size: 14px;
+    }
+
     thead th {
       border-top: 0;
     }
@@ -81,7 +84,10 @@
   table {
     margin-bottom: 0;
     border: 1px solid $grey-1;
-    font-size: 0.85em;
+
+    th, td {
+      font-size: 12px;
+    }
   }
   table & td {
     padding: 0 1px 1em 1em;
