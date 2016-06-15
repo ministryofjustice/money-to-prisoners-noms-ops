@@ -4,7 +4,7 @@
 {% load security %}
 
 {% block credit_group_title %}
-  {{ request.GET.prisoner_name|default:_('Unknown prisoners, refunded') }}
+  {{ request.GET.prisoner_name|default:_('Cannot be credited') }}
   {% if request.GET.prisoner_number %}
     ({{ request.GET.prisoner_number }})
   {% endif %}
