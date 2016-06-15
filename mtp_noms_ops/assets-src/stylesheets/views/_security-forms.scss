@@ -17,10 +17,6 @@
     }
   }
 
-  .form-label {
-    font-weight: bold;
-  }
-
   .form-range-field {
     width: 15em;
     margin-top: 1.15789em;
@@ -41,23 +37,26 @@
   padding-bottom: 1em;
   background: $grey-3;
 
-  h3 {
+  h2 {
     margin-top: 1em;
   }
 }
 
 .ResultsList {
-  h3 {
+  h2 {
     margin-top: 0;
   }
 
   table {
     width: 100%;
     margin-bottom: 1.5em;
-    font-size: 0.7em;
 
     thead th {
       border-top: 0;
+    }
+
+    td {
+      font-size: 0.7em;
     }
   }
 }

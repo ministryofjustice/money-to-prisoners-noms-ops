@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block content %}
+{% block inner_content %}
   <header class="ContentHeader">
     <a href="{% url 'security:dashboard' %}" class="ContentHeader-back">{% trans 'Home' %}</a>
-    <h1>{{ view.title }}</h1>
+    <h1 class="heading-xlarge">{{ view.title }}</h1>
   </header>
 
   {% include 'mtp_common/includes/message_box.html' %}

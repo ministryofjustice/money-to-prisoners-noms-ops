@@ -1,19 +1,11 @@
 /* globals require */
 
-(function() {
+(function () {
   'use strict';
+  require('security-forms').SecurityForms.init();
+  require('analytics').Analytics.init();
+  require('help-popup').HelpPopup.init();
+  require('collapsing-table').CollapsingTableShowHide.init();
+  require('upload').UploadSubmit.init();
 
-  var Mojular = require('mojular');
-
-  Mojular
-    .use([
-      require('mojular-govuk-elements'),
-      require('mojular-moj-elements'),
-      require('polyfills'),
-      require('collapsing-table'),
-      require('upload'),
-      
-      require('security-forms')
-    ])
-    .init();
-}());
+})();

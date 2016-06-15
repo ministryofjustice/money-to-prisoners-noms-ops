@@ -4,11 +4,10 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: {
-    app: './mtp_noms_ops/assets-src/javascripts/main.js',
-    polyfills: ['JSON2', 'html5shiv']
+    app: './mtp_noms_ops/assets-src/javascripts/main.js'
   },
   output: {
-    path: './mtp_noms_ops/assets/scripts',
+    path: './mtp_noms_ops/assets/javascripts',
     filename: '[name].bundle.js'
   },
   module: {
@@ -21,8 +20,7 @@ module.exports = {
   },
   resolve: {
     root: [
-      __dirname + '/node_modules',
-      __dirname + '/node_modules/mojular-moj-elements/node_modules'
+      __dirname + '/node_modules'
     ],
     modulesDirectories: [
       './mtp_noms_ops/assets-src/javascripts/modules',

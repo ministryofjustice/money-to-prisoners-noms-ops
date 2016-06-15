@@ -2,10 +2,10 @@
 {% load i18n %}
 {% load security %}
 
-{% block content %}
+{% block inner_content %}
   <header class="ContentHeader">
     <a href="{% url 'security:dashboard' %}" class="ContentHeader-back">{% trans 'Home' %}</a>
-    <h1>{{ view.title }}</h1>
+    <h1 class="heading-xlarge">{{ view.title }}</h1>
   </header>
 
   {% include 'mtp_common/includes/message_box.html' %}
@@ -17,7 +17,7 @@
 
     <div class="grid-row">
       <aside class="ResultsFormWrapper column-third">
-        <h3>{% trans 'Edit your search' %}</h3>
+        <h2 class="heading-medium">{% trans 'Edit your search' %}</h2>
 
         {% include view.form_template_name with view=view form=form only %}
 
@@ -27,7 +27,7 @@
       </aside>
 
       <div class="ResultsList column-two-thirds">
-        <h3>{% trans 'Results' %}</h3>
+        <h2 class="heading-large">{% trans 'Results' %}</h2>
 
         {% include 'security/select-field.html' with field=form.ordering only %}
 
@@ -79,4 +79,4 @@
 
   </form>
 
-{% endblock content %}
+{% endblock %}
