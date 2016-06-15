@@ -20,10 +20,6 @@
     width: 15em;
     float: left;
     clear: left;
-
-    .column-half .form-label {
-      font-weight: normal;
-    }
   }
 }
 
@@ -67,6 +63,10 @@
 .CollapsingTableHeader {
   background: #CDE2B7;
   font-weight: normal;
+
+  strong {
+    font-weight: bold;
+  }
 
   .GroupedResults-sender-details {
     line-height: 1em;
