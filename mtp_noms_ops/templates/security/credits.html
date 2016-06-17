@@ -16,7 +16,7 @@
     <input type="hidden" name="page" value="1">
 
     <div class="grid-row">
-      <aside class="ResultsFormWrapper column-third">
+      <aside class="ResultsFormWrapper column-third print-hidden">
         <h2 class="heading-medium">{% trans 'Edit your search' %}</h2>
 
         {% include view.form_template_name with view=view form=form only %}
@@ -29,7 +29,12 @@
       <div class="ResultsList column-two-thirds">
         <h2 class="heading-large">{% trans 'Results' %}</h2>
 
-        {% include 'security/select-field.html' with field=form.ordering only %}
+        <div class="print-hidden">
+          {% include 'security/select-field.html' with field=form.ordering only %}
+        </div>
+        <p class="search-description-text">
+          {{ form.search_description }}
+        </p>
 
         <table>
           <thead>

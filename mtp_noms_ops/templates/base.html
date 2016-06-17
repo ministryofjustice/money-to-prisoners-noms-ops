@@ -17,12 +17,12 @@
 {% block proposition %}{% trans 'NOMS admin' %}{% endblock %}
 
 {% block user_menu %}
-  <span>
+  <span class="print-hidden">
     <a href="{% url 'password_change' %}">{% trans 'Change password' %}</a>
   </span>
 
   {% if request.can_access_prisoner_location and request.can_access_security %}
-    <span>
+    <span class="print-hidden">
       {% if request.resolver_match.namespace == 'security' %}
         <a href="{% url 'location_file_upload' %}">{% trans 'Prisoner location upload' %}</a>
       {% else %}
