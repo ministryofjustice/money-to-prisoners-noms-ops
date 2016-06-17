@@ -50,10 +50,6 @@
       font-size: 14px;
     }
 
-    thead th {
-      border-top: 0;
-    }
-
     td {
       font-size: 0.7em;
     }
@@ -83,23 +79,27 @@
 
   table {
     margin-bottom: 0;
-    border: 1px solid $grey-1;
+    border: 1px solid $border-color;
+    font-size: 0.85em;
 
     th, td {
       font-size: 12px;
     }
   }
-  table & td {
+  table & > td {
     padding: 0 1px 1em 1em;
   }
 }
 tbody tr.CreditDetailRow table {
   th, td {
-    background: #ededed;
+    background: $grey-4;
   }
-}
-tbody tr.odd.CreditDetailRow table {
-  th, td {
-    background: #fff;
+
+  @media print {
+    & {
+      th, td {
+        background: $page-colour;
+      }
+    }
   }
 }

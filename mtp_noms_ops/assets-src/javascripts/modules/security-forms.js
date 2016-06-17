@@ -48,7 +48,7 @@ exports.SecurityForms = {
       var state = $link.data('credit-detail');
 
       function loadCreditDetails(html) {
-        var $thisRow = $link.closest('tr'),
+        var $thisRow = $link.closest('tr').addClass('no-border'),
           $creditList = $(html).find('.ResultsList'),
           $creditRow = $('<tr></tr>').addClass(creditRowClass).addClass($thisRow.attr('class')),
           $creditCell = $('<td></td>'),
@@ -72,7 +72,8 @@ exports.SecurityForms = {
       }
 
       function removeCreditDetails() {
-        var $creditDetailsRow = $link.closest('tr').next();
+        var $thisRow = $link.closest('tr').removeClass('no-border'),
+          $creditDetailsRow = $thisRow.next();
 
         if ($creditDetailsRow.hasClass(creditRowClass)) {
           $creditDetailsRow.remove();

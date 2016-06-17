@@ -19,7 +19,7 @@
 
 {% block group_results %}
   {% for sender in group.senders %}
-    <tr {% if not forloop.counter|divisibleby:2 %}class="odd"{% endif %}>
+    <tr>
       <td>
         {{ sender.sender_name }}
         {% if sender.sender_sort_code or sender.sender_account_number %}
@@ -45,7 +45,7 @@
     </tr>
   {% endfor %}
 
-  <tr {% if group.senders|length|divisibleby:2 %}class="odd"{% endif %}>
+  <tr class="no-border">
     <td>{% trans 'Total credits' %}</td>
     <td>{{ group.credit_count }}</td>
     <td colspan="2">{{ group.credit_total|currency }}</td>

@@ -30,7 +30,7 @@
       </thead>
       <tbody>
         {% for credit in credits|parse_date_fields %}
-          <tr>
+          <tr {% if forloop.last %}class="no-border"{% endif %}>
             <td>
               {{ credit.prisoner_name|default_if_none:'—' }}
               {% if credit.prisoner_number %}
@@ -51,7 +51,7 @@
             <td>{{ credit.owner_name|default_if_none:'—' }}</td>
           </tr>
         {% empty %}
-          <tr>
+          <tr class="no-border">
             <td colspan="6">{% trans 'No credits found' %}</td>
           </tr>
         {% endfor %}
