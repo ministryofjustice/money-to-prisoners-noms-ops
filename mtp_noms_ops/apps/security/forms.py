@@ -7,6 +7,8 @@ from urllib.parse import urlencode
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
+from django.utils.dateformat import format as date_format
+from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_connection
@@ -77,8 +79,8 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     """
     page = forms.IntegerField(min_value=1)
     page_size = 20
-    received_at_0 = forms.DateField(label=_('Received since'), help_text=_('eg 01/06/2016'), required=False)
-    received_at_1 = forms.DateField(label=_('Received before'), help_text=_('eg 01/06/2016'), required=False)
+    received_at_0 = forms.DateField(label=_('Received from'), help_text=_('eg 01/06/2016'), required=False)
+    received_at_1 = forms.DateField(label=_('Received to'), help_text=_('eg 01/06/2016'), required=False)
 
     extra_filters = {}
 
@@ -120,6 +122,38 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     @property
     def page_range(self):
         return make_page_range(self.cleaned_data['page'], self.page_count)
+
+    @property
+    def search_description(self):
+        def get_value_text(bf):
+            f = bf.field
+            v = self.cleaned_data.get(bf.name) or f.initial
+            if isinstance(f, forms.ChoiceField):
+                return dict(f.choices).get(v)
+            if isinstance(f, forms.DateField) and v is not None:
+                return date_format(v, 'j M Y')
+            if isinstance(f, forms.IntegerField) and v is not None:
+                return str(v)
+            return v or None
+
+        filters = []
+        for bound_field in self:
+            if bound_field.name in ('page', 'ordering'):
+                continue
+            value = get_value_text(bound_field)
+            if value is None:
+                continue
+            filters.append((str(bound_field.label).lower(), value))
+        if filters:
+            filters = format_html_join(', ', _('{} is <strong>{}</strong>'), filters)
+            description = format_html(_('Filtering results: {}.'), filters)
+        else:
+            description = _('Showing all results.')
+
+        ordering = get_value_text(self['ordering'])
+        if ordering:
+            return format_html('{} {}', description, _('Ordered by %s.') % str(ordering).lower())
+        return description
 
 
 @validate_range_field('prisoner_count', _('Must be larger than the minimum prisoners'))
