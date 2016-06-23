@@ -1,3 +1,4 @@
+import logging
 from unittest import mock
 
 from django.core.urlresolvers import reverse
@@ -19,6 +20,7 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
                 'first_name': 'Sam',
                 'last_name': 'Hall',
                 'username': 'shall',
+                'applications': ['noms-ops'],
                 'permissions': required_permissions,
             }
         }
@@ -38,6 +40,40 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
             'attempted_url': attempted_url
         }
         self.assertRedirects(response, redirect_url)
+
+    @mock.patch('mtp_common.auth.backends.api_client')
+    def test_cannot_login_with_incorrect_details(self, mock_api_client):
+        mock_api_client.authenticate.return_value = None
+
+        response = self.client.post(
+            reverse('login'),
+            data={'username': 'shall', 'password': 'pass'},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['form'].is_valid())
+
+    @mock.patch('mtp_common.auth.backends.api_client')
+    def test_cannot_login_without_app_access(self, mock_api_client):
+        mock_api_client.authenticate.return_value = {
+            'pk': 5,
+            'token': generate_tokens(),
+            'user_data': {
+                'first_name': 'Sam',
+                'last_name': 'Hall',
+                'username': 'shall',
+                'applications': [''],
+                'permissions': required_permissions,
+            }
+        }
+
+        response = self.client.post(
+            reverse('login'),
+            data={'username': 'shall', 'password': 'pass'},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['form'].is_valid())
 
     def test_requires_login_upload(self):
         self.check_login_redirect(reverse('location_file_upload'))
@@ -80,9 +116,13 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
 
         file_data, _ = generate_testable_location_data()
 
+        logger = logging.getLogger('mtp')
+        previous_logging_level = logger.level
+        logger.setLevel(logging.CRITICAL)
         response = self.client.post(
             reverse('location_file_upload'),
             {'location_file': get_csv_data_as_file(file_data)}
         )
+        logger.setLevel(previous_logging_level)
 
         self.assertContains(response, api_error_message)
