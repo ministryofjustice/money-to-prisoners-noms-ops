@@ -47,11 +47,6 @@
 
     th, td {
       padding: 0.5em;
-      font-size: 14px;
-    }
-
-    td {
-      font-size: 0.7em;
     }
   }
 
@@ -63,6 +58,10 @@
       display: block;
     }
   }
+}
+
+.CollapsingTable {
+  font-size: .85em;
 }
 
 .CollapsingTableHeader {
@@ -89,11 +88,6 @@
   table {
     margin-bottom: 0;
     border: 1px solid $border-color;
-    font-size: 0.85em;
-
-    th, td {
-      font-size: 12px;
-    }
   }
   table & > td {
     padding: 0 1px 1em 1em;
