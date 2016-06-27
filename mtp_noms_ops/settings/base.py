@@ -198,6 +198,10 @@ def find_api_url():
     return 'http://%s:%s' % (host_machine_ip, api_port)
 
 
+# control the time a session exists for; should match api's access token expiry
+SESSION_COOKIE_AGE = 60 * 60  # 1 hour
+
+
 API_CLIENT_ID = 'noms-ops'
 API_CLIENT_SECRET = os.environ.get('API_CLIENT_SECRET', 'noms-ops')
 API_URL = os.environ.get('API_URL', find_api_url())
