@@ -37,16 +37,23 @@
 }
 
 .ResultsList {
-  h2 {
-    margin-top: 0;
-  }
 
   table {
     width: 100%;
     margin-bottom: 1.5em;
 
     th, td {
+      font-size: .85em;
       padding: 0.5em;
+
+      .CreditDetailLink {
+        background-color: $page-colour;
+        font-size: 1em;
+        color: $link-colour;
+        border: none;
+        text-decoration: underline;
+        cursor: pointer;
+      }
     }
   }
 
@@ -58,10 +65,6 @@
       display: block;
     }
   }
-}
-
-.CollapsingTable {
-  font-size: .85em;
 }
 
 .CollapsingTableHeader {
@@ -84,7 +87,7 @@
 
 .CreditDetailRow {
   // credit detail tables that are loaded inline
-
+  font-size: 1.19em;
   table {
     margin-bottom: 0;
     border: 1px solid $border-color;

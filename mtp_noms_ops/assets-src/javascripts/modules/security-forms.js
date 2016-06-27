@@ -13,9 +13,9 @@ exports.SecurityForms = {
   },
 
   bindAmountPatternSelection: function() {
-    var $patternSelect = $('#id_amount_pattern'),
-      $exactWrapper = $('#id_amount_exact-wrapper'),
-      $penceWrapper = $('#id_amount_pence-wrapper');
+    var $patternSelect = $('#id_amount_pattern');
+    var $exactWrapper = $('#id_amount_exact-wrapper');
+    var $penceWrapper = $('#id_amount_pence-wrapper');
 
     function update() {
       switch ($patternSelect.val()) {
@@ -41,46 +41,43 @@ exports.SecurityForms = {
     var creditRowClass = 'CreditDetailRow';
 
     function creditToggle(e) {
-      var $link = $(e.target);
-      var showTitle = $link.data('show-title');
-      var loadingTitle = $link.data('loading-title');
-      var hideTitle = $link.data('hide-title');
-      var state = $link.data('credit-detail');
+      var $button = $(e.target);
+      var showTitle = $button.data('show-title');
+      var loadingTitle = $button.data('loading-title');
+      var hideTitle = $button.data('hide-title');
+      var state = $button.data('credit-detail');
 
       function loadCreditDetails(html) {
-        var $thisRow = $link.closest('tr').addClass('no-border'),
-          $creditList = $(html).find('.ResultsList'),
-          $creditRow = $('<tr></tr>').addClass(creditRowClass).addClass($thisRow.attr('class')),
-          $creditCell = $('<td></td>'),
-          columns = 0;
+        var $thisRow = $button.closest('tr').addClass('no-border');
+        var $creditRow = $('<tr></tr>').addClass(creditRowClass).addClass($thisRow.attr('class'));
+        var $creditCell = $('<td></td>');
+        var columns = 0;
 
-        $creditList.find('caption').remove();
-        $creditList.find('.CollapsingTable').removeClass('CollapsingTable');
-        $creditList.find('tr th:first-of-type, tr td:first-of-type').each(function() {
-          $(this).remove();
-        });
         $thisRow.find('td').each(function () {
           columns += parseInt($(this).attr('colspan') || '1', 10);
         });
         $creditRow.append(
-          $creditCell.append($creditList).attr('colspan', columns)
+          $creditCell.append($(html)).attr('colspan', columns)
         );
         $thisRow.after($creditRow);
 
-        $link.text(hideTitle);
-        $link.data('credit-detail', 'loaded');
+        $button
+          .text(hideTitle)
+          .data('credit-detail', 'loaded')
+          .attr('aria-expanded', 'true');
       }
 
       function removeCreditDetails() {
-        var $thisRow = $link.closest('tr').removeClass('no-border'),
-          $creditDetailsRow = $thisRow.next();
+        var $thisRow = $button.closest('tr').removeClass('no-border');
+        var $creditDetailsRow = $thisRow.next();
 
         if ($creditDetailsRow.hasClass(creditRowClass)) {
           $creditDetailsRow.remove();
         }
-
-        $link.text(showTitle);
-        $link.data('credit-detail', '');
+        $button
+          .text(showTitle)
+          .data('credit-detail', '')
+          .attr('aria-expanded', 'false');
       }
 
       e.preventDefault();
@@ -91,10 +88,10 @@ exports.SecurityForms = {
       } else if (state !== 'loading') {
         // load credit details
 
-        $link.text(loadingTitle);
-        $link.data('credit-detail', 'loading');
+        $button.text(loadingTitle);
+        $button.data('credit-detail', 'loading');
         $.ajax({
-          url: $link.attr('href'),
+          url: $button.data('fetch'),
           dataType: 'html'
         }).then(
           // load credit details table if ajax works
