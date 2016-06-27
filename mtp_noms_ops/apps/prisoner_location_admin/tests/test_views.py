@@ -3,6 +3,7 @@ from unittest import mock
 
 from django.core.urlresolvers import reverse
 from django.test import SimpleTestCase
+from mtp_common.auth.exceptions import Forbidden
 from mtp_common.auth.test_utils import generate_tokens
 from slumber.exceptions import HttpClientError
 
@@ -55,17 +56,7 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
 
     @mock.patch('mtp_common.auth.backends.api_client')
     def test_cannot_login_without_app_access(self, mock_api_client):
-        mock_api_client.authenticate.return_value = {
-            'pk': 5,
-            'token': generate_tokens(),
-            'user_data': {
-                'first_name': 'Sam',
-                'last_name': 'Hall',
-                'username': 'shall',
-                'applications': [''],
-                'permissions': required_permissions,
-            }
-        }
+        mock_api_client.authenticate.side_effect = Forbidden
 
         response = self.client.post(
             reverse('login'),
