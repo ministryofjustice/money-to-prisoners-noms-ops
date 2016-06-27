@@ -13,7 +13,7 @@
 {% block group_title %}
   {% trans 'Received from' %}:
   <strong>{{ request.GET.sender_name|default:_('Unknown sender name') }}</strong>
-  <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
+  <span>
     {% stripwhitespace %}
       {{ request.GET.sender_sort_code|format_sort_code }}
       {% if request.GET.sender_account_number %}

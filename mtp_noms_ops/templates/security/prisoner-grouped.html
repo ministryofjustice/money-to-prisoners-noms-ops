@@ -3,11 +3,16 @@
 {% load security %}
 
 {% block group_title %}
-  {% trans 'Prisoner' %}:
+  {% trans 'To: ' %}
   <strong>
     {{ group.prisoner_name }}
-    ({{ group.prisoner_number }})
-  </strong>
+  </strong><br/>
+  <span class="CollapsingTableHeader-below">
+    {{ group.prisoner_number }}
+  </span>
+  <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
+    {% trans 'Credits' %}: {{ group.credit_count }}<br/>{% trans 'Total: £' %}{{ group.credit_total|currency }}
+  </span>
 {% endblock %}
 
 {% block group_header_row %}
@@ -47,9 +52,4 @@
     </tr>
   {% endfor %}
 
-  <tr class="no-border">
-    <td>{% trans 'Total credits' %}</td>
-    <td>{{ group.credit_count }}</td>
-    <td colspan="2">{{ group.credit_total|currency }}</td>
-  </tr>
 {% endblock %}
