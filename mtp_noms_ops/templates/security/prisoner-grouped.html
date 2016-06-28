@@ -14,7 +14,7 @@
   <th>{% trans 'Sender' %}</th>
   <th>{% trans 'No. of payments' %}</th>
   <th>{% trans 'Total received (£)' %}</th>
-  <th>{% trans 'Details' %}</th>
+  <th class="print-hidden">{% trans 'Details' %}</th>
 {% endblock %}
 
 {% block group_results %}
@@ -33,16 +33,16 @@
       </td>
       <td>{{ sender.credit_count }}</td>
       <td>{{ sender.credit_total|currency }}</td>
-      <td>
-        <button
-           class="CreditDetailLink print-hidden"
+      <td class="print-hidden">
+        <a href="{% get_credits_list_url view form group sender %}&amp;return_to={% serialise_back_url request %}"
+           class="CreditDetailLink"
            aria-expanded="false"
-           data-fetch="{% get_credits_list_url view form group sender %}"
+           data-ajax-url="{% get_credits_list_url view form group sender %}&amp;ajax=1"
            data-show-title="{% trans 'Show' %}"
            data-hide-title="{% trans 'Hide' %}"
            data-loading-title="{% trans 'Loading…' %}">
           {% trans 'Show' %}
-        </button>
+        </a>
       </td>
     </tr>
   {% endfor %}
