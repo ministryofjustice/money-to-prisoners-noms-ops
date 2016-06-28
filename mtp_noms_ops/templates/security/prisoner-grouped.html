@@ -14,7 +14,7 @@
   <th>{% trans 'Sender' %}</th>
   <th>{% trans 'No. of payments' %}</th>
   <th>{% trans 'Total received (£)' %}</th>
-  <th>{% trans 'Details' %}</th>
+  <th class="print-hidden">{% trans 'Details' %}</th>
 {% endblock %}
 
 {% block group_results %}
@@ -33,9 +33,9 @@
       </td>
       <td>{{ sender.credit_count }}</td>
       <td>{{ sender.credit_total|currency }}</td>
-      <td>
+      <td class="print-hidden">
         <button
-           class="CreditDetailLink print-hidden"
+           class="CreditDetailLink"
            aria-expanded="false"
            data-fetch="{% get_credits_list_url view form group sender %}"
            data-show-title="{% trans 'Show' %}"

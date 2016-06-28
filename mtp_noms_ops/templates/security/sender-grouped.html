@@ -28,7 +28,7 @@
   <th>{% trans 'Prison' %}</th>
   <th>{% trans 'No. of payments' %}</th>
   <th>{% trans 'Total sent (£)' %}</th>
-  <th>{% trans 'Details' %}</th>
+  <th class="print-hidden">{% trans 'Details' %}</th>
 {% endblock %}
 
 {% block group_results %}
@@ -43,9 +43,9 @@
       {% endif %}
       <td>{{ prisoner.credit_count }}</td>
       <td>{{ prisoner.credit_total|currency }}</td>
-      <td>
+      <td class="print-hidden">
         <button
-           class="CreditDetailLink print-hidden"
+           class="CreditDetailLink"
            aria-expanded="false"
            data-fetch="{% get_credits_list_url view form group prisoner %}"
            data-show-title="{% trans 'Show' %}"
