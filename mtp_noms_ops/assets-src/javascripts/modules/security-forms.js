@@ -51,13 +51,9 @@ exports.SecurityForms = {
         var $thisRow = $button.closest('tr').addClass('no-border');
         var $creditRow = $('<tr></tr>').addClass(creditRowClass).addClass($thisRow.attr('class'));
         var $creditCell = $('<td></td>');
-        var columns = 0;
 
-        $thisRow.find('td').each(function () {
-          columns += parseInt($(this).attr('colspan') || '1', 10);
-        });
         $creditRow.append(
-          $creditCell.append($(html)).attr('colspan', columns)
+          $creditCell.append($(html)).attr('colspan', 100)
         );
         $thisRow.after($creditRow);
 
