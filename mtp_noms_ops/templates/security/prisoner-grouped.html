@@ -34,15 +34,15 @@
       <td>{{ sender.credit_count }}</td>
       <td>{{ sender.credit_total|currency }}</td>
       <td class="print-hidden">
-        <button
+        <a href="{% get_credits_list_url view form group sender %}&amp;return_to={% serialise_back_url request %}"
            class="CreditDetailLink"
            aria-expanded="false"
-           data-fetch="{% get_credits_list_url view form group sender %}"
+           data-ajax-url="{% get_credits_list_url view form group sender %}&amp;ajax=1"
            data-show-title="{% trans 'Show' %}"
            data-hide-title="{% trans 'Hide' %}"
            data-loading-title="{% trans 'Loading…' %}">
           {% trans 'Show' %}
-        </button>
+        </a>
       </td>
     </tr>
   {% endfor %}

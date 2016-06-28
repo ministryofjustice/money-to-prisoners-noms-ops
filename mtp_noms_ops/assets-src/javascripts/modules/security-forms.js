@@ -41,14 +41,14 @@ exports.SecurityForms = {
     var creditRowClass = 'CreditDetailRow';
 
     function creditToggle(e) {
-      var $button = $(e.target);
-      var showTitle = $button.data('show-title');
-      var loadingTitle = $button.data('loading-title');
-      var hideTitle = $button.data('hide-title');
-      var state = $button.data('credit-detail');
+      var $detailsLink = $(e.target);
+      var showTitle = $detailsLink.data('show-title');
+      var loadingTitle = $detailsLink.data('loading-title');
+      var hideTitle = $detailsLink.data('hide-title');
+      var state = $detailsLink.data('credit-detail');
 
       function loadCreditDetails(html) {
-        var $thisRow = $button.closest('tr').addClass('no-border');
+        var $thisRow = $detailsLink.closest('tr').addClass('no-border');
         var $creditRow = $('<tr></tr>').addClass(creditRowClass).addClass($thisRow.attr('class'));
         var $creditCell = $('<td></td>');
 
@@ -57,20 +57,20 @@ exports.SecurityForms = {
         );
         $thisRow.after($creditRow);
 
-        $button
+        $detailsLink
           .text(hideTitle)
           .data('credit-detail', 'loaded')
           .attr('aria-expanded', 'true');
       }
 
       function removeCreditDetails() {
-        var $thisRow = $button.closest('tr').removeClass('no-border');
+        var $thisRow = $detailsLink.closest('tr').removeClass('no-border');
         var $creditDetailsRow = $thisRow.next();
 
         if ($creditDetailsRow.hasClass(creditRowClass)) {
           $creditDetailsRow.remove();
         }
-        $button
+        $detailsLink
           .text(showTitle)
           .data('credit-detail', '')
           .attr('aria-expanded', 'false');
@@ -84,10 +84,10 @@ exports.SecurityForms = {
       } else if (state !== 'loading') {
         // load credit details
 
-        $button.text(loadingTitle);
-        $button.data('credit-detail', 'loading');
+        $detailsLink.text(loadingTitle);
+        $detailsLink.data('credit-detail', 'loading');
         $.ajax({
-          url: $button.data('fetch'),
+          url: $detailsLink.data('ajax-url'),
           dataType: 'html'
         }).then(
           // load credit details table if ajax works

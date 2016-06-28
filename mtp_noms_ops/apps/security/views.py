@@ -72,6 +72,7 @@ class GroupedSecurityView(SecurityView):
         for key, value in filters.items():
             if value:
                 query_string[key] = value
+        ajax = query_string.get('ajax', False)
         query_string = query_string.urlencode()
 
         offset = (page - 1) * self.page_size
@@ -89,7 +90,8 @@ class GroupedSecurityView(SecurityView):
             'query_string': query_string,
             'credits': data.get('results', []),
         }
-        return render(request, self.credits_template_name, context)
+        template_name = self.credits_ajax_template_name if ajax else self.credits_template_name
+        return render(request, template_name, context)
 
     def get_credits_row_query_string(self, form, group, row):
         query_string = QueryDict(form.query_string, mutable=True)
@@ -110,6 +112,7 @@ class SenderGroupedView(GroupedSecurityView):
     form_template_name = 'security/sender-grouped-form.html'
     results_template_name = 'security/sender-grouped.html'
     credits_template_name = 'security/sender-grouped-credits.html'
+    credits_ajax_template_name = 'security/prisoner-grouped-credits-ajax.html'
     credits_view = 'security:sender_grouped_credits'
     form_class = SenderGroupedForm
 
@@ -144,6 +147,7 @@ class PrisonerGroupedView(GroupedSecurityView):
     form_template_name = 'security/prisoner-grouped-form.html'
     results_template_name = 'security/prisoner-grouped.html'
     credits_template_name = 'security/prisoner-grouped-credits.html'
+    credits_ajax_template_name = 'security/prisoner-grouped-credits-ajax.html'
     credits_view = 'security:prisoner_grouped_credits'
     form_class = PrisonerGroupedForm
 
