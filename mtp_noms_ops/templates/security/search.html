@@ -8,9 +8,7 @@
   </header>
 
   {% include 'mtp_common/includes/message_box.html' %}
-
-  {{ view.intro_text }}
-  <p class="panel panel-border-wide">{% trans 'All fields are optional.' %}</p>
+  {% include view.help_template_name %}
 
   <form method="get" class="SearchFormWrapper">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
