@@ -12,7 +12,8 @@
   <strong>
     {{ request.GET.prisoner_name|default:_('Cannot be credited') }}
     {% if request.GET.prisoner_number %}
-      ({{ request.GET.prisoner_number }})
+    <br/>
+    {{ request.GET.prisoner_number }}
     {% endif %}
   </strong>
 {% endblock %}

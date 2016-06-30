@@ -4,13 +4,12 @@
 {% load security %}
 
 {% block group_title %}
-  {% trans 'Sender' %}:
-  <strong>{{ group.sender_name|default:_('Unknown sender name') }}</strong>
-  <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
-    {% stripwhitespace %}
+  {% trans 'From: ' %}
+  <strong>{{ group.sender_name|default:_('Unknown sender name') }}</strong><br/>
+  <span class="CollapsingTableHeader-below">
       {{ group.sender_sort_code|format_sort_code }}
       {% if group.sender_account_number %}
-        <br>
+        <span>/</span>
         {% if group.sender_roll_number %}
           <small>
             {{ group.sender_account_number }}/{{ group.sender_roll_number }}
@@ -19,7 +18,9 @@
           {{ group.sender_account_number }}
         {% endif %}
       {% endif %}
-    {% endstripwhitespace %}
+  </span>
+  <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
+    {% trans 'Credits' %}: {{ group.credit_count }}<br/>{% trans 'Total: £' %}{{ group.credit_total|currency }}
   </span>
 {% endblock %}
 
@@ -56,10 +57,4 @@
       </td>
     </tr>
   {% endfor %}
-
-  <tr class="no-border">
-    <td colspan="3"><span title="{% trans 'Excludes payments that could not be credited to a prisoner' %}">{% trans 'Total credits' %}</span></td>
-    <td>{{ group.credit_count }}</td>
-    <td colspan="2">{{ group.credit_total|currency }}</td>
-  </tr>
 {% endblock %}

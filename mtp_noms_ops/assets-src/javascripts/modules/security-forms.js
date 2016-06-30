@@ -2,6 +2,8 @@
 /* globals exports, $ */
 'use strict';
 
+var collapsingTable = require('collapsing-table');
+
 exports.SecurityForms = {
   init: function () {
     $('#id_ordering').change(function () {
@@ -10,6 +12,10 @@ exports.SecurityForms = {
 
     this.bindAmountPatternSelection();
     this.bindCreditDetailLoading();
+
+    if ($('.CollapsingTable').length > 1) {
+      collapsingTable.CollapsingTable.collapseAll();
+    }
   },
 
   bindAmountPatternSelection: function() {
