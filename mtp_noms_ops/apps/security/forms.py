@@ -169,7 +169,7 @@ class SenderGroupedForm(SecurityForm):
                                      ('sender_name', _('Sender name (A to Z)')),
                                  ])
 
-    prisoner_count_0 = forms.IntegerField(label=_('Minimum prisoners sent to'), required=False, min_value=1)
+    prisoner_count_0 = forms.IntegerField(label=_('Number of prisoners'), required=False, min_value=1)
     prisoner_count_1 = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
     credit_count_0 = forms.IntegerField(label=_('Minimum credits sent'), required=False, min_value=1)
     credit_count_1 = forms.IntegerField(label=_('Maximum credits sent'), required=False, min_value=1)
@@ -225,7 +225,7 @@ class PrisonerGroupedForm(SecurityForm):
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
                                  ])
 
-    sender_count_0 = forms.IntegerField(label=_('Minimum senders received from'), required=False, min_value=1)
+    sender_count_0 = forms.IntegerField(label=_('Number of senders'), required=False, min_value=1)
     sender_count_1 = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)
     credit_count_0 = forms.IntegerField(label=_('Minimum credits received'), required=False, min_value=1)
     credit_count_1 = forms.IntegerField(label=_('Maximum credits received'), required=False, min_value=1)
@@ -256,12 +256,12 @@ class PrisonerGroupedForm(SecurityForm):
 
 
 class AmountPattern(enum.Enum):
-    not_integral = _('Non-integer amount')
+    not_integral = _('Not a whole number')
     not_multiple_5 = _('Not a multiple of £5')
     not_multiple_10 = _('Not a multiple of £10')
     gte_100 = _('£100 or more')
     exact = _('Exact amount')
-    pence = _('Exact pence part')
+    pence = _('Exact number of pence')
 
     @classmethod
     def get_choices(cls):
