@@ -47,9 +47,11 @@ class SecurityViewTestCase(SecurityBaseTestCase):
     view_name = None
 
     def setUp(self):
-        self.mocked_prison_data = mock.patch('security.forms.get_prisons_and_regions', return_value={
+        self.mocked_prison_data = mock.patch('security.forms.get_prison_details_choices', return_value={
             'prisons': [('IXB', 'Prison 1'), ('INP', 'Prison 2')],
             'regions': [('London', 'London'), ('West Midlands', 'West Midlands')],
+            'populations': [('male', 'Male'), ('female', 'Female'), ('adults', 'Adults')],
+            'categories': [('A', 'Category A'), ('B', 'Category B')],
         })
         self.mocked_prison_data.start()
 

@@ -10,9 +10,11 @@ class SecurityFormTestCase(unittest.TestCase):
         self.request = mock.MagicMock()
         self.mocked_connection = mock.patch('security.forms.get_connection')
         self.mocked_connection.start()
-        self.mocked_prison_data = mock.patch('security.forms.get_prisons_and_regions', return_value={
+        self.mocked_prison_data = mock.patch('security.forms.get_prison_details_choices', return_value={
             'prisons': [('IXB', 'Prison 1'), ('INP', 'Prison 2')],
             'regions': [('London', 'London'), ('West Midlands', 'West Midlands')],
+            'populations': [('male', 'Male'), ('female', 'Female'), ('adults', 'Adults')],
+            'categories': [('A', 'Category A'), ('B', 'Category B')],
         })
         self.mocked_prison_data.start()
 
@@ -41,7 +43,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'prison': '', 'prison_region': '', 'prison_gender': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'received_at_0': None, 'prisoner_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'prisoner_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
@@ -56,7 +58,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '-credit_total',
             'sender_name': 'Joh', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'prison': '', 'prison_region': '', 'prison_gender': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'received_at_0': None, 'prisoner_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'prisoner_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
@@ -82,7 +84,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '',
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': '', 'prison_region': '', 'prison_gender': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'received_at_0': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
@@ -97,7 +99,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '-credit_total',
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': 'IXB', 'prison_region': '', 'prison_gender': '',
+            'prison': 'IXB', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'received_at_0': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
@@ -124,7 +126,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '',
             'received_at_0': None, 'received_at_1': None,
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': '', 'prison_region': '', 'prison_gender': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
         }
@@ -141,7 +143,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '-amount',
             'received_at_0': received_at_0, 'received_at_1': None,
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': '', 'prison_region': '', 'prison_gender': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
         }
