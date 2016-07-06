@@ -23,7 +23,7 @@ class SecurityDashboardTests(SecurityDashboardTestCase):
         self.assertEqual(self.driver.title, 'NOMS admin')
 
     def test_superuser_can_see_prisoner_location_link(self):
-        self.login('admin', 'admin')
+        self.login('admin', 'adminadmin')
         prisoner_location_url = reverse('location_file_upload')
         security_url = reverse('security:dashboard')
         self.driver.get(urljoin(self.live_server_url, security_url))

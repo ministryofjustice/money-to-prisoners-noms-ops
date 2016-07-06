@@ -46,7 +46,7 @@ class LoginTests(PrisonerLocationAdminTestCase):
         self.assertCurrentUrl(reverse('login'))
 
     def test_superuser_can_see_security_link(self):
-        self.login('admin', 'admin')
+        self.login('admin', 'adminadmin')
         prisoner_location_url = reverse('location_file_upload')
         security_url = reverse('security:dashboard')
         self.assertCurrentUrl(prisoner_location_url)
