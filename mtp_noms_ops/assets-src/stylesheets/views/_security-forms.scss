@@ -74,9 +74,17 @@
 }
 
 .CollapsingTableHeader {
-  background: #CDE2B7;
+  background: $panel-colour;
   font-weight: normal;
   min-height: 2em;
+
+  &.sender-header {
+    background: #CDE2B7;
+  }
+
+  &.prisoner-header {
+    background: #FDE4D4;
+  }
 
   .CollapsingTableHeader-below {
     font-size: 0.75em;

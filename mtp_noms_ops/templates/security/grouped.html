@@ -39,9 +39,7 @@
           {% for group in form.get_object_list %}
 
             <table id="GroupedResults-{{ forloop.counter }}" class="CollapsingTable">
-              <caption class="CollapsingTableHeader" data-collapse-text="{% trans 'Collapse' %}" data-expand-text="{% trans 'Expand' %}">
-                {% block group_title %}{% endblock %}
-              </caption>
+              {% block group_title %}{% endblock %}
               <thead>
                 <tr>{% block group_header_row %}{% endblock %}</tr>
               </thead>

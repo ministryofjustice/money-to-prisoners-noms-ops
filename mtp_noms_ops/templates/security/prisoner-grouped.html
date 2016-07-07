@@ -3,6 +3,7 @@
 {% load security %}
 
 {% block group_title %}
+<caption class="CollapsingTableHeader prisoner-header" data-collapse-text="{% trans 'Collapse' %}" data-expand-text="{% trans 'Expand' %}">
   {% trans 'To: ' %}
   <strong>
     {{ group.prisoner_name }}
@@ -15,6 +16,7 @@
     {% trans 'Senders: ' %}{{ group.sender_count }}</br>
     {% trans 'Total: £' %}{{ group.credit_total|currency }}
   </span>
+</caption>
 {% endblock %}
 
 {% block group_header_row %}
