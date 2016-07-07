@@ -80,9 +80,18 @@ def validate_range_field(field_name, bound_ordering_msg):
         lower = field_name + '_0'
         upper = field_name + '_1'
 
+        def cleaned_field_accessor(field):
+            return (
+                getattr(cls, 'clean_' + field, None) or
+                (lambda s: s.cleaned_data.get(field))
+            )
+
+        get_cleaned_lower = cleaned_field_accessor(lower)
+        get_cleaned_upper = cleaned_field_accessor(upper)
+
         def clean(self):
-            lower_value = self.cleaned_data.get(lower)
-            upper_value = self.cleaned_data.get(upper)
+            lower_value = get_cleaned_lower(self)
+            upper_value = get_cleaned_upper(self)
             if lower_value and upper_value and lower_value > upper_value:
                 raise ValidationError(bound_ordering_msg or _('Must be greater than the lower bound'),
                                       code='bound_ordering')
@@ -234,6 +243,20 @@ class SenderGroupedForm(SecurityForm):
             sender_sort_code = sender_sort_code.replace('-', '')
         return sender_sort_code
 
+    def clean_credit_total_0(self):
+        credit_total_0 = self.cleaned_data.get('credit_total_0')
+        if credit_total_0:
+            return int(credit_total_0*100)
+        else:
+            return credit_total_0
+
+    def clean_credit_total_1(self):
+        credit_total_1 = self.cleaned_data.get('credit_total_1')
+        if credit_total_1:
+            return int(credit_total_1*100)
+        else:
+            return credit_total_1
+
     def get_api_endpoint(self):
         return self.client.credits.senders
 
@@ -281,6 +304,20 @@ class PrisonerGroupedForm(SecurityForm):
                                                                       title=_('All types'))
         self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
                                                                     title=_('All categories'))
+
+    def clean_credit_total_0(self):
+        credit_total_0 = self.cleaned_data.get('credit_total_0')
+        if credit_total_0:
+            return int(credit_total_0*100)
+        else:
+            return credit_total_0
+
+    def clean_credit_total_1(self):
+        credit_total_1 = self.cleaned_data.get('credit_total_1')
+        if credit_total_1:
+            return int(credit_total_1*100)
+        else:
+            return credit_total_1
 
     def get_api_endpoint(self):
         return self.client.credits.prisoners
