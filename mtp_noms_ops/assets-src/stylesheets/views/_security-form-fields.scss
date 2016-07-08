@@ -19,3 +19,10 @@
   padding-left: 15px;
   border-left: 10px solid $grey-2;
 }
+
+.form-label {
+  font-weight: bold;
+  &.sublabel {
+    font-weight: normal;
+  }
+}
