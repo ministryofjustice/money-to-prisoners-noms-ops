@@ -11,7 +11,9 @@
     {{ group.prisoner_number }}
   </span>
   <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
-    {% trans 'Credits' %}: {{ group.credit_count }}<br/>{% trans 'Total: £' %}{{ group.credit_total|currency }}
+    {% trans 'Credits' %}: {{ group.credit_count }}<br/>
+    {% trans 'Senders: ' %}{{ group.sender_count }}</br>
+    {% trans 'Total: £' %}{{ group.credit_total|currency }}
   </span>
 {% endblock %}
 
