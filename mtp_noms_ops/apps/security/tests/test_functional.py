@@ -9,6 +9,7 @@ class SecurityDashboardTestCase(FunctionalTestCase):
     """
     Base class for all NOMS security operations functional tests
     """
+    auto_load_test_data = True
     accessibility_scope_selector = '#content'
 
 
@@ -30,8 +31,41 @@ class SecurityDashboardTests(SecurityDashboardTestCase):
         self.assertCurrentUrl(security_url)
         self.assertInSource(prisoner_location_url)
 
-    def test_search_by_other_results_show_sender(self):
-        self.login('admin', 'adminadmin')
+
+class SecurityOtherSearchTests(SecurityDashboardTestCase):
+    def setUp(self):
+        super().setUp()
+        self.login('security-staff', 'security-staff')
         self.click_on_text('Search by other')
+
+    def test_search_by_other_results_show_sender(self):
         self.click_on_text('Search')
-        self.assertInSource('<td>Sender</td>')
+        self.assertInSource('<th>Sender</th>')
+
+
+class SecuritySenderSearchTests(SecurityDashboardTestCase):
+    def setUp(self):
+        super().setUp()
+        self.login('security-staff', 'security-staff')
+        self.click_on_text('Search by sender')
+
+    def test_headers_show_all_fields(self):
+        self.click_on_text('Search')
+        self.assertInSource('Credits:')
+        self.assertInSource('Prisoners:')
+        self.assertInSource('Total: £')
+        self.assertInSource('From:')
+
+
+class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
+    def setUp(self):
+        super().setUp()
+        self.login('security-staff', 'security-staff')
+        self.click_on_text('Search by prisoner')
+
+    def test_headers_show_all_fields(self):
+        self.click_on_text('Search')
+        self.assertInSource('Credits:')
+        self.assertInSource('Senders:')
+        self.assertInSource('Total: £')
+        self.assertInSource('To:')
