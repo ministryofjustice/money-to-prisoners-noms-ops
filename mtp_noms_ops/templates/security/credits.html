@@ -39,6 +39,7 @@
         <table>
           <thead>
             <tr>
+              <th>{% trans 'Sender' %}</th>
               <th>{% trans 'Prisoner' %}</th>
               <th>{% trans 'Prison' %}</th>
               <th title="{% trans 'As specified by sender in reference generator form' %}">
@@ -53,6 +54,7 @@
           <tbody>
             {% for credit in credits|parse_date_fields %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
+                <td>{{ credit.sender_name | default_if_none:'-' }}</td>
                 <td>
                   {{ credit.prisoner_name|default_if_none:'—' }}
                   {% if credit.prisoner_number %}

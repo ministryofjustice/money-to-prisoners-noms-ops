@@ -29,3 +29,9 @@ class SecurityDashboardTests(SecurityDashboardTestCase):
         self.driver.get(urljoin(self.live_server_url, security_url))
         self.assertCurrentUrl(security_url)
         self.assertInSource(prisoner_location_url)
+
+    def test_search_by_other_results_show_sender(self):
+        self.login('admin', 'adminadmin')
+        self.click_on_text('Search by other')
+        self.click_on_text('Search')
+        self.assertInSource('<td>Sender</td>')
