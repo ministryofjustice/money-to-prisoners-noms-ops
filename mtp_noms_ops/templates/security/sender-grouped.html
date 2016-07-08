@@ -33,7 +33,7 @@
 {% endblock %}
 
 {% block group_results %}
-  {% for prisoner in group.prisoners %}
+  {% for prisoner in group.prisoners|dictsort:"prisoner_name" %}
     <tr>
       {% if not prisoner.prisoner_number %}
         <td colspan="3">{% trans 'Cannot be credited' %}</td>

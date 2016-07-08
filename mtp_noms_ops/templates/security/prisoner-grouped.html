@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block group_results %}
-  {% for sender in group.senders %}
+  {% for sender in group.senders|dictsort:"sender_name" %}
     <tr>
       <td>
         {{ sender.sender_name }}
