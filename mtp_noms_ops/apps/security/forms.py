@@ -228,7 +228,8 @@ class SenderGroupedForm(SecurityForm):
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
                                                                   title=_('All regions'))
-        self['prison_population'].field.choices = prison_details_choices['populations']
+        self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
+                                                                      title=_('All types'))
         self['prison_category'].field.choices = prison_details_choices['categories']
 
     def clean_sender_sort_code(self):
@@ -295,7 +296,8 @@ class PrisonerGroupedForm(SecurityForm):
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
                                                                   title=_('All regions'))
-        self['prison_population'].field.choices = prison_details_choices['populations']
+        self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
+                                                                      title=_('All types'))
         self['prison_category'].field.choices = prison_details_choices['categories']
 
     def clean_credit_total_0(self):
@@ -392,7 +394,8 @@ class CreditsForm(SecurityForm):
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
                                                                   title=_('All regions'))
-        self['prison_population'].field.choices = prison_details_choices['populations']
+        self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
+                                                                      title=_('All types'))
         self['prison_category'].field.choices = prison_details_choices['categories']
 
     def clean_amount_exact(self):
