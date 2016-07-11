@@ -55,6 +55,14 @@ def format_sort_code(sort_code):
     return sort_code or ''
 
 
+@register.filter
+def clean_dict_values(dicts, key):
+    for dic in dicts:
+        if dic[key] is None:
+            dic[key] = ''
+    return dicts
+
+
 @register.simple_tag
 def get_credits_list_url(view, form, group, row):
     return reverse(view.credits_view) + '?' + \
