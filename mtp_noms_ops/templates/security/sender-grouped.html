@@ -33,28 +33,30 @@
 {% endblock %}
 
 {% block group_results %}
-  {% for prisoner in group.prisoners|dictsort:"prisoner_name" %}
-    <tr>
-      {% if not prisoner.prisoner_number %}
-        <td colspan="3">{% trans 'Cannot be credited' %}</td>
-      {% else %}
-        <td>{{ prisoner.prisoner_number }}</td>
-        <td>{{ prisoner.prisoner_name }}</td>
-        <td>{{ prisoner.prison_name }}</td>
-      {% endif %}
-      <td>{{ prisoner.credit_count }}</td>
-      <td>{{ prisoner.credit_total|currency }}</td>
-      <td class="print-hidden">
-        <a href="{% get_credits_list_url view form group prisoner %}&amp;return_to={% serialise_back_url request %}"
-           class="CreditDetailLink"
-           aria-expanded="false"
-           data-ajax-url="{% get_credits_list_url view form group prisoner %}&amp;ajax=1"
-           data-show-title="{% trans 'Show' %}"
-           data-hide-title="{% trans 'Hide' %}"
-           data-loading-title="{% trans 'Loading…' %}">
-          {% trans 'Show' %}
-        </a>
-      </td>
-    </tr>
-  {% endfor %}
+  {% with prisoners=group.prisoners|clean_dict_values:"prisoner_name" %}
+    {% for prisoner in prisoners|dictsort:"prisoner_name" %}
+      <tr>
+        {% if not prisoner.prisoner_number %}
+          <td colspan="3">{% trans 'Cannot be credited' %}</td>
+        {% else %}
+          <td>{{ prisoner.prisoner_number }}</td>
+          <td>{{ prisoner.prisoner_name }}</td>
+          <td>{{ prisoner.prison_name }}</td>
+        {% endif %}
+        <td>{{ prisoner.credit_count }}</td>
+        <td>{{ prisoner.credit_total|currency }}</td>
+        <td class="print-hidden">
+          <a href="{% get_credits_list_url view form group prisoner %}&amp;return_to={% serialise_back_url request %}"
+             class="CreditDetailLink"
+             aria-expanded="false"
+             data-ajax-url="{% get_credits_list_url view form group prisoner %}&amp;ajax=1"
+             data-show-title="{% trans 'Show' %}"
+             data-hide-title="{% trans 'Hide' %}"
+             data-loading-title="{% trans 'Loading…' %}">
+            {% trans 'Show' %}
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  {% endwith %}
 {% endblock %}

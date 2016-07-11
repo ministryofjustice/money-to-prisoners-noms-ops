@@ -23,33 +23,34 @@
 {% endblock %}
 
 {% block group_results %}
-  {% for sender in group.senders|dictsort:"sender_name" %}
-    <tr>
-      <td>
-        {{ sender.sender_name }}
-        {% if sender.sender_sort_code or sender.sender_account_number %}
-          <br>
-          {{ sender.sender_sort_code|format_sort_code }}
-          {{ sender.sender_account_number }}
-          {% if sender.sender_roll_number %}
-            / {{ sender.sender_roll_number }}
+  {% with senders=group.senders|clean_dict_values:"sender_name" %}
+    {% for sender in senders|dictsort:"sender_name" %}
+      <tr>
+        <td>
+          {{ sender.sender_name }}
+          {% if sender.sender_sort_code or sender.sender_account_number %}
+            <br>
+            {{ sender.sender_sort_code|format_sort_code }}
+            {{ sender.sender_account_number }}
+            {% if sender.sender_roll_number %}
+              / {{ sender.sender_roll_number }}
+            {% endif %}
           {% endif %}
-        {% endif %}
-      </td>
-      <td>{{ sender.credit_count }}</td>
-      <td>{{ sender.credit_total|currency }}</td>
-      <td class="print-hidden">
-        <a href="{% get_credits_list_url view form group sender %}&amp;return_to={% serialise_back_url request %}"
-           class="CreditDetailLink"
-           aria-expanded="false"
-           data-ajax-url="{% get_credits_list_url view form group sender %}&amp;ajax=1"
-           data-show-title="{% trans 'Show' %}"
-           data-hide-title="{% trans 'Hide' %}"
-           data-loading-title="{% trans 'Loading…' %}">
-          {% trans 'Show' %}
-        </a>
-      </td>
-    </tr>
-  {% endfor %}
-
+        </td>
+        <td>{{ sender.credit_count }}</td>
+        <td>{{ sender.credit_total|currency }}</td>
+        <td class="print-hidden">
+          <a href="{% get_credits_list_url view form group sender %}&amp;return_to={% serialise_back_url request %}"
+             class="CreditDetailLink"
+             aria-expanded="false"
+             data-ajax-url="{% get_credits_list_url view form group sender %}&amp;ajax=1"
+             data-show-title="{% trans 'Show' %}"
+             data-hide-title="{% trans 'Hide' %}"
+             data-loading-title="{% trans 'Loading…' %}">
+            {% trans 'Show' %}
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  {% endwith %}
 {% endblock %}
