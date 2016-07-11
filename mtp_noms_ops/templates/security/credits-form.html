@@ -8,6 +8,9 @@
   {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
 
   {% include 'security/select-field.html' with field=form.prison %}
+  {% include 'security/select-field.html' with field=form.prison_region %}
+  {% include 'security/select-field.html' with field=form.prison_population %}
+  {% include 'security/select-field.html' with field=form.prison_category %}
 
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}

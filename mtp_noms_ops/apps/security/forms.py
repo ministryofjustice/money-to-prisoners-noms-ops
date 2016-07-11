@@ -131,7 +131,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             if field.name == 'page':
                 continue
             value = self.cleaned_data.get(field.name)
-            if value is None or isinstance(value, str) and len(value) == 0:
+            if value in [None, '', []]:
                 continue
             data[field.name] = value
         return data
@@ -149,7 +149,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     @cached_property
     def query_string(self):
-        return urlencode(self.get_query_data())
+        return urlencode(self.get_query_data(), doseq=True)
 
     @property
     def page_range(self):
@@ -219,7 +219,7 @@ class SenderGroupedForm(SecurityForm):
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
-    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
+    prison_category = forms.MultipleChoiceField(label=_('Prison category'), required=False, choices=[])
 
     extra_filters = {
         'include_invalid': 'True'
@@ -232,10 +232,8 @@ class SenderGroupedForm(SecurityForm):
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
                                                                   title=_('All regions'))
-        self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
-                                                                      title=_('All types'))
-        self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
-                                                                    title=_('All categories'))
+        self['prison_population'].field.choices = prison_details_choices['populations']
+        self['prison_category'].field.choices = prison_details_choices['categories']
 
     def clean_sender_sort_code(self):
         sender_sort_code = self.cleaned_data.get('sender_sort_code')
@@ -285,13 +283,14 @@ class PrisonerGroupedForm(SecurityForm):
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
     #                          required=False)
 
-    prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
+    prisoner_number = forms.CharField(label=_('Prisoner number'),
+                                      validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
 
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
-    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
+    prison_category = forms.MultipleChoiceField(label=_('Prison category'), required=False, choices=[])
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
@@ -300,10 +299,8 @@ class PrisonerGroupedForm(SecurityForm):
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
                                                                   title=_('All regions'))
-        self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
-                                                                      title=_('All types'))
-        self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
-                                                                    title=_('All categories'))
+        self['prison_population'].field.choices = prison_details_choices['populations']
+        self['prison_category'].field.choices = prison_details_choices['categories']
 
     def clean_credit_total_0(self):
         credit_total_0 = self.cleaned_data.get('credit_total_0')
@@ -382,7 +379,7 @@ class CreditsForm(SecurityForm):
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
-    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
+    prison_category = forms.MultipleChoiceField(label=_('Prison category'), required=False, choices=[])
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
     sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('eg 01-23-45'), required=False)
@@ -399,10 +396,8 @@ class CreditsForm(SecurityForm):
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
                                                                   title=_('All regions'))
-        self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
-                                                                      title=_('All types'))
-        self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
-                                                                    title=_('All categories'))
+        self['prison_population'].field.choices = prison_details_choices['populations']
+        self['prison_category'].field.choices = prison_details_choices['categories']
 
     def clean_amount_exact(self):
         amount_exact = self.cleaned_data.get('amount_exact')
