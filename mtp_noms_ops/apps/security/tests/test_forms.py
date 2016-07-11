@@ -43,7 +43,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
             'received_at_0': None, 'prisoner_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'prisoner_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
@@ -58,7 +58,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '-credit_total',
             'sender_name': 'Joh', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
             'received_at_0': None, 'prisoner_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'prisoner_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
@@ -84,7 +84,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '',
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
             'received_at_0': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
@@ -99,7 +99,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '-credit_total',
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': 'IXB', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': 'IXB', 'prison_region': '', 'prison_population': '', 'prison_category': [],
             'received_at_0': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
             'received_at_1': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
@@ -126,7 +126,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '',
             'received_at_0': None, 'received_at_1': None,
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
         }
@@ -143,7 +143,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '-amount',
             'received_at_0': received_at_0, 'received_at_1': None,
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
         }
