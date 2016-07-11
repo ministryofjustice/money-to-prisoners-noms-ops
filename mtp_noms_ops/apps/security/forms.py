@@ -80,24 +80,20 @@ def validate_range_field(field_name, bound_ordering_msg):
         lower = field_name + '_0'
         upper = field_name + '_1'
 
-        def cleaned_field_accessor(field):
-            return (
-                getattr(cls, 'clean_' + field, None) or
-                (lambda s: s.cleaned_data.get(field))
-            )
-
-        get_cleaned_lower = cleaned_field_accessor(lower)
-        get_cleaned_upper = cleaned_field_accessor(upper)
+        base_clean = cls.clean
 
         def clean(self):
-            lower_value = get_cleaned_lower(self)
-            upper_value = get_cleaned_upper(self)
+            base_clean(self)
+            lower_value = self.cleaned_data.get(lower)
+            upper_value = self.cleaned_data.get(upper)
             if lower_value and upper_value and lower_value > upper_value:
-                raise ValidationError(bound_ordering_msg or _('Must be greater than the lower bound'),
-                                      code='bound_ordering')
-            return upper_value
+                self.add_error(
+                    upper,
+                    ValidationError(bound_ordering_msg or _('Must be greater than the lower bound'),
+                                    code='bound_ordering'))
+            return self.cleaned_data
 
-        setattr(cls, 'clean_' + upper, clean)
+        setattr(cls, 'clean', clean)
         return cls
 
     return inner
