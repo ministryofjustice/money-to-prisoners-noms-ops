@@ -197,7 +197,7 @@ class SenderGroupedForm(SecurityForm):
                                      ('sender_name', _('Sender name (A to Z)')),
                                  ])
 
-    prisoner_count_0 = forms.IntegerField(label=_('Number of prisoners'), required=False, min_value=1)
+    prisoner_count_0 = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
     prisoner_count_1 = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
     credit_count_0 = forms.IntegerField(label=_('Minimum credits sent'), required=False, min_value=1)
     credit_count_1 = forms.IntegerField(label=_('Maximum credits sent'), required=False, min_value=1)
@@ -270,7 +270,7 @@ class PrisonerGroupedForm(SecurityForm):
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
                                  ])
 
-    sender_count_0 = forms.IntegerField(label=_('Number of senders'), required=False, min_value=1)
+    sender_count_0 = forms.IntegerField(label=_('Number of senders (minimum)'), required=False, min_value=1)
     sender_count_1 = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)
     credit_count_0 = forms.IntegerField(label=_('Minimum credits received'), required=False, min_value=1)
     credit_count_1 = forms.IntegerField(label=_('Maximum credits received'), required=False, min_value=1)
