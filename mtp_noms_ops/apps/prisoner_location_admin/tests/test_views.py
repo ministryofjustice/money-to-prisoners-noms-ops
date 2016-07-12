@@ -100,10 +100,11 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
     def test_location_file_upload_api_error_displays_message(self, mock_api_client):
         self.login()
 
-        api_error_message = 'Bad Request'
+        api_error_message = "prison not found"
+        response_content = ('[{"prison": ["%s"]}]' % api_error_message).encode('utf-8')
 
         conn = mock_api_client.get_connection().prisoner_locations
-        conn.post.side_effect = HttpClientError(content=api_error_message)
+        conn.post.side_effect = HttpClientError(content=response_content)
 
         file_data, _ = generate_testable_location_data()
 
