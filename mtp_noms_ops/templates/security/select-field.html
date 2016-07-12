@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}error{% endif %}">
   {% include 'mtp_common/forms/field-label.html' with field=field only %}
   {% include 'mtp_common/forms/field-errors.html' with field=field only %}
@@ -13,5 +15,6 @@
         {% endif %}
       {% endfor %}
     </select>
+    <button class="button button-secondary js-hidden" type="submit">{% trans 'Sort' %}</button>
   {% endwith %}
 </div>
