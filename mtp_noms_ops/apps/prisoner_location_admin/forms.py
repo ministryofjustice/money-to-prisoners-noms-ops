@@ -1,6 +1,7 @@
 import csv
 from datetime import datetime
 import io
+import json
 import logging
 import re
 
@@ -17,6 +18,17 @@ DOB_PATTERN = re.compile(
     '([0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}).*'
 )
 DATE_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
+
+
+def format_errors(error_list):
+    output_list = []
+    for i, error in enumerate(error_list):
+        if error:
+            field_errors = []
+            for key in error:
+                field_errors += error[key]
+            output_list.append('Row %s: %s' % (i+1, ', '.join(field_errors)))
+    return output_list
 
 
 class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
@@ -100,7 +112,13 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
             client.prisoner_locations.post(locations)
         except HttpClientError as e:
             logger.exception('Prisoner locations update by %s failed!' % user_description)
-            raise forms.ValidationError(e.content)
+            if e.content:
+                try:
+                    errors = json.loads(e.content.decode('utf-8'))
+                    raise forms.ValidationError(format_errors(errors))
+                except ValueError:
+                    raise forms.ValidationError(e.content)
+            raise forms.ValidationError(_('An unknown error occurred'))
 
         location_count = len(locations)
         logger.info('%d prisoner locations updated successfully by %s' % (
