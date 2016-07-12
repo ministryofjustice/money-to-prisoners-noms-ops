@@ -20,7 +20,7 @@
 
         {% include view.form_template_name with view=view form=form only %}
 
-        <div class="form-group">
+        <div class="form-group ResultsFormSubmit">
           <button type="submit" class="button">{% trans 'Update search' %}</button>
         </div>
       </aside>
@@ -58,7 +58,7 @@
           {% endfor %}
         {% endblock %}
 
-        {% include 'security/pagination.html' with page=form.page.value page_count=form.page_count page_range=form.page_range query_string=form.query_string %}
+        {% include 'security/pagination.html' with page=form.cleaned_data.page page_count=form.page_count page_range=form.page_range query_string=form.query_string %}
       </div>
     </div>
 
