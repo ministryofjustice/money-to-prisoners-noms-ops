@@ -6,6 +6,10 @@ $images-dir: '/static/images/';
 @import 'views/security-forms';
 @import 'views/security-form-fields';
 
-form .form-group .form-hint {
-  margin-top: 0;
+form {
+  margin-top: 2em;
+
+ .form-group .form-hint {
+    margin-top: 0;
+  }
 }
