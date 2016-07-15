@@ -32,6 +32,9 @@
   .ResultsFormSubmit {
     float: none;
   }
+  @media print {
+    display: none;
+  }
 }
 
 .ResultsList {
@@ -63,7 +66,7 @@
     display: none;
     font-size: 0.8em;
 
-    @include print {
+    @media print {
       display: block;
     }
   }

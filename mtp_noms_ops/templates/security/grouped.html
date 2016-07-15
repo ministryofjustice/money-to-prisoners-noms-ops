@@ -3,7 +3,7 @@
 
 {% block inner_content %}
   <header class="ContentHeader">
-    <a href="{% url 'security:dashboard' %}" class="ContentHeader-back print-hidden">{% trans 'Home' %}</a>
+    <a href="{% url 'security:dashboard' %}" class="ContentHeader-back">{% trans 'Home' %}</a>
     <h1 class="heading-large">{{ view.title }}</h1>
   </header>
 
@@ -16,7 +16,7 @@
     <input type="hidden" name="page" value="1">
 
     <div class="grid-row">
-      <aside class="ResultsFormWrapper column-third print-hidden">
+      <aside class="ResultsFormWrapper column-third">
         <h2 class="heading-medium">{% trans 'Edit your search' %}</h2>
 
         {% include view.form_template_name with view=view form=form only %}
