@@ -46,7 +46,13 @@
                 {% trans 'Bank transfer' %}
               {% endif %}
             </td>
-            <td>{{ credit.owner_name|default_if_none:'—' }}</td>
+            <td>
+              {% if credit.resolution == 'credited' %}
+                {{ credit.owner_name|default_if_none:'—' }}
+              {% else %}
+                {{ credit.resolution }}
+              {% endif %}
+            </td>
           </tr>
         {% empty %}
           <tr class="no-border">

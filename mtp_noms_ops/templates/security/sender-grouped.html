@@ -30,7 +30,7 @@
 
 {% block group_header_row %}
   <th colspan="2">{% trans 'Prisoner' %}</th>
-  <th>{% trans 'Prison' %}</th>
+  <th>{% trans 'Current Prison' %}</th>
   <th>{% trans 'No. of payments' %}</th>
   <th>{% trans 'Total sent (£)' %}</th>
   <th class="print-hidden">{% trans 'Details' %}</th>
@@ -45,7 +45,7 @@
         {% else %}
           <td>{{ prisoner.prisoner_number }}</td>
           <td>{{ prisoner.prisoner_name }}</td>
-          <td>{{ prisoner.prison_name }}</td>
+          <td>n/a</td>
         {% endif %}
         <td>{{ prisoner.credit_count }}</td>
         <td>{{ prisoner.credit_total|currency }}</td>
