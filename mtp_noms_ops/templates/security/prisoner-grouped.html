@@ -35,7 +35,7 @@
           {% if sender.sender_sort_code or sender.sender_account_number %}
             <br>
             {{ sender.sender_sort_code|format_sort_code }}
-            {{ sender.sender_account_number }}
+            / {{ sender.sender_account_number }}
             {% if sender.sender_roll_number %}
               / {{ sender.sender_roll_number }}
             {% endif %}

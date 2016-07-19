@@ -10,10 +10,10 @@
   <span class="CollapsingTableHeader-below">
       {{ group.sender_sort_code|format_sort_code }}
       {% if group.sender_account_number %}
-        <span>/</span>
+        /
         {% if group.sender_roll_number %}
           <small>
-            {{ group.sender_account_number }}/{{ group.sender_roll_number }}
+            {{ group.sender_account_number }} / {{ group.sender_roll_number }}
           </small>
         {% else %}
           {{ group.sender_account_number }}

@@ -14,18 +14,16 @@
   {% trans 'Received from' %}:
   <strong>{{ request.GET.sender_name|default:_('Unknown sender name') }}</strong>
   <span>
-    {% stripwhitespace %}
-      {{ request.GET.sender_sort_code|format_sort_code }}
-      {% if request.GET.sender_account_number %}
-        <br>
-        {% if request.GET.sender_roll_number %}
-          <small>
-            {{ request.GET.sender_account_number }}/{{ request.GET.sender_roll_number }}
-          </small>
-        {% else %}
-          {{ request.GET.sender_account_number }}
-        {% endif %}
+    {{ request.GET.sender_sort_code|format_sort_code }}
+    {% if request.GET.sender_account_number %}
+      /
+      {% if request.GET.sender_roll_number %}
+        <small>
+          {{ request.GET.sender_account_number }} / {{ request.GET.sender_roll_number }}
+        </small>
+      {% else %}
+        {{ request.GET.sender_account_number }}
       {% endif %}
-    {% endstripwhitespace %}
+    {% endif %}
   </span>
 {% endblock %}
