@@ -45,7 +45,7 @@
         {% else %}
           <td>{{ prisoner.prisoner_number }}</td>
           <td>{{ prisoner.prisoner_name }}</td>
-          <td>n/a</td>
+          <td>{{ prisoner.current_prison_name }}</td>
         {% endif %}
         <td>{{ prisoner.credit_count }}</td>
         <td>{{ prisoner.credit_total|currency }}</td>
