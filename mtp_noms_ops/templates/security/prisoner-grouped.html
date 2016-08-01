@@ -9,7 +9,7 @@
     {{ group.prisoner_name }}
   </strong><br/>
   <span class="CollapsingTableHeader-below">
-    {{ group.prisoner_number }}
+    {{ group.prisoner_number }}{% if group.current_prison_name %} / {{ group.current_prison_name }}{% endif %}
   </span>
   <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
     {% trans 'Credits' %}: {{ group.credit_count }}<br/>
