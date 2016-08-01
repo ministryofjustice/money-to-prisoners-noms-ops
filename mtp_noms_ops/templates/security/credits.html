@@ -49,7 +49,7 @@
               <th>{% trans 'Amount (£)' %}</th>
               <th>{% trans 'Payment method' %}</th>
               <th>{% trans 'Date received' %}</th>
-              <th>{% trans 'Processed by' %}</th>
+              <th>{% trans 'Credited by' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -73,7 +73,13 @@
                   {% endif %}
                 </td>
                 <td>{{ credit.received_at|date:'DATE_FORMAT' }}</td>
-                <td>{{ credit.owner_name|default_if_none:'—' }}</td>
+                <td>
+                  {% if credit.resolution == 'credited' %}
+                    {{ credit.owner_name|default_if_none:'—' }}
+                  {% else %}
+                    {{ credit.resolution }}
+                  {% endif %}
+                </td>
               </tr>
             {% empty %}
               <tr class="no-border">
