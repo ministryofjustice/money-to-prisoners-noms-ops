@@ -5,25 +5,25 @@
 
 {% block group_title %}
 <caption class="CollapsingTableHeader sender-header" data-collapse-text="{% trans 'Collapse' %}" data-expand-text="{% trans 'Expand' %}">
-  {% trans 'From: ' %}
+  {% trans 'From:' %}
   <strong>{{ group.sender_name|default:_('Unknown sender name') }}</strong><br/>
   <span class="CollapsingTableHeader-below">
-      {{ group.sender_sort_code|format_sort_code }}
-      {% if group.sender_account_number %}
-        /
-        {% if group.sender_roll_number %}
-          <small>
-            {{ group.sender_account_number }} / {{ group.sender_roll_number }}
-          </small>
-        {% else %}
-          {{ group.sender_account_number }}
-        {% endif %}
+    {{ group.sender_sort_code|format_sort_code }}
+    {% if group.sender_account_number %}
+      /
+      {% if group.sender_roll_number %}
+        <small>
+          {{ group.sender_account_number }} / {{ group.sender_roll_number }}
+        </small>
+      {% else %}
+        {{ group.sender_account_number }}
       {% endif %}
+    {% endif %}
   </span>
   <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
-    {% trans 'Credits: ' %}{{ group.credit_count }}<br/>
-    {% trans 'Prisoners: ' %}{{ group.prisoner_count }}<br/>
-    {% trans 'Total: £' %}{{ group.credit_total|currency }}
+    {% trans 'Credits:' %} {{ group.credit_count }}<br/>
+    {% trans 'Prisoners:' %} {{ group.prisoner_count }}<br/>
+    {% trans 'Total:' %} £{{ group.credit_total|currency }}
   </span>
 </caption>
 {% endblock %}
@@ -37,8 +37,8 @@
 {% endblock %}
 
 {% block group_results %}
-  {% with prisoners=group.prisoners|clean_dict_values:"prisoner_name" %}
-    {% for prisoner in prisoners|dictsort:"prisoner_name" %}
+  {% with prisoners=group.prisoners|clean_dict_values:'prisoner_name' %}
+    {% for prisoner in prisoners|dictsort:'prisoner_name' %}
       <tr>
         {% if not prisoner.prisoner_number %}
           <td colspan="3">{% trans 'Cannot be credited' %}</td>
