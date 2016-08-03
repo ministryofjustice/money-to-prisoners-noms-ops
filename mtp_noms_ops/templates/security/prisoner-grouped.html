@@ -4,7 +4,7 @@
 
 {% block group_title %}
 <caption class="CollapsingTableHeader prisoner-header" data-collapse-text="{% trans 'Collapse' %}" data-expand-text="{% trans 'Expand' %}">
-  {% trans 'To: ' %}
+  {% trans 'To:' %}
   <strong>
     {{ group.prisoner_name }}
   </strong><br/>
@@ -12,9 +12,9 @@
     {{ group.prisoner_number }}{% if group.current_prison_name %} / {{ group.current_prison_name }}{% endif %}
   </span>
   <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
-    {% trans 'Credits' %}: {{ group.credit_count }}<br/>
-    {% trans 'Senders: ' %}{{ group.sender_count }}</br>
-    {% trans 'Total: £' %}{{ group.credit_total|currency }}
+    {% trans 'Credits:' %} {{ group.credit_count }}<br/>
+    {% trans 'Senders:' %} {{ group.sender_count }}<br/>
+    {% trans 'Total:' %} £{{ group.credit_total|currency }}
   </span>
 </caption>
 {% endblock %}
@@ -27,8 +27,8 @@
 {% endblock %}
 
 {% block group_results %}
-  {% with senders=group.senders|clean_dict_values:"sender_name" %}
-    {% for sender in senders|dictsort:"sender_name" %}
+  {% with senders=group.senders|clean_dict_values:'sender_name' %}
+    {% for sender in senders|dictsort:'sender_name' %}
       <tr>
         <td>
           {{ sender.sender_name }}
