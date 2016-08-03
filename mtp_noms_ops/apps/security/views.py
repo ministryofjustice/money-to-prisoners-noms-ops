@@ -48,6 +48,7 @@ class GroupedSecurityView(SecurityView):
     listing_credits = False
     credits_view = NotImplemented
     credits_template_name = NotImplemented
+    credits_ajax_template_name = NotImplemented
     page_size = 20
 
     sender_keys = ('sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number')
