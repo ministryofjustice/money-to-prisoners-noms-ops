@@ -53,6 +53,8 @@ class GroupedSecurityView(SecurityView):
     sender_keys = ('sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number')
     prisoner_keys = ('prisoner_name', 'prisoner_number')
 
+    blank_keys = ()
+
     def get(self, request, *args, **kwargs):
         if not self.listing_credits:
             return super().get(request, *args, **kwargs)
@@ -75,10 +77,17 @@ class GroupedSecurityView(SecurityView):
         ajax = query_string.get('ajax', False)
         query_string = query_string.urlencode()
 
-        offset = (page - 1) * self.page_size
         filters.pop('prisoner_name', None)  # this should not be used to identify prisoners
         filters.pop('return_to', None)  # this is for navigation not filtering
         filters.update(self.form_class.extra_filters)
+
+        # convert empty filters into 'isblank' filters for special keys
+        for blank_key in self.blank_keys:
+            if filters.get(blank_key, None) == '':
+                del filters[blank_key]
+                filters['%s__isblank' % blank_key] = True
+
+        offset = (page - 1) * self.page_size
         data = client.credits.get(offset=offset, limit=self.page_size, **filters)
         count = data['count']
         page_count = int(ceil(count / self.page_size))
@@ -115,9 +124,10 @@ class SenderGroupedView(GroupedSecurityView):
     credits_ajax_template_name = 'security/prisoner-grouped-credits-ajax.html'
     credits_view = 'security:sender_grouped_credits'
     form_class = SenderGroupedForm
+    blank_keys = ('sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number')
 
     def get_credits_view(self, request):
-        if not any(bool(request.GET.get(key)) for key in self.sender_keys):
+        if not all(key in request.GET for key in self.sender_keys):
             return redirect('security:dashboard')
         return super().get_credits_view(request)
 
@@ -125,7 +135,7 @@ class SenderGroupedView(GroupedSecurityView):
         query_dict = {
             key: value
             for key, value in group.items()
-            if value and key in self.sender_keys
+            if key in self.sender_keys
         }
         if not row['prison_name']:
             query_dict['prison__isnull'] = 'True'
@@ -152,7 +162,7 @@ class PrisonerGroupedView(GroupedSecurityView):
     form_class = PrisonerGroupedForm
 
     def get_credits_view(self, request):
-        if not any(bool(request.GET.get(key)) for key in self.prisoner_keys):
+        if not all(key in request.GET for key in self.prisoner_keys):
             return redirect('security:dashboard')
         return super().get_credits_view(request)
 
@@ -160,7 +170,7 @@ class PrisonerGroupedView(GroupedSecurityView):
         query_dict = {
             key: value
             for key, value in group.items()
-            if value and key in self.prisoner_keys
+            if key in self.prisoner_keys
         }
         query_dict.update({
             key: value
