@@ -4,25 +4,25 @@
 {% block inner_content %}
   <p>{% trans 'Home' %}</p>
 
-  <ul class="SummaryBoxes">
-    <li class="SummaryBoxes--variant-1">
-      <a href="{% url 'security:sender_grouped' %}">
-        <h2 class="SummaryBoxes--small-title">{% trans 'Search by sender' %}</h2>
-        <p>{% trans '1 sender' %}<br/>{% trans 'many prisoners' %}</p>
-      </a>
-    </li>
+  <h1 class="heading-xlarge">{% trans 'Search the digital cashbook' %}</h1>
 
-   <li class="SummaryBoxes--variant-2">
-      <a href="{% url 'security:prisoner_grouped' %}">
-        <h2 class="SummaryBoxes--small-title">{% trans 'Search by prisoner' %}</h2>
-        <p>{% trans 'Many senders' %}<br/>{% trans '1 prisoner' %}</p>
-      </a>
-    </li>
-
-   <li class="SummaryBoxes--variant-3">
+  <ul class="DashboardLinks">
+    <li>
       <a href="{% url 'security:credits' %}">
-        <h2 class="SummaryBoxes--small-title">{% trans 'Search by other' %}</h2>
-        <p>{% trans 'Eg by prison, bank details, amount patterns' %}</p>
+        <div class="DashboardLinks--title">{% trans 'All transactions' %}</div>
+        <div class="DashboardLinks--description">{% trans 'Search transactions by amount, bank, sender, prison, or prisoner' %}</div>
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'security:sender_grouped' %}">
+        <div class="DashboardLinks--title">{% trans '1 sender to many prisoners' %}</div>
+        <div class="DashboardLinks--description">{% trans 'Search transactions sent by one person to many prisoners' %}</div>
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'security:prisoner_grouped' %}">
+        <div class="DashboardLinks--title">{% trans '1 prisoner sending to many people' %}</div>
+        <div class="DashboardLinks--description">{% trans 'Search transactions sent by one prisoner to many people' %}</div>
       </a>
     </li>
   </ul>
