@@ -20,4 +20,6 @@ urlpatterns = [
         name='prisoner_grouped_credits'),
     url(r'^credits/$', security_test(views.CreditsView.as_view()),
         name='credits'),
+    url(r'^credits/export$', security_test(views.CreditsExportView.as_view()),
+        name='credits_export'),
 ]

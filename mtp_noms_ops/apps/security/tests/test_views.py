@@ -233,3 +233,106 @@ class CreditsListTestCase(SecurityViewTestCase):
         self.assertIn('275.00', response_content)
         self.assertIn('Bank transfer', response_content)
         self.assertIn('Debit card', response_content)
+
+
+class CreditsExportTestCase(SecurityBaseTestCase):
+
+    @mock.patch('security.forms.get_connection')
+    def test_creates_csv(self, mocked_connection):
+        response_data = {
+            'count': 2,
+            'previous': None,
+            'next': None,
+            'results': [
+                {
+                    'id': 1,
+                    'source': 'online',
+                    'amount': 23000,
+                    'intended_recipient': 'GEORGE MELLEY',
+                    'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
+                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+                    'sender_name': None,
+                    'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
+                    'resolution': 'credited',
+                    'owner': None, 'owner_name': None,
+                    'received_at': '2016-05-25T20:24:00Z', 'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,
+                },
+                {
+                    'id': 2,
+                    'source': 'bank_transfer',
+                    'amount': 27500,
+                    'intended_recipient': None,
+                    'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
+                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+                    'sender_name': 'HEIDENREICH X',
+                    'sender_sort_code': '219657', 'sender_account_number': '88447894', 'sender_roll_number': '',
+                    'resolution': 'credited',
+                    'owner': None, 'owner_name': None,
+                    'received_at': '2016-05-22T23:00:00Z', 'credited_at': '2016-05-23T01:10:00Z', 'refunded_at': None,
+                },
+            ]
+        }
+        mocked_connection().credits.get.return_value = response_data
+
+        expected_result = (
+            'prisoner_name,prisoner_number,prison,sender_name,' +
+            'sender_sort_code,sender_account_number,sender_roll_number,' +
+            'amount,resolution,received_at\r\n' +
+            'GEORGE MELLEY,A1411AE,LEI,,,,,230.00,credited,2016-05-25T20:24:00Z\r\n' +
+            'NORMAN STANLEY FLETCHER,A1413AE,LEI,HEIDENREICH X,219657,88447894,,' +
+            '275.00,credited,2016-05-22T23:00:00Z\r\n'
+        )
+
+        self.login()
+        response = self.client.get(
+            reverse('security:credits_export') + '?page=1'
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('text/csv', response['Content-Type'])
+        self.assertEqual(
+            bytes(expected_result, 'utf8'),
+            response.content
+        )
+
+    @mock.patch('security.forms.get_connection')
+    def test_no_data(self, mocked_connection):
+        response_data = {
+            'count': 0,
+            'previous': None,
+            'next': None,
+            'results': []
+        }
+        mocked_connection().credits.get.return_value = response_data
+
+        expected_result = (
+            'prisoner_name,prisoner_number,prison,sender_name,' +
+            'sender_sort_code,sender_account_number,sender_roll_number,' +
+            'amount,resolution,received_at\r\n'
+        )
+
+        self.login()
+        response = self.client.get(
+            reverse('security:credits_export') + '?page=1'
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('text/csv', response['Content-Type'])
+        self.assertEqual(
+            bytes(expected_result, 'utf8'),
+            response.content
+        )
+
+    @mock.patch('security.forms.get_connection')
+    def test_missing_page_redirects_to_form(self, mocked_connection):
+        self.login()
+        response = self.client.get(
+            reverse('security:credits_export') + '?prison=LEI'
+        )
+        self.assertRedirects(response, reverse('security:credits') + '?prison=LEI')
+
+    @mock.patch('security.forms.get_connection')
+    def test_invalid_params_redirects_to_form(self, mocked_connection):
+        self.login()
+        response = self.client.get(
+            reverse('security:credits_export') + '?page=1&received_at_0=LL'
+        )
+        self.assertRedirects(response, reverse('security:credits'))
