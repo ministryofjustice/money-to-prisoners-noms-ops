@@ -15,14 +15,14 @@
     </li>
     <li>
       <a href="{% url 'security:sender_grouped' %}">
-        <div class="DashboardLinks--title">{% trans '1 sender to many prisoners' %}</div>
+        <div class="DashboardLinks--title">{% trans 'From one sender to many prisoners' %}</div>
         <div class="DashboardLinks--description">{% trans 'Search transactions sent by one person to many prisoners' %}</div>
       </a>
     </li>
     <li>
       <a href="{% url 'security:prisoner_grouped' %}">
-        <div class="DashboardLinks--title">{% trans '1 prisoner sending to many people' %}</div>
-        <div class="DashboardLinks--description">{% trans 'Search transactions sent by one prisoner to many people' %}</div>
+        <div class="DashboardLinks--title">{% trans 'To one prisoner from many senders' %}</div>
+        <div class="DashboardLinks--description">{% trans 'Search transactions sent to one prisoner from many people' %}</div>
       </a>
     </li>
   </ul>

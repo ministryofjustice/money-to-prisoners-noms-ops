@@ -20,7 +20,7 @@ class SecurityDashboardTests(SecurityDashboardTestCase):
 
     def test_login_redirects_to_security_dashboard(self):
         self.login('security-staff', 'security-staff')
-        self.assertInSource('Search by sender')
+        self.assertInSource('From one sender to many prisoners')
         self.assertEqual(self.driver.title, 'NOMS admin')
 
     def test_superuser_can_see_prisoner_location_link(self):
@@ -36,7 +36,7 @@ class SecurityOtherSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('Search by other')
+        self.click_on_text('All transactions')
 
     def test_search_by_other_results_show_sender(self):
         self.click_on_text('Search')
@@ -47,7 +47,7 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('Search by sender')
+        self.click_on_text('From one sender to many prisoners')
 
     def test_headers_show_all_fields(self):
         self.click_on_text('Search')
@@ -61,7 +61,7 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('Search by prisoner')
+        self.click_on_text('To one prisoner from many senders')
 
     def test_headers_show_all_fields(self):
         self.click_on_text('Search')
