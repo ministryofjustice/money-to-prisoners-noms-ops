@@ -1,12 +1,14 @@
 from math import ceil
 
-from django.http import QueryDict
+from django.core.urlresolvers import reverse
+from django.http import QueryDict, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from mtp_common.auth.api_client import get_connection
 
 from mtp_noms_ops.utils import make_page_range
+from security.export import export_as_csv
 from security.forms import SenderGroupedForm, PrisonerGroupedForm, CreditsForm
 
 
@@ -195,3 +197,26 @@ class CreditsView(SecurityView):
         context = self.get_context_data(form=form)
         context['credits'] = form.get_object_list()
         return render(self.request, self.results_template_name, context)
+
+
+class CreditsExportView(SecurityView):
+    form_class = CreditsForm
+
+    def form_valid(self, form):
+        data = form.get_complete_object_list()
+        csvdata = export_as_csv(data)
+        response = HttpResponse(csvdata, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="export.csv"'
+        return response
+
+    def form_invalid(self, form):
+        return redirect('?'.join(
+            filter(lambda x: x, [reverse('security:credits'), form.query_string])
+        ))
+
+    def get(self, request, *args, **kwargs):
+        if 'page' in self.request.GET:
+            return self.post(request, *args, **kwargs)
+        return redirect('?'.join(
+            filter(lambda x: x, [reverse('security:credits'), request.GET.urlencode()])
+        ))

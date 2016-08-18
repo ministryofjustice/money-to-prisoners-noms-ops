@@ -12,6 +12,7 @@ from django.utils.dateformat import format as date_format
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
+from mtp_common.api import retrieve_all_pages
 from mtp_common.auth.api_client import get_connection
 
 from mtp_noms_ops.utils import make_page_range
@@ -142,6 +143,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         count = data['count']
         self.page_count = int(ceil(count / self.page_size))
         return data.get('results', [])
+
+    def get_complete_object_list(self):
+        filters = self.get_query_data()
+        filters.update(self.extra_filters)
+        return retrieve_all_pages(self.get_api_endpoint().get, **filters)
 
     @cached_property
     def query_string(self):
