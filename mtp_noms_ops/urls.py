@@ -58,6 +58,8 @@ urlpatterns = [
         }, name='reset_password_done'
     ),
 
+    url(r'^', include('mtp_common.user_admin.urls')),
+
     url(r'^ping.json$', PingJsonView.as_view(
         build_date_key='APP_BUILD_DATE',
         commit_id_key='APP_GIT_COMMIT',
