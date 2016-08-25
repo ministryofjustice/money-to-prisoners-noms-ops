@@ -32,7 +32,7 @@
           {% if credit.resolution == 'credited' %}
             {{ credit.owner_name|default_if_none:'—' }}
           {% else %}
-            {{ credit.resolution }}
+            {{ credit.resolution|format_resolution }}
           {% endif %}
         </td>
       </tr>

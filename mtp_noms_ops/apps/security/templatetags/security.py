@@ -56,6 +56,19 @@ def format_sort_code(sort_code):
 
 
 @register.filter
+def format_resolution(resolution):
+    if resolution == 'initial':
+        return gettext('Initial')
+    if resolution == 'pending':
+        return gettext('Pending')
+    if resolution == 'credited':
+        return gettext('Credited')
+    if resolution == 'refunded':
+        return gettext('Refunded')
+    return resolution
+
+
+@register.filter
 def clean_dict_values(dicts, key):
     for dic in dicts:
         if dic[key] is None:
