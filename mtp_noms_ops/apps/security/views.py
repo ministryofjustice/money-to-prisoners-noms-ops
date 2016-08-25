@@ -148,6 +148,9 @@ class SenderGroupedView(GroupedSecurityView):
                 for key, value in row.items()
                 if value and key in self.prisoner_keys
             })
+            prison = row.get('prison_id')
+            if prison:
+                query_dict['prison'] = prison
         return query_dict
 
 
