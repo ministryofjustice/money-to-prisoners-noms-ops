@@ -333,6 +333,6 @@ class CreditsExportTestCase(SecurityBaseTestCase):
     def test_invalid_params_redirects_to_form(self, mocked_connection):
         self.login()
         response = self.client.get(
-            reverse('security:credits_export') + '?page=1&received_at_0=LL'
+            reverse('security:credits_export') + '?page=1&received_at__gte=LL'
         )
         self.assertRedirects(response, reverse('security:credits'))

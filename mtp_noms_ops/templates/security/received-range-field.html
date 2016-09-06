@@ -4,7 +4,7 @@
   <span class="form-label">{% trans 'Date received' %}</span>
 
   <div class="grid-row">
-    {% with field=form.received_at_0 %}
+    {% with field=form.received_at__gte %}
       <div class="column-half">
         <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}error{% endif %}">
           <label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="form-label sublabel">{% trans 'From' %}</label>
@@ -15,7 +15,7 @@
       </div>
     {% endwith %}
 
-    {% with field=form.received_at_1 %}
+    {% with field=form.received_at__lt %}
       <div class="column-half">
         <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}error{% endif %}">
           <label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="form-label sublabel">{% trans 'To' %}</label>

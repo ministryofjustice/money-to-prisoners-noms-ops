@@ -30,8 +30,8 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, {
             'page': 1,
-            'received_at_0': None,
-            'received_at_1': None,
+            'received_at__gte': None,
+            'received_at__lt': None,
         })
         self.assertDictEqual(form.get_query_data(), {})
         self.assertEqual(form.query_string, '')
@@ -44,8 +44,8 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
-            'received_at_0': None, 'prisoner_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
-            'received_at_1': None, 'prisoner_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
+            'received_at__gte': None, 'prisoner_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
+            'received_at__lt': None, 'prisoner_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
         form = SenderGroupedForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
@@ -59,8 +59,8 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '-credit_total',
             'sender_name': 'Joh', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
-            'received_at_0': None, 'prisoner_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
-            'received_at_1': None, 'prisoner_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
+            'received_at__gte': None, 'prisoner_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
+            'received_at__lt': None, 'prisoner_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
         form = SenderGroupedForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'sender_name': 'Joh '})
         self.assertTrue(form.is_valid())
@@ -85,8 +85,8 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '',
             'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
-            'received_at_0': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
-            'received_at_1': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
+            'received_at__gte': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
+            'received_at__lt': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
         form = PrisonerGroupedForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
@@ -100,8 +100,8 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '-credit_total',
             'prisoner_number': '', 'prisoner_name': '',
             'prison': 'IXB', 'prison_region': '', 'prison_population': '', 'prison_category': [],
-            'received_at_0': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
-            'received_at_1': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
+            'received_at__gte': None, 'sender_count_0': None, 'credit_count_0': None, 'credit_total_0': None,
+            'received_at__lt': None, 'sender_count_1': None, 'credit_count_1': None, 'credit_total_1': None,
         }
         form = PrisonerGroupedForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'prison': 'IXB'})
         self.assertTrue(form.is_valid())
@@ -124,7 +124,7 @@ class SecurityFormTestCase(unittest.TestCase):
         expected_data = {
             'page': 1,
             'ordering': '',
-            'received_at_0': None, 'received_at_1': None,
+            'received_at__gte': None, 'received_at__lt': None,
             'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
@@ -137,21 +137,21 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertEqual(form.query_string, '')
 
         # valid forms
-        received_at_0 = datetime.date(2016, 5, 26)
+        received_at__gte = datetime.date(2016, 5, 26)
         expected_data = {
             'page': 1,
             'ordering': '-amount',
-            'received_at_0': received_at_0, 'received_at_1': None,
+            'received_at__gte': received_at__gte, 'received_at__lt': None,
             'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': [],
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
         }
-        form = CreditsForm(self.request, data={'page': '1', 'ordering': '-amount', 'received_at_0': '26/5/2016'})
+        form = CreditsForm(self.request, data={'page': '1', 'ordering': '-amount', 'received_at__gte': '26/5/2016'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
-        self.assertDictEqual(form.get_query_data(), {'ordering': '-amount', 'received_at_0': received_at_0})
-        self.assertEqual(form.query_string, 'received_at_0=2016-05-26&ordering=-amount')
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-amount', 'received_at__gte': received_at__gte})
+        self.assertEqual(form.query_string, 'received_at__gte=2016-05-26&ordering=-amount')
 
         # invalid forms
         form = CreditsForm(self.request, data={})
