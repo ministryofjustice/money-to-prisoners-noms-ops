@@ -61,7 +61,7 @@
                 <td>
                   {{ credit.prisoner_name|default_if_none:'—' }}
                   {% if credit.prisoner_number %}
-                    (<a href="{% url 'security:credits' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a>)
+                    (<a href="{% url 'security:credits' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}" class="muted-link">{{ credit.prisoner_number }}</a>)
                   {% endif %}
                 </td>
                 <td>{{ credit.prison_name|default_if_none:'—' }}</td>
