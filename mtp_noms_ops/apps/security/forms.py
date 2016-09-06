@@ -1,4 +1,5 @@
 import collections
+from datetime import timedelta
 import enum
 from functools import reduce
 from math import ceil
@@ -108,8 +109,8 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     """
     page = forms.IntegerField(min_value=1)
     page_size = 20
-    received_at_0 = forms.DateField(label=_('Received from'), help_text=_('eg 01/06/2016'), required=False)
-    received_at_1 = forms.DateField(label=_('Received to'), help_text=_('eg 01/06/2016'), required=False)
+    received_at__gte = forms.DateField(label=_('Received from'), help_text=_('eg 01/06/2016'), required=False)
+    received_at__lt = forms.DateField(label=_('Received to'), help_text=_('eg 01/06/2016'), required=False)
 
     extra_filters = {}
 
@@ -138,6 +139,8 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         page = self.cleaned_data['page']
         offset = (page - 1) * self.page_size
         filters = self.get_query_data()
+        if 'received_at__lt' in filters:
+            filters['received_at__lt'] += timedelta(days=1)
         filters.update(self.extra_filters)
         data = end_point.get(offset=offset, limit=self.page_size, **filters)
         count = data['count']
