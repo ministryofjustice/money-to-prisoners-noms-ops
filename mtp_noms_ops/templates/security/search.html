@@ -15,7 +15,7 @@
 
     <input type="hidden" name="page" value="1">
 
-    {% include view.form_template_name with view=view form=form only %}
+    {% include view.form_template_name with view=view form=form standalone=True only %}
 
     <div class="form-group">
       <button type="submit" class="button">{% trans 'Search' %}</button>
