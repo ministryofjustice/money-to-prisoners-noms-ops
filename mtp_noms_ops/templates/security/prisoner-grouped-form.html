@@ -8,4 +8,6 @@
   {% include 'security/select-field.html' with field=form.prison_category %}
 
   {% include 'security/grouped-range-fields.html' %}
+
+  {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
 </div>

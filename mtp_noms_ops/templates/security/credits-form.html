@@ -18,4 +18,6 @@
   {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
+
+  {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
 </div>

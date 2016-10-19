@@ -6,4 +6,6 @@
   {% include 'mtp_common/forms/field.html' with field=form.sender_roll_number %}
 
   {% include 'security/grouped-range-fields.html' %}
+
+  {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
 </div>
