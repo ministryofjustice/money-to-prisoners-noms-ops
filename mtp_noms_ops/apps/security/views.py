@@ -198,7 +198,7 @@ class CreditsView(SecurityView):
     """
     Open-ended search view
     """
-    title = _('All transactions')
+    title = _('All payments')
     help_template_name = 'security/credits-help.html'
     form_template_name = 'security/credits-form.html'
     results_template_name = 'security/credits.html'

@@ -7,20 +7,20 @@
   <ul class="DashboardLinks">
     <li>
       <a href="{% url 'security:credits' %}">
-        <div class="DashboardLinks--title">{% trans 'All transactions' %}</div>
-        <div class="DashboardLinks--description">{% trans 'Search transactions by amount, bank, sender, prison, or prisoner' %}</div>
+        <div class="DashboardLinks--title">{% trans 'All payments' %}</div>
+        <div class="DashboardLinks--description">{% trans 'Search payments by amount, bank, sender, prison, or prisoner' %}</div>
       </a>
     </li>
     <li>
       <a href="{% url 'security:sender_grouped' %}">
         <div class="DashboardLinks--title">{% trans 'From one sender to many prisoners' %}</div>
-        <div class="DashboardLinks--description">{% trans 'Search transactions sent by one person to many prisoners' %}</div>
+        <div class="DashboardLinks--description">{% trans 'Search payments sent by one person to many prisoners' %}</div>
       </a>
     </li>
     <li>
       <a href="{% url 'security:prisoner_grouped' %}">
         <div class="DashboardLinks--title">{% trans 'To one prisoner from many senders' %}</div>
-        <div class="DashboardLinks--description">{% trans 'Search transactions sent to one prisoner from many people' %}</div>
+        <div class="DashboardLinks--description">{% trans 'Search payments sent to one prisoner from many people' %}</div>
       </a>
     </li>
   </ul>
