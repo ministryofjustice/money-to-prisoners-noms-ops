@@ -42,7 +42,7 @@ class LoginTests(PrisonerLocationAdminTestCase):
 
     def test_logout(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
-        self.driver.find_element_by_link_text('Sign out').click()
+        self.driver.find_element_by_link_text('Sign out Prisoner Location Admin').click()
         self.assertCurrentUrl(reverse('login'))
 
     def test_superuser_can_see_security_link(self):

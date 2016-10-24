@@ -13,6 +13,7 @@ class UserPermissionMiddleware:
     def process_request(cls, request):
         request.can_access_prisoner_location = request.user.has_perms(prisoner_location_permissions)
         request.can_access_security = request.user.has_perms(security_permissions)
+        request.can_access_user_management = request.user.has_perm('auth.change_user')
 
 
 def external_breadcrumbs(request):

@@ -2,6 +2,7 @@
 
 (function () {
   'use strict';
+  require('proposition-header').PropositionHeader.init();
   require('upload').Upload.init();
   require('analytics').Analytics.init();
   require('help-popup').HelpPopup.init();
