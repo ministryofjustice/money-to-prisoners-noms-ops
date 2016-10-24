@@ -3,6 +3,7 @@ from django.conf.urls import include, url
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.template.response import TemplateResponse
 from django.views.generic import RedirectView
 from moj_irat.views import HealthcheckView, PingJsonView
 from mtp_common.auth import views as auth_views
@@ -69,6 +70,9 @@ urlpatterns = [
 
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'images/favicon.ico', permanent=True)),
     url(r'^robots.txt$', lambda request: HttpResponse('User-agent: *\nDisallow: /', content_type='text/plain')),
+
+    url(r'^404.html$', lambda request: TemplateResponse(request, 'mtp_common/errors/404.html', status=404)),
+    url(r'^500.html$', lambda request: TemplateResponse(request, 'mtp_common/errors/500.html', status=500)),
 ]
 
 handler404 = 'mtp_common.views.page_not_found'
