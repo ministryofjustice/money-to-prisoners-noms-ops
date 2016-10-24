@@ -40,6 +40,14 @@ class SecurityView(FormView):
         context = self.get_context_data(form=form)
         return render(self.request, self.results_template_name, context)
 
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['breadcrumbs'] = [
+            {'name': _('Search'), 'url': reverse('security:dashboard')},
+            {'name': self.title}
+        ]
+        return context_data
+
     def get(self, request, *args, **kwargs):
         if 'page' in self.request.GET:
             return self.post(request, *args, **kwargs)
@@ -119,7 +127,7 @@ class SenderGroupedView(GroupedSecurityView):
     """
     Show list of senders who sent to multiple prisoners
     """
-    title = _('Search by sender')
+    title = _('From one sender to many prisoners')
     help_template_name = 'security/sender-grouped-help.html'
     form_template_name = 'security/sender-grouped-form.html'
     results_template_name = 'security/sender-grouped.html'
@@ -158,7 +166,7 @@ class PrisonerGroupedView(GroupedSecurityView):
     """
     Show list of prisoners who received from multiple senders
     """
-    title = _('Search by prisoner')
+    title = _('To one prisoner from many senders')
     help_template_name = 'security/prisoner-grouped-help.html'
     form_template_name = 'security/prisoner-grouped-form.html'
     results_template_name = 'security/prisoner-grouped.html'
@@ -190,7 +198,7 @@ class CreditsView(SecurityView):
     """
     Open-ended search view
     """
-    title = _('Search by other')
+    title = _('All transactions')
     help_template_name = 'security/credits-help.html'
     form_template_name = 'security/credits-form.html'
     results_template_name = 'security/credits.html'

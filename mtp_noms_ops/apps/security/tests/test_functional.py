@@ -12,6 +12,9 @@ class SecurityDashboardTestCase(FunctionalTestCase):
     auto_load_test_data = True
     accessibility_scope_selector = '#content'
 
+    def click_on_submit(self):
+        self.driver.find_element_by_xpath('//button[@type="submit"]').click()
+
 
 class SecurityDashboardTests(SecurityDashboardTestCase):
     """
@@ -39,7 +42,7 @@ class SecurityOtherSearchTests(SecurityDashboardTestCase):
         self.click_on_text('All transactions')
 
     def test_search_by_other_results_show_sender(self):
-        self.click_on_text('Search')
+        self.click_on_submit()
         self.assertInSource('<th>Sender</th>')
 
 
@@ -50,7 +53,7 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
         self.click_on_text('From one sender to many prisoners')
 
     def test_headers_show_all_fields(self):
-        self.click_on_text('Search')
+        self.click_on_submit()
         self.assertInSource('Credits:')
         self.assertInSource('Prisoners:')
         self.assertInSource('Total: £')
@@ -64,7 +67,7 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
         self.click_on_text('To one prisoner from many senders')
 
     def test_headers_show_all_fields(self):
-        self.click_on_text('Search')
+        self.click_on_submit()
         self.assertInSource('Credits:')
         self.assertInSource('Senders:')
         self.assertInSource('Total: £')
