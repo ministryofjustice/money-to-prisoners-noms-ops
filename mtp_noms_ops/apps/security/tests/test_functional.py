@@ -39,7 +39,7 @@ class SecurityOtherSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('All transactions')
+        self.click_on_text('All payments')
 
     def test_search_by_other_results_show_sender(self):
         self.click_on_submit()
