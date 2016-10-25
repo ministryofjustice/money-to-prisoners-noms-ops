@@ -36,7 +36,9 @@
           {{ form.search_description }}
         </p>
 
-        <p><a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export the data you’ve found as a CSV file' %}</a></p>
+        <p class="print-hidden">
+          <a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export the data you’ve found as a CSV file' %}</a>
+        </p>
 
         <table>
           <thead>
