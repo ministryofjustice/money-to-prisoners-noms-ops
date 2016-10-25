@@ -15,6 +15,8 @@
         {% endif %}
       {% endfor %}
     </select>
-    <button class="button button-secondary js-hidden" type="submit">{% trans 'Sort' %}</button>
+    {% if field.html_name == 'ordering' %}
+      <button class="button button-secondary js-hidden" type="submit">{% trans 'Sort' %}</button>
+    {% endif %}
   {% endwith %}
 </div>
