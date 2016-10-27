@@ -21,7 +21,7 @@
     <ul id="proposition-links" class="print-hidden">
       {% if request.can_access_security and request.can_access_prisoner_location or request.can_access_user_management %}
         {% if request.can_access_security %}
-          <li><a href="{% url 'security:dashboard' %}">{% trans 'Security dashboard' %}</a></li>
+          <li><a href="{% url 'security:dashboard' %}">{% trans 'All prisons’ credit search' %}</a></li>
         {% endif %}
         {% if request.can_access_prisoner_location %}
           <li><a href="{% url 'location_file_upload' %}">{% trans 'Prisoner location upload' %}</a></li>

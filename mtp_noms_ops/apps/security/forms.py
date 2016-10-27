@@ -201,7 +201,7 @@ class SenderGroupedForm(SecurityForm):
                                  initial='-prisoner_count',
                                  choices=[
                                      ('-prisoner_count', _('Number of prisoners (high to low)')),
-                                     ('-credit_count', _('Number of payments (high to low)')),
+                                     ('-credit_count', _('Number of credits (high to low)')),
                                      ('-credit_total', _('Total sent (high to low)')),
                                      ('sender_name', _('Sender name (A to Z)')),
                                  ])
@@ -273,7 +273,7 @@ class PrisonerGroupedForm(SecurityForm):
                                  initial='-sender_count',
                                  choices=[
                                      ('-sender_count', _('Number of senders (high to low)')),
-                                     ('-credit_count', _('Number of payments (high to low)')),
+                                     ('-credit_count', _('Number of credits (high to low)')),
                                      ('-credit_total', _('Total received (high to low)')),
                                      ('prisoner_name', _('Prisoner name (A to Z)')),
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
