@@ -1,3 +1,5 @@
+// app-specific styles
+
 .SecurityForm {
   overflow: hidden;
   padding-left: 1px;
@@ -12,26 +14,29 @@
 
 
   .form-range-field {
-    width: 15em;
-    float: left;
     clear: left;
+    float: left;
+    width: 15em;
   }
 }
 
 .ResultsFormWrapper {
-  padding-bottom: 1em;
   background: $grey-3;
-
+  padding-bottom: 1em;
   padding-top: .5em;
+
   @include breakpoint($mobile) {
     padding-top: .8em;
   }
+
   h2 {
     margin-top: 0;
   }
+
   .ResultsFormSubmit {
     float: none;
   }
+
   @media print {
     display: none;
   }
@@ -41,36 +46,68 @@
   h2 {
     margin-top: 0;
   }
+
   table {
+    margin-bottom: 1em;
+    width: 100%;
+
     &.ResultsList-alone caption {
-      background-color:  #CDE2B7;
+      background-color: #CDE2B7;
     }
 
-    width: 100%;
-    margin-bottom: 1em;
-
-    th, td {
-      padding: 0.5em;
+    th,
+    td {
+      padding: .5em;
 
       .CreditDetailLink {
         background-color: $page-colour;
+        border: 0;
         color: $link-colour;
-        border: none;
-        text-decoration: underline;
         cursor: pointer;
+        text-decoration: underline;
       }
     }
   }
 
   .search-description-text {
     display: none;
-    font-size: 0.8em;
+    font-size: .8em;
 
     @media print {
       display: block;
     }
   }
 }
+
+.CreditDetailRow {
+  // credit detail tables that are loaded inline
+  font-size: 1.19em;
+
+  table {
+    border: 1px solid $border-color;
+    margin-bottom: 0;
+
+    > td {
+      padding: 0 1px 1em 1em;
+    }
+  }
+}
+
+tbody tr.CreditDetailRow table {
+  th,
+  td {
+    background: $grey-4;
+  }
+
+  @media print {
+    th,
+    td {
+      background: $page-colour;
+    }
+  }
+}
+
+// govuk elements overrides
 
 .CollapsingTableHeader {
   background: $panel-colour;
@@ -86,7 +123,7 @@
   }
 
   .CollapsingTableHeader-below {
-    font-size: 0.75em;
+    font-size: .75em;
   }
 
   .CollapsingTableHeader-aside-right {
@@ -102,32 +139,18 @@
     text-align: right;
 
     small {
-      font-size: 0.75em;
+      font-size: .75em;
     }
   }
 }
 
-.CreditDetailRow {
-  // credit detail tables that are loaded inline
-  font-size: 1.19em;
-  table {
-    margin-bottom: 0;
-    border: 1px solid $border-color;
-  }
-  table & > td {
-    padding: 0 1px 1em 1em;
-  }
-}
-tbody tr.CreditDetailRow table {
-  th, td {
-    background: $grey-4;
-  }
 
-  @media print {
-    & {
-      th, td {
-        background: $page-colour;
-      }
-    }
-  }
-}
+
+
+
+
+
+
+
+
+

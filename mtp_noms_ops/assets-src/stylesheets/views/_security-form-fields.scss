@@ -1,27 +1,35 @@
+// app-specific styles
+
 #id_sender_name {
-  width: 100%;
   max-width: 16em;
+  width: 100%;
 }
+
 #id_sender_account_number {
   width: 10em;
 }
 
 #id_prisoner_name {
-  width: 100%;
   max-width: 16em;
+  width: 100%;
 }
+
 #id_prisoner_number {
   width: 10em;
 }
 
-#id_amount_exact-wrapper, #id_amount_pence-wrapper {
+#id_amount_exact-wrapper,
+#id_amount_pence-wrapper {
+  border-left: 10px solid $grey-2;
   display: none;
   padding-left: 15px;
-  border-left: 10px solid $grey-2;
 }
+
+// govuk elements overrides
 
 .form-label {
   font-weight: bold;
+
   &.sublabel {
     font-weight: normal;
   }
