@@ -1,6 +1,6 @@
 // app-specific styles
 
-.SecurityForm {
+.mtp-security-form {
   overflow: hidden;
   padding-left: 1px;
 
@@ -12,7 +12,6 @@
     width: auto;
   }
 
-
   .form-range-field {
     clear: left;
     float: left;
@@ -20,7 +19,7 @@
   }
 }
 
-.ResultsFormWrapper {
+.mtp-results-form__wrapper {
   background: $grey-3;
   padding-bottom: 1em;
   padding-top: .5em;
@@ -33,7 +32,7 @@
     margin-top: 0;
   }
 
-  .ResultsFormSubmit {
+  .mtp-results-form__submit {
     float: none;
   }
 
@@ -42,7 +41,7 @@
   }
 }
 
-.ResultsList {
+.mtp-results-list {
   h2 {
     margin-top: 0;
   }
@@ -51,7 +50,7 @@
     margin-bottom: 1em;
     width: 100%;
 
-    &.ResultsList-alone caption {
+    &.mtp-results-list__alone caption {
       background-color: #CDE2B7;
     }
 
@@ -59,7 +58,7 @@
     td {
       padding: .5em;
 
-      .CreditDetailLink {
+      .mtp-credit-detail__link {
         background-color: $page-colour;
         border: 0;
         color: $link-colour;
@@ -69,7 +68,7 @@
     }
   }
 
-  .search-description-text {
+  .mtp-search-description__text {
     display: none;
     font-size: .8em;
 
@@ -79,7 +78,7 @@
   }
 }
 
-.CreditDetailRow {
+.mtp-credit-detail__row {
   // credit detail tables that are loaded inline
   font-size: 1.19em;
 
@@ -93,7 +92,7 @@
   }
 }
 
-tbody tr.CreditDetailRow table {
+tbody tr.mtp-credit-detail__row table {
   th,
   td {
     background: $grey-4;
@@ -107,7 +106,7 @@ tbody tr.CreditDetailRow table {
   }
 }
 
-// govuk elements overrides
+// mtp-common overrides
 
 .CollapsingTableHeader {
   background: $panel-colour;
@@ -143,14 +142,3 @@ tbody tr.CreditDetailRow table {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-

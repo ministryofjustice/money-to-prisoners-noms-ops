@@ -45,7 +45,7 @@
         <td>{{ sender.credit_total|currency }}</td>
         <td class="print-hidden">
           <a href="{% get_credits_list_url view form group sender %}&amp;return_to={% serialise_back_url request %}"
-             class="CreditDetailLink"
+             class="mtp-credit-detail__link"
              aria-expanded="false"
              data-ajax-url="{% get_credits_list_url view form group sender %}&amp;ajax=1"
              data-show-title="{% trans 'Show' %}"
