@@ -4,7 +4,7 @@
 {% load security %}
 
 {% block group_title %}
-<caption class="CollapsingTableHeader sender-header" data-collapse-text="{% trans 'Collapse' %}" data-expand-text="{% trans 'Expand' %}">
+<caption class="CollapsingTableHeader mtp-sender__header" data-collapse-text="{% trans 'Collapse' %}" data-expand-text="{% trans 'Expand' %}">
   {% trans 'From:' %}
   <strong>{{ group.sender_name|default:_('Unknown sender name') }}</strong><br/>
   <span class="CollapsingTableHeader-below">
