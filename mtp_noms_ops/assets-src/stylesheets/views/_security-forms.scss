@@ -1,4 +1,6 @@
-.SecurityForm {
+// app-specific styles
+
+.mtp-security-form {
   overflow: hidden;
   padding-left: 1px;
 
@@ -10,61 +12,65 @@
     width: auto;
   }
 
-
   .form-range-field {
-    width: 15em;
-    float: left;
     clear: left;
+    float: left;
+    width: 15em;
   }
 }
 
-.ResultsFormWrapper {
-  padding-bottom: 1em;
+.mtp-results-form__wrapper {
   background: $grey-3;
-
+  padding-bottom: 1em;
   padding-top: .5em;
+
   @include breakpoint($mobile) {
     padding-top: .8em;
   }
+
   h2 {
     margin-top: 0;
   }
-  .ResultsFormSubmit {
+
+  .mtp-results-form__submit {
     float: none;
   }
+
   @media print {
     display: none;
   }
 }
 
-.ResultsList {
+.mtp-results-list {
   h2 {
     margin-top: 0;
   }
+
   table {
-    &.ResultsList-alone caption {
-      background-color:  #CDE2B7;
+    margin-bottom: 1em;
+    width: 100%;
+
+    &.mtp-results-list__alone caption {
+      background-color: #CDE2B7;
     }
 
-    width: 100%;
-    margin-bottom: 1em;
+    th,
+    td {
+      padding: .5em;
 
-    th, td {
-      padding: 0.5em;
-
-      .CreditDetailLink {
+      .mtp-credit-detail__link {
         background-color: $page-colour;
+        border: 0;
         color: $link-colour;
-        border: none;
-        text-decoration: underline;
         cursor: pointer;
+        text-decoration: underline;
       }
     }
   }
 
-  .search-description-text {
+  .mtp-search-description__text {
     display: none;
-    font-size: 0.8em;
+    font-size: .8em;
 
     @media print {
       display: block;
@@ -72,21 +78,51 @@
   }
 }
 
+.mtp-credit-detail__row {
+  // credit detail tables that are loaded inline
+  font-size: 1.19em;
+
+  table {
+    border: 1px solid $border-color;
+    margin-bottom: 0;
+
+    > td {
+      padding: 0 1px 1em 1em;
+    }
+  }
+}
+
+tbody tr.mtp-credit-detail__row table {
+  th,
+  td {
+    background: $grey-4;
+  }
+
+  @media print {
+    th,
+    td {
+      background: $page-colour;
+    }
+  }
+}
+
+// mtp-common overrides
+
 .CollapsingTableHeader {
   background: $panel-colour;
   font-weight: normal;
   min-height: 2em;
 
-  &.sender-header {
+  &.mtp-sender__header {
     background: #CDE2B7;
   }
 
-  &.prisoner-header {
+  &.mtp-prisoner__header {
     background: #FDE4D4;
   }
 
   .CollapsingTableHeader-below {
-    font-size: 0.75em;
+    font-size: .75em;
   }
 
   .CollapsingTableHeader-aside-right {
@@ -97,37 +133,12 @@
     font-weight: bold;
   }
 
-  .GroupedResults-sender-details {
+  .mtp-grouped-results__sender-details {
     line-height: 1em;
     text-align: right;
 
     small {
-      font-size: 0.75em;
-    }
-  }
-}
-
-.CreditDetailRow {
-  // credit detail tables that are loaded inline
-  font-size: 1.19em;
-  table {
-    margin-bottom: 0;
-    border: 1px solid $border-color;
-  }
-  table & > td {
-    padding: 0 1px 1em 1em;
-  }
-}
-tbody tr.CreditDetailRow table {
-  th, td {
-    background: $grey-4;
-  }
-
-  @media print {
-    & {
-      th, td {
-        background: $page-colour;
-      }
+      font-size: .75em;
     }
   }
 }

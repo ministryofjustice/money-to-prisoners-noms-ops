@@ -14,30 +14,30 @@
     <input type="hidden" name="page" value="1">
 
     <div class="grid-row">
-      <aside class="ResultsFormWrapper column-third">
+      <aside class="mtp-results-form__wrapper column-third">
         <h2 class="heading-medium">{% trans 'Edit your search' %}</h2>
 
         {% include view.form_template_name with view=view form=form only %}
 
-        <div class="form-group ResultsFormSubmit">
+        <div class="form-group mtp-results-form__submit">
           <button type="submit" class="button">{% trans 'Update search' %}</button>
         </div>
       </aside>
 
-      <div class="ResultsList column-two-thirds">
+      <div class="mtp-results-list column-two-thirds">
         <h2 class="heading-large">{% trans 'Results' %}</h2>
 
         <div class="print-hidden">
           {% include 'security/select-field.html' with field=form.ordering only %}
         </div>
-        <p class="search-description-text">
+        <p class="mtp-search-description__text">
           {{ form.search_description }}
         </p>
 
         {% block results_list %}
           {% for group in form.get_object_list %}
 
-            <table id="GroupedResults-{{ forloop.counter }}" class="CollapsingTable">
+            <table id="mtp-grouped-results__sender-details-{{ forloop.counter }}" class="CollapsingTable">
               {% block group_title %}{% endblock %}
               <thead>
                 <tr>{% block group_header_row %}{% endblock %}</tr>

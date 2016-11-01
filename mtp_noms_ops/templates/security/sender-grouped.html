@@ -4,7 +4,7 @@
 {% load security %}
 
 {% block group_title %}
-<caption class="CollapsingTableHeader sender-header" data-collapse-text="{% trans 'Collapse' %}" data-expand-text="{% trans 'Expand' %}">
+<caption class="CollapsingTableHeader mtp-sender__header" data-collapse-text="{% trans 'Collapse' %}" data-expand-text="{% trans 'Expand' %}">
   {% trans 'From:' %}
   <strong>{{ group.sender_name|default:_('Unknown sender name') }}</strong><br/>
   <span class="CollapsingTableHeader-below">
@@ -20,7 +20,7 @@
       {% endif %}
     {% endif %}
   </span>
-  <span class="GroupedResults-sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
+  <span class="mtp-grouped-results__sender-details CollapsingTableHeader-aside CollapsingTableHeader-aside-right">
     {% trans 'Credits:' %} {{ group.credit_count }}<br/>
     {% trans 'Prisoners:' %} {{ group.prisoner_count }}<br/>
     {% trans 'Total:' %} £{{ group.credit_total|currency }}
@@ -51,7 +51,7 @@
         <td>{{ prisoner.credit_total|currency }}</td>
         <td class="print-hidden">
           <a href="{% get_credits_list_url view form group prisoner %}&amp;return_to={% serialise_back_url request %}"
-             class="CreditDetailLink"
+             class="mtp-credit-detail__link"
              aria-expanded="false"
              data-ajax-url="{% get_credits_list_url view form group prisoner %}&amp;ajax=1"
              data-show-title="{% trans 'Show' %}"

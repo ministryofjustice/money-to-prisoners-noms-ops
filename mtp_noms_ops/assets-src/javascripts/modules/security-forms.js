@@ -44,7 +44,7 @@ exports.SecurityForms = {
   },
 
   bindCreditDetailLoading: function() {
-    var creditRowClass = 'CreditDetailRow';
+    var creditRowClass = 'mtp-credit-detail__row';
 
     function creditToggle(e) {
       var $detailsLink = $(e.target);
@@ -104,7 +104,7 @@ exports.SecurityForms = {
       }
     }
 
-    $('.CreditDetailLink').each(function() {
+    $('.mtp-credit-detail__link').each(function() {
       $(this).click(creditToggle);
     });
   }
