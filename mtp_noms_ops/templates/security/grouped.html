@@ -37,7 +37,7 @@
         {% block results_list %}
           {% for group in form.get_object_list %}
 
-            <table id="GroupedResults-{{ forloop.counter }}" class="CollapsingTable">
+            <table id="mtp-grouped-results__sender-details-{{ forloop.counter }}" class="CollapsingTable">
               {% block group_title %}{% endblock %}
               <thead>
                 <tr>{% block group_header_row %}{% endblock %}</tr>
