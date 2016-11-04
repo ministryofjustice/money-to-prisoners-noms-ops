@@ -29,11 +29,13 @@ make docker
 
 and you should eventually be able to connect to the local server.
 
-### Log in to the application
+### Translating
 
-You should be able to log into the cash book app using following credentials:
+Update translation files with `cd mtp_noms_ops; ../manage.py makemessages --all --keep-pot --no-wrap`.
 
-- *noms-ops / noms-ops*
+Pull updates from Transifex with `tx pull`. You'll need to update translation files afterwards.
+
+Push latest English to Transifex with `tx push -s`. NB: always pull updates before pushing to merge correctly.
 
 ## Developing
 

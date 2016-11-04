@@ -1,0 +1,678 @@
+# MTP noms-ops
+msgid ""
+msgstr ""
+"Project-Id-Version: MTP noms-ops\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-11-04 11:52+0000\n"
+"PO-Revision-Date: 2016-11-04 10:00+0000\n"
+"Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>\n"
+"Language-Team: Welsh (http://www.transifex.com/ministry-of-justice/mtp/language/cy/)\n"
+"Language: en_GB\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/prisoner_location_admin/forms.py:35
+msgid "Location file"
+msgstr ""
+
+#: apps/prisoner_location_admin/forms.py:37
+msgid "Please choose a file"
+msgstr ""
+
+#: apps/prisoner_location_admin/forms.py:48
+msgid "Uploaded file must be a CSV"
+msgstr ""
+
+#: apps/prisoner_location_admin/forms.py:53
+msgid "Can’t read CSV file"
+msgstr ""
+
+#: apps/prisoner_location_admin/forms.py:70
+msgid "The file has the wrong number of columns"
+msgstr ""
+
+#: apps/prisoner_location_admin/forms.py:85
+#, python-format
+msgid "Date of birth \"%s\" is not in a valid format"
+msgstr ""
+
+#: apps/prisoner_location_admin/forms.py:96
+msgid "The file doesn’t contain valid rows"
+msgstr ""
+
+#: apps/prisoner_location_admin/forms.py:121
+msgid "An unknown error occurred"
+msgstr ""
+
+#: apps/prisoner_location_admin/views.py:24
+#, python-format
+msgid "%d prisoner location updated successfully"
+msgid_plural "%d prisoner locations updated successfully"
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/security/forms.py:64
+msgid "Select an option"
+msgstr ""
+
+#: apps/security/forms.py:72
+msgid "Invalid amount"
+msgstr ""
+
+#: apps/security/forms.py:77
+msgid "Invalid prisoner number"
+msgstr ""
+
+#: apps/security/forms.py:94
+msgid "Must be greater than the lower bound"
+msgstr ""
+
+#: apps/security/forms.py:104
+msgid "Must be after the start date"
+msgstr ""
+
+#: apps/security/forms.py:112
+#: templates/security/prisoner-grouped-credits.html:13
+msgid "Received from"
+msgstr ""
+
+#: apps/security/forms.py:112 apps/security/forms.py:113
+msgid "eg 01/06/2016"
+msgstr ""
+
+#: apps/security/forms.py:113
+msgid "Received to"
+msgstr ""
+
+#: apps/security/forms.py:185
+msgid "{} is <strong>{}</strong>"
+msgstr ""
+
+#: apps/security/forms.py:186
+msgid "Filtering results: {}."
+msgstr ""
+
+#: apps/security/forms.py:188
+msgid "Showing all results."
+msgstr ""
+
+#: apps/security/forms.py:192
+#, python-format
+msgid "Ordered by %s."
+msgstr ""
+
+#: apps/security/forms.py:196
+msgid "Must be larger than the minimum prisoners"
+msgstr ""
+
+#: apps/security/forms.py:197 apps/security/forms.py:269
+msgid "Must be larger than the minimum credits"
+msgstr ""
+
+#: apps/security/forms.py:198 apps/security/forms.py:270
+msgid "Must be larger than the minimum total"
+msgstr ""
+
+#: apps/security/forms.py:200 apps/security/forms.py:272
+#: apps/security/forms.py:370
+msgid "Sort by"
+msgstr ""
+
+#: apps/security/forms.py:203
+msgid "Number of prisoners (high to low)"
+msgstr ""
+
+#: apps/security/forms.py:204 apps/security/forms.py:276
+msgid "Number of credits (high to low)"
+msgstr ""
+
+#: apps/security/forms.py:205
+msgid "Total sent (high to low)"
+msgstr ""
+
+#: apps/security/forms.py:206
+msgid "Sender name (A to Z)"
+msgstr ""
+
+#: apps/security/forms.py:209
+msgid "Number of prisoners (minimum)"
+msgstr ""
+
+#: apps/security/forms.py:210
+msgid "Maximum prisoners sent to"
+msgstr ""
+
+#: apps/security/forms.py:211
+msgid "Minimum credits sent"
+msgstr ""
+
+#: apps/security/forms.py:212
+msgid "Maximum credits sent"
+msgstr ""
+
+#: apps/security/forms.py:213
+msgid "Minimum total sent"
+msgstr ""
+
+#: apps/security/forms.py:214
+msgid "Maximum total sent"
+msgstr ""
+
+#: apps/security/forms.py:219 apps/security/forms.py:391
+msgid "Sender name"
+msgstr ""
+
+#: apps/security/forms.py:220 apps/security/forms.py:392
+msgid "Sender sort code"
+msgstr ""
+
+#: apps/security/forms.py:220 apps/security/forms.py:392
+msgid "eg 01-23-45"
+msgstr ""
+
+#: apps/security/forms.py:221 apps/security/forms.py:393
+msgid "Sender account number"
+msgstr ""
+
+#: apps/security/forms.py:222 apps/security/forms.py:394
+msgid "Sender roll number"
+msgstr ""
+
+#: apps/security/forms.py:224 apps/security/forms.py:296
+#: apps/security/forms.py:386 templates/security/credits.html:47
+#: templates/security/grouped-credits-ajax.html:7
+msgid "Prison"
+msgstr ""
+
+#: apps/security/forms.py:225 apps/security/forms.py:297
+#: apps/security/forms.py:387
+msgid "Prison region"
+msgstr ""
+
+#: apps/security/forms.py:226 apps/security/forms.py:298
+#: apps/security/forms.py:388
+msgid "Prison type"
+msgstr ""
+
+#: apps/security/forms.py:227 apps/security/forms.py:299
+#: apps/security/forms.py:389
+msgid "Prison category"
+msgstr ""
+
+#: apps/security/forms.py:237 apps/security/forms.py:305
+#: apps/security/forms.py:403
+msgid "All prisons"
+msgstr ""
+
+#: apps/security/forms.py:239 apps/security/forms.py:307
+#: apps/security/forms.py:405
+msgid "All regions"
+msgstr ""
+
+#: apps/security/forms.py:241 apps/security/forms.py:309
+#: apps/security/forms.py:407
+msgid "All types"
+msgstr ""
+
+#: apps/security/forms.py:268
+msgid "Must be larger than the minimum senders"
+msgstr ""
+
+#: apps/security/forms.py:275
+msgid "Number of senders (high to low)"
+msgstr ""
+
+#: apps/security/forms.py:277
+msgid "Total received (high to low)"
+msgstr ""
+
+#: apps/security/forms.py:278 apps/security/forms.py:375
+msgid "Prisoner name (A to Z)"
+msgstr ""
+
+#: apps/security/forms.py:279 apps/security/forms.py:376
+msgid "Prisoner number (A to Z)"
+msgstr ""
+
+#: apps/security/forms.py:282
+msgid "Number of senders (minimum)"
+msgstr ""
+
+#: apps/security/forms.py:283
+msgid "Maximum senders received from"
+msgstr ""
+
+#: apps/security/forms.py:284
+msgid "Minimum credits received"
+msgstr ""
+
+#: apps/security/forms.py:285
+msgid "Maximum credits received"
+msgstr ""
+
+#: apps/security/forms.py:286
+msgid "Minimum total received"
+msgstr ""
+
+#: apps/security/forms.py:287
+msgid "Maximum total received"
+msgstr ""
+
+#: apps/security/forms.py:292 apps/security/forms.py:384
+msgid "Prisoner number"
+msgstr ""
+
+#: apps/security/forms.py:294 apps/security/forms.py:385
+#: templates/security/credits.html:48
+#: templates/security/grouped-credits-ajax.html:8
+#: templates/security/grouped-credits.html:20
+#: templates/security/grouped-credits.html:21
+msgid "Prisoner name"
+msgstr ""
+
+#: apps/security/forms.py:331
+msgid "Not a whole number"
+msgstr ""
+
+#: apps/security/forms.py:332
+msgid "Not a multiple of £5"
+msgstr ""
+
+#: apps/security/forms.py:333
+msgid "Not a multiple of £10"
+msgstr ""
+
+#: apps/security/forms.py:334
+msgid "£100 or more"
+msgstr ""
+
+#: apps/security/forms.py:335
+msgid "Exact amount"
+msgstr ""
+
+#: apps/security/forms.py:336
+msgid "Exact number of pence"
+msgstr ""
+
+#: apps/security/forms.py:373
+msgid "Received date (newest to oldest)"
+msgstr ""
+
+#: apps/security/forms.py:374
+msgid "Amount sent (high to low)"
+msgstr ""
+
+#: apps/security/forms.py:379 templates/security/credits.html:51
+#: templates/security/grouped-credits-ajax.html:11
+#: templates/security/grouped-credits.html:24
+msgid "Amount (£)"
+msgstr ""
+
+#: apps/security/forms.py:380
+msgid "Any amount"
+msgstr ""
+
+#: apps/security/forms.py:419 apps/security/forms.py:426
+msgid "This field is required for the selected amount pattern"
+msgstr ""
+
+#: apps/security/templatetags/security.py:61
+msgid "Initial"
+msgstr ""
+
+#: apps/security/templatetags/security.py:63
+msgid "Pending"
+msgstr ""
+
+#: apps/security/templatetags/security.py:65
+msgid "Credited"
+msgstr ""
+
+#: apps/security/templatetags/security.py:67
+msgid "Refunded"
+msgstr ""
+
+#: apps/security/templatetags/security.py:106
+#, python-format
+msgid "Sender %(sender_name)s"
+msgstr ""
+
+#: apps/security/templatetags/security.py:108
+#: templates/security/sender-grouped-credits.html:7
+msgid "Unknown sender"
+msgstr ""
+
+#: apps/security/views.py:46 templates/security/search.html:19
+msgid "Search"
+msgstr ""
+
+#: apps/security/views.py:130 templates/security/dashboard.html:16
+msgid "From one sender to many prisoners"
+msgstr ""
+
+#: apps/security/views.py:169 templates/security/dashboard.html:22
+msgid "To one prisoner from many senders"
+msgstr ""
+
+#: apps/security/views.py:201 templates/security/dashboard.html:10
+msgid "All credits"
+msgstr ""
+
+#: templates/base.html:15 templates/base.html:17
+#: templates/mtp_auth/login.html:4
+msgid "NOMS admin"
+msgstr ""
+
+#: templates/base.html:24 templates/security/dashboard.html:5
+msgid "All prisons’ credit search"
+msgstr ""
+
+#: templates/base.html:27
+msgid "Prisoner location upload"
+msgstr ""
+
+#: templates/base.html:30
+msgid "Manage users"
+msgstr ""
+
+#: templates/base.html:33
+msgid "Change password"
+msgstr ""
+
+#: templates/base.html:36
+#, python-format
+msgid "Sign out %(full_name)s"
+msgstr ""
+
+#: templates/prisoner_location_admin/location_file_upload.html:5
+msgid "Upload location file"
+msgstr ""
+
+#: templates/prisoner_location_admin/location_file_upload.html:18
+msgid "Run the “Electronic Credits and Prisoner Establishment Locations” report in P-NOMIS, then upload the file on this page in CSV format (.csv)"
+msgstr ""
+
+#: templates/prisoner_location_admin/location_file_upload.html:22
+msgid "Please note that the uploaded prisoner locations will replace all those currently stored in the system."
+msgstr ""
+
+#: templates/prisoner_location_admin/location_file_upload.html:28
+msgid "Choose file"
+msgstr ""
+
+#: templates/prisoner_location_admin/location_file_upload.html:34
+msgid "Upload file"
+msgstr ""
+
+#: templates/prisoner_location_admin/location_file_upload.html:36
+msgid "Upload another file"
+msgstr ""
+
+#: templates/security/credits-help.html:4
+msgid "Find credits sent using various filters."
+msgstr ""
+
+#: templates/security/credits-help.html:7
+#: templates/security/prisoner-grouped-help.html:7
+#: templates/security/sender-grouped-help.html:7
+msgid "Help"
+msgstr ""
+
+#: templates/security/credits-help.html:11
+msgid "Use the Amount  section to specifically search using amount patterns eg, money sent in multiples of 5 or not a whole number"
+msgstr ""
+
+#: templates/security/credits-help.html:12
+#: templates/security/prisoner-grouped-help.html:12
+#: templates/security/sender-grouped-help.html:12
+msgid "All fields are optional"
+msgstr ""
+
+#: templates/security/credits-help.html:13
+#: templates/security/prisoner-grouped-help.html:13
+#: templates/security/sender-grouped-help.html:13
+msgid "Use the search without filling in any fields to bring up all credits"
+msgstr ""
+
+#: templates/security/credits-help.html:14
+#: templates/security/prisoner-grouped-help.html:14
+#: templates/security/sender-grouped-help.html:14
+msgid "Keep adding filters to refine your search"
+msgstr ""
+
+#: templates/security/credits.html:19 templates/security/grouped.html:18
+msgid "Edit your search"
+msgstr ""
+
+#: templates/security/credits.html:24 templates/security/grouped.html:23
+msgid "Update search"
+msgstr ""
+
+#: templates/security/credits.html:29 templates/security/grouped.html:28
+msgid "Results"
+msgstr ""
+
+#: templates/security/credits.html:39
+msgid "Export the data you’ve found as a CSV file"
+msgstr ""
+
+#: templates/security/credits.html:45
+#: templates/security/prisoner-grouped.html:23
+msgid "Sender"
+msgstr ""
+
+#: templates/security/credits.html:46 templates/security/sender-grouped.html:32
+msgid "Prisoner"
+msgstr ""
+
+#: templates/security/credits.html:49
+#: templates/security/grouped-credits-ajax.html:9
+#: templates/security/grouped-credits.html:22
+msgid "(as entered by sender)"
+msgstr ""
+
+#: templates/security/credits.html:52
+#: templates/security/grouped-credits-ajax.html:12
+#: templates/security/grouped-credits.html:25
+msgid "Payment method"
+msgstr ""
+
+#: templates/security/credits.html:53
+#: templates/security/grouped-credits-ajax.html:13
+#: templates/security/grouped-credits.html:19
+#: templates/security/received-range-field.html:4
+msgid "Date received"
+msgstr ""
+
+#: templates/security/credits.html:54
+#: templates/security/grouped-credits-ajax.html:14
+#: templates/security/grouped-credits.html:26
+msgid "Credited by"
+msgstr ""
+
+#: templates/security/credits.html:72
+#: templates/security/grouped-credits-ajax.html:25
+#: templates/security/grouped-credits.html:43
+msgid "Debit card"
+msgstr ""
+
+#: templates/security/credits.html:74
+#: templates/security/grouped-credits-ajax.html:27
+#: templates/security/grouped-credits.html:45
+msgid "Bank transfer"
+msgstr ""
+
+#: templates/security/credits.html:88 templates/security/grouped.html:53
+msgid "No matching credits found"
+msgstr ""
+
+#: templates/security/dashboard.html:11
+msgid "Search credits by amount, bank, sender, prison, or prisoner"
+msgstr ""
+
+#: templates/security/dashboard.html:17
+msgid "Search credits sent by one person to many prisoners"
+msgstr ""
+
+#: templates/security/dashboard.html:23
+msgid "Search credits sent to one prisoner from many people"
+msgstr ""
+
+#: templates/security/grouped-credits-ajax.html:41
+#: templates/security/grouped-credits.html:58
+msgid "No credits found"
+msgstr ""
+
+#: templates/security/grouped-credits.html:8
+msgid "Back"
+msgstr ""
+
+#: templates/security/grouped-range-fields.html:4
+#: templates/security/sender-grouped.html:35
+msgid "Total sent (£)"
+msgstr ""
+
+#: templates/security/grouped-range-fields.html:10
+msgid "Total credits sent"
+msgstr ""
+
+#: templates/security/numeric-range-field.html:6
+msgid "Min"
+msgstr ""
+
+#: templates/security/numeric-range-field.html:15
+msgid "Max"
+msgstr ""
+
+#: templates/security/pagination.html:14
+msgid "Page"
+msgstr ""
+
+#: templates/security/pagination.html:23
+#, python-format
+msgid "Page %(page)s of %(page_count)s."
+msgstr ""
+
+#: templates/security/prisoner-grouped-credits.html:6
+#: templates/security/sender-grouped-credits.html:13
+#: templates/security/sender-grouped.html:44
+msgid "Cannot be credited"
+msgstr ""
+
+#: templates/security/prisoner-grouped-credits.html:14
+#: templates/security/sender-grouped.html:9
+msgid "Unknown sender name"
+msgstr ""
+
+#: templates/security/prisoner-grouped-help.html:4
+msgid "Find credits sent to one prisoner from multiple senders."
+msgstr ""
+
+#: templates/security/prisoner-grouped-help.html:11
+msgid "‘Number of senders’ means the minimum amount of senders from whom a prisoner has received money"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:6
+#: templates/security/sender-grouped.html:7
+msgid "Collapse"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:6
+#: templates/security/sender-grouped.html:7
+msgid "Expand"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:7
+msgid "To:"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:15
+#: templates/security/sender-grouped.html:24
+msgid "Credits:"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:16
+msgid "Senders:"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:17
+#: templates/security/sender-grouped.html:26
+msgid "Total:"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:24
+#: templates/security/sender-grouped.html:34
+msgid "No. of credits"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:25
+msgid "Total received (£)"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:26
+#: templates/security/sender-grouped.html:36
+msgid "Details"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:51
+#: templates/security/prisoner-grouped.html:54
+#: templates/security/sender-grouped.html:57
+#: templates/security/sender-grouped.html:60
+msgid "Show"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:52
+#: templates/security/sender-grouped.html:58
+msgid "Hide"
+msgstr ""
+
+#: templates/security/prisoner-grouped.html:53
+#: templates/security/sender-grouped.html:59
+msgid "Loading…"
+msgstr ""
+
+#: templates/security/received-range-field.html:10
+msgid "From"
+msgstr ""
+
+#: templates/security/received-range-field.html:21
+msgid "To"
+msgstr ""
+
+#: templates/security/select-field.html:19
+msgid "Sort"
+msgstr ""
+
+#: templates/security/sender-grouped-credits.html:11
+msgid "Sent to"
+msgstr ""
+
+#: templates/security/sender-grouped-help.html:4
+msgid "Find credits sent by one sender to many prisoners."
+msgstr ""
+
+#: templates/security/sender-grouped-help.html:11
+msgid "‘Number of prisoners’ means the minimum amount of prisoners to whom the one sender has sent money"
+msgstr ""
+
+#: templates/security/sender-grouped.html:8
+msgid "From:"
+msgstr ""
+
+#: templates/security/sender-grouped.html:25
+msgid "Prisoners:"
+msgstr ""
+
+#: templates/security/sender-grouped.html:33
+msgid "Current Prison"
+msgstr ""
+
+#: utils.py:24
+msgid "Contact us"
+msgstr ""
+
+#: utils.py:29
+msgid "Home"
+msgstr ""
