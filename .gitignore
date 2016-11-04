@@ -1,4 +1,6 @@
-*.pyc
+*.py[cod]
+*.mo
+*.pot
 include/
 lib/
 static/
@@ -34,5 +36,6 @@ mtp_noms_ops/assets/
 # failed test screenshots
 test/errorshots/
 
-# testing log
+# selenium
+geckodriver.log
 ghostdriver.log
