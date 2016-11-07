@@ -8,6 +8,7 @@
   require('help-popup').HelpPopup.init();
   require('collapsing-table').CollapsingTable.init();
   require('selection-buttons').SelectionButtons.init();
+  require('print').Print.init();
 
   require('security-forms').SecurityForms.init();
 })();

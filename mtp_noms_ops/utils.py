@@ -14,6 +14,10 @@ class UserPermissionMiddleware:
         request.can_access_prisoner_location = request.user.has_perms(prisoner_location_permissions)
         request.can_access_security = request.user.has_perms(security_permissions)
         request.can_access_user_management = request.user.has_perm('auth.change_user')
+        request.can_pre_approve = any((
+            prison['pre_approval_required']
+            for prison in request.user.user_data.get('prisons', [])
+        ))
 
 
 def external_breadcrumbs(request):
