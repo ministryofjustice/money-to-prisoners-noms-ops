@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load security %}
+
+{% block page_title %}{% trans 'New credits check' %}{% endblock %}
+
+{% block inner_content %}
+<h1 class="heading-xlarge">{{ view.title }}</h1>
+
+{% include "mtp_common/includes/message_box.html" %}
+
+<p>
+  {% trans 'Your prison has requested that credits be checked by security before action is taken cashiers.' %}'
+  {% trans 'Please check the following credits and make comments where needed, then select ‘Credits checked by security’.' %}
+  {% trans 'Credits can always be viewed again from ‘Search all prison credits’.' %}
+</p>
+
+<div class="mtp-review">
+  {% if credits %}
+  <form method="post" action="">
+    {% csrf_token %}
+
+    <div class="actions print-hidden">
+      <input type="submit" class="button" value="{% trans 'Credits checked by security' %}"/>
+      <a class="js-Print" href="#print-dialog">{% trans 'Print these credits' %}</a>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>{% trans 'Sender' %}</th>
+          <th>{% trans 'Prisoner' %}</th>
+          <th>{% trans 'Amount' %}</th>
+          <th>{% trans 'Security comments' %}</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      {% for credit in credits %}
+        <tr valign="top">
+          <td class="sender">
+            {% if credit.source == 'online' %}
+              <div class="line1">{{ credit.sender_email|default_if_none:'—' }}</div>
+              <div>**** **** **** ****</div>
+              <div>{% trans 'Debit card payment' %}</div>
+            {% else %}
+              <div class="line1">{{ credit.sender_name|default_if_none:'—' }}</div>
+              <div>{{ credit.sender_account_number }} {{ credit.sender_sort_code|format_sort_code }}</div>
+              <div>{% trans 'Bank transfer' %}</div>
+            {% endif %}
+          </td>
+          <td class="prisoner">
+            <div class="line1">{{ credit.prisoner_number }}</div>
+            <div>{{ credit.prisoner_name }}</div>
+          </td>
+          <td class="numeric">&pound;{{ credit.amount|currency }}</td>
+          <td><textarea rows="4" name="comment_{{ credit.id }}"></textarea></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="actions print-hidden">
+      <input type="submit" class="button" value="{% trans 'Credits checked by security' %}"/>
+    </div>
+  </form>
+</div>
+{% else %}
+{% trans 'No new credits for review.' %}
+{% endif %}
+
+
+{% endblock %}

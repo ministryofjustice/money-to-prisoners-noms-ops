@@ -57,7 +57,7 @@
           <tbody>
             {% for credit in credits|parse_date_fields %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
-                <td>{{ credit.sender_name | default_if_none:'-' }}</td>
+                <td>{{ credit.sender_name | default_if_none:'—' }}</td>
                 <td>
                   {{ credit.prisoner_name|default_if_none:'—' }}
                   {% if credit.prisoner_number %}

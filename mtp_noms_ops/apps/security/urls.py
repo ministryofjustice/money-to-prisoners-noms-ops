@@ -22,4 +22,6 @@ urlpatterns = [
         name='credits'),
     url(r'^credits/export$', security_test(views.CreditsExportView.as_view()),
         name='credits_export'),
+    url(r'^review-credits/$', security_test(views.ReviewCreditsView.as_view()),
+        name='review_credits'),
 ]

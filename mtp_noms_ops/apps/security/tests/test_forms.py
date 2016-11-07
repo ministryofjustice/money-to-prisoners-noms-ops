@@ -2,7 +2,10 @@ import datetime
 import unittest
 from unittest import mock
 
-from security.forms import SecurityForm, SenderGroupedForm, PrisonerGroupedForm, CreditsForm
+from security.forms import (
+    SecurityForm, SenderGroupedForm, PrisonerGroupedForm, CreditsForm,
+    ReviewCreditsForm
+)
 
 
 class SecurityFormTestCase(unittest.TestCase):
@@ -162,3 +165,54 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertFalse(form.is_valid())
         form = CreditsForm(self.request, data={'page': '1', 'prison': 'ABC'})
         self.assertFalse(form.is_valid())
+
+
+class ReviewCreditsFormTestCase(unittest.TestCase):
+
+    @mock.patch('security.forms.get_connection')
+    def test_review_credits_form(self, mock_get_connection):
+        mock_get_connection().credits.get.return_value = {
+            'count': 2,
+            'results': [
+                {
+                    'id': 1,
+                    'source': 'online',
+                    'amount': 23000,
+                    'intended_recipient': 'GEORGE MELLEY',
+                    'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
+                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+                    'sender_name': None, 'sender_email': 'HENRY MOORE',
+                    'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
+                    'resolution': 'pending',
+                    'owner': None, 'owner_name': None,
+                    'received_at': '2016-05-25T20:24:00Z', 'credited_at': None, 'refunded_at': None,
+                },
+                {
+                    'id': 2,
+                    'source': 'bank_transfer',
+                    'amount': 27500,
+                    'intended_recipient': None,
+                    'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
+                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+                    'sender_name': 'HEIDENREICH X',
+                    'sender_sort_code': '219657', 'sender_account_number': '88447894', 'sender_roll_number': '',
+                    'resolution': 'pending',
+                    'owner': None, 'owner_name': None,
+                    'received_at': '2016-05-22T23:00:00Z', 'credited_at': None, 'refunded_at': None,
+                },
+            ]
+        }
+
+        request = mock.MagicMock()
+        form = ReviewCreditsForm(request, data={'comment_1': 'hold up'})
+        self.assertEqual(len(form.credits), 2)
+        self.assertTrue(form.is_valid())
+
+        form.review()
+
+        mock_get_connection().credits.comments.post.assert_called_once_with(
+            [{'credit': 1, 'comment': 'hold up'}]
+        )
+        mock_get_connection().credits.actions.review.post.assert_called_once_with(
+            {'credit_ids': [1, 2]}
+        )

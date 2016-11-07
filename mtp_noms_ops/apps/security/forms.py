@@ -1,5 +1,5 @@
 import collections
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 import enum
 from functools import reduce
 from math import ceil
@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.dateformat import format as date_format
 from django.utils.html import format_html, format_html_join
+from django.utils.timezone import now, utc
 from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages
@@ -446,3 +447,47 @@ class CreditsForm(SecurityForm):
         query_data = super().get_query_data()
         AmountPattern.update_query_data(query_data)
         return query_data
+
+
+class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
+
+    def __init__(self, request, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request = request
+        self.client = get_connection(request)
+
+        for credit in self.credits:
+            self.fields['comment_%s' % credit['id']] = forms.CharField(required=False)
+
+    @cached_property
+    def credits(self):
+        prisons = [
+            prison['nomis_id']
+            for prison in self.request.user.user_data.get('prisons', [])
+            if prison['pre_approval_required']
+        ]
+        credits = retrieve_all_pages(
+            self.client.credits.get, valid=True, reviewed=False, prison=prisons,
+            received_at__lt=datetime.combine(now().date(), time(0, 0, 0, tzinfo=utc))
+        )
+        return credits
+
+    def review(self):
+        reviewed = set()
+        comments = []
+        for credit in self.credits:
+            reviewed.add(credit['id'])
+            comment = self.cleaned_data['comment_%s' % credit['id']]
+
+            if comment:
+                comments.append({
+                    'credit': credit['id'],
+                    'comment': comment
+                })
+        if comments:
+            self.client.credits.comments.post(comments)
+        self.client.credits.actions.review.post({
+            'credit_ids': list(reviewed)
+        })
+
+        return len(reviewed)
