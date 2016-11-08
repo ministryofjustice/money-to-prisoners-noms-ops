@@ -112,6 +112,7 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
 
         location_count = len(locations)
         try:
+            client.prisoner_locations.actions.delete_inactive.post()
             for i in range(math.ceil(location_count/settings.UPLOAD_REQUEST_PAGE_SIZE)):
                 client.prisoner_locations.post(
                     locations[

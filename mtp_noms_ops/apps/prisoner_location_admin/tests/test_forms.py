@@ -75,7 +75,8 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
     @mock.patch('prisoner_location_admin.forms.api_client')
     def test_location_file_batch_upload(self, mock_api_client):
         create_conn = mock_api_client.get_connection().prisoner_locations
-        delete_conn = create_conn.actions.delete_old
+        delete_inactive_conn = create_conn.actions.delete_inactive
+        delete_old_conn = create_conn.actions.delete_old
 
         file_data, expected_data = generate_testable_location_data(length=50)
 
@@ -91,6 +92,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
         self.assertTrue(form.is_valid())
         form.update_locations()
 
+        delete_inactive_conn.post.assert_called_once_with()
         create_conn.post.assert_has_calls([
             mock.call(expected_data[0:10]),
             mock.call(expected_data[10:20]),
@@ -98,4 +100,4 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
             mock.call(expected_data[30:40]),
             mock.call(expected_data[40:50]),
         ])
-        delete_conn.post.assert_called_once_with()
+        delete_old_conn.post.assert_called_once_with()
