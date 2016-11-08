@@ -112,7 +112,6 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
 
         location_count = len(locations)
         try:
-            client.prisoner_locations.actions.delete_all.post()
             for i in range(math.ceil(location_count/settings.UPLOAD_REQUEST_PAGE_SIZE)):
                 client.prisoner_locations.post(
                     locations[
@@ -120,6 +119,7 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
                         (i+1)*settings.UPLOAD_REQUEST_PAGE_SIZE
                     ]
                 )
+            client.prisoner_locations.actions.delete_old.post()
         except HttpClientError as e:
             logger.exception('Prisoner locations update by %s failed!' % user_description)
             if e.content:
