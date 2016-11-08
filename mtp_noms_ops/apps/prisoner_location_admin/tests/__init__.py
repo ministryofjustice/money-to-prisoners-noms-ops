@@ -1,10 +1,41 @@
 import random
 import string
+from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.urlresolvers import reverse
+from django.test import SimpleTestCase
 from django.utils.crypto import get_random_string
+from mtp_common.auth.test_utils import generate_tokens
+
+from prisoner_location_admin import required_permissions
 
 TEST_PRISONS = ['AGI', 'OGS', 'BBB']
+
+
+class PrisonerLocationUploadTestCase(SimpleTestCase):
+
+    @mock.patch('mtp_common.auth.backends.api_client')
+    def login(self, mock_api_client):
+        mock_api_client.authenticate.return_value = {
+            'pk': 5,
+            'token': generate_tokens(),
+            'user_data': {
+                'first_name': 'Sam',
+                'last_name': 'Hall',
+                'username': 'shall',
+                'applications': ['noms-ops'],
+                'permissions': required_permissions,
+            }
+        }
+
+        response = self.client.post(
+            reverse('login'),
+            data={'username': 'shall', 'password': 'pass'},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        return mock_api_client.authenticate.return_value
 
 
 def get_csv_data_as_file(data, filename='example.csv'):

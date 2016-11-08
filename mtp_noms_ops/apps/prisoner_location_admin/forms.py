@@ -3,9 +3,11 @@ from datetime import datetime
 import io
 import json
 import logging
+import math
 import re
 
 from django import forms
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth import api_client
@@ -108,8 +110,17 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
         else:
             user_description = username
 
+        location_count = len(locations)
         try:
-            client.prisoner_locations.post(locations)
+            client.prisoner_locations.actions.delete_inactive.post()
+            for i in range(math.ceil(location_count/settings.UPLOAD_REQUEST_PAGE_SIZE)):
+                client.prisoner_locations.post(
+                    locations[
+                        i*settings.UPLOAD_REQUEST_PAGE_SIZE:
+                        (i+1)*settings.UPLOAD_REQUEST_PAGE_SIZE
+                    ]
+                )
+            client.prisoner_locations.actions.delete_old.post()
         except HttpClientError as e:
             logger.exception('Prisoner locations update by %s failed!' % user_description)
             if e.content:
@@ -120,7 +131,6 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
                     raise forms.ValidationError(e.content)
             raise forms.ValidationError(_('An unknown error occurred'))
 
-        location_count = len(locations)
         logger.info('%d prisoner locations updated successfully by %s' % (
             location_count,
             user_description,

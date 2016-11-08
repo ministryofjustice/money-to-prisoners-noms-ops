@@ -1,1 +1,1 @@
-required_permissions = ['prison.add_prisonerlocation']
+required_permissions = ['prison.add_prisonerlocation', 'prison.delete_prisonerlocation']

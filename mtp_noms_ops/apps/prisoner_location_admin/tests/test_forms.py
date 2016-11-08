@@ -1,11 +1,16 @@
+from unittest import mock
+
 from django.core.urlresolvers import reverse
-from django.test import SimpleTestCase, RequestFactory
+from django.test import RequestFactory, override_settings
 
-from ..forms import LocationFileUploadForm
-from . import get_csv_data_as_file, generate_testable_location_data
+from prisoner_location_admin.forms import LocationFileUploadForm
+from . import (
+    PrisonerLocationUploadTestCase, generate_testable_location_data,
+    get_csv_data_as_file
+)
 
 
-class LocationFileUploadFormTestCase(SimpleTestCase):
+class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
     def setUp(self):
         self.factory = RequestFactory()
@@ -65,3 +70,34 @@ class LocationFileUploadFormTestCase(SimpleTestCase):
             form.errors['location_file'],
             ["Uploaded file must be a CSV"]
         )
+
+    @override_settings(UPLOAD_REQUEST_PAGE_SIZE=10)
+    @mock.patch('prisoner_location_admin.forms.api_client')
+    def test_location_file_batch_upload(self, mock_api_client):
+        create_conn = mock_api_client.get_connection().prisoner_locations
+        delete_inactive_conn = create_conn.actions.delete_inactive
+        delete_old_conn = create_conn.actions.delete_old
+
+        file_data, expected_data = generate_testable_location_data(length=50)
+
+        auth_response = self.login()
+        request = self.factory.post(
+            reverse('location_file_upload'),
+            {'location_file': get_csv_data_as_file(file_data)}
+        )
+        request.user = mock.MagicMock()
+        request.user.user_data = auth_response['user_data']
+        form = LocationFileUploadForm(request.POST, request.FILES, request=request)
+
+        self.assertTrue(form.is_valid())
+        form.update_locations()
+
+        delete_inactive_conn.post.assert_called_once_with()
+        create_conn.post.assert_has_calls([
+            mock.call(expected_data[0:10]),
+            mock.call(expected_data[10:20]),
+            mock.call(expected_data[20:30]),
+            mock.call(expected_data[30:40]),
+            mock.call(expected_data[40:50]),
+        ])
+        delete_old_conn.post.assert_called_once_with()

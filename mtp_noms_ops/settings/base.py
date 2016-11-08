@@ -228,6 +228,8 @@ ZENDESK_CUSTOM_FIELDS = {
     'contact_email': 30769508,
 }
 
+UPLOAD_REQUEST_PAGE_SIZE = 5000
+
 try:
     from .local import *  # noqa
 except ImportError:
