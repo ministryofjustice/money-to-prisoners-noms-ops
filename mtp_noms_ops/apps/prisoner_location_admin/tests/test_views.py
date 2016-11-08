@@ -2,37 +2,16 @@ import logging
 from unittest import mock
 
 from django.core.urlresolvers import reverse
-from django.test import SimpleTestCase
 from mtp_common.auth.exceptions import Forbidden
-from mtp_common.auth.test_utils import generate_tokens
 from slumber.exceptions import HttpClientError
 
-from . import generate_testable_location_data, get_csv_data_as_file
-from prisoner_location_admin import required_permissions
+from . import (
+    PrisonerLocationUploadTestCase, generate_testable_location_data,
+    get_csv_data_as_file
+)
 
 
-class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
-    @mock.patch('mtp_common.auth.backends.api_client')
-    def login(self, mock_api_client):
-        mock_api_client.authenticate.return_value = {
-            'pk': 5,
-            'token': generate_tokens(),
-            'user_data': {
-                'first_name': 'Sam',
-                'last_name': 'Hall',
-                'username': 'shall',
-                'applications': ['noms-ops'],
-                'permissions': required_permissions,
-            }
-        }
-
-        response = self.client.post(
-            reverse('login'),
-            data={'username': 'shall', 'password': 'pass'},
-            follow=True
-        )
-        self.assertEqual(response.status_code, 200)
-        return response
+class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
 
     def check_login_redirect(self, attempted_url):
         response = self.client.get(attempted_url)
@@ -70,7 +49,8 @@ class PrisonerLocationAdminViewsTestCase(SimpleTestCase):
         self.check_login_redirect(reverse('location_file_upload'))
 
     def test_can_access_prisoner_location_admin(self):
-        response = self.login()
+        self.login()
+        response = self.client.get(reverse('location_file_upload'))
         self.assertContains(response, '<!-- location_file_upload -->')
 
     def test_cannot_access_security_dashboard(self):
