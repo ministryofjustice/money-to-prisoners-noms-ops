@@ -1,3 +1,4 @@
+import logging
 from unittest import mock
 
 from django.core.urlresolvers import reverse
@@ -5,6 +6,7 @@ from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
 
 from security import required_permissions
+from security.tests import silence_logger
 
 
 class SecurityBaseTestCase(SimpleTestCase):
@@ -29,6 +31,26 @@ class SecurityBaseTestCase(SimpleTestCase):
         )
         self.assertEqual(response.status_code, 200)
         return response
+
+
+class LocaleTestCase(SecurityBaseTestCase):
+    def test_locale_switches_based_on_browser_language(self):
+        languages = (
+            ('*', 'en-gb'),
+            ('en', 'en-gb'),
+            ('en-gb', 'en-gb'),
+            ('en-GB, en, *', 'en-gb'),
+            ('cy', 'cy'),
+            ('cy, en-GB, en, *', 'cy'),
+            ('en, cy, *', 'en-gb'),
+            ('es', 'en-gb'),
+        )
+        with silence_logger(name='django.request', level=logging.ERROR):
+            for accept_language, expected_slug in languages:
+                response = self.client.get('/', HTTP_ACCEPT_LANGUAGE=accept_language)
+                self.assertRedirects(response, '/%s/' % expected_slug, fetch_redirect_response=False)
+                response = self.client.get('/login/', HTTP_ACCEPT_LANGUAGE=accept_language)
+                self.assertRedirects(response, '/%s/login/' % expected_slug, fetch_redirect_response=True)
 
 
 class SecurityDashboardViewsTestCase(SecurityBaseTestCase):

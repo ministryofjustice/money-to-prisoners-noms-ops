@@ -1,7 +1,7 @@
 from itertools import chain
 
 from django.contrib.auth.decorators import login_required, permission_required
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
 from prisoner_location_admin import required_permissions as prisoner_location_permissions
@@ -30,7 +30,7 @@ def external_breadcrumbs(request):
         return {}
     return {
         'breadcrumbs': [
-            {'name': _('Home'), 'url': '/'},
+            {'name': _('Home'), 'url': reverse('redirect_to_start')},
             {'name': section_title}
         ]
     }
