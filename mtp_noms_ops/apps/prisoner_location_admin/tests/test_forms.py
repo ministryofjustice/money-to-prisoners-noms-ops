@@ -1,9 +1,11 @@
+import logging
 from unittest import mock
 
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory, override_settings
 
 from prisoner_location_admin.forms import LocationFileUploadForm
+from security.tests import silence_logger
 from . import (
     PrisonerLocationUploadTestCase, generate_testable_location_data,
     get_csv_data_as_file
@@ -90,7 +92,8 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
         form = LocationFileUploadForm(request.POST, request.FILES, request=request)
 
         self.assertTrue(form.is_valid())
-        form.update_locations()
+        with silence_logger(name='mtp', level=logging.WARNING):
+            form.update_locations()
 
         delete_inactive_conn.post.assert_called_once_with()
         create_conn.post.assert_has_calls([

@@ -1,7 +1,10 @@
+import logging
 import os
 
 from django.core.urlresolvers import reverse
 from mtp_common.test_utils.functional_tests import FunctionalTestCase
+
+from security.tests import silence_logger
 
 
 class PrisonerLocationAdminTestCase(FunctionalTestCase):
@@ -10,11 +13,21 @@ class PrisonerLocationAdminTestCase(FunctionalTestCase):
     """
     accessibility_scope_selector = '#content'
 
+    def load_test_data(self):
+        with silence_logger(name='mtp', level=logging.WARNING):
+            super().load_test_data()
+
+    def login(self, *args, **kwargs):
+        kwargs['url'] = self.live_server_url + '/en-gb/'
+        super().login(*args, **kwargs)
+
 
 class ErrorTests(PrisonerLocationAdminTestCase):
     """
     Tests for general errors
     """
+
+    @silence_logger(name='django.request', level=logging.ERROR)
     def test_404(self):
         self.driver.get(self.live_server_url + '/unknown-page/')
         self.assertInSource('Page not found')
@@ -26,7 +39,7 @@ class LoginTests(PrisonerLocationAdminTestCase):
     """
 
     def test_title(self):
-        self.driver.get(self.live_server_url)
+        self.driver.get(self.live_server_url + '/en-gb/')
         heading = self.driver.find_element_by_tag_name('h1')
         self.assertEqual('NOMS admin', heading.text)
         self.assertEqual('48px', heading.value_of_css_property('font-size'))
@@ -69,6 +82,7 @@ class UploadTests(PrisonerLocationAdminTestCase):
         self.assertInSource('upload the file on this page in CSV format')
         self.assertCssProperty('.upload-otherfilelink', 'display', 'none')
 
+    @silence_logger(name='mtp', level=logging.WARNING)
     def test_upload_valid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'valid.csv'))

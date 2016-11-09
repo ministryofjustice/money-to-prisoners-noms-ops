@@ -1,8 +1,10 @@
+import logging
 from urllib.parse import urljoin
 
 from django.core.urlresolvers import reverse
-
 from mtp_common.test_utils.functional_tests import FunctionalTestCase
+
+from security.tests import silence_logger
 
 
 class SecurityDashboardTestCase(FunctionalTestCase):
@@ -11,6 +13,14 @@ class SecurityDashboardTestCase(FunctionalTestCase):
     """
     auto_load_test_data = True
     accessibility_scope_selector = '#content'
+
+    def load_test_data(self):
+        with silence_logger(name='mtp', level=logging.WARNING):
+            super().load_test_data()
+
+    def login(self, *args, **kwargs):
+        kwargs['url'] = self.live_server_url + '/en-gb/'
+        super().login(*args, **kwargs)
 
     def click_on_submit(self):
         self.driver.find_element_by_xpath('//button[@type="submit"]').click()

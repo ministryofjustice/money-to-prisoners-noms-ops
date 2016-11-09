@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from mtp_common.auth.exceptions import Forbidden
 from slumber.exceptions import HttpClientError
 
+from security.tests import silence_logger
 from . import (
     PrisonerLocationUploadTestCase, generate_testable_location_data,
     get_csv_data_as_file
@@ -68,10 +69,11 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
 
         file_data, expected_data = generate_testable_location_data()
 
-        response = self.client.post(
-            reverse('location_file_upload'),
-            {'location_file': get_csv_data_as_file(file_data)}
-        )
+        with silence_logger(name='mtp', level=logging.WARNING):
+            response = self.client.post(
+                reverse('location_file_upload'),
+                {'location_file': get_csv_data_as_file(file_data)}
+            )
 
         conn.post.assert_called_with(expected_data)
         self.assertRedirects(response, reverse('location_file_upload'))
