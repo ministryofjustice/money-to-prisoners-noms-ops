@@ -25,6 +25,7 @@ DEBUG = True
 SECRET_KEY = 'CHANGE_ME'
 ALLOWED_HOSTS = []
 
+SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8003')
 
 # Application definition
 INSTALLED_APPS = (
@@ -235,7 +236,17 @@ ZENDESK_CUSTOM_FIELDS = {
     'contact_email': 30769508,
 }
 
-UPLOAD_REQUEST_PAGE_SIZE = 5000
+UPLOAD_REQUEST_PAGE_SIZE = 3000
+
+EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY', '')
+MAILGUN_SERVER_NAME = os.environ.get('MAILGUN_SERVER_NAME', '')
+MAILGUN_FROM_ADDRESS = os.environ.get('MAILGUN_FROM_ADDRESS', '')
+
+LOCATION_UPLOADER_USERNAME = os.environ.get('LOCATION_UPLOADER_USERNAME', 'prisoner-location-admin')
+LOCATION_UPLOADER_PASSWORD = os.environ.get('LOCATION_UPLOADER_PASSWORD', 'prisoner-location-admin')
+
+ASYNC_LOCATION_UPLOAD = os.environ.get('ASYNC_LOCATION_UPLOAD', 'True') == 'True'
 
 try:
     from .local import *  # noqa

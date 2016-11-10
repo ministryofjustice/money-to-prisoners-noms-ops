@@ -2,4 +2,4 @@
 -r base.txt
 
 money-to-prisoners-common[monitoring]==4.36.1
-uWSGI==2.0.12
+uWSGI==2.0.14

@@ -74,9 +74,9 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
         )
 
     @override_settings(UPLOAD_REQUEST_PAGE_SIZE=10)
-    @mock.patch('prisoner_location_admin.forms.api_client')
+    @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_batch_upload(self, mock_api_client):
-        create_conn = mock_api_client.get_connection().prisoner_locations
+        create_conn = mock_api_client.get_authenticated_connection().prisoner_locations
         delete_inactive_conn = create_conn.actions.delete_inactive
         delete_old_conn = create_conn.actions.delete_old
 
