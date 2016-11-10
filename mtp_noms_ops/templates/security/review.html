@@ -10,18 +10,18 @@
 {% include "mtp_common/includes/message_box.html" %}
 
 <p>
-  {% trans 'Your prison has requested that credits be checked by security before action is taken cashiers.' %}'
-  {% trans 'Please check the following credits and make comments where needed, then select ‘Credits checked by security’.' %}
-  {% trans 'Credits can always be viewed again from ‘Search all prison credits’.' %}
+  {% trans 'Credits must be checked by security before cashiers can process them.' %}'
+  {% trans 'Please check the following credits, add any comments then select ‘All credits checked by security.’' %}
+  {% trans 'Comments will be visible to business hub staff in the digital cashbook.' %}
 </p>
 
 <div class="mtp-review">
   {% if credits %}
-  <form method="post" action="">
+  <form method="post" action="" class="js-ConfirmChecked">
     {% csrf_token %}
 
     <div class="actions print-hidden">
-      <input type="submit" class="button" value="{% trans 'Credits checked by security' %}"/>
+      <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
       <a class="js-Print" href="#print-dialog">{% trans 'Print these credits' %}</a>
     </div>
 
@@ -61,7 +61,25 @@
     </table>
 
     <div class="actions print-hidden">
-      <input type="submit" class="button" value="{% trans 'Credits checked by security' %}"/>
+      <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
+    </div>
+
+    <div id="confirm-checked"
+         class="Dialog u-nojs-hidden"
+         style="display: none"
+         data-hide-close="true"
+         data-disable-backdrop-close="true">
+      <div class="Dialog-inner">
+        <p><strong>{% trans 'Have you checked these credits?' %}</strong></p>
+        <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
+        <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
+        <button type="submit"
+                class="button"
+                value="override">{% trans 'Yes, all credits checked' %}</button>
+        <button type="button"
+                class="button button-secondary js-Dialog-close"
+                data-analytics="pageview,/batch/-dialog_close/">{% trans 'No, continue checking' %}</button>
+      </div>
     </div>
   </form>
 </div>

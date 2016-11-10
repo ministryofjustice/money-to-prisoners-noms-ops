@@ -9,6 +9,8 @@
   require('collapsing-table').CollapsingTable.init();
   require('selection-buttons').SelectionButtons.init();
   require('print').Print.init();
+  require('dialog').Dialog.init();
 
   require('security-forms').SecurityForms.init();
+  require('confirm-checked').ConfirmChecked.init();
 })();
