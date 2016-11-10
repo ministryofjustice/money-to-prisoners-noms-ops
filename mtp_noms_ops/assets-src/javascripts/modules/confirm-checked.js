@@ -32,12 +32,12 @@ exports.ConfirmChecked = {
       return;
     }
 
-      e.preventDefault();
-      this.$body.trigger({
-        type: 'Dialog.render',
-        target: e.target,
-        targetSelector: '#confirm-checked'
-      });
-      return;
+    e.preventDefault();
+    this.$body.trigger({
+      type: 'Dialog.render',
+      target: e.target,
+      targetSelector: '#confirm-checked'
+    });
+    return;
   }
 };
