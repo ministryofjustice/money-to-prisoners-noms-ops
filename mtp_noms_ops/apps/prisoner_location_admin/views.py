@@ -33,8 +33,8 @@ class LocationFileUploadView(FormView):
             else:
                 message_parts = [
                     ungettext(
-                        '%d prisoner location uploaded successfully.',
-                        '%d prisoner locations uploaded successfully.',
+                        '%d prisoner location updated successfully',
+                        '%d prisoner locations updated successfully',
                         location_count
                     ) % location_count,
                 ]
