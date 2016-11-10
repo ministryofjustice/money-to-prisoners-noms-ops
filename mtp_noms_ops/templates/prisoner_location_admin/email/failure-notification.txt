@@ -1,0 +1,12 @@
+{% load i18n %}
+GOV.UK - {% trans 'Send money to a prisoner' %}
+
+{% trans 'The upload of the prisoner location file failed, with the following errors:' %}
+
+{% for error in errors %}
+{{ error }}
+{% endfor %}
+
+{% trans 'You may need to try uploading the prisoner location report again.' %}
+
+{% trans 'If you are unsure what the problem might be, please contact us at https://noms-ops.moneytoprisoners.dsd.io/feedback/' %}

@@ -1,36 +1,22 @@
 import csv
 from datetime import datetime
 import io
-import json
-import logging
-import math
+import pickle
 import re
+import uuid
 
 from django import forms
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
-from mtp_common.auth import api_client
-from slumber.exceptions import HttpClientError
 
-logger = logging.getLogger('mtp')
+from .tasks import update_locations, schedule_locations_update
 
 EXPECTED_ROW_LENGTH = 5
 DOB_PATTERN = re.compile(
     '([0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}).*'
 )
 DATE_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
-
-
-def format_errors(error_list):
-    output_list = []
-    for i, error in enumerate(error_list):
-        if error:
-            field_errors = []
-            for key in error:
-                field_errors += error[key]
-            output_list.append('Row %s: %s' % (i+1, ', '.join(field_errors)))
-    return output_list
 
 
 class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
@@ -101,43 +87,13 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
 
     def update_locations(self):
         locations = self.cleaned_data['location_file']
-        client = api_client.get_connection(self.request)
-        user = self.request.user
-        username = user.user_data.get('username', 'Unknown')
-        user_description = user.get_full_name()
-        if user_description:
-            user_description += ' (%s)' % username
+
+        if schedule_locations_update and settings.ASYNC_LOCATION_UPLOAD:
+            filename = '/app/uploads/%s' % uuid.uuid4()
+            with open(filename, 'wb+') as f:
+                pickle.dump(locations, f)
+            schedule_locations_update(self.request.user, filename)
         else:
-            user_description = username
+            update_locations(self.request.user, locations)
 
-        location_count = len(locations)
-        try:
-            client.prisoner_locations.actions.delete_inactive.post()
-            for i in range(math.ceil(location_count/settings.UPLOAD_REQUEST_PAGE_SIZE)):
-                client.prisoner_locations.post(
-                    locations[
-                        i*settings.UPLOAD_REQUEST_PAGE_SIZE:
-                        (i+1)*settings.UPLOAD_REQUEST_PAGE_SIZE
-                    ]
-                )
-            client.prisoner_locations.actions.delete_old.post()
-        except HttpClientError as e:
-            logger.exception('Prisoner locations update by %s failed!' % user_description)
-            if e.content:
-                try:
-                    errors = json.loads(e.content.decode('utf-8'))
-                    raise forms.ValidationError(format_errors(errors))
-                except ValueError:
-                    raise forms.ValidationError(e.content)
-            raise forms.ValidationError(_('An unknown error occurred'))
-
-        logger.info('%d prisoner locations updated successfully by %s' % (
-            location_count,
-            user_description,
-        ), extra={
-            'elk_fields': {
-                '@fields.prisoner_location_count': location_count,
-                '@fields.username': username,
-            }
-        })
-        return location_count
+        return len(locations)

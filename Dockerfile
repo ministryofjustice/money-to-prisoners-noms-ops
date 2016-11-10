@@ -37,5 +37,11 @@ RUN venv/bin/pip install -r requirements/docker.txt
 ADD . /app
 RUN make build python_requirements=requirements/docker.txt
 
+RUN mkdir -p /app/spooler
+RUN mkdir -p /app/uploads
+
+RUN chown www-data:www-data /app/spooler
+RUN chown www-data:www-data /app/uploads
+
 EXPOSE 8080
 CMD make uwsgi python_requirements=requirements/docker.txt

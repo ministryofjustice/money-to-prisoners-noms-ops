@@ -60,11 +60,11 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         self.assertNotContains(response, '<!-- security:dashboard -->')
         self.assertContains(response, '<!-- location_file_upload -->')
 
-    @mock.patch('prisoner_location_admin.forms.api_client')
+    @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_upload(self, mock_api_client):
         self.login()
 
-        conn = mock_api_client.get_connection().prisoner_locations
+        conn = mock_api_client.get_authenticated_connection().prisoner_locations
         conn.post.return_value = 200
 
         file_data, expected_data = generate_testable_location_data()
@@ -78,14 +78,14 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         conn.post.assert_called_with(expected_data)
         self.assertRedirects(response, reverse('location_file_upload'))
 
-    @mock.patch('prisoner_location_admin.forms.api_client')
+    @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_upload_api_error_displays_message(self, mock_api_client):
         self.login()
 
         api_error_message = "prison not found"
         response_content = ('[{"prison": ["%s"]}]' % api_error_message).encode('utf-8')
 
-        conn = mock_api_client.get_connection().prisoner_locations
+        conn = mock_api_client.get_authenticated_connection().prisoner_locations
         conn.post.side_effect = HttpClientError(content=response_content)
 
         file_data, _ = generate_testable_location_data()
