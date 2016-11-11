@@ -57,6 +57,10 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
             if invalid_row is not None:
                 raise forms.ValidationError(_('The file has the wrong number of columns'))
 
+            if row[4] == 'TRN':
+                # skip transfer records
+                continue
+
             # parse dob
             m = DOB_PATTERN.match(row[3])
             dt = None
