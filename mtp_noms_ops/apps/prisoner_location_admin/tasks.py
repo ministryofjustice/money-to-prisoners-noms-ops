@@ -16,7 +16,7 @@ logger = logging.getLogger('mtp')
 
 try:
     import uwsgi  # noqa
-    from uwsgidecorators import spool
+    from mtp_common.uwsgidecorators import spool
 
     @spool(pass_arguments=True)
     def schedule_locations_update(user, filename):
