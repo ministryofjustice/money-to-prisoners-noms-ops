@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load mtp_common %}
 
 {% block inner_content %}
-  <h1 class="heading-xlarge">{% trans 'All prisons’ credit search' %}</h1>
+  <header>
+    {% language_switch %}
+    <h1 class="heading-xlarge">{% trans 'All prisons’ credit search' %}</h1>
+  </header>
 
   <ul class="DashboardLinks">
     <li>
