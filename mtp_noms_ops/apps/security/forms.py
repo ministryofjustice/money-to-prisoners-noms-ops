@@ -17,8 +17,6 @@ from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages
 from mtp_common.auth.api_client import get_connection
 
-from mtp_noms_ops.utils import make_page_range
-
 
 def sorted_prison_type_choices(type_list):
     def flatten(nested_list):
@@ -156,10 +154,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     @cached_property
     def query_string(self):
         return urlencode(self.get_query_data(), doseq=True)
-
-    @property
-    def page_range(self):
-        return make_page_range(self.cleaned_data['page'], self.page_count)
 
     @property
     def search_description(self):

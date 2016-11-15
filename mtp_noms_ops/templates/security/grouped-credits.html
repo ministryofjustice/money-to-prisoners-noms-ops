@@ -65,7 +65,7 @@
       </tbody>
     </table>
 
-    {% include 'security/pagination.html' %}
+    {% page_list page=page page_count=page_count query_string=query_string %}
   </div>
 
 {% endblock %}

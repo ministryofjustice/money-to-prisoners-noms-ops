@@ -95,7 +95,7 @@
           </tbody>
         </table>
 
-        {% include 'security/pagination.html' with page=form.cleaned_data.page page_count=form.page_count page_range=form.page_range query_string=form.query_string %}
+        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
       </div>
     </div>
 

@@ -2,7 +2,7 @@ from django.views.generic.edit import FormView
 from django.core.urlresolvers import reverse_lazy
 from django import forms
 from django.contrib import messages
-from django.utils.translation import ungettext, gettext as _
+from django.utils.translation import ngettext, gettext as _
 
 from .forms import LocationFileUploadForm
 from .tasks import schedule_locations_update
@@ -23,7 +23,7 @@ class LocationFileUploadView(FormView):
             location_count = form.update_locations()
             if schedule_locations_update:
                 message_parts = [
-                    ungettext(
+                    ngettext(
                         '%d prisoner location scheduled for upload.',
                         '%d prisoner locations scheduled for upload.',
                         location_count
@@ -32,7 +32,7 @@ class LocationFileUploadView(FormView):
                 ]
             else:
                 message_parts = [
-                    ungettext(
+                    ngettext(
                         '%d prisoner location updated successfully',
                         '%d prisoner locations updated successfully',
                         location_count
