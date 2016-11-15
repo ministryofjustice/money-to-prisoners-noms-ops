@@ -247,6 +247,7 @@ LOCATION_UPLOADER_USERNAME = os.environ.get('LOCATION_UPLOADER_USERNAME', 'priso
 LOCATION_UPLOADER_PASSWORD = os.environ.get('LOCATION_UPLOADER_PASSWORD', 'prisoner-location-admin')
 
 ASYNC_LOCATION_UPLOAD = os.environ.get('ASYNC_LOCATION_UPLOAD', 'True') == 'True'
+SHOW_LANGUAGE_SWITCH = os.environ.get('SHOW_LANGUAGE_SWITCH', 'False') == 'True'
 
 try:
     from .local import *  # noqa

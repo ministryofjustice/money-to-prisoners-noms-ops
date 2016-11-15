@@ -1,9 +1,13 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load mtp_common %}
 
 {% block inner_content %}
 
-  <h1 class="heading-xlarge">{{ view.title }}</h1>
+  <header>
+    {% language_switch %}
+    <h1 class="heading-xlarge">{{ view.title }}</h1>
+  </header>
 
   {% include 'mtp_common/includes/message_box.html' %}
   {% include view.help_template_name %}
