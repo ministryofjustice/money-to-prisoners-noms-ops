@@ -1,5 +1,7 @@
 @charset 'UTF-8';
 
+$images-dir: '/static/images/';
+
 @import 'mtp';
 @import 'views/security-forms';
 @import 'views/security-form-fields';

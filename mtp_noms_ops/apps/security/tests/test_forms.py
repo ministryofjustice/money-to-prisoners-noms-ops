@@ -38,7 +38,6 @@ class SecurityFormTestCase(unittest.TestCase):
         })
         self.assertDictEqual(form.get_query_data(), {})
         self.assertEqual(form.query_string, '')
-        self.assertSequenceEqual(form.page_range, [])
 
     def test_sender_list_form(self):
         # blank form

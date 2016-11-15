@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from mtp_common.auth.api_client import get_connection
 
-from mtp_noms_ops.utils import make_page_range
 from security.export import export_as_csv
 from security.forms import (
     SenderGroupedForm, PrisonerGroupedForm, CreditsForm, ReviewCreditsForm
@@ -109,7 +108,6 @@ class GroupedSecurityView(SecurityView):
             'view': self,
             'page': page,
             'page_count': page_count,
-            'page_range': make_page_range(page, page_count),
             'query_string': query_string,
             'credits': data.get('results', []),
         }

@@ -88,7 +88,6 @@ class UploadTests(PrisonerLocationAdminTestCase):
         self.assertInSource('Change file')
         el.submit()
         self.assertInSource('316 prisoner locations updated successfully')
-        self.assertCssProperty('.upload-otherfilelink', 'display', 'block')
 
     def test_upload_invalid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
