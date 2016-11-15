@@ -28,6 +28,17 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         self.assertTrue(form.is_valid())
 
+    def test_location_file_valid_excel_format(self):
+        file_data, _ = generate_testable_location_data(excel_csv=True)
+
+        request = self.factory.post(
+            reverse('location_file_upload'),
+            {'location_file': get_csv_data_as_file(file_data)}
+        )
+        form = LocationFileUploadForm(request.POST, request.FILES, request=request)
+
+        self.assertTrue(form.is_valid())
+
     def test_location_file_skips_transfer_records(self):
         file_data, _ = generate_testable_location_data(
             length=20, extra_row='A1234ZZ,Smith,John,2/9/1997 00:00,TRN'

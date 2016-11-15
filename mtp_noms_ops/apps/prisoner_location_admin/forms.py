@@ -48,7 +48,7 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
                 first_row = False
                 continue
 
-            if len(row) != EXPECTED_ROW_LENGTH:
+            if len(row) != EXPECTED_ROW_LENGTH or row[1] == row[2] == row[3] == row[4] == '':
                 invalid_row = row
                 continue
             # On next pass through the loop, if next line is valid,
