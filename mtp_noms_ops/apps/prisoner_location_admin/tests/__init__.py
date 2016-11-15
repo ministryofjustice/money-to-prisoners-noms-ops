@@ -88,7 +88,7 @@ def random_dob():
     )
 
 
-def generate_testable_location_data(length=20, extra_row=None):
+def generate_testable_location_data(length=20, extra_row=None, excel_csv=False):
     file_data = ['NOMS Number,Offender Surname,Offender Given Name 1,Date of Birth,Establishment Code']
     expected_data = []
 
@@ -109,7 +109,13 @@ def generate_testable_location_data(length=20, extra_row=None):
             'prison': prison
         })
 
-    file_data.append('Latest Business Data Available')
-    file_data.append(random_dob()[1])
+    penultimate_line = 'Latest Business Data Available'
+    ultimate_line = random_dob()[1]
+    if excel_csv:
+        penultimate_line += ',,,,'
+        ultimate_line += ',,,,'
+
+    file_data.append(penultimate_line)
+    file_data.append(ultimate_line)
 
     return '\n'.join(file_data), expected_data
