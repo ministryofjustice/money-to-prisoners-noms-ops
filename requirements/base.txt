@@ -6,6 +6,6 @@ pytz>=2016.4
 transifex-client>=0.12
 django-mailgun>=0.8,<0.9
 
-django-form-error-reporting>=0.3
+django-form-error-reporting>=0.4
 git+git://github.com/ministryofjustice/django-moj-irat.git
 git+git://github.com/ministryofjustice/django-zendesk-tickets.git
