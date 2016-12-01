@@ -1,5 +1,4 @@
 // Batch validation module
-/* global exports, $ */
 'use strict';
 
 exports.ConfirmChecked = {
@@ -26,7 +25,7 @@ exports.ConfirmChecked = {
     var $el = $(e.target);
     var type = $el.val();
 
-    if(type !== 'submit') {
+    if (type !== 'submit') {
       // If this is a 'Yes' click in the confirmation popup, so just
       // actually submit
       return;

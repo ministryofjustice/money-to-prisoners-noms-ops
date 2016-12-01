@@ -1,5 +1,4 @@
 // Security module
-/* globals exports, $ */
 'use strict';
 
 var collapsingTable = require('collapsing-table');
@@ -18,12 +17,12 @@ exports.SecurityForms = {
     }
   },
 
-  bindAmountPatternSelection: function() {
+  bindAmountPatternSelection: function () {
     var $patternSelect = $('#id_amount_pattern');
     var $exactWrapper = $('#id_amount_exact-wrapper');
     var $penceWrapper = $('#id_amount_pence-wrapper');
 
-    function update() {
+    function update () {
       switch ($patternSelect.val()) {
         case 'exact':
           $exactWrapper.show();
@@ -43,17 +42,17 @@ exports.SecurityForms = {
     update();
   },
 
-  bindCreditDetailLoading: function() {
+  bindCreditDetailLoading: function () {
     var creditRowClass = 'mtp-credit-detail__row';
 
-    function creditToggle(e) {
+    function creditToggle (e) {
       var $detailsLink = $(e.target);
       var showTitle = $detailsLink.data('show-title');
       var loadingTitle = $detailsLink.data('loading-title');
       var hideTitle = $detailsLink.data('hide-title');
       var state = $detailsLink.data('credit-detail');
 
-      function loadCreditDetails(html) {
+      function loadCreditDetails (html) {
         var $thisRow = $detailsLink.closest('tr').addClass('no-border');
         var $creditRow = $('<tr></tr>').addClass(creditRowClass).addClass($thisRow.attr('class'));
         var $creditCell = $('<td></td>');
@@ -69,7 +68,7 @@ exports.SecurityForms = {
           .attr('aria-expanded', 'true');
       }
 
-      function removeCreditDetails() {
+      function removeCreditDetails () {
         var $thisRow = $detailsLink.closest('tr').removeClass('no-border');
         var $creditDetailsRow = $thisRow.next();
 
@@ -104,7 +103,7 @@ exports.SecurityForms = {
       }
     }
 
-    $('.mtp-credit-detail__link').each(function() {
+    $('.mtp-credit-detail__link').each(function () {
       $(this).click(creditToggle);
     });
   }

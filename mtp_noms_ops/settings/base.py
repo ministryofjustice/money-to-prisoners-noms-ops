@@ -96,6 +96,7 @@ STATIC_ROOT = 'static'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     get_project_dir('assets'),
+    get_project_dir('assets-static'),
 ]
 
 TEMPLATES = [
@@ -103,8 +104,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             get_project_dir('templates'),
-            get_project_dir('assets/templates'),
-            get_project_dir('node_modules')
         ],
         'APP_DIRS': True,
         'OPTIONS': {

@@ -1,5 +1,3 @@
-/* globals require */
-
 (function () {
   'use strict';
   require('proposition-header').PropositionHeader.init();
@@ -13,4 +11,4 @@
 
   require('security-forms').SecurityForms.init();
   require('confirm-checked').ConfirmChecked.init();
-})();
+}());
