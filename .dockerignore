@@ -9,9 +9,20 @@
 *.sublime-workspace
 *.sublime-project
 
-# project
-mtp_noms_ops/settings/local.py
-mtp_noms_ops/assets/
+# sass & node.js
+*.sass-cache/
+.eslintcache/
 node_modules/
+npm-debug.log
+
+# project
+Dockerfile
+docker-compose.yml
+package.json
+webpack.config.js
+mtp_noms_ops/assets/
+mtp_noms_ops/settings/local.py
+mtp_noms_ops/templates/govuk_template
 static/
+media/
 venv/

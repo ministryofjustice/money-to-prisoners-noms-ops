@@ -12,7 +12,7 @@ Please refer to the [money-to-prisoners-api](https://github.com/ministryofjustic
 Once the API is running locally, run
 
 ```
-make start
+./run.py start
 ```
 
 This will build everything (which will initially take a while) and run
@@ -24,7 +24,7 @@ In order to run a server that's exactly similar to the production machines,
 you need to have [Docker](https://www.docker.com/docker-toolbox) installed. Run
 
 ```
-make docker
+./run.py local_docker
 ```
 
 and you should eventually be able to connect to the local server.
@@ -39,17 +39,23 @@ Push latest English to Transifex with `tx push -s`. NB: always pull updates befo
 
 ## Developing
 
-With the `make` command, you can run a browser-sync server, and get the assets
-to automatically recompile when changes are made, run `make serve` instead of
-`make start`. The server is then available at the URL indicated.
+With the `./run.py` command, you can run a browser-sync server, and get the assets
+to automatically recompile when changes are made, run `./run.py serve` instead of
+`./run.py start`. The server is then available at the URL indicated.
 
 
 ```
-make test
+./run.py test
 ```
 
 Runs all the application tests.
 
+You can connect a local version of [money-to-prisoners-common](https://github.com/ministryofjustice/money-to-prisoners-common/)
+for development by pre-pending the following task to the run script.
+
+```
+python_dependencies --common-path [path]
+```
 
 ## Deploying
 
