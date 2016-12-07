@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MTP noms-ops\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-15 16:50+0000\n"
+"POT-Creation-Date: 2016-12-07 12:00+0000\n"
 "PO-Revision-Date: 2016-11-04 10:00+0000\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>\n"
 "Language-Team: Welsh (http://www.transifex.com/ministry-of-justice/mtp/language/cy/)\n"
@@ -42,11 +42,11 @@ msgstr ""
 msgid "The file doesn’t contain valid rows"
 msgstr ""
 
-#: apps/prisoner_location_admin/tasks.py:88
+#: apps/prisoner_location_admin/tasks.py:90
 msgid "An unknown error occurred uploading prisoner locations"
 msgstr ""
 
-#: apps/prisoner_location_admin/tasks.py:103
+#: apps/prisoner_location_admin/tasks.py:107
 msgid "Send money to a prisoner: prisoner location update failed"
 msgstr ""
 
@@ -417,13 +417,14 @@ msgid "The upload of the prisoner location file failed, with the following error
 msgstr ""
 
 #: templates/prisoner_location_admin/email/failure-notification.html:16
-#: templates/prisoner_location_admin/email/failure-notification.txt:10
+#: templates/prisoner_location_admin/email/failure-notification.txt:9
 msgid "You may need to try uploading the prisoner location report again."
 msgstr ""
 
-#: templates/prisoner_location_admin/email/failure-notification.html:20
-#: templates/prisoner_location_admin/email/failure-notification.txt:12
-msgid "If you are unsure what the problem might be, please contact us at https://noms-ops.moneytoprisoners.dsd.io/feedback/"
+#: templates/prisoner_location_admin/email/failure-notification.html:21
+#: templates/prisoner_location_admin/email/failure-notification.txt:11
+#, python-format
+msgid "If you are unsure what the problem might be, please contact us at %(feedback_url)s"
 msgstr ""
 
 #: templates/prisoner_location_admin/email/failure-notification.txt:2
@@ -546,7 +547,7 @@ msgstr ""
 
 #: templates/security/credits.html:78
 #: templates/security/grouped-credits-ajax.html:27
-#: templates/security/grouped-credits.html:49 templates/security/review.html:53
+#: templates/security/grouped-credits.html:49 templates/security/review.html:54
 msgid "Bank transfer"
 msgstr ""
 
@@ -690,7 +691,7 @@ msgstr ""
 msgid "Comments will be visible to business hub staff in the digital cashbook."
 msgstr ""
 
-#: templates/security/review.html:28 templates/security/review.html:68
+#: templates/security/review.html:28 templates/security/review.html:69
 msgid "Credits checked by security"
 msgstr ""
 
@@ -706,31 +707,31 @@ msgstr ""
 msgid "Security comments"
 msgstr ""
 
-#: templates/security/review.html:49
+#: templates/security/review.html:50
 msgid "Debit card payment"
 msgstr ""
 
-#: templates/security/review.html:77
+#: templates/security/review.html:78
 msgid "Have you checked these credits?"
 msgstr ""
 
-#: templates/security/review.html:78
+#: templates/security/review.html:79
 msgid "These credits will be marked as checked in the digital cashbook."
 msgstr ""
 
-#: templates/security/review.html:79
+#: templates/security/review.html:80
 msgid "You can view credits again in ‘Search all prison credits’."
 msgstr ""
 
-#: templates/security/review.html:82
+#: templates/security/review.html:83
 msgid "Yes, all credits checked"
 msgstr ""
 
-#: templates/security/review.html:84
+#: templates/security/review.html:85
 msgid "No, continue checking"
 msgstr ""
 
-#: templates/security/review.html:90
+#: templates/security/review.html:91
 msgid "No new credits for review."
 msgstr ""
 
@@ -762,10 +763,10 @@ msgstr ""
 msgid "Current Prison"
 msgstr ""
 
-#: utils.py:28
+#: utils.py:26
 msgid "Contact us"
 msgstr ""
 
-#: utils.py:33
+#: utils.py:31
 msgid "Home"
 msgstr ""
