@@ -3,10 +3,12 @@ import logging
 import math
 import os
 import pickle
+from urllib.parse import urljoin
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.forms import ValidationError
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import activate, gettext, gettext_lazy as _
 from mtp_common.auth import api_client
 from mtp_common.email import send_email
 from slumber.exceptions import HttpClientError
@@ -97,6 +99,8 @@ def update_locations(user, locations, async=False):
 def send_task_failure_notification(email, context):
     if not email:
         return False
+    activate(settings.LANGUAGE_CODE)
+    context['feedback_url'] = urljoin(settings.SITE_URL, reverse('submit_ticket'))
     try:
         send_email(
             email, 'prisoner_location_admin/email/failure-notification.txt',

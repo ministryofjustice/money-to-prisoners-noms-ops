@@ -7,16 +7,18 @@
   </p>
 
   <ul>
-  {% for error in errors %}
-    <li>{{ error }}</li>
-  {% endfor %}
+    {% for error in errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
   </ul>
 
   <p>
-  {% trans 'You may need to try uploading the prisoner location report again.' %}
+    {% trans 'You may need to try uploading the prisoner location report again.' %}
   </p>
 
   <p>
-  {% trans 'If you are unsure what the problem might be, please contact us at https://noms-ops.moneytoprisoners.dsd.io/feedback/' %}
+    <a href="{{ feedback_url }}">
+      {% blocktrans %}If you are unsure what the problem might be, please contact us at {{ feedback_url }}{% endblocktrans %}
+    </a>
   </p>
 {% endblock %}
