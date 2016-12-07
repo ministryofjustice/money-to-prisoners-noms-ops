@@ -6,7 +6,7 @@ import pickle
 
 from django.conf import settings
 from django.forms import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from mtp_common.auth import api_client
 from mtp_common.email import send_email
 from slumber.exceptions import HttpClientError
@@ -100,7 +100,7 @@ def send_task_failure_notification(email, context):
     try:
         send_email(
             email, 'prisoner_location_admin/email/failure-notification.txt',
-            _('Send money to a prisoner: prisoner location update failed'),
+            gettext('Send money to a prisoner: prisoner location update failed'),
             context=context, html_template='prisoner_location_admin/email/failure-notification.html'
         )
         return True
