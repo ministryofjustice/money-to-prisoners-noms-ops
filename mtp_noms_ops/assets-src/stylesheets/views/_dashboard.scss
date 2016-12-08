@@ -1,0 +1,32 @@
+.mtp-security-description {
+  width: 65%;
+}
+
+// .column-one-third {
+//   padding-right: 0;
+// }
+
+.column-one-third a {
+  color: $page-colour;
+  text-decoration: none;
+
+  &:hover,
+  &:active,
+  &:focus {
+    text-decoration: underline;
+  }
+}
+
+.mtp-box {
+  background-color: $govuk-blue;
+  padding: 0.8em;
+  height: 6em;
+  font-size: 1.2em;
+}
+
+.mtp-pin {
+  background-color: $turquoise;
+  padding: 0.8em;
+  height: 7em;
+  font-size: 1.2em;
+}
