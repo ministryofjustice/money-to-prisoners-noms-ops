@@ -49,19 +49,20 @@ class LoginTests(PrisonerLocationAdminTestCase):
     def test_good_login(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
         self.assertCurrentUrl(reverse('location_file_upload'))
-        self.assertInSource('Upload location file')
+        self.assertInSource('Upload prisoner location file')
 
     def test_logout(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
-        self.driver.find_element_by_link_text('Sign out Prisoner Location Admin').click()
+        self.driver.find_element_by_link_text('Sign out').click()
         self.assertCurrentUrl(reverse('login'))
 
     def test_superuser_can_see_security_link(self):
         self.login('admin', 'adminadmin')
+        dashboard_url = reverse('dashboard')
         prisoner_location_url = reverse('location_file_upload')
-        security_url = reverse('security:dashboard')
-        self.assertCurrentUrl(prisoner_location_url)
-        self.assertInSource(security_url)
+        self.assertCurrentUrl(dashboard_url)
+        self.assertInSource('Welcome')
+        self.assertInSource(prisoner_location_url)
 
 
 class UploadTests(PrisonerLocationAdminTestCase):
@@ -73,10 +74,11 @@ class UploadTests(PrisonerLocationAdminTestCase):
     def setUp(self):
         super().setUp()
         self.login('prisoner-location-admin', 'prisoner-location-admin')
+        self.click_on_text_substring('Upload prisoner location file')
         self.driver.execute_script('document.getElementById("id_location_file").style.left = 0')
 
     def test_checking_upload_page(self):
-        self.assertInSource('Upload location file')
+        self.assertInSource('Upload prisoner location file')
         self.assertInSource('upload the file on this page in CSV format')
         self.assertCssProperty('.upload-otherfilelink', 'display', 'none')
 

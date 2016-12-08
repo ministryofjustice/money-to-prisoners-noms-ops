@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -28,7 +29,7 @@ def external_breadcrumbs(request):
         return {}
     return {
         'breadcrumbs': [
-            {'name': _('Home'), 'url': reverse('redirect_to_start')},
+            {'name': _('Home'), 'url': reverse('dashboard')},
             {'name': section_title}
         ]
     }
@@ -36,8 +37,7 @@ def external_breadcrumbs(request):
 
 def user_test(permissions):
     def decorator(view):
-        permission_test = permission_required(permissions,
-                                              login_url=reverse_lazy('redirect_to_start'))
+        permission_test = permission_required(permissions, login_url=reverse_lazy(settings.LOGIN_REDIRECT_URL))
         return login_required(permission_test(view))
 
     return decorator

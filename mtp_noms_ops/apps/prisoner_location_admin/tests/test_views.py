@@ -54,10 +54,10 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         response = self.client.get(reverse('location_file_upload'))
         self.assertContains(response, '<!-- location_file_upload -->')
 
-    def test_cannot_access_security_dashboard(self):
+    def test_cannot_access_security_views(self):
         self.login()
-        response = self.client.get(reverse('security:dashboard'), follow=True)
-        self.assertNotContains(response, '<!-- security:dashboard -->')
+        response = self.client.get(reverse('security:credits'), follow=True)
+        self.assertNotContains(response, '<!-- security:credits -->')
         self.assertContains(response, '<!-- location_file_upload -->')
 
     @mock.patch('prisoner_location_admin.tasks.api_client')

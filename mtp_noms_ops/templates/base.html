@@ -13,14 +13,16 @@
 {% block proposition %}{% trans 'NOMS admin' %}{% endblock %}
 
 {% block proposition_menu %}
-<ul id="proposition-links" class="print-hidden">
-
-  <li><a href="{% url 'security:dashboard' %}">{% trans 'Home' %}</a></li>
-  <li><a href="{% url 'security:credits' %}">{% trans 'Credits' %}</a></li>
-  <li><a href="{% url 'security:sender_grouped' %}">{% trans 'Senders' %}</a></li>
-  <li><a href="{% url 'security:prisoner_grouped' %}">{% trans 'Prisoners' %}</a></li>
-  <li><a href="{% url 'password_change' %}">{% trans 'Change password' %}</a></li>
-  <li><a href="{% url 'logout' %}">{% trans 'Sign out' %}</a></li>
-</ul>
-
+  {% if request.user.is_authenticated %}
+    <ul id="proposition-links" class="print-hidden">
+      <li><a href="{% url 'dashboard' %}">{% trans 'Home' %}</a></li>
+      {% if request.can_access_security %}
+        <li><a href="{% url 'security:credits' %}">{% trans 'Credits' %}</a></li>
+        <li><a href="{% url 'security:sender_grouped' %}">{% trans 'Senders' %}</a></li>
+        <li><a href="{% url 'security:prisoner_grouped' %}">{% trans 'Prisoners' %}</a></li>
+      {% endif %}
+      <li><a href="{% url 'password_change' %}">{% trans 'Change password' %}</a></li>
+      <li><a href="{% url 'logout' %}">{% trans 'Sign out' %}</a></li>
+    </ul>
+  {% endif %}
 {% endblock %}

@@ -56,13 +56,13 @@ class LocaleTestCase(SecurityBaseTestCase):
 class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
     def test_can_access_security_dashboard(self):
         response = self.login()
-        self.assertContains(response, '<!-- security:dashboard -->')
+        self.assertContains(response, '<!-- dashboard -->')
 
     def test_cannot_access_prisoner_location_admin(self):
         self.login()
         response = self.client.get(reverse('location_file_upload'), follow=True)
         self.assertNotContains(response, '<!-- location_file_upload -->')
-        self.assertContains(response, '<!-- security:dashboard -->')
+        self.assertContains(response, '<!-- dashboard -->')
 
 
 class SecurityViewTestCase(SecurityBaseTestCase):
