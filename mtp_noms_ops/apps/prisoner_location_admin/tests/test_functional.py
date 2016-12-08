@@ -2,9 +2,8 @@ import logging
 import os
 
 from django.core.urlresolvers import reverse
+from mtp_common.test_utils import silence_logger
 from mtp_common.test_utils.functional_tests import FunctionalTestCase
-
-from security.tests import silence_logger
 
 
 class PrisonerLocationAdminTestCase(FunctionalTestCase):
