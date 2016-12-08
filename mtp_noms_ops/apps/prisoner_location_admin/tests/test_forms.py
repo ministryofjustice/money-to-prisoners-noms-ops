@@ -3,9 +3,9 @@ from unittest import mock
 
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory, override_settings
+from mtp_common.test_utils import silence_logger
 
 from prisoner_location_admin.forms import LocationFileUploadForm
-from security.tests import silence_logger
 from . import (
     PrisonerLocationUploadTestCase, generate_testable_location_data,
     get_csv_data_as_file

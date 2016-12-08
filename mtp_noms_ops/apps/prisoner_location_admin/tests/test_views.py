@@ -3,9 +3,9 @@ from unittest import mock
 
 from django.core.urlresolvers import reverse
 from mtp_common.auth.exceptions import Forbidden
+from mtp_common.test_utils import silence_logger
 from slumber.exceptions import HttpClientError
 
-from security.tests import silence_logger
 from . import (
     PrisonerLocationUploadTestCase, generate_testable_location_data,
     get_csv_data_as_file

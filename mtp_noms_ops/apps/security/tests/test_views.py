@@ -4,9 +4,9 @@ from unittest import mock
 from django.core.urlresolvers import reverse
 from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
+from mtp_common.test_utils import silence_logger
 
 from security import required_permissions
-from security.tests import silence_logger
 
 
 class SecurityBaseTestCase(SimpleTestCase):
