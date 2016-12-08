@@ -1,5 +1,4 @@
 import logging
-from urllib.parse import urljoin
 
 from django.core.urlresolvers import reverse
 from mtp_common.test_utils.functional_tests import FunctionalTestCase
@@ -32,15 +31,20 @@ class SecurityDashboardTests(SecurityDashboardTestCase):
 
     def test_login_redirects_to_security_dashboard(self):
         self.login('security-staff', 'security-staff')
-        self.assertInSource('From one sender to many prisoners')
+        self.assertInSource('Credits')
+        self.assertInSource('Senders')
+        self.assertInSource('Prisoners')
         self.assertEqual(self.driver.title, 'NOMS admin')
+        dashboard_url = reverse('dashboard')
+        prisoner_location_url = reverse('location_file_upload')
+        self.assertCurrentUrl(dashboard_url)
+        self.assertNotInSource(prisoner_location_url)
 
     def test_superuser_can_see_prisoner_location_link(self):
         self.login('admin', 'adminadmin')
+        dashboard_url = reverse('dashboard')
         prisoner_location_url = reverse('location_file_upload')
-        security_url = reverse('security:dashboard')
-        self.driver.get(urljoin(self.live_server_url, security_url))
-        self.assertCurrentUrl(security_url)
+        self.assertCurrentUrl(dashboard_url)
         self.assertInSource(prisoner_location_url)
 
 
@@ -48,7 +52,7 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('All credits')
+        self.click_on_text('Credits')
 
     def test_search_by_other_results_show_sender(self):
         self.click_on_submit()
@@ -59,7 +63,7 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('From one sender to many prisoners')
+        self.click_on_text('Senders')
 
     def test_headers_show_all_fields(self):
         self.click_on_submit()
@@ -73,7 +77,7 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('To one prisoner from many senders')
+        self.click_on_text('Prisoners')
 
     def test_headers_show_all_fields(self):
         self.click_on_submit()

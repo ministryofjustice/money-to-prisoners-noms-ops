@@ -14,10 +14,6 @@ from security.forms import (
 )
 
 
-def dashboard_view(request):
-    return render(request, 'security/dashboard.html')
-
-
 class SecurityView(FormView):
     """
     Base view for retrieving security-related searches
@@ -45,7 +41,7 @@ class SecurityView(FormView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         context_data['breadcrumbs'] = [
-            {'name': _('Search'), 'url': reverse('security:dashboard')},
+            {'name': _('Home'), 'url': reverse('dashboard')},
             {'name': self.title}
         ]
         return context_data
@@ -140,7 +136,7 @@ class SenderGroupedView(GroupedSecurityView):
 
     def get_credits_view(self, request):
         if not all(key in request.GET for key in self.sender_keys):
-            return redirect('security:dashboard')
+            return redirect('dashboard')
         return super().get_credits_view(request)
 
     def get_credit_row_query_dict(self, group, row):
@@ -178,7 +174,7 @@ class PrisonerGroupedView(GroupedSecurityView):
 
     def get_credits_view(self, request):
         if not all(key in request.GET for key in self.prisoner_keys):
-            return redirect('security:dashboard')
+            return redirect('dashboard')
         return super().get_credits_view(request)
 
     def get_credit_row_query_dict(self, group, row):

@@ -3,7 +3,7 @@ from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
 from django.views.generic import RedirectView
 from moj_irat.views import HealthcheckView, PingJsonView
@@ -11,18 +11,18 @@ from mtp_common.auth import views as auth_views
 from mtp_common.auth.exceptions import Unauthorized
 
 
-def redirect_to_start(request):
-    if request.can_access_prisoner_location:
+def dashboard_view(request):
+    if not (request.can_access_prisoner_location or request.can_access_security):
+        raise Unauthorized()  # middleware causes user to be logged-out
+    if request.can_access_prisoner_location and not (request.can_access_security or request.can_access_user_management):
         return redirect(reverse_lazy('location_file_upload'))
-    if request.can_access_security:
-        return redirect(reverse_lazy('security:dashboard'))
-    raise Unauthorized()  # middleware causes user to be logged-out
+    return render(request, 'dashboard.html', {'start_page_url': settings.START_PAGE_URL})
 
 
 urlpatterns = i18n_patterns(
-    url(r'^$', redirect_to_start, name='redirect_to_start'),
+    url(r'^$', dashboard_view, name='dashboard'),
     url(r'^prisoner-location/', include('prisoner_location_admin.urls')),
-    url(r'^security-dashboard/', include('security.urls', namespace='security')),
+    url(r'^security/', include('security.urls', namespace='security')),
     url(r'^feedback/', include('feedback.urls')),
 
     url(

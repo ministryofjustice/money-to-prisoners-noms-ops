@@ -2,10 +2,6 @@
   width: 65%;
 }
 
-// .column-one-third {
-//   padding-right: 0;
-// }
-
 .column-one-third a {
   color: $page-colour;
   text-decoration: none;
@@ -18,6 +14,7 @@
 }
 
 .mtp-box {
+  display: block;
   background-color: $govuk-blue;
   padding: 0.8em;
   height: 6em;

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+
+{% block inner_content %}
+  <header>
+    {% language_switch %}
+    <h1 class="heading-xlarge">
+      {% blocktrans trimmed with full_name=request.user.get_full_name|default:request.user.username %}
+        Welcome {{ full_name }}
+      {% endblocktrans %}
+    </h1>
+  </header>
+
+  {% if request.can_access_security %}
+
+    <div class="mtp-security-description">
+      <p class="lede">
+        {% blocktrans trimmed %}
+          Use this tool to monitor all credits sent to prisoners using the <a href="{{ start_page_url }}">send money to a prisoner</a> service.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+    <h2 class="heading-medium">{% trans 'View all' %}</h2>
+
+    <div class="grid-row">
+      <div class="column-one-third">
+        <a href="{% url 'security:credits' %}" class="mtp-box">
+          {% trans 'Credits' %}
+        </a>
+      </div>
+
+      <div class="column-one-third">
+        <a href="{% url 'security:sender_grouped' %}" class="mtp-box">
+          {% trans 'Senders' %}
+        </a>
+      </div>
+
+      <div class="column-one-third">
+        <a href="{% url 'security:prisoner_grouped' %}" class="mtp-box">
+          {% trans 'Prisoners' %}
+        </a>
+      </div>
+    </div>
+
+  {% endif %}
+
+  {% if request.can_access_security and request.can_pre_approve or request.can_access_user_management or request.can_access_prisoner_location %}
+
+    <h2 class="heading-medium">{% trans 'Admin options' %}</h2>
+
+    <div class="grid-row">
+      {% if request.can_access_security and request.can_pre_approve %}
+        <div class="column-one-third">
+          <a href="{% url 'security:review_credits' %}" class="mtp-box">
+            {% trans 'New credits check' %}
+          </a>
+        </div>
+      {% endif %}
+
+      {% if request.can_access_user_management %}
+        <div class="column-one-third">
+          <a href="{% url 'list-users' %}" class="mtp-box">
+            {% trans 'Manage users' %}
+          </a>
+        </div>
+      {% endif %}
+
+      {% if request.can_access_prisoner_location %}
+        <div class="column-one-third">
+          <a href="{% url 'location_file_upload' %}" class="mtp-box">
+            {% trans 'Upload prisoner location file' %}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+  {% endif %}
+
+{% endblock %}
