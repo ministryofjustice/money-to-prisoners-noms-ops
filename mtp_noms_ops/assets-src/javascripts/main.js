@@ -11,4 +11,5 @@
 
   require('security-forms').SecurityForms.init();
   require('confirm-checked').ConfirmChecked.init();
+  require('tabs').Tabs.init();
 }());

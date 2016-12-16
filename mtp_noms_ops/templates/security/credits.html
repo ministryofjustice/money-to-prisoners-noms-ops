@@ -11,80 +11,74 @@
   </header>
 
   {% include 'mtp_common/includes/message_box.html' %}
-  {% include view.help_template_name %}
 
   <form method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
     <input type="hidden" name="page" value="1">
 
-    <div class="grid-row">
-      <aside class="mtp-results-form__wrapper column-third">
-        <h2 class="heading-medium">{% trans 'Edit your search' %}</h2>
+    <div class="print-hidden">
+      <h2 class="heading-medium">{% trans 'Filter by' %}</h2>
 
-        {% include view.form_template_name with view=view form=form only %}
-
-        <div class="form-group mtp-results-form__submit">
-          <button type="submit" class="button">{% trans 'Update search' %}</button>
-        </div>
-      </aside>
+      {% include view.form_template_name with view=view form=form only %}
+    </div>
 
       {% if form.cleaned_data %}
-      <div class="mtp-results-list column-two-thirds">
-        <h2 class="heading-large">{% trans 'Results' %}</h2>
+      <div class="mtp-results-list">
+        <h2 class="heading-medium">{% trans 'Showing all payments' %}</h2>
 
-        <div class="print-hidden">
-          {% include 'security/select-field.html' with field=form.ordering only %}
-        </div>
         <p class="mtp-search-description__text">
           {{ form.search_description }}
         </p>
 
-        <p class="print-hidden">
-          <a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export the data you’ve found as a CSV file' %}</a>
-        </p>
+        <div class="print-hidden mtp-links">
+          <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a> &nbsp;
+          <a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
+        </div>
+
+        <div class="print-hidden">
+          {% include 'security/select-field.html' with field=form.ordering only %}
+        </div>
 
         <table>
           <thead>
             <tr>
-              <th>{% trans 'Sender' %}</th>
+              <th>{% trans 'Date received' %}</th>
+              <th>{% trans 'Sender and type' %}</th>
+              <th class="number">{% trans 'Amount' %}</th>
               <th>{% trans 'Prisoner' %}</th>
               <th>{% trans 'Prison' %}</th>
-              <th>{% trans 'Prisoner name' %}
-                <span class="font-xsmall">{%trans '(as entered by sender)' %}</span>
-              </th>
-              <th>{% trans 'Amount (£)' %}</th>
-              <th>{% trans 'Payment method' %}</th>
-              <th>{% trans 'Date received' %}</th>
-              <th>{% trans 'Credited by' %}</th>
+              <th>{% trans 'Credited status' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for credit in credits|parse_date_fields %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
-                <td>{{ credit.sender_name | default_if_none:'—' }}</td>
-                <td>
-                  {{ credit.prisoner_name|default_if_none:'—' }}
-                  {% if credit.prisoner_number %}
-                    (<a href="{% url 'security:credit_list' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a>)
-                  {% endif %}
-                </td>
-                <td>{{ credit.prison_name|default_if_none:'—' }}</td>
-                <td>{{ credit.intended_recipient|default:'—' }}</td>
-                <td>{{ credit.amount|currency }}</td>
-                <td>
-                  {% if credit.source == 'online' %}
-                    {% trans 'Debit card' %}
-                  {% else %}
-                    {% trans 'Bank transfer' %}
-                  {% endif %}
-                </td>
                 <td>{{ credit.received_at|date:'DATE_FORMAT' }}</td>
                 <td>
+                  {{ credit.sender_name | default_if_none:'—' }}
+                    <p>
+                      {% if credit.source == 'online' %}
+                        {% trans 'Debit card' %}
+                      {% else %}
+                        {% trans 'Bank transfer' %}
+                      {% endif %}
+                    </p>
+                </td>
+                <td class="number"><strong>£{{ credit.amount|currency }}</strong></td>
+                <td>
+                  {% if credit.prisoner_number %}
+                    <strong><a href="{% url 'security:credits' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a></strong>
+                  {% endif %}
+                  <p>{{ credit.prisoner_name|default_if_none:'—' }}</p>
+                </td>
+                <td>{{ credit.prison_name|default_if_none:'—' }}</td>
+                <td>
                   {% if credit.resolution == 'credited' %}
-                    {{ credit.owner_name|default_if_none:'—' }}
+                    {{ credit.credited_at.date }}
+                    <p>by {{ credit.owner_name|default_if_none:'—' }}</p>
                   {% else %}
-                    {{ credit.resolution|format_resolution }}
+                    No
                   {% endif %}
                 </td>
               </tr>
@@ -99,7 +93,6 @@
         {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
       </div>
       {% endif %}
-    </div>
 
   </form>
 

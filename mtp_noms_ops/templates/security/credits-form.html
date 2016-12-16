@@ -1,23 +1,93 @@
 {% load i18n %}
 
-<div class="mtp-security-form">
-  {% include 'security/received-range-field.html' %}
-
-  {% include 'security/select-field.html' with field=form.amount_pattern %}
-  {% include 'mtp_common/forms/field.html' with field=form.amount_exact %}
-  {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
-
-  {% include 'security/select-field.html' with field=form.prison %}
-  {% include 'security/select-field.html' with field=form.prison_region %}
-  {% include 'security/select-field.html' with field=form.prison_population %}
-  {% include 'security/select-field.html' with field=form.prison_category %}
-
-  {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
-  {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
-
-  {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
-  {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
-  {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
-
+<div class="mtp-security-form mtp-credits">
   {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
+
+  <div data-tabs>
+    <ul role="tablist" class="tabs-nav" id="tabs">
+        <li class="tab-item" role="presentation"><a role="tab" aria-selected="true" aria-controls="date" id="dateTab" href="#date" class="tab selected">Date</a></li>
+        <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="amount" id="amountTab" href="#amount" class="tab" tabindex="-1">Amount (£)</a></li>
+        <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="prison" id="prisonTab" href="#prison" class="tab" tabindex="-1">Prison</a></li>
+        <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="sender" id="senderTab" href="#sender" class="tab" tabindex="-1">Sender</a></li>
+        <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="prisoner" id="prisonerTab" href="#prisoner" class="tab" tabindex="-1">Prisoner</a></li>
+    </ul>
+
+    <div class="tabs-contents">
+      <div role="tabpanel" aria-labelledby="dateTab" id="date" class="tabcontent">
+        {% include 'security/received-range-field.html' %}
+        {% include 'security/update-search.html' %}
+      </div>
+
+      <div role="tabpanel" aria-labelledby="amountTab" id="amount" class="tabcontent hidden">
+        <div class="grid-row">
+          <div class="column-one-third">
+            {% include 'security/select-field.html' with field=form.amount_pattern %}
+            {% include 'mtp_common/forms/field.html' with field=form.amount_exact %}
+            {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
+          </div>
+          <div class="column-full">
+            {% include 'security/update-search.html' %}
+          </div>
+        </div>
+      </div>
+
+      <div role="tabpanel" aria-labelledby="prisonTab" id="prison" class="tabcontent hidden">
+        <div class="grid-row">
+          <div class="column-one-third">
+            {% include 'security/select-field.html' with field=form.prison %}
+            {% include 'security/select-field.html' with field=form.prison_population %}
+          </div>
+          <div class="column-one-third">
+            {% include 'security/select-field.html' with field=form.prison_category %}
+            {% include 'security/select-field.html' with field=form.prison_region %}
+          </div>
+          <div class="column-full">
+            {% include 'security/update-search.html' %}
+          </div>
+        </div>
+      </div>
+
+      <div role="tabpanel" aria-labelledby="senderTab" id="sender" class="tabcontent hidden">
+        <div class="grid-row">
+          <div class="column-full">
+            {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
+          </div>
+          <div class="column-one-third narrow">
+            {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
+          </div>
+          <div class="column-one-third narrow">
+            {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
+          </div>
+          <div class="column-narrow">
+            {% trans 'or' %}
+          </div>
+          <div class="column-one-third narrow">
+            <!-- placeholder field -->
+            <label for="debit-card-digits" class="form-label">Last 4 digits of debit card</label>
+            <input class="form-control" type="text">
+            <!--  -->
+          </div>
+          <div class="column-full">
+            {% include 'security/update-search.html' %}
+          </div>
+        </div>
+      </div>
+
+      <div role="tabpanel" aria-labelledby="prisonerTab" id="prisoner" class="tabcontent hidden">
+        <div class="grid-row">
+          <div class="column-one-third">
+            {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
+          </div>
+          <div class="column-one-third">
+            {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
+          </div>
+          <div class="column-full">
+            {% include 'security/update-search.html' %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
+

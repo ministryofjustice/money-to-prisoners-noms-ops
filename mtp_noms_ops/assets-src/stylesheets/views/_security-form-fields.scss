@@ -25,6 +25,28 @@
   padding-left: 15px;
 }
 
+.mtp-credits {
+
+  #id_amount_pattern,
+  #id_prison,
+  #id_prison_region,
+  #id_prison_population,
+  #id_prison_category,
+  #id_prisoner_number {
+    width: 100%;
+  }
+
+  .column-narrow {
+    width: 4em;
+    display: block;
+    float: left;
+  }
+
+  .narrow {
+    width: 28%;
+  }
+}
+
 // govuk elements overrides
 
 .form-label {
@@ -33,4 +55,8 @@
   &.sublabel {
     font-weight: normal;
   }
+}
+
+.mtp-results-form__submit {
+  margin-bottom: .3em;
 }

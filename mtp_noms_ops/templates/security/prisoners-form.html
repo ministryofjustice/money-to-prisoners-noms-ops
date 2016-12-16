@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <div class="mtp-security-form">
   {% include 'mtp_common/forms/field.html' with field=form.sender_count__gte %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
@@ -10,4 +12,8 @@
   {% include 'security/total-range-fields.html' %}
 
   {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
+
+  <div class="form-group">
+    <button type="submit" class="button">{% trans 'Search' %}</button>
+  </div>
 </div>

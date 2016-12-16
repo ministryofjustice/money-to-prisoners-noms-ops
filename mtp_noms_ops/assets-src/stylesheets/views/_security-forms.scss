@@ -1,5 +1,4 @@
 // app-specific styles
-
 .mtp-security-form {
   overflow: hidden;
   padding-left: 1px;
@@ -8,13 +7,16 @@
     width: 6em;
   }
 
+  .form-group {
+    float: none;
+  }
+
   select.form-control {
     width: auto;
   }
 
   .form-range-field {
     clear: left;
-    float: left;
     width: 15em;
   }
 }
@@ -47,8 +49,11 @@
 }
 
 .mtp-results-list {
+  margin-top: 2.5em;
+
   h2 {
     margin-top: 0;
+    display: inline-block;
   }
 
   table {
@@ -59,9 +64,14 @@
       background-color: #CDE2B7;
     }
 
+    thead {
+      border-top: 1px solid $grey-2;
+    }
+
     th,
     td {
-      padding: .5em;
+      vertical-align: top;
+      padding: .8em;
 
       .mtp-credit-detail__link {
         background-color: $page-colour;
@@ -70,6 +80,10 @@
         cursor: pointer;
         text-decoration: underline;
       }
+    }
+
+    .number {
+      text-align: right;
     }
   }
 
@@ -109,6 +123,95 @@ tbody tr.mtp-credit-detail__row table {
       background: $page-colour;
     }
   }
+}
+
+.mtp-links {
+  float: right;
+  display: inline-block;
+}
+
+// tabs
+
+.tabs-nav {
+  overflow: hidden;
+  position: relative;
+
+  &:before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-bottom: 3px solid $border-colour;
+    z-index: 1;
+    width: 100%;
+  }
+}
+
+.tab-item {
+  display: inline;
+}
+
+.tab-item a {
+  margin-bottom: 0;
+  display: block;
+  padding: em(9.5);
+  white-space: nowrap;
+  z-index: 0;
+  outline: none;
+  box-sizing: border-box;
+  position: relative;
+  transition: background .25s ease-in-out;
+
+  &:focus,
+  &:hover,
+  &:active {
+    background-color: $focus-colour;
+  }
+
+  &:visited {
+    color: $govuk-blue;
+  }
+
+  @include media(tablet) {
+    height: em(53);
+    display: inline-block;
+    margin: 0 em(3) 0 0;
+    padding: 0.7em 0.8em;
+    border-top: none;
+    border-bottom: 6px solid $page-colour;
+  }
+}
+
+.tab-item a.selected {
+  cursor: default;
+  z-index: 2;
+  color: $text-colour;
+  background-color: $page-colour;
+  transition: none;
+
+  &:focus,
+  &:hover,
+  &:active {
+    background-color: $focus-colour;
+  }
+
+  @include media(tablet) {
+    height: 3em;
+    padding: em(13.3);
+    border: 3px solid $border-colour;
+    border-bottom: 1px solid $page-colour;
+  }
+}
+
+.tabcontent {
+  display: block;
+  border: 3px solid $border-colour;
+  border-top: 0;
+  padding: 1em;
+}
+
+.hidden {
+  display: none;
 }
 
 // mtp-common overrides

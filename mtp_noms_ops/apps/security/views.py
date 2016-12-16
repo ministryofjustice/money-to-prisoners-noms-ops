@@ -1,5 +1,3 @@
-from math import ceil
-
 from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponse
