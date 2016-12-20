@@ -9,6 +9,35 @@ from mtp_common.test_utils import silence_logger
 from security import required_permissions
 
 
+def sample_prison_list(mocked_api_client):
+    mocked_api_client().prisons.get.return_value = {
+        'count': 2,
+        'results': [
+            {
+                'nomis_id': 'AAI',
+                'general_ledger_code': '001',
+                'name': 'HMP & YOI Test 1',
+                'region': 'London',
+                'categories': [{'description': 'Category D', 'name': 'D'},
+                               {'description': 'Young Offender Institution', 'name': 'YOI'}],
+                'populations': [{'description': 'Female', 'name': 'female'},
+                                {'description': 'Male', 'name': 'male'},
+                                {'description': 'Young offenders', 'name': 'young'}],
+                'pre_approval_required': False,
+            },
+            {
+                'nomis_id': 'BBI',
+                'general_ledger_code': '002',
+                'name': 'HMP Test 2',
+                'region': 'London',
+                'categories': [{'description': 'Category D', 'name': 'D'}],
+                'populations': [{'description': 'Male', 'name': 'male'}],
+                'pre_approval_required': False,
+            },
+        ],
+    }
+
+
 class SecurityBaseTestCase(SimpleTestCase):
     @mock.patch('mtp_common.auth.backends.api_client')
     def login(self, mock_api_client):
@@ -261,6 +290,7 @@ class CreditsExportTestCase(SecurityBaseTestCase):
 
     @mock.patch('security.forms.get_connection')
     def test_creates_csv(self, mocked_connection):
+        sample_prison_list(mocked_connection)
         response_data = {
             'count': 2,
             'previous': None,
@@ -318,6 +348,7 @@ class CreditsExportTestCase(SecurityBaseTestCase):
 
     @mock.patch('security.forms.get_connection')
     def test_no_data(self, mocked_connection):
+        sample_prison_list(mocked_connection)
         response_data = {
             'count': 0,
             'previous': None,
@@ -345,6 +376,7 @@ class CreditsExportTestCase(SecurityBaseTestCase):
 
     @mock.patch('security.forms.get_connection')
     def test_missing_page_redirects_to_form(self, mocked_connection):
+        sample_prison_list(mocked_connection)
         self.login()
         response = self.client.get(
             reverse('security:credits_export') + '?prison=LEI'
@@ -353,6 +385,7 @@ class CreditsExportTestCase(SecurityBaseTestCase):
 
     @mock.patch('security.forms.get_connection')
     def test_invalid_params_redirects_to_form(self, mocked_connection):
+        sample_prison_list(mocked_connection)
         self.login()
         response = self.client.get(
             reverse('security:credits_export') + '?page=1&received_at__gte=LL'
