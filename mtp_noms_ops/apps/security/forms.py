@@ -40,7 +40,7 @@ def get_prison_details_choices(client, session):
         ]
         region_choices = [
             (region, region)
-            for region in sorted(set(prison['region'] for prison in prisons))
+            for region in sorted(set(prison['region'] for prison in prisons if prison['region']))
         ]
         population_choices = [
             (population['name'], population['description'])
