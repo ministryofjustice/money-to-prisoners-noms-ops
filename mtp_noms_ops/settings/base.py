@@ -236,6 +236,7 @@ ZENDESK_CUSTOM_FIELDS = {
     'contact_email': 30769508,
 }
 
+REQUEST_PAGE_SIZE = 500
 UPLOAD_REQUEST_PAGE_SIZE = 3000
 
 EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
