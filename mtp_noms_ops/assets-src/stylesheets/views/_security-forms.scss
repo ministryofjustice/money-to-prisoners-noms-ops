@@ -24,6 +24,11 @@
   padding-bottom: 1em;
   padding-top: .5em;
 
+  input, select {
+    // GDS style override since form elements inherit background
+    background: $page-colour;
+  }
+
   @include breakpoint($mobile) {
     padding-top: .8em;
   }
