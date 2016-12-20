@@ -33,10 +33,10 @@ def sorted_prison_type_choices(type_list):
 def get_prison_details_choices(client, session):
     prison_details_choices = session.get('prison_details_choices')
     if not prison_details_choices:
-        prisons = client.prisons.get().get('results', [])
+        prisons = retrieve_all_pages(client.prisons.get)
         prison_choices = [
             (prison['nomis_id'], prison['name'])
-            for prison in prisons
+            for prison in sorted(prisons, key=lambda prison: prison['name'])
         ]
         region_choices = [
             (region, region)
