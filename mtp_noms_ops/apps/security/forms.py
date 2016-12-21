@@ -30,34 +30,30 @@ def sorted_prison_type_choices(type_list):
     )
 
 
-def get_prison_details_choices(client, session):
-    prison_details_choices = session.get('prison_details_choices')
-    if not prison_details_choices:
-        prisons = retrieve_all_pages(client.prisons.get)
-        prison_choices = [
-            (prison['nomis_id'], prison['name'])
-            for prison in sorted(prisons, key=lambda prison: prison['name'])
-        ]
-        region_choices = [
-            (region, region)
-            for region in sorted(set(prison['region'] for prison in prisons if prison['region']))
-        ]
-        population_choices = [
-            (population['name'], population['description'])
-            for population in sorted_prison_type_choices(prison['populations'] for prison in prisons)
-        ]
-        category_choices = [
-            (category['name'], category['description'])
-            for category in sorted_prison_type_choices(prison['categories'] for prison in prisons)
-        ]
-        prison_details_choices = {
-            'prisons': prison_choices,
-            'regions': region_choices,
-            'populations': population_choices,
-            'categories': category_choices
-        }
-        session['prison_details_choices'] = prison_details_choices
-    return prison_details_choices
+def get_prison_details_choices(client):
+    prisons = retrieve_all_pages(client.prisons.get)
+    prison_choices = [
+        (prison['nomis_id'], prison['name'])
+        for prison in sorted(prisons, key=lambda prison: prison['name'])
+    ]
+    region_choices = [
+        (region, region)
+        for region in sorted(set(prison['region'] for prison in prisons if prison['region']))
+    ]
+    population_choices = [
+        (population['name'], population['description'])
+        for population in sorted_prison_type_choices(prison['populations'] for prison in prisons)
+    ]
+    category_choices = [
+        (category['name'], category['description'])
+        for category in sorted_prison_type_choices(prison['categories'] for prison in prisons)
+    ]
+    return {
+        'prisons': prison_choices,
+        'regions': region_choices,
+        'populations': population_choices,
+        'categories': category_choices,
+    }
 
 
 def insert_blank_option(choices, title=_('Select an option')):
@@ -227,7 +223,7 @@ class SenderGroupedForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        prison_details_choices = get_prison_details_choices(self.client, request.session)
+        prison_details_choices = get_prison_details_choices(self.client)
         self['prison'].field.choices = insert_blank_option(prison_details_choices['prisons'],
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
@@ -295,7 +291,7 @@ class PrisonerGroupedForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        prison_details_choices = get_prison_details_choices(self.client, request.session)
+        prison_details_choices = get_prison_details_choices(self.client)
         self['prison'].field.choices = insert_blank_option(prison_details_choices['prisons'],
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
@@ -393,7 +389,7 @@ class CreditsForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        prison_details_choices = get_prison_details_choices(self.client, request.session)
+        prison_details_choices = get_prison_details_choices(self.client)
         self['prison'].field.choices = insert_blank_option(prison_details_choices['prisons'],
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
