@@ -215,7 +215,7 @@ class SendersForm(SecurityForm):
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
-    prison_category = forms.MultipleChoiceField(label=_('Prison category'), required=False, choices=[])
+    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
     extra_filters = {
         'include_invalid': 'True'
@@ -287,7 +287,7 @@ class PrisonersForm(SecurityForm):
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
-    prison_category = forms.MultipleChoiceField(label=_('Prison category'), required=False, choices=[])
+    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
