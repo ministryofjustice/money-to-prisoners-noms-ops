@@ -40,57 +40,58 @@
           {{ form.search_description }}
         </p>
 
-        <p class="print-hidden">
-          <a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export the data you’ve found as a CSV file' %}</a>
-        </p>
-
         <table>
           <thead>
             <tr>
-              <th>{% trans 'Sender' %}</th>
-              <th>{% trans 'Prisoner' %}</th>
-              <th>{% trans 'Prison' %}</th>
-              <th>{% trans 'Prisoner name' %}
-                <span class="font-xsmall">{%trans '(as entered by sender)' %}</span>
-              </th>
-              <th>{% trans 'Amount (£)' %}</th>
-              <th>{% trans 'Payment method' %}</th>
-              <th>{% trans 'Date received' %}</th>
-              <th>{% trans 'Credited by' %}</th>
+              <th>{% trans 'Sender and type' %}</th>
+              <th>{% trans 'Sent' %}</th>
+              <th>{% trans 'Prisoners' %}</th>
+              <th>{% trans 'Prisons' %}</th>
+              <th>{% trans 'Value (£)' %}</th>
             </tr>
           </thead>
           <tbody>
-            {% for credit in credits|parse_date_fields %}
+            {% for sender in senders %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
-                <td>{{ credit.sender_name | default_if_none:'—' }}</td>
                 <td>
-                  {{ credit.prisoner_name|default_if_none:'—' }}
-                  {% if credit.prisoner_number %}
-                    (<a href="{% url 'security:credit_list' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a>)
-                  {% endif %}
-                </td>
-                <td>{{ credit.prison_name|default_if_none:'—' }}</td>
-                <td>{{ credit.intended_recipient|default:'—' }}</td>
-                <td>{{ credit.amount|currency }}</td>
-                <td>
-                  {% if credit.source == 'online' %}
-                    {% trans 'Debit card' %}
+                  {% if sender.bank_transfer_details %}
+                    {{ sender.bank_transfer_details.0.sender_name|default_if_none:'—' }}
+                    <br/>
+                    {% trans 'by bank transfer' %}
+                  {% elif sender.debit_card_details %}
+                    {{ sender.debit_card_details.0.cardholder_names.0|default_if_none:'—' }}
+                    <br/>
+                    {% trans 'by debit card' %}
                   {% else %}
-                    {% trans 'Bank transfer' %}
+                    —
                   {% endif %}
                 </td>
-                <td>{{ credit.received_at|date:'DATE_FORMAT' }}</td>
                 <td>
-                  {% if credit.resolution == 'credited' %}
-                    {{ credit.owner_name|default_if_none:'—' }}
-                  {% else %}
-                    {{ credit.resolution|format_resolution }}
-                  {% endif %}
+                  {% blocktrans count payment=sender.credit_count %}
+                    {{ payment }} payment sent
+                  {% plural %}
+                    {{ payment }} payments sent
+                  {% endblocktrans %}
                 </td>
+                <td>
+                  {% blocktrans count count=sender.prisoner_count %}
+                    {{ count }} prisoner
+                  {% plural %}
+                    {{ count }} prisoners
+                  {% endblocktrans %}
+                </td>
+                <td>
+                  {% blocktrans count count=sender.prison_count %}
+                    {{ count }} prison
+                  {% plural %}
+                    {{ count }} prisons
+                  {% endblocktrans %}
+                </td>
+                <td>{{ sender.credit_total|currency }}</td>
               </tr>
             {% empty %}
               <tr class="no-border">
-                <td colspan="7">{% trans 'No matching credits found' %}</td>
+                <td colspan="7">{% trans 'No matching senders found' %}</td>
               </tr>
             {% endfor %}
           </tbody>

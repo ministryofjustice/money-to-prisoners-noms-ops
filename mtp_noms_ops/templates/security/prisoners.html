@@ -40,35 +40,25 @@
           {{ form.search_description }}
         </p>
 
-        <p class="print-hidden">
-          <a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export the data you’ve found as a CSV file' %}</a>
-        </p>
-
         <table>
           <thead>
             <tr>
-              <th>{% trans 'Sender' %}</th>
               <th>{% trans 'Prisoner' %}</th>
               <th>{% trans 'Prison' %}</th>
-              <th>{% trans 'Prisoner name' %}
-                <span class="font-xsmall">{%trans '(as entered by sender)' %}</span>
-              </th>
-              <th>{% trans 'Amount (£)' %}</th>
-              <th>{% trans 'Payment method' %}</th>
-              <th>{% trans 'Date received' %}</th>
-              <th>{% trans 'Credited by' %}</th>
+              <th>{% trans 'Received' %}</th>
+              <th>{% trans 'Senders' %}</th>
+              <th>{% trans 'Value (£)' %}</th>
             </tr>
           </thead>
           <tbody>
-            {% for credit in credits|parse_date_fields %}
+            {% for prisoner in prisoners %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
-                <td>{{ credit.sender_name | default_if_none:'—' }}</td>
                 <td>
-                  {{ credit.prisoner_name|default_if_none:'—' }}
-                  {% if credit.prisoner_number %}
-                    (<a href="{% url 'security:credit_list' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a>)
-                  {% endif %}
+                  {{ prisoner.prisoner_number }}
+                  <br/>
+                  {{ prisoner.prisoner_name }}
                 </td>
+                <td>{{ prisoner.prisons }}</td>
                 <td>{{ credit.prison_name|default_if_none:'—' }}</td>
                 <td>{{ credit.intended_recipient|default:'—' }}</td>
                 <td>{{ credit.amount|currency }}</td>

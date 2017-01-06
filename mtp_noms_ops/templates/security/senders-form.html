@@ -1,11 +1,11 @@
 <div class="mtp-security-form">
-  {% include 'mtp_common/forms/field.html' with field=form.prisoner_count_0 %}
+  {% include 'mtp_common/forms/field.html' with field=form.prisoner_count__gte %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_roll_number %}
 
-  {% include 'security/grouped-range-fields.html' %}
+  {% include 'security/total-range-fields.html' %}
 
   {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
 </div>

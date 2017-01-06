@@ -1,5 +1,5 @@
 <div class="mtp-security-form">
-  {% include 'mtp_common/forms/field.html' with field=form.sender_count_0 %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_count__gte %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
   {% include 'security/select-field.html' with field=form.prison %}
@@ -7,7 +7,7 @@
   {% include 'security/select-field.html' with field=form.prison_population %}
   {% include 'security/select-field.html' with field=form.prison_category %}
 
-  {% include 'security/grouped-range-fields.html' %}
+  {% include 'security/total-range-fields.html' %}
 
   {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
 </div>
