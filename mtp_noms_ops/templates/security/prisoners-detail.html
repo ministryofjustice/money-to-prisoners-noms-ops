@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block inner_content %}
+
+  <header>
+    {% language_switch %}
+    <h1 class="heading-xlarge">{{ prisoner.prisoner_number}} {{ prisoner.prisoner_name }}</h1>
+  </header>
+
+  <p>
+    {% blocktrans count count=prisoner.credit_count %}
+      {{ count }} credit received
+    {% plural %}
+      {{ count }} credits received
+    {% endblocktrans %}
+  </p>
+
+  <p>
+    {% blocktrans count count=prisoner.sender_count %}
+      {{ count }} sender
+    {% plural %}
+      {{ count }} senders
+    {% endblocktrans %}
+  </p>
+
+  <p>
+    {% blocktrans with total=prisoner.credit_total|currency %}
+      £{{ total }} total value received
+    {% endblocktrans %}
+  </p>
+
+  <div class="mtp-results-list">
+    <h2 class="heading-large">{% trans 'Credits sent' %}</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>{% trans 'Date received' %}</th>
+          <th>{% trans 'Sender and type' %}</th>
+          <th>{% trans 'Name entered by sender' %}</th>
+          <th class="number">{% trans 'Value (£)' %}</th>
+          <th>{% trans 'Received at prison' %}</th>
+          <th>{% trans 'Credited status' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for credit in credits|parse_date_fields %}
+          <tr {% if forloop.last %}class="no-border"{% endif %}>
+            <td>
+              <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
+            </td>
+            </td>
+            <td>
+              {% if credit.source == 'online' %}
+                <p class="mtp-credit__card">
+                  {{ credit.sender_name | default_if_none:'—' }} <br />
+                  {% trans 'Debit card' %}
+                </p>
+              {% else %}
+                <p class="mtp-credit__transfer">
+                {{ credit.sender_name | default_if_none:'—' }} <br />
+                {% trans 'Bank transfer' %}
+                </p>
+              {% endif %}
+            </td>
+            <td>{{ credit.intended_recipient | default_if_none:'—' }}</td>
+            <td class="number">
+              <p><strong>£{{ credit.amount|currency }}</strong></p>
+            </td>
+            <td>
+              <p>{{ credit.prison_name|default_if_none:'—' }}</p>
+            </td>
+            <td>
+              {% if credit.resolution == 'credited' %}
+                <p>{{ credit.credited_at.date }} <br />
+                {% trans 'by' %} {{ credit.owner_name|default_if_none:'—' }}</p>
+              {% else %}
+                <p>{% trans 'No' %}</p>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr class="no-border">
+            <td colspan="7">{% trans 'No matching credits found' %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% page_list page=page page_count=page_count %}
+  </div>
+
+{% endblock %}

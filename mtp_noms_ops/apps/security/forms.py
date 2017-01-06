@@ -315,7 +315,7 @@ class PrisonersForm(SecurityForm):
             return credit_total__lte
 
     def get_api_endpoint(self):
-        return self.client.credits.prisoners
+        return self.client.prisoners
 
 
 class AmountPattern(enum.Enum):

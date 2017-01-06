@@ -54,29 +54,28 @@
             {% for prisoner in prisoners %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
+                  <a href="{% url 'security:prisoner_detail' prisoner.id %}">
                   {{ prisoner.prisoner_number }}
+                  </a>
                   <br/>
                   {{ prisoner.prisoner_name }}
                 </td>
                 <td>{{ prisoner.prisons }}</td>
-                <td>{{ credit.prison_name|default_if_none:'—' }}</td>
-                <td>{{ credit.intended_recipient|default:'—' }}</td>
-                <td>{{ credit.amount|currency }}</td>
                 <td>
-                  {% if credit.source == 'online' %}
-                    {% trans 'Debit card' %}
-                  {% else %}
-                    {% trans 'Bank transfer' %}
-                  {% endif %}
+                  {% blocktrans count count=prisoner.credit_count %}
+                    {{ count }} credit received
+                  {% plural %}
+                    {{ count }} credits received
+                  {% endblocktrans %}
                 </td>
-                <td>{{ credit.received_at|date:'DATE_FORMAT' }}</td>
                 <td>
-                  {% if credit.resolution == 'credited' %}
-                    {{ credit.owner_name|default_if_none:'—' }}
-                  {% else %}
-                    {{ credit.resolution|format_resolution }}
-                  {% endif %}
+                  {% blocktrans count count=prisoner.sender_count %}
+                    {{ count }} sender
+                  {% plural %}
+                    {{ count }} senders
+                  {% endblocktrans %}
                 </td>
+                <td>{{ sender.credit_total|currency }}</td>
               </tr>
             {% empty %}
               <tr class="no-border">

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block inner_content %}
+
+  <header>
+    {% language_switch %}
+    <h1 class="heading-xlarge">
+      {% if sender.bank_transfer_details %}
+        {{ sender.bank_transfer_details.0.sender_name|default_if_none:'—' }}
+      {% elif sender.debit_card_details %}
+        {{ sender.debit_card_details.0.cardholder_names.0|default_if_none:'—' }}
+      {% else %}
+        —
+      {% endif %}
+    </h1>
+  </header>
+
+  {% if sender.bank_transfer_details %}
+    <p>{% trans 'by bank transfer' %}</p>
+    <p>{% trans 'Sort code:' %} {{ sender.bank_transfer_details.0.sender_sort_code|default_if_none:'—' }}</p>
+    <p>{% trans 'Account number:' %} {{ sender.bank_transfer_details.0.sender_account_number|default_if_none:'—' }}</p>
+    <p>{% trans 'Roll number (for building societies):' %} {{ sender.bank_transfer_details.0.sender_roll_number|default_if_none:'—' }}</p>
+  {% elif sender.debit_card_details %}
+    <p>{% trans 'by debit card' %}</p>
+    <p>{% trans 'Card number:' %} **** **** **** {{ sender.debit_card_details.0.card_number_last_digits|default_if_none:'—' }}</p>
+    <p>{% trans 'Expiry date:' %} {{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}</p>
+  {% else %}
+    <p>—</p>
+  {% endif %}
+
+  <p>
+    {% blocktrans count count=sender.credit_count %}
+      {{ count }} credit sent
+    {% plural %}
+      {{ count }} credits sent
+    {% endblocktrans %}
+  </p>
+
+  <p>
+    {% blocktrans count count=sender.prisoner_count %}
+      {{ count }} prisoner
+    {% plural %}
+      {{ count }} prisoners
+    {% endblocktrans %}
+  </p>
+
+  <p>
+    {% blocktrans count count=sender.prison_count %}
+      {{ count }} prison
+    {% plural %}
+      {{ count }} prisons
+    {% endblocktrans %}
+  </p>
+
+  <p>
+    {% blocktrans with total=sender.credit_total|currency %}
+      £{{ total }} total value sent
+    {% endblocktrans %}
+  </p>
+
+  <div class="mtp-results-list">
+    <h2 class="heading-large">{% trans 'Credits sent' %}</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>{% trans 'Date received' %}</th>
+          <th>{% trans 'Prisoner' %}</th>
+          <th class="number">{% trans 'Amount' %}</th>
+          <th>{% trans 'Prison' %}</th>
+          <th>{% trans 'Credited status' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for credit in credits|parse_date_fields %}
+          <tr {% if forloop.last %}class="no-border"{% endif %}>
+            <td>
+              <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
+            </td>
+            </td>
+            <td>
+              {% if credit.prisoner_number %}
+                <p><strong><a href="{% url 'security:prisoner_list' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a></strong><br />
+                {{ credit.prisoner_name|default_if_none:'—' }}</p>
+              {% endif %}
+            </td>
+            <td class="number">
+              <p><strong>£{{ credit.amount|currency }}</strong></p>
+            </td>
+            <td>
+              <p>{{ credit.prison_name|default_if_none:'—' }}</p>
+            </td>
+            <td>
+              {% if credit.resolution == 'credited' %}
+                <p>{{ credit.credited_at.date }} <br />
+                {% trans 'by' %} {{ credit.owner_name|default_if_none:'—' }}</p>
+              {% else %}
+                <p>{% trans 'No' %}</p>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr class="no-border">
+            <td colspan="7">{% trans 'No matching credits found' %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% page_list page=page page_count=page_count %}
+  </div>
+
+{% endblock %}

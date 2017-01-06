@@ -1,9 +1,12 @@
+from math import ceil
+
 from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
+from mtp_common.auth.api_client import get_connection
 
 from security.export import export_as_csv
 from security.forms import (
@@ -48,6 +51,33 @@ class SecurityView(FormView):
         return super().get(request, *args, **kwargs)
 
 
+class SecurityDetailView(TemplateView):
+    template_name = NotImplemented
+    id_kwarg_name = NotImplemented
+    object_name = NotImplemented
+    page_size = 20
+
+    def get_api_endpoint(self, client):
+        return NotImplemented
+
+    def get_context_data(self, **kwargs):
+        print('here')
+        context = super().get_context_data(**kwargs)
+        client = get_connection(self.request)
+        endpoint = self.get_api_endpoint(client)(self.kwargs[self.id_kwarg_name])
+
+        context[self.object_name] = endpoint.get()
+        page = self.request.GET.get('page', 1)
+        offset = (page - 1) * self.page_size
+        data = endpoint.credits.get(offset=offset, limit=self.page_size)
+        print(data)
+        count = data['count']
+        context['page'] = page
+        context['page_count'] = int(ceil(count / self.page_size))
+        context['credits'] = data.get('results', [])
+        return context
+
+
 class CreditListView(SecurityView):
     """
     Credit search view
@@ -80,6 +110,15 @@ class SenderListView(SecurityView):
         return render(self.request, self.template_name, context)
 
 
+class SenderDetailView(SecurityDetailView):
+    template_name = 'security/senders-detail.html'
+    id_kwarg_name = 'sender_id'
+    object_name = 'sender'
+
+    def get_api_endpoint(self, client):
+        return client.senders
+
+
 class PrisonerListView(SecurityView):
     """
     Prisoner search view
@@ -94,6 +133,15 @@ class PrisonerListView(SecurityView):
         context = self.get_context_data(form=form)
         context['prisoners'] = form.get_object_list()
         return render(self.request, self.template_name, context)
+
+
+class PrisonerDetailView(SecurityDetailView):
+    template_name = 'security/prisoners-detail.html'
+    id_kwarg_name = 'prisoner_id'
+    object_name = 'prisoner'
+
+    def get_api_endpoint(self, client):
+        return client.prisoners
 
 
 class CreditExportView(SecurityView):

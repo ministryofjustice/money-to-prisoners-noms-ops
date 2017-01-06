@@ -54,23 +54,29 @@
             {% for sender in senders %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
+                  <a href="{% url 'security:sender_detail' sender.id %}">
                   {% if sender.bank_transfer_details %}
                     {{ sender.bank_transfer_details.0.sender_name|default_if_none:'—' }}
-                    <br/>
-                    {% trans 'by bank transfer' %}
                   {% elif sender.debit_card_details %}
                     {{ sender.debit_card_details.0.cardholder_names.0|default_if_none:'—' }}
-                    <br/>
+                  {% else %}
+                    —
+                  {% endif %}
+                  </a>
+                  <br/>
+                  {% if sender.bank_transfer_details %}
+                    {% trans 'by bank transfer' %}
+                  {% elif sender.debit_card_details %}
                     {% trans 'by debit card' %}
                   {% else %}
                     —
                   {% endif %}
                 </td>
                 <td>
-                  {% blocktrans count payment=sender.credit_count %}
-                    {{ payment }} payment sent
+                  {% blocktrans count count=sender.credit_count %}
+                    {{ count }} payment sent
                   {% plural %}
-                    {{ payment }} payments sent
+                    {{ count }} payments sent
                   {% endblocktrans %}
                 </td>
                 <td>
