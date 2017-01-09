@@ -75,11 +75,9 @@
 
       <div role="tabpanel" aria-labelledby="prisonerTab" id="prisoner" class="tabcontent hidden">
         <div class="grid-row">
-          <div class="column-one-third">
-            {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
-          </div>
-          <div class="column-one-third">
+          <div class="column-full">
             {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
+            {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
           </div>
           <div class="column-full">
             {% include 'security/update-search.html' %}
