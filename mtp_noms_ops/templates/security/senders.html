@@ -11,34 +11,32 @@
   </header>
 
   {% include 'mtp_common/includes/message_box.html' %}
-  {% include view.help_template_name %}
 
   <form method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
     <input type="hidden" name="page" value="1">
 
-    <div class="grid-row">
-      <aside class="mtp-results-form__wrapper column-third">
-        <h2 class="heading-medium">{% trans 'Edit your search' %}</h2>
-
-        {% include view.form_template_name with view=view form=form only %}
-
-        <div class="form-group mtp-results-form__submit">
-          <button type="submit" class="button">{% trans 'Update search' %}</button>
-        </div>
-      </aside>
+    <div class="print-hidden">
+      <h2 class="heading-medium">{% trans 'Filter by' %}</h2>
+      {% include view.form_template_name with view=view form=form only %}
+    </div>
 
       {% if form.cleaned_data %}
-      <div class="mtp-results-list column-two-thirds">
-        <h2 class="heading-large">{% trans 'Results' %}</h2>
+      <div class="mtp-results-list">
+        <h2 class="heading-medium">{% trans 'Showing senders by number of prisoners they have sent money to' %}</h2>
+
+        <p class="mtp-search-description__text">
+          {{ form.search_description }}
+        </p>
+
+        <div class="print-hidden mtp-links">
+          <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
+        </div>
 
         <div class="print-hidden">
           {% include 'security/select-field.html' with field=form.ordering only %}
         </div>
-        <p class="mtp-search-description__text">
-          {{ form.search_description }}
-        </p>
 
         <table>
           <thead>
@@ -47,53 +45,53 @@
               <th>{% trans 'Sent' %}</th>
               <th>{% trans 'Prisoners' %}</th>
               <th>{% trans 'Prisons' %}</th>
-              <th>{% trans 'Value (£)' %}</th>
+              <th class="number">{% trans 'Amount' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for sender in senders %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
-                  <a href="{% url 'security:sender_detail' sender.id %}">
                   {% if sender.bank_transfer_details %}
-                    {{ sender.bank_transfer_details.0.sender_name|default_if_none:'—' }}
-                  {% elif sender.debit_card_details %}
-                    {{ sender.debit_card_details.0.cardholder_names.0|default_if_none:'—' }}
-                  {% else %}
-                    —
-                  {% endif %}
-                  </a>
-                  <br/>
-                  {% if sender.bank_transfer_details %}
+                  <p class="mtp-credit__transfer">
+                    <a href="{% url 'security:sender_detail' sender.id %}">
+                      <strong>{{ sender.bank_transfer_details.0.sender_name|default_if_none:'—' }}</strong>
+                    </a><br />
                     {% trans 'by bank transfer' %}
+                  </p>
                   {% elif sender.debit_card_details %}
+                  <p class="mtp-credit__card">
+                    <a href="{% url 'security:sender_detail' sender.id %}">
+                      <strong>{{ sender.debit_card_details.0.cardholder_names.0|default_if_none:'—' }}</strong>
+                    </a><br />
                     {% trans 'by debit card' %}
+                  </p>
                   {% else %}
                     —
                   {% endif %}
                 </td>
                 <td>
                   {% blocktrans count count=sender.credit_count %}
-                    {{ count }} payment sent
+                    <strong>{{ count }}</strong> payment sent
                   {% plural %}
-                    {{ count }} payments sent
+                    <strong>{{ count }}</strong> payments sent
                   {% endblocktrans %}
                 </td>
                 <td>
                   {% blocktrans count count=sender.prisoner_count %}
-                    {{ count }} prisoner
+                    <strong>{{ count }}</strong> prisoner
                   {% plural %}
-                    {{ count }} prisoners
+                    <strong>{{ count }}</strong> prisoners
                   {% endblocktrans %}
                 </td>
                 <td>
                   {% blocktrans count count=sender.prison_count %}
-                    {{ count }} prison
+                    <strong>{{ count }}</strong> prison
                   {% plural %}
-                    {{ count }} prisons
+                    <strong>{{ count }}</strong> prisons
                   {% endblocktrans %}
                 </td>
-                <td>{{ sender.credit_total|currency }}</td>
+                <td class="number"><strong>£{{ sender.credit_total|currency }}</strong></td>
               </tr>
             {% empty %}
               <tr class="no-border">
