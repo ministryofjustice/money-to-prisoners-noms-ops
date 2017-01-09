@@ -9,7 +9,7 @@
   require('print').Print.init();
   require('dialog').Dialog.init();
 
+  require('tabs').Tabs.init();
   require('security-forms').SecurityForms.init();
   require('confirm-checked').ConfirmChecked.init();
-  require('tabs').Tabs.init();
 }());

@@ -18,6 +18,12 @@
   width: 10em;
 }
 
+#id_prisoner_name-wrapper,
+#id_prisoner_number-wrapper {
+  width: 18em;
+  display: inline-block;
+}
+
 #id_amount_exact-wrapper,
 #id_amount_pence-wrapper {
   border-left: 10px solid $grey-2;

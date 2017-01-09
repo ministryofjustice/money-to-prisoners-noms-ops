@@ -11,34 +11,32 @@
   </header>
 
   {% include 'mtp_common/includes/message_box.html' %}
-  {% include view.help_template_name %}
 
   <form method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
     <input type="hidden" name="page" value="1">
 
-    <div class="grid-row">
-      <aside class="mtp-results-form__wrapper column-third">
-        <h2 class="heading-medium">{% trans 'Edit your search' %}</h2>
+    <div class="print-hidden">
+      <h2 class="heading-medium">{% trans 'Filter by' %}</h2>
+      {% include view.form_template_name with view=view form=form only %}
+    </div>
 
-        {% include view.form_template_name with view=view form=form only %}
+    {% if form.cleaned_data %}
+      <div class="mtp-results-list">
+        <h2 class="heading-medium">{% trans 'Showing prisoners by number of senders' %}</h2>
 
-        <div class="form-group mtp-results-form__submit">
-          <button type="submit" class="button">{% trans 'Update search' %}</button>
+        <p class="mtp-search-description__text">
+          {{ form.search_description }}
+        </p>
+
+        <div class="print-hidden mtp-links">
+          <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
         </div>
-      </aside>
-
-      {% if form.cleaned_data %}
-      <div class="mtp-results-list column-two-thirds">
-        <h2 class="heading-large">{% trans 'Results' %}</h2>
 
         <div class="print-hidden">
           {% include 'security/select-field.html' with field=form.ordering only %}
         </div>
-        <p class="mtp-search-description__text">
-          {{ form.search_description }}
-        </p>
 
         <table>
           <thead>
@@ -47,7 +45,7 @@
               <th>{% trans 'Prison' %}</th>
               <th>{% trans 'Received' %}</th>
               <th>{% trans 'Senders' %}</th>
-              <th>{% trans 'Value (£)' %}</th>
+              <th class="number">{% trans 'Amount' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -55,7 +53,7 @@
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
                   <a href="{% url 'security:prisoner_detail' prisoner.id %}">
-                  {{ prisoner.prisoner_number }}
+                  <strong>{{ prisoner.prisoner_number }}</strong>
                   </a>
                   <br/>
                   {{ prisoner.prisoner_name }}
@@ -63,19 +61,19 @@
                 <td>{{ prisoner.prisons }}</td>
                 <td>
                   {% blocktrans count count=prisoner.credit_count %}
-                    {{ count }} credit received
+                    <strong>{{ count }}</strong> credit received
                   {% plural %}
-                    {{ count }} credits received
+                    <strong>{{ count }}</strong> credits received
                   {% endblocktrans %}
                 </td>
                 <td>
                   {% blocktrans count count=prisoner.sender_count %}
-                    {{ count }} sender
+                    <strong>{{ count }}</strong> sender
                   {% plural %}
-                    {{ count }} senders
+                    <strong>{{ count }}</strong> senders
                   {% endblocktrans %}
                 </td>
-                <td>{{ prisoner.credit_total|currency }}</td>
+                <td class="number"><strong>£{{ prisoner.credit_total|currency }}</strong></td>
               </tr>
             {% empty %}
               <tr class="no-border">
