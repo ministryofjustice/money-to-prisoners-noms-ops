@@ -213,7 +213,6 @@ class SendersForm(SecurityForm):
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
     card_expiry_date = forms.CharField(label=_('Card expiry date'), required=False)
- 
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
