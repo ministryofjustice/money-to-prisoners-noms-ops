@@ -9,9 +9,18 @@
   width: 10em;
 }
 
-#id_sender_name-wrapper,
-#id_sender_account_number-wrapper {
+#id_card_number_last_digits-wrapper {
+  display: inline-block;
+  width: 14em;
+}
+
+#id_sender_name-wrapper {
   width: 18em;
+  display: inline-block;
+}
+
+#id_sender_account_number-wrapper {
+  width: 12em;
   display: inline-block;
 }
 

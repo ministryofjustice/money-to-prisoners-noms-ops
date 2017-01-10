@@ -62,10 +62,7 @@
             {% trans 'or' %}
           </div>
           <div class="column-one-third narrow">
-            <!-- placeholder field -->
-            <label for="debit-card-digits" class="form-label">Last 4 digits of debit card</label>
-            <input class="form-control" type="text">
-            <!--  -->
+            {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
           </div>
           <div class="column-full">
             {% include 'security/update-search.html' %}
