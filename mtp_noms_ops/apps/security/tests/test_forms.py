@@ -46,6 +46,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
+            'card_number_last_digits': '',
         }
         form = SendersForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
@@ -61,6 +62,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
+            'card_number_last_digits': '',
         }
         form = SendersForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'sender_name': 'Joh '})
         self.assertTrue(form.is_valid())
@@ -128,7 +130,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
+            'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
         }
         form = CreditsForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
@@ -145,7 +147,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
+            'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
         }
         form = CreditsForm(self.request, data={'page': '1', 'ordering': '-amount', 'received_at__gte': '26/5/2016'})
         self.assertTrue(form.is_valid())

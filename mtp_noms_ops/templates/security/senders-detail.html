@@ -42,8 +42,14 @@
         <p>{% trans 'Card number' %}</p>
       </div>
       <div class="column-two-thirds">
-        <strong>{{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}</strong>
-        <p>{% trans 'Expiry date' %}</p>
+        <div class="column-one-third">
+          <strong>{{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}</strong>
+          <p>{% trans 'Expiry date' %}</p>
+        </div>
+        <div class="column-two-thirds">
+          <strong>{{ sender.debit_card_details.0.sender_emails.0 |default_if_none:'—' }}</strong>
+          <p>{% trans 'Email' %}</p>
+        </div>
       </div>
     {% else %}
     <p>—</p>
