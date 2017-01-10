@@ -1,0 +1,10 @@
+{% load i18n %}
+
+<div class="mtp-security-form">
+  {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
+
+  {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
+
+  {% include 'security/update-search.html' %}
+</div>

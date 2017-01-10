@@ -1,0 +1,13 @@
+{% load i18n %}
+
+<div class="form-range-field">
+  <span class="form-label">{% trans 'Total sent (£)' %}</span>
+
+  {% include 'security/numeric-range-field.html' with min_field=form.credit_total__gte max_field=form.credit_total__lte %}
+</div>
+
+<div class="form-range-field">
+  <span class="form-label">{% trans 'Total credits sent' %}</span>
+
+  {% include 'security/numeric-range-field.html' with min_field=form.credit_count__gte max_field=form.credit_count__lte %}
+</div>

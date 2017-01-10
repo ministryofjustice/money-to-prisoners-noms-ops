@@ -1,0 +1,44 @@
+.mtp-prisoner-summary__results {
+  .mtp-results-list__table--prisoners td {
+    padding-bottom: 0;
+  }
+
+  .mtp-results-list__table--details {
+    border-bottom: 1px solid $border-colour;
+
+    td {
+      padding-top: 0;
+    }
+  }
+
+  .mtp-results-list__table {
+    td {
+      border-bottom: none;
+      vertical-align: top;
+    }
+  }
+
+  .mtp-results-list__table--prisoners {
+    p {
+      margin-bottom: 0;
+    }
+  }
+
+  .mtp-credit-details {
+
+    .mtp-credit-details__acc-no {
+      padding-left: 3.2em;
+      width: 27%;
+    }
+
+    .mtp-credit-details__sort-code {
+      width: 15%;
+    }
+
+    .mtp-credit-details__card {
+      padding-left: 3.2em;
+    }
+  }
+}
+
+

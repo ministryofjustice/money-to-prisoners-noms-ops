@@ -9,6 +9,12 @@
   width: 10em;
 }
 
+#id_sender_name-wrapper,
+#id_sender_account_number-wrapper {
+  width: 18em;
+  display: inline-block;
+}
+
 #id_prisoner_name {
   max-width: 16em;
   width: 100%;
@@ -18,11 +24,38 @@
   width: 10em;
 }
 
+#id_prisoner_name-wrapper,
+#id_prisoner_number-wrapper {
+  width: 18em;
+  display: inline-block;
+}
+
 #id_amount_exact-wrapper,
 #id_amount_pence-wrapper {
   border-left: 10px solid $grey-2;
   display: none;
   padding-left: 15px;
+}
+
+.mtp-credits {
+
+  #id_amount_pattern,
+  #id_prison,
+  #id_prison_region,
+  #id_prison_population,
+  #id_prison_category {
+    width: 100%;
+  }
+
+  .column-narrow {
+    width: 4em;
+    display: block;
+    float: left;
+  }
+
+  .narrow {
+    width: 28%;
+  }
 }
 
 // govuk elements overrides
@@ -33,4 +66,8 @@
   &.sublabel {
     font-weight: normal;
   }
+}
+
+.mtp-results-form__submit {
+  margin-bottom: .3em;
 }

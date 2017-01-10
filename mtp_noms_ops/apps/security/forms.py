@@ -74,8 +74,8 @@ def validate_prisoner_number(prisoner_number):
 
 def validate_range_field(field_name, bound_ordering_msg):
     def inner(cls):
-        lower = field_name + '_0'
-        upper = field_name + '_1'
+        lower = field_name + '__gte'
+        upper = field_name + '__lte'
 
         base_clean = cls.clean
 
@@ -104,10 +104,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     """
     page = forms.IntegerField(min_value=1)
     page_size = 20
-    received_at__gte = forms.DateField(label=_('Received from'), help_text=_('eg 01/06/2016'), required=False)
-    received_at__lt = forms.DateField(label=_('Received to'), help_text=_('eg 01/06/2016'), required=False)
 
     extra_filters = {}
+    exclusive_date_params = []
 
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
@@ -134,8 +133,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         page = self.cleaned_data['page']
         offset = (page - 1) * self.page_size
         filters = self.get_query_data()
-        if 'received_at__lt' in filters:
-            filters['received_at__lt'] += timedelta(days=1)
+        for param in filters:
+            if param in self.exclusive_date_params:
+                filters[param] += timedelta(days=1)
         filters.update(self.extra_filters)
         data = end_point.get(offset=offset, limit=self.page_size, **filters)
         count = data['count']
@@ -187,7 +187,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 @validate_range_field('prisoner_count', _('Must be larger than the minimum prisoners'))
 @validate_range_field('credit_count', _('Must be larger than the minimum credits'))
 @validate_range_field('credit_total', _('Must be larger than the minimum total'))
-class SenderGroupedForm(SecurityForm):
+class SendersForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Sort by'), required=False,
                                  initial='-prisoner_count',
                                  choices=[
@@ -197,12 +197,12 @@ class SenderGroupedForm(SecurityForm):
                                      ('sender_name', _('Sender name (A to Z)')),
                                  ])
 
-    prisoner_count_0 = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
-    prisoner_count_1 = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
-    credit_count_0 = forms.IntegerField(label=_('Minimum credits sent'), required=False, min_value=1)
-    credit_count_1 = forms.IntegerField(label=_('Maximum credits sent'), required=False, min_value=1)
-    credit_total_0 = forms.IntegerField(label=_('Minimum total sent'), required=False)
-    credit_total_1 = forms.IntegerField(label=_('Maximum total sent'), required=False)
+    prisoner_count__gte = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
+    prisoner_count__lte = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
+    credit_count__gte = forms.IntegerField(label=_('Minimum credits sent'), required=False, min_value=1)
+    credit_count__lte = forms.IntegerField(label=_('Maximum credits sent'), required=False, min_value=1)
+    credit_total__gte = forms.IntegerField(label=_('Minimum total sent'), required=False)
+    credit_total__lte = forms.IntegerField(label=_('Maximum total sent'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
     #                          required=False)
@@ -215,7 +215,7 @@ class SenderGroupedForm(SecurityForm):
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
-    prison_category = forms.MultipleChoiceField(label=_('Prison category'), required=False, choices=[])
+    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
     extra_filters = {
         'include_invalid': 'True'
@@ -238,28 +238,28 @@ class SenderGroupedForm(SecurityForm):
             sender_sort_code = sender_sort_code.replace('-', '')
         return sender_sort_code
 
-    def clean_credit_total_0(self):
-        credit_total_0 = self.cleaned_data.get('credit_total_0')
-        if credit_total_0:
-            return int(credit_total_0*100)
+    def clean_credit_total__gte(self):
+        credit_total__gte = self.cleaned_data.get('credit_total__gte')
+        if credit_total__gte:
+            return int(credit_total__gte*100)
         else:
-            return credit_total_0
+            return credit_total__gte
 
-    def clean_credit_total_1(self):
-        credit_total_1 = self.cleaned_data.get('credit_total_1')
-        if credit_total_1:
-            return int(credit_total_1*100)
+    def clean_credit_total__lte(self):
+        credit_total__lte = self.cleaned_data.get('credit_total__lte')
+        if credit_total__lte:
+            return int(credit_total__lte*100)
         else:
-            return credit_total_1
+            return credit_total__lte
 
     def get_api_endpoint(self):
-        return self.client.credits.senders
+        return self.client.senders
 
 
 @validate_range_field('sender_count', _('Must be larger than the minimum senders'))
 @validate_range_field('credit_count', _('Must be larger than the minimum credits'))
 @validate_range_field('credit_total', _('Must be larger than the minimum total'))
-class PrisonerGroupedForm(SecurityForm):
+class PrisonersForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Sort by'), required=False,
                                  initial='-sender_count',
                                  choices=[
@@ -270,12 +270,12 @@ class PrisonerGroupedForm(SecurityForm):
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
                                  ])
 
-    sender_count_0 = forms.IntegerField(label=_('Number of senders (minimum)'), required=False, min_value=1)
-    sender_count_1 = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)
-    credit_count_0 = forms.IntegerField(label=_('Minimum credits received'), required=False, min_value=1)
-    credit_count_1 = forms.IntegerField(label=_('Maximum credits received'), required=False, min_value=1)
-    credit_total_0 = forms.IntegerField(label=_('Minimum total received'), required=False)
-    credit_total_1 = forms.IntegerField(label=_('Maximum total received'), required=False)
+    sender_count__gte = forms.IntegerField(label=_('Number of senders (minimum)'), required=False, min_value=1)
+    sender_count__lte = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)
+    credit_count__gte = forms.IntegerField(label=_('Minimum credits received'), required=False, min_value=1)
+    credit_count__lte = forms.IntegerField(label=_('Maximum credits received'), required=False, min_value=1)
+    credit_total__gte = forms.IntegerField(label=_('Minimum total received'), required=False)
+    credit_total__lte = forms.IntegerField(label=_('Maximum total received'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
     #                          required=False)
@@ -287,7 +287,7 @@ class PrisonerGroupedForm(SecurityForm):
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
-    prison_category = forms.MultipleChoiceField(label=_('Prison category'), required=False, choices=[])
+    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
@@ -300,22 +300,22 @@ class PrisonerGroupedForm(SecurityForm):
                                                                       title=_('All types'))
         self['prison_category'].field.choices = prison_details_choices['categories']
 
-    def clean_credit_total_0(self):
-        credit_total_0 = self.cleaned_data.get('credit_total_0')
-        if credit_total_0:
-            return int(credit_total_0*100)
+    def clean_credit_total__gte(self):
+        credit_total__gte = self.cleaned_data.get('credit_total__gte')
+        if credit_total__gte:
+            return int(credit_total__gte*100)
         else:
-            return credit_total_0
+            return credit_total__gte
 
-    def clean_credit_total_1(self):
-        credit_total_1 = self.cleaned_data.get('credit_total_1')
-        if credit_total_1:
-            return int(credit_total_1*100)
+    def clean_credit_total__lte(self):
+        credit_total__lte = self.cleaned_data.get('credit_total__lte')
+        if credit_total__lte:
+            return int(credit_total__lte*100)
         else:
-            return credit_total_1
+            return credit_total__lte
 
     def get_api_endpoint(self):
-        return self.client.credits.prisoners
+        return self.client.prisoners
 
 
 class AmountPattern(enum.Enum):
@@ -367,17 +367,21 @@ class CreditsForm(SecurityForm):
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
                                  ])
 
+    received_at__gte = forms.DateField(label=_('Received from'), help_text=_('eg 01/06/2016'), required=False)
+    received_at__lt = forms.DateField(label=_('Received to'), help_text=_('eg 01/06/2016'), required=False)
+
     amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
                                        choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
     amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
     amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 
-    prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
+    prisoner_number = forms.CharField(
+        label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
-    prison_category = forms.MultipleChoiceField(label=_('Prison category'), required=False, choices=[])
+    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
     sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('eg 01-23-45'), required=False)

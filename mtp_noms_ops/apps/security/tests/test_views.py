@@ -118,111 +118,68 @@ class SecurityViewTestCase(SecurityBaseTestCase):
 
 
 class SenderListTestCase(SecurityViewTestCase):
-    view_name = 'security:sender_grouped'
+    view_name = 'security:sender_list'
 
     @mock.patch('security.forms.get_connection')
     def test_displays_results(self, mocked_connection):
         response_data = {
             'count': 1,
             'previous': None,
-            'next': 'http://mtp.local/credits/senders/?limit=20&offset=20&ordering=-prisoner_count',
+            'next': 'http://mtp.local/senders/?limit=20&offset=20&ordering=-prisoner_count',
             'results': [
                 {
-                    'sender_name': 'MAISIE NOLAN',
-                    'sender_sort_code': '101010',
-                    'sender_account_number': '12312345',
-                    'sender_roll_number': '',
-                    'prisoner_count': 3,
+                    'id': 9,
                     'credit_count': 4,
                     'credit_total': 41000,
-                    'prisoners': [
+                    'prisoner_count': 3,
+                    'prison_count': 2,
+                    'bank_transfer_details': [
                         {
-                            'prisoner_number': 'A1450AE',
-                            'prisoner_name': 'NICHOLAS FINNEY',
-                            'prison_name': 'Prison 1',
-                            'credit_count': 1,
-                            'credit_total': 10000,
-                        },
-                        {
-                            'prisoner_number': 'A1409AE',
-                            'prisoner_name': 'JAMES HALLS',
-                            'prison_name': 'Prison 1',
-                            'credit_count': 2,
-                            'credit_total': 26000,
-                        },
-                        {
-                            'prisoner_number': 'A1421AE',
-                            'prisoner_name': 'JAMES HERBERT',
-                            'prison_name': 'Prison 1',
-                            'credit_count': 1,
-                            'credit_total': 5000,
-                        },
-                        {
-                            # NB: this is not counted in group sums
-                            'prisoner_number': None,
-                            'prisoner_name': None,
-                            'prison_name': None,
-                            'credit_count': 1,
-                            'credit_total': 1700,
-                        },
-                    ]
+                            'sender_name': 'MAISIE NOLAN',
+                            'sender_sort_code': '101010',
+                            'sender_account_number': '12312345',
+                            'sender_roll_number': '',
+                        }
+                    ],
+                    'created': '2016-05-25T20:24:00Z',
+                    'modified': '2016-05-25T20:24:00Z',
                 },
             ]
         }
-        mocked_connection().credits.senders.get.return_value = response_data
+        mocked_connection().senders.get.return_value = response_data
 
         self.login()
         response = self.client.post(reverse(self.view_name), {'page': '1'})
         self.assertContains(response, 'MAISIE NOLAN')
         response_content = response.content.decode(response.charset)
         self.assertIn('410.00', response_content)
-        self.assertIn('Cannot be credited', response_content)
-        for prisoner in response_data['results'][0]['prisoners']:
-            if not prisoner['prisoner_number']:
-                continue
-            self.assertIn(prisoner['prisoner_number'], response_content)
-            self.assertIn(prisoner['prisoner_name'], response_content)
 
 
 class PrisonerListTestCase(SecurityViewTestCase):
-    view_name = 'security:prisoner_grouped'
+    view_name = 'security:prisoner_list'
 
     @mock.patch('security.forms.get_connection')
     def test_displays_results(self, mocked_connection):
         response_data = {
             'count': 1,
             'previous': None,
-            'next': 'http://localhost:8000/credits/prisoners/?limit=20&offset=20&ordering=-prisoner_count',
+            'next': 'http://mtp.local/prisoners/?limit=20&offset=20&ordering=-prisoner_count',
             'results': [
                 {
-                    'prisoner_number': 'A1409AE',
-                    'prisoner_name': 'JAMES HALLS',
-                    'prison_name': 'Prison 1',
-                    'sender_count': 2,
+                    'id': 8,
                     'credit_count': 3,
                     'credit_total': 31000,
-                    'senders': [
-                        {
-                            'sender_name': 'ANJELICA HALLS',
-                            'sender_sort_code': '',
-                            'sender_account_number': '',
-                            'sender_roll_number': '',
-                            'credit_count': 1,
-                            'credit_total': 5000,
-                        },
-                        {
-                            'sender_name': 'MAISIE NOLAN',
-                            'sender_sort_code': '101010',
-                            'sender_account_number': '12312345',
-                            'sender_roll_number': '',
-                            'credit_count': 2,
-                            'credit_total': 26000,
-                        },
-                    ],
+                    'sender_count': 2,
+                    'prisoner_name': 'JAMES HALLS',
+                    'prisoner_number': 'A1409AE',
+                    'prisoner_dob': '1986-12-09',
+                    'prisons': ['PRN'],
+                    'created': '2016-05-25T20:24:00Z',
+                    'modified': '2016-05-25T20:24:00Z',
                 }
             ]
         }
-        mocked_connection().credits.prisoners.get.return_value = response_data
+        mocked_connection().prisoners.get.return_value = response_data
 
         self.login()
         response = self.client.post(reverse(self.view_name), {'page': '1'})
@@ -230,14 +187,10 @@ class PrisonerListTestCase(SecurityViewTestCase):
         response_content = response.content.decode(response.charset)
         self.assertIn('A1409AE', response_content)
         self.assertIn('310.00', response_content)
-        for sender in response_data['results'][0]['senders']:
-            self.assertIn(sender['sender_name'], response_content)
-            if sender['sender_account_number']:
-                self.assertIn(sender['sender_account_number'], response_content)
 
 
 class CreditsListTestCase(SecurityViewTestCase):
-    view_name = 'security:credits'
+    view_name = 'security:credit_list'
 
     @mock.patch('security.forms.get_connection')
     def test_displays_results(self, mocked_connection):
@@ -381,7 +334,7 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         response = self.client.get(
             reverse('security:credits_export') + '?prison=LEI'
         )
-        self.assertRedirects(response, reverse('security:credits') + '?prison=LEI')
+        self.assertRedirects(response, reverse('security:credit_list') + '?prison=LEI')
 
     @mock.patch('security.forms.get_connection')
     def test_invalid_params_redirects_to_form(self, mocked_connection):
@@ -390,4 +343,4 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         response = self.client.get(
             reverse('security:credits_export') + '?page=1&received_at__gte=LL'
         )
-        self.assertRedirects(response, reverse('security:credits'))
+        self.assertRedirects(response, reverse('security:credit_list'))
