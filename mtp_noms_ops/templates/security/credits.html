@@ -60,12 +60,12 @@
                 <td>
                   {% if credit.source == 'online' %}
                     <p class="mtp-credit__card">
-                      <strong><a href="{% url 'security:sender_list' %}?page=1&amp;sender_name={{ credit.sender_name }}">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
+                      <strong><a href="{% url 'security:sender_list' %}?page=1&amp;sender_name={{ credit.sender_name }}">{{ credit.sender_name | default:'—' }}</a></strong><br />
                       {% trans 'Debit card' %}
                     </p>
                   {% else %}
                     <p class="mtp-credit__transfer">
-                    <strong><a href="{% url 'security:sender_list' %}?page=1&amp;sender_name={{ credit.sender_name }}">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
+                    <strong><a href="{% url 'security:sender_list' %}?page=1&amp;sender_name={{ credit.sender_name }}">{{ credit.sender_name | default:'—' }}</a></strong><br />
                     {% trans 'Bank transfer' %}
                     </p>
                   {% endif %}
@@ -76,16 +76,16 @@
                 <td>
                   {% if credit.prisoner_number %}
                     <p><strong><a href="{% url 'security:credit_list' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a></strong><br />
-                    {{ credit.prisoner_name|default_if_none:'—' }}</p>
+                    {{ credit.prisoner_name|default:'—' }}</p>
                   {% endif %}
                 </td>
                 <td>
-                  <p>{{ credit.prison_name|default_if_none:'—' }}</p>
+                  <p>{{ credit.prison_name|default:'—' }}</p>
                 </td>
                 <td>
                   {% if credit.resolution == 'credited' %}
                     <p>{{ credit.credited_at.date }} <br />
-                    {% trans 'by' %} {{ credit.owner_name|default_if_none:'—' }}</p>
+                    {% trans 'by' %} {{ credit.owner_name|default:'—' }}</p>
                   {% else %}
                     <p>{% trans 'No' %}</p>
                   {% endif %}

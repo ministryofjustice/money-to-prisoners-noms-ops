@@ -114,6 +114,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         self.client = get_connection(request)
         self.page_count = 0
 
+    def clean_ordering(self):
+        return self.cleaned_data['ordering'] or self.fields['ordering'].initial
+
     def get_api_endpoint(self):
         raise NotImplementedError
 
@@ -216,10 +219,6 @@ class SendersForm(SecurityForm):
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
-
-    extra_filters = {
-        'include_invalid': 'True'
-    }
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)

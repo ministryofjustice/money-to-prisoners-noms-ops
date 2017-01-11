@@ -41,7 +41,7 @@ class SecurityFormTestCase(unittest.TestCase):
         # blank form
         expected_data = {
             'page': 1,
-            'ordering': '',
+            'ordering': '-prisoner_count',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
@@ -51,8 +51,8 @@ class SecurityFormTestCase(unittest.TestCase):
         form = SendersForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
-        self.assertDictEqual(form.get_query_data(), {})
-        self.assertEqual(form.query_string, '')
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-prisoner_count'})
+        self.assertEqual(form.query_string, 'ordering=-prisoner_count')
 
         # valid forms
         expected_data = {
@@ -84,7 +84,7 @@ class SecurityFormTestCase(unittest.TestCase):
         # blank form
         expected_data = {
             'page': 1,
-            'ordering': '',
+            'ordering': '-sender_count',
             'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
@@ -93,8 +93,8 @@ class SecurityFormTestCase(unittest.TestCase):
         form = PrisonersForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
-        self.assertDictEqual(form.get_query_data(), {})
-        self.assertEqual(form.query_string, '')
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-sender_count'})
+        self.assertEqual(form.query_string, 'ordering=-sender_count')
 
         # valid forms
         expected_data = {
@@ -125,7 +125,7 @@ class SecurityFormTestCase(unittest.TestCase):
         # blank form
         expected_data = {
             'page': 1,
-            'ordering': '',
+            'ordering': '-received_at',
             'received_at__gte': None, 'received_at__lt': None,
             'prisoner_number': '', 'prisoner_name': '',
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
@@ -135,8 +135,8 @@ class SecurityFormTestCase(unittest.TestCase):
         form = CreditsForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
-        self.assertDictEqual(form.get_query_data(), {})
-        self.assertEqual(form.query_string, '')
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-received_at'})
+        self.assertEqual(form.query_string, 'ordering=-received_at')
 
         # valid forms
         received_at__gte = datetime.date(2016, 5, 26)

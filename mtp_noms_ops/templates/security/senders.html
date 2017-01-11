@@ -55,14 +55,14 @@
                   {% if sender.bank_transfer_details %}
                   <p class="mtp-credit__transfer">
                     <a href="{% url 'security:sender_detail' sender.id %}">
-                      <strong>{{ sender.bank_transfer_details.0.sender_name|default_if_none:'—' }}</strong>
+                      <strong>{{ sender.bank_transfer_details.0.sender_name|default:'—' }}</strong>
                     </a><br />
                     {% trans 'by bank transfer' %}
                   </p>
                   {% elif sender.debit_card_details %}
                   <p class="mtp-credit__card">
                     <a href="{% url 'security:sender_detail' sender.id %}">
-                      <strong>{{ sender.debit_card_details.0.cardholder_names.0|default_if_none:'—' }}</strong>
+                      <strong>{{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}</strong>
                     </a><br />
                     {% trans 'by debit card' %}
                   </p>

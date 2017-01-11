@@ -343,4 +343,4 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         response = self.client.get(
             reverse('security:credits_export') + '?page=1&received_at__gte=LL'
         )
-        self.assertRedirects(response, reverse('security:credit_list'))
+        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
