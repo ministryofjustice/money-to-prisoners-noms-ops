@@ -230,7 +230,8 @@ class SendersForm(SecurityForm):
                                                                   title=_('All regions'))
         self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
                                                                       title=_('All types'))
-        self['prison_category'].field.choices = prison_details_choices['categories']
+        self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
+                                                                    title=_('All categories'))
 
     def clean_sender_sort_code(self):
         sender_sort_code = self.cleaned_data.get('sender_sort_code')
@@ -298,7 +299,8 @@ class PrisonersForm(SecurityForm):
                                                                   title=_('All regions'))
         self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
                                                                       title=_('All types'))
-        self['prison_category'].field.choices = prison_details_choices['categories']
+        self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
+                                                                    title=_('All categories'))
 
     def clean_credit_total__gte(self):
         credit_total__gte = self.cleaned_data.get('credit_total__gte')
@@ -401,7 +403,8 @@ class CreditsForm(SecurityForm):
                                                                   title=_('All regions'))
         self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
                                                                       title=_('All types'))
-        self['prison_category'].field.choices = prison_details_choices['categories']
+        self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
+                                                                    title=_('All categories'))
 
     def clean_amount_exact(self):
         amount_exact = self.cleaned_data.get('amount_exact')
