@@ -393,6 +393,8 @@ class CreditsForm(SecurityForm):
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
     #                          required=False)
 
+    exclusive_date_params = ['received_at__lt']
+
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
         prison_details_choices = get_prison_details_choices(self.client)
