@@ -72,9 +72,9 @@
                 </td>
                 <td>
                   {% blocktrans count count=sender.credit_count %}
-                    <strong>{{ count }}</strong> payment sent
+                    <strong>{{ count }}</strong> credit sent
                   {% plural %}
-                    <strong>{{ count }}</strong> payments sent
+                    <strong>{{ count }}</strong> credits sent
                   {% endblocktrans %}
                 </td>
                 <td>
@@ -103,8 +103,7 @@
 
         {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
       </div>
-      {% endif %}
-    </div>
+    {% endif %}
 
   </form>
 

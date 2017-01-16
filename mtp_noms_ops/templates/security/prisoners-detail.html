@@ -7,8 +7,9 @@
 
   <header>
     {% language_switch %}
+
     <h1 class="heading-xlarge">{{ prisoner.prisoner_number}} {{ prisoner.prisoner_name }}
-      <p class="lede">{% trans 'Held at ' %}{{ prisoner.current_prison.name }}</p>
+      <p class="lede">{% blocktrans with prison=prisoner.current_prison.name %}Held at {{prison}}{% endblocktrans %}</p>
     </h1>
   </header>
 
