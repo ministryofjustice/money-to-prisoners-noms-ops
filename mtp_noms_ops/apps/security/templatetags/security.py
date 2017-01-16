@@ -121,3 +121,8 @@ def credit_group_title_for_sender(context):
         credit_group_title = mark_safe('%s<br>\n<small>%s</small>' % (credit_group_title, sender_account))
 
     return credit_group_title
+
+
+@register.filter
+def list_prison_names(prisons):
+    return ', '.join((prison['name'] for prison in prisons))

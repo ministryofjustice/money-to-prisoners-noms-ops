@@ -58,7 +58,7 @@
                   <br/>
                   {{ prisoner.prisoner_name }}
                 </td>
-                <td>{{ prisoner.prisons }}</td>
+                <td>{{ prisoner.prisons|list_prison_names }}</td>
                 <td>
                   {% blocktrans count count=prisoner.credit_count %}
                     <strong>{{ count }}</strong> credit received

@@ -8,7 +8,7 @@
   <header>
     {% language_switch %}
     <h1 class="heading-xlarge">{{ prisoner.prisoner_number}} {{ prisoner.prisoner_name }}
-      <p class="lede">{% trans 'Held at ' %}{{ prisoner.prisons }}</p>
+      <p class="lede">{% trans 'Held at ' %}{{ prisoner.current_prison.name }}</p>
     </h1>
   </header>
 
