@@ -211,7 +211,7 @@ class SendersForm(SecurityForm):
     #                          required=False)
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
-    sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('eg 01-23-45'), required=False)
+    sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('for example 01-23-45'), required=False)
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
@@ -368,8 +368,8 @@ class CreditsForm(SecurityForm):
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
                                  ])
 
-    received_at__gte = forms.DateField(label=_('Received from'), help_text=_('eg 01/06/2016'), required=False)
-    received_at__lt = forms.DateField(label=_('Received to'), help_text=_('eg 01/06/2016'), required=False)
+    received_at__gte = forms.DateField(label=_('Received from'), help_text=_('for example 01/06/2016'), required=False)
+    received_at__lt = forms.DateField(label=_('Received to'), help_text=_('for example 01/06/2016'), required=False)
 
     amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
                                        choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
@@ -385,7 +385,7 @@ class CreditsForm(SecurityForm):
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
-    sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('eg 01-23-45'), required=False)
+    sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('for example 01-23-45'), required=False)
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
