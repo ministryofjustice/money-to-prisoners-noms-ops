@@ -173,7 +173,8 @@ class PrisonerListTestCase(SecurityViewTestCase):
                     'prisoner_name': 'JAMES HALLS',
                     'prisoner_number': 'A1409AE',
                     'prisoner_dob': '1986-12-09',
-                    'prisons': ['PRN'],
+                    'current_prison': {'nomis_id': 'PRN', 'name': 'Prison'},
+                    'prisons': [{'nomis_id': 'PRN', 'name': 'Prison'}],
                     'created': '2016-05-25T20:24:00Z',
                     'modified': '2016-05-25T20:24:00Z',
                 }
