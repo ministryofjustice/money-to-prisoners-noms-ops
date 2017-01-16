@@ -61,7 +61,6 @@ class SecurityDetailView(TemplateView):
         return NotImplemented
 
     def get_context_data(self, **kwargs):
-        print('here')
         context = super().get_context_data(**kwargs)
         client = get_connection(self.request)
         endpoint = self.get_api_endpoint(client)(self.kwargs[self.id_kwarg_name])
@@ -70,7 +69,6 @@ class SecurityDetailView(TemplateView):
         page = self.request.GET.get('page', 1)
         offset = (page - 1) * self.page_size
         data = endpoint.credits.get(offset=offset, limit=self.page_size)
-        print(data)
         count = data['count']
         context['page'] = page
         context['page_count'] = int(ceil(count / self.page_size))
