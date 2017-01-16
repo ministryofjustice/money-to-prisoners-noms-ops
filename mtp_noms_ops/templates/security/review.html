@@ -49,13 +49,13 @@
               <div>**** **** **** {{ credit.card_number_last_digits|default_if_none:'****' }} {{ credit.card_expiry_date|default_if_none:'' }}</div>
               <div>{% trans 'Debit card payment' %}</div>
             {% else %}
-              <div class="line1"><a href="{% url 'security:sender_grouped' %}?page=1&sender_name={{ credit.sender_name }}&sender_account_number={{ credit.sender_account_number }}&sender_sort_code={{ credit.sender_sort_code }}">{{ credit.sender_name|default_if_none:'—' }}</a></div>
+              <div class="line1"><a href="{% url 'security:sender_list' %}?page=1&sender_name={{ credit.sender_name }}&sender_account_number={{ credit.sender_account_number }}&sender_sort_code={{ credit.sender_sort_code }}">{{ credit.sender_name|default_if_none:'—' }}</a></div>
               <div>{{ credit.sender_account_number }} {{ credit.sender_sort_code|format_sort_code }}</div>
               <div>{% trans 'Bank transfer' %}</div>
             {% endif %}
           </td>
           <td class="prisoner">
-            <div class="line1"><a href="{% url 'security:prisoner_grouped' %}?page=1&prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a></div>
+            <div class="line1"><a href="{% url 'security:prisoner_list' %}?page=1&prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a></div>
             <div>{{ credit.prisoner_name }}</div>
           </td>
           <td class="numeric">&pound;{{ credit.amount|currency }}</td>

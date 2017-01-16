@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block inner_content %}
+
+  <header>
+    {% language_switch %}
+
+    <h1 class="heading-xlarge">{{ prisoner.prisoner_number}} {{ prisoner.prisoner_name }}
+      <p class="lede">{% blocktrans with prison=prisoner.current_prison.name %}Held at {{prison}}{% endblocktrans %}</p>
+    </h1>
+  </header>
+
+  <div class="grid-row mtp-prisoner-summary">
+    <div class="column-one-quarter">
+      <p>
+        {% blocktrans count count=prisoner.credit_count %}
+        <strong>{{ count }}</strong><br /> credit received
+        {% plural %}
+        <strong>{{ count }}</strong><br /> credits received
+        {% endblocktrans %}
+      </p>
+    </div>
+
+    <div class="column-one-quarter">
+      <p>
+        {% blocktrans count count=prisoner.sender_count %}
+        <strong>{{ count }}</strong><br /> sender
+        {% plural %}
+        <strong>{{ count }}</strong><br /> senders
+        {% endblocktrans %}
+      </p>
+    </div>
+
+    <div class="column-one-quarter">
+      <p>
+        {% blocktrans with total=prisoner.credit_total|currency %}
+        <strong>£{{ total }}</strong><br /> total value received
+        {% endblocktrans %}
+      </p>
+    </div>
+  </div>
+
+  <div class="mtp-prisoner-summary__results">
+    <div class="mtp-results-list">
+      <h2 class="heading-large">{% trans 'Credits received' %}</h2>
+
+      <div class="print-hidden mtp-links">
+        <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a> &nbsp;
+      </div>
+
+      <table class="mtp-results-list__table">
+        <thead>
+          <tr>
+            <th>{% trans 'Date received' %}</th>
+            <th>{% trans 'Sender and type' %}</th>
+            <th>{% trans 'Name entered by sender' %}</th>
+            <th class="number">{% trans 'Amount' %}</th>
+            <th>{% trans 'Received at prison' %}</th>
+            <th>{% trans 'Credited status' %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for credit in credits|parse_date_fields %}
+            <tr class="mtp-results-list__table--prisoners">
+              <td>
+                <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
+              </td>
+              </td>
+              <td>
+                {% if credit.source == 'online' %}
+                  <p class="mtp-credit__card">
+                    <strong><a href="{% url 'security:sender_list' %}?page=1&amp;sender_name={{ credit.sender_name }}">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
+                    {% trans 'by debit card' %} <br />
+                    —
+                  </p>
+                {% else %}
+                  <p class="mtp-credit__transfer">
+                  <strong><a href="{% url 'security:sender_list' %}?page=1&amp;sender_name={{ credit.sender_name }}">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
+                  {% trans 'by bank transfer' %} <br />
+                  —
+                  </p>
+                {% endif %}
+              </td>
+              <td><p>{{ credit.intended_recipient | default_if_none:'—' }}</p></td>
+              <td class="number">
+                <p>£{{ credit.amount|currency }}</p>
+              </td>
+              <td>
+                <p>{{ credit.prison_name|default_if_none:'—' }}</p>
+              </td>
+              <td>
+                {% if credit.resolution == 'credited' %}
+                  <p>{{ credit.credited_at.date }} <br />
+                  {% trans 'by' %} {{ credit.owner_name|default_if_none:'—' }}</p>
+                {% else %}
+                  <p>{% trans 'No' %}</p>
+                {% endif %}
+              </td>
+            </tr>
+
+            {% if credit.source == 'bank_transfer' %}
+
+            <tr class="mtp-results-list__table--details">
+              <td>
+              </td>
+              <td colspan="6">
+                <div class="grid-row mtp-credit-details">
+                  <div class="column-one-third mtp-credit-details__acc-no">
+                    <strong>{{ credit.sender_account_number }}</strong>
+                    <p>{% trans 'Account number' %}</p>
+                  </div>
+                  <div class="column-one-third mtp-credit-details__sort-code">
+                    <strong>{{ credit.sender_sort_code}}</strong>
+                    <p>{% trans 'Sort code' %}</p>
+                  </div>
+                  <div class="column-one-third mtp-credit-details__roll-no">
+                    <strong>{{ credit.sender_roll_number|default:'—'}}</strong>
+                    <p>{% trans 'Building society roll number' %}</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            {% else %}
+
+            <tr class="mtp-results-list__table--details">
+            <td>
+
+            </td>
+            <td colspan="6">
+              <div class="grid-row mtp-credit-details">
+                <div class="column-one-third mtp-credit-details__card">
+                  <strong>**** **** **** {{ credit.card_number_last_digits }}</strong>
+                  <p>{% trans 'Last 4 card digits' %}</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          {% endif %}
+
+          {% empty %}
+            <tr class="no-border">
+              <td colspan="7">{% trans 'No matching credits found' %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% page_list page=page page_count=page_count %}
+  </div>
+
+{% endblock %}

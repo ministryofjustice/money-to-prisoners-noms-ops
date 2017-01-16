@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block inner_content %}
+
+  <header>
+    {% language_switch %}
+    <h1 class="heading-xlarge">{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <form method="get">
+    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+
+    <input type="hidden" name="page" value="1">
+
+    <div class="print-hidden">
+      <h2 class="heading-medium">{% trans 'Filter by' %}</h2>
+      {% include view.form_template_name with view=view form=form only %}
+    </div>
+
+    {% if form.cleaned_data %}
+      <div class="mtp-results-list">
+        <h2 class="heading-medium">{% trans 'Showing prisoners by number of senders' %}</h2>
+
+        <p class="mtp-search-description__text">
+          {{ form.search_description }}
+        </p>
+
+        <div class="print-hidden mtp-links">
+          <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
+        </div>
+
+        <div class="print-hidden">
+          {% include 'security/select-field.html' with field=form.ordering only %}
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>{% trans 'Prisoner' %}</th>
+              <th>{% trans 'Prison' %}</th>
+              <th>{% trans 'Received' %}</th>
+              <th>{% trans 'Senders' %}</th>
+              <th class="number">{% trans 'Amount' %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prisoner in prisoners %}
+              <tr {% if forloop.last %}class="no-border"{% endif %}>
+                <td>
+                  <a href="{% url 'security:prisoner_detail' prisoner.id %}">
+                  <strong>{{ prisoner.prisoner_number }}</strong>
+                  </a>
+                  <br/>
+                  {{ prisoner.prisoner_name }}
+                </td>
+                <td>{{ prisoner.prisons|list_prison_names }}</td>
+                <td>
+                  {% blocktrans count count=prisoner.credit_count %}
+                    <strong>{{ count }}</strong> credit received
+                  {% plural %}
+                    <strong>{{ count }}</strong> credits received
+                  {% endblocktrans %}
+                </td>
+                <td>
+                  {% blocktrans count count=prisoner.sender_count %}
+                    <strong>{{ count }}</strong> sender
+                  {% plural %}
+                    <strong>{{ count }}</strong> senders
+                  {% endblocktrans %}
+                </td>
+                <td class="number"><strong>£{{ prisoner.credit_total|currency }}</strong></td>
+              </tr>
+            {% empty %}
+              <tr class="no-border">
+                <td colspan="7">{% trans 'No matching credits found' %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+      </div>
+    {% endif %}
+
+  </form>
+
+{% endblock %}

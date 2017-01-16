@@ -17,9 +17,9 @@
     <ul id="proposition-links" class="print-hidden">
       <li><a href="{% url 'dashboard' %}">{% trans 'Home' %}</a></li>
       {% if request.can_access_security %}
-        <li><a href="{% url 'security:credits' %}">{% trans 'Credits' %}</a></li>
-        <li><a href="{% url 'security:sender_grouped' %}">{% trans 'Senders' %}</a></li>
-        <li><a href="{% url 'security:prisoner_grouped' %}">{% trans 'Prisoners' %}</a></li>
+        <li><a href="{% url 'security:credit_list' %}?page=1">{% trans 'Credits' %}</a></li>
+        <li><a href="{% url 'security:sender_list' %}?page=1">{% trans 'Senders' %}</a></li>
+        <li><a href="{% url 'security:prisoner_list' %}?page=1">{% trans 'Prisoners' %}</a></li>
       {% endif %}
       <li><a href="{% url 'password_change' %}">{% trans 'Change password' %}</a></li>
       <li><a href="{% url 'logout' %}">{% trans 'Sign out' %}</a></li>
