@@ -73,6 +73,11 @@
       display: block;
     }
   }
+
+  a:link:after, a:visited:after {
+    content: "";
+    display: none;
+  }
 }
 
 .mtp-credit-detail__row {
