@@ -1,8 +1,6 @@
 // Security module
 'use strict';
 
-var collapsingTable = require('collapsing-table');
-
 exports.SecurityForms = {
   init: function () {
     $('#id_ordering').change(function () {
@@ -10,11 +8,6 @@ exports.SecurityForms = {
     });
 
     this.bindAmountPatternSelection();
-    this.bindCreditDetailLoading();
-
-    if ($('.CollapsingTable').length > 1) {
-      collapsingTable.CollapsingTable.collapseAll();
-    }
   },
 
   bindAmountPatternSelection: function () {
@@ -40,71 +33,5 @@ exports.SecurityForms = {
 
     $patternSelect.change(update);
     update();
-  },
-
-  bindCreditDetailLoading: function () {
-    var creditRowClass = 'mtp-credit-detail__row';
-
-    function creditToggle (e) {
-      var $detailsLink = $(e.target);
-      var showTitle = $detailsLink.data('show-title');
-      var loadingTitle = $detailsLink.data('loading-title');
-      var hideTitle = $detailsLink.data('hide-title');
-      var state = $detailsLink.data('credit-detail');
-
-      function loadCreditDetails (html) {
-        var $thisRow = $detailsLink.closest('tr').addClass('no-border');
-        var $creditRow = $('<tr></tr>').addClass(creditRowClass).addClass($thisRow.attr('class'));
-        var $creditCell = $('<td></td>');
-
-        $creditRow.append(
-          $creditCell.append($(html)).attr('colspan', 100)
-        );
-        $thisRow.after($creditRow);
-
-        $detailsLink
-          .text(hideTitle)
-          .data('credit-detail', 'loaded')
-          .attr('aria-expanded', 'true');
-      }
-
-      function removeCreditDetails () {
-        var $thisRow = $detailsLink.closest('tr').removeClass('no-border');
-        var $creditDetailsRow = $thisRow.next();
-
-        if ($creditDetailsRow.hasClass(creditRowClass)) {
-          $creditDetailsRow.remove();
-        }
-        $detailsLink
-          .text(showTitle)
-          .data('credit-detail', '')
-          .attr('aria-expanded', 'false');
-      }
-
-      e.preventDefault();
-      if (state === 'loaded') {
-        // remove credit details
-
-        removeCreditDetails();
-      } else if (state !== 'loading') {
-        // load credit details
-
-        $detailsLink.text(loadingTitle);
-        $detailsLink.data('credit-detail', 'loading');
-        $.ajax({
-          url: $detailsLink.data('ajax-url'),
-          dataType: 'html'
-        }).then(
-          // load credit details table if ajax works
-          loadCreditDetails,
-          // remove credit details if fails to load
-          removeCreditDetails
-        );
-      }
-    }
-
-    $('.mtp-credit-detail__link').each(function () {
-      $(this).click(creditToggle);
-    });
   }
 };

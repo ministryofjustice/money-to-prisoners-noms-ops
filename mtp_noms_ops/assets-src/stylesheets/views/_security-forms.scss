@@ -25,33 +25,6 @@
   }
 }
 
-.mtp-results-form__wrapper {
-  background: $grey-3;
-  padding-bottom: 1em;
-  padding-top: .5em;
-
-  input, select {
-    // GDS style override since form elements inherit background
-    background: $page-colour;
-  }
-
-  @include breakpoint($mobile) {
-    padding-top: .8em;
-  }
-
-  h2 {
-    margin-top: 0;
-  }
-
-  .mtp-results-form__submit {
-    float: none;
-  }
-
-  @media print {
-    display: none;
-  }
-}
-
 .mtp-results-list {
   width: 100%;
   margin-top: 2.5em;
@@ -246,41 +219,4 @@ tbody tr.mtp-credit-detail__row table {
 
 .hidden {
   display: none;
-}
-
-// mtp-common overrides
-
-.CollapsingTableHeader {
-  background: $panel-colour;
-  font-weight: normal;
-  min-height: 2em;
-
-  &.mtp-sender__header {
-    background: #CDE2B7;
-  }
-
-  &.mtp-prisoner__header {
-    background: #FDE4D4;
-  }
-
-  .CollapsingTableHeader-below {
-    font-size: .75em;
-  }
-
-  .CollapsingTableHeader-aside-right {
-    top: 1.2em;
-  }
-
-  strong {
-    font-weight: bold;
-  }
-
-  .mtp-grouped-results__sender-details {
-    line-height: 1em;
-    text-align: right;
-
-    small {
-      font-size: .75em;
-    }
-  }
 }
