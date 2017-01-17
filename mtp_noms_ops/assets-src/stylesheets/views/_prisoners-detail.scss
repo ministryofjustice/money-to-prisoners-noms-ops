@@ -1,4 +1,18 @@
+.mtp-prisoner-summary {
+  @media print {
+    .column-one-quarter {
+      display: inline-block;
+    }
+  }
+}
+
 .mtp-prisoner-summary__results {
+  @media print {
+    .column-one-third {
+      display: inline-block;
+      width: 100%;
+    }
+  }
   .mtp-results-list__table--prisoners td {
     padding-bottom: 0;
   }
