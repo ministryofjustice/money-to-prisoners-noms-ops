@@ -71,21 +71,21 @@
                   {% endif %}
                 </td>
                 <td>
-                  {% blocktrans count count=sender.credit_count %}
+                  {% blocktrans trimmed count count=sender.credit_count %}
                     <strong>{{ count }}</strong> credit sent
                   {% plural %}
                     <strong>{{ count }}</strong> credits sent
                   {% endblocktrans %}
                 </td>
                 <td>
-                  {% blocktrans count count=sender.prisoner_count %}
+                  {% blocktrans trimmed count count=sender.prisoner_count %}
                     <strong>{{ count }}</strong> prisoner
                   {% plural %}
                     <strong>{{ count }}</strong> prisoners
                   {% endblocktrans %}
                 </td>
                 <td>
-                  {% blocktrans count count=sender.prison_count %}
+                  {% blocktrans trimmed count count=sender.prison_count %}
                     <strong>{{ count }}</strong> prison
                   {% plural %}
                     <strong>{{ count }}</strong> prisons
