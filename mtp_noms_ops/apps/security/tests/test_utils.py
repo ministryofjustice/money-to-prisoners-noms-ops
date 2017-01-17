@@ -12,7 +12,7 @@ class UtilTestCase(unittest.TestCase):
         self.assertEqual(currency(123500), '1,235.00')
 
     def test_sort_code_formatting(self):
-        self.assertEqual(format_sort_code(None), '')
-        self.assertEqual(format_sort_code(''), '')
+        self.assertEqual(format_sort_code(None), '—')
+        self.assertEqual(format_sort_code(''), '—')
         self.assertEqual(format_sort_code('123456'), '12-34-56')
         self.assertEqual(format_sort_code('1234567'), '1234567')

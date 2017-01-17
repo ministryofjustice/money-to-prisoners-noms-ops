@@ -20,80 +20,92 @@
     </h1>
   </header>
 
-  <div class="grid-row mtp-sender-summary">
+  <div class="mtp-sender-summary">
     {% if sender.bank_transfer_details %}
-    <div class="mtp-sender-summary__transfer">
-      <div class="column-one-third col-1">
-        <strong>{{ sender.bank_transfer_details.0.sender_account_number|default:'—' }}</strong>
-        <p>{% trans 'Account number' %}</p>
+
+      <div class="grid-row mtp-sender-summary__details mtp-sender-summary__bank-transfer">
+        <div class="column-one-third col-1">
+          <strong>{{ sender.bank_transfer_details.0.sender_account_number|default:'—' }}</strong>
+          <p>{% trans 'Account number' %}</p>
+        </div>
+        <div class="column-one-third col-2">
+          <strong>{{ sender.bank_transfer_details.0.sender_sort_code|format_sort_code }}</strong>
+          <p>{% trans 'Sort code' %}</p>
+        </div>
+        {% if sender.bank_transfer_details.0.sender_roll_number %}
+          <div class="column-one-third col-3">
+            <strong>{{ sender.bank_transfer_details.0.sender_roll_number }}</strong>
+            <p>{% trans 'Roll number (for building societies)' %}</p>
+          </div>
+        {% endif %}
       </div>
-      <div class="column-one-third col-2">
-        <strong>{{ sender.bank_transfer_details.0.sender_sort_code|default:'—' }}</strong>
-        <p>{% trans 'Sort code' %}</p>
-      </div>
-      <div class="column-one-third col-3">
-        <strong>{{ sender.bank_transfer_details.0.sender_roll_number|default:'—' }}</strong>
-        <p>{% trans 'Roll number (for building societies)' %}</p>
-      </div>
+
     {% elif sender.debit_card_details %}
-    <div class="grid-row mtp-sender-summary__debit">
-      <div class="column-one-third">
-        <strong>**** **** **** {{ sender.debit_card_details.0.card_number_last_digits|default_if_none:'—' }}</strong>
-        <p>{% trans 'Card number' %}</p>
-      </div>
-      <div class="column-two-thirds">
+
+      <div class="grid-row mtp-sender-summary__details mtp-sender-summary__debit-card">
         <div class="column-one-third">
-          <strong>{{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}</strong>
-          <p>{% trans 'Expiry date' %}</p>
+          <strong>{{ sender.debit_card_details.0.card_number_last_digits|format_card_number }}</strong>
+          <p>{% trans 'Card number' %}</p>
         </div>
         <div class="column-two-thirds">
-          <strong>{{ sender.debit_card_details.0.sender_emails.0 |default_if_none:'—' }}</strong>
-          <p>{% trans 'Email' %}</p>
+          <div class="column-one-third">
+            <strong>{{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}</strong>
+            <p>{% trans 'Expiry date' %}</p>
+          </div>
+          <div class="column-two-thirds">
+            <strong>{{ sender.debit_card_details.0.sender_emails.0 |default_if_none:'—' }}</strong>
+            <p>{% trans 'Email' %}</p>
+          </div>
         </div>
       </div>
+
     {% else %}
-    <p>—</p>
+
+      <p>—</p>
+
     {% endif %}
 
-    <div class="column-one-third col-1">
-      <p>
-        {% blocktrans count count=sender.credit_count %}
-        <strong>{{ count }}</strong><br />credit sent
-        {% plural %}
-        <strong>{{ count }}</strong><br /> credits sent
-        {% endblocktrans %}
-      </p>
-    </div>
-
-    <div class="column-one-third col-2">
-      <p>
-        {% blocktrans count count=sender.prisoner_count %}
-        <strong>{{ count }}</strong><br /> prisoner
-        {% plural %}
-        <strong>{{ count }}</strong><br /> prisoners
-        {% endblocktrans %}
-      </p>
-    </div>
-
-    <div class="column-one-third col-3">
-      <div class="column-one-half">
+    <div class="grid-row mtp-sender-summary__details">
+      <div class="column-one-third col-1">
         <p>
-          {% blocktrans count count=sender.prison_count %}
-          <strong>{{ count }}</strong><br /> prison
+          {% blocktrans count count=sender.credit_count %}
+          <strong>{{ count }}</strong><br />credit sent
           {% plural %}
-          <strong>{{ count }}</strong><br /> prisons
+          <strong>{{ count }}</strong><br /> credits sent
           {% endblocktrans %}
         </p>
       </div>
-      <div class="column-one-half">
+
+      <div class="column-one-third col-2">
         <p>
-          {% blocktrans with total=sender.credit_total|currency %}
-          <strong>£{{ total }}</strong><br /> total value sent
+          {% blocktrans count count=sender.prisoner_count %}
+          <strong>{{ count }}</strong><br /> prisoner
+          {% plural %}
+          <strong>{{ count }}</strong><br /> prisoners
           {% endblocktrans %}
         </p>
+      </div>
+
+      <div class="column-one-third col-3">
+        <div class="column-one-half">
+          <p>
+            {% blocktrans count count=sender.prison_count %}
+            <strong>{{ count }}</strong><br /> prison
+            {% plural %}
+            <strong>{{ count }}</strong><br /> prisons
+            {% endblocktrans %}
+          </p>
+        </div>
+        <div class="column-one-half">
+          <p>
+            {% blocktrans with total=sender.credit_total|currency %}
+            <strong>£{{ total }}</strong><br /> total value sent
+            {% endblocktrans %}
+          </p>
+        </div>
       </div>
     </div>
-  </div>
+
 </div>
 
   <div class="mtp-results-list">
@@ -119,7 +131,6 @@
             <td>
               <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
             </td>
-            </td>
             <td>
               {% if credit.prisoner_number %}
                 <p><strong><a href="{% url 'security:prisoner_list' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a></strong><br />
@@ -134,8 +145,10 @@
             </td>
             <td>
               {% if credit.resolution == 'credited' %}
-                <p>{{ credit.credited_at.date }} <br />
-                {% trans 'by' %} {{ credit.owner_name|default_if_none:'—' }}</p>
+                <p>
+                  {{ credit.credited_at.date }} <br />
+                  {% blocktrans with clerk_name=credit.owner_name|default_if_none:'—' %}by {{ clerk_name }}{% endblocktrans %}
+                </p>
               {% else %}
                 <p>{% trans 'No' %}</p>
               {% endif %}
@@ -143,7 +156,7 @@
           </tr>
         {% empty %}
           <tr class="no-border">
-            <td colspan="7">{% trans 'No matching credits found' %}</td>
+            <td colspan="5">{% trans 'No matching credits found' %}</td>
           </tr>
         {% endfor %}
       </tbody>
