@@ -52,7 +52,12 @@ def parse_date_fields(credits):
 def format_sort_code(sort_code):
     if sort_code and len(sort_code) == 6:
         return '%s-%s-%s' % (sort_code[0:2], sort_code[2:4], sort_code[4:6])
-    return sort_code or ''
+    return sort_code or '—'
+
+
+@register.filter
+def format_card_number(card_number_last_digits):
+    return '**** **** **** %s' % (card_number_last_digits or '****')
 
 
 @register.filter

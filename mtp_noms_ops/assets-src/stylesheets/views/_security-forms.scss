@@ -145,8 +145,8 @@ tbody tr.mtp-credit-detail__row table {
   padding-left: 2.5em;
 
   @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
-    background-image: url('icon-card-2x.png');
-    background-size: 30px 39px;
+    background-image: url('/static/images/icon-card-2x.png');
+    background-size: 30px 30px;
   }
 }
 
@@ -160,8 +160,8 @@ tbody tr.mtp-credit-detail__row table {
   padding-left: 2.5em;
 
   @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
-    background-image: url('icon-bank-2x.png');
-    background-size: 30px 39px;
+    background-image: url('/static/images/icon-bank-2x.png');
+    background-size: 30px 30px;
   }
 }
 

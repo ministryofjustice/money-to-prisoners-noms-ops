@@ -18,37 +18,29 @@
   }
 }
 
-
-.mtp-sender-summary__transfer {
-
+.mtp-sender-summary__details {
+  display: inline-block;
   margin-top: 1em;
   margin-left: 0;
-  width: 70%;
-
-  background: url('/static/images/icon-bank-2x.png') no-repeat scroll 0 0;
-  display: inline-block;
   min-height: 2.5em;
   padding-left: 4em;
+  width: 70%;
+}
+
+.mtp-sender-summary__bank-transfer {
+  background: url('/static/images/icon-bank.png') no-repeat scroll 0 0;
 
   @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
     background-image: url('/static/images/icon-bank-2x.png');
-    background-size: 30px 39px;
+    background-size: 30px 30px;
   }
 }
 
-.mtp-sender-summary__debit {
-
-  margin-top: 1em;
-  margin-left: 0;
-  width: 70%;
-
-  background: url('/static/images/icon-card-2x.png') no-repeat scroll 0 0;
-  display: inline-block;
-  min-height: 2.5em;
-  padding-left: 4em;
+.mtp-sender-summary__debit-card {
+  background: url('/static/images/icon-card.png') no-repeat scroll 0 0;
 
   @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
-    background-image: url('/static/images/icon-bank-2x.png');
-    background-size: 30px 39px;
+    background-image: url('/static/images/icon-card-2x.png');
+    background-size: 30px 30px;
   }
 }

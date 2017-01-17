@@ -21,75 +21,74 @@
 
 <div class="mtp-review">
   {% if credits %}
-  <form method="post" action="" class="js-ConfirmChecked">
-    {% csrf_token %}
+    <form method="post" action="" class="js-ConfirmChecked">
+      {% csrf_token %}
 
-    <div class="actions print-hidden">
-      <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
-      <a class="js-Print" href="#print-dialog">{% trans 'Print these credits' %}</a>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>{% trans 'Sender' %}</th>
-          <th>{% trans 'Prisoner' %}</th>
-          <th>{% trans 'Amount' %}</th>
-          <th>{% trans 'Security comments' %}</th>
-        </tr>
-      </thead>
-
-      <tbody>
-      {% for credit in credits %}
-        <tr valign="top">
-          <td class="sender">
-            {% if credit.source == 'online' %}
-              <div class="line1">{{ credit.sender_name|default_if_none:'—' }}</div>
-              <div>{{ credit.sender_email|default_if_none:'—' }}</div>
-              <div>**** **** **** {{ credit.card_number_last_digits|default_if_none:'****' }} {{ credit.card_expiry_date|default_if_none:'' }}</div>
-              <div>{% trans 'Debit card payment' %}</div>
-            {% else %}
-              <div class="line1"><a href="{% url 'security:sender_list' %}?page=1&sender_name={{ credit.sender_name }}&sender_account_number={{ credit.sender_account_number }}&sender_sort_code={{ credit.sender_sort_code }}">{{ credit.sender_name|default_if_none:'—' }}</a></div>
-              <div>{{ credit.sender_account_number }} {{ credit.sender_sort_code|format_sort_code }}</div>
-              <div>{% trans 'Bank transfer' %}</div>
-            {% endif %}
-          </td>
-          <td class="prisoner">
-            <div class="line1"><a href="{% url 'security:prisoner_list' %}?page=1&prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a></div>
-            <div>{{ credit.prisoner_name }}</div>
-          </td>
-          <td class="numeric">&pound;{{ credit.amount|currency }}</td>
-          <td><textarea class="form-control" rows="4" name="comment_{{ credit.id }}"></textarea></td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-
-    <div class="actions print-hidden">
-      <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
-    </div>
-
-    <div id="confirm-checked"
-         class="Dialog u-nojs-hidden"
-         style="display: none"
-         data-hide-close="true"
-         data-disable-backdrop-close="true">
-      <div class="Dialog-inner">
-        <p><strong>{% trans 'Have you checked these credits?' %}</strong></p>
-        <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
-        <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
-        <button type="submit"
-                class="button"
-                value="override">{% trans 'Yes, all credits checked' %}</button>
-        <button type="button"
-                class="button button-secondary js-Dialog-close">{% trans 'No, continue checking' %}</button>
+      <div class="actions print-hidden">
+        <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
+        <a class="js-Print" href="#print-dialog">{% trans 'Print these credits' %}</a>
       </div>
-    </div>
-  </form>
-</div>
-{% else %}
-{% trans 'No new credits for review.' %}
-{% endif %}
 
+      <table>
+        <thead>
+          <tr>
+            <th>{% trans 'Sender' %}</th>
+            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Amount' %}</th>
+            <th>{% trans 'Security comments' %}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for credit in credits %}
+            <tr valign="top">
+              <td class="sender">
+                {% if credit.source == 'online' %}
+                  <div class="line1">{{ credit.sender_name|default_if_none:'—' }}</div>
+                  <div>{{ credit.sender_email|default_if_none:'—' }}</div>
+                  <div>{{ credit.card_number_last_digits|format_card_number }} {{ credit.card_expiry_date|default_if_none:'' }}</div>
+                  <div>{% trans 'Debit card payment' %}</div>
+                {% else %}
+                  <div class="line1"><a href="{% url 'security:sender_list' %}?page=1&amp;sender_name={{ credit.sender_name }}&amp;sender_account_number={{ credit.sender_account_number }}&amp;sender_sort_code={{ credit.sender_sort_code }}">{{ credit.sender_name|default_if_none:'—' }}</a></div>
+                  <div>{{ credit.sender_account_number }} {{ credit.sender_sort_code|format_sort_code }}</div>
+                  <div>{% trans 'Bank transfer' %}</div>
+                {% endif %}
+              </td>
+              <td class="prisoner">
+                <div class="line1"><a href="{% url 'security:prisoner_list' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a></div>
+                <div>{{ credit.prisoner_name }}</div>
+              </td>
+              <td class="numeric">&pound;{{ credit.amount|currency }}</td>
+              <td><textarea class="form-control" rows="4" name="comment_{{ credit.id }}"></textarea></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="actions print-hidden">
+        <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
+      </div>
+
+      <div id="confirm-checked"
+           class="Dialog u-nojs-hidden"
+           style="display: none"
+           data-hide-close="true"
+           data-disable-backdrop-close="true">
+        <div class="Dialog-inner">
+          <p><strong>{% trans 'Have you checked these credits?' %}</strong></p>
+          <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
+          <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
+          <button type="submit"
+                  class="button"
+                  value="override">{% trans 'Yes, all credits checked' %}</button>
+          <button type="button"
+                  class="button button-secondary js-Dialog-close">{% trans 'No, continue checking' %}</button>
+        </div>
+      </div>
+    </form>
+  {% else %}
+    {% trans 'No new credits for review.' %}
+  {% endif %}
+</div>
 
 {% endblock %}
