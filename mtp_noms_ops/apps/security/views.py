@@ -66,7 +66,12 @@ class SecurityDetailView(TemplateView):
         endpoint = self.get_api_endpoint(client)(self.kwargs[self.id_kwarg_name])
 
         context[self.object_name] = endpoint.get()
-        page = self.request.GET.get('page', 1)
+        try:
+            page = int(self.request.GET.get('page', 1))
+            if page < 1:
+                raise ValueError
+        except ValueError:
+            page = 1
         offset = (page - 1) * self.page_size
         data = endpoint.credits.get(offset=offset, limit=self.page_size)
         count = data['count']
