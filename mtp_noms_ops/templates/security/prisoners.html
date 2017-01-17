@@ -60,14 +60,14 @@
                 </td>
                 <td>{{ prisoner.prisons|list_prison_names }}</td>
                 <td>
-                  {% blocktrans count count=prisoner.credit_count %}
+                  {% blocktrans trimmed count count=prisoner.credit_count %}
                     <strong>{{ count }}</strong> credit received
                   {% plural %}
                     <strong>{{ count }}</strong> credits received
                   {% endblocktrans %}
                 </td>
                 <td>
-                  {% blocktrans count count=prisoner.sender_count %}
+                  {% blocktrans trimmed count count=prisoner.sender_count %}
                     <strong>{{ count }}</strong> sender
                   {% plural %}
                     <strong>{{ count }}</strong> senders
