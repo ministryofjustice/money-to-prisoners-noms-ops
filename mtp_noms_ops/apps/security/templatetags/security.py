@@ -45,7 +45,7 @@ def parse_date_fields(credits):
                     pass
         return credit
 
-    return map(convert, credits)
+    return map(convert, credits) if credits else credits
 
 
 @register.filter
