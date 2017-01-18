@@ -56,6 +56,12 @@ def get_prison_details_choices(client):
     }
 
 
+def get_credit_source_choices():
+    return insert_blank_option(
+        [('bank_transfer', _('Bank transfers')), ('online', _('Debit card payments'))]
+    )
+
+
 def insert_blank_option(choices, title=_('Select an option')):
     new_choices = [('', title)]
     new_choices.extend(choices)
@@ -219,6 +225,8 @@ class SendersForm(SecurityForm):
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
+
+    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices())
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
@@ -389,6 +397,8 @@ class CreditsForm(SecurityForm):
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
+
+    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices())
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
     #                          required=False)
