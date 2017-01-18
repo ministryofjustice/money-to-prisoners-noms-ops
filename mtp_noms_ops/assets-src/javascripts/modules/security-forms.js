@@ -8,6 +8,7 @@ exports.SecurityForms = {
     });
 
     this.bindAmountPatternSelection();
+    this.bindPaymentSourceSelection();
   },
 
   bindAmountPatternSelection: function () {
@@ -32,6 +33,35 @@ exports.SecurityForms = {
     }
 
     $patternSelect.change(update);
+    update();
+  },
+
+  bindPaymentSourceSelection: function () {
+    var $paymentSourceSelect = $('#id_source');
+    var $senderAccountNumber = $('#id_sender_account_number-wrapper');
+    var $senderSortCode = $('#id_sender_sort_code-wrapper');
+    var $cardNumberLastDigits = $('#id_card_number_last_digits-wrapper');
+
+    function update () {
+      switch ($paymentSourceSelect.val()) {
+        case 'bank_transfer':
+          $senderAccountNumber.show();
+          $senderSortCode.show();
+          $cardNumberLastDigits.hide();
+          break;
+        case 'online':
+          $senderAccountNumber.hide();
+          $senderSortCode.hide();
+          $cardNumberLastDigits.show();
+          break;
+        default:
+          $senderAccountNumber.hide();
+          $senderSortCode.hide();
+          $cardNumberLastDigits.hide();
+      }
+    }
+
+    $paymentSourceSelect.change(update);
     update();
   }
 };

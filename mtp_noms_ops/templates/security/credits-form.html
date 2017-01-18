@@ -49,19 +49,15 @@
 
       <div role="tabpanel" aria-labelledby="senderTab" id="sender" class="tabcontent hidden">
         <div class="grid-row">
-          <div class="column-full">
+          <div class="column-one-third">
+            {% include 'mtp_common/forms/select-field.html' with field=form.source %}
             {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
           </div>
-          <div class="column-one-third narrow">
+          <div class="column-two-thirds">
             {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
-          </div>
-          <div class="column-one-third narrow">
             {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
           </div>
-          <div class="column-narrow">
-            {% trans 'or' %}
-          </div>
-          <div class="column-one-third narrow">
+          <div class="column-two-thirds">
             {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
           </div>
           <div class="column-full">

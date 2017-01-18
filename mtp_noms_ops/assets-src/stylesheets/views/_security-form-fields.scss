@@ -5,23 +5,16 @@
   width: 100%;
 }
 
+#id_source {
+  width: 100%;
+}
+
 #id_sender_account_number {
   width: 10em;
 }
 
 #id_card_number_last_digits-wrapper {
-  display: inline-block;
   width: 14em;
-}
-
-#id_sender_name-wrapper {
-  width: 18em;
-  display: inline-block;
-}
-
-#id_sender_account_number-wrapper {
-  width: 12em;
-  display: inline-block;
 }
 
 #id_prisoner_name {
@@ -79,4 +72,13 @@
 
 .mtp-results-form__submit {
   margin-bottom: .3em;
+}
+
+.mtp-security-form {
+  #id_sender_account_number-wrapper,
+  #id_sender_sort_code-wrapper,
+  #id_card_number_last_digits-wrapper {
+    padding-left: 1em;
+    display: none;
+  }
 }
