@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MTP noms-ops\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-17 12:45+0000\n"
+"POT-Creation-Date: 2017-01-19 17:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Igor U <igor.ushkarev@digital.justice.gov.uk>, 2016\n"
 "Language-Team: Welsh (https://www.transifex.com/ministry-of-justice/teams/34553/cy/)\n"
@@ -70,271 +70,283 @@ msgid_plural "%d prisoner locations updated successfully"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/security/forms.py:59
+#: apps/security/forms.py:61
+msgid "Bank transfers"
+msgstr ""
+
+#: apps/security/forms.py:61
+msgid "Debit card payments"
+msgstr ""
+
+#: apps/security/forms.py:65
 msgid "Select an option"
 msgstr ""
 
-#: apps/security/forms.py:67
+#: apps/security/forms.py:73
 msgid "Invalid amount"
 msgstr ""
 
-#: apps/security/forms.py:72
+#: apps/security/forms.py:78
 msgid "Invalid prisoner number"
 msgstr ""
 
-#: apps/security/forms.py:89
+#: apps/security/forms.py:95
 msgid "Must be greater than the lower bound"
 msgstr ""
 
-#: apps/security/forms.py:99
+#: apps/security/forms.py:105
 msgid "Must be after the start date"
 msgstr ""
 
-#: apps/security/forms.py:179
+#: apps/security/forms.py:185
 msgid "{} is <strong>{}</strong>"
 msgstr ""
 
-#: apps/security/forms.py:180
+#: apps/security/forms.py:186
 msgid "Filtering results: {}."
 msgstr ""
 
-#: apps/security/forms.py:182
+#: apps/security/forms.py:188
 msgid "Showing all results."
 msgstr ""
 
-#: apps/security/forms.py:186
+#: apps/security/forms.py:192
 #, python-format
 msgid "Ordered by %s."
 msgstr ""
 
-#: apps/security/forms.py:190
+#: apps/security/forms.py:196
 msgid "Must be larger than the minimum prisoners"
 msgstr ""
 
-#: apps/security/forms.py:191 apps/security/forms.py:260
+#: apps/security/forms.py:197 apps/security/forms.py:268
 msgid "Must be larger than the minimum credits"
 msgstr ""
 
-#: apps/security/forms.py:192 apps/security/forms.py:261
+#: apps/security/forms.py:198 apps/security/forms.py:269
 msgid "Must be larger than the minimum total"
 msgstr ""
 
-#: apps/security/forms.py:194 apps/security/forms.py:263
-#: apps/security/forms.py:362
+#: apps/security/forms.py:200 apps/security/forms.py:271
+#: apps/security/forms.py:370
 msgid "Sort by"
 msgstr ""
 
-#: apps/security/forms.py:197
+#: apps/security/forms.py:203
 msgid "Number of prisoners (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:198 apps/security/forms.py:267
+#: apps/security/forms.py:204 apps/security/forms.py:275
 msgid "Number of credits (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:199
+#: apps/security/forms.py:205
 msgid "Total sent (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:200
+#: apps/security/forms.py:206
 msgid "Sender name (A to Z)"
 msgstr ""
 
-#: apps/security/forms.py:203
+#: apps/security/forms.py:209
 msgid "Number of prisoners (minimum)"
 msgstr ""
 
-#: apps/security/forms.py:204
+#: apps/security/forms.py:210
 msgid "Maximum prisoners sent to"
 msgstr ""
 
-#: apps/security/forms.py:205
+#: apps/security/forms.py:211
 msgid "Minimum credits sent"
 msgstr ""
 
-#: apps/security/forms.py:206
+#: apps/security/forms.py:212
 msgid "Maximum credits sent"
 msgstr ""
 
-#: apps/security/forms.py:207
+#: apps/security/forms.py:213
 msgid "Minimum total sent"
 msgstr ""
 
-#: apps/security/forms.py:208
+#: apps/security/forms.py:214
 msgid "Maximum total sent"
 msgstr ""
 
-#: apps/security/forms.py:213 apps/security/forms.py:387
+#: apps/security/forms.py:219 apps/security/forms.py:395
 msgid "Sender name"
 msgstr ""
 
-#: apps/security/forms.py:214 apps/security/forms.py:388
+#: apps/security/forms.py:220 apps/security/forms.py:396
 msgid "Sender sort code"
 msgstr ""
 
-#: apps/security/forms.py:214 apps/security/forms.py:388
+#: apps/security/forms.py:220 apps/security/forms.py:396
 msgid "for example 01-23-45"
 msgstr ""
 
-#: apps/security/forms.py:215 apps/security/forms.py:389
+#: apps/security/forms.py:221 apps/security/forms.py:397
 msgid "Sender account number"
 msgstr ""
 
-#: apps/security/forms.py:216 apps/security/forms.py:390
+#: apps/security/forms.py:222 apps/security/forms.py:398
 msgid "Sender roll number"
 msgstr ""
 
-#: apps/security/forms.py:217 apps/security/forms.py:391
+#: apps/security/forms.py:223 apps/security/forms.py:399
 msgid "Last 4 digits of card number"
 msgstr ""
 
-#: apps/security/forms.py:218 apps/security/forms.py:287
-#: apps/security/forms.py:382 templates/security/credits-form.html:10
+#: apps/security/forms.py:224 apps/security/forms.py:295
+#: apps/security/forms.py:390 templates/security/credits-form.html:10
 #: templates/security/credits.html:50 templates/security/prisoners.html:45
 #: templates/security/senders-detail.html:124
 msgid "Prison"
 msgstr ""
 
-#: apps/security/forms.py:219 apps/security/forms.py:288
-#: apps/security/forms.py:383
+#: apps/security/forms.py:225 apps/security/forms.py:296
+#: apps/security/forms.py:391
 msgid "Prison region"
 msgstr ""
 
-#: apps/security/forms.py:220 apps/security/forms.py:289
-#: apps/security/forms.py:384
+#: apps/security/forms.py:226 apps/security/forms.py:297
+#: apps/security/forms.py:392
 msgid "Prison type"
 msgstr ""
 
-#: apps/security/forms.py:221 apps/security/forms.py:290
-#: apps/security/forms.py:385
+#: apps/security/forms.py:227 apps/security/forms.py:298
+#: apps/security/forms.py:393
 msgid "Prison category"
 msgstr ""
 
-#: apps/security/forms.py:227 apps/security/forms.py:296
-#: apps/security/forms.py:402
+#: apps/security/forms.py:229 apps/security/forms.py:401
+msgid "Payment method"
+msgstr ""
+
+#: apps/security/forms.py:235 apps/security/forms.py:304
+#: apps/security/forms.py:412
 msgid "All prisons"
 msgstr ""
 
-#: apps/security/forms.py:229 apps/security/forms.py:298
-#: apps/security/forms.py:404
+#: apps/security/forms.py:237 apps/security/forms.py:306
+#: apps/security/forms.py:414
 msgid "All regions"
 msgstr ""
 
-#: apps/security/forms.py:231 apps/security/forms.py:300
-#: apps/security/forms.py:406
+#: apps/security/forms.py:239 apps/security/forms.py:308
+#: apps/security/forms.py:416
 msgid "All types"
 msgstr ""
 
-#: apps/security/forms.py:233 apps/security/forms.py:302
-#: apps/security/forms.py:408
+#: apps/security/forms.py:241 apps/security/forms.py:310
+#: apps/security/forms.py:418
 msgid "All categories"
 msgstr ""
 
-#: apps/security/forms.py:259
+#: apps/security/forms.py:267
 msgid "Must be larger than the minimum senders"
 msgstr ""
 
-#: apps/security/forms.py:266
+#: apps/security/forms.py:274
 msgid "Number of senders (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:268
+#: apps/security/forms.py:276
 msgid "Total received (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:269 apps/security/forms.py:367
+#: apps/security/forms.py:277 apps/security/forms.py:375
 msgid "Prisoner name (A to Z)"
 msgstr ""
 
-#: apps/security/forms.py:270 apps/security/forms.py:368
+#: apps/security/forms.py:278 apps/security/forms.py:376
 msgid "Prisoner number (A to Z)"
 msgstr ""
 
-#: apps/security/forms.py:273
+#: apps/security/forms.py:281
 msgid "Number of senders (minimum)"
 msgstr ""
 
-#: apps/security/forms.py:274
+#: apps/security/forms.py:282
 msgid "Maximum senders received from"
 msgstr ""
 
-#: apps/security/forms.py:275
+#: apps/security/forms.py:283
 msgid "Minimum credits received"
 msgstr ""
 
-#: apps/security/forms.py:276
+#: apps/security/forms.py:284
 msgid "Maximum credits received"
 msgstr ""
 
-#: apps/security/forms.py:277
+#: apps/security/forms.py:285
 msgid "Minimum total received"
 msgstr ""
 
-#: apps/security/forms.py:278
+#: apps/security/forms.py:286
 msgid "Maximum total received"
 msgstr ""
 
-#: apps/security/forms.py:283 apps/security/forms.py:380
+#: apps/security/forms.py:291 apps/security/forms.py:388
 msgid "Prisoner number"
 msgstr ""
 
-#: apps/security/forms.py:285 apps/security/forms.py:381
+#: apps/security/forms.py:293 apps/security/forms.py:389
 msgid "Prisoner name"
 msgstr ""
 
-#: apps/security/forms.py:323
+#: apps/security/forms.py:331
 msgid "Not a whole number"
 msgstr ""
 
-#: apps/security/forms.py:324
+#: apps/security/forms.py:332
 msgid "Not a multiple of £5"
 msgstr ""
 
-#: apps/security/forms.py:325
+#: apps/security/forms.py:333
 msgid "Not a multiple of £10"
 msgstr ""
 
-#: apps/security/forms.py:326
+#: apps/security/forms.py:334
 msgid "£100 or more"
 msgstr ""
 
-#: apps/security/forms.py:327
+#: apps/security/forms.py:335
 msgid "Exact amount"
 msgstr ""
 
-#: apps/security/forms.py:328
+#: apps/security/forms.py:336
 msgid "Exact number of pence"
 msgstr ""
 
-#: apps/security/forms.py:365
+#: apps/security/forms.py:373
 msgid "Received date (newest to oldest)"
 msgstr ""
 
-#: apps/security/forms.py:366
+#: apps/security/forms.py:374
 msgid "Amount sent (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:371
+#: apps/security/forms.py:379
 msgid "Received from"
 msgstr ""
 
-#: apps/security/forms.py:371 apps/security/forms.py:372
+#: apps/security/forms.py:379 apps/security/forms.py:380
 msgid "for example 01/06/2016"
 msgstr ""
 
-#: apps/security/forms.py:372
+#: apps/security/forms.py:380
 msgid "Received to"
 msgstr ""
 
-#: apps/security/forms.py:374 templates/security/credits-form.html:9
+#: apps/security/forms.py:382 templates/security/credits-form.html:9
 msgid "Amount (£)"
 msgstr ""
 
-#: apps/security/forms.py:375
+#: apps/security/forms.py:383
 msgid "Any amount"
 msgstr ""
 
-#: apps/security/forms.py:419 apps/security/forms.py:426
+#: apps/security/forms.py:429 apps/security/forms.py:436
 msgid "This field is required for the selected amount pattern"
 msgstr ""
 
@@ -483,11 +495,6 @@ msgstr ""
 #: templates/security/prisoners.html:44 templates/security/review.html:36
 #: templates/security/senders-detail.html:122
 msgid "Prisoner"
-msgstr ""
-
-#: templates/security/credits-form.html:62
-#: templates/security/senders-form.html:6
-msgid "or"
 msgstr ""
 
 #: templates/security/credits-help.html:4
