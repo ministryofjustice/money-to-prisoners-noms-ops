@@ -22,18 +22,29 @@ class SecurityView(FormView):
     title = NotImplemented
     template_name = NotImplemented
     form_template_name = NotImplemented
+    object_list_context_key = NotImplemented
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.redirect_on_single = False
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
         form_kwargs['request'] = self.request
-        if 'page' in self.request.GET:
-            form_kwargs['data'] = self.request.GET
-        else:
-            form_kwargs['initial'].update(self.request.GET.dict())
+        request_data = self.request.GET.dict()
+        if 'redirect-on-single' in request_data:
+            self.redirect_on_single = True
+        if 'page' not in request_data:
+            request_data['page'] = '1'
+        form_kwargs['data'] = request_data
         return form_kwargs
 
     def form_valid(self, form):
         context = self.get_context_data(form=form)
+        object_list = form.get_object_list()
+        if self.redirect_on_single and len(object_list) == 1 and hasattr(self, 'url_for_single_result'):
+            return redirect(self.url_for_single_result(object_list[0]))
+        context[self.object_list_context_key] = object_list
         return render(self.request, self.template_name, context)
 
     def get_context_data(self, **kwargs):
@@ -44,10 +55,7 @@ class SecurityView(FormView):
         ]
         return context_data
 
-    def get(self, request, *args, **kwargs):
-        if 'page' in self.request.GET:
-            return self.post(request, *args, **kwargs)
-        return super().get(request, *args, **kwargs)
+    get = FormView.post
 
 
 class SecurityDetailView(TemplateView):
@@ -88,11 +96,7 @@ class CreditListView(SecurityView):
     form_template_name = 'security/credits-form.html'
     template_name = 'security/credits.html'
     form_class = CreditsForm
-
-    def form_valid(self, form):
-        context = self.get_context_data(form=form)
-        context['credits'] = form.get_object_list()
-        return render(self.request, self.template_name, context)
+    object_list_context_key = 'credits'
 
 
 class SenderListView(SecurityView):
@@ -103,11 +107,10 @@ class SenderListView(SecurityView):
     form_template_name = 'security/senders-form.html'
     template_name = 'security/senders.html'
     form_class = SendersForm
+    object_list_context_key = 'senders'
 
-    def form_valid(self, form):
-        context = self.get_context_data(form=form)
-        context['senders'] = form.get_object_list()
-        return render(self.request, self.template_name, context)
+    def url_for_single_result(self, sender):
+        return reverse('security:sender_detail', kwargs={'sender_id': sender['id']})
 
 
 class SenderDetailView(SecurityDetailView):
@@ -127,11 +130,10 @@ class PrisonerListView(SecurityView):
     form_template_name = 'security/prisoners-form.html'
     template_name = 'security/prisoners.html'
     form_class = PrisonersForm
+    object_list_context_key = 'prisoners'
 
-    def form_valid(self, form):
-        context = self.get_context_data(form=form)
-        context['prisoners'] = form.get_object_list()
-        return render(self.request, self.template_name, context)
+    def url_for_single_result(self, prisoner):
+        return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner['id']})
 
 
 class PrisonerDetailView(SecurityDetailView):
