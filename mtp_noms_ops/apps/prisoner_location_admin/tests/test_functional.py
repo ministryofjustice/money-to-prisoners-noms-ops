@@ -88,7 +88,10 @@ class UploadTests(PrisonerLocationAdminTestCase):
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'valid.csv'))
         self.assertInSource('Change file')
         el.submit()
-        self.assertInSource('316 prisoner locations updated successfully')
+        if os.environ.get('DJANGO_TEST_REMOTE_INTEGRATION_URL', None):
+            self.assertInSource('316 prisoner locations scheduled for upload')
+        else:
+            self.assertInSource('316 prisoner locations updated successfully')
 
     def test_upload_invalid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
