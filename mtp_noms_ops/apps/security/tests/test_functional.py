@@ -54,9 +54,9 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         self.login('security-staff', 'security-staff')
         self.click_on_text('Credits')
 
-    def test_search_by_other_results_show_sender(self):
+    def test_search_results_show_sender(self):
         self.click_on_submit()
-        self.assertInSource('<th>Sender</th>')
+        self.assertInSource('<th>Sender and type</th>')
 
 
 class SecuritySenderSearchTests(SecurityDashboardTestCase):
@@ -67,10 +67,11 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
 
     def test_headers_show_all_fields(self):
         self.click_on_submit()
-        self.assertInSource('Credits:')
-        self.assertInSource('Prisoners:')
-        self.assertInSource('Total: £')
-        self.assertInSource('From:')
+        self.assertInSource('<th>Sender and type</th>')
+        self.assertInSource('<th>Sent</th>')
+        self.assertInSource('<th>Prisoners</th>')
+        self.assertInSource('<th>Prisons</th>')
+        self.assertInSource('<th class="number">Amount</th>')
 
 
 class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
@@ -81,7 +82,9 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
 
     def test_headers_show_all_fields(self):
         self.click_on_submit()
-        self.assertInSource('Credits:')
-        self.assertInSource('Senders:')
-        self.assertInSource('Total: £')
-        self.assertInSource('To:')
+        self.assertInSource('<th>Prisoner</th>')
+        self.assertInSource('<th>Prisoner</th>')
+        self.assertInSource('<th>Prison</th>')
+        self.assertInSource('<th>Received</th>')
+        self.assertInSource('<th>Senders</th>')
+        self.assertInSource('<th class="number">Amount</th>')
