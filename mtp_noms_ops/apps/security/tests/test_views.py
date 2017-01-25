@@ -109,7 +109,9 @@ class SecurityViewTestCase(SecurityBaseTestCase):
     def tearDown(self):
         self.mocked_prison_data.stop()
 
-    def test_can_access_security_view(self):
+    @mock.patch('security.forms.SecurityForm.get_object_list')
+    def test_can_access_security_view(self, mocked_form_method):
+        mocked_form_method.return_value = []
         if not self.view_name:
             return
         self.login()

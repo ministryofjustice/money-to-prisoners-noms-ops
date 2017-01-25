@@ -133,8 +133,10 @@
             </td>
             <td>
               {% if credit.prisoner_number %}
-                <p><strong><a href="{% url 'security:prisoner_list' %}?page=1&amp;prisoner_number={{ credit.prisoner_number }}">{{ credit.prisoner_number }}</a></strong><br />
-                {{ credit.prisoner_name|default_if_none:'—' }}</p>
+                <p>
+                  <strong><a href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></strong><br/>
+                  {{ credit.prisoner_name|default_if_none:'—' }}
+                </p>
               {% endif %}
             </td>
             <td class="number">
