@@ -20,7 +20,6 @@ class SecurityView(FormView):
     Allows form submission via GET (using page parameter as the flag)
     """
     title = NotImplemented
-    help_template_name = NotImplemented
     template_name = NotImplemented
     form_template_name = NotImplemented
 
@@ -86,7 +85,6 @@ class CreditListView(SecurityView):
     Credit search view
     """
     title = _('Credits')
-    help_template_name = 'security/credits-help.html'
     form_template_name = 'security/credits-form.html'
     template_name = 'security/credits.html'
     form_class = CreditsForm
@@ -102,7 +100,6 @@ class SenderListView(SecurityView):
     Sender search view
     """
     title = _('Senders')
-    help_template_name = 'security/senders-help.html'
     form_template_name = 'security/senders-form.html'
     template_name = 'security/senders.html'
     form_class = SendersForm
@@ -127,7 +124,6 @@ class PrisonerListView(SecurityView):
     Prisoner search view
     """
     title = _('Prisoners')
-    help_template_name = 'security/prisoners-help.html'
     form_template_name = 'security/prisoners-form.html'
     template_name = 'security/prisoners.html'
     form_class = PrisonersForm
