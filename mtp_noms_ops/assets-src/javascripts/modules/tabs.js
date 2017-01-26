@@ -8,9 +8,11 @@ exports.Tabs = {
 
   bindEvents: function () {
     var $tabs = $('a.tab');
+    var $tabItems = $('.tabs');
     var index = 0;
 
     function setFocus () {
+
       $tabs.attr({
         tabindex: '-1',
         'aria-selected': 'false'
@@ -51,6 +53,11 @@ exports.Tabs = {
 
     $tabs.on('click', function (e) {
       index = $.inArray(this, $tabs.get());
+      if ($(this).hasClass('selected')) {
+        $tabItems.toggleClass('collapsed-tabs');
+      } else {
+        $tabItems.removeClass('collapsed-tabs');
+      }
       setFocus();
       e.preventDefault();
     });

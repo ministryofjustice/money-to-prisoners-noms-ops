@@ -159,6 +159,27 @@ tbody tr.mtp-credit-detail__row table {
 
 // tabs
 
+.collapsed-tabs {
+  .tabs-contents {
+    display: none;
+  }
+
+  .tab-item a.selected {
+    border: 0;
+    border-bottom: 3px solid $border-colour;
+  }
+
+  .tab-item a {
+    height: 3em;
+  }
+
+  .tabs-nav {
+    border: 3px solid $border-colour;
+    border-bottom: 0;
+    width: 25.1em;
+  }
+}
+
 .tabs-nav {
   overflow: hidden;
   position: relative;
@@ -202,16 +223,13 @@ tbody tr.mtp-credit-detail__row table {
   @include media(tablet) {
     height: em(53);
     display: inline-block;
-    margin: 0 em(3) 0 0;
     padding: 0.7em 0.8em;
     border-top: none;
   }
 }
 
 .tab-item a.selected {
-  cursor: default;
   z-index: 2;
-  color: $text-colour;
   background-color: $page-colour;
   transition: none;
 
@@ -239,3 +257,4 @@ tbody tr.mtp-credit-detail__row table {
 .hidden {
   display: none;
 }
+
