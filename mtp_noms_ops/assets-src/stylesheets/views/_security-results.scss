@@ -13,10 +13,6 @@
     margin-bottom: 1em;
     width: 100%;
 
-    &.mtp-results-list__alone caption {
-      background-color: #CDE2B7;
-    }
-
     thead {
       border-top: 1px solid $grey-2;
     }
@@ -25,14 +21,6 @@
     td {
       vertical-align: top;
       padding: .8em;
-
-      .mtp-credit-detail__link {
-        background-color: $page-colour;
-        border: 0;
-        color: $link-colour;
-        cursor: pointer;
-        text-decoration: underline;
-      }
     }
 
     .number {
