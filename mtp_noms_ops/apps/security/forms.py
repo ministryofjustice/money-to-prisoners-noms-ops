@@ -189,7 +189,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
         ordering = get_value_text(self['ordering'])
         if ordering:
-            return format_html('{} {}', description, _('Ordered by %s.') % str(ordering).lower())
+            ordering = str(ordering)
+            ordering = ordering[0].lower() + ordering[1:]
+            return format_html('{} {}', description, _('Ordered by %s.') % ordering)
         return description
 
 

@@ -86,11 +86,12 @@
   }
 
   .mtp-search-description__text {
-    display: none;
-    font-size: .8em;
+    float: left;
+    margin-bottom: 0;
+    width: 80%;
 
-    @media print {
-      display: block;
+    @include media (mobile) {
+      width: 100%;
     }
   }
 
