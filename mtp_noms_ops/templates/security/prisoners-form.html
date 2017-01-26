@@ -1,8 +1,6 @@
 {% load i18n %}
 
 <div class="mtp-security-form">
-  {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
-
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
 

@@ -1,8 +1,6 @@
 {% load i18n %}
 
 <div class="mtp-security-form mtp-credits">
-  {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
-
   <div data-tabs class="tabs collapsed-tabs">
     <ul role="tablist" class="tabs-nav" id="tabs">
         <li class="tab-item" role="presentation"><a role="tab" aria-selected="true" aria-controls="date" id="dateTab" href="#date" class="tab selected">{% trans 'Date' %}</a></li>

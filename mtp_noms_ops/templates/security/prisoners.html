@@ -15,8 +15,6 @@
   <form class="mtp-security-search" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <input type="hidden" name="page" value="1">
-
     <div class="print-hidden">
       <h2 class="heading-medium">{% trans 'Filter by' %}</h2>
       {% include view.form_template_name with view=view form=form only %}
@@ -34,18 +32,42 @@
           <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
         </div>
 
-        <div class="print-hidden">
-          {% include 'security/select-field.html' with field=form.ordering only %}
-        </div>
-
         <table>
           <thead>
             <tr>
-              <th>{% trans 'Prisoner' %}</th>
+              <th class="{{ form|ordering_classes:'prisoner_number' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
+                  <span>
+                    {% trans 'Prisoner' %}
+                    {% describe_ordering_for_screenreader form 'prisoner_number' %}
+                  </span>
+                </a>
+              </th>
               <th>{% trans 'Prison' %}</th>
-              <th>{% trans 'Received' %}</th>
-              <th>{% trans 'Senders' %}</th>
-              <th class="number">{% trans 'Amount' %}</th>
+              <th class="{{ form|ordering_classes:'credit_count' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
+                  <span>
+                    {% trans 'Received' %}
+                    {% describe_ordering_for_screenreader form 'credit_count' %}
+                  </span>
+                </a>
+              </th>
+              <th class="{{ form|ordering_classes:'sender_count' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'sender_count' }}">
+                  <span>
+                    {% trans 'Senders' %}
+                    {% describe_ordering_for_screenreader form 'sender_count' %}
+                  </span>
+                </a>
+              </th>
+              <th class="{{ form|ordering_classes:'credit_total' }} number">
+                <a href="?{{ form|query_string_with_reversed_ordering:'credit_total' }}">
+                  <span>
+                    {% trans 'Amount' %}
+                    {% describe_ordering_for_screenreader form 'credit_total' %}
+                  </span>
+                </a>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -53,7 +75,7 @@
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
                   <a href="{% url 'security:prisoner_detail' prisoner.id %}">
-                  <strong>{{ prisoner.prisoner_number }}</strong>
+                    <strong>{{ prisoner.prisoner_number }}</strong>
                   </a>
                   <br/>
                   {{ prisoner.prisoner_name }}
@@ -77,7 +99,7 @@
               </tr>
             {% empty %}
               <tr class="no-border">
-                <td colspan="7">{% trans 'No matching credits found' %}</td>
+                <td colspan="7">{% trans 'No matching prisoners found' %}</td>
               </tr>
             {% endfor %}
           </tbody>

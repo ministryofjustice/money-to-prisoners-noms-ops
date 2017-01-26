@@ -15,15 +15,12 @@
   <form class="mtp-security-search" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <input type="hidden" name="page" value="1">
-
     <div class="print-hidden">
       <h2 class="heading-medium">{% trans 'Filter by' %}</h2>
-
       {% include view.form_template_name with view=view form=form only %}
     </div>
 
-      {% if form.cleaned_data %}
+    {% if form.cleaned_data %}
       <div class="mtp-results-list">
         <h2 class="heading-medium">{% trans 'Showing all credits' %}</h2>
 
@@ -36,17 +33,34 @@
           <a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
         </div>
 
-        <div class="print-hidden">
-          {% include 'security/select-field.html' with field=form.ordering only %}
-        </div>
-
         <table>
           <thead>
             <tr>
-              <th>{% trans 'Date received' %}</th>
+              <th class="{{ form|ordering_classes:'received_at' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'received_at' }}">
+                  <span>
+                    {% trans 'Date received' %}
+                    {% describe_ordering_for_screenreader form 'received_at' %}
+                  </span>
+                </a>
+              </th>
               <th>{% trans 'Sender and type' %}</th>
-              <th class="number">{% trans 'Amount' %}</th>
-              <th>{% trans 'Prisoner' %}</th>
+              <th class="{{ form|ordering_classes:'amount' }} number">
+                <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
+                  <span>
+                    {% trans 'Amount' %}
+                    {% describe_ordering_for_screenreader form 'amount' %}
+                  </span>
+                </a>
+              </th>
+              <th class="{{ form|ordering_classes:'prisoner_number' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
+                  <span>
+                    {% trans 'Prisoner' %}
+                    {% describe_ordering_for_screenreader form 'prisoner_number' %}
+                  </span>
+                </a>
+              </th>
               <th>{% trans 'Prison' %}</th>
               <th>{% trans 'Credited status' %}</th>
             </tr>

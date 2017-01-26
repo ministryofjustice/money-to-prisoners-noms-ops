@@ -23,6 +23,10 @@ class SecurityDashboardTestCase(FunctionalTestCase):
     def click_on_submit(self):
         self.driver.find_element_by_xpath('//button[@type="submit"]').click()
 
+    def click_on_nth_form_tab(self, n):
+        tab_element = self.driver.find_element_by_css_selector('#tabs li:nth-child(%d) a' % n)
+        tab_element.click()
+
 
 class SecurityDashboardTests(SecurityDashboardTestCase):
     """
@@ -54,9 +58,12 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         self.login('security-staff', 'security-staff')
         self.click_on_text('Credits')
 
-    def test_search_results_show_sender(self):
+    def test_perform_searches(self):
+        self.assertInSource('Sender and type')  # a results list header
+        self.click_on_nth_form_tab(4)
+        self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
         self.click_on_submit()
-        self.assertInSource('<th>Sender and type</th>')
+        self.assertInSource('No matching credits found')
 
 
 class SecuritySenderSearchTests(SecurityDashboardTestCase):
@@ -65,13 +72,12 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
         self.login('security-staff', 'security-staff')
         self.click_on_text('Senders')
 
-    def test_headers_show_all_fields(self):
+    def test_perform_searches(self):
+        self.assertInSource('Sender and type')  # a results list header
+        self.click_on_nth_form_tab(1)
+        self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
         self.click_on_submit()
-        self.assertInSource('<th>Sender and type</th>')
-        self.assertInSource('<th>Sent</th>')
-        self.assertInSource('<th>Prisoners</th>')
-        self.assertInSource('<th>Prisons</th>')
-        self.assertInSource('<th class="number">Amount</th>')
+        self.assertInSource('No matching senders found')
 
 
 class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
@@ -80,11 +86,11 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
         self.login('security-staff', 'security-staff')
         self.click_on_text('Prisoners')
 
-    def test_headers_show_all_fields(self):
+    def test_perform_searches(self):
+        self.assertInSource('Received')  # a results list header
+        self.type_in('id_prisoner_name', 'James')
         self.click_on_submit()
-        self.assertInSource('<th>Prisoner</th>')
-        self.assertInSource('<th>Prisoner</th>')
-        self.assertInSource('<th>Prison</th>')
-        self.assertInSource('<th>Received</th>')
-        self.assertInSource('<th>Senders</th>')
-        self.assertInSource('<th class="number">Amount</th>')
+        self.assertInSource('JAMES HALLS')
+        self.type_in('id_prisoner_name', 'aaabbbccc111222333')  # not a likely prisoner name
+        self.click_on_submit()
+        self.assertInSource('No matching prisoners found')

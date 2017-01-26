@@ -78,6 +78,38 @@ def list_prison_names(prisons):
     return ', '.join((prison['name'] for prison in prisons))
 
 
+@register.filter
+def ordering_classes(form, ordering):
+    current_ordering = form.cleaned_data.get('ordering')
+    if current_ordering == ordering:
+        return 'mtp-results-ordering mtp-results-ordering--asc'
+    if current_ordering == '-%s' % ordering:
+        return 'mtp-results-ordering mtp-results-ordering--desc'
+    return 'mtp-results-ordering'
+
+
+@register.inclusion_tag('security/includes/result-ordering-for-screenreader.html')
+def describe_ordering_for_screenreader(form, ordering):
+    current_ordering = form.cleaned_data.get('ordering')
+    if current_ordering == ordering:
+        ordering = 'ascending'
+    elif current_ordering == '-%s' % ordering:
+        ordering = 'descending'
+    else:
+        ordering = None
+    return {'ordering': ordering}
+
+
+@register.filter
+def query_string_with_reversed_ordering(form, ordering):
+    data = form.get_query_data()
+    current_ordering = data.get('ordering')
+    if current_ordering == ordering:
+        ordering = '-%s' % ordering
+    data['ordering'] = ordering
+    return urlencode(data, doseq=True)
+
+
 def get_profile_search_url(credit, keys, url, redirect_on_single=True):
     params = urlencode((key, credit[key]) for key in keys if key in credit and credit[key])
     if redirect_on_single:
