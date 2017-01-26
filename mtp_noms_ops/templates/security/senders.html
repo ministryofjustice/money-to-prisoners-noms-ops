@@ -15,14 +15,12 @@
   <form class="mtp-security-search" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <input type="hidden" name="page" value="1">
-
     <div class="print-hidden">
       <h2 class="heading-medium">{% trans 'Filter by' %}</h2>
       {% include view.form_template_name with view=view form=form only %}
     </div>
 
-      {% if form.cleaned_data %}
+    {% if form.cleaned_data %}
       <div class="mtp-results-list">
         <h2 class="heading-medium">{% trans 'Showing senders by number of prisoners they have sent money to' %}</h2>
 
@@ -34,18 +32,35 @@
           <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
         </div>
 
-        <div class="print-hidden">
-          {% include 'security/select-field.html' with field=form.ordering only %}
-        </div>
-
         <table>
           <thead>
             <tr>
               <th>{% trans 'Sender and type' %}</th>
-              <th>{% trans 'Sent' %}</th>
-              <th>{% trans 'Prisoners' %}</th>
+              <th class="{{ form|ordering_classes:'credit_count' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
+                  <span>
+                    {% trans 'Sent' %}
+                    {% describe_ordering_for_screenreader form 'credit_count' %}
+                  </span>
+                </a>
+              </th>
+              <th class="{{ form|ordering_classes:'prisoner_count' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_count' }}">
+                  <span>
+                    {% trans 'Prisoners' %}
+                    {% describe_ordering_for_screenreader form 'prisoner_count' %}
+                  </span>
+                </a>
+              </th>
               <th>{% trans 'Prisons' %}</th>
-              <th class="number">{% trans 'Amount' %}</th>
+              <th class="{{ form|ordering_classes:'credit_total' }} number">
+                <a href="?{{ form|query_string_with_reversed_ordering:'credit_total' }}">
+                  <span>
+                    {% trans 'Amount' %}
+                    {% describe_ordering_for_screenreader form 'credit_total' %}
+                  </span>
+                </a>
+              </th>
             </tr>
           </thead>
           <tbody>
