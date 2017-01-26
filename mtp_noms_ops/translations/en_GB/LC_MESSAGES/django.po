@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MTP noms-ops\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-26 22:18+0000\n"
+"POT-Creation-Date: 2017-01-26 22:28+0000\n"
 "PO-Revision-Date: 2016-11-04 10:00+0000\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>\n"
 "Language-Team: Welsh (http://www.transifex.com/ministry-of-justice/mtp/language/cy/)\n"
@@ -203,10 +203,10 @@ msgid "Last 4 digits of card number"
 msgstr ""
 
 #: apps/security/forms.py:228 apps/security/forms.py:304
-#: apps/security/forms.py:403 templates/security/credits-form.html:8
-#: templates/security/credits.html:61 templates/security/prisoners.html:43
+#: apps/security/forms.py:403 templates/security/credits.html:61
+#: templates/security/forms/credits.html:8
+#: templates/security/forms/senders.html:8 templates/security/prisoners.html:43
 #: templates/security/senders-detail.html:124
-#: templates/security/senders-form.html:8
 msgid "Prison"
 msgstr ""
 
@@ -369,7 +369,7 @@ msgstr ""
 msgid "Received to"
 msgstr ""
 
-#: apps/security/forms.py:395 templates/security/credits-form.html:7
+#: apps/security/forms.py:395 templates/security/forms/credits.html:7
 msgid "Amount (£)"
 msgstr ""
 
@@ -506,21 +506,6 @@ msgstr ""
 msgid "Upload another file"
 msgstr ""
 
-#: templates/security/credits-form.html:6
-msgid "Date"
-msgstr ""
-
-#: templates/security/credits-form.html:9 templates/security/review.html:35
-#: templates/security/senders-form.html:7
-msgid "Sender"
-msgstr ""
-
-#: templates/security/credits-form.html:10 templates/security/credits.html:56
-#: templates/security/prisoners.html:38 templates/security/review.html:36
-#: templates/security/senders-detail.html:122
-msgid "Prisoner"
-msgstr ""
-
 #: templates/security/credits.html:19 templates/security/prisoners.html:19
 #: templates/security/senders.html:19
 msgid "Filter by"
@@ -539,8 +524,8 @@ msgid "Export"
 msgstr ""
 
 #: templates/security/credits.html:39
+#: templates/security/forms/received-range-field.html:4
 #: templates/security/prisoners-detail.html:57
-#: templates/security/received-range-field.html:4
 #: templates/security/senders-detail.html:121
 msgid "Date received"
 msgstr ""
@@ -557,6 +542,12 @@ msgstr ""
 #: templates/security/senders-detail.html:123
 #: templates/security/senders.html:56
 msgid "Amount"
+msgstr ""
+
+#: templates/security/credits.html:56 templates/security/forms/credits.html:10
+#: templates/security/prisoners.html:38 templates/security/review.html:36
+#: templates/security/senders-detail.html:122
+msgid "Prisoner"
 msgstr ""
 
 #: templates/security/credits.html:62
@@ -590,20 +581,53 @@ msgstr ""
 msgid "No matching credits found"
 msgstr ""
 
+#: templates/security/forms/credits.html:6
+msgid "Date"
+msgstr ""
+
+#: templates/security/forms/credits.html:9
+#: templates/security/forms/senders.html:7 templates/security/review.html:35
+msgid "Sender"
+msgstr ""
+
+#: templates/security/forms/numeric-range-field.html:6
+msgid "Min"
+msgstr ""
+
+#: templates/security/forms/numeric-range-field.html:15
+msgid "Max"
+msgstr ""
+
+#: templates/security/forms/received-range-field.html:10
+msgid "From"
+msgstr ""
+
+#: templates/security/forms/received-range-field.html:21
+msgid "To"
+msgstr ""
+
+#: templates/security/forms/select-field.html:19
+msgid "Sort"
+msgstr ""
+
+#: templates/security/forms/total-range-fields.html:4
+msgid "Total sent (£)"
+msgstr ""
+
+#: templates/security/forms/total-range-fields.html:10
+msgid "Total credits sent"
+msgstr ""
+
+#: templates/security/forms/update-search.html:4
+msgid "Update list"
+msgstr ""
+
 #: templates/security/includes/result-ordering-for-screenreader.html:4
 msgid "In ascending order"
 msgstr ""
 
 #: templates/security/includes/result-ordering-for-screenreader.html:6
 msgid "In descending order"
-msgstr ""
-
-#: templates/security/numeric-range-field.html:6
-msgid "Min"
-msgstr ""
-
-#: templates/security/numeric-range-field.html:15
-msgid "Max"
 msgstr ""
 
 #: templates/security/prisoners-detail.html:12
@@ -698,14 +722,6 @@ msgstr[1] ""
 msgid "No matching prisoners found"
 msgstr ""
 
-#: templates/security/received-range-field.html:10
-msgid "From"
-msgstr ""
-
-#: templates/security/received-range-field.html:21
-msgid "To"
-msgstr ""
-
 #: templates/security/review.html:17
 msgid "Credits must be checked by security before cashiers can process them."
 msgstr ""
@@ -756,10 +772,6 @@ msgstr ""
 
 #: templates/security/review.html:89
 msgid "No new credits for review."
-msgstr ""
-
-#: templates/security/select-field.html:19
-msgid "Sort"
 msgstr ""
 
 #: templates/security/senders-detail.html:13
@@ -847,18 +859,6 @@ msgstr[1] ""
 
 #: templates/security/senders.html:110
 msgid "No matching senders found"
-msgstr ""
-
-#: templates/security/total-range-fields.html:4
-msgid "Total sent (£)"
-msgstr ""
-
-#: templates/security/total-range-fields.html:10
-msgid "Total credits sent"
-msgstr ""
-
-#: templates/security/update-search.html:4
-msgid "Update list"
 msgstr ""
 
 #: utils.py:27

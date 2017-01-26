@@ -93,7 +93,7 @@ class CreditListView(SecurityView):
     Credit search view
     """
     title = _('Credits')
-    form_template_name = 'security/credits-form.html'
+    form_template_name = 'security/forms/credits.html'
     template_name = 'security/credits.html'
     form_class = CreditsForm
     object_list_context_key = 'credits'
@@ -104,7 +104,7 @@ class SenderListView(SecurityView):
     Sender search view
     """
     title = _('Senders')
-    form_template_name = 'security/senders-form.html'
+    form_template_name = 'security/forms/senders.html'
     template_name = 'security/senders.html'
     form_class = SendersForm
     object_list_context_key = 'senders'
@@ -127,7 +127,7 @@ class PrisonerListView(SecurityView):
     Prisoner search view
     """
     title = _('Prisoners')
-    form_template_name = 'security/prisoners-form.html'
+    form_template_name = 'security/forms/prisoners.html'
     template_name = 'security/prisoners.html'
     form_class = PrisonersForm
     object_list_context_key = 'prisoners'
