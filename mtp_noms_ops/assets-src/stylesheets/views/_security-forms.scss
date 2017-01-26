@@ -4,6 +4,7 @@
 }
 
 .mtp-security-form {
+  margin: 0;
   overflow: hidden;
   padding-left: 1px;
 
@@ -178,6 +179,10 @@ tbody tr.mtp-credit-detail__row table {
     border-bottom: 0;
     width: 25.1em;
   }
+
+  .tabs-nav_senders {
+    width: 9.24em;
+  }
 }
 
 .tabs-nav {
@@ -257,4 +262,3 @@ tbody tr.mtp-credit-detail__row table {
 .hidden {
   display: none;
 }
-

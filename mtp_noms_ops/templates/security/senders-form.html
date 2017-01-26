@@ -1,18 +1,48 @@
 {% load i18n %}
 
 <div class="mtp-security-form grid-row">
-  <div class="column-one-third">
-    {% include 'mtp_common/forms/select-field.html' with field=form.source %}
-    {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
-  </div>
-  <div class="column-two-thirds">
-    {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
-    {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
-  </div>
-  <div class="column-two-thirds">
-    {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
-  </div>
-  <div class="column-full">
-    {% include 'security/update-search.html' %}
-  </div>
+
+  <div data-tabs class="tabs collapsed-tabs">
+    <ul role="tablist" class="tabs-nav tabs-nav_senders" id="tabs">
+      <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="sender" id="senderTab" href="#sender" class="tab" tabindex="-1">{% trans 'Sender' %}</a></li>
+      <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="prison" id="prisonTab" href="#prison" class="tab" tabindex="-1">{% trans 'Prison' %}</a></li>
+    </ul>
+
+    <div class="tabs-contents">
+      <div role="tabpanel" aria-labelledby="senderTab" id="sender" class="tabcontent hidden">
+        <div class="grid-row">
+          <div class="column-one-third">
+            {% include 'mtp_common/forms/select-field.html' with field=form.source %}
+            {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
+          </div>
+          <div class="column-two-thirds">
+            {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
+            {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
+          </div>
+          <div class="column-two-thirds">
+            {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
+          </div>
+          <div class="column-full">
+            {% include 'security/update-search.html' %}
+          </div>
+        </div>
+      </div>
+      <div role="tabpanel" aria-labelledby="prisonTab" id="prison" class="tabcontent">
+        <div class="grid-row">
+          <div class="column-one-third">
+            {% include 'security/select-field.html' with field=form.prison %}
+            {% include 'security/select-field.html' with field=form.prison_population %}
+          </div>
+          <div class="column-one-third">
+            {% include 'security/select-field.html' with field=form.prison_category %}
+            {% include 'security/select-field.html' with field=form.prison_region %}
+          </div>
+          <div class="column-full">
+            {% include 'security/update-search.html' %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+
 </div>
