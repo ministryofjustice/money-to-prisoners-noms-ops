@@ -95,34 +95,6 @@
   }
 }
 
-.mtp-credit-detail__row {
-  // credit detail tables that are loaded inline
-  font-size: 1.19em;
-
-  table {
-    border: 1px solid $border-color;
-    margin-bottom: 0;
-
-    > td {
-      padding: 0 1px 1em 1em;
-    }
-  }
-}
-
-tbody tr.mtp-credit-detail__row table {
-  th,
-  td {
-    background: $grey-4;
-  }
-
-  @media print {
-    th,
-    td {
-      background: $page-colour;
-    }
-  }
-}
-
 .mtp-links {
   float: right;
   display: inline-block;
