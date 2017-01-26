@@ -20,104 +20,100 @@
       {% include view.form_template_name with view=view form=form only %}
     </div>
 
-    {% if form.cleaned_data %}
-      <div class="mtp-results-list">
-        <h2 class="heading-medium">{% trans 'Showing all credits' %}</h2>
-
-        <p class="mtp-search-description__text">
-          {{ form.search_description }}
-        </p>
+    <div class="mtp-results-list">
+      <div class="panel panel-border-narrow">
+        <p class="mtp-search-description__text">{{ form.search_description }}</p>
 
         <div class="print-hidden mtp-links">
           <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a> &nbsp;
           <a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
         </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th class="{{ form|ordering_classes:'received_at' }}">
-                <a href="?{{ form|query_string_with_reversed_ordering:'received_at' }}">
-                  <span>
-                    {% trans 'Date received' %}
-                    {% describe_ordering_for_screenreader form 'received_at' %}
-                  </span>
-                </a>
-              </th>
-              <th>{% trans 'Sender and type' %}</th>
-              <th class="{{ form|ordering_classes:'amount' }} number">
-                <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
-                  <span>
-                    {% trans 'Amount' %}
-                    {% describe_ordering_for_screenreader form 'amount' %}
-                  </span>
-                </a>
-              </th>
-              <th class="{{ form|ordering_classes:'prisoner_number' }}">
-                <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
-                  <span>
-                    {% trans 'Prisoner' %}
-                    {% describe_ordering_for_screenreader form 'prisoner_number' %}
-                  </span>
-                </a>
-              </th>
-              <th>{% trans 'Prison' %}</th>
-              <th>{% trans 'Credited status' %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for credit in credits|parse_date_fields %}
-              <tr {% if forloop.last %}class="no-border"{% endif %}>
-                <td>
-                  <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
-                </td>
-                <td>
-                  {% if credit.source == 'online' %}
-                    <p class="mtp-credit__card">
-                      <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default:'—' }}</a></strong><br/>
-                      {% trans 'Debit card' %}
-                    </p>
-                  {% else %}
-                    <p class="mtp-credit__transfer">
-                      <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default:'—' }}</a></strong><br/>
-                      {% trans 'Bank transfer' %}
-                    </p>
-                  {% endif %}
-                </td>
-                <td class="number">
-                  <p><strong>£{{ credit.amount|currency }}</strong></p>
-                </td>
-                <td>
-                  {% if credit.prisoner_number %}
-                    <p>
-                      <strong><a href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></strong><br/>
-                      {{ credit.prisoner_name|default:'—' }}
-                    </p>
-                  {% endif %}
-                </td>
-                <td>
-                  <p>{{ credit.prison_name|default:'—' }}</p>
-                </td>
-                <td>
-                  {% if credit.resolution == 'credited' %}
-                    <p>{{ credit.credited_at.date }} <br />
-                    {% trans 'by' %} {{ credit.owner_name|default:'—' }}</p>
-                  {% else %}
-                    <p>{% trans 'No' %}</p>
-                  {% endif %}
-                </td>
-              </tr>
-            {% empty %}
-              <tr class="no-border">
-                <td colspan="7">{% trans 'No matching credits found' %}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-
-        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
       </div>
-      {% endif %}
+
+      <table>
+        <thead>
+          <tr>
+            <th class="{{ form|ordering_classes:'received_at' }}">
+              <a href="?{{ form|query_string_with_reversed_ordering:'received_at' }}">
+                <span>
+                  {% trans 'Date received' %}
+                  {% describe_ordering_for_screenreader form 'received_at' %}
+                </span>
+              </a>
+            </th>
+            <th>{% trans 'Sender and type' %}</th>
+            <th class="{{ form|ordering_classes:'amount' }} number">
+              <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
+                <span>
+                  {% trans 'Amount' %}
+                  {% describe_ordering_for_screenreader form 'amount' %}
+                </span>
+              </a>
+            </th>
+            <th class="{{ form|ordering_classes:'prisoner_number' }}">
+              <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
+                <span>
+                  {% trans 'Prisoner' %}
+                  {% describe_ordering_for_screenreader form 'prisoner_number' %}
+                </span>
+              </a>
+            </th>
+            <th>{% trans 'Prison' %}</th>
+            <th>{% trans 'Credited status' %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for credit in credits|parse_date_fields %}
+            <tr {% if forloop.last %}class="no-border"{% endif %}>
+              <td>
+                <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
+              </td>
+              <td>
+                {% if credit.source == 'online' %}
+                  <p class="mtp-credit__card">
+                    <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default:'—' }}</a></strong><br/>
+                    {% trans 'Debit card' %}
+                  </p>
+                {% else %}
+                  <p class="mtp-credit__transfer">
+                    <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default:'—' }}</a></strong><br/>
+                    {% trans 'Bank transfer' %}
+                  </p>
+                {% endif %}
+              </td>
+              <td class="number">
+                <p><strong>£{{ credit.amount|currency }}</strong></p>
+              </td>
+              <td>
+                {% if credit.prisoner_number %}
+                  <p>
+                    <strong><a href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></strong><br/>
+                    {{ credit.prisoner_name|default:'—' }}
+                  </p>
+                {% endif %}
+              </td>
+              <td>
+                <p>{{ credit.prison_name|default:'—' }}</p>
+              </td>
+              <td>
+                {% if credit.resolution == 'credited' %}
+                  <p>{{ credit.credited_at.date }} <br />
+                  {% trans 'by' %} {{ credit.owner_name|default:'—' }}</p>
+                {% else %}
+                  <p>{% trans 'No' %}</p>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr class="no-border">
+              <td colspan="7">{% trans 'No matching credits found' %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+    </div>
 
   </form>
 
