@@ -12,19 +12,19 @@
 
     <div class="tabs-contents">
       <div role="tabpanel" aria-labelledby="dateTab" id="date" class="tabcontent">
-        {% include 'security/received-range-field.html' %}
-        {% include 'security/update-search.html' %}
+        {% include 'security/forms/received-range-field.html' %}
+        {% include 'security/forms/update-search.html' %}
       </div>
 
       <div role="tabpanel" aria-labelledby="amountTab" id="amount" class="tabcontent hidden">
         <div class="grid-row">
           <div class="column-one-third">
-            {% include 'security/select-field.html' with field=form.amount_pattern %}
+            {% include 'security/forms/select-field.html' with field=form.amount_pattern %}
             {% include 'mtp_common/forms/field.html' with field=form.amount_exact %}
             {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
           </div>
           <div class="column-full">
-            {% include 'security/update-search.html' %}
+            {% include 'security/forms/update-search.html' %}
           </div>
         </div>
       </div>
@@ -32,15 +32,15 @@
       <div role="tabpanel" aria-labelledby="prisonTab" id="prison" class="tabcontent hidden">
         <div class="grid-row">
           <div class="column-one-third">
-            {% include 'security/select-field.html' with field=form.prison %}
-            {% include 'security/select-field.html' with field=form.prison_population %}
+            {% include 'security/forms/select-field.html' with field=form.prison %}
+            {% include 'security/forms/select-field.html' with field=form.prison_population %}
           </div>
           <div class="column-one-third">
-            {% include 'security/select-field.html' with field=form.prison_category %}
-            {% include 'security/select-field.html' with field=form.prison_region %}
+            {% include 'security/forms/select-field.html' with field=form.prison_category %}
+            {% include 'security/forms/select-field.html' with field=form.prison_region %}
           </div>
           <div class="column-full">
-            {% include 'security/update-search.html' %}
+            {% include 'security/forms/update-search.html' %}
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@
             {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
           </div>
           <div class="column-full">
-            {% include 'security/update-search.html' %}
+            {% include 'security/forms/update-search.html' %}
           </div>
         </div>
       </div>
@@ -71,7 +71,7 @@
             {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
           </div>
           <div class="column-full">
-            {% include 'security/update-search.html' %}
+            {% include 'security/forms/update-search.html' %}
           </div>
         </div>
       </div>
