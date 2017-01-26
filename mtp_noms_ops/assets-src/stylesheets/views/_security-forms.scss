@@ -4,6 +4,7 @@
 }
 
 .mtp-security-form {
+  margin: 0;
   overflow: hidden;
   padding-left: 1px;
 
@@ -94,34 +95,6 @@
   }
 }
 
-.mtp-credit-detail__row {
-  // credit detail tables that are loaded inline
-  font-size: 1.19em;
-
-  table {
-    border: 1px solid $border-color;
-    margin-bottom: 0;
-
-    > td {
-      padding: 0 1px 1em 1em;
-    }
-  }
-}
-
-tbody tr.mtp-credit-detail__row table {
-  th,
-  td {
-    background: $grey-4;
-  }
-
-  @media print {
-    th,
-    td {
-      background: $page-colour;
-    }
-  }
-}
-
 .mtp-links {
   float: right;
   display: inline-block;
@@ -158,6 +131,31 @@ tbody tr.mtp-credit-detail__row table {
 }
 
 // tabs
+
+.collapsed-tabs {
+  .tabs-contents {
+    display: none;
+  }
+
+  .tab-item a.selected {
+    border: 0;
+    border-bottom: 3px solid $border-colour;
+  }
+
+  .tab-item a {
+    height: 3em;
+  }
+
+  .tabs-nav {
+    border: 3px solid $border-colour;
+    border-bottom: 0;
+    width: 25.1em;
+  }
+
+  .tabs-nav_senders {
+    width: 9.24em;
+  }
+}
 
 .tabs-nav {
   overflow: hidden;
@@ -202,16 +200,13 @@ tbody tr.mtp-credit-detail__row table {
   @include media(tablet) {
     height: em(53);
     display: inline-block;
-    margin: 0 em(3) 0 0;
     padding: 0.7em 0.8em;
     border-top: none;
   }
 }
 
 .tab-item a.selected {
-  cursor: default;
   z-index: 2;
-  color: $text-colour;
   background-color: $page-colour;
   transition: none;
 

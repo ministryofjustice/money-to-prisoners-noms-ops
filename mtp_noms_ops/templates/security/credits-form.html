@@ -3,7 +3,7 @@
 <div class="mtp-security-form mtp-credits">
   {% if standalone %}{{ form.ordering.as_hidden }}{% endif %}
 
-  <div data-tabs>
+  <div data-tabs class="tabs collapsed-tabs">
     <ul role="tablist" class="tabs-nav" id="tabs">
         <li class="tab-item" role="presentation"><a role="tab" aria-selected="true" aria-controls="date" id="dateTab" href="#date" class="tab selected">{% trans 'Date' %}</a></li>
         <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="amount" id="amountTab" href="#amount" class="tab" tabindex="-1">{% trans 'Amount (£)' %}</a></li>
