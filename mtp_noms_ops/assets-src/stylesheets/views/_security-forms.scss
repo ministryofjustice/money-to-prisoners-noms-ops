@@ -37,105 +37,71 @@
 
 // tabs
 
-.collapsed-tabs {
-  .tabs-contents {
-    display: none;
-  }
-
-  .tab-item a.selected {
-    border: 0;
-    border-bottom: 3px solid $border-colour;
-  }
-
-  .tab-item a {
-    height: 3em;
-  }
-
+.tabs {
   .tabs-nav {
-    border: 3px solid $border-colour;
-    border-bottom: 0;
-    width: 25.1em;
+    display: block;
+
+    .tab-item {
+      display: inline-block;
+
+      a.tab {
+        border: 3px solid transparent;
+        border-bottom-width: 0;
+        display: block;
+        outline: none;
+        padding: em(9.5);
+
+        @include media(mobile) {
+          border-bottom-width: 3px;
+        }
+
+        &.selected {
+          background: $page-colour;
+          border-color: $border-colour;
+
+          &:focus {
+            background: $focus-colour;
+          }
+        }
+      }
+    }
   }
 
-  .tabs-nav_senders {
-    width: 9.24em;
-  }
-}
+  .tabs-contents {
+    margin-top: -3px;
 
-.tabs-nav {
-  overflow: hidden;
-  position: relative;
+    @include media(mobile) {
+      margin-top: .5em;
+    }
 
-  &:before {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    border-bottom: 3px solid $border-colour;
-    z-index: 1;
-    width: 100%;
-  }
-}
-
-.tab-item {
-  display: inline;
-}
-
-.tab-item a {
-  margin-bottom: 0;
-  display: block;
-  padding: em(9.5);
-  white-space: nowrap;
-  z-index: 0;
-  outline: none;
-  box-sizing: border-box;
-  position: relative;
-  transition: background .25s ease-in-out;
-
-  &:focus,
-  &:hover,
-  &:active {
-    background-color: $focus-colour;
+    .tabcontent {
+      border: 3px solid $border-color;
+      padding: 1em;
+    }
   }
 
-  &:visited {
-    color: $govuk-blue;
-  }
-
-  @include media(tablet) {
-    height: em(53);
+  &.collapsed-tabs {
     display: inline-block;
-    padding: 0.7em 0.8em;
-    border-top: none;
+
+    .tabs-nav {
+      border: 3px solid $border-color;
+
+      .tab-item {
+        a.tab {
+          border-top: 0;
+
+          &.first-tab {
+            border-left: 0;
+          }
+          &.last-tab {
+            border-right: 0;
+          }
+        }
+      }
+    }
+
+    .tabs-contents {
+      display: none;
+    }
   }
-}
-
-.tab-item a.selected {
-  z-index: 2;
-  background-color: $page-colour;
-  transition: none;
-
-  &:focus,
-  &:hover,
-  &:active {
-    background-color: $focus-colour;
-  }
-
-  @include media(tablet) {
-    height: 3em;
-    padding: em(13.3);
-    border: 3px solid $border-colour;
-    border-bottom: 1px solid $page-colour;
-  }
-}
-
-.tabcontent {
-  display: block;
-  border: 3px solid $border-colour;
-  border-top: 0;
-  padding: 1em;
-}
-
-.hidden {
-  display: none;
 }

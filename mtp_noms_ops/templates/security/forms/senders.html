@@ -1,15 +1,16 @@
 {% load i18n %}
 
 <div class="mtp-security-form grid-row">
-
-  <div data-tabs class="tabs collapsed-tabs">
-    <ul role="tablist" class="tabs-nav tabs-nav_senders" id="tabs">
-      <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="sender" id="senderTab" href="#sender" class="tab" tabindex="-1">{% trans 'Sender' %}</a></li>
-      <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="prison" id="prisonTab" href="#prison" class="tab" tabindex="-1">{% trans 'Prison' %}</a></li>
-    </ul>
+  <div class="tabs collapsed-tabs">
+    {% spaceless %}
+      <ul role="tablist" class="tabs-nav tabs-nav_senders" id="tabs">
+        <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="sender" id="senderTab" href="#sender" class="tab first-tab">{% trans 'Sender' %}</a></li>
+        <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="prison" id="prisonTab" href="#prison" class="tab last-tab" tabindex="-1">{% trans 'Prison' %}</a></li>
+      </ul>
+    {% endspaceless %}
 
     <div class="tabs-contents">
-      <div role="tabpanel" aria-labelledby="senderTab" id="sender" class="tabcontent hidden">
+      <div role="tabpanel" aria-labelledby="senderTab" id="sender" class="tabcontent">
         <div class="grid-row">
           <div class="column-one-third">
             {% include 'mtp_common/forms/select-field.html' with field=form.source %}

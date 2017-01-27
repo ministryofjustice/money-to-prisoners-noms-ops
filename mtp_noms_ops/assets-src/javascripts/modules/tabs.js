@@ -1,66 +1,79 @@
 'use strict';
 
 exports.Tabs = {
-
   init: function () {
-    this.bindEvents();
+    this.bindEvents($('a.tab'));
   },
 
-  bindEvents: function () {
-    var $tabs = $('a.tab');
-    var $tabItems = $('.tabs');
-    var index = 0;
+  bindEvents: function ($tabButtons) {
+    if ($tabButtons.length === 0) {
+      return;
+    }
 
-    function setFocus () {
+    var selectedIndex = null;
+    var $tabContainer = $tabButtons.closest('.tabs');
+    var $tabPanels = $tabContainer.find('.tabcontent');
 
-      $tabs.attr({
+    function resetTabButtons () {
+      $tabButtons.attr({
         tabindex: '-1',
         'aria-selected': 'false'
       }).removeClass('selected');
-
-      $('.tabcontent').addClass('hidden');
-
-      $($tabs.get(index)).attr({
-        tabindex: '0',
-        'aria-selected': 'true'
-      }).addClass('selected').focus();
-
-      $($($tabs.get(index)).attr('href')).removeClass('hidden');
+      $tabPanels.hide();
     }
 
-    $tabs.on('keydown', function (e) {
-      var k = e.which || e.keyCode;
+    resetTabButtons();
 
-      if (k >= 37 && k <= 40) {
-        if (k === 37 || k === 38) {
-          if (index > 0) {
-            index--;
-          } else {
-            index = $tabs.length - 1;
-          }
-        } else if (k === 39 || k === 40) {
-          if (index < $tabs.length - 1) {
-            index++;
-          } else {
-            index = 0;
-          }
+    $tabButtons.each(function () {
+      $(this).on('click', function (e) {
+        var $tabButton = $(this);
+        var wasSelected = $tabButton.hasClass('selected');
+
+        resetTabButtons();
+
+        if (wasSelected) {
+          selectedIndex = null;
+          $tabContainer.addClass('collapsed-tabs');
+        } else {
+          selectedIndex = $tabButtons.index($tabButton);
+          $tabButton.attr({
+            tabindex: '0',
+            'aria-selected': 'true'
+          }).addClass('selected');
+          $($tabButton.attr('href')).show();
+          $tabContainer.removeClass('collapsed-tabs');
         }
 
-        $($tabs.get(index)).click();
         e.preventDefault();
-      }
+      });
     });
 
-    $tabs.on('click', function (e) {
-      index = $.inArray(this, $tabs.get());
-      if ($(this).hasClass('selected')) {
-        $tabItems.toggleClass('collapsed-tabs');
-      } else {
-        $tabItems.removeClass('collapsed-tabs');
+    $tabContainer.on('keydown', 'a.tab', function (e) {
+      var key = e.which;
+
+      if (selectedIndex === null || key < 37 || key > 40) {
+        return;
       }
-      setFocus();
+
+      var maxIndex = $tabButtons.length - 1;
+
+      if (key === 37 || key === 38) {
+        if (selectedIndex > 0) {
+          selectedIndex--;
+        } else {
+          selectedIndex = maxIndex;
+        }
+      } else if (key === 39 || key === 40) {
+        if (selectedIndex < maxIndex) {
+          selectedIndex++;
+        } else {
+          selectedIndex = 0;
+        }
+      }
+      $($tabButtons[selectedIndex]).focus().click();
+
       e.preventDefault();
     });
-
   }
+
 };
