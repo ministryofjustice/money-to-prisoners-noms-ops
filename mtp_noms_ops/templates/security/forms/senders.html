@@ -1,15 +1,17 @@
 {% load i18n %}
+{% load security %}
 
-<div class="mtp-security-form grid-row">
+<div class="mtp-security-form">
+  <div class="mtp-tab-container mtp-tab-container--collapsed">
+    {% spaceless %}
+      <ul class="mtp-tab-wrapper" role="tablist">
+        <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--first" {% tab_aria_atts 'sender' %}>{% trans 'Sender' %}</a></li>
+        <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--last" {% tab_aria_atts 'prison' %}>{% trans 'Prison' %}</a></li>
+      </ul>
+    {% endspaceless %}
 
-  <div data-tabs class="tabs collapsed-tabs">
-    <ul role="tablist" class="tabs-nav tabs-nav_senders" id="tabs">
-      <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="sender" id="senderTab" href="#sender" class="tab" tabindex="-1">{% trans 'Sender' %}</a></li>
-      <li class="tab-item" role="presentation"><a role="tab" aria-selected="false" aria-controls="prison" id="prisonTab" href="#prison" class="tab" tabindex="-1">{% trans 'Prison' %}</a></li>
-    </ul>
-
-    <div class="tabs-contents">
-      <div role="tabpanel" aria-labelledby="senderTab" id="sender" class="tabcontent hidden">
+    <div class="mtp-tabpanels" aria-expanded="false">
+      <div class="mtp-tabpanel" {% panel_aria_atts 'sender' %}>
         <div class="grid-row">
           <div class="column-one-third">
             {% include 'mtp_common/forms/select-field.html' with field=form.source %}
@@ -27,7 +29,8 @@
           </div>
         </div>
       </div>
-      <div role="tabpanel" aria-labelledby="prisonTab" id="prison" class="tabcontent">
+
+      <div class="mtp-tabpanel" {% panel_aria_atts 'prison' %}>
         <div class="grid-row">
           <div class="column-one-third">
             {% include 'security/forms/select-field.html' with field=form.prison %}
