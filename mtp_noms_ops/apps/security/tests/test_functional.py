@@ -23,9 +23,14 @@ class SecurityDashboardTestCase(FunctionalTestCase):
     def click_on_submit(self):
         self.driver.find_element_by_xpath('//button[@type="submit"]').click()
 
-    def click_on_nth_form_tab(self, n):
-        tab_element = self.driver.find_element_by_css_selector('#tabs li:nth-child(%d) a' % n)
+    def click_on_tab(self, field):
+        tab_element = self.driver.find_element_by_css_selector('#mtp-tab-%s' % field)
         tab_element.click()
+
+    def submit_tabpanel(self, field):
+        selector = '#mtp-tabpanel-%s button[type="submit"]' % field
+        update_list_button = self.driver.find_element_by_css_selector(selector)
+        update_list_button.click()
 
 
 class SecurityDashboardTests(SecurityDashboardTestCase):
@@ -60,9 +65,9 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
 
     def test_perform_searches(self):
         self.assertInSource('Sender and type')  # a results list header
-        self.click_on_nth_form_tab(4)
+        self.click_on_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
-        self.click_on_submit()
+        self.submit_tabpanel('sender')
         self.assertInSource('No matching credits found')
 
 
@@ -74,9 +79,9 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
 
     def test_perform_searches(self):
         self.assertInSource('Sender and type')  # a results list header
-        self.click_on_nth_form_tab(1)
+        self.click_on_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
-        self.click_on_submit()
+        self.submit_tabpanel('sender')
         self.assertInSource('No matching senders found')
 
 

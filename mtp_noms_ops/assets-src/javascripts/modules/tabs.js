@@ -2,7 +2,7 @@
 
 exports.Tabs = {
   init: function () {
-    this.bindEvents($('a.tab'));
+    this.bindEvents($('.mtp-tab'));
   },
 
   bindEvents: function ($tabButtons) {
@@ -11,44 +11,47 @@ exports.Tabs = {
     }
 
     var selectedIndex = null;
-    var $tabContainer = $tabButtons.closest('.tabs');
-    var $tabPanels = $tabContainer.find('.tabcontent');
+    var $tabContainer = $tabButtons.closest('.mtp-tab-container');
+    var $tabPanels = $tabContainer.find('.mtp-tabpanel');
+    var $tabPanelContainer = $tabPanels.closest('.mtp-tabpanels');
 
-    function resetTabButtons () {
+    function resetTabsAndPanels () {
       $tabButtons.attr({
         tabindex: '-1',
         'aria-selected': 'false'
-      }).removeClass('selected');
+      }).removeClass('mtp-tab--selected');
       $tabPanels.hide();
     }
 
-    resetTabButtons();
+    resetTabsAndPanels();
 
     $tabButtons.each(function () {
       $(this).on('click', function (e) {
         var $tabButton = $(this);
-        var wasSelected = $tabButton.hasClass('selected');
+        var wasSelected = $tabButton.hasClass('mtp-tab--selected');
 
-        resetTabButtons();
+        resetTabsAndPanels();
 
         if (wasSelected) {
           selectedIndex = null;
-          $tabContainer.addClass('collapsed-tabs');
+          $tabContainer.addClass('mtp-tab-container--collapsed');
+          $tabPanelContainer.attr('aria-expanded', 'false');
         } else {
           selectedIndex = $tabButtons.index($tabButton);
           $tabButton.attr({
             tabindex: '0',
             'aria-selected': 'true'
-          }).addClass('selected');
+          }).addClass('mtp-tab--selected');
           $($tabButton.attr('href')).show();
-          $tabContainer.removeClass('collapsed-tabs');
+          $tabContainer.removeClass('mtp-tab-container--collapsed');
+          $tabPanelContainer.attr('aria-expanded', 'true');
         }
 
         e.preventDefault();
       });
     });
 
-    $tabContainer.on('keydown', 'a.tab', function (e) {
+    $tabContainer.on('keydown', '.mtp-tab', function (e) {
       var key = e.which;
 
       if (selectedIndex === null || key < 37 || key > 40) {
