@@ -126,7 +126,13 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     def get_api_endpoint(self):
         raise NotImplementedError
 
-    def get_query_data(self):
+    def get_query_data(self, allow_parameter_manipulation=True):
+        """
+        Serialises the form into a dictionary stripping empty and pagination fields.
+        NB: Forms can sometimes manipulate parameters so this is not always reversible.
+        :param allow_parameter_manipulation: turn off to make serialisation reversible
+        :return: collections.OrderedDict
+        """
         data = collections.OrderedDict()
         for field in self:
             if field.name == 'page':
@@ -158,7 +164,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     @cached_property
     def query_string(self):
-        return urlencode(self.get_query_data(), doseq=True)
+        return urlencode(self.get_query_data(allow_parameter_manipulation=False), doseq=True)
 
     @property
     def search_description(self):
@@ -465,9 +471,10 @@ class CreditsForm(SecurityForm):
     def get_api_endpoint(self):
         return self.client.credits
 
-    def get_query_data(self):
-        query_data = super().get_query_data()
-        AmountPattern.update_query_data(query_data)
+    def get_query_data(self, allow_parameter_manipulation=True):
+        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
+        if allow_parameter_manipulation:
+            AmountPattern.update_query_data(query_data)
         return query_data
 
 
