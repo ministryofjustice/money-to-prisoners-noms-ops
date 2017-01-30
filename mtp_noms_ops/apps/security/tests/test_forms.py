@@ -156,6 +156,12 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertDictEqual(form.cleaned_data, expected_data)
         self.assertDictEqual(form.get_query_data(), {'ordering': '-amount', 'received_at__gte': received_at__gte})
         self.assertEqual(form.query_string, 'ordering=-amount&received_at__gte=2016-05-26')
+        form = CreditsForm(self.request, data={'page': '1', 'amount_pattern': 'not_integral'})
+        self.assertTrue(form.is_valid(), msg=form.errors.as_text())
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-received_at', 'exclude_amount__endswith': '00'})
+        self.assertDictEqual(form.get_query_data(allow_parameter_manipulation=False),
+                             {'ordering': '-received_at', 'amount_pattern': 'not_integral'})
+        self.assertEqual(form.query_string, 'ordering=-received_at&amount_pattern=not_integral')
 
         # invalid forms
         form = CreditsForm(self.request, data={})

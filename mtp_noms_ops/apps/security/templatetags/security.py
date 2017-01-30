@@ -103,7 +103,7 @@ def describe_ordering_for_screenreader(form, ordering):
 
 @register.filter
 def query_string_with_reversed_ordering(form, ordering):
-    data = form.get_query_data()
+    data = form.get_query_data(allow_parameter_manipulation=False)
     current_ordering = data.get('ordering')
     if current_ordering == ordering:
         ordering = '-%s' % ordering

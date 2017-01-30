@@ -151,7 +151,7 @@ class SenderListTestCase(SecurityViewTestCase):
         mocked_connection().senders.get.return_value = response_data
 
         self.login()
-        response = self.client.post(reverse(self.view_name), {'page': '1'})
+        response = self.client.get(reverse(self.view_name))
         self.assertContains(response, 'MAISIE NOLAN')
         response_content = response.content.decode(response.charset)
         self.assertIn('410.00', response_content)
@@ -185,7 +185,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
         mocked_connection().prisoners.get.return_value = response_data
 
         self.login()
-        response = self.client.post(reverse(self.view_name), {'page': '1'})
+        response = self.client.get(reverse(self.view_name))
         self.assertContains(response, 'JAMES HALLS')
         response_content = response.content.decode(response.charset)
         self.assertIn('A1409AE', response_content)
@@ -233,7 +233,7 @@ class CreditsListTestCase(SecurityViewTestCase):
         mocked_connection().credits.get.return_value = response_data
 
         self.login()
-        response = self.client.post(reverse(self.view_name), {'page': '1', 'ordering': '-amount'})
+        response = self.client.get(reverse(self.view_name), {'ordering': '-amount'})
         self.assertContains(response, 'GEORGE MELLEY')
         response_content = response.content.decode(response.charset)
         self.assertIn('A1413AE', response_content)
