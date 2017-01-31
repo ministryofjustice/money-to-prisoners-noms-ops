@@ -187,15 +187,19 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         if filters:
             filters = format_html_join(', ', _('{} is <strong>{}</strong>'), filters)
             description = format_html(_('Filtering results: {}.'), filters)
+            has_filters = True
         else:
             description = _('Showing all results.')
-
+            has_filters = False
         ordering = get_value_text(self['ordering'])
         if ordering:
             ordering = str(ordering)
             ordering = ordering[0].lower() + ordering[1:]
-            return format_html('{} {}', description, _('Ordered by %s.') % ordering)
-        return description
+            description = format_html('{} {}', description, _('Ordered by %s.') % ordering)
+        return {
+            'has_filters': has_filters,
+            'description': description,
+        }
 
 
 @validate_range_field('prisoner_count', _('Must be larger than the minimum prisoners'))
