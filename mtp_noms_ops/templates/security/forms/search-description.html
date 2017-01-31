@@ -1,0 +1,10 @@
+{% load i18n %}
+
+{% with search_description=form.search_description %}
+  <p class="mtp-search-description__text">
+    {{ search_description.description }}
+    {% if search_description.has_filters %}
+      <a href="?{% if form.ordering.value %}ordering={{ form.ordering.value }}{% endif %}">{% trans 'Clear filters' %}</a>
+    {% endif %}
+  </p>
+{% endwith %}

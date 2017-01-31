@@ -22,7 +22,7 @@
 
     <div class="mtp-results-list">
       <div class="panel panel-border-narrow">
-        <p class="mtp-search-description__text">{{ form.search_description }}</p>
+        {% include 'security/forms/search-description.html' with form=form only %}
 
         <div class="print-hidden mtp-links">
           <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
