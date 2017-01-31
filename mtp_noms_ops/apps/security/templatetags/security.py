@@ -13,12 +13,23 @@ logger = logging.getLogger('mtp')
 register = template.Library()
 
 
-@register.filter(is_safe=True)
-def currency(value):
+@register.filter
+def currency(pence_value):
     try:
-        return '{:,.2f}'.format(value / 100)
+        return '£{:,.2f}'.format(pence_value / 100)
     except TypeError:
-        return ''
+        return pence_value
+
+
+@register.filter
+def pence(pence_value):
+    try:
+        assert isinstance(pence_value, int)
+        if pence_value >= 100:
+            return currency(pence_value)
+        return '%dp' % pence_value
+    except AssertionError:
+        return pence_value
 
 
 @register.filter

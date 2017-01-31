@@ -57,7 +57,7 @@
                 <div class="line1"><a href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
                 <div>{{ credit.prisoner_name }}</div>
               </td>
-              <td class="numeric">&pound;{{ credit.amount|currency }}</td>
+              <td class="numeric">{{ credit.amount|currency }}</td>
               <td><textarea class="form-control" rows="4" name="comment_{{ credit.id }}"></textarea></td>
             </tr>
           {% endfor %}

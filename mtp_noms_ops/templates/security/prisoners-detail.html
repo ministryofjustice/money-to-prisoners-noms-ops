@@ -37,9 +37,8 @@
 
     <div class="column-one-quarter">
       <p>
-        {% blocktrans trimmed with total=prisoner.credit_total|currency %}
-          <strong>£{{ total }}</strong><br /> total value received
-        {% endblocktrans %}
+        <strong>{{ prisoner.credit_total|currency }}</strong><br />
+        {% trans 'total amount received' %}
       </p>
     </div>
   </div>
@@ -88,7 +87,7 @@
                 <p>{{ credit.intended_recipient|default_if_none:'—' }}</p>
               </td>
               <td class="number">
-                <p>£{{ credit.amount|currency }}</p>
+                <p>{{ credit.amount|currency }}</p>
               </td>
               <td>
                 <p>{{ credit.prison_name|default_if_none:'—' }}</p>

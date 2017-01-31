@@ -92,7 +92,7 @@
                   <strong>{{ count }}</strong> senders
                 {% endblocktrans %}
               </td>
-              <td class="number"><strong>£{{ prisoner.credit_total|currency }}</strong></td>
+              <td class="number"><strong>{{ prisoner.credit_total|currency }}</strong></td>
             </tr>
           {% empty %}
             <tr class="no-border">
