@@ -10,12 +10,14 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.dateformat import format as date_format
-from django.utils.html import format_html, format_html_join
+from django.utils.html import format_html
 from django.utils.timezone import now, utc
 from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages
 from mtp_common.auth.api_client import get_connection
+
+from security.templatetags.security import currency as format_currency
 
 
 def sorted_prison_type_choices(type_list):
@@ -56,9 +58,10 @@ def get_prison_details_choices(client):
     }
 
 
-def get_credit_source_choices():
+def get_credit_source_choices(blank_option=_('Any method')):
     return insert_blank_option(
-        [('bank_transfer', _('Bank transfers')), ('online', _('Debit card payments'))]
+        [('bank_transfer', _('Bank transfer')), ('online', _('Debit card'))],
+        title=blank_option
     )
 
 
@@ -66,6 +69,18 @@ def insert_blank_option(choices, title=_('Select an option')):
     new_choices = [('', title)]
     new_choices.extend(choices)
     return new_choices
+
+
+def parse_amount(value, as_int=True):
+    # assumes a valid amount in pounds, i.e. validate_amount passes
+    value = value.lstrip('£')
+    if '.' in value:
+        value = value.replace('.', '')
+    else:
+        value += '00'
+    if as_int:
+        return int(value)
+    return value
 
 
 def validate_amount(amount):
@@ -89,11 +104,9 @@ def validate_range_field(field_name, bound_ordering_msg):
             base_clean(self)
             lower_value = self.cleaned_data.get(lower)
             upper_value = self.cleaned_data.get(upper)
-            if lower_value and upper_value and lower_value > upper_value:
-                self.add_error(
-                    upper,
-                    ValidationError(bound_ordering_msg or _('Must be greater than the lower bound'),
-                                    code='bound_ordering'))
+            if lower_value is not None and upper_value is not None and lower_value > upper_value:
+                self.add_error(upper, ValidationError(bound_ordering_msg or _('Must be greater than the lower bound'),
+                                                      code='bound_ordering'))
             return self.cleaned_data
 
         setattr(cls, 'clean', clean)
@@ -106,18 +119,28 @@ def validate_range_field(field_name, bound_ordering_msg):
 class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     """
     Base form for security searches
-    Uses 'page' parameter to determine if form is submitted
     """
     page = forms.IntegerField(min_value=1)
     page_size = 20
 
     exclusive_date_params = []
 
+    filtered_description_template = NotImplemented
+    unfiltered_description_template = NotImplemented
+    description_templates = ()
+    description_capitalisation = {
+        'ordering': 'lowerfirst',
+    }
+
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
         self.request = request
         self.client = get_connection(request)
         self.page_count = 0
+        for cls in self.__class__.mro()[1:]:
+            description_capitalisation = getattr(cls, 'description_capitalisation', None)
+            if description_capitalisation:
+                self.description_capitalisation.update(description_capitalisation)
 
     def clean_ordering(self):
         return self.cleaned_data['ordering'] or self.fields['ordering'].initial
@@ -163,42 +186,69 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     def query_string(self):
         return urlencode(self.get_query_data(allow_parameter_manipulation=False), doseq=True)
 
+    def _get_value_text(self, bf):
+        f = bf.field
+        v = self.cleaned_data.get(bf.name) or f.initial
+        if isinstance(f, forms.ChoiceField):
+            v = dict(f.choices).get(v)
+            if not v:
+                return None
+            v = str(v)
+            capitalisation = self.description_capitalisation.get(bf.name)
+            if capitalisation == 'preserve':
+                return v
+            if capitalisation == 'lowerfirst':
+                return v[0].lower() + v[1:]
+            return v.lower()
+        if isinstance(f, forms.DateField) and v is not None:
+            return date_format(v, 'j M Y')
+        if isinstance(f, forms.IntegerField) and v is not None:
+            return str(v)
+        return v or None
+
     @property
     def search_description(self):
-        def get_value_text(bf):
-            f = bf.field
-            v = self.cleaned_data.get(bf.name) or f.initial
-            if isinstance(f, forms.ChoiceField):
-                return dict(f.choices).get(v)
-            if isinstance(f, forms.DateField) and v is not None:
-                return date_format(v, 'j M Y')
-            if isinstance(f, forms.IntegerField) and v is not None:
-                return str(v)
-            return v or None
+        description_kwargs = {
+            'ordering_description': self._get_value_text(self['ordering']),
+        }
 
-        filters = []
+        filters = {}
         for bound_field in self:
             if bound_field.name in ('page', 'ordering'):
                 continue
-            value = get_value_text(bound_field)
+            description_override = 'describe_field_%s' % bound_field.name
+            if hasattr(self, description_override):
+                value = getattr(self, description_override)()
+            else:
+                value = self._get_value_text(bound_field)
             if value is None:
                 continue
-            filters.append((str(bound_field.label).lower(), value))
-        if filters:
-            filters = format_html_join(', ', _('{} is <strong>{}</strong>'), filters)
-            description = format_html(_('Filtering results: {}.'), filters)
+            filters[bound_field.name] = value
+
+        descriptions = []
+        for template_group in self.description_templates:
+            for filter_template in template_group:
+                try:
+                    descriptions.append(filter_template.format(**filters))
+                    break
+                except KeyError:
+                    continue
+        if descriptions:
+            description_template = self.filtered_description_template
+            if len(descriptions) > 1:
+                filter_description = _('{0} and {1}').format(', '.join(descriptions[:-1]),
+                                                             descriptions[-1])
+            else:
+                filter_description = descriptions[0]
+            description_kwargs['filter_description'] = filter_description
             has_filters = True
         else:
-            description = _('Showing all results.')
+            description_template = self.unfiltered_description_template
             has_filters = False
-        ordering = get_value_text(self['ordering'])
-        if ordering:
-            ordering = str(ordering)
-            ordering = ordering[0].lower() + ordering[1:]
-            description = format_html('{} {}', description, _('Ordered by %s.') % ordering)
+
         return {
             'has_filters': has_filters,
-            'description': description,
+            'description': format_html(description_template, **description_kwargs),
         }
 
 
@@ -206,7 +256,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 @validate_range_field('credit_count', _('Must be larger than the minimum credits'))
 @validate_range_field('credit_total', _('Must be larger than the minimum total'))
 class SendersForm(SecurityForm):
-    ordering = forms.ChoiceField(label=_('Sort by'), required=False,
+    ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-prisoner_count',
                                  choices=[
                                      ('prisoner_count', _('Number of prisoners (low to high)')),
@@ -224,20 +274,52 @@ class SendersForm(SecurityForm):
     credit_total__gte = forms.IntegerField(label=_('Minimum total sent'), required=False)
     credit_total__lte = forms.IntegerField(label=_('Maximum total sent'), required=False)
 
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
-    #                          required=False)
-
     sender_name = forms.CharField(label=_('Sender name'), required=False)
+    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices())
     sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('for example 01-23-45'), required=False)
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
+
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
-    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices())
+    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
+
+    filtered_description_template = _('Showing senders who {filter_description}, ordered by {ordering_description}.')
+    unfiltered_description_template = _('Showing all senders ordered by {ordering_description}.')
+    description_templates = (
+        (_('are named ‘{sender_name}’'),),
+        (_('sent by {source} from account {sender_account_number} {sender_sort_code}'),
+         _('sent by {source} from account {sender_account_number}'),
+         _('sent by {source} from sort code {sender_sort_code}'),
+         _('sent by {source} **** **** **** {card_number_last_digits}'),
+         _('sent by {source}'),),
+        (_('sent to {prison}'),),
+        (_('sent to {prison_population} {prison_category} prisons in {prison_region}'),
+         _('sent to {prison_category} prisons in {prison_region}'),
+         _('sent to {prison_population} prisons in {prison_region}'),
+         _('sent to {prison_population} {prison_category} prisons'),
+         _('sent to {prison_category} prisons'),
+         _('sent to {prison_population} prisons'),
+         _('sent to prisons in {prison_region}'),),
+        (_('sent to {prisoner_count__gte}-{prisoner_count__lte} prisoners'),
+         _('sent to at least {prisoner_count__gte} prisoners'),
+         _('sent to at most {prisoner_count__lte} prisoners'),),
+        (_('sent between {credit_count__gte}-{credit_count__lte} credits'),
+         _('sent at least {credit_count__gte} credits'),
+         _('sent at most {credit_count__lte} credits'),),
+        (_('sent between £{credit_total__gte}-{credit_total__lte}'),
+         _('sent at least £{credit_total__gte}'),
+         _('sent at most £{credit_total__lte}'),),
+    )
+    description_capitalisation = {
+        'prison': 'preserve',
+        'prison_region': 'preserve',
+        'prison_category': 'lowerfirst',
+    }
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
@@ -252,34 +334,46 @@ class SendersForm(SecurityForm):
                                                                     title=_('All categories'))
 
     def clean_sender_sort_code(self):
+        if self.cleaned_data.get('source') != 'bank_transfer':
+            return ''
         sender_sort_code = self.cleaned_data.get('sender_sort_code')
         if sender_sort_code:
             sender_sort_code = sender_sort_code.replace('-', '')
         return sender_sort_code
 
-    def clean_credit_total__gte(self):
-        credit_total__gte = self.cleaned_data.get('credit_total__gte')
-        if credit_total__gte:
-            return int(credit_total__gte*100)
-        else:
-            return credit_total__gte
+    def clean_sender_account_number(self):
+        if self.cleaned_data.get('source') != 'bank_transfer':
+            return ''
+        return self.cleaned_data.get('sender_account_number')
 
-    def clean_credit_total__lte(self):
-        credit_total__lte = self.cleaned_data.get('credit_total__lte')
-        if credit_total__lte:
-            return int(credit_total__lte*100)
-        else:
-            return credit_total__lte
+    def clean_sender_roll_number(self):
+        if self.cleaned_data.get('source') != 'bank_transfer':
+            return ''
+        return self.cleaned_data.get('sender_roll_number')
+
+    def clean_card_number_last_digits(self):
+        if self.cleaned_data.get('source') != 'online':
+            return ''
+        return self.cleaned_data.get('card_number_last_digits')
 
     def get_api_endpoint(self):
         return self.client.senders
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
+        if allow_parameter_manipulation:
+            for field in ('credit_total__gte', 'credit_total__lte'):
+                value = query_data.get(field)
+                if value is not None:
+                    query_data[field] = value * 100
+        return query_data
 
 
 @validate_range_field('sender_count', _('Must be larger than the minimum senders'))
 @validate_range_field('credit_count', _('Must be larger than the minimum credits'))
 @validate_range_field('credit_total', _('Must be larger than the minimum total'))
 class PrisonersForm(SecurityForm):
-    ordering = forms.ChoiceField(label=_('Sort by'), required=False,
+    ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-sender_count',
                                  choices=[
                                      ('sender_count', _('Number of senders (low to high)')),
@@ -301,17 +395,44 @@ class PrisonersForm(SecurityForm):
     credit_total__gte = forms.IntegerField(label=_('Minimum total received'), required=False)
     credit_total__lte = forms.IntegerField(label=_('Maximum total received'), required=False)
 
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
-    #                          required=False)
-
     prisoner_number = forms.CharField(label=_('Prisoner number'),
                                       validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
-
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
+
+    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
+
+    filtered_description_template = _('Showing prisoners who {filter_description}, ordered by {ordering_description}.')
+    unfiltered_description_template = _('Showing all prisoners ordered by {ordering_description}.')
+    description_templates = (
+        (_('are named ‘{prisoner_name}’'),),
+        (_('have prisoner number {prisoner_number}'),),
+        (_('are at {prison}'),),
+        (_('are at {prison_population} {prison_category} prisons in {prison_region}'),
+         _('are at {prison_category} prisons in {prison_region}'),
+         _('are at {prison_population} prisons in {prison_region}'),
+         _('are at {prison_population} {prison_category} prisons'),
+         _('are at {prison_category} prisons'),
+         _('are at {prison_population} prisons'),
+         _('are at prisons in {prison_region}'),),
+        (_('received from {sender_count__gte}-{sender_count__lte} senders'),
+         _('received from at least {sender_count__gte} senders'),
+         _('received from at most {sender_count__lte} senders'),),
+        (_('received between {credit_count__gte}-{credit_count__lte} credits'),
+         _('received at least {credit_count__gte} credits'),
+         _('received at most {credit_count__lte} credits'),),
+        (_('received between £{credit_total__gte}-{credit_total__lte}'),
+         _('received at least £{credit_total__gte}'),
+         _('received at most £{credit_total__lte}'),),
+    )
+    description_capitalisation = {
+        'prison': 'preserve',
+        'prison_region': 'preserve',
+        'prison_category': 'lowerfirst',
+    }
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
@@ -325,22 +446,17 @@ class PrisonersForm(SecurityForm):
         self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
                                                                     title=_('All categories'))
 
-    def clean_credit_total__gte(self):
-        credit_total__gte = self.cleaned_data.get('credit_total__gte')
-        if credit_total__gte:
-            return int(credit_total__gte*100)
-        else:
-            return credit_total__gte
-
-    def clean_credit_total__lte(self):
-        credit_total__lte = self.cleaned_data.get('credit_total__lte')
-        if credit_total__lte:
-            return int(credit_total__lte*100)
-        else:
-            return credit_total__lte
-
     def get_api_endpoint(self):
         return self.client.prisoners
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
+        if allow_parameter_manipulation:
+            for field in ('credit_total__gte', 'credit_total__lte'):
+                value = query_data.get(field)
+                if value is not None:
+                    query_data[field] = value * 100
+        return query_data
 
 
 class AmountPattern(enum.Enum):
@@ -375,7 +491,7 @@ class AmountPattern(enum.Enum):
         elif amount_pattern == cls.gte_100:
             query_data['amount__gte'] = '10000'
         elif amount_pattern == cls.exact:
-            query_data['amount'] = amount_exact
+            query_data['amount'] = parse_amount(amount_exact, as_int=False)
         elif amount_pattern == cls.pence:
             query_data['amount__endswith'] = '%02d' % amount_pence
         else:
@@ -383,7 +499,7 @@ class AmountPattern(enum.Enum):
 
 
 class CreditsForm(SecurityForm):
-    ordering = forms.ChoiceField(label=_('Sort by'), required=False,
+    ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-received_at',
                                  choices=[
                                      ('received_at', _('Received date (oldest to newest)')),
@@ -404,8 +520,7 @@ class CreditsForm(SecurityForm):
     amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
     amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 
-    prisoner_number = forms.CharField(
-        label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
+    prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
@@ -413,17 +528,46 @@ class CreditsForm(SecurityForm):
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
+    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices())
     sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('for example 01-23-45'), required=False)
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
 
-    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices())
-
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'),
-    #                          required=False)
+    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
     exclusive_date_params = ['received_at__lt']
+
+    filtered_description_template = _('Showing credits sent {filter_description}, ordered by {ordering_description}.')
+    unfiltered_description_template = _('Showing all credits ordered by {ordering_description}.')
+    description_templates = (
+        (_('between {received_at__gte} and {received_at__lt}'),
+         _('since {received_at__gte}'),
+         _('before {received_at__lt}'),),
+        (_('that are {amount_pattern}'),),
+        (_('by ‘{sender_name}’'),),
+        (_('by {source} from account {sender_account_number} {sender_sort_code}'),
+         _('by {source} from account {sender_account_number}'),
+         _('by {source} from sort code {sender_sort_code}'),
+         _('by {source} **** **** **** {card_number_last_digits}'),
+         _('by {source}'),),
+        (_('to prisoner {prisoner_name} ({prisoner_number})'),
+         _('to prisoners named ‘{prisoner_name}’'),
+         _('to prisoner {prisoner_number}'),),
+        (_('to {prison}'),),
+        (_('to {prison_population} {prison_category} prisons in {prison_region}'),
+         _('to {prison_category} prisons in {prison_region}'),
+         _('to {prison_population} prisons in {prison_region}'),
+         _('to {prison_population} {prison_category} prisons'),
+         _('to {prison_category} prisons'),
+         _('to {prison_population} prisons'),
+         _('to prisons in {prison_region}'),),
+    )
+    description_capitalisation = {
+        'prison': 'preserve',
+        'prison_region': 'preserve',
+        'prison_category': 'lowerfirst',
+    }
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
@@ -438,24 +582,20 @@ class CreditsForm(SecurityForm):
                                                                     title=_('All categories'))
 
     def clean_amount_exact(self):
-        amount_exact = self.cleaned_data.get('amount_exact')
-        if amount_exact:
-            amount_exact = amount_exact.lstrip('£')
-            if '.' in amount_exact:
-                amount_exact = amount_exact.replace('.', '')
-            else:
-                amount_exact += '00'
-        elif self.cleaned_data.get('amount_pattern') == 'exact':
-            raise ValidationError(_('This field is required for the selected amount pattern'),
-                                  code='required')
-        return amount_exact
+        if self.cleaned_data.get('amount_pattern') != 'exact':
+            return ''
+        amount = self.cleaned_data.get('amount_exact')
+        if amount is None:
+            raise ValidationError(_('This field is required for the selected amount pattern'), code='required')
+        return amount
 
     def clean_amount_pence(self):
-        amount_pence = self.cleaned_data.get('amount_pence')
-        if amount_pence is None and self.cleaned_data.get('amount_pattern') == 'pence':
-            raise ValidationError(_('This field is required for the selected amount pattern'),
-                                  code='required')
-        return amount_pence
+        if self.cleaned_data.get('amount_pattern') != 'pence':
+            return None
+        amount = self.cleaned_data.get('amount_pence')
+        if amount is None:
+            raise ValidationError(_('This field is required for the selected amount pattern'), code='required')
+        return amount
 
     def clean_prisoner_number(self):
         prisoner_number = self.cleaned_data.get('prisoner_number')
@@ -464,10 +604,27 @@ class CreditsForm(SecurityForm):
         return prisoner_number
 
     def clean_sender_sort_code(self):
+        if self.cleaned_data.get('source') != 'bank_transfer':
+            return ''
         sender_sort_code = self.cleaned_data.get('sender_sort_code')
         if sender_sort_code:
             sender_sort_code = sender_sort_code.replace('-', '')
         return sender_sort_code
+
+    def clean_sender_account_number(self):
+        if self.cleaned_data.get('source') != 'bank_transfer':
+            return ''
+        return self.cleaned_data.get('sender_account_number')
+
+    def clean_sender_roll_number(self):
+        if self.cleaned_data.get('source') != 'bank_transfer':
+            return ''
+        return self.cleaned_data.get('sender_roll_number')
+
+    def clean_card_number_last_digits(self):
+        if self.cleaned_data.get('source') != 'online':
+            return ''
+        return self.cleaned_data.get('card_number_last_digits')
 
     def get_api_endpoint(self):
         return self.client.credits
@@ -477,6 +634,20 @@ class CreditsForm(SecurityForm):
         if allow_parameter_manipulation:
             AmountPattern.update_query_data(query_data)
         return query_data
+
+    def describe_field_amount_pattern(self):
+        value = self.cleaned_data.get('amount_pattern')
+        if not value:
+            return None
+        if value in ('exact', 'pence'):
+            amount_value = self.cleaned_data.get('amount_%s' % value)
+            if amount_value is None:
+                return None
+            if value == 'exact':
+                return format_currency(parse_amount(amount_value))
+            return _('ending in %02d pence') % amount_value
+        description = dict(self['amount_pattern'].field.choices).get(value)
+        return str(description).lower() if description else None
 
 
 class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
@@ -496,11 +667,10 @@ class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
             for prison in self.request.user.user_data.get('prisons', [])
             if prison['pre_approval_required']
         ]
-        credits = retrieve_all_pages(
+        return retrieve_all_pages(
             self.client.credits.get, valid=True, reviewed=False, prison=prisons,
             received_at__lt=datetime.combine(now().date(), time(0, 0, 0, tzinfo=utc))
         )
-        return credits
 
     def review(self):
         reviewed = set()

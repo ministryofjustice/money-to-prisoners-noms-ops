@@ -72,17 +72,17 @@
                 {% if credit.source == 'online' %}
                   <p class="mtp-credit__card">
                     <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default:'—' }}</a></strong><br/>
-                    {% trans 'Debit card' %}
+                    {% trans 'by debit card' %}
                   </p>
                 {% else %}
                   <p class="mtp-credit__transfer">
                     <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default:'—' }}</a></strong><br/>
-                    {% trans 'Bank transfer' %}
+                    {% trans 'by bank transfer' %}
                   </p>
                 {% endif %}
               </td>
               <td class="number">
-                <p><strong>£{{ credit.amount|currency }}</strong></p>
+                <p><strong>{{ credit.amount|currency }}</strong></p>
               </td>
               <td>
                 {% if credit.prisoner_number %}
