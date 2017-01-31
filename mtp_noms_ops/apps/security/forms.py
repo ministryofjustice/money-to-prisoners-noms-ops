@@ -111,7 +111,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     page = forms.IntegerField(min_value=1)
     page_size = 20
 
-    extra_filters = {}
     exclusive_date_params = []
 
     def __init__(self, request, **kwargs):
@@ -151,7 +150,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         for param in filters:
             if param in self.exclusive_date_params:
                 filters[param] += timedelta(days=1)
-        filters.update(self.extra_filters)
         data = end_point.get(offset=offset, limit=self.page_size, **filters)
         count = data['count']
         self.page_count = int(ceil(count / self.page_size))
@@ -159,7 +157,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_complete_object_list(self):
         filters = self.get_query_data()
-        filters.update(self.extra_filters)
         return retrieve_all_pages(self.get_api_endpoint().get, **filters)
 
     @cached_property
