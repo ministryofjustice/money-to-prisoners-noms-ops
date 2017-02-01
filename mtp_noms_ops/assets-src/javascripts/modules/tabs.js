@@ -26,7 +26,12 @@ exports.Tabs = {
     resetTabsAndPanels();
 
     $tabButtons.each(function () {
-      $(this).on('click', function (e) {
+      var $tabButton = $(this);
+      var $tabPanel = $($tabButton.attr('href'));
+      $tabButton.data('mtp-tabpanel', $tabPanel);
+      $tabPanel.data('mtp-tab', $tabButton);
+    });
+    $tabButtons.on('click', function (e) {
         var $tabButton = $(this);
         var wasSelected = $tabButton.hasClass('mtp-tab--selected');
 
@@ -42,14 +47,13 @@ exports.Tabs = {
             tabindex: '0',
             'aria-selected': 'true'
           }).addClass('mtp-tab--selected');
-          $($tabButton.attr('href')).show();
+        $tabButton.data('mtp-tabpanel').show();
           $tabContainer.removeClass('mtp-tab-container--collapsed');
           $tabPanelContainer.attr('aria-expanded', 'true');
         }
 
         e.preventDefault();
       });
-    });
 
     $tabContainer.on('keydown', '.mtp-tab', function (e) {
       var key = e.which;
