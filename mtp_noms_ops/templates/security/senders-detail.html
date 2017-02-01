@@ -8,14 +8,11 @@
   <header>
     {% language_switch %}
     <h1 class="heading-xlarge">
+      {{ view.title }}
       {% if sender.bank_transfer_details %}
-        {{ sender.bank_transfer_details.0.sender_name|default_if_none:'—' }}
         <p class="lede">{% trans 'Sent by bank transfer' %}</p>
       {% elif sender.debit_card_details %}
-        {{ sender.debit_card_details.0.cardholder_names.0|default_if_none:'—' }}
         <p class="lede">{% trans 'Sent by debit card' %}</p>
-      {% else %}
-        —
       {% endif %}
     </h1>
   </header>

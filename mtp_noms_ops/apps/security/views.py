@@ -59,20 +59,24 @@ class SecurityView(FormView):
 
 
 class SecurityDetailView(TemplateView):
+    title = NotImplemented
+    list_title = NotImplemented
+    list_url = NotImplemented
     template_name = NotImplemented
     id_kwarg_name = NotImplemented
     object_name = NotImplemented
     page_size = 20
 
     def get_api_endpoint(self, client):
-        return NotImplemented
+        raise NotImplementedError
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         client = get_connection(self.request)
         endpoint = self.get_api_endpoint(client)(self.kwargs[self.id_kwarg_name])
 
-        context[self.object_name] = endpoint.get()
+        detail_object = endpoint.get()
+        self.title = self.get_title_for_object(detail_object)
         try:
             page = int(self.request.GET.get('page', 1))
             if page < 1:
@@ -82,10 +86,19 @@ class SecurityDetailView(TemplateView):
         offset = (page - 1) * self.page_size
         data = endpoint.credits.get(offset=offset, limit=self.page_size)
         count = data['count']
+        context[self.object_name] = detail_object
         context['page'] = page
         context['page_count'] = int(ceil(count / self.page_size))
         context['credits'] = data.get('results', [])
+        context['breadcrumbs'] = [
+            {'name': _('Home'), 'url': reverse('dashboard')},
+            {'name': self.list_title, 'url': self.list_url},
+            {'name': self.title}
+        ]
         return context
+
+    def get_title_for_object(self, detail_object):
+        raise NotImplementedError
 
 
 class CreditListView(SecurityView):
@@ -114,12 +127,28 @@ class SenderListView(SecurityView):
 
 
 class SenderDetailView(SecurityDetailView):
+    """
+    Sender profile view
+    """
+    list_title = SenderListView.title
+    list_url = reverse_lazy('security:sender_list')
     template_name = 'security/senders-detail.html'
     id_kwarg_name = 'sender_id'
     object_name = 'sender'
 
     def get_api_endpoint(self, client):
         return client.senders
+
+    def get_title_for_object(self, detail_object):
+        try:
+            return detail_object['bank_transfer_details'][0]['sender_name']
+        except (KeyError, IndexError):
+            pass
+        try:
+            return detail_object['debit_card_details'][0]['cardholder_names'][0]
+        except (KeyError, IndexError):
+            pass
+        return '—'
 
 
 class PrisonerListView(SecurityView):
@@ -137,12 +166,21 @@ class PrisonerListView(SecurityView):
 
 
 class PrisonerDetailView(SecurityDetailView):
+    """
+    Prisoner profile view
+    """
+    list_title = PrisonerListView.title
+    list_url = reverse_lazy('security:prisoner_list')
     template_name = 'security/prisoners-detail.html'
     id_kwarg_name = 'prisoner_id'
     object_name = 'prisoner'
 
     def get_api_endpoint(self, client):
         return client.prisoners
+
+    def get_title_for_object(self, detail_object):
+        title = ' '.join(detail_object.get(key) for key in ('prisoner_number', 'prisoner_name'))
+        return title.strip() or '—'
 
 
 class CreditExportView(SecurityView):
