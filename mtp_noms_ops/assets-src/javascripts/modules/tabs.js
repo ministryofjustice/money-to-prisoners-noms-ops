@@ -87,6 +87,7 @@ exports.Tabs = {
       var $tabPanel = $(this);
       $tabPanel.data('mtp-tab').addClass('error-message');
     });
+    $tabPanelsWithErrors.first().data('mtp-tab').click();
   }
 
 };
