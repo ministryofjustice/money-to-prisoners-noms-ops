@@ -88,6 +88,15 @@ exports.Tabs = {
       $tabPanel.data('mtp-tab').addClass('error-message');
     });
     $tabPanelsWithErrors.first().data('mtp-tab').click();
+
+    $('.field-specific-error a').click(function () {
+      var $errorLink = $(this);
+      var $fieldLabel = $($errorLink.attr('href'));
+      var $tabPanel = $fieldLabel.closest('.mtp-tabpanel');
+      if ($tabPanel.is(':hidden')) {
+        $tabPanel.data('mtp-tab').click();
+      }
+    });
   }
 
 };
