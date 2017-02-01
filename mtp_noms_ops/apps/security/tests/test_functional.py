@@ -17,7 +17,7 @@ class SecurityDashboardTestCase(FunctionalTestCase):
         with silence_logger(name='mtp', level=logging.WARNING):
             super().load_test_data()
         # only need it the first time as data is not modified by these tests:
-        self.__class__.auto_load_test_data = False
+        SecurityDashboardTestCase.auto_load_test_data = False
 
     def login(self, *args, **kwargs):
         kwargs['url'] = self.live_server_url + '/en-gb/'
@@ -121,10 +121,12 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
     def test_perform_searches(self):
         self.assertInSource('Received')  # a results list header
 
+        self.click_on_tab('prisoner')
         self.type_in('id_prisoner_name', 'James')
-        self.click_on_submit()
+        self.submit_tabpanel('prisoner')
         self.assertInSource('JAMES HALLS')
 
+        self.click_on_tab('prisoner')
         self.type_in('id_prisoner_name', 'aaabbbccc111222333')  # not a likely prisoner name
-        self.click_on_submit()
+        self.submit_tabpanel('prisoner')
         self.assertInSource('No matching prisoners found')
