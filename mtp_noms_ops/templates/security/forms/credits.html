@@ -9,9 +9,9 @@
       <ul class="mtp-tab-wrapper" role="tablist">
         <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--first" {% tab_aria_atts 'date' %}>{% trans 'Date' %}</a></li>
         <li class="mtp-tab-item" role="presentation"><a class="mtp-tab" {% tab_aria_atts 'amount' %}>{% trans 'Amount (£)' %}</a></li>
-        <li class="mtp-tab-item" role="presentation"><a class="mtp-tab" {% tab_aria_atts 'prison' %}>{% trans 'Prison' %}</a></li>
         <li class="mtp-tab-item" role="presentation"><a class="mtp-tab" {% tab_aria_atts 'sender' %}>{% trans 'Sender' %}</a></li>
-        <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--last" {% tab_aria_atts 'prisoner' %}>{% trans 'Prisoner' %}</a></li>
+        <li class="mtp-tab-item" role="presentation"><a class="mtp-tab" {% tab_aria_atts 'prisoner' %}>{% trans 'Prisoner' %}</a></li>
+        <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--last" {% tab_aria_atts 'prison' %}>{% trans 'Prison' %}</a></li>
       </ul>
     {% endspaceless %}
 
@@ -27,22 +27,6 @@
             {% include 'security/forms/select-field.html' with field=form.amount_pattern %}
             {% include 'mtp_common/forms/field.html' with field=form.amount_exact %}
             {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
-          </div>
-          <div class="column-full">
-            {% include 'security/forms/update-search.html' %}
-          </div>
-        </div>
-      </div>
-
-      <div class="mtp-tabpanel" {% panel_aria_atts 'prison' %}>
-        <div class="grid-row">
-          <div class="column-one-third">
-            {% include 'security/forms/select-field.html' with field=form.prison %}
-            {% include 'security/forms/select-field.html' with field=form.prison_population %}
-          </div>
-          <div class="column-one-third">
-            {% include 'security/forms/select-field.html' with field=form.prison_category %}
-            {% include 'security/forms/select-field.html' with field=form.prison_region %}
           </div>
           <div class="column-full">
             {% include 'security/forms/update-search.html' %}
@@ -74,6 +58,22 @@
           <div class="column-full">
             {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
             {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
+          </div>
+          <div class="column-full">
+            {% include 'security/forms/update-search.html' %}
+          </div>
+        </div>
+      </div>
+
+      <div class="mtp-tabpanel" {% panel_aria_atts 'prison' %}>
+        <div class="grid-row">
+          <div class="column-one-third">
+            {% include 'security/forms/select-field.html' with field=form.prison %}
+            {% include 'security/forms/select-field.html' with field=form.prison_population %}
+          </div>
+          <div class="column-one-third">
+            {% include 'security/forms/select-field.html' with field=form.prison_category %}
+            {% include 'security/forms/select-field.html' with field=form.prison_region %}
           </div>
           <div class="column-full">
             {% include 'security/forms/update-search.html' %}
