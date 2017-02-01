@@ -77,6 +77,10 @@ class SecurityDetailView(TemplateView):
 
         detail_object = endpoint.get()
         self.title = self.get_title_for_object(detail_object)
+        list_url = self.request.build_absolute_uri(str(self.list_url))
+        referrer_url = self.request.META.get('HTTP_REFERER', '-')
+        if referrer_url.startswith(list_url):
+            list_url = referrer_url
         try:
             page = int(self.request.GET.get('page', 1))
             if page < 1:
@@ -92,7 +96,7 @@ class SecurityDetailView(TemplateView):
         context['credits'] = data.get('results', [])
         context['breadcrumbs'] = [
             {'name': _('Home'), 'url': reverse('dashboard')},
-            {'name': self.list_title, 'url': self.list_url},
+            {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
         return context
