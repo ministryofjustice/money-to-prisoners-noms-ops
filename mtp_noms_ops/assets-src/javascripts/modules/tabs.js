@@ -32,28 +32,28 @@ exports.Tabs = {
       $tabPanel.data('mtp-tab', $tabButton);
     });
     $tabButtons.on('click', function (e) {
-        var $tabButton = $(this);
-        var wasSelected = $tabButton.hasClass('mtp-tab--selected');
+      var $tabButton = $(this);
+      var wasSelected = $tabButton.hasClass('mtp-tab--selected');
 
-        resetTabsAndPanels();
+      resetTabsAndPanels();
 
-        if (wasSelected) {
-          selectedIndex = null;
-          $tabContainer.addClass('mtp-tab-container--collapsed');
-          $tabPanelContainer.attr('aria-expanded', 'false');
-        } else {
-          selectedIndex = $tabButtons.index($tabButton);
-          $tabButton.attr({
-            tabindex: '0',
-            'aria-selected': 'true'
-          }).addClass('mtp-tab--selected');
+      if (wasSelected) {
+        selectedIndex = null;
+        $tabContainer.addClass('mtp-tab-container--collapsed');
+        $tabPanelContainer.attr('aria-expanded', 'false');
+      } else {
+        selectedIndex = $tabButtons.index($tabButton);
+        $tabButton.attr({
+          tabindex: '0',
+          'aria-selected': 'true'
+        }).addClass('mtp-tab--selected');
         $tabButton.data('mtp-tabpanel').show();
-          $tabContainer.removeClass('mtp-tab-container--collapsed');
-          $tabPanelContainer.attr('aria-expanded', 'true');
-        }
+        $tabContainer.removeClass('mtp-tab-container--collapsed');
+        $tabPanelContainer.attr('aria-expanded', 'true');
+      }
 
-        e.preventDefault();
-      });
+      e.preventDefault();
+    });
 
     $tabContainer.on('keydown', '.mtp-tab', function (e) {
       var key = e.which;
@@ -80,6 +80,12 @@ exports.Tabs = {
       $($tabButtons[selectedIndex]).focus().click();
 
       e.preventDefault();
+    });
+
+    var $tabPanelsWithErrors = $tabPanels.has('.error-message');
+    $tabPanelsWithErrors.each(function () {
+      var $tabPanel = $(this);
+      $tabPanel.data('mtp-tab').addClass('error-message');
     });
   }
 

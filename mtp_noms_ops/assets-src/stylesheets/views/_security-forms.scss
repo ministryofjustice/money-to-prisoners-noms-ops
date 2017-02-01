@@ -65,6 +65,10 @@
         background: $focus-colour;
       }
     }
+
+    &.error-message {
+      color: $error-colour;
+    }
   }
 
   .mtp-tabpanels {
