@@ -129,19 +129,13 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     filtered_description_template = NotImplemented
     unfiltered_description_template = NotImplemented
     description_templates = ()
-    description_capitalisation = {
-        'ordering': 'lowerfirst',
-    }
+    description_capitalisation = {}
 
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
         self.request = request
         self.client = get_connection(request)
         self.page_count = 0
-        for cls in self.__class__.mro()[1:]:
-            description_capitalisation = getattr(cls, 'description_capitalisation', None)
-            if description_capitalisation:
-                self.description_capitalisation.update(description_capitalisation)
 
     def clean_ordering(self):
         return self.cleaned_data['ordering'] or self.fields['ordering'].initial
@@ -324,6 +318,7 @@ class SendersForm(SecurityForm):
          'sent at most £{credit_total__lte}',),
     )
     description_capitalisation = {
+        'ordering': 'lowerfirst',
         'prison': 'preserve',
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
@@ -438,6 +433,7 @@ class PrisonersForm(SecurityForm):
          'received at most £{credit_total__lte}',),
     )
     description_capitalisation = {
+        'ordering': 'lowerfirst',
         'prison': 'preserve',
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
@@ -574,6 +570,7 @@ class CreditsForm(SecurityForm):
          '{prison_preposition} prisons in {prison_region}',),
     )
     description_capitalisation = {
+        'ordering': 'lowerfirst',
         'prison': 'preserve',
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
