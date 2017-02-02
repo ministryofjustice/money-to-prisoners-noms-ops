@@ -96,6 +96,54 @@ class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
 
 class SecurityViewTestCase(SecurityBaseTestCase):
     view_name = None
+    sender_profile = {
+        'id': 9,
+        'credit_count': 4,
+        'credit_total': 41000,
+        'prisoner_count': 3,
+        'prison_count': 2,
+        'bank_transfer_details': [
+            {
+                'sender_name': 'MAISIE NOLAN',
+                'sender_sort_code': '101010',
+                'sender_account_number': '12312345',
+                'sender_roll_number': '',
+            }
+        ],
+        'created': '2016-05-25T20:24:00Z',
+        'modified': '2016-05-25T20:24:00Z',
+    }
+    prisoner_profile = {
+        'id': 8,
+        'credit_count': 3,
+        'credit_total': 31000,
+        'sender_count': 2,
+        'prisoner_name': 'JAMES HALLS',
+        'prisoner_number': 'A1409AE',
+        'prisoner_dob': '1986-12-09',
+        'current_prison': {'nomis_id': 'PRN', 'name': 'Prison'},
+        'prisons': [{'nomis_id': 'PRN', 'name': 'Prison'}],
+        'created': '2016-05-25T20:24:00Z',
+        'modified': '2016-05-25T20:24:00Z',
+    }
+    credit_object = {
+        'id': 1,
+        'amount': 10250,
+        'resolution': 'credited', 'anonymous': False,
+        'credited_at': '2016-05-25T20:24:00Z',
+        'owner': 1, 'owner_name': 'Clerk',
+        'prison': 'PRN', 'prison_name': 'Prison', 'prisoner_name': 'JAMES HALLS', 'prisoner_number': 'A1409AE',
+        'reconciliation_code': None,
+        'received_at': '2017-01-25T12:00:00Z',
+        'refunded_at': None,
+        'reviewed': False, 'comments': [],
+        'source': 'bank_transfer',
+        'sender_sort_code': '101010', 'sender_account_number': '12312345', 'sender_roll_number': '',
+        'card_expiry_date': None, 'card_number_last_digits': None,
+        'sender_name': 'MAISIE NOLAN',
+        'sender_email': None,
+        'intended_recipient': None,
+    }
 
     def setUp(self):
         self.mocked_prison_data = mock.patch('security.forms.get_prison_details_choices', return_value={
@@ -121,75 +169,72 @@ class SecurityViewTestCase(SecurityBaseTestCase):
 
 class SenderListTestCase(SecurityViewTestCase):
     view_name = 'security:sender_list'
+    detail_view_name = 'security:sender_detail'
+
+    def setUp(self):
+        super().setUp()
+        self.login()
 
     @mock.patch('security.forms.get_connection')
     def test_displays_results(self, mocked_connection):
-        response_data = {
+        mocked_connection().senders.get.return_value = {
             'count': 1,
-            'previous': None,
-            'next': 'http://mtp.local/senders/?limit=20&offset=20&ordering=-prisoner_count',
-            'results': [
-                {
-                    'id': 9,
-                    'credit_count': 4,
-                    'credit_total': 41000,
-                    'prisoner_count': 3,
-                    'prison_count': 2,
-                    'bank_transfer_details': [
-                        {
-                            'sender_name': 'MAISIE NOLAN',
-                            'sender_sort_code': '101010',
-                            'sender_account_number': '12312345',
-                            'sender_roll_number': '',
-                        }
-                    ],
-                    'created': '2016-05-25T20:24:00Z',
-                    'modified': '2016-05-25T20:24:00Z',
-                },
-            ]
+            'results': [self.sender_profile],
         }
-        mocked_connection().senders.get.return_value = response_data
 
-        self.login()
         response = self.client.get(reverse(self.view_name))
         self.assertContains(response, 'MAISIE NOLAN')
         response_content = response.content.decode(response.charset)
         self.assertIn('410.00', response_content)
 
+    @mock.patch('security.views.get_connection')
+    def test_displays_detail(self, mocked_connection):
+        mocked_connection().senders().get.return_value = self.sender_profile
+        mocked_connection().senders().credits.get.return_value = {
+            'count': 4,
+            'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
+        }
+
+        response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
+        self.assertContains(response, 'JAMES HALLS')
+        self.assertContains(response, 'MAISIE')
+        self.assertContains(response, '£102.50')
+
 
 class PrisonerListTestCase(SecurityViewTestCase):
     view_name = 'security:prisoner_list'
+    detail_view_name = 'security:prisoner_detail'
+
+    def setUp(self):
+        super().setUp()
+        self.login()
 
     @mock.patch('security.forms.get_connection')
     def test_displays_results(self, mocked_connection):
         response_data = {
             'count': 1,
-            'previous': None,
-            'next': 'http://mtp.local/prisoners/?limit=20&offset=20&ordering=-prisoner_count',
-            'results': [
-                {
-                    'id': 8,
-                    'credit_count': 3,
-                    'credit_total': 31000,
-                    'sender_count': 2,
-                    'prisoner_name': 'JAMES HALLS',
-                    'prisoner_number': 'A1409AE',
-                    'prisoner_dob': '1986-12-09',
-                    'current_prison': {'nomis_id': 'PRN', 'name': 'Prison'},
-                    'prisons': [{'nomis_id': 'PRN', 'name': 'Prison'}],
-                    'created': '2016-05-25T20:24:00Z',
-                    'modified': '2016-05-25T20:24:00Z',
-                }
-            ]
+            'results': [self.prisoner_profile]
         }
         mocked_connection().prisoners.get.return_value = response_data
 
-        self.login()
         response = self.client.get(reverse(self.view_name))
         self.assertContains(response, 'JAMES HALLS')
         response_content = response.content.decode(response.charset)
         self.assertIn('A1409AE', response_content)
         self.assertIn('310.00', response_content)
+
+    @mock.patch('security.views.get_connection')
+    def test_displays_detail(self, mocked_connection):
+        mocked_connection().prisoners().get.return_value = self.prisoner_profile
+        mocked_connection().prisoners().credits.get.return_value = {
+            'count': 4,
+            'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
+        }
+
+        response = self.client.get(reverse(self.detail_view_name, kwargs={'prisoner_id': 9}))
+        self.assertContains(response, 'JAMES HALLS')
+        self.assertContains(response, 'MAISIE')
+        self.assertContains(response, '£102.50')
 
 
 class CreditsListTestCase(SecurityViewTestCase):
