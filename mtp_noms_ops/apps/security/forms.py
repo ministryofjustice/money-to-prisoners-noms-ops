@@ -7,12 +7,13 @@ import re
 from urllib.parse import urlencode
 
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.dateformat import format as date_format
 from django.utils.html import format_html
 from django.utils.timezone import now, utc
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, override as override_locale
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages
 from mtp_common.auth.api_client import get_connection
@@ -208,48 +209,53 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     @property
     def search_description(self):
-        description_kwargs = {
-            'ordering_description': self._get_value_text(self['ordering']),
-        }
+        with override_locale(settings.LANGUAGE_CODE):
+            description_kwargs = {
+                'ordering_description': self._get_value_text(self['ordering']),
+            }
 
-        filters = {}
-        for bound_field in self:
-            if bound_field.name in ('page', 'ordering'):
-                continue
-            description_override = 'describe_field_%s' % bound_field.name
-            if hasattr(self, description_override):
-                value = getattr(self, description_override)()
-            else:
-                value = self._get_value_text(bound_field)
-            if value is None:
-                continue
-            filters[bound_field.name] = value
-
-        descriptions = []
-        for template_group in self.description_templates:
-            for filter_template in template_group:
-                try:
-                    descriptions.append(filter_template.format(**filters))
-                    break
-                except KeyError:
+            filters = {}
+            for bound_field in self:
+                if bound_field.name in ('page', 'ordering'):
                     continue
-        if descriptions:
-            description_template = self.filtered_description_template
-            if len(descriptions) > 1:
-                filter_description = _('{0} and {1}').format(', '.join(descriptions[:-1]),
-                                                             descriptions[-1])
+                description_override = 'describe_field_%s' % bound_field.name
+                if hasattr(self, description_override):
+                    value = getattr(self, description_override)()
+                else:
+                    value = self._get_value_text(bound_field)
+                if value is None:
+                    continue
+                filters[bound_field.name] = value
+            if any(field in filters for field in ('prisoner_number', 'prisoner_name')):
+                filters['prison_preposition'] = 'in'
             else:
-                filter_description = descriptions[0]
-            description_kwargs['filter_description'] = filter_description
-            has_filters = True
-        else:
-            description_template = self.unfiltered_description_template
-            has_filters = False
+                filters['prison_preposition'] = 'to'
 
-        return {
-            'has_filters': has_filters,
-            'description': format_html(description_template, **description_kwargs),
-        }
+            descriptions = []
+            for template_group in self.description_templates:
+                for filter_template in template_group:
+                    try:
+                        descriptions.append(filter_template.format(**filters))
+                        break
+                    except KeyError:
+                        continue
+
+            if descriptions:
+                description_template = self.filtered_description_template
+                if len(descriptions) > 1:
+                    filter_description = '{0} and {1}'.format(', '.join(descriptions[:-1]), descriptions[-1])
+                else:
+                    filter_description = descriptions[0]
+                description_kwargs['filter_description'] = filter_description
+                has_filters = True
+            else:
+                description_template = self.unfiltered_description_template
+                has_filters = False
+
+            return {
+                'has_filters': has_filters,
+                'description': format_html(description_template, **description_kwargs),
+            }
 
 
 @validate_range_field('prisoner_count', _('Must be larger than the minimum prisoners'))
@@ -288,32 +294,32 @@ class SendersForm(SecurityForm):
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
-    filtered_description_template = _('Showing senders who {filter_description}, ordered by {ordering_description}.')
-    unfiltered_description_template = _('Showing all senders ordered by {ordering_description}.')
+    filtered_description_template = 'Showing senders who {filter_description}, ordered by {ordering_description}.'
+    unfiltered_description_template = 'Showing all senders ordered by {ordering_description}.'
     description_templates = (
-        (_('are named ‘{sender_name}’'),),
-        (_('sent by {source} from account {sender_account_number} {sender_sort_code}'),
-         _('sent by {source} from account {sender_account_number}'),
-         _('sent by {source} from sort code {sender_sort_code}'),
-         _('sent by {source} **** **** **** {card_number_last_digits}'),
-         _('sent by {source}'),),
-        (_('sent to {prison}'),),
-        (_('sent to {prison_population} {prison_category} prisons in {prison_region}'),
-         _('sent to {prison_category} prisons in {prison_region}'),
-         _('sent to {prison_population} prisons in {prison_region}'),
-         _('sent to {prison_population} {prison_category} prisons'),
-         _('sent to {prison_category} prisons'),
-         _('sent to {prison_population} prisons'),
-         _('sent to prisons in {prison_region}'),),
-        (_('sent to {prisoner_count__gte}-{prisoner_count__lte} prisoners'),
-         _('sent to at least {prisoner_count__gte} prisoners'),
-         _('sent to at most {prisoner_count__lte} prisoners'),),
-        (_('sent between {credit_count__gte}-{credit_count__lte} credits'),
-         _('sent at least {credit_count__gte} credits'),
-         _('sent at most {credit_count__lte} credits'),),
-        (_('sent between £{credit_total__gte}-{credit_total__lte}'),
-         _('sent at least £{credit_total__gte}'),
-         _('sent at most £{credit_total__lte}'),),
+        ('are named ‘{sender_name}’',),
+        ('sent by {source} from account {sender_account_number} {sender_sort_code}',
+         'sent by {source} from account {sender_account_number}',
+         'sent by {source} from sort code {sender_sort_code}',
+         'sent by {source} **** **** **** {card_number_last_digits}',
+         'sent by {source}',),
+        ('sent to {prison}',),
+        ('sent to {prison_population} {prison_category} prisons in {prison_region}',
+         'sent to {prison_category} prisons in {prison_region}',
+         'sent to {prison_population} prisons in {prison_region}',
+         'sent to {prison_population} {prison_category} prisons',
+         'sent to {prison_category} prisons',
+         'sent to {prison_population} prisons',
+         'sent to prisons in {prison_region}',),
+        ('sent to {prisoner_count__gte}-{prisoner_count__lte} prisoners',
+         'sent to at least {prisoner_count__gte} prisoners',
+         'sent to at most {prisoner_count__lte} prisoners',),
+        ('sent between {credit_count__gte}-{credit_count__lte} credits',
+         'sent at least {credit_count__gte} credits',
+         'sent at most {credit_count__lte} credits',),
+        ('sent between £{credit_total__gte}-{credit_total__lte}',
+         'sent at least £{credit_total__gte}',
+         'sent at most £{credit_total__lte}',),
     )
     description_capitalisation = {
         'prison': 'preserve',
@@ -405,28 +411,28 @@ class PrisonersForm(SecurityForm):
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
-    filtered_description_template = _('Showing prisoners who {filter_description}, ordered by {ordering_description}.')
-    unfiltered_description_template = _('Showing all prisoners ordered by {ordering_description}.')
+    filtered_description_template = 'Showing prisoners who {filter_description}, ordered by {ordering_description}.'
+    unfiltered_description_template = 'Showing all prisoners ordered by {ordering_description}.'
     description_templates = (
-        (_('are named ‘{prisoner_name}’'),),
-        (_('have prisoner number {prisoner_number}'),),
-        (_('are at {prison}'),),
-        (_('are at {prison_population} {prison_category} prisons in {prison_region}'),
-         _('are at {prison_category} prisons in {prison_region}'),
-         _('are at {prison_population} prisons in {prison_region}'),
-         _('are at {prison_population} {prison_category} prisons'),
-         _('are at {prison_category} prisons'),
-         _('are at {prison_population} prisons'),
-         _('are at prisons in {prison_region}'),),
-        (_('received from {sender_count__gte}-{sender_count__lte} senders'),
-         _('received from at least {sender_count__gte} senders'),
-         _('received from at most {sender_count__lte} senders'),),
-        (_('received between {credit_count__gte}-{credit_count__lte} credits'),
-         _('received at least {credit_count__gte} credits'),
-         _('received at most {credit_count__lte} credits'),),
-        (_('received between £{credit_total__gte}-{credit_total__lte}'),
-         _('received at least £{credit_total__gte}'),
-         _('received at most £{credit_total__lte}'),),
+        ('are named ‘{prisoner_name}’',),
+        ('have prisoner number {prisoner_number}',),
+        ('are at {prison}',),
+        ('are at {prison_population} {prison_category} prisons in {prison_region}',
+         'are at {prison_category} prisons in {prison_region}',
+         'are at {prison_population} prisons in {prison_region}',
+         'are at {prison_population} {prison_category} prisons',
+         'are at {prison_category} prisons',
+         'are at {prison_population} prisons',
+         'are at prisons in {prison_region}',),
+        ('received from {sender_count__gte}-{sender_count__lte} senders',
+         'received from at least {sender_count__gte} senders',
+         'received from at most {sender_count__lte} senders',),
+        ('received between {credit_count__gte}-{credit_count__lte} credits',
+         'received at least {credit_count__gte} credits',
+         'received at most {credit_count__lte} credits',),
+        ('received between £{credit_total__gte}-{credit_total__lte}',
+         'received at least £{credit_total__gte}',
+         'received at most £{credit_total__lte}',),
     )
     description_capitalisation = {
         'prison': 'preserve',
@@ -538,30 +544,30 @@ class CreditsForm(SecurityForm):
 
     exclusive_date_params = ['received_at__lt']
 
-    filtered_description_template = _('Showing credits sent {filter_description}, ordered by {ordering_description}.')
-    unfiltered_description_template = _('Showing all credits ordered by {ordering_description}.')
+    filtered_description_template = 'Showing credits sent {filter_description}, ordered by {ordering_description}.'
+    unfiltered_description_template = 'Showing all credits ordered by {ordering_description}.'
     description_templates = (
-        (_('between {received_at__gte} and {received_at__lt}'),
-         _('since {received_at__gte}'),
-         _('before {received_at__lt}'),),
-        (_('that are {amount_pattern}'),),
-        (_('by ‘{sender_name}’'),),
-        (_('by {source} from account {sender_account_number} {sender_sort_code}'),
-         _('by {source} from account {sender_account_number}'),
-         _('by {source} from sort code {sender_sort_code}'),
-         _('by {source} **** **** **** {card_number_last_digits}'),
-         _('by {source}'),),
-        (_('to prisoner {prisoner_name} ({prisoner_number})'),
-         _('to prisoners named ‘{prisoner_name}’'),
-         _('to prisoner {prisoner_number}'),),
-        (_('to {prison}'),),
-        (_('to {prison_population} {prison_category} prisons in {prison_region}'),
-         _('to {prison_category} prisons in {prison_region}'),
-         _('to {prison_population} prisons in {prison_region}'),
-         _('to {prison_population} {prison_category} prisons'),
-         _('to {prison_category} prisons'),
-         _('to {prison_population} prisons'),
-         _('to prisons in {prison_region}'),),
+        ('between {received_at__gte} and {received_at__lt}',
+         'since {received_at__gte}',
+         'before {received_at__lt}',),
+        ('that are {amount_pattern}',),
+        ('by ‘{sender_name}’',),
+        ('by {source} from account {sender_account_number} {sender_sort_code}',
+         'by {source} from account {sender_account_number}',
+         'by {source} from sort code {sender_sort_code}',
+         'by {source} **** **** **** {card_number_last_digits}',
+         'by {source}',),
+        ('to prisoner {prisoner_name} ({prisoner_number})',
+         'to prisoners named ‘{prisoner_name}’',
+         'to prisoner {prisoner_number}',),
+        ('{prison_preposition} {prison}',),
+        ('{prison_preposition} {prison_population} {prison_category} prisons in {prison_region}',
+         '{prison_preposition} {prison_category} prisons in {prison_region}',
+         '{prison_preposition} {prison_population} prisons in {prison_region}',
+         '{prison_preposition} {prison_population} {prison_category} prisons',
+         '{prison_preposition} {prison_category} prisons',
+         '{prison_preposition} {prison_population} prisons',
+         '{prison_preposition} prisons in {prison_region}',),
     )
     description_capitalisation = {
         'prison': 'preserve',
