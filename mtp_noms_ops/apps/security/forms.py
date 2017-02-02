@@ -1,7 +1,6 @@
 import collections
 from datetime import datetime, time, timedelta
 import enum
-from functools import reduce
 from math import ceil
 import re
 from urllib.parse import urlencode
@@ -18,45 +17,8 @@ from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages
 from mtp_common.auth.api_client import get_connection
 
+from security.models import PrisonList
 from security.templatetags.security import currency as format_currency
-
-
-def sorted_prison_type_choices(type_list):
-    def flatten(nested_list):
-        return reduce(lambda a, b: a + b, nested_list, [])
-
-    def exclude_duplicate_dicts(dict_list):
-        return {d['name']: d for d in dict_list}.values()
-
-    return sorted(
-        exclude_duplicate_dicts(flatten(type_list)), key=lambda d: d['name']
-    )
-
-
-def get_prison_details_choices(client):
-    prisons = retrieve_all_pages(client.prisons.get)
-    prison_choices = [
-        (prison['nomis_id'], prison['name'])
-        for prison in sorted(prisons, key=lambda prison: prison['name'])
-    ]
-    region_choices = [
-        (region, region)
-        for region in sorted(set(prison['region'] for prison in prisons if prison['region']))
-    ]
-    population_choices = [
-        (population['name'], population['description'])
-        for population in sorted_prison_type_choices(prison['populations'] for prison in prisons)
-    ]
-    category_choices = [
-        (category['name'], category['description'])
-        for category in sorted_prison_type_choices(prison['categories'] for prison in prisons)
-    ]
-    return {
-        'prisons': prison_choices,
-        'regions': region_choices,
-        'populations': population_choices,
-        'categories': category_choices,
-    }
 
 
 def get_credit_source_choices(blank_option=_('Any method')):
@@ -326,15 +288,16 @@ class SendersForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        prison_details_choices = get_prison_details_choices(self.client)
-        self['prison'].field.choices = insert_blank_option(prison_details_choices['prisons'],
+        prison_list = PrisonList(self.client)
+        self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
                                                            title=_('All prisons'))
-        self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
+        self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
                                                                   title=_('All regions'))
-        self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
+        self['prison_population'].field.choices = insert_blank_option(prison_list.population_choices,
                                                                       title=_('All types'))
-        self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
+        self['prison_category'].field.choices = insert_blank_option(prison_list.category_choices,
                                                                     title=_('All categories'))
+        self.prison_list = prison_list
 
     def clean_sender_sort_code(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
@@ -441,15 +404,16 @@ class PrisonersForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        prison_details_choices = get_prison_details_choices(self.client)
-        self['prison'].field.choices = insert_blank_option(prison_details_choices['prisons'],
+        prison_list = PrisonList(self.client)
+        self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
                                                            title=_('All prisons'))
-        self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
+        self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
                                                                   title=_('All regions'))
-        self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
+        self['prison_population'].field.choices = insert_blank_option(prison_list.population_choices,
                                                                       title=_('All types'))
-        self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
+        self['prison_category'].field.choices = insert_blank_option(prison_list.category_choices,
                                                                     title=_('All categories'))
+        self.prison_list = prison_list
 
     def get_api_endpoint(self):
         return self.client.prisoners
@@ -578,15 +542,16 @@ class CreditsForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        prison_details_choices = get_prison_details_choices(self.client)
-        self['prison'].field.choices = insert_blank_option(prison_details_choices['prisons'],
+        prison_list = PrisonList(self.client)
+        self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
                                                            title=_('All prisons'))
-        self['prison_region'].field.choices = insert_blank_option(prison_details_choices['regions'],
+        self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
                                                                   title=_('All regions'))
-        self['prison_population'].field.choices = insert_blank_option(prison_details_choices['populations'],
+        self['prison_population'].field.choices = insert_blank_option(prison_list.population_choices,
                                                                       title=_('All types'))
-        self['prison_category'].field.choices = insert_blank_option(prison_details_choices['categories'],
+        self['prison_category'].field.choices = insert_blank_option(prison_list.category_choices,
                                                                     title=_('All categories'))
+        self.prison_list = prison_list
 
     def clean_amount_exact(self):
         if self.cleaned_data.get('amount_pattern') != 'exact':
