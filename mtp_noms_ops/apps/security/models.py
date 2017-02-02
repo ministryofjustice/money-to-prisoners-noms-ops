@@ -5,6 +5,8 @@ from mtp_common.api import retrieve_all_pages
 
 
 class PrisonList:
+    excluded_nomis_ids = {'ZCH'}
+
     def __init__(self, client):
         self.prisons = retrieve_all_pages(client.prisons.get)
 
@@ -13,6 +15,8 @@ class PrisonList:
         category_choices = {}
         population_choices = {}
         for prison in self.prisons:
+            if prison['nomis_id'] in self.excluded_nomis_ids:
+                continue
             prison_choices.append((prison['nomis_id'], prison['name']))
             if prison['region']:
                 region_choices.add(prison['region'])
@@ -36,6 +40,7 @@ class PrisonList:
                 'populations': {label['name']: 1 for label in prison['populations']},
             }
             for prison in self.prisons
+            if prison['nomis_id'] not in self.excluded_nomis_ids
         }
 
     @property
