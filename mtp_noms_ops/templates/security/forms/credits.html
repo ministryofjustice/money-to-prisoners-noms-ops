@@ -66,6 +66,7 @@
       </div>
 
       <div class="mtp-tabpanel" {% panel_aria_atts 'prison' %}>
+        <script>var prisonData={{ form.prison_list.mapping_as_json }};</script>
         <div class="grid-row">
           <div class="column-one-third">
             {% include 'security/forms/select-field.html' with field=form.prison %}

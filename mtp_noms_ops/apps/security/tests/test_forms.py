@@ -7,18 +7,30 @@ from security.forms import (
     ReviewCreditsForm
 )
 
+mocked_prisons = [
+    {
+        'nomis_id': 'IXB', 'general_ledger_code': '10200042',
+        'name': 'HMP Prison 1', 'short_name': 'Prison 1',
+        'region': 'West Midlands',
+        'categories': [{'description': 'Category A', 'name': 'A'}],
+        'populations': [{'description': 'Adult', 'name': 'adult'}, {'description': 'Male', 'name': 'male'}],
+    },
+    {
+        'nomis_id': 'INP', 'general_ledger_code': '10200015',
+        'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
+        'region': 'London',
+        'categories': [{'description': 'Category B', 'name': 'B'}],
+        'populations': [{'description': 'Adult', 'name': 'adult'}, {'description': 'Female', 'name': 'female'}],
+    },
+]
+
 
 class SecurityFormTestCase(unittest.TestCase):
     def setUp(self):
         self.request = mock.MagicMock()
         self.mocked_connection = mock.patch('security.forms.get_connection')
         self.mocked_connection.start()
-        self.mocked_prison_data = mock.patch('security.forms.get_prison_details_choices', return_value={
-            'prisons': [('IXB', 'Prison 1'), ('INP', 'Prison 2')],
-            'regions': [('London', 'London'), ('West Midlands', 'West Midlands')],
-            'populations': [('male', 'Male'), ('female', 'Female'), ('adults', 'Adults')],
-            'categories': [('A', 'Category A'), ('B', 'Category B')],
-        })
+        self.mocked_prison_data = mock.patch('security.models.retrieve_all_pages', return_value=mocked_prisons)
         self.mocked_prison_data.start()
 
     def tearDown(self):

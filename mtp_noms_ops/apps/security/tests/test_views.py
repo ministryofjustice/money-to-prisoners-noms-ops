@@ -7,6 +7,7 @@ from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 
 from security import required_permissions
+from security.tests.test_forms import mocked_prisons
 
 
 def sample_prison_list(mocked_api_client):
@@ -16,7 +17,7 @@ def sample_prison_list(mocked_api_client):
             {
                 'nomis_id': 'AAI',
                 'general_ledger_code': '001',
-                'name': 'HMP & YOI Test 1',
+                'name': 'HMP & YOI Test 1', 'short_name': 'Test 1',
                 'region': 'London',
                 'categories': [{'description': 'Category D', 'name': 'D'},
                                {'description': 'Young Offender Institution', 'name': 'YOI'}],
@@ -28,7 +29,7 @@ def sample_prison_list(mocked_api_client):
             {
                 'nomis_id': 'BBI',
                 'general_ledger_code': '002',
-                'name': 'HMP Test 2',
+                'name': 'HMP Test 2', 'short_name': 'Test 2',
                 'region': 'London',
                 'categories': [{'description': 'Category D', 'name': 'D'}],
                 'populations': [{'description': 'Male', 'name': 'male'}],
@@ -146,12 +147,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
     }
 
     def setUp(self):
-        self.mocked_prison_data = mock.patch('security.forms.get_prison_details_choices', return_value={
-            'prisons': [('IXB', 'Prison 1'), ('INP', 'Prison 2')],
-            'regions': [('London', 'London'), ('West Midlands', 'West Midlands')],
-            'populations': [('male', 'Male'), ('female', 'Female'), ('adults', 'Adults')],
-            'categories': [('A', 'Category A'), ('B', 'Category B')],
-        })
+        self.mocked_prison_data = mock.patch('security.models.retrieve_all_pages', return_value=mocked_prisons)
         self.mocked_prison_data.start()
 
     def tearDown(self):

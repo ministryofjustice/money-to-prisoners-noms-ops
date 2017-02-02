@@ -1,4 +1,5 @@
 // Security module
+/* globals prisonData */
 'use strict';
 
 exports.SecurityForms = {
@@ -9,6 +10,7 @@ exports.SecurityForms = {
 
     this.bindAmountPatternSelection();
     this.bindPaymentSourceSelection();
+    this.bindPrisonSelection();
   },
 
   bindAmountPatternSelection: function () {
@@ -62,6 +64,49 @@ exports.SecurityForms = {
     }
 
     $paymentSourceSelect.change(update);
+    update();
+  },
+
+  bindPrisonSelection: function () {
+    var $prisonOptions = $('#id_prison option');
+    $prisonOptions.each(function () {
+      var $option = $(this);
+      var nomisID = $option.val();
+      if (!nomisID) {
+        return;
+      }
+      $option.data(prisonData[nomisID] || {});
+    });
+
+    var $regionSelect = $('#id_prison_region');
+    var $categorySelect = $('#id_prison_category');
+    var $populationSelect = $('#id_prison_population');
+
+    function update () {
+      var selectedRegion = $regionSelect.val();
+      var selectedCategory = $categorySelect.val();
+      var selectedPopulation = $populationSelect.val();
+
+      $prisonOptions.each(function () {
+        var $option = $(this);
+        if (!$option.val()) {
+          return;
+        }
+        var optionData = $option.data();
+        /* eslint-disable no-extra-parens */
+        var optionDisabled = (
+          (selectedRegion && optionData.region && optionData.region !== selectedRegion) ||
+          (selectedCategory && !optionData.categories[selectedCategory]) ||
+          (selectedPopulation && !optionData.populations[selectedPopulation])
+        );
+        /* eslint-enable no-extra-parens */
+        $option.prop('disabled', optionDisabled);
+      });
+    }
+
+    $regionSelect.change(update);
+    $categorySelect.change(update);
+    $populationSelect.change(update);
     update();
   }
 };
