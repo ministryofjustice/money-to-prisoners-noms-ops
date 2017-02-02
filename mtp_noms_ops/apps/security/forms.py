@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.dateformat import format as date_format
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from django.utils.timezone import now, utc
 from django.utils.translation import gettext_lazy as _, override as override_locale
 from form_error_reporting import GARequestErrorReportingMixin
@@ -225,7 +225,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                     value = self._get_value_text(bound_field)
                 if value is None:
                     continue
-                filters[bound_field.name] = value
+                filters[bound_field.name] = format_html('<strong>{}</strong>', value)
             if any(field in filters for field in ('prisoner_number', 'prisoner_name')):
                 filters['prison_preposition'] = 'in'
             else:
@@ -235,7 +235,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             for template_group in self.description_templates:
                 for filter_template in template_group:
                     try:
-                        descriptions.append(filter_template.format(**filters))
+                        descriptions.append(format_html(filter_template, **filters))
                         break
                     except KeyError:
                         continue
@@ -243,7 +243,8 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             if descriptions:
                 description_template = self.filtered_description_template
                 if len(descriptions) > 1:
-                    filter_description = '{0} and {1}'.format(', '.join(descriptions[:-1]), descriptions[-1])
+                    all_but_last = format_html_join(', ', '{}', ((d,) for d in descriptions[:-1]))
+                    filter_description = format_html('{0} and {1}', all_but_last, descriptions[-1])
                 else:
                     filter_description = descriptions[0]
                 description_kwargs['filter_description'] = filter_description
@@ -294,6 +295,7 @@ class SendersForm(SecurityForm):
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
+    # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Showing senders who {filter_description}, ordered by {ordering_description}.'
     unfiltered_description_template = 'Showing all senders ordered by {ordering_description}.'
     description_templates = (
@@ -411,6 +413,7 @@ class PrisonersForm(SecurityForm):
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
+    # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Showing prisoners who {filter_description}, ordered by {ordering_description}.'
     unfiltered_description_template = 'Showing all prisoners ordered by {ordering_description}.'
     description_templates = (
@@ -544,6 +547,7 @@ class CreditsForm(SecurityForm):
 
     exclusive_date_params = ['received_at__lt']
 
+    # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Showing credits sent {filter_description}, ordered by {ordering_description}.'
     unfiltered_description_template = 'Showing all credits ordered by {ordering_description}.'
     description_templates = (
