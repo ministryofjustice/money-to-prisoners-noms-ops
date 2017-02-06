@@ -89,10 +89,14 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         amount_pattern = self.get_element('id_amount_pattern')
         amount_pattern.find_element_by_xpath('//option[text()="Not a multiple of £5"]').click()
         self.submit_tabpanel('amount')
-        self.assertInSource('Showing credits sent that are not a multiple of £5, ordered by received date')
+        search_description = self.get_element('.mtp-search-description__text')
+        self.assertIn('Showing credits sent that are not a multiple of £5, ordered by received date',
+                      search_description.text)
 
         self.get_element('.mtp-results-list th:nth-child(3) a').click()
-        self.assertInSource('Showing credits sent that are not a multiple of £5, ordered by amount sent (low to high)')
+        search_description = self.get_element('.mtp-search-description__text')
+        self.assertIn('Showing credits sent that are not a multiple of £5, ordered by amount sent (low to high)',
+                      search_description.text)
 
 
 class SecuritySenderSearchTests(SecurityDashboardTestCase):
