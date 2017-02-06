@@ -26,7 +26,10 @@
       </div>
 
       <div class="mtp-tabpanel" {% panel_aria_atts 'prison' %}>
-        <script>var prisonData={{ form.prison_list.mapping_as_json }};</script>
+        <script>
+          var prisonData={{ form.prison_list.mapping_as_json }};
+          prisonData['_no_matches_label']='{% trans 'No matching prisons' %}';
+        </script>
         <div class="grid-row">
           <div class="column-one-third">
             {% include 'security/forms/select-field.html' with field=form.prison %}

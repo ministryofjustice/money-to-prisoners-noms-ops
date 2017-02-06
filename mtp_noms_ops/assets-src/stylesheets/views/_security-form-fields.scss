@@ -1,5 +1,10 @@
 // app-specific styles
 
+select[disabled] {
+  border-color: $secondary-text-colour;
+  color: $secondary-text-colour;
+}
+
 #id_sender_name {
   max-width: 16em;
   width: 100%;
