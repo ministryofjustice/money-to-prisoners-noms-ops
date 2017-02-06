@@ -68,7 +68,16 @@ exports.SecurityForms = {
   },
 
   bindPrisonSelection: function () {
-    var $prisonOptions = $('#id_prison option');
+    var $prisonSelect = $('#id_prison');
+    var $prisonOptions = $('option', $prisonSelect[0]);
+    var prisonCount = $prisonOptions.length - 1;
+    var $allPrisonsOption = $($prisonOptions[0]);
+    var allPrisonsOptionText = $allPrisonsOption.text();
+
+    var $regionSelect = $('#id_prison_region');
+    var $categorySelect = $('#id_prison_category');
+    var $populationSelect = $('#id_prison_population');
+
     $prisonOptions.each(function () {
       var $option = $(this);
       var nomisID = $option.val();
@@ -78,14 +87,11 @@ exports.SecurityForms = {
       $option.data(prisonData[nomisID] || {});
     });
 
-    var $regionSelect = $('#id_prison_region');
-    var $categorySelect = $('#id_prison_category');
-    var $populationSelect = $('#id_prison_population');
-
     function update () {
       var selectedRegion = $regionSelect.val();
       var selectedCategory = $categorySelect.val();
       var selectedPopulation = $populationSelect.val();
+      var disabledPrisonsCount = 0;
 
       $prisonOptions.each(function () {
         var $option = $(this);
@@ -101,7 +107,20 @@ exports.SecurityForms = {
         );
         /* eslint-enable no-extra-parens */
         $option.prop('disabled', optionDisabled);
+        if (optionDisabled) {
+          disabledPrisonsCount++;
+          $option.hide();
+        } else {
+          $option.show();
+        }
       });
+      if (disabledPrisonsCount === prisonCount) {
+        $allPrisonsOption.text(prisonData['_no_matches_label']).click();
+        $prisonSelect.prop('disabled', true);
+      } else {
+        $allPrisonsOption.text(allPrisonsOptionText);
+        $prisonSelect.prop('disabled', false);
+      }
     }
 
     $regionSelect.change(update);
