@@ -10,5 +10,6 @@
   require('help-popup').HelpPopup.init();
   require('print').Print.init();
   require('analytics').Analytics.init();
+  require('polyfills').Polyfills.init();
   require('selection-buttons').SelectionButtons.init();
 }());
