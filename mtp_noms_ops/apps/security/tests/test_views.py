@@ -97,7 +97,7 @@ class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
 
 class SecurityViewTestCase(SecurityBaseTestCase):
     view_name = None
-    sender_profile = {
+    bank_transfer_sender = {
         'id': 9,
         'credit_count': 4,
         'credit_total': 41000,
@@ -109,6 +109,24 @@ class SecurityViewTestCase(SecurityBaseTestCase):
                 'sender_sort_code': '101010',
                 'sender_account_number': '12312345',
                 'sender_roll_number': '',
+            }
+        ],
+        'created': '2016-05-25T20:24:00Z',
+        'modified': '2016-05-25T20:24:00Z',
+    }
+    debit_card_sender = {
+        'id': 9,
+        'credit_count': 4,
+        'credit_total': 42000,
+        'prisoner_count': 3,
+        'prison_count': 2,
+        'bank_transfer_details': [],
+        'debit_card_details': [
+            {
+                'card_number_last_digits': '1234',
+                'card_expiry_date': '10/20',
+                'sender_emails': ['m@outside.local', 'm@Outside.local', 'mn@outside.local'],
+                'cardholder_names': ['Maisie N', 'MAISIE N', 'Maisie Nolan'],
             }
         ],
         'created': '2016-05-25T20:24:00Z',
@@ -174,27 +192,51 @@ class SenderListTestCase(SecurityViewTestCase):
     @mock.patch('security.forms.get_connection')
     def test_displays_results(self, mocked_connection):
         mocked_connection().senders.get.return_value = {
-            'count': 1,
-            'results': [self.sender_profile],
+            'count': 2,
+            'results': [self.bank_transfer_sender, self.debit_card_sender],
         }
 
         response = self.client.get(reverse(self.view_name))
         self.assertContains(response, 'MAISIE NOLAN')
         response_content = response.content.decode(response.charset)
-        self.assertIn('410.00', response_content)
+        self.assertIn('£410.00', response_content)
+        self.assertIn('£420.00', response_content)
 
     @mock.patch('security.views.get_connection')
-    def test_displays_detail(self, mocked_connection):
-        mocked_connection().senders().get.return_value = self.sender_profile
+    def test_displays_bank_transfer_detail(self, mocked_connection):
+        mocked_connection().senders().get.return_value = self.bank_transfer_sender
         mocked_connection().senders().credits.get.return_value = {
             'count': 4,
             'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
         }
 
         response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
-        self.assertContains(response, 'JAMES HALLS')
-        self.assertContains(response, 'MAISIE')
-        self.assertContains(response, '£102.50')
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('MAISIE', response_content)
+        self.assertIn('12312345', response_content)
+        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('£102.50', response_content)
+
+    @mock.patch('security.views.get_connection')
+    def test_displays_debit_card_detail(self, mocked_connection):
+        mocked_connection().senders().get.return_value = self.debit_card_sender
+        mocked_connection().senders().credits.get.return_value = {
+            'count': 4,
+            'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
+        }
+
+        response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('**** **** **** 1234', response_content)
+        self.assertSequenceEqual(response.context['other_cardholder_names'], ['Maisie Nolan'])
+        self.assertIn('<strong>Maisie Nolan</strong>', response_content)  # another name used
+        self.assertIn('Maisie N, MAISIE N, Maisie Nolan', response_content)  # all names list
+        self.assertIn('m@outside.local', response_content)
+        self.assertNotIn('m@Outside.local', response_content)
+        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('£102.50', response_content)
 
 
 class PrisonerListTestCase(SecurityViewTestCase):

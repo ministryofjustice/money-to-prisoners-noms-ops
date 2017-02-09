@@ -45,14 +45,8 @@
           <p>{% trans 'Card number' %}</p>
         </div>
         <div class="column-two-thirds">
-          <div class="column-one-third">
-            <strong>{{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}</strong>
-            <p>{% trans 'Expiry date' %}</p>
-          </div>
-          <div class="column-two-thirds">
-            <strong>{{ sender.debit_card_details.0.sender_emails.0 |default_if_none:'—' }}</strong>
-            <p>{% trans 'Email' %}</p>
-          </div>
+          <strong>{{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}</strong>
+          <p>{% trans 'Expiry date' %}</p>
         </div>
       </div>
 
@@ -62,14 +56,30 @@
 
     {% endif %}
 
-    {% if other_cardholder_names %}
+    {% if sender_emails or other_cardholder_names %}
       <div class="grid-row mtp-sender-summary__details">
-        <div class="column-full" title="{% trans 'All names:' %} {{ all_cardholder_names }}">
-          {% for other_cardholder_name in other_cardholder_names %}
-            <strong>{{ other_cardholder_name }}</strong>{% if not forloop.last %},{% endif %}
-          {% endfor %}
-          <p>{% trans 'Other names used' %}</p>
-        </div>
+        {% if sender_emails %}
+          <div class="column-half">
+            {% for sender_email in sender_emails %}
+              <strong>{{ sender_email }}</strong>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+            <p>
+              {% if sender_emails|length > 1 %}
+                {% trans 'Emails' %}
+              {% else %}
+                {% trans 'Email' %}
+              {% endif %}
+            </p>
+          </div>
+        {% endif %}
+        {% if other_cardholder_names %}
+          <div class="column-half" title="{% trans 'All names:' %} {{ all_cardholder_names|join:', ' }}">
+            {% for other_cardholder_name in other_cardholder_names %}
+              <strong>{{ other_cardholder_name }}</strong>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+            <p>{% trans 'Other names used' %}</p>
+          </div>
+        {% endif %}
       </div>
     {% endif %}
 

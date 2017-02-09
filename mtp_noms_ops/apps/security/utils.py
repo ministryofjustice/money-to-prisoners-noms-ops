@@ -23,6 +23,9 @@ class OrderedSet(collections.MutableSet):
         item_hash = self.hash_item(item)
         return item_hash in self.item_set
 
+    def __getitem__(self, index):
+        return self.item_list[index]
+
     def add(self, item):
         item_hash = self.hash_item(item)
         if item_hash not in self.item_set:
@@ -63,3 +66,11 @@ class NameSet(OrderedSet):
                 if name.startswith(title_prefix):
                     return name[len(title_prefix):]
         return name
+
+
+class EmailSet(OrderedSet):
+    def hash_item(self, item):
+        item = item.strip().split('@', 1)
+        if len(item) < 2:
+            return None
+        return '%s@%s' % (item[0], item[1].lower())
