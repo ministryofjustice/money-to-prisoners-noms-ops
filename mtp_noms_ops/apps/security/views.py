@@ -12,6 +12,7 @@ from security.export import export_as_csv
 from security.forms import (
     SendersForm, PrisonersForm, CreditsForm, ReviewCreditsForm
 )
+from security.utils import NameSet
 
 
 class SecurityView(FormView):
@@ -142,6 +143,22 @@ class SenderDetailView(SecurityDetailView):
 
     def get_api_endpoint(self, client):
         return client.senders
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        sender = context_data['sender']
+        all_cardholder_names = list(details['sender_name']
+                                    for details in sender.get('bank_transfer_details', ()))
+        all_cardholder_names.extend(cardholder_name
+                                    for details in sender.get('debit_card_details', ())
+                                    for cardholder_name in details['cardholder_names'])
+        context_data['all_cardholder_names'] = ', '.join(all_cardholder_names)
+        other_cardholder_names = NameSet(strip_titles=True)
+        other_cardholder_names.extend(all_cardholder_names)
+        if other_cardholder_names:
+            other_cardholder_names.pop_first()
+        context_data['other_cardholder_names'] = other_cardholder_names
+        return context_data
 
     def get_title_for_object(self, detail_object):
         try:

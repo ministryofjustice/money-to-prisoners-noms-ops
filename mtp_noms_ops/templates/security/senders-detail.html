@@ -62,6 +62,17 @@
 
     {% endif %}
 
+    {% if other_cardholder_names %}
+      <div class="grid-row mtp-sender-summary__details">
+        <div class="column-full" title="{% trans 'All names:' %} {{ all_cardholder_names }}">
+          {% for other_cardholder_name in other_cardholder_names %}
+            <strong>{{ other_cardholder_name }}</strong>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+          <p>{% trans 'Other names used' %}</p>
+        </div>
+      </div>
+    {% endif %}
+
     <div class="grid-row mtp-sender-summary__details">
       <div class="column-one-third col-1">
         <p>
