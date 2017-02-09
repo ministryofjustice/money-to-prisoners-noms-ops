@@ -10,13 +10,19 @@ from moj_irat.views import HealthcheckView, PingJsonView
 from mtp_common.auth import views as auth_views
 from mtp_common.auth.exceptions import Unauthorized
 
+from security.searches import get_saved_searches
+
 
 def dashboard_view(request):
     if not (request.can_access_prisoner_location or request.can_access_security):
         raise Unauthorized()  # middleware causes user to be logged-out
-    if request.can_access_prisoner_location and not (request.can_access_security or request.can_access_user_management):
+    if request.can_access_prisoner_location and not (
+            request.can_access_security or request.can_access_user_management):
         return redirect(reverse_lazy('location_file_upload'))
-    return render(request, 'dashboard.html', {'start_page_url': settings.START_PAGE_URL})
+    return render(request, 'dashboard.html', {
+        'start_page_url': settings.START_PAGE_URL,
+        'saved_searches': get_saved_searches(request)
+    })
 
 
 urlpatterns = i18n_patterns(
