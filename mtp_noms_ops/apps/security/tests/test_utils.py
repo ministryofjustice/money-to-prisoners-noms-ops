@@ -1,6 +1,7 @@
 import unittest
 
 from security.templatetags.security import currency, pence, format_sort_code
+from security.utils import NameSet, EmailSet
 
 
 class UtilTestCase(unittest.TestCase):
@@ -27,3 +28,21 @@ class UtilTestCase(unittest.TestCase):
         self.assertEqual(format_sort_code(''), '—')
         self.assertEqual(format_sort_code('123456'), '12-34-56')
         self.assertEqual(format_sort_code('1234567'), '1234567')
+
+    def test_name_set(self):
+        names = NameSet(['A', 'a', 'A ', ' Aa ', 'John A.', 'MR. JOHN A.'])
+        self.assertSequenceEqual(names, ('A', ' Aa ', 'John A.', 'MR. JOHN A.'))
+        names.add('JOHN')
+        names.add('Mr John')
+        self.assertSequenceEqual(names, ('A', ' Aa ', 'John A.', 'MR. JOHN A.', 'JOHN', 'Mr John'))
+
+        names = NameSet(['A', 'a', 'A ', ' Aa ', 'John A.', 'MR. JOHN A.'], strip_titles=True)
+        self.assertSequenceEqual(names, ('A', ' Aa ', 'John A.'))
+        names.add('JOHN')
+        names.add('Mr John')
+        self.assertSequenceEqual(names, ('A', ' Aa ', 'John A.', 'JOHN'))
+
+    def test_email_set(self):
+        emails = EmailSet(['abc@example.com', 'ABC@EXAMPLE.COM', 'abc@example.co.uk',
+                           'abc@example.com ', 'Abc@example.com', ''])
+        self.assertSequenceEqual(emails, ('abc@example.com', 'abc@example.co.uk', ''))
