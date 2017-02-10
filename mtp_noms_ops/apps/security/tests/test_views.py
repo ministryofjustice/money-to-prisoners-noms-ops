@@ -202,7 +202,7 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertIn('£410.00', response_content)
         self.assertIn('£420.00', response_content)
 
-    @mock.patch('security.views.get_connection')
+    @mock.patch('security.forms.get_connection')
     def test_displays_bank_transfer_detail(self, mocked_connection):
         mocked_connection().senders().get.return_value = self.bank_transfer_sender
         mocked_connection().senders().credits.get.return_value = {
@@ -218,7 +218,7 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('£102.50', response_content)
 
-    @mock.patch('security.views.get_connection')
+    @mock.patch('security.forms.get_connection')
     def test_displays_debit_card_detail(self, mocked_connection):
         mocked_connection().senders().get.return_value = self.debit_card_sender
         mocked_connection().senders().credits.get.return_value = {
@@ -261,7 +261,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
         self.assertIn('A1409AE', response_content)
         self.assertIn('310.00', response_content)
 
-    @mock.patch('security.views.get_connection')
+    @mock.patch('security.forms.get_connection')
     def test_displays_detail(self, mocked_connection):
         mocked_connection().prisoners().get.return_value = self.prisoner_profile
         mocked_connection().prisoners().credits.get.return_value = {

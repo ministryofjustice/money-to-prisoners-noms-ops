@@ -26,24 +26,42 @@ mocked_prisons = [
 
 
 class SecurityFormTestCase(unittest.TestCase):
+    empty_response = {
+        'count': 0,
+        'results': [],
+    }
+
     def setUp(self):
         self.request = mock.MagicMock()
-        self.mocked_connection = mock.patch('security.forms.get_connection')
-        self.mocked_connection.start()
-        self.mocked_prison_data = mock.patch('security.models.retrieve_all_pages', return_value=mocked_prisons)
-        self.mocked_prison_data.start()
+        self.mocks = []
+
+        patch = mock.patch('security.forms.get_connection')
+        mocked_connection = patch.start()
+        mocked_connection().senders.get.return_value = self.empty_response
+        mocked_connection().prisoners.get.return_value = self.empty_response
+        mocked_connection().credits.get.return_value = self.empty_response
+        self.mocks.append(patch)
+
+        patch = mock.patch('security.models.retrieve_all_pages', return_value=mocked_prisons)
+        patch.start()
+        self.mocks.append(patch)
 
     def tearDown(self):
-        self.mocked_connection.stop()
-        self.mocked_prison_data.stop()
+        for patch in self.mocks:
+            patch.stop()
 
-    def test_base_security_form(self):
+    @mock.patch.object(SecurityForm, 'get_object_list_endpoint')
+    def test_base_security_form(self, mocked_object_list_endpoint):
+        # mock no results from API
+        mocked_object_list_endpoint().get.return_value = self.empty_response
+
         form = SecurityForm(self.request, data={})
         self.assertFalse(form.is_valid())
 
         form = SecurityForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, {
+            'object_list': [],
             'page': 1,
         })
         self.assertDictEqual(form.get_query_data(), {})
@@ -59,6 +77,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'card_number_last_digits': '', 'source': '',
+            'object_list': [],
         }
         form = SendersForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
@@ -75,6 +94,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'card_number_last_digits': '', 'source': '',
+            'object_list': [],
         }
         form = SendersForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'sender_name': 'Joh '})
         self.assertTrue(form.is_valid())
@@ -101,6 +121,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'sender_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
+            'object_list': [],
         }
         form = PrisonersForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
@@ -116,6 +137,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': 'IXB', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'sender_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
+            'object_list': [],
         }
         form = PrisonersForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'prison': 'IXB'})
         self.assertTrue(form.is_valid())
@@ -144,6 +166,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
             'source': '',
+            'object_list': [],
         }
         form = CreditsForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
@@ -162,6 +185,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
             'source': '',
+            'object_list': [],
         }
         form = CreditsForm(self.request, data={'page': '1', 'ordering': '-amount', 'received_at__gte': '26/5/2016'})
         self.assertTrue(form.is_valid())
