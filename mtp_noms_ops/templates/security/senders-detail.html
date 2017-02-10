@@ -73,7 +73,7 @@
           </div>
         {% endif %}
         {% if other_cardholder_names %}
-          <div class="column-half" title="{% trans 'All names:' %} {{ all_cardholder_names|join:', ' }}">
+          <div class="column-half">
             {% for other_cardholder_name in other_cardholder_names %}
               <strong>{{ other_cardholder_name }}</strong>{% if not forloop.last %},{% endif %}
             {% endfor %}
