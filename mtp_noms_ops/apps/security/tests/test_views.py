@@ -232,7 +232,7 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertIn('**** **** **** 1234', response_content)
         self.assertSequenceEqual(response.context['other_cardholder_names'], ['Maisie Nolan'])
         self.assertIn('<strong>Maisie Nolan</strong>', response_content)  # another name used
-        self.assertIn('Maisie N, MAISIE N, Maisie Nolan', response_content)  # all names list
+        self.assertNotIn('MAISIE N', response_content)  # complete names list is not included
         self.assertIn('m@outside.local', response_content)
         self.assertNotIn('M@OUTSIDE.LOCAL', response_content)
         self.assertIn('JAMES HALLS', response_content)
