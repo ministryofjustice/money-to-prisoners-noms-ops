@@ -122,6 +122,13 @@ def query_string_with_reversed_ordering(form, ordering):
     return urlencode(data, doseq=True)
 
 
+@register.filter
+def query_string_with_additional_parameter(form, param):
+    data = form.get_query_data(allow_parameter_manipulation=False)
+    data[param] = 1
+    return urlencode(data, doseq=True)
+
+
 def get_profile_search_url(credit, keys, url, redirect_on_single=True):
     params = urlencode((key, credit[key]) for key in keys if key in credit and credit[key])
     if redirect_on_single:

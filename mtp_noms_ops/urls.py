@@ -8,9 +8,10 @@ from django.template.response import TemplateResponse
 from django.views.generic import RedirectView
 from moj_irat.views import HealthcheckView, PingJsonView
 from mtp_common.auth import views as auth_views
+from mtp_common.auth.api_client import get_connection
 from mtp_common.auth.exceptions import Unauthorized
 
-from security.searches import get_saved_searches
+from security.searches import get_saved_searches, populate_new_result_count
 
 
 def dashboard_view(request):
@@ -19,9 +20,13 @@ def dashboard_view(request):
     if request.can_access_prisoner_location and not (
             request.can_access_security or request.can_access_user_management):
         return redirect(reverse_lazy('location_file_upload'))
+    client = get_connection(request)
     return render(request, 'dashboard.html', {
         'start_page_url': settings.START_PAGE_URL,
-        'saved_searches': get_saved_searches(request)
+        'saved_searches': [
+            populate_new_result_count(client, search)
+            for search in get_saved_searches(client)
+        ]
     })
 
 

@@ -41,6 +41,7 @@ class SecurityView(FormView):
     def form_valid(self, form):
         context = self.get_context_data(form=form)
         object_list = form.cleaned_data['object_list']
+        form.check_and_update_saved_searches(self.title)
         if self.redirect_on_single and len(object_list) == 1 and hasattr(self, 'url_for_single_result'):
             return redirect(self.url_for_single_result(object_list[0]))
         context[self.object_list_context_key] = object_list
