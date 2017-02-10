@@ -78,7 +78,6 @@ def validate_range_field(field_name, bound_ordering_msg):
     return inner
 
 
-@validate_range_field('received_at', _('Must be after the start date'))
 class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     """
     Base form for security searches
@@ -467,6 +466,7 @@ class AmountPattern(enum.Enum):
             raise NotImplementedError
 
 
+@validate_range_field('received_at', _('Must be after the start date'))
 class CreditsForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-received_at',
@@ -623,7 +623,6 @@ class CreditsForm(SecurityForm):
 
 
 class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
-
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.request = request
