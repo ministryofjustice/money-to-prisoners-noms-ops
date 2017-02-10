@@ -52,25 +52,31 @@ class OrderedSet(collections.MutableSet):
 
 
 class NameSet(OrderedSet):
+    """
+    An ordered set of names: adding a name will not modify it,
+    but if a similar one already exists, the new one is not added
+    """
     whitespace = re.compile(r'\s+')
-    title_prefixes = {'miss ', 'mrs ', 'mr ', 'dr '}
+    titles = {'miss', 'mrs', 'mr', 'dr'}
 
     def __init__(self, iterable=None, strip_titles=False):
-        super().__init__(iterable=iterable)
         self.strip_titles = strip_titles
+        super().__init__(iterable=iterable)
 
     def hash_item(self, item):
-        name = self.whitespace.sub(' ', item.strip()).lower()
+        name = self.whitespace.sub(' ', (item or '').strip()).lower()
         if self.strip_titles:
-            for title_prefix in self.title_prefixes:
+            for title_prefix in (t for title in self.titles for t in ('%s ' % title, '%s. ' % title)):
                 if name.startswith(title_prefix):
                     return name[len(title_prefix):]
         return name
 
 
 class EmailSet(OrderedSet):
+    """
+    An ordered set of email addresses: adding an email will not modify it,
+    but if a similar one already exists, the new one is not added
+    """
+
     def hash_item(self, item):
-        item = item.strip().split('@', 1)
-        if len(item) < 2:
-            return None
-        return '%s@%s' % (item[0], item[1].lower())
+        return (item or '').strip().lower()

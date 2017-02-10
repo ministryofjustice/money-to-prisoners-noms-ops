@@ -125,7 +125,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
             {
                 'card_number_last_digits': '1234',
                 'card_expiry_date': '10/20',
-                'sender_emails': ['m@outside.local', 'm@Outside.local', 'mn@outside.local'],
+                'sender_emails': ['m@outside.local', 'M@OUTSIDE.LOCAL', 'mn@outside.local'],
                 'cardholder_names': ['Maisie N', 'MAISIE N', 'Maisie Nolan'],
             }
         ],
@@ -234,7 +234,7 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertIn('<strong>Maisie Nolan</strong>', response_content)  # another name used
         self.assertIn('Maisie N, MAISIE N, Maisie Nolan', response_content)  # all names list
         self.assertIn('m@outside.local', response_content)
-        self.assertNotIn('m@Outside.local', response_content)
+        self.assertNotIn('M@OUTSIDE.LOCAL', response_content)
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('£102.50', response_content)
 
