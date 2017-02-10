@@ -40,7 +40,7 @@ class SecurityView(FormView):
 
     def form_valid(self, form):
         context = self.get_context_data(form=form)
-        object_list = form.get_object_list()
+        object_list = form.cleaned_data['object_list']
         if self.redirect_on_single and len(object_list) == 1 and hasattr(self, 'url_for_single_result'):
             return redirect(self.url_for_single_result(object_list[0]))
         context[self.object_list_context_key] = object_list
@@ -76,7 +76,7 @@ class SecurityDetailView(SecurityView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        detail_object = context_data['form'].get_object()
+        detail_object = context_data['form'].cleaned_data.get('object')
         if not detail_object:
             raise Http404('Detail object not found')
         self.title = self.get_title_for_object(detail_object)

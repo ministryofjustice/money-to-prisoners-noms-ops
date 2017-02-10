@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _, override as override_loc
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages
 from mtp_common.auth.api_client import get_connection
-from slumber.exceptions import HttpNotFoundError
+from slumber.exceptions import HttpNotFoundError, SlumberHttpBaseException
 
 from security.models import PrisonList
 from security.templatetags.security import currency as format_currency
@@ -102,7 +102,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     def clean_ordering(self):
         return self.cleaned_data['ordering'] or self.fields['ordering'].initial
 
-    def get_api_endpoint(self):
+    def clean(self):
+        self.cleaned_data['object_list'] = self.get_object_list()
+        return self.cleaned_data
+
+    def get_object_list_endpoint(self):
         raise NotImplementedError
 
     def get_query_data(self, allow_parameter_manipulation=True):
@@ -123,21 +127,30 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         return data
 
     def get_object_list(self):
-        end_point = self.get_api_endpoint()
-        page = self.cleaned_data['page']
+        """
+        Gets the security object list: senders, prisoners or credits
+        :return: list
+        """
+        page = self.cleaned_data.get('page')
+        if not page:
+            return []
         offset = (page - 1) * self.page_size
         filters = self.get_query_data()
         for param in filters:
             if param in self.exclusive_date_params:
                 filters[param] += timedelta(days=1)
-        data = end_point.get(offset=offset, limit=self.page_size, **filters)
+        try:
+            data = self.get_object_list_endpoint().get(offset=offset, limit=self.page_size, **filters)
+        except SlumberHttpBaseException:
+            self.add_error(None, _('This service is currently unavailable'))
+            return []
         count = data['count']
         self.page_count = int(ceil(count / self.page_size))
         return data.get('results', [])
 
     def get_complete_object_list(self):
         filters = self.get_query_data()
-        return retrieve_all_pages(self.get_api_endpoint().get, **filters)
+        return retrieve_all_pages(self.get_object_list_endpoint().get, **filters)
 
     @cached_property
     def query_string(self):
@@ -322,7 +335,7 @@ class SendersForm(SecurityForm):
             return ''
         return self.cleaned_data.get('card_number_last_digits')
 
-    def get_api_endpoint(self):
+    def get_object_list_endpoint(self):
         return self.client.senders
 
     def get_query_data(self, allow_parameter_manipulation=True):
@@ -415,7 +428,7 @@ class PrisonersForm(SecurityForm):
                                                                     title=_('All categories'))
         self.prison_list = prison_list
 
-    def get_api_endpoint(self):
+    def get_object_list_endpoint(self):
         return self.client.prisoners
 
     def get_query_data(self, allow_parameter_manipulation=True):
@@ -599,7 +612,7 @@ class CreditsForm(SecurityForm):
             return ''
         return self.cleaned_data.get('card_number_last_digits')
 
-    def get_api_endpoint(self):
+    def get_object_list_endpoint(self):
         return self.client.credits
 
     def get_query_data(self, allow_parameter_manipulation=True):
@@ -628,17 +641,28 @@ class SecurityDetailForm(SecurityForm):
         super().__init__(**kwargs)
         self.object_id = object_id
 
-    def get_api_endpoint(self):
-        return self.get_api_detail_endpoint().credits
+    def clean(self):
+        self.cleaned_data['object'] = self.get_object()
+        return super().clean()
 
-    def get_api_detail_endpoint(self):
+    def get_object_list_endpoint(self):
+        return self.get_object_endpoint().credits
+
+    def get_object_endpoint(self):
         raise NotImplementedError
 
     def get_object(self):
+        """
+        Gets the security detail object, a sender or prisoner profile
+        :return: dict or None if not found
+        """
         try:
-            return self.get_api_detail_endpoint().get()
+            return self.get_object_endpoint().get()
         except HttpNotFoundError:
-            return None
+            self.add_error(None, _('Not found'))
+        except SlumberHttpBaseException:
+            self.add_error(None, _('This service is currently unavailable'))
+        return None
 
 
 class SendersDetailForm(SecurityDetailForm):
@@ -660,7 +684,7 @@ class SendersDetailForm(SecurityDetailForm):
                                     'ordered by {ordering_description}.'
     unfiltered_description_template = 'Showing all credits sent by this sender ordered by {ordering_description}.'
 
-    def get_api_detail_endpoint(self):
+    def get_object_endpoint(self):
         return self.client.senders(self.object_id)
 
 
@@ -679,7 +703,7 @@ class PrisonersDetailForm(SecurityDetailForm):
                                     'ordered by {ordering_description}.'
     unfiltered_description_template = 'Showing all credits received by this prisoner ordered by {ordering_description}.'
 
-    def get_api_detail_endpoint(self):
+    def get_object_endpoint(self):
         return self.client.prisoners(self.object_id)
 
 
