@@ -77,7 +77,7 @@ class SecurityDetailView(SecurityView):
         context_data = super().get_context_data(**kwargs)
 
         detail_object = context_data['form'].cleaned_data.get('object')
-        if not detail_object:
+        if detail_object is None:
             raise Http404('Detail object not found')
         self.title = self.get_title_for_object(detail_object)
         list_url = self.request.build_absolute_uri(str(self.list_url))
@@ -165,7 +165,7 @@ class SenderDetailView(SecurityDetailView):
             return detail_object['debit_card_details'][0]['cardholder_names'][0]
         except (KeyError, IndexError):
             pass
-        return '—'
+        return _('Unknown sender')
 
 
 class PrisonerListView(SecurityView):
@@ -195,7 +195,7 @@ class PrisonerDetailView(SecurityDetailView):
 
     def get_title_for_object(self, detail_object):
         title = ' '.join(detail_object.get(key, '') for key in ('prisoner_number', 'prisoner_name'))
-        return title.strip() or '—'
+        return title.strip() or _('Unknown prisoner')
 
 
 class CreditExportView(SecurityView):

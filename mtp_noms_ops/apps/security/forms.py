@@ -144,7 +144,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         except SlumberHttpBaseException:
             self.add_error(None, _('This service is currently unavailable'))
             return []
-        count = data['count']
+        count = data.get('count', 0)
         self.page_count = int(ceil(count / self.page_size))
         return data.get('results', [])
 
@@ -660,9 +660,10 @@ class SecurityDetailForm(SecurityForm):
             return self.get_object_endpoint().get()
         except HttpNotFoundError:
             self.add_error(None, _('Not found'))
+            return None
         except SlumberHttpBaseException:
             self.add_error(None, _('This service is currently unavailable'))
-        return None
+            return {}
 
 
 class SendersDetailForm(SecurityDetailForm):
