@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
+from slumber.exceptions import HttpNotFoundError, HttpServerError
 
 from security import required_permissions
 from security.tests.test_forms import mocked_prisons
@@ -238,6 +239,27 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('£102.50', response_content)
 
+    @mock.patch('security.forms.get_connection')
+    def test_detail_not_found(self, mocked_connection):
+        mocked_connection().senders().get.side_effect = HttpNotFoundError
+        mocked_connection().senders().credits.get.side_effect = HttpNotFoundError
+        with silence_logger('django.request'):
+            response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
+        self.assertEqual(response.status_code, 404)
+
+    @mock.patch('security.forms.get_connection')
+    def test_connection_errors(self, mocked_connection):
+        mocked_connection().senders.get.side_effect = HttpServerError
+        with silence_logger('django.request'):
+            response = self.client.get(reverse(self.view_name))
+        self.assertContains(response, 'non-field-error')
+
+        mocked_connection().senders().get.side_effect = HttpServerError
+        mocked_connection().senders().credits.get.side_effect = HttpServerError
+        with silence_logger('django.request'):
+            response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
+        self.assertContains(response, 'non-field-error')
+
 
 class PrisonerListTestCase(SecurityViewTestCase):
     view_name = 'security:prisoner_list'
@@ -273,6 +295,27 @@ class PrisonerListTestCase(SecurityViewTestCase):
         self.assertContains(response, 'JAMES HALLS')
         self.assertContains(response, 'MAISIE')
         self.assertContains(response, '£102.50')
+
+    @mock.patch('security.forms.get_connection')
+    def test_detail_not_found(self, mocked_connection):
+        mocked_connection().prisoners().get.side_effect = HttpNotFoundError
+        mocked_connection().prisoners().credits.get.side_effect = HttpNotFoundError
+        with silence_logger('django.request'):
+            response = self.client.get(reverse(self.detail_view_name, kwargs={'prisoner_id': 9}))
+        self.assertEqual(response.status_code, 404)
+
+    @mock.patch('security.forms.get_connection')
+    def test_connection_errors(self, mocked_connection):
+        mocked_connection().prisoners.get.side_effect = HttpServerError
+        with silence_logger('django.request'):
+            response = self.client.get(reverse(self.view_name))
+        self.assertContains(response, 'non-field-error')
+
+        mocked_connection().prisoners().get.side_effect = HttpServerError
+        mocked_connection().prisoners().credits.get.side_effect = HttpServerError
+        with silence_logger('django.request'):
+            response = self.client.get(reverse(self.detail_view_name, kwargs={'prisoner_id': 9}))
+        self.assertContains(response, 'non-field-error')
 
 
 class CreditsListTestCase(SecurityViewTestCase):

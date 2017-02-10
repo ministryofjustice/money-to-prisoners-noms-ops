@@ -10,44 +10,48 @@
 
     <h1 class="heading-xlarge">
       {{ view.title }}
-      <p class="lede">{% blocktrans with prison=prisoner.current_prison.name %}Held at {{prison}}{% endblocktrans %}</p>
+      {% if prisoner %}
+        <p class="lede">{% blocktrans with prison=prisoner.current_prison.name %}Held at {{prison}}{% endblocktrans %}</p>
+    {% endif %}
     </h1>
   </header>
 
-  <div class="grid-row mtp-prisoner-summary">
-    <div class="column-one-quarter">
-      <p>
-        {% blocktrans trimmed count count=prisoner.credit_count %}
-          <strong>{{ count }}</strong><br /> credit received
-        {% plural %}
-          <strong>{{ count }}</strong><br /> credits received
-        {% endblocktrans %}
-      </p>
-    </div>
+  {% if prisoner %}
+    <div class="grid-row mtp-prisoner-summary">
+      <div class="column-one-quarter">
+        <p>
+          {% blocktrans trimmed count count=prisoner.credit_count %}
+            <strong>{{ count }}</strong><br /> credit received
+          {% plural %}
+            <strong>{{ count }}</strong><br /> credits received
+          {% endblocktrans %}
+        </p>
+      </div>
 
-    <div class="column-one-quarter">
-      <p>
-        {% blocktrans trimmed count count=prisoner.sender_count %}
-          <strong>{{ count }}</strong><br /> sender
-        {% plural %}
-          <strong>{{ count }}</strong><br /> senders
-        {% endblocktrans %}
-      </p>
-    </div>
+      <div class="column-one-quarter">
+        <p>
+          {% blocktrans trimmed count count=prisoner.sender_count %}
+            <strong>{{ count }}</strong><br /> sender
+          {% plural %}
+            <strong>{{ count }}</strong><br /> senders
+          {% endblocktrans %}
+        </p>
+      </div>
 
-    <div class="column-one-quarter">
-      <p>
-        <strong>{{ prisoner.credit_total|currency }}</strong><br />
-        {% trans 'total amount received' %}
-      </p>
+      <div class="column-one-quarter">
+        <p>
+          <strong>{{ prisoner.credit_total|currency }}</strong><br />
+          {% trans 'total amount received' %}
+        </p>
+      </div>
     </div>
-  </div>
+  {% endif %}
+
+  {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
   <div class="mtp-prisoner-summary__results">
     <div class="mtp-results-list">
       <h2 class="heading-large">{% trans 'Credits received' %}</h2>
-
-      {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
       <div class="panel panel-border-narrow">
         {% include 'security/forms/search-description.html' with form=form only %}
