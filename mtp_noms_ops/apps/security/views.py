@@ -1,16 +1,14 @@
-from math import ceil
-
 from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView, TemplateView
-from mtp_common.auth.api_client import get_connection
+from django.views.generic import FormView
 
 from security.export import export_as_csv
 from security.forms import (
-    SendersForm, PrisonersForm, CreditsForm, ReviewCreditsForm
+    SendersForm, SendersDetailForm, PrisonersForm, PrisonersDetailForm, CreditsForm,
+    ReviewCreditsForm,
 )
 from security.utils import NameSet, EmailSet
 
@@ -18,7 +16,7 @@ from security.utils import NameSet, EmailSet
 class SecurityView(FormView):
     """
     Base view for retrieving security-related searches
-    Allows form submission via GET (using page parameter as the flag)
+    Allows form submission via GET
     """
     title = NotImplemented
     template_name = NotImplemented
@@ -59,48 +57,41 @@ class SecurityView(FormView):
     get = FormView.post
 
 
-class SecurityDetailView(TemplateView):
-    title = NotImplemented
+class SecurityDetailView(SecurityView):
+    """
+    Base view for presenting a profile with associated credits
+    Allows form submission via GET
+    """
     list_title = NotImplemented
     list_url = NotImplemented
-    template_name = NotImplemented
     id_kwarg_name = NotImplemented
-    object_name = NotImplemented
-    page_size = 20
+    object_list_context_key = 'credits'
+    object_context_key = NotImplemented
 
-    def get_api_endpoint(self, client):
-        raise NotImplementedError
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['object_id'] = self.kwargs[self.id_kwarg_name]
+        return form_kwargs
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        client = get_connection(self.request)
-        endpoint = self.get_api_endpoint(client)(self.kwargs[self.id_kwarg_name])
+        context_data = super().get_context_data(**kwargs)
 
-        detail_object = endpoint.get()
+        detail_object = context_data['form'].get_object()
+        if not detail_object:
+            raise Http404('Detail object not found')
         self.title = self.get_title_for_object(detail_object)
         list_url = self.request.build_absolute_uri(str(self.list_url))
         referrer_url = self.request.META.get('HTTP_REFERER', '-')
         if referrer_url.startswith(list_url):
             list_url = referrer_url
-        try:
-            page = int(self.request.GET.get('page', 1))
-            if page < 1:
-                raise ValueError
-        except ValueError:
-            page = 1
-        offset = (page - 1) * self.page_size
-        data = endpoint.credits.get(offset=offset, limit=self.page_size)
-        count = data['count']
-        context[self.object_name] = detail_object
-        context['page'] = page
-        context['page_count'] = int(ceil(count / self.page_size))
-        context['credits'] = data.get('results', [])
-        context['breadcrumbs'] = [
+        context_data[self.object_context_key] = detail_object
+
+        context_data['breadcrumbs'] = [
             {'name': _('Home'), 'url': reverse('dashboard')},
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
-        return context
+        return context_data
 
     def get_title_for_object(self, detail_object):
         raise NotImplementedError
@@ -138,11 +129,9 @@ class SenderDetailView(SecurityDetailView):
     list_title = SenderListView.title
     list_url = reverse_lazy('security:sender_list')
     template_name = 'security/senders-detail.html'
+    form_class = SendersDetailForm
     id_kwarg_name = 'sender_id'
-    object_name = 'sender'
-
-    def get_api_endpoint(self, client):
-        return client.senders
+    object_context_key = 'sender'
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
@@ -200,14 +189,12 @@ class PrisonerDetailView(SecurityDetailView):
     list_title = PrisonerListView.title
     list_url = reverse_lazy('security:prisoner_list')
     template_name = 'security/prisoners-detail.html'
+    form_class = PrisonersDetailForm
     id_kwarg_name = 'prisoner_id'
-    object_name = 'prisoner'
-
-    def get_api_endpoint(self, client):
-        return client.prisoners
+    object_context_key = 'prisoner'
 
     def get_title_for_object(self, detail_object):
-        title = ' '.join(detail_object.get(key) for key in ('prisoner_number', 'prisoner_name'))
+        title = ' '.join(detail_object.get(key, '') for key in ('prisoner_number', 'prisoner_name'))
         return title.strip() or '—'
 
 

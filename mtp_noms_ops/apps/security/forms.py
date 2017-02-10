@@ -16,6 +16,7 @@ from django.utils.translation import gettext_lazy as _, override as override_loc
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages
 from mtp_common.auth.api_client import get_connection
+from slumber.exceptions import HttpNotFoundError
 
 from security.models import PrisonList
 from security.templatetags.security import currency as format_currency
@@ -620,6 +621,66 @@ class CreditsForm(SecurityForm):
             return _('ending in %02d pence') % amount_value
         description = dict(self['amount_pattern'].field.choices).get(value)
         return str(description).lower() if description else None
+
+
+class SecurityDetailForm(SecurityForm):
+    def __init__(self, object_id, **kwargs):
+        super().__init__(**kwargs)
+        self.object_id = object_id
+
+    def get_api_endpoint(self):
+        return self.get_api_detail_endpoint().credits
+
+    def get_api_detail_endpoint(self):
+        raise NotImplementedError
+
+    def get_object(self):
+        try:
+            return self.get_api_detail_endpoint().get()
+        except HttpNotFoundError:
+            return None
+
+
+class SendersDetailForm(SecurityDetailForm):
+    ordering = forms.ChoiceField(label=_('Order by'), required=False,
+                                 initial='-received_at',
+                                 choices=[
+                                     ('received_at', _('Received date (oldest to newest)')),
+                                     ('-received_at', _('Received date (newest to oldest)')),
+                                     ('amount', _('Amount sent (low to high)')),
+                                     ('-amount', _('Amount sent (high to low)')),
+                                     ('prisoner_name', _('Prisoner name (A to Z)')),
+                                     ('-prisoner_name', _('Prisoner name (Z to A)')),
+                                     ('prisoner_number', _('Prisoner number (A to Z)')),
+                                     ('-prisoner_number', _('Prisoner number (Z to A)')),
+                                 ])
+
+    # NB: ensure that these templates are HTML-safe
+    filtered_description_template = 'Showing credits sent by this sender that {filter_description}, ' \
+                                    'ordered by {ordering_description}.'
+    unfiltered_description_template = 'Showing all credits sent by this sender ordered by {ordering_description}.'
+
+    def get_api_detail_endpoint(self):
+        return self.client.senders(self.object_id)
+
+
+class PrisonersDetailForm(SecurityDetailForm):
+    ordering = forms.ChoiceField(label=_('Order by'), required=False,
+                                 initial='-received_at',
+                                 choices=[
+                                     ('received_at', _('Received date (oldest to newest)')),
+                                     ('-received_at', _('Received date (newest to oldest)')),
+                                     ('amount', _('Amount sent (low to high)')),
+                                     ('-amount', _('Amount sent (high to low)')),
+                                 ])
+
+    # NB: ensure that these templates are HTML-safe
+    filtered_description_template = 'Showing credits received by this prisoner that {filter_description}, ' \
+                                    'ordered by {ordering_description}.'
+    unfiltered_description_template = 'Showing all credits received by this prisoner ordered by {ordering_description}.'
+
+    def get_api_detail_endpoint(self):
+        return self.client.prisoners(self.object_id)
 
 
 class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
