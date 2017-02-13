@@ -724,7 +724,7 @@ class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
             if prison['pre_approval_required']
         ]
         return retrieve_all_pages(
-            self.client.credits.get, valid=True, reviewed=False, prison=prisons,
+            self.client.credits.get, valid=True, reviewed=False, prison=prisons, resolution='pending',
             received_at__lt=datetime.combine(now().date(), time(0, 0, 0, tzinfo=utc))
         )
 
