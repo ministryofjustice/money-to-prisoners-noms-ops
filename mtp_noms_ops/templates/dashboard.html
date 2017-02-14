@@ -78,4 +78,24 @@
 
   {% endif %}
 
+  {% if request.can_access_security and saved_searches|length > 0 %}
+
+    <h2 class="heading-medium">{% trans 'Pinned profiles' %}</h2>
+    {% for search in saved_searches %}
+      {% if forloop.counter0|divisibleby:3 %}
+      <div class="grid-row">
+      {% endif %}
+        <div class="column-one-third">
+          <a href="{{ search.site_url }}" class="mtp-box">
+            {{ search.description }}<br/>
+            {% blocktrans with count=search.new_result_count %}{{ count }} new credits{% endblocktrans %}
+          </a>
+        </div>
+      {% if forloop.counter|divisibleby:3 or forloop.counter == saved_searches|length %}
+      </div><br/>
+      {% endif %}
+    {% endfor %}
+
+  {% endif %}
+
 {% endblock %}

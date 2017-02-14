@@ -1,0 +1,8 @@
+{% load i18n %}
+{% load security %}
+
+{% if form.existing_search %}
+<div class="print-hidden"><a class="button" href="?{{ form|query_string_with_additional_parameter:'unpin' }}">{% trans 'Unpin from home page' %}</a></div>
+{% else %}
+<div class="print-hidden"><a class="button" href="?{{ form|query_string_with_additional_parameter:'pin' }}">{% trans 'Pin to home page' %}</a></div>
+{% endif %}

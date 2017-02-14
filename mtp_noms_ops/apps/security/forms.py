@@ -3,7 +3,7 @@ from datetime import datetime, time, timedelta
 import enum
 from math import ceil
 import re
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
 from django import forms
 from django.conf import settings
@@ -19,6 +19,9 @@ from mtp_common.auth.api_client import get_connection
 from slumber.exceptions import HttpNotFoundError, SlumberHttpBaseException
 
 from security.models import PrisonList
+from security.searches import (
+    save_search, update_result_count, delete_search, get_existing_search
+)
 from security.templatetags.security import currency as format_currency
 
 
@@ -145,6 +148,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             self.add_error(None, _('This service is currently unavailable'))
             return []
         count = data.get('count', 0)
+        self.total_count = count
         self.page_count = int(ceil(count / self.page_size))
         return data.get('results', [])
 
@@ -226,6 +230,24 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 'has_filters': has_filters,
                 'description': format_html(description_template, **description_kwargs),
             }
+
+    def check_and_update_saved_searches(self, page_title):
+        site_url = '?'.join([urlparse(self.request.path).path, self.query_string])
+        self.existing_search = get_existing_search(self.client, site_url)
+        if self.existing_search:
+            update_result_count(
+                self.client, self.existing_search['id'], self.total_count
+            )
+        if self.request.GET.get('pin') and not self.existing_search:
+            endpoint = self.get_object_list_endpoint()
+            endpoint_path = urlparse(endpoint.url()).path
+            self.existing_search = save_search(
+                self.client, page_title, endpoint_path, site_url,
+                filters=self.get_query_data(), last_result_count=self.total_count
+            )
+        elif self.request.GET.get('unpin') and self.existing_search:
+            delete_search(self.client, self.existing_search['id'])
+            self.existing_search = None
 
 
 @validate_range_field('prisoner_count', _('Must be larger than the minimum prisoners'))

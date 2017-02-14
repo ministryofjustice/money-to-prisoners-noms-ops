@@ -1,3 +1,5 @@
+from functools import wraps
+import json
 import logging
 from unittest import mock
 
@@ -6,8 +8,10 @@ from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 from slumber.exceptions import HttpNotFoundError, HttpServerError
+import responses
 
 from security import required_permissions
+from security.tests import api_url
 from security.tests.test_forms import mocked_prisons
 
 
@@ -40,9 +44,35 @@ def sample_prison_list(mocked_api_client):
     }
 
 
+def no_saved_searches(mocked_api_client):
+    mocked_api_client.searches.get.return_value = {
+        'count': 0,
+        'results': []
+    }
+
+
+def mock_form_connection(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        with mock.patch('security.forms.get_connection') as c:
+            no_saved_searches(c())
+            args += (c,)
+            return f(*args, **kwargs)
+    return wrapper
+
+
 class SecurityBaseTestCase(SimpleTestCase):
+    @mock.patch('mtp_noms_ops.urls.get_connection')
     @mock.patch('mtp_common.auth.backends.api_client')
-    def login(self, mock_api_client):
+    def login(self, mock_api_client, mocked_search_connection, follow=True):
+        no_saved_searches(mocked_search_connection())
+        return self._login(mock_api_client, follow=follow)
+
+    @mock.patch('mtp_common.auth.backends.api_client')
+    def login_test_searches(self, mock_api_client, follow=True):
+        return self._login(mock_api_client, follow=follow)
+
+    def _login(self, mock_api_client, follow=True):
         mock_api_client.authenticate.return_value = {
             'pk': 5,
             'token': generate_tokens(),
@@ -58,9 +88,12 @@ class SecurityBaseTestCase(SimpleTestCase):
         response = self.client.post(
             reverse('login'),
             data={'username': 'shall', 'password': 'pass'},
-            follow=True
+            follow=follow
         )
-        self.assertEqual(response.status_code, 200)
+        if follow:
+            self.assertEqual(response.status_code, 200)
+        else:
+            self.assertEqual(response.status_code, 302)
         return response
 
 
@@ -89,8 +122,10 @@ class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
         response = self.login()
         self.assertContains(response, '<!-- dashboard -->')
 
-    def test_cannot_access_prisoner_location_admin(self):
+    @mock.patch('mtp_noms_ops.urls.get_connection')
+    def test_cannot_access_prisoner_location_admin(self, mocked_search_connection):
         self.login()
+        no_saved_searches(mocked_search_connection())
         response = self.client.get(reverse('location_file_upload'), follow=True)
         self.assertNotContains(response, '<!-- location_file_upload -->')
         self.assertContains(response, '<!-- dashboard -->')
@@ -172,8 +207,9 @@ class SecurityViewTestCase(SecurityBaseTestCase):
     def tearDown(self):
         self.mocked_prison_data.stop()
 
+    @mock_form_connection
     @mock.patch('security.forms.SecurityForm.get_object_list')
-    def test_can_access_security_view(self, mocked_form_method):
+    def test_can_access_security_view(self, mock_connection, mocked_form_method):
         mocked_form_method.return_value = []
         if not self.view_name:
             return
@@ -190,7 +226,7 @@ class SenderListTestCase(SecurityViewTestCase):
         super().setUp()
         self.login()
 
-    @mock.patch('security.forms.get_connection')
+    @mock_form_connection
     def test_displays_results(self, mocked_connection):
         mocked_connection().senders.get.return_value = {
             'count': 2,
@@ -203,7 +239,7 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertIn('£410.00', response_content)
         self.assertIn('£420.00', response_content)
 
-    @mock.patch('security.forms.get_connection')
+    @mock_form_connection
     def test_displays_bank_transfer_detail(self, mocked_connection):
         mocked_connection().senders().get.return_value = self.bank_transfer_sender
         mocked_connection().senders().credits.get.return_value = {
@@ -219,7 +255,7 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('£102.50', response_content)
 
-    @mock.patch('security.forms.get_connection')
+    @mock_form_connection
     def test_displays_debit_card_detail(self, mocked_connection):
         mocked_connection().senders().get.return_value = self.debit_card_sender
         mocked_connection().senders().credits.get.return_value = {
@@ -269,7 +305,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
         super().setUp()
         self.login()
 
-    @mock.patch('security.forms.get_connection')
+    @mock_form_connection
     def test_displays_results(self, mocked_connection):
         response_data = {
             'count': 1,
@@ -283,7 +319,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
         self.assertIn('A1409AE', response_content)
         self.assertIn('310.00', response_content)
 
-    @mock.patch('security.forms.get_connection')
+    @mock_form_connection
     def test_displays_detail(self, mocked_connection):
         mocked_connection().prisoners().get.return_value = self.prisoner_profile
         mocked_connection().prisoners().credits.get.return_value = {
@@ -321,7 +357,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
 class CreditsListTestCase(SecurityViewTestCase):
     view_name = 'security:credit_list'
 
-    @mock.patch('security.forms.get_connection')
+    @mock_form_connection
     def test_displays_results(self, mocked_connection):
         response_data = {
             'count': 2,
@@ -465,7 +501,7 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         )
         self.assertRedirects(response, reverse('security:credit_list') + '?prison=LEI')
 
-    @mock.patch('security.forms.get_connection')
+    @mock_form_connection
     def test_invalid_params_redirects_to_form(self, mocked_connection):
         sample_prison_list(mocked_connection)
         self.login()
@@ -473,3 +509,160 @@ class CreditsExportTestCase(SecurityBaseTestCase):
             reverse('security:credits_export') + '?page=1&received_at__gte=LL'
         )
         self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
+
+
+class PinnedProfileTestCase(SecurityViewTestCase):
+
+    def test_pinned_profiles_on_dashboard(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url('/searches'),
+                json={
+                    'count': 2,
+                    'results': [
+                        {
+                            'id': 1,
+                            'description': 'Saved search 1',
+                            'endpoint': '/prisoners/1/credits',
+                            'last_result_count': 2,
+                            'site_url': '/en-gb/security/prisoners/1/',
+                            'filters': []
+                        },
+                        {
+                            'id': 2,
+                            'description': 'Saved search 2',
+                            'endpoint': '/senders/1/credits',
+                            'last_result_count': 3,
+                            'site_url': '/en-gb/security/senders/1/',
+                            'filters': []
+                        }
+                    ]
+                },
+                status=200,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoners/1/credits/'),
+                json={
+                    'count': 5,
+                    'results': []
+                },
+                status=200,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/senders/1/credits/'),
+                json={
+                    'count': 10,
+                    'results': []
+                },
+                status=200,
+            )
+            response = self.login_test_searches()
+
+        self.assertContains(response, 'Saved search 1')
+        self.assertContains(response, 'Saved search 2')
+        self.assertContains(response, '3 new credits')
+        self.assertContains(response, '7 new credits')
+
+    def test_display_pinned_profile(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoners/1/'),
+                json=self.prisoner_profile,
+                status=200,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoners/1/credits/'),
+                json={
+                    'count': 4,
+                    'results': [
+                        self.credit_object, self.credit_object,
+                        self.credit_object, self.credit_object
+                    ],
+                },
+                status=200,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/searches'),
+                json={
+                    'count': 1,
+                    'results': [
+                        {
+                            'id': 1,
+                            'description': 'Saved search 1',
+                            'endpoint': '/prisoners/1/credits/',
+                            'last_result_count': 2,
+                            'site_url': '/en-gb/security/prisoners/1/?ordering=-received_at',
+                            'filters': []
+                        },
+                    ]
+                },
+                status=200,
+            )
+            rsps.add(
+                rsps.PATCH,
+                api_url('/searches/1/'),
+                status=204,
+            )
+            self.login(follow=False)
+            response = self.client.get(
+                reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
+            )
+            self.assertContains(response, 'Unpin from home page')
+            self.assertEqual(rsps.calls[-1].request.body, '{"last_result_count": 4}')
+
+    def test_pin_profile(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoners/1/'),
+                json=self.prisoner_profile,
+                status=200,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoners/1/credits/'),
+                json={
+                    'count': 4,
+                    'results': [
+                        self.credit_object, self.credit_object,
+                        self.credit_object, self.credit_object
+                    ],
+                },
+                status=200,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/searches'),
+                json={
+                    'count': 0,
+                    'results': []
+                },
+                status=200,
+            )
+            rsps.add(
+                rsps.POST,
+                api_url('/searches'),
+                status=201,
+            )
+
+            self.login(follow=False)
+            self.client.get(
+                reverse('security:prisoner_detail', kwargs={'prisoner_id': 1}) +
+                '?pin=1'
+            )
+            self.assertEqual(
+                json.loads(rsps.calls[-1].request.body),
+                {
+                    'description': 'A1409AE JAMES HALLS',
+                    'endpoint': '/prisoners/1/credits/',
+                    'last_result_count': 4,
+                    'site_url': '/en-gb/security/prisoners/1/?ordering=-received_at',
+                    'filters': [{'field': 'ordering', 'value': '-received_at'}],
+                },
+            )
