@@ -7,7 +7,7 @@
 
   <header>
     {% language_switch %}
-
+    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
     <h1 class="heading-xlarge">
       {{ view.title }}
       {% if prisoner %}
@@ -48,7 +48,6 @@
   {% endif %}
 
   {% include 'security/includes/save-search.html' %}
-  {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
   <div class="mtp-prisoner-summary__results">
     <div class="mtp-results-list">
