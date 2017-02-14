@@ -1,5 +1,9 @@
 .mtp-save-search {
   float: right;
   text-align: right;
-  margin-top: 1.8em;
+  margin-top: 0.2em;
+
+  .mtp-language-switch + .mtp-save-search {
+  	margin-top: 1.8em;
+  }
 }
