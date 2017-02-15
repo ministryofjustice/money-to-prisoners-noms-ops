@@ -1,5 +1,6 @@
 import collections
 import re
+from urllib.parse import urlencode
 
 
 class OrderedSet(collections.MutableSet):
@@ -80,3 +81,11 @@ class EmailSet(OrderedSet):
 
     def hash_item(self, item):
         return (item or '').strip().lower()
+
+
+def initial_params(request):
+    user_prisons = request.user.user_data.get('prisons', [])
+    initial_params = {}
+    if len(user_prisons) == 1:
+        initial_params['prison'] = user_prisons[0]['nomis_id']
+    return {'initial_params': urlencode(initial_params, doseq=True)}

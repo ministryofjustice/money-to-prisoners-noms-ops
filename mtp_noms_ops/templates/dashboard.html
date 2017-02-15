@@ -26,19 +26,19 @@
 
     <div class="grid-row">
       <div class="column-one-third">
-        <a href="{% url 'security:credit_list' %}" class="mtp-box">
+        <a href="{% url 'security:credit_list' %}?{{ initial_params }}" class="mtp-box">
           {% trans 'Credits' %}
         </a>
       </div>
 
       <div class="column-one-third">
-        <a href="{% url 'security:sender_list' %}" class="mtp-box">
+        <a href="{% url 'security:sender_list' %}?{{ initial_params }}" class="mtp-box">
           {% trans 'Senders' %}
         </a>
       </div>
 
       <div class="column-one-third">
-        <a href="{% url 'security:prisoner_list' %}" class="mtp-box">
+        <a href="{% url 'security:prisoner_list' %}?{{ initial_params }}" class="mtp-box">
           {% trans 'Prisoners' %}
         </a>
       </div>
