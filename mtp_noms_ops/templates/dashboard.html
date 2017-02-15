@@ -23,24 +23,52 @@
     <h2 class="heading-medium">{% trans 'View all' %}</h2>
 
     <div class="grid-row">
-      <div class="column-one-third">
-        <a href="{% url 'security:credit_list' %}?{{ initial_params }}" class="mtp-box">
+      <div class="column-one-third mtp-box">
+        <a href="{% url 'security:credit_list' %}?{{ initial_params }}">
           {% trans 'Credits' %}
         </a>
       </div>
 
-      <div class="column-one-third">
-        <a href="{% url 'security:sender_list' %}?{{ initial_params }}" class="mtp-box">
+      <div class="column-one-third mtp-box">
+        <a href="{% url 'security:sender_list' %}?{{ initial_params }}">
           {% trans 'Senders' %}
         </a>
       </div>
 
-      <div class="column-one-third">
-        <a href="{% url 'security:prisoner_list' %}?{{ initial_params }}" class="mtp-box">
+      <div class="column-one-third mtp-box">
+        <a href="{% url 'security:prisoner_list' %}?{{ initial_params }}">
           {% trans 'Prisoners' %}
         </a>
       </div>
     </div>
+
+  {% endif %}
+
+  {% if request.can_access_security and saved_searches|length > 0 %}
+
+    <h2 class="heading-medium">{% trans 'Activity from your pinned profiles' %}</h2>
+    {% for search in saved_searches %}
+      {% if forloop.counter0|divisibleby:3 %}
+      <div class="grid-row">
+      {% endif %}
+        <div class="column-one-third mtp-box mtp-box-pinned">
+          <a href="{{ search.site_url }}">
+            {{ search.description }}
+            {% if search.new_result_count %}
+              <span>
+                {% blocktrans trimmed count count=search.new_result_count %}
+                  1 new credit
+                {% plural %}
+                  {{ count }} new credits
+                {% endblocktrans %}
+              </span>
+            {% endif %}
+          </a>
+        </div>
+      {% if forloop.counter|divisibleby:3 or forloop.last %}
+      </div>
+      {% endif %}
+    {% endfor %}
 
   {% endif %}
 
@@ -50,49 +78,29 @@
 
     <div class="grid-row">
       {% if request.can_access_security and request.can_pre_approve %}
-        <div class="column-one-third">
-          <a href="{% url 'security:review_credits' %}" class="mtp-box">
+        <div class="column-one-third mtp-box">
+          <a href="{% url 'security:review_credits' %}">
             {% trans 'New credits check' %}
           </a>
         </div>
       {% endif %}
 
       {% if request.can_access_user_management %}
-        <div class="column-one-third">
-          <a href="{% url 'list-users' %}" class="mtp-box">
+        <div class="column-one-third mtp-box">
+          <a href="{% url 'list-users' %}">
             {% trans 'Manage users' %}
           </a>
         </div>
       {% endif %}
 
       {% if request.can_access_prisoner_location %}
-        <div class="column-one-third">
-          <a href="{% url 'location_file_upload' %}" class="mtp-box">
+        <div class="column-one-third mtp-box">
+          <a href="{% url 'location_file_upload' %}">
             {% trans 'Upload prisoner location file' %}
           </a>
         </div>
       {% endif %}
     </div>
-
-  {% endif %}
-
-  {% if request.can_access_security and saved_searches|length > 0 %}
-
-    <h2 class="heading-medium">{% trans 'Pinned profiles' %}</h2>
-    {% for search in saved_searches %}
-      {% if forloop.counter0|divisibleby:3 %}
-      <div class="grid-row">
-      {% endif %}
-        <div class="column-one-third">
-          <a href="{{ search.site_url }}" class="mtp-box">
-            {{ search.description }}<br/>
-            {% blocktrans with count=search.new_result_count %}{{ count }} new credits{% endblocktrans %}
-          </a>
-        </div>
-      {% if forloop.counter|divisibleby:3 or forloop.counter == saved_searches|length %}
-      </div><br/>
-      {% endif %}
-    {% endfor %}
 
   {% endif %}
 
