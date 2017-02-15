@@ -14,13 +14,11 @@
 
   {% if request.can_access_security %}
 
-    <div class="mtp-security-description">
-      <p class="lede">
-        {% blocktrans trimmed %}
-          Use this tool to monitor all credits sent to prisoners using the <a href="{{ start_page_url }}">send money to a prisoner</a> service.
-        {% endblocktrans %}
-      </p>
-    </div>
+    <p class="lede mtp-security-description">
+      {% blocktrans trimmed %}
+        Use this tool to monitor all credits sent to prisoners using the <a href="{{ start_page_url }}">send money to a prisoner</a> service.
+      {% endblocktrans %}
+    </p>
 
     <h2 class="heading-medium">{% trans 'View all' %}</h2>
 
