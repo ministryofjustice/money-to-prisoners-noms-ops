@@ -2,7 +2,8 @@
 
 $images-dir: '/static/images/';
 
-@import 'mtp';
+@import 'mtp-internal';
+
 @import 'views/dashboard';
 @import 'views/security-forms';
 @import 'views/security-form-fields';
