@@ -2,28 +2,40 @@
   width: 65%;
 }
 
-.column-one-third a {
-  color: $page-colour;
-  text-decoration: none;
-
-  &:hover,
-  &:active,
-  &:focus {
-    text-decoration: underline;
-  }
-}
-
 .mtp-box {
-  display: block;
-  background-color: $govuk-blue;
-  padding: 0.8em;
-  height: 6em;
-  font-size: 1.2em;
-}
+  padding-bottom: 30px;
 
-.mtp-pin {
-  background-color: $turquoise;
-  padding: 0.8em;
-  height: 7em;
-  font-size: 1.2em;
+  a {
+    display: block;
+    background: $govuk-blue;
+    color: $page-colour;
+    text-decoration: none;
+    padding: 0.8em;
+    height: 6em;
+    font-size: 1.2em;
+
+    @include breakpoint($mobile) {
+      height: 4em;
+    }
+
+    &:hover,
+    &:active,
+    &:focus {
+      text-decoration: underline;
+    }
+  }
+
+  &.mtp-box-pinned {
+    a {
+      background: $turquoise;
+      position: relative;
+
+      span {
+        display: block;
+        font-size: 0.8em;
+        position: absolute;
+        bottom: 0.8em;
+      }
+    }
+  }
 }
