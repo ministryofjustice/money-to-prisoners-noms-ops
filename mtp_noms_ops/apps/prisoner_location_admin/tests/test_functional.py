@@ -40,7 +40,7 @@ class LoginTests(PrisonerLocationAdminTestCase):
     def test_title(self):
         self.driver.get(self.live_server_url + '/en-gb/')
         heading = self.driver.find_element_by_tag_name('h1')
-        self.assertEqual('NOMS admin\nSign in', heading.text)
+        self.assertEqual('Security check\nSign in', heading.text)
 
     def test_bad_login(self):
         self.login('prisoner-location-admin', 'bad-password')
@@ -50,6 +50,7 @@ class LoginTests(PrisonerLocationAdminTestCase):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
         self.assertCurrentUrl(reverse('location_file_upload'))
         self.assertInSource('Upload prisoner location file')
+        self.assertNotInSource('Security check')
 
     def test_logout(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
