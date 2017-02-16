@@ -35,6 +35,16 @@ def external_breadcrumbs(request):
     }
 
 
+def user_specific_context(request):
+    if request.can_access_prisoner_location and not request.can_access_security:
+        app_title = _('Prisoner location admin')
+    else:
+        app_title = _('Security check')
+    return {
+        'app_title': app_title
+    }
+
+
 def user_test(permissions):
     def decorator(view):
         permission_test = permission_required(permissions, login_url=reverse_lazy(settings.LOGIN_REDIRECT_URL))

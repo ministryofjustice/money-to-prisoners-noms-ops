@@ -8,9 +8,9 @@
   <!-- {% if request.resolver_match.namespace %}{{ request.resolver_match.namespace }}:{% endif %}{{ request.resolver_match.url_name }} -->
 {% endblock %}
 
-{% block page_title %}{% trans 'NOMS admin' %}{% endblock %}
+{% block page_title %}{{ app_title }}{% endblock %}
 
-{% block proposition %}{% trans 'NOMS admin' %}{% endblock %}
+{% block proposition %}{{ app_title }}{% endblock %}
 
 {% block proposition_menu %}
   {% if request.user.is_authenticated %}

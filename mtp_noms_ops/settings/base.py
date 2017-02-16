@@ -116,6 +116,7 @@ TEMPLATES = [
                 'mtp_common.context_processors.app_environment',
                 'mtp_common.context_processors.govuk_localisation',
                 'mtp_noms_ops.utils.external_breadcrumbs',
+                'mtp_noms_ops.utils.user_specific_context',
                 'mtp_noms_ops.apps.security.utils.initial_params',
             ],
         },
