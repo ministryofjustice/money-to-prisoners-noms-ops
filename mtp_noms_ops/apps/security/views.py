@@ -136,7 +136,7 @@ class SenderDetailView(SecurityDetailView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        sender = context_data['sender']
+        sender = context_data.get('sender', {})
 
         all_cardholder_names = list(details['sender_name']
                                     for details in sender.get('bank_transfer_details', ()))
@@ -193,6 +193,12 @@ class PrisonerDetailView(SecurityDetailView):
     form_class = PrisonersDetailForm
     id_kwarg_name = 'prisoner_id'
     object_context_key = 'prisoner'
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        prisoner = context_data.get('prisoner', {})
+        context_data['recipient_names'] = NameSet(prisoner.get('recipient_names', ()), strip_titles=True)
+        return context_data
 
     def get_title_for_object(self, detail_object):
         title = ' '.join(detail_object.get(key, '') for key in ('prisoner_number', 'prisoner_name'))

@@ -178,6 +178,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'prisoner_dob': '1986-12-09',
         'current_prison': {'nomis_id': 'PRN', 'name': 'Prison'},
         'prisons': [{'nomis_id': 'PRN', 'name': 'Prison'}],
+        'recipient_names': ['Jim Halls', 'JAMES HALLS', 'James Halls '],
         'created': '2016-05-25T20:24:00Z',
         'modified': '2016-05-25T20:24:00Z',
     }
@@ -329,8 +330,11 @@ class PrisonerListTestCase(SecurityViewTestCase):
 
         response = self.client.get(reverse(self.detail_view_name, kwargs={'prisoner_id': 9}))
         self.assertContains(response, 'JAMES HALLS')
-        self.assertContains(response, 'MAISIE')
-        self.assertContains(response, '£102.50')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('Jim Halls', response_content)
+        self.assertNotIn('James Halls', response_content)
+        self.assertIn('MAISIE', response_content)
+        self.assertIn('£102.50', response_content)
 
     @mock.patch('security.forms.get_connection')
     def test_detail_not_found(self, mocked_connection):

@@ -45,6 +45,17 @@
         </p>
       </div>
     </div>
+
+    {% if recipient_names %}
+      <div class="grid-row">
+        <div class="column-full">
+            {% for recipient_name in recipient_names %}
+              <strong>{{ recipient_name }}</strong>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+            <p>{% trans 'names given by senders' %}</p>
+          </div>
+      </div>
+    {% endif %}
   {% endif %}
 
   {% include 'mtp_common/forms/error-summary.html' with form=form only %}
