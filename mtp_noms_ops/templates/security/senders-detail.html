@@ -25,16 +25,16 @@
         <div class="grid-row mtp-sender-summary__details mtp-sender-summary__bank-transfer">
           <div class="column-one-third col-1">
             <strong>{{ sender.bank_transfer_details.0.sender_account_number|default:'—' }}</strong>
-            <p>{% trans 'Account number' %}</p>
+            <p>{% trans 'account number' %}</p>
           </div>
           <div class="column-one-third col-2">
             <strong>{{ sender.bank_transfer_details.0.sender_sort_code|format_sort_code }}</strong>
-            <p>{% trans 'Sort code' %}</p>
+            <p>{% trans 'sort code' %}</p>
           </div>
           {% if sender.bank_transfer_details.0.sender_roll_number %}
             <div class="column-one-third col-3">
               <strong>{{ sender.bank_transfer_details.0.sender_roll_number }}</strong>
-              <p>{% trans 'Roll number (for building societies)' %}</p>
+              <p>{% trans 'roll number (for building societies)' %}</p>
             </div>
           {% endif %}
         </div>
@@ -44,11 +44,11 @@
         <div class="grid-row mtp-sender-summary__details mtp-sender-summary__debit-card">
           <div class="column-one-third">
             <strong>{{ sender.debit_card_details.0.card_number_last_digits|format_card_number }}</strong>
-            <p>{% trans 'Card number' %}</p>
+            <p>{% trans 'card number' %}</p>
           </div>
           <div class="column-two-thirds">
             <strong>{{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}</strong>
-            <p>{% trans 'Expiry date' %}</p>
+            <p>{% trans 'expiry date' %}</p>
           </div>
         </div>
 
@@ -67,9 +67,9 @@
               {% endfor %}
               <p>
                 {% if sender_emails|length > 1 %}
-                  {% trans 'Emails' %}
+                  {% trans 'emails' %}
                 {% else %}
-                  {% trans 'Email' %}
+                  {% trans 'email' %}
                 {% endif %}
               </p>
             </div>
@@ -79,7 +79,7 @@
               {% for other_cardholder_name in other_cardholder_names %}
                 <strong>{{ other_cardholder_name }}</strong>{% if not forloop.last %},{% endif %}
               {% endfor %}
-              <p>{% trans 'Other names used' %}</p>
+              <p>{% trans 'other names used' %}</p>
             </div>
           {% endif %}
         </div>
