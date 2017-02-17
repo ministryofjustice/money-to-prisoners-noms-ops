@@ -19,41 +19,33 @@
   {% if prisoner %}
     <div class="grid-row mtp-prisoner-summary">
       <div class="column-one-quarter">
+        <strong>{{ prisoner.credit_count }}</strong>
         <p>
-          {% blocktrans trimmed count count=prisoner.credit_count %}
-            <strong>{{ count }}</strong><br /> credit received
-          {% plural %}
-            <strong>{{ count }}</strong><br /> credits received
-          {% endblocktrans %}
+          {% blocktrans trimmed count count=prisoner.credit_count %}credit received{% plural %}credits received{% endblocktrans %}
         </p>
       </div>
 
       <div class="column-one-quarter">
+        <strong>{{ prisoner.sender_count }}</strong>
         <p>
-          {% blocktrans trimmed count count=prisoner.sender_count %}
-            <strong>{{ count }}</strong><br /> sender
-          {% plural %}
-            <strong>{{ count }}</strong><br /> senders
-          {% endblocktrans %}
+          {% blocktrans trimmed count count=prisoner.sender_count %}sender{% plural %}senders{% endblocktrans %}
         </p>
       </div>
 
       <div class="column-one-quarter">
-        <p>
-          <strong>{{ prisoner.credit_total|currency }}</strong><br />
-          {% trans 'total amount received' %}
-        </p>
+        <strong>{{ prisoner.credit_total|currency }}</strong>
+        <p>{% trans 'total amount received' %}</p>
       </div>
     </div>
 
     {% if recipient_names %}
       <div class="grid-row">
         <div class="column-full">
-            {% for recipient_name in recipient_names %}
-              <strong>{{ recipient_name }}</strong>{% if not forloop.last %},{% endif %}
-            {% endfor %}
-            <p>{% trans 'names given by senders' %}</p>
-          </div>
+          {% for recipient_name in recipient_names %}
+            <strong>{{ recipient_name }}</strong>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+          <p>{% trans 'names given by senders' %}</p>
+        </div>
       </div>
     {% endif %}
   {% endif %}
