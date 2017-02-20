@@ -1,4 +1,5 @@
 from mtp_common.api import retrieve_all_pages
+from slumber.exceptions import HttpNotFoundError
 from slumber.utils import url_join
 
 
@@ -13,13 +14,20 @@ def get_saved_searches(client):
     return retrieve_all_pages(client.searches.get)
 
 
-def populate_new_result_count(client, saved_search):
-    filters = filter_list_to_dict(saved_search['filters'])
-    endpoint = get_slumber_resource_from_path(client, saved_search['endpoint'])
-    current_results = endpoint.get(**filters)
-    new_result_count = current_results['count'] - saved_search['last_result_count']
-    saved_search['new_result_count'] = new_result_count if new_result_count > 0 else 0
-    return saved_search
+def populate_new_result_counts(client, saved_searches, delete_invalid=True):
+    modified = []
+    for saved_search in saved_searches:
+        filters = filter_list_to_dict(saved_search['filters'])
+        endpoint = get_slumber_resource_from_path(client, saved_search['endpoint'])
+        try:
+            current_results = endpoint.get(**filters)
+            new_result_count = current_results['count'] - saved_search['last_result_count']
+            saved_search['new_result_count'] = new_result_count if new_result_count > 0 else 0
+            modified.append(saved_search)
+        except HttpNotFoundError:
+            if delete_invalid:
+                delete_search(client, saved_search['id'])
+    return modified
 
 
 def get_existing_search(client, path):

@@ -11,7 +11,7 @@ from mtp_common.auth import views as auth_views
 from mtp_common.auth.api_client import get_connection
 from mtp_common.auth.exceptions import Unauthorized
 
-from security.searches import get_saved_searches, populate_new_result_count
+from security.searches import get_saved_searches, populate_new_result_counts
 
 
 def dashboard_view(request):
@@ -23,10 +23,7 @@ def dashboard_view(request):
     client = get_connection(request)
     return render(request, 'dashboard.html', {
         'start_page_url': settings.START_PAGE_URL,
-        'saved_searches': [
-            populate_new_result_count(client, search)
-            for search in get_saved_searches(client)
-        ]
+        'saved_searches': populate_new_result_counts(client, get_saved_searches(client)),
     })
 
 
