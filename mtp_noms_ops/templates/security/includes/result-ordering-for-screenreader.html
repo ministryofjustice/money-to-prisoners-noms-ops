@@ -1,8 +1,8 @@
 {% load i18n %}
 {% spaceless %}
   {% if ordering == 'ascending' %}
-    <span class="screenreader-only">{% trans 'In ascending order' %}</span>
+    <span class="visually-hidden">{% trans 'In ascending order' %}</span>
   {% elif ordering == 'descending' %}
-    <span class="screenreader-only">{% trans 'In descending order' %}</span>
+    <span class="visually-hidden">{% trans 'In descending order' %}</span>
   {% endif %}
 {% endspaceless %}
