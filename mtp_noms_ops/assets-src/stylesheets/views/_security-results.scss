@@ -72,20 +72,20 @@
       border-right: 1px solid $grey-2;
 
       span {
-        background: transparent url('/static/images/ordering-asc.png') no-repeat 92% 50%;
+        background: transparent file-url('ordering-asc.png') no-repeat 92% 50%;
 
         @include device-pixel-ratio {
-          background-image: url('/static/images/ordering-asc@2x.png');
+          background-image: file-url('ordering-asc@2x.png');
           background-size: 9px 9px;
         }
       }
     }
 
     &.mtp-results-ordering--desc span {
-      background-image: url('/static/images/ordering-desc.png');
+      background-image: file-url('ordering-desc.png');
 
       @include device-pixel-ratio {
-        background-image: url('/static/images/ordering-desc@2x.png');
+        background-image: file-url('ordering-desc@2x.png');
       }
     }
   }
@@ -110,13 +110,13 @@
   margin-left: 0;
   width: 70%;
 
-  background: url('/static/images/icon-card.png') no-repeat scroll 0 0;
+  background: file-url('icon-card.png') no-repeat scroll 0 0;
   display: inline-block;
   min-height: 2.5em;
   padding-left: 2em;
 
   @include device-pixel-ratio {
-    background-image: url('/static/images/icon-card-2x.png');
+    background-image: file-url('icon-card-2x.png');
     background-size: 30px 30px;
   }
 }
@@ -125,13 +125,13 @@
   margin-left: 0;
   width: 70%;
 
-  background: url('/static/images/icon-bank.png') no-repeat scroll 0 0;
+  background: file-url('icon-bank.png') no-repeat scroll 0 0;
   display: inline-block;
   min-height: 2.5em;
   padding-left: 2em;
 
   @include device-pixel-ratio {
-    background-image: url('/static/images/icon-bank-2x.png');
+    background-image: file-url('icon-bank-2x.png');
     background-size: 30px 30px;
   }
 }
