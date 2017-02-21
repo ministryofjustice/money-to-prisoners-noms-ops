@@ -14,7 +14,7 @@
     height: 6em;
     font-size: 1.2em;
 
-    @include breakpoint($mobile) {
+    @include media(mobile) {
       height: 4em;
     }
 
