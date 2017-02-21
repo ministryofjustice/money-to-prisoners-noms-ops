@@ -1,5 +1,7 @@
 'use strict';
 
+var Cookies = require('js-cookie');
+
 exports.Tabs = {
   init: function () {
     this.bindEvents($('.mtp-tab'));
@@ -14,6 +16,7 @@ exports.Tabs = {
     var $tabContainer = $tabButtons.closest('.mtp-tab-container');
     var $tabPanels = $tabContainer.find('.mtp-tabpanel');
     var $tabPanelContainer = $tabPanels.closest('.mtp-tabpanels');
+    var tabCookieName = $tabContainer.data('tab-cookie-name');
 
     function resetTabsAndPanels () {
       $tabButtons.attr({
@@ -41,6 +44,9 @@ exports.Tabs = {
         selectedIndex = null;
         $tabContainer.addClass('mtp-tab-container--collapsed');
         $tabPanelContainer.attr('aria-expanded', 'false');
+        if (tabCookieName) {
+          Cookies.remove(tabCookieName);
+        }
       } else {
         selectedIndex = $tabButtons.index($tabButton);
         $tabButton.attr({
@@ -50,6 +56,9 @@ exports.Tabs = {
         $tabButton.data('mtp-tabpanel').show();
         $tabContainer.removeClass('mtp-tab-container--collapsed');
         $tabPanelContainer.attr('aria-expanded', 'true');
+        if (tabCookieName) {
+          Cookies.set(tabCookieName, selectedIndex);
+        }
       }
 
       e.preventDefault();
@@ -89,6 +98,11 @@ exports.Tabs = {
     });
     if ($tabPanelsWithErrors.length) {
       $tabPanelsWithErrors.first().data('mtp-tab').click();
+    } else if (tabCookieName) {
+      var lastOpenTab = parseInt(Cookies.get(tabCookieName), 10);
+      if ($.isNumeric(lastOpenTab) && lastOpenTab >= 0 && lastOpenTab < $tabButtons.length) {
+        $($tabButtons[lastOpenTab]).focus().click();
+      }
     }
 
     $('.field-specific-error a').click(function () {

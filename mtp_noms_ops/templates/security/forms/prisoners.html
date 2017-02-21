@@ -4,7 +4,7 @@
 <div class="mtp-security-form">
   {{ form.ordering.as_hidden }}
 
-  <div class="mtp-tab-container mtp-tab-container--collapsed">
+  <div class="mtp-tab-container mtp-tab-container--collapsed" data-tab-cookie-name="mtp-tab-prisoners">
     {% spaceless %}
       <ul class="mtp-tab-wrapper" role="tablist">
         <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--first" {% tab_aria_atts 'prisoner' %}>{% trans 'Prisoner' %}</a></li>
