@@ -82,7 +82,10 @@ select[disabled] {
   #id_sender_sort_code-wrapper,
   #id_card_number_last_digits-wrapper,
   #id_sender_email-wrapper {
-    padding-left: 1em;
     display: none;
+
+    @include media(tablet) {
+      padding-left: 1em;
+    }
   }
 }
