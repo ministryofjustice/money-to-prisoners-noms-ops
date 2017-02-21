@@ -13,6 +13,7 @@
       width: 100%;
     }
   }
+
   .mtp-results-list__table--prisoners td {
     padding-bottom: 0;
   }
@@ -27,7 +28,7 @@
 
   .mtp-results-list__table {
     td {
-      border-bottom: none;
+      border-bottom: 0;
       vertical-align: top;
     }
   }
