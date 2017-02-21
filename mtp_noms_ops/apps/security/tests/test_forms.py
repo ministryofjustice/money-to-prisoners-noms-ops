@@ -76,7 +76,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
-            'card_number_last_digits': '', 'source': '',
+            'card_number_last_digits': '', 'source': '', 'sender_email': '',
             'object_list': [],
         }
         form = SendersForm(self.request, data={'page': '1'})
@@ -93,7 +93,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
-            'card_number_last_digits': '', 'source': '',
+            'card_number_last_digits': '', 'source': '', 'sender_email': '',
             'object_list': [],
         }
         form = SendersForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'sender_name': 'Joh '})
@@ -165,7 +165,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
-            'source': '',
+            'source': '', 'sender_email': '',
             'object_list': [],
         }
         form = CreditsForm(self.request, data={'page': '1'})
@@ -184,7 +184,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
-            'source': '',
+            'source': '', 'sender_email': '',
             'object_list': [],
         }
         form = CreditsForm(self.request, data={'page': '1', 'ordering': '-amount', 'received_at__gte': '26/5/2016'})

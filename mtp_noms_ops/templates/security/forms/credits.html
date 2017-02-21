@@ -46,6 +46,7 @@
           </div>
           <div class="column-two-thirds">
             {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
+            {% include 'mtp_common/forms/field.html' with field=form.sender_email %}
           </div>
           <div class="column-full">
             {% include 'security/forms/update-search.html' %}

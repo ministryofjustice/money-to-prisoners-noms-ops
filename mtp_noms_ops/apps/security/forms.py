@@ -278,6 +278,7 @@ class SendersForm(SecurityForm):
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
+    sender_email = forms.CharField(label=_('Sender email'), required=False)
 
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
@@ -538,6 +539,7 @@ class CreditsForm(SecurityForm):
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
+    sender_email = forms.CharField(label=_('Sender email'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
