@@ -43,6 +43,7 @@ exports.SecurityForms = {
     var $senderAccountNumber = $('#id_sender_account_number-wrapper');
     var $senderSortCode = $('#id_sender_sort_code-wrapper');
     var $cardNumberLastDigits = $('#id_card_number_last_digits-wrapper');
+    var $senderEmail = $('#id_sender_email-wrapper');
 
     function update () {
       switch ($paymentSourceSelect.val()) {
@@ -50,16 +51,19 @@ exports.SecurityForms = {
           $senderAccountNumber.show();
           $senderSortCode.show();
           $cardNumberLastDigits.hide();
+          $senderEmail.hide();
           break;
         case 'online':
           $senderAccountNumber.hide();
           $senderSortCode.hide();
           $cardNumberLastDigits.show();
+          $senderEmail.show();
           break;
         default:
           $senderAccountNumber.hide();
           $senderSortCode.hide();
           $cardNumberLastDigits.hide();
+          $senderEmail.hide();
       }
     }
 

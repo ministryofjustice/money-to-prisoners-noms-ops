@@ -5,7 +5,7 @@ select[disabled] {
   color: $secondary-text-colour;
 }
 
-#id_sender_name {
+#id_sender_name, #id_sender_email {
   max-width: 16em;
   width: 100%;
 }
@@ -80,7 +80,8 @@ select[disabled] {
 .mtp-security-form {
   #id_sender_account_number-wrapper,
   #id_sender_sort_code-wrapper,
-  #id_card_number_last_digits-wrapper {
+  #id_card_number_last_digits-wrapper,
+  #id_sender_email-wrapper {
     padding-left: 1em;
     display: none;
   }
