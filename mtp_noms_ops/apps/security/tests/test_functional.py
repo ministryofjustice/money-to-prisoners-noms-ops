@@ -128,7 +128,7 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
         self.submit_tabpanel('prisoner')
         self.assertInSource('JAMES HALLS')
 
-        self.click_on_tab('prisoner')
+        # no need to click on tab as they're persistent
         self.type_in('id_prisoner_name', 'aaabbbccc111222333')  # not a likely prisoner name
         self.submit_tabpanel('prisoner')
         self.assertInSource('No matching prisoners found')
