@@ -292,6 +292,7 @@ class SendersForm(SecurityForm):
     unfiltered_description_template = 'Showing all senders ordered by {ordering_description}.'
     description_templates = (
         ('are named ‘{sender_name}’',),
+        ('have email {sender_email}',),
         ('sent by {source} from account {sender_account_number} {sender_sort_code}',
          'sent by {source} from account {sender_account_number}',
          'sent by {source} from sort code {sender_sort_code}',
@@ -553,7 +554,9 @@ class CreditsForm(SecurityForm):
          'since {received_at__gte}',
          'before {received_at__lt}',),
         ('that are {amount_pattern}',),
-        ('by ‘{sender_name}’',),
+        ('by ‘{sender_name}’ with email {sender_email}',
+         'by {sender_email}',
+         'by ‘{sender_name}’',),
         ('by {source} from account {sender_account_number} {sender_sort_code}',
          'by {source} from account {sender_account_number}',
          'by {source} from sort code {sender_sort_code}',
