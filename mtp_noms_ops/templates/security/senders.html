@@ -49,7 +49,14 @@
                 </span>
               </a>
             </th>
-            <th>{% trans 'Prisons' %}</th>
+            <th class="{{ form|ordering_classes:'prison_count' }}">
+              <a href="?{{ form|query_string_with_reversed_ordering:'prison_count' }}">
+                <span>
+                  {% trans 'Prisons' %}
+                  {% describe_ordering_for_screenreader form 'prison_count' %}
+                </span>
+              </a>
+            </th>
             <th class="{{ form|ordering_classes:'credit_total' }} number">
               <a href="?{{ form|query_string_with_reversed_ordering:'credit_total' }}">
                 <span>

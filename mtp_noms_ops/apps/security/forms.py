@@ -259,6 +259,8 @@ class SendersForm(SecurityForm):
                                  choices=[
                                      ('prisoner_count', _('Number of prisoners (low to high)')),
                                      ('-prisoner_count', _('Number of prisoners (high to low)')),
+                                     ('prison_count', _('Number of prisons (low to high)')),
+                                     ('-prison_count', _('Number of prisons (high to low)')),
                                      ('credit_count', _('Number of credits (low to high)')),
                                      ('-credit_count', _('Number of credits (high to low)')),
                                      ('credit_total', _('Total sent (low to high)')),
@@ -267,6 +269,8 @@ class SendersForm(SecurityForm):
 
     prisoner_count__gte = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
     prisoner_count__lte = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
+    prison_count__gte = forms.IntegerField(label=_('Number of prisons (minimum)'), required=False, min_value=1)
+    prison_count__lte = forms.IntegerField(label=_('Maximum prisons sent to'), required=False, min_value=1)
     credit_count__gte = forms.IntegerField(label=_('Minimum credits sent'), required=False, min_value=1)
     credit_count__lte = forms.IntegerField(label=_('Maximum credits sent'), required=False, min_value=1)
     credit_total__gte = forms.IntegerField(label=_('Minimum total sent'), required=False)
@@ -309,6 +313,9 @@ class SendersForm(SecurityForm):
         ('sent to {prisoner_count__gte}-{prisoner_count__lte} prisoners',
          'sent to at least {prisoner_count__gte} prisoners',
          'sent to at most {prisoner_count__lte} prisoners',),
+        ('sent to {prison_count__gte}-{prison_count__lte} prisons',
+         'sent to at least {prison_count__gte} prisons',
+         'sent to at most {prison_count__lte} prisons',),
         ('sent between {credit_count__gte}-{credit_count__lte} credits',
          'sent at least {credit_count__gte} credits',
          'sent at most {credit_count__lte} credits',),
