@@ -183,8 +183,15 @@
             <td>
               {% if credit.resolution == 'credited' %}
                 <p>
-                  {{ credit.credited_at.date }} <br />
-                  {% blocktrans with clerk_name=credit.owner_name|default_if_none:'—' %}by {{ clerk_name }}{% endblocktrans %}
+                  {{ credit.credited_at.date }}<br />
+                  {% blocktrans trimmed with name_of_clerk=credit.owner_name|default:'—' %}
+                    by {{ name_of_clerk }}
+                  {% endblocktrans %}
+                </p>
+              {% elif credit.resolution == 'refunded' %}
+                <p>
+                  {% trans 'Refunded' %}<br />
+                  {{ credit.refunded_at.date }}
                 </p>
               {% else %}
                 <p>{% trans 'No' %}</p>
