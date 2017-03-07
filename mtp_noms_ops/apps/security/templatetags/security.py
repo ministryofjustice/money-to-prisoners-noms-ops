@@ -141,6 +141,9 @@ def sender_profile_search_url(credit, redirect_on_single=True):
     """
     Given an API credit response object, returns the URL for searching this sender
     """
+    sender_id = credit.get('sender_profile')
+    if sender_id:
+        return reverse('security:sender_detail', kwargs={'sender_id': sender_id})
     keys = ['sender_name']
     if credit['source'] == 'bank_transfer':
         keys.extend(['sender_sort_code', 'sender_account_number', 'sender_roll_number'])
@@ -157,6 +160,9 @@ def prisoner_profile_search_url(credit, redirect_on_single=True):
     """
     Given an API credit response object, returns the URL for searching this prisoner
     """
+    prisoner_id = credit.get('prisoner_profile')
+    if prisoner_id:
+        return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner_id})
     return get_profile_search_url(credit, ['prisoner_number'], reverse('security:prisoner_list'),
                                   redirect_on_single=redirect_on_single)
 
