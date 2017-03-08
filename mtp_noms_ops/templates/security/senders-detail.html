@@ -118,95 +118,97 @@
 
   {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-  <div class="mtp-results-list">
-    <h2 class="heading-large">{% trans 'Credits sent' %}</h2>
+  {% if form.is_valid %}
+    <div class="mtp-results-list">
+      <h2 class="heading-large">{% trans 'Credits sent' %}</h2>
 
-    <div class="panel panel-border-narrow">
-      {% include 'security/forms/search-description.html' with form=form only %}
+      <div class="panel panel-border-narrow">
+        {% include 'security/forms/search-description.html' with form=form only %}
 
-      <div class="print-hidden mtp-links">
-        <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
+        <div class="print-hidden mtp-links">
+          <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
+        </div>
       </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="{{ form|ordering_classes:'received_at' }}">
+              <a href="?{{ form|query_string_with_reversed_ordering:'received_at' }}">
+                <span>
+                  {% trans 'Date received' %}
+                  {% describe_ordering_for_screenreader form 'received_at' %}
+                </span>
+              </a>
+            </th>
+            <th class="{{ form|ordering_classes:'prisoner_number' }}">
+              <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
+                <span>
+                  {% trans 'Prisoner' %}
+                  {% describe_ordering_for_screenreader form 'prisoner_number' %}
+                </span>
+              </a>
+            </th>
+            <th class="{{ form|ordering_classes:'amount' }} number">
+              <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
+                <span>
+                  {% trans 'Amount' %}
+                  {% describe_ordering_for_screenreader form 'amount' %}
+                </span>
+              </a>
+            </th>
+            <th>{% trans 'Prison' %}</th>
+            <th>{% trans 'Credited status' %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for credit in credits|parse_date_fields %}
+            <tr {% if forloop.last %}class="no-border"{% endif %}>
+              <td>
+                <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
+              </td>
+              <td>
+                {% if credit.prisoner_number %}
+                  <p>
+                    <strong><a href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></strong><br/>
+                    {{ credit.prisoner_name|default_if_none:'—' }}
+                  </p>
+                {% endif %}
+              </td>
+              <td class="number">
+                <p>{{ credit.amount|currency }}</p>
+              </td>
+              <td>
+                <p>{{ credit.prison_name|default_if_none:'—' }}</p>
+              </td>
+              <td>
+                {% if credit.resolution == 'credited' %}
+                  <p>
+                    {{ credit.credited_at.date }}<br />
+                    {% blocktrans trimmed with name_of_clerk=credit.owner_name|default:'—' %}
+                      by {{ name_of_clerk }}
+                    {% endblocktrans %}
+                  </p>
+                {% elif credit.resolution == 'refunded' %}
+                  <p>
+                    {% trans 'Refunded' %}<br />
+                    {{ credit.refunded_at.date }}
+                  </p>
+                {% else %}
+                  <p>{% trans 'No' %}</p>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr class="no-border">
+              <td colspan="5">{% trans 'No matching credits found' %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
     </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th class="{{ form|ordering_classes:'received_at' }}">
-            <a href="?{{ form|query_string_with_reversed_ordering:'received_at' }}">
-              <span>
-                {% trans 'Date received' %}
-                {% describe_ordering_for_screenreader form 'received_at' %}
-              </span>
-            </a>
-          </th>
-          <th class="{{ form|ordering_classes:'prisoner_number' }}">
-            <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
-              <span>
-                {% trans 'Prisoner' %}
-                {% describe_ordering_for_screenreader form 'prisoner_number' %}
-              </span>
-            </a>
-          </th>
-          <th class="{{ form|ordering_classes:'amount' }} number">
-            <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
-              <span>
-                {% trans 'Amount' %}
-                {% describe_ordering_for_screenreader form 'amount' %}
-              </span>
-            </a>
-          </th>
-          <th>{% trans 'Prison' %}</th>
-          <th>{% trans 'Credited status' %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for credit in credits|parse_date_fields %}
-          <tr {% if forloop.last %}class="no-border"{% endif %}>
-            <td>
-              <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
-            </td>
-            <td>
-              {% if credit.prisoner_number %}
-                <p>
-                  <strong><a href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></strong><br/>
-                  {{ credit.prisoner_name|default_if_none:'—' }}
-                </p>
-              {% endif %}
-            </td>
-            <td class="number">
-              <p>{{ credit.amount|currency }}</p>
-            </td>
-            <td>
-              <p>{{ credit.prison_name|default_if_none:'—' }}</p>
-            </td>
-            <td>
-              {% if credit.resolution == 'credited' %}
-                <p>
-                  {{ credit.credited_at.date }}<br />
-                  {% blocktrans trimmed with name_of_clerk=credit.owner_name|default:'—' %}
-                    by {{ name_of_clerk }}
-                  {% endblocktrans %}
-                </p>
-              {% elif credit.resolution == 'refunded' %}
-                <p>
-                  {% trans 'Refunded' %}<br />
-                  {{ credit.refunded_at.date }}
-                </p>
-              {% else %}
-                <p>{% trans 'No' %}</p>
-              {% endif %}
-            </td>
-          </tr>
-        {% empty %}
-          <tr class="no-border">
-            <td colspan="5">{% trans 'No matching credits found' %}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
-  </div>
+  {% endif %}
 
 {% endblock %}
