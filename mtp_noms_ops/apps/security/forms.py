@@ -100,6 +100,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         super().__init__(**kwargs)
         self.request = request
         self.client = get_connection(request)
+        self.total_count = None
         self.page_count = 0
 
     def clean_ordering(self):
