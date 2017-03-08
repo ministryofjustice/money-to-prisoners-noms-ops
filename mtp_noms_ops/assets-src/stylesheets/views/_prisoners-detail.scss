@@ -6,7 +6,7 @@
   }
 }
 
-.mtp-prisoner-summary__results {
+.mtp-prisoner-credits {
   @media print {
     .column-one-third {
       display: inline-block;
@@ -14,11 +14,21 @@
     }
   }
 
-  .mtp-results-list__table--prisoners td {
-    padding-bottom: 0;
+  td {
+    border-bottom: 0;
+    vertical-align: top;
   }
 
-  .mtp-results-list__table--details {
+  .mtp-prisoner-credits__credit-row {
+    td {
+      padding-bottom: 0;
+    }
+    p {
+      margin-bottom: 0;
+    }
+  }
+
+  .mtp-prisoner-credits__sender-row {
     border-bottom: 1px solid $border-colour;
 
     td {
@@ -26,33 +36,17 @@
     }
   }
 
-  .mtp-results-list__table {
-    td {
-      border-bottom: 0;
-      vertical-align: top;
-    }
+  .mtp-credit-details__acc-no {
+    padding-left: 3.2em;
+    width: 27%;
   }
 
-  .mtp-results-list__table--prisoners {
-    p {
-      margin-bottom: 0;
-    }
+  .mtp-credit-details__sort-code {
+    width: 15%;
   }
 
-  .mtp-credit-details {
-
-    .mtp-credit-details__acc-no {
-      padding-left: 3.2em;
-      width: 27%;
-    }
-
-    .mtp-credit-details__sort-code {
-      width: 15%;
-    }
-
-    .mtp-credit-details__card {
-      padding-left: 3.2em;
-    }
+  .mtp-credit-details__card {
+    padding-left: 3.2em;
   }
 }
 
