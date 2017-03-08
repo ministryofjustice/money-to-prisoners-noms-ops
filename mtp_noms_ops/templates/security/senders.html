@@ -20,108 +20,110 @@
       {% include view.form_template_name with view=view form=form only %}
     </div>
 
-    <div class="mtp-results-list">
-      <div class="panel panel-border-narrow">
-        {% include 'security/forms/search-description.html' with form=form only %}
+    {% if form.is_valid %}
+      <div class="mtp-results-list">
+        <div class="panel panel-border-narrow">
+          {% include 'security/forms/search-description.html' with form=form only %}
 
-        <div class="print-hidden mtp-links">
-          <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
+          <div class="print-hidden mtp-links">
+            <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
+          </div>
         </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>{% trans 'Sender and type' %}</th>
+              <th class="{{ form|ordering_classes:'credit_count' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
+                  <span>
+                    {% trans 'Sent' %}
+                    {% describe_ordering_for_screenreader form 'credit_count' %}
+                  </span>
+                </a>
+              </th>
+              <th class="{{ form|ordering_classes:'prisoner_count' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_count' }}">
+                  <span>
+                    {% trans 'Prisoners' %}
+                    {% describe_ordering_for_screenreader form 'prisoner_count' %}
+                  </span>
+                </a>
+              </th>
+              <th class="{{ form|ordering_classes:'prison_count' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'prison_count' }}">
+                  <span>
+                    {% trans 'Prisons' %}
+                    {% describe_ordering_for_screenreader form 'prison_count' %}
+                  </span>
+                </a>
+              </th>
+              <th class="{{ form|ordering_classes:'credit_total' }} number">
+                <a href="?{{ form|query_string_with_reversed_ordering:'credit_total' }}">
+                  <span>
+                    {% trans 'Amount' %}
+                    {% describe_ordering_for_screenreader form 'credit_total' %}
+                  </span>
+                </a>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sender in senders %}
+              <tr {% if forloop.last %}class="no-border"{% endif %}>
+                <td>
+                  {% if sender.bank_transfer_details %}
+                  <p class="mtp-credit__transfer">
+                    <a href="{% url 'security:sender_detail' sender.id %}">
+                      <strong>{{ sender.bank_transfer_details.0.sender_name|default:'—' }}</strong>
+                    </a><br />
+                    {% trans 'by bank transfer' %}
+                  </p>
+                  {% elif sender.debit_card_details %}
+                  <p class="mtp-credit__card">
+                    <a href="{% url 'security:sender_detail' sender.id %}">
+                      <strong>{{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}</strong>
+                    </a><br />
+                    {% trans 'by debit card' %}
+                  </p>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td>
+                  {% blocktrans trimmed count count=sender.credit_count %}
+                    <strong>{{ count }}</strong> credit sent
+                  {% plural %}
+                    <strong>{{ count }}</strong> credits sent
+                  {% endblocktrans %}
+                </td>
+                <td>
+                  {% blocktrans trimmed count count=sender.prisoner_count %}
+                    <strong>{{ count }}</strong> prisoner
+                  {% plural %}
+                    <strong>{{ count }}</strong> prisoners
+                  {% endblocktrans %}
+                </td>
+                <td>
+                  {% blocktrans trimmed count count=sender.prison_count %}
+                    <strong>{{ count }}</strong> prison
+                  {% plural %}
+                    <strong>{{ count }}</strong> prisons
+                  {% endblocktrans %}
+                </td>
+                <td class="number"><strong>{{ sender.credit_total|currency }}</strong></td>
+              </tr>
+            {% empty %}
+              <tr class="no-border">
+                <td colspan="5">{% trans 'No matching senders found' %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
       </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>{% trans 'Sender and type' %}</th>
-            <th class="{{ form|ordering_classes:'credit_count' }}">
-              <a href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
-                <span>
-                  {% trans 'Sent' %}
-                  {% describe_ordering_for_screenreader form 'credit_count' %}
-                </span>
-              </a>
-            </th>
-            <th class="{{ form|ordering_classes:'prisoner_count' }}">
-              <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_count' }}">
-                <span>
-                  {% trans 'Prisoners' %}
-                  {% describe_ordering_for_screenreader form 'prisoner_count' %}
-                </span>
-              </a>
-            </th>
-            <th class="{{ form|ordering_classes:'prison_count' }}">
-              <a href="?{{ form|query_string_with_reversed_ordering:'prison_count' }}">
-                <span>
-                  {% trans 'Prisons' %}
-                  {% describe_ordering_for_screenreader form 'prison_count' %}
-                </span>
-              </a>
-            </th>
-            <th class="{{ form|ordering_classes:'credit_total' }} number">
-              <a href="?{{ form|query_string_with_reversed_ordering:'credit_total' }}">
-                <span>
-                  {% trans 'Amount' %}
-                  {% describe_ordering_for_screenreader form 'credit_total' %}
-                </span>
-              </a>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sender in senders %}
-            <tr {% if forloop.last %}class="no-border"{% endif %}>
-              <td>
-                {% if sender.bank_transfer_details %}
-                <p class="mtp-credit__transfer">
-                  <a href="{% url 'security:sender_detail' sender.id %}">
-                    <strong>{{ sender.bank_transfer_details.0.sender_name|default:'—' }}</strong>
-                  </a><br />
-                  {% trans 'by bank transfer' %}
-                </p>
-                {% elif sender.debit_card_details %}
-                <p class="mtp-credit__card">
-                  <a href="{% url 'security:sender_detail' sender.id %}">
-                    <strong>{{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}</strong>
-                  </a><br />
-                  {% trans 'by debit card' %}
-                </p>
-                {% else %}
-                  —
-                {% endif %}
-              </td>
-              <td>
-                {% blocktrans trimmed count count=sender.credit_count %}
-                  <strong>{{ count }}</strong> credit sent
-                {% plural %}
-                  <strong>{{ count }}</strong> credits sent
-                {% endblocktrans %}
-              </td>
-              <td>
-                {% blocktrans trimmed count count=sender.prisoner_count %}
-                  <strong>{{ count }}</strong> prisoner
-                {% plural %}
-                  <strong>{{ count }}</strong> prisoners
-                {% endblocktrans %}
-              </td>
-              <td>
-                {% blocktrans trimmed count count=sender.prison_count %}
-                  <strong>{{ count }}</strong> prison
-                {% plural %}
-                  <strong>{{ count }}</strong> prisons
-                {% endblocktrans %}
-              </td>
-              <td class="number"><strong>{{ sender.credit_total|currency }}</strong></td>
-            </tr>
-          {% empty %}
-            <tr class="no-border">
-              <td colspan="5">{% trans 'No matching senders found' %}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
-      {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
-    </div>
+    {% endif %}
 
   </form>
 
