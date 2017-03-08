@@ -504,9 +504,9 @@ class AmountPattern(enum.Enum):
         elif amount_pattern == cls.gte_100:
             query_data['amount__gte'] = '10000'
         elif amount_pattern == cls.exact:
-            query_data['amount'] = parse_amount(amount_exact, as_int=False)
+            query_data['amount'] = parse_amount(amount_exact or '', as_int=False)
         elif amount_pattern == cls.pence:
-            query_data['amount__endswith'] = '%02d' % amount_pence
+            query_data['amount__endswith'] = '' if amount_pence is None else '%02d' % amount_pence
         else:
             raise NotImplementedError
 
@@ -605,7 +605,7 @@ class CreditsForm(SecurityForm):
         if self.cleaned_data.get('amount_pattern') != 'exact':
             return ''
         amount = self.cleaned_data.get('amount_exact')
-        if amount is None:
+        if not amount:
             raise ValidationError(_('This field is required for the selected amount pattern'), code='required')
         return amount
 
