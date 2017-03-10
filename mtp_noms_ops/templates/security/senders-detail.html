@@ -7,7 +7,6 @@
 
   <header>
     {% language_switch %}
-    {% include 'security/includes/save-search.html' with form=form only %}
     <h1 class="heading-xlarge">
       {{ view.title }}
       {% if sender.bank_transfer_details %}
@@ -115,6 +114,8 @@
       </div>
     </div>
   {% endif %}
+
+  {% include 'security/includes/save-search.html' with form=form only %}
 
   {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 

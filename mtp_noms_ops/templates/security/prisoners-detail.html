@@ -8,7 +8,6 @@
 
   <header>
     {% language_switch %}
-    {% include 'security/includes/save-search.html' %}
     <h1 class="heading-xlarge">
 
       {% if nomis_api_available %}
@@ -61,6 +60,8 @@
         </div>
       {% endif %}
     </div>
+
+  {% include 'security/includes/save-search.html' %}
 
   {% endif %}
 
