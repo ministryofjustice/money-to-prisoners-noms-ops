@@ -1,4 +1,24 @@
+.mtp-prisoner-image {
+  float: left;
+  margin-right: 30px;
+}
+
 .mtp-prisoner-summary {
+  margin: 0 0;
+
+  .column-one-quarter {
+    padding-left: 0;
+    padding-right: 30px;
+  }
+
+  .column-full {
+    padding: 0;
+  }
+
+  .column-one-quarter {
+    width: auto;
+  }
+
   @media print {
     .column-one-quarter {
       display: inline-block;

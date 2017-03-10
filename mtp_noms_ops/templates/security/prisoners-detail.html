@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load mtp_common %}
 {% load security %}
+{% load static %}
 
 {% block inner_content %}
 
@@ -9,12 +10,26 @@
     {% language_switch %}
     {% include 'security/includes/save-search.html' %}
     <h1 class="heading-xlarge">
+
+      {% if nomis_api_available %}
+        <div class="mtp-prisoner-image">
+          {% if photo %}
+            <img src="{{ photo }}" alt="{% trans 'Photo of the prisoner' %}"/>
+          {% else %}
+            <img src="{% static 'images/placeholder-image.png' %}"
+            srcset="{% static 'images/placeholder-image@2x.png' %} 2x"
+            alt="{% trans 'Placeholder image for prisoner photo' %}" />
+          {% endif %}
+        </div>
+      {% endif %}
+
       {{ view.title }}
       {% if prisoner %}
         <p class="lede">{% blocktrans with prison=prisoner.current_prison.name %}Held at {{prison}}{% endblocktrans %}</p>
-    {% endif %}
+      {% endif %}
     </h1>
   </header>
+
 
   {% if prisoner %}
     <div class="grid-row mtp-prisoner-summary">
@@ -36,18 +51,17 @@
         <strong>{{ prisoner.credit_total|currency }}</strong>
         <p>{% trans 'total amount received' %}</p>
       </div>
-    </div>
 
-    {% if recipient_names %}
-      <div class="grid-row">
-        <div class="column-full">
+      {% if recipient_names %}
+        <div class="column-one-quarter">
           {% for recipient_name in recipient_names %}
             <strong>{{ recipient_name }}</strong>{% if not forloop.last %},{% endif %}
           {% endfor %}
           <p>{% trans 'names given by senders' %}</p>
         </div>
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
+
   {% endif %}
 
   {% include 'mtp_common/forms/error-summary.html' with form=form only %}
