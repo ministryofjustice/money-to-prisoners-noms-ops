@@ -9,21 +9,19 @@
   <header>
     {% language_switch %}
     <h1 class="heading-xlarge">
-
-      {% if nomis_api_available %}
-        <div class="mtp-prisoner-image">
-          {% if photo %}
-            <img src="{{ photo }}" alt="{% trans 'Photo of the prisoner' %}"/>
-          {% else %}
-            <img src="{% static 'images/placeholder-image.png' %}"
-            srcset="{% static 'images/placeholder-image@2x.png' %} 2x"
-            alt="{% trans 'Placeholder image for prisoner photo' %}" />
-          {% endif %}
-        </div>
-      {% endif %}
-
-      {{ view.title }}
       {% if prisoner %}
+        {% if nomis_api_available %}
+          <div class="mtp-prisoner-image">
+            {% if photo %}
+              <img src="{{ photo }}" alt="{% trans 'Photo of the prisoner' %}"/>
+            {% else %}
+              <img src="{% static 'images/placeholder-image.png' %}"
+              srcset="{% static 'images/placeholder-image@2x.png' %} 2x"
+              alt="{% trans 'Placeholder image for prisoner photo' %}" />
+            {% endif %}
+          </div>
+          {% endif %}
+        {{ view.title }}
         <p class="lede">{% blocktrans with prison=prisoner.current_prison.name %}Held at {{prison}}{% endblocktrans %}</p>
       {% endif %}
     </h1>
