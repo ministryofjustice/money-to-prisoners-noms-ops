@@ -130,11 +130,26 @@
   }
 }
 
+<<<<<<< 831be89d02b288462a324b770549e509241ee7f8
 @media print {
   .mtp-credit__card, .mtp-credit__transfer {
     padding-left: 0;
     background: none;
     min-height: 0;
     width: auto;
+=======
+.mtp-credit__post {
+  margin-left: 0;
+  width: 70%;
+
+  background: file-url('icon-post.png') no-repeat scroll 0 0;
+  display: inline-block;
+  min-height: 2.5em;
+  padding-left: 2em;
+
+  @include device-pixel-ratio {
+    background-image: file-url('icon-post-2x.png');
+    background-size: 30px 30px;
+>>>>>>> Add icons and styles for payments by post
   }
 }
