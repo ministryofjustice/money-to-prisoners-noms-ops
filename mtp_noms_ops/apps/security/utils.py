@@ -2,6 +2,8 @@ import collections
 import re
 from urllib.parse import urlencode
 
+from django.conf import settings
+
 
 class OrderedSet(collections.MutableSet):
     def __init__(self, iterable=None):
@@ -89,3 +91,7 @@ def initial_params(request):
     if len(user_prisons) == 1:
         initial_params['prison'] = user_prisons[0]['nomis_id']
     return {'initial_params': urlencode(initial_params, doseq=True)}
+
+
+def nomis_api_availability(request):
+    return {'nomis_api_available': settings.NOMIS_API_AVAILABLE}

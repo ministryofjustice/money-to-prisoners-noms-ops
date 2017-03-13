@@ -1,4 +1,31 @@
+.mtp-prisoner-image {
+  float: left;
+  margin-right: 30px;
+
+}
+
+@include media($max-width: 940px) {
+  .mtp-prisoner-image {
+    float: none;
+  }
+}
+
 .mtp-prisoner-summary {
+  margin: 0 0;
+
+  .column-one-quarter {
+    padding-left: 0;
+    padding-right: 30px;
+  }
+
+  .column-full {
+    padding: 0;
+  }
+
+  .column-one-quarter {
+    width: auto;
+  }
+
   @media print {
     .column-one-quarter {
       display: inline-block;
@@ -37,7 +64,7 @@
   }
 
   .mtp-credit-details__acc-no {
-    padding-left: 3.2em;
+    padding-left: 2.7em;
     width: 27%;
   }
 
@@ -46,7 +73,7 @@
   }
 
   .mtp-credit-details__card {
-    padding-left: 3.2em;
+    padding-left: 2.7em;
   }
 }
 

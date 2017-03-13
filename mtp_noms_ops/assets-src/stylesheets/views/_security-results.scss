@@ -106,7 +106,7 @@
   }
 }
 
-.mtp-credit__card, .mtp-credit__transfer {
+.mtp-credit__card, .mtp-credit__transfer, .mtp-credit__post {
   display: inline-block;
   width: 70%;
   min-height: 2.5em;
@@ -130,8 +130,17 @@
   }
 }
 
+.mtp-credit__post {
+  background: file-url('icon-post.png') no-repeat scroll 0 0;
+
+  @include device-pixel-ratio {
+    background-image: file-url('icon-post-2x.png');
+    background-size: 30px 30px;
+  }
+}
+
 @media print {
-  .mtp-credit__card, .mtp-credit__transfer {
+  .mtp-credit__card, .mtp-credit__transfer, .mtp-credit__post {
     padding-left: 0;
     background: none;
     min-height: 0;

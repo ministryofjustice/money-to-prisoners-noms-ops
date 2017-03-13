@@ -4,14 +4,14 @@ import logging
 from unittest import mock
 
 from django.core.urlresolvers import reverse
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 from slumber.exceptions import HttpNotFoundError, HttpServerError
 import responses
 
 from security import required_permissions
-from security.tests import api_url
+from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
 from security.tests.test_forms import mocked_prisons
 
 
@@ -623,26 +623,102 @@ class PinnedProfileTestCase(SecurityViewTestCase):
         self.assertNotContains(response, 'Saved search 2')
         self.assertContains(response, '3 new credits')
 
-    def test_display_pinned_profile(self):
+
+override_nomis_settings = override_settings(
+    NOMIS_API_AVAILABLE=True,
+    NOMIS_API_BASE_URL='https://nomis.local/',
+    NOMIS_API_CLIENT_TOKEN='hello',
+    NOMIS_API_PRIVATE_KEY=(
+        '-----BEGIN EC PRIVATE KEY-----\n'
+        'MHcCAQEEIOhhs3RXk8dU/YQE3j2s6u97mNxAM9s+13S+cF9YVgluoAoGCCqGSM49\n'
+        'AwEHoUQDQgAE6l49nl7NN6k6lJBfGPf4QMeHNuER/o+fLlt8mCR5P7LXBfMG6Uj6\n'
+        'TUeoge9H2N/cCafyhCKdFRdQF9lYB2jB+A==\n'
+        '-----END EC PRIVATE KEY-----\n'
+    ),  # this key is just for tests, doesn't do anything
+)
+
+
+class PrisonerDetailViewTestCase(SecurityViewTestCase):
+
+    def _add_prisoner_data_responses(self, rsps):
+        rsps.add(
+            rsps.GET,
+            api_url('/prisoners/1/'),
+            json=self.prisoner_profile,
+            status=200,
+        )
+        rsps.add(
+            rsps.GET,
+            api_url('/prisoners/1/credits/'),
+            json={
+                'count': 4,
+                'results': [
+                    self.credit_object, self.credit_object,
+                    self.credit_object, self.credit_object
+                ],
+            },
+            status=200,
+        )
+
+    @override_nomis_settings
+    def test_display_nomis_photo(self):
         with responses.RequestsMock() as rsps:
+            self._add_prisoner_data_responses(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/prisoners/1/'),
-                json=self.prisoner_profile,
-                status=200,
-            )
-            rsps.add(
-                rsps.GET,
-                api_url('/prisoners/1/credits/'),
+                api_url('/searches'),
                 json={
-                    'count': 4,
-                    'results': [
-                        self.credit_object, self.credit_object,
-                        self.credit_object, self.credit_object
-                    ],
+                    'count': 0,
+                    'results': []
                 },
                 status=200,
             )
+            rsps.add(
+                rsps.GET,
+                nomis_url('/offenders/{prisoner_number}/image'.format(
+                    prisoner_number=self.prisoner_profile['prisoner_number'])),
+                json={
+                    'image': TEST_IMAGE_DATA
+                },
+                status=200,
+            )
+            self.login(follow=False)
+            response = self.client.get(
+                reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
+            )
+            self.assertContains(response, TEST_IMAGE_DATA)
+
+    @override_nomis_settings
+    def test_missing_nomis_photo(self):
+        with responses.RequestsMock() as rsps:
+            self._add_prisoner_data_responses(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/searches'),
+                json={
+                    'count': 0,
+                    'results': []
+                },
+                status=200,
+            )
+            rsps.add(
+                rsps.GET,
+                nomis_url('/offenders/{prisoner_number}/image'.format(
+                    prisoner_number=self.prisoner_profile['prisoner_number'])),
+                json={
+                    'image': None
+                },
+                status=200,
+            )
+            self.login(follow=False)
+            response = self.client.get(
+                reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
+            )
+            self.assertContains(response, 'images/placeholder-image.png')
+
+    def test_display_pinned_profile(self):
+        with responses.RequestsMock() as rsps:
+            self._add_prisoner_data_responses(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/searches'),
@@ -675,24 +751,7 @@ class PinnedProfileTestCase(SecurityViewTestCase):
 
     def test_pin_profile(self):
         with responses.RequestsMock() as rsps:
-            rsps.add(
-                rsps.GET,
-                api_url('/prisoners/1/'),
-                json=self.prisoner_profile,
-                status=200,
-            )
-            rsps.add(
-                rsps.GET,
-                api_url('/prisoners/1/credits/'),
-                json={
-                    'count': 4,
-                    'results': [
-                        self.credit_object, self.credit_object,
-                        self.credit_object, self.credit_object
-                    ],
-                },
-                status=200,
-            )
+            self._add_prisoner_data_responses(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/searches'),
