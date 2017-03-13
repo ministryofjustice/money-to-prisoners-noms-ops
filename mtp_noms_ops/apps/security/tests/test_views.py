@@ -714,7 +714,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             response = self.client.get(
                 reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
             )
-            self.assertContains(response, 'images/default-prisoner-photo.png')
+            self.assertContains(response, 'images/placeholder-image.png')
 
     def test_display_pinned_profile(self):
         with responses.RequestsMock() as rsps:
