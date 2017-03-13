@@ -13,7 +13,7 @@
         {% if nomis_api_available %}
           <div class="mtp-prisoner-image">
             {% if photo %}
-              <img src="{{ photo }}" alt="{% trans 'Photo of the prisoner' %}"/>
+              <img src="data:image/jpeg;base64,{{ photo }}" alt="{% trans 'Photo of the prisoner' %}"/>
             {% else %}
               <img src="{% static 'images/placeholder-image.png' %}"
               srcset="{% static 'images/placeholder-image@2x.png' %} 2x"
