@@ -46,7 +46,7 @@ class SecurityDashboardTests(SecurityDashboardTestCase):
         self.assertInSource('Credits')
         self.assertInSource('Senders')
         self.assertInSource('Prisoners')
-        self.assertEqual(self.driver.title, 'Security check')
+        self.assertEqual(self.driver.title, 'Prisoner money intelligence')
         dashboard_url = reverse('dashboard')
         prisoner_location_url = reverse('location_file_upload')
         self.assertCurrentUrl(dashboard_url)

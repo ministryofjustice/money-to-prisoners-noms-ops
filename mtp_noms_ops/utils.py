@@ -39,7 +39,7 @@ def user_specific_context(request):
     if request.can_access_prisoner_location and not request.can_access_security:
         app_title = _('Prisoner location admin')
     else:
-        app_title = _('Security check')
+        app_title = _('Prisoner money intelligence')
     return {
         'app_title': app_title
     }
