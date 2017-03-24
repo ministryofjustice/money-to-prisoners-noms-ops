@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -5,7 +7,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
-from mtp_common.nomis import NomisClient
+from mtp_common.nomis import get_photograph_data
 from requests.exceptions import RequestException
 
 from security.export import export_as_csv
@@ -14,6 +16,8 @@ from security.forms import (
     ReviewCreditsForm,
 )
 from security.utils import NameSet, EmailSet
+
+logger = logging.getLogger('mtp')
 
 
 class SecurityView(FormView):
@@ -202,11 +206,10 @@ class PrisonerDetailView(SecurityDetailView):
         prisoner = context_data.get('prisoner', {})
         context_data['recipient_names'] = NameSet(prisoner.get('recipient_names', ()), strip_titles=True)
         if settings.NOMIS_API_AVAILABLE and prisoner.get('prisoner_number'):
-            nomis_client = NomisClient()
             try:
-                context_data['photo'] = nomis_client.get_photograph_data(prisoner['prisoner_number'])
+                context_data['photo'] = get_photograph_data(prisoner['prisoner_number'])
             except RequestException:
-                pass
+                logger.exception('Could not load image for %s' % prisoner['prisoner_number'])
         return context_data
 
     def get_title_for_object(self, detail_object):

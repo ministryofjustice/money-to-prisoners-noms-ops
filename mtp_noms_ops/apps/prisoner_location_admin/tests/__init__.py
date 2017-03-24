@@ -24,7 +24,6 @@ class PrisonerLocationUploadTestCase(SimpleTestCase):
                 'first_name': 'Sam',
                 'last_name': 'Hall',
                 'username': 'shall',
-                'applications': ['noms-ops'],
                 'permissions': required_permissions,
             }
         }
