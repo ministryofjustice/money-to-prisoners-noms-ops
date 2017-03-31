@@ -116,7 +116,7 @@
   background: file-url('icon-card.png') no-repeat scroll 0 0;
 
   @include device-pixel-ratio {
-    background-image: file-url('icon-card-2x.png');
+    background-image: file-url('icon-card@2x.png');
     background-size: 30px 30px;
   }
 }
@@ -125,7 +125,7 @@
   background: file-url('icon-bank.png') no-repeat scroll 0 0;
 
   @include device-pixel-ratio {
-    background-image: file-url('icon-bank-2x.png');
+    background-image: file-url('icon-bank@2x.png');
     background-size: 30px 30px;
   }
 }
@@ -134,7 +134,7 @@
   background: file-url('icon-post.png') no-repeat scroll 0 0;
 
   @include device-pixel-ratio {
-    background-image: file-url('icon-post-2x.png');
+    background-image: file-url('icon-post@2x.png');
     background-size: 30px 30px;
   }
 }

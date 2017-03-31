@@ -38,19 +38,19 @@
 }
 
 .mtp-sender-summary__bank-transfer {
-  background: file-url('bank.png') no-repeat scroll 0 0;
+  background: file-url('icon-large-bank.png') no-repeat scroll 0 0;
 
   @include device-pixel-ratio {
-    background-image: file-url('bank-2x.png');
+    background-image: file-url('icon-large-bank@2x.png');
     background-size: 50px 50px;
   }
 }
 
 .mtp-sender-summary__debit-card {
-  background: file-url('card.png') no-repeat scroll 0 0;
+  background: file-url('icon-large-card.png') no-repeat scroll 0 0;
 
   @include device-pixel-ratio {
-    background-image: file-url('card-2x.png');
+    background-image: file-url('icon-large-card@2x.png');
     background-size: 50px 50px;
   }
 }
