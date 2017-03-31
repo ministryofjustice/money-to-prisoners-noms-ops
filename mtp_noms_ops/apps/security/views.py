@@ -15,6 +15,7 @@ from security.forms import (
     SendersForm, SendersDetailForm, PrisonersForm, PrisonersDetailForm, CreditsForm,
     ReviewCreditsForm,
 )
+from security.money_by_post import merge_money_by_post
 from security.utils import NameSet, EmailSet
 
 logger = logging.getLogger('mtp')
@@ -215,6 +216,12 @@ class PrisonerDetailView(SecurityDetailView):
     def get_title_for_object(self, detail_object):
         title = ' '.join(detail_object.get(key, '') for key in ('prisoner_number', 'prisoner_name'))
         return title.strip() or _('Unknown prisoner')
+
+    def form_valid(self, form):
+        prisoner = form.cleaned_data.get('object')
+        if settings.NOMIS_API_AVAILABLE and prisoner:
+            merge_money_by_post(form, prisoner)
+        return super().form_valid(form)
 
 
 class CreditExportView(SecurityView):

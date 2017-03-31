@@ -110,15 +110,25 @@
               </td>
               <td>
                 {% if credit.source == 'online' %}
+                  <p class="mtp-credit__transfer">
+                    <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
+                    {% trans 'by bank transfer' %} <br />
+                    —
+                  </p>
+                {% elif credit.source == 'bank_transfer' %}
                   <p class="mtp-credit__card">
                     <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
                     {% trans 'by debit card' %} <br />
                     —
                   </p>
+                {% elif credit.source == 'post' %}
+                  <p class="mtp-credit__post">
+                    {% trans 'by post' %} <br />
+                    —
+                  </p>
                 {% else %}
-                  <p class="mtp-credit__transfer">
-                    <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
-                    {% trans 'by bank transfer' %} <br />
+                  <p class="mtp-credit__post">
+                    {% trans 'unknown' %} <br />
                     —
                   </p>
                 {% endif %}
@@ -145,7 +155,7 @@
                     {% trans 'Refunded' %}<br />
                     {{ credit.refunded_at.date }}
                   </p>
-                {% else %}
+                {% elif credit.source != 'post' %}
                   <p>{% trans 'No' %}</p>
                 {% endif %}
               </td>
@@ -174,7 +184,7 @@
                   </div>
                 </td>
 
-              {% else %}
+              {% elif credit.source == 'online' %}
 
                 <td></td>
                 <td colspan="5">
@@ -185,6 +195,21 @@
                     </div>
                   </div>
                 </td>
+
+              {% elif credit.source == 'post' %}
+
+                <td></td>
+                <td colspan="5">
+                  <div class="grid-row">
+                    <div class="column-half mtp-credit-details__post">
+                      {{ credit.nomis_transaction.description }}
+                    </div>
+                  </div>
+                </td>
+
+              {% else %}
+
+                <td colspan="6"></td>
 
               {% endif %}
             </tr>

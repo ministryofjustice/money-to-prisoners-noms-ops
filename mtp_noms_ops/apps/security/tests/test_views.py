@@ -644,18 +644,37 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             },
         )
 
+    def _add_no_saved_searches_response(self, rsps):
+        rsps.add(
+            rsps.GET,
+            api_url('/searches/'),
+            json={'count': 0, 'results': []},
+        )
+
+    def _add_empty_prisoner_image_response(self, rsps):
+        rsps.add(
+            rsps.GET,
+            nomis_url('/offenders/{prisoner_number}/image'.format(
+                prisoner_number=self.prisoner_profile['prisoner_number']
+            )),
+            json={'image': None},
+        )
+
+    def _add_money_by_post(self, rsps, transactions, url_suffix=''):
+        rsps.add(
+            rsps.GET,
+            nomis_url('/prison/{prison_id}/offenders/{prisoner_number}/accounts/cash/transactions'.format(
+                prison_id='PRN', prisoner_number=self.prisoner_profile['prisoner_number']
+            )) + url_suffix,
+            json={'transactions': transactions},
+            match_querystring=bool(url_suffix),
+        )
+
     @override_nomis_settings
     def test_display_nomis_photo(self):
         with responses.RequestsMock() as rsps:
             self._add_prisoner_data_responses(rsps)
-            rsps.add(
-                rsps.GET,
-                api_url('/searches/'),
-                json={
-                    'count': 0,
-                    'results': []
-                },
-            )
+            self._add_no_saved_searches_response(rsps)
             rsps.add(
                 rsps.GET,
                 nomis_url('/offenders/{prisoner_number}/image'.format(
@@ -664,6 +683,10 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
                     'image': TEST_IMAGE_DATA
                 },
             )
+            self._add_money_by_post(rsps, [])
+            self._add_money_by_post(rsps, [])
+            self._add_money_by_post(rsps, [])
+            self._add_money_by_post(rsps, [])
             self.login(follow=False)
             response = self.client.get(
                 reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
@@ -674,22 +697,12 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
     def test_missing_nomis_photo(self):
         with responses.RequestsMock() as rsps:
             self._add_prisoner_data_responses(rsps)
-            rsps.add(
-                rsps.GET,
-                api_url('/searches/'),
-                json={
-                    'count': 0,
-                    'results': []
-                },
-            )
-            rsps.add(
-                rsps.GET,
-                nomis_url('/offenders/{prisoner_number}/image'.format(
-                    prisoner_number=self.prisoner_profile['prisoner_number'])),
-                json={
-                    'image': None
-                },
-            )
+            self._add_no_saved_searches_response(rsps)
+            self._add_empty_prisoner_image_response(rsps)
+            self._add_money_by_post(rsps, [])
+            self._add_money_by_post(rsps, [])
+            self._add_money_by_post(rsps, [])
+            self._add_money_by_post(rsps, [])
             self.login(follow=False)
             response = self.client.get(
                 reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
@@ -731,14 +744,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
     def test_pin_profile(self):
         with responses.RequestsMock() as rsps:
             self._add_prisoner_data_responses(rsps)
-            rsps.add(
-                rsps.GET,
-                api_url('/searches/'),
-                json={
-                    'count': 0,
-                    'results': []
-                },
-            )
+            self._add_no_saved_searches_response(rsps)
             rsps.add(
                 rsps.POST,
                 api_url('/searches/'),
@@ -760,3 +766,91 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
                     'filters': [{'field': 'ordering', 'value': '-received_at'}],
                 },
             )
+
+    @override_nomis_settings
+    def test_merging_money_by_post_for_received_at_sorting(self):
+        newer_credit_object = self.credit_object.copy()
+        newer_credit_object.update({
+            'received_at': '2017-01-26T11:00:00Z',
+        })
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoners/1/'),
+                json=self.prisoner_profile,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoners/1/credits/'),
+                json={
+                    'count': 21,
+                    'results': [newer_credit_object, self.credit_object],
+                },
+            )
+            self._add_no_saved_searches_response(rsps)
+            self._add_empty_prisoner_image_response(rsps)
+            self._add_money_by_post(rsps, [
+                {
+                    'id': '1234567-1',
+                    'date': '2017-01-26',
+                    'amount': '1017',
+                    'description': 'Cheque from M Smith',
+                    'type': {'desc': 'Money Through Post', 'code': 'POST'},
+                },
+            ], url_suffix='?from_date=2017-01-25&to_date=2017-01-26')
+            self.login(follow=False)
+            response = self.client.get(
+                reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
+            )
+        self.assertContains(response, 'Cheque from M Smith')
+        self.assertIn('£10.17', response.content.decode(response.charset))
+        object_list = response.context['credits']
+        self.assertSequenceEqual([credit['source'] for credit in object_list],
+                                 ['bank_transfer', 'post', 'bank_transfer'])
+
+    @override_nomis_settings
+    def test_merging_money_by_post_for_amount_sorting(self):
+        smaller_credit_object = self.credit_object.copy()
+        smaller_credit_object.update({
+            'received_at': '2017-01-26T11:00:00Z',
+            'amount': 1058,
+        })
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoners/1/'),
+                json=self.prisoner_profile,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoners/1/credits/'),
+                json={
+                    'count': 21,
+                    'results': [smaller_credit_object, self.credit_object],
+                },
+            )
+            self._add_no_saved_searches_response(rsps)
+            self._add_empty_prisoner_image_response(rsps)
+            self._add_money_by_post(rsps, [
+                {
+                    'id': '1234567-1',
+                    'date': '2017-01-26',
+                    'amount': '5023',
+                    'description': 'Cheque from M Smith',
+                    'type': {'desc': 'Money Through Post', 'code': 'POST'},
+                },
+            ])
+            self._add_money_by_post(rsps, [])
+            self._add_money_by_post(rsps, [])
+            self._add_money_by_post(rsps, [])
+            self.login(follow=False)
+            response = self.client.get(
+                reverse('security:prisoner_detail', kwargs={'prisoner_id': 1}) + '?ordering=amount'
+            )
+        self.assertContains(response, 'Cheque from M Smith')
+        self.assertIn('£50.23', response.content.decode(response.charset))
+        object_list = response.context['credits']
+        self.assertSequenceEqual([credit['source'] for credit in object_list],
+                                 ['bank_transfer', 'post', 'bank_transfer'])
+        self.assertSequenceEqual([credit['amount'] for credit in object_list],
+                                 [1058, 5023, 10250])
