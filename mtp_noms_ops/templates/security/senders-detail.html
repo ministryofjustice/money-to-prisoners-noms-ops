@@ -5,6 +5,15 @@
 
 {% block inner_content %}
 
+  {% if sender_emails|length > 1 or other_cardholder_names|length > 1 %}
+  <div class="grid-row mtp-sender-summary__sender-warning">
+    <div class="column-full">
+      {% trans 'We’re currently fixing an issue where senders are being identified only by the last four digits of their card and its expiry date.' %}
+      {% trans 'These credits may not all be from the same sender.' %}
+    </div>
+  </div>
+  {% endif %}
+
   <header>
     {% language_switch %}
     <h1 class="heading-xlarge">
@@ -142,6 +151,7 @@
                 </span>
               </a>
             </th>
+            <th>{% trans 'Sender' %}</th>
             <th class="{{ form|ordering_classes:'prisoner_number' }}">
               <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
                 <span>
@@ -167,6 +177,9 @@
             <tr {% if forloop.last %}class="no-border"{% endif %}>
               <td>
                 <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
+              </td>
+              <td>
+                <p>{{ credit.sender_name|default:'—' }}</p>
               </td>
               <td>
                 {% if credit.prisoner_number %}
@@ -202,7 +215,7 @@
             </tr>
           {% empty %}
             <tr class="no-border">
-              <td colspan="5">{% trans 'No matching credits found' %}</td>
+              <td colspan="6">{% trans 'No matching credits found' %}</td>
             </tr>
           {% endfor %}
         </tbody>
