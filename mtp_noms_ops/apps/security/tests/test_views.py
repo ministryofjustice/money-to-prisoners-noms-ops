@@ -448,12 +448,12 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         mocked_connection().credits.get.return_value = response_data
 
         expected_result = (
-            'prisoner_name,prisoner_number,prison,sender_name,' +
-            'sender_sort_code,sender_account_number,sender_roll_number,' +
-            'amount,resolution,received_at\r\n' +
-            'GEORGE MELLEY,A1411AE,LEI,,,,,230.00,credited,2016-05-25T20:24:00Z\r\n' +
-            'NORMAN STANLEY FLETCHER,A1413AE,LEI,HEIDENREICH X,219657,88447894,,' +
-            '275.00,credited,2016-05-22T23:00:00Z\r\n'
+            'prisoner_name,prisoner_number,prison,sender_name,' 
+            'sender_sort_code,sender_account_number,sender_roll_number,' 
+            'amount,resolution,received_at\r\n' 
+            'GEORGE MELLEY,A1411AE,LEI,,,,,230.00,credited,2016-05-25 21:24:00\r\n' 
+            'NORMAN STANLEY FLETCHER,A1413AE,LEI,HEIDENREICH X,219657,88447894,,' 
+            '275.00,credited,2016-05-23 00:00:00\r\n'
         )
 
         self.login()

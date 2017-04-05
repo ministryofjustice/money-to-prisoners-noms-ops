@@ -103,7 +103,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for credit in credits|parse_date_fields %}
+          {% for credit in credits %}
             <tr class="mtp-prisoner-credits__credit-row">
               <td>
                 <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
