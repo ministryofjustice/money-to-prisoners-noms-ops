@@ -1,5 +1,5 @@
 import collections
-from datetime import datetime, time, timedelta
+import datetime
 import enum
 from math import ceil
 import re
@@ -8,10 +8,11 @@ from urllib.parse import urlencode, urlparse
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.utils.functional import cached_property
+from django.utils import timezone
 from django.utils.dateformat import format as date_format
+from django.utils.dateparse import parse_date, parse_datetime
+from django.utils.functional import cached_property
 from django.utils.html import format_html, format_html_join
-from django.utils.timezone import now, utc
 from django.utils.translation import gettext_lazy as _, override as override_locale
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages
@@ -102,6 +103,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         self.client = get_connection(request)
         self.total_count = None
         self.page_count = 0
+        self.existing_search = None
 
     def clean_ordering(self):
         return self.cleaned_data['ordering'] or self.fields['ordering'].initial
@@ -142,7 +144,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         filters = self.get_query_data()
         for param in filters:
             if param in self.exclusive_date_params:
-                filters[param] += timedelta(days=1)
+                filters[param] += datetime.timedelta(days=1)
         try:
             data = self.get_object_list_endpoint().get(offset=offset, limit=self.page_size, **filters)
         except SlumberHttpBaseException:
@@ -155,11 +157,36 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_complete_object_list(self):
         filters = self.get_query_data()
-        return retrieve_all_pages(self.get_object_list_endpoint().get, **filters)
+        return self.parse_date_fields(retrieve_all_pages(self.get_object_list_endpoint().get, **filters))
 
     @cached_property
     def query_string(self):
         return urlencode(self.get_query_data(allow_parameter_manipulation=False), doseq=True)
+
+    def parse_date_fields(self, object_list):
+        """
+        MTP API responds with string date/time fields, this filter converts them to python objects
+        """
+        fields = ['received_at', 'credited_at', 'refunded_at']
+        parsers = [parse_datetime, parse_date]
+
+        def convert(credit):
+            for field in fields:
+                value = credit.get(field)
+                if not value or not isinstance(value, str):
+                    continue
+                for parser in parsers:
+                    try:
+                        value = parser(value)
+                        if isinstance(value, datetime.datetime):
+                            value = timezone.localtime(value)
+                        credit[field] = value
+                        break
+                    except (ValueError, TypeError):
+                        pass
+            return credit
+
+        return list(map(convert, object_list)) if object_list else object_list
 
     def _get_value_text(self, bf):
         f = bf.field
@@ -650,6 +677,9 @@ class CreditsForm(SecurityForm):
     def get_object_list_endpoint(self):
         return self.client.credits
 
+    def get_object_list(self):
+        return self.parse_date_fields(super().get_object_list())
+
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
@@ -685,6 +715,9 @@ class SecurityDetailForm(SecurityForm):
 
     def get_object_endpoint(self):
         raise NotImplementedError
+
+    def get_object_list(self):
+        return self.parse_date_fields(super().get_object_list())
 
     def get_object(self):
         """
@@ -761,7 +794,8 @@ class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
         ]
         return retrieve_all_pages(
             self.client.credits.get, valid=True, reviewed=False, prison=prisons, resolution='pending',
-            received_at__lt=datetime.combine(now().date(), time(0, 0, 0, tzinfo=utc))
+            received_at__lt=datetime.datetime.combine(timezone.now().date(),
+                                                      datetime.time(0, 0, 0, tzinfo=timezone.utc))
         )
 
     def review(self):

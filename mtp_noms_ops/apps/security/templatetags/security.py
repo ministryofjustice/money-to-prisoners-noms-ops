@@ -1,11 +1,8 @@
-import datetime
 import logging
 
 from django import template
 from django.core.urlresolvers import reverse
 from django.forms.utils import flatatt
-from django.utils import timezone
-from django.utils.dateparse import parse_datetime, parse_date
 from django.utils.http import urlencode
 from django.utils.translation import gettext
 
@@ -30,34 +27,6 @@ def pence(pence_value):
         return '%dp' % pence_value
     except AssertionError:
         return pence_value
-
-
-@register.filter
-def parse_date_fields(credits):
-    """
-    MTP API responds with string date/time fields,
-    this filter converts them to python objects
-    """
-    fields = ['received_at', 'credited_at', 'refunded_at']
-    parsers = [parse_datetime, parse_date]
-
-    def convert(credit):
-        for field in fields:
-            value = credit[field]
-            if not value:
-                continue
-            for parser in parsers:
-                try:
-                    value = parser(value)
-                    if isinstance(value, datetime.datetime):
-                        value = timezone.localtime(value)
-                    credit[field] = value
-                    break
-                except (ValueError, TypeError):
-                    pass
-        return credit
-
-    return map(convert, credits) if credits else credits
 
 
 @register.filter

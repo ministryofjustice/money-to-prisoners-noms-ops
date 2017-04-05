@@ -1,4 +1,5 @@
 import csv
+import datetime
 from decimal import Decimal
 import io
 
@@ -10,7 +11,7 @@ def export_as_csv(credits):
         writer.writerow([
             'prisoner_name', 'prisoner_number', 'prison', 'sender_name',
             'sender_sort_code', 'sender_account_number', 'sender_roll_number',
-            'amount', 'resolution', 'received_at'
+            'amount', 'resolution', 'received_at',
         ])
         for credit in credits:
             cells = map(escape_csv_formula, [
@@ -21,7 +22,7 @@ def export_as_csv(credits):
                 credit['sender_sort_code'],
                 credit['sender_account_number'],
                 credit['sender_roll_number'],
-                '%.2f' % (Decimal(credit['amount'])/100),
+                '%.2f' % (Decimal(credit['amount']) / 100),
                 credit['resolution'],
                 credit['received_at'],
             ])
@@ -38,4 +39,8 @@ def escape_csv_formula(value):
     """
     if isinstance(value, str) and value.startswith('='):
         return "'" + value
+    if isinstance(value, datetime.datetime):
+        return value.strftime('%Y-%m-%d %H:%M:%S')
+    if isinstance(value, datetime.date):
+        return value.strftime('%Y-%m-%d')
     return value
