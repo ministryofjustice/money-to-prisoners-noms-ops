@@ -495,15 +495,6 @@ class CreditsExportTestCase(SecurityBaseTestCase):
             response.content
         )
 
-    @mock.patch('security.forms.get_connection')
-    def test_missing_page_redirects_to_form(self, mocked_connection):
-        sample_prison_list(mocked_connection)
-        self.login()
-        response = self.client.get(
-            reverse('security:credits_export') + '?prison=LEI'
-        )
-        self.assertRedirects(response, reverse('security:credit_list') + '?prison=LEI')
-
     @mock_form_connection
     def test_invalid_params_redirects_to_form(self, mocked_connection):
         sample_prison_list(mocked_connection)

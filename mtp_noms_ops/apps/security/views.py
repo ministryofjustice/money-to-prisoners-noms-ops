@@ -232,13 +232,6 @@ class CreditExportView(SecurityView):
             filter(lambda x: x, [reverse('security:credit_list'), form.query_string])
         ))
 
-    def get(self, request, *args, **kwargs):
-        if 'page' in self.request.GET:
-            return self.post(request, *args, **kwargs)
-        return redirect('?'.join(
-            filter(lambda x: x, [reverse('security:credit_list'), request.GET.urlencode()])
-        ))
-
 
 class ReviewCreditsView(FormView):
     title = _('New credits check')
