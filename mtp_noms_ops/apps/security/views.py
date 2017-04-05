@@ -90,7 +90,7 @@ class SecurityDetailView(SecurityView):
         self.title = self.get_title_for_object(detail_object)
         list_url = self.request.build_absolute_uri(str(self.list_url))
         referrer_url = self.request.META.get('HTTP_REFERER', '-')
-        if referrer_url.startswith(list_url):
+        if referrer_url.split('?', 1)[0] == list_url:
             list_url = referrer_url
         context_data[self.object_context_key] = detail_object
 
