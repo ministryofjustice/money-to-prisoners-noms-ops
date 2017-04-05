@@ -448,11 +448,11 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         mocked_connection().credits.get.return_value = response_data
 
         expected_result = (
-            'prisoner_name,prisoner_number,prison,sender_name,' 
-            'sender_sort_code,sender_account_number,sender_roll_number,' 
-            'amount,resolution,received_at\r\n' 
-            'GEORGE MELLEY,A1411AE,LEI,,,,,230.00,credited,2016-05-25 21:24:00\r\n' 
-            'NORMAN STANLEY FLETCHER,A1413AE,LEI,HEIDENREICH X,219657,88447894,,' 
+            'prisoner_name,prisoner_number,prison,sender_name,'
+            'sender_sort_code,sender_account_number,sender_roll_number,'
+            'amount,resolution,received_at\r\n'
+            'GEORGE MELLEY,A1411AE,LEI,,,,,230.00,credited,2016-05-25 21:24:00\r\n'
+            'NORMAN STANLEY FLETCHER,A1413AE,LEI,HEIDENREICH X,219657,88447894,,'
             '275.00,credited,2016-05-23 00:00:00\r\n'
         )
 
@@ -511,7 +511,7 @@ class PinnedProfileTestCase(SecurityViewTestCase):
         with responses.RequestsMock() as rsps:
             rsps.add(
                 rsps.GET,
-                api_url('/searches'),
+                api_url('/searches/'),
                 json={
                     'count': 2,
                     'results': [
@@ -533,7 +533,6 @@ class PinnedProfileTestCase(SecurityViewTestCase):
                         }
                     ]
                 },
-                status=200,
             )
             rsps.add(
                 rsps.GET,
@@ -542,7 +541,6 @@ class PinnedProfileTestCase(SecurityViewTestCase):
                     'count': 5,
                     'results': []
                 },
-                status=200,
             )
             rsps.add(
                 rsps.GET,
@@ -551,7 +549,6 @@ class PinnedProfileTestCase(SecurityViewTestCase):
                     'count': 10,
                     'results': []
                 },
-                status=200,
             )
             response = self.login_test_searches()
 
@@ -564,7 +561,7 @@ class PinnedProfileTestCase(SecurityViewTestCase):
         with responses.RequestsMock() as rsps:
             rsps.add(
                 rsps.GET,
-                api_url('/searches'),
+                api_url('/searches/'),
                 json={
                     'count': 2,
                     'results': [
@@ -586,7 +583,6 @@ class PinnedProfileTestCase(SecurityViewTestCase):
                         }
                     ]
                 },
-                status=200,
             )
             rsps.add(
                 rsps.GET,
@@ -595,7 +591,6 @@ class PinnedProfileTestCase(SecurityViewTestCase):
                     'count': 5,
                     'results': []
                 },
-                status=200,
             )
             rsps.add(
                 rsps.GET,
@@ -629,13 +624,13 @@ override_nomis_settings = override_settings(
 
 
 class PrisonerDetailViewTestCase(SecurityViewTestCase):
+    _overridden_settings = {'NOMIS_API_AVAILABLE': False}
 
     def _add_prisoner_data_responses(self, rsps):
         rsps.add(
             rsps.GET,
             api_url('/prisoners/1/'),
             json=self.prisoner_profile,
-            status=200,
         )
         rsps.add(
             rsps.GET,
@@ -647,7 +642,6 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
                     self.credit_object, self.credit_object
                 ],
             },
-            status=200,
         )
 
     @override_nomis_settings
@@ -656,12 +650,11 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             self._add_prisoner_data_responses(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/searches'),
+                api_url('/searches/'),
                 json={
                     'count': 0,
                     'results': []
                 },
-                status=200,
             )
             rsps.add(
                 rsps.GET,
@@ -670,7 +663,6 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
                 json={
                     'image': TEST_IMAGE_DATA
                 },
-                status=200,
             )
             self.login(follow=False)
             response = self.client.get(
@@ -684,12 +676,11 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             self._add_prisoner_data_responses(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/searches'),
+                api_url('/searches/'),
                 json={
                     'count': 0,
                     'results': []
                 },
-                status=200,
             )
             rsps.add(
                 rsps.GET,
@@ -698,7 +689,6 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
                 json={
                     'image': None
                 },
-                status=200,
             )
             self.login(follow=False)
             response = self.client.get(
@@ -711,7 +701,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             self._add_prisoner_data_responses(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/searches'),
+                api_url('/searches/'),
                 json={
                     'count': 1,
                     'results': [
@@ -725,7 +715,6 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
                         },
                     ]
                 },
-                status=200,
             )
             rsps.add(
                 rsps.PATCH,
@@ -744,16 +733,15 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             self._add_prisoner_data_responses(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/searches'),
+                api_url('/searches/'),
                 json={
                     'count': 0,
                     'results': []
                 },
-                status=200,
             )
             rsps.add(
                 rsps.POST,
-                api_url('/searches'),
+                api_url('/searches/'),
                 status=201,
             )
 
