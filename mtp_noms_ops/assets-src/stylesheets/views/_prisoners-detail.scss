@@ -1,7 +1,18 @@
 .mtp-prisoner-image {
   float: left;
   margin-right: 30px;
+  width: 160px;
+  height: 200px;
+  background-image: file-url('placeholder-image.png');
 
+  @include device-pixel-ratio {
+    background-image: file-url('placeholder-image@2x.png');
+  }
+
+  img {
+    width: 160px;
+    height: 200px;
+  }
 }
 
 @include media($max-width: 940px) {
