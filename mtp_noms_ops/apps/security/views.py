@@ -7,6 +7,7 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.utils.cache import patch_cache_control
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from mtp_common.nomis import get_photograph_data
@@ -260,9 +261,11 @@ def prisoner_image_view(request, prisoner_number):
         try:
             b64data = get_photograph_data(prisoner_number)
             if b64data:
-                return HttpResponse(
+                response = HttpResponse(
                     base64.b64decode(b64data), content_type='image/jpeg'
                 )
+                patch_cache_control(response, private=True, max_age=2592000)
+                return response
         except RequestException:
             logger.warning('Could not load image for %s' % prisoner_number)
     if request.GET.get('ratio') == '2x':
