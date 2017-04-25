@@ -22,6 +22,10 @@ urlpatterns = [
     url(r'^prisoners/(?P<prisoner_id>[0-9]+)/$', security_test(views.PrisonerDetailView.as_view()),
         name='prisoner_detail'),
 
+    url(r'^prisoner_image/(?P<prisoner_number>[A-Za-z0-9]+)/$',
+        security_test(views.prisoner_image_view),
+        name='prisoner_image'),
+
     url(r'^review-credits/$', security_test(views.ReviewCreditsView.as_view()),
         name='review_credits'),
 ]

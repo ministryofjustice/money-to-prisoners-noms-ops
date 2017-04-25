@@ -1,9 +1,11 @@
+import base64
 import logging
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
@@ -205,11 +207,6 @@ class PrisonerDetailView(SecurityDetailView):
         context_data = super().get_context_data(**kwargs)
         prisoner = context_data.get('prisoner', {})
         context_data['recipient_names'] = NameSet(prisoner.get('recipient_names', ()), strip_titles=True)
-        if settings.NOMIS_API_AVAILABLE and prisoner.get('prisoner_number'):
-            try:
-                context_data['photo'] = get_photograph_data(prisoner['prisoner_number'])
-            except RequestException:
-                logger.exception('Could not load image for %s' % prisoner['prisoner_number'])
         return context_data
 
     def get_title_for_object(self, detail_object):
@@ -256,3 +253,19 @@ class ReviewCreditsView(FormView):
         context_data = super().get_context_data(**kwargs)
         context_data['credits'] = context_data['form'].credits
         return context_data
+
+
+def prisoner_image_view(request, prisoner_number):
+    if settings.NOMIS_API_AVAILABLE and prisoner_number:
+        try:
+            b64data = get_photograph_data(prisoner_number)
+            if b64data:
+                return HttpResponse(
+                    base64.b64decode(b64data), content_type='image/jpeg'
+                )
+        except RequestException:
+            logger.warning('Could not load image for %s' % prisoner_number)
+    if request.GET.get('ratio') == '2x':
+        return HttpResponseRedirect(static('images/placeholder-image@2x.png'))
+    else:
+        return HttpResponseRedirect(static('images/placeholder-image.png'))

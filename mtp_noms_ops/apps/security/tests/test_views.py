@@ -1,3 +1,4 @@
+import base64
 from functools import wraps
 import json
 import logging
@@ -647,15 +648,6 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
     @override_nomis_settings
     def test_display_nomis_photo(self):
         with responses.RequestsMock() as rsps:
-            self._add_prisoner_data_responses(rsps)
-            rsps.add(
-                rsps.GET,
-                api_url('/searches/'),
-                json={
-                    'count': 0,
-                    'results': []
-                },
-            )
             rsps.add(
                 rsps.GET,
                 nomis_url('/offenders/{prisoner_number}/image'.format(
@@ -666,22 +658,16 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             )
             self.login(follow=False)
             response = self.client.get(
-                reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
+                reverse(
+                    'security:prisoner_image',
+                    kwargs={'prisoner_number': self.prisoner_profile['prisoner_number']}
+                )
             )
-            self.assertContains(response, TEST_IMAGE_DATA)
+            self.assertContains(response, base64.b64decode(TEST_IMAGE_DATA))
 
     @override_nomis_settings
     def test_missing_nomis_photo(self):
         with responses.RequestsMock() as rsps:
-            self._add_prisoner_data_responses(rsps)
-            rsps.add(
-                rsps.GET,
-                api_url('/searches/'),
-                json={
-                    'count': 0,
-                    'results': []
-                },
-            )
             rsps.add(
                 rsps.GET,
                 nomis_url('/offenders/{prisoner_number}/image'.format(
@@ -692,9 +678,13 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             )
             self.login(follow=False)
             response = self.client.get(
-                reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
+                reverse(
+                    'security:prisoner_image',
+                    kwargs={'prisoner_number': self.prisoner_profile['prisoner_number']}
+                ),
+                follow=False
             )
-            self.assertContains(response, 'images/placeholder-image.png')
+            self.assertRedirects(response, '/static/images/placeholder-image.png', fetch_redirect_response=False)
 
     def test_display_pinned_profile(self):
         with responses.RequestsMock() as rsps:

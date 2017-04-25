@@ -12,13 +12,7 @@
       {% if prisoner %}
         {% if nomis_api_available %}
           <div class="mtp-prisoner-image">
-            {% if photo %}
-              <img src="data:image/jpeg;base64,{{ photo }}" alt="{% trans 'Photo of the prisoner' %}"/>
-            {% else %}
-              <img src="{% static 'images/placeholder-image.png' %}"
-              srcset="{% static 'images/placeholder-image@2x.png' %} 2x"
-              alt="{% trans 'Placeholder image for prisoner photo' %}" />
-            {% endif %}
+              <img src="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}" srcset="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}?ratio=2x 2x" alt="{% trans 'Photo of the prisoner' %}"/>
           </div>
           {% endif %}
         {{ view.title }}
