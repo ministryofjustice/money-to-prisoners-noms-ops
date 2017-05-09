@@ -14,7 +14,7 @@ from .tasks import update_locations, schedule_locations_update
 
 EXPECTED_ROW_LENGTH = 5
 DOB_PATTERN = re.compile(
-    '([0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}).*'
+    r'(?P<dob>\d{1,2}/\d{1,2}/\d{2,4}).*'
 )
 DATE_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
 
@@ -27,7 +27,7 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
-        super(LocationFileUploadForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean_location_file(self):
         locations = []
@@ -62,24 +62,24 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
                 continue
 
             # parse dob
-            m = DOB_PATTERN.match(row[3])
-            dt = None
-            if m:
-                for format in DATE_FORMATS:
+            dob_matches = DOB_PATTERN.match(row[3])
+            dob = None
+            if dob_matches:
+                for date_format in DATE_FORMATS:
                     try:
-                        dt = datetime.strptime(m.groups()[0], format)
+                        dob = datetime.strptime(dob_matches.group('dob'), date_format)
                         break
                     except ValueError:
                         pass
 
-            if dt is None:
+            if dob is None:
                 raise forms.ValidationError(
                     _('Date of birth "%s" is not in a valid format' % row[3]))
 
             locations.append({
                 'prisoner_number': row[0],
                 'prisoner_name': ' '.join([row[2], row[1]]),
-                'prisoner_dob': dt.strftime('%Y-%m-%d'),
+                'prisoner_dob': dob.strftime('%Y-%m-%d'),
                 'prison': row[4],
             })
 

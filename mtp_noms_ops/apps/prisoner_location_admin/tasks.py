@@ -57,11 +57,12 @@ def update_locations(user, locations, async=False):
     location_count = len(locations)
     try:
         client.prisoner_locations.actions.delete_inactive.post()
-        for i in range(math.ceil(location_count/settings.UPLOAD_REQUEST_PAGE_SIZE)):
+        pages = int(math.ceil(location_count / settings.UPLOAD_REQUEST_PAGE_SIZE))
+        for page in range(pages):
             client.prisoner_locations.post(
                 locations[
-                    i*settings.UPLOAD_REQUEST_PAGE_SIZE:
-                    (i+1)*settings.UPLOAD_REQUEST_PAGE_SIZE
+                    page * settings.UPLOAD_REQUEST_PAGE_SIZE:
+                    (page + 1) * settings.UPLOAD_REQUEST_PAGE_SIZE
                 ]
             )
         client.prisoner_locations.actions.delete_old.post()
@@ -78,12 +79,12 @@ def update_locations(user, locations, async=False):
         return location_count
     except HttpClientError as e:
         logger.exception('Prisoner locations update by %s failed!' % user_description)
-        if e.content:
+        if hasattr(e, 'content') and e.content:
             try:
                 errors += format_errors(json.loads(e.content.decode('utf-8')))
             except ValueError:
                 errors.append(e.content)
-    except Exception as e:
+    except:
         logger.exception('Prisoner locations update by %s failed!' % user_description)
 
     if not errors:
@@ -98,7 +99,7 @@ def update_locations(user, locations, async=False):
 
 def send_task_failure_notification(email, context):
     if not email:
-        return False
+        return
     activate(settings.LANGUAGE_CODE)
     context['feedback_url'] = urljoin(settings.SITE_URL, reverse('submit_ticket'))
     try:
@@ -107,6 +108,5 @@ def send_task_failure_notification(email, context):
             gettext('Send money to a prisoner: prisoner location update failed'),
             context=context, html_template='prisoner_location_admin/email/failure-notification.html'
         )
-        return True
     except SMTPException:
         logger.exception('Could not send location upload failure notification')

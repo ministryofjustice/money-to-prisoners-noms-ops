@@ -14,7 +14,7 @@ class LocationFileUploadView(FormView):
     success_url = reverse_lazy('location_file_upload')
 
     def get_form_kwargs(self):
-        kwargs = super(LocationFileUploadView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
 
