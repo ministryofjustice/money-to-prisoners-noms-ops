@@ -17,9 +17,7 @@ RUN mkdir -p mtp_noms_ops/assets-static
 RUN mkdir -p static
 RUN mkdir -p media
 RUN mkdir -p spooler
-RUN mkdir -p uploads
 RUN chown www-data:www-data spooler
-RUN chown www-data:www-data uploads
 
 # install python
 RUN apt-get install -y python3-all python3-all-dev python3-setuptools python3-pip python-pip python3.4-venv
@@ -45,4 +43,4 @@ RUN venv/bin/python run.py --requirements-file requirements/docker.txt build
 # run uwsgi on 8080
 EXPOSE 8080
 ENV DJANGO_SETTINGS_MODULE=mtp_noms_ops.settings.docker
-CMD venv/bin/uwsgi --ini conf/uwsgi/noms_ops.ini
+CMD venv/bin/uwsgi --ini noms_ops.ini

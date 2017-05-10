@@ -1,11 +1,12 @@
-from django.views.generic.edit import FormView
-from django.core.urlresolvers import reverse_lazy
 from django import forms
+from django.conf import settings
 from django.contrib import messages
+from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ngettext, gettext as _
+from django.views.generic.edit import FormView
+from mtp_common.spooling import spooler
 
 from .forms import LocationFileUploadForm
-from .tasks import schedule_locations_update
 
 
 class LocationFileUploadView(FormView):
@@ -21,7 +22,7 @@ class LocationFileUploadView(FormView):
     def form_valid(self, form):
         try:
             location_count = form.update_locations()
-            if schedule_locations_update:
+            if settings.ASYNC_LOCATION_UPLOAD and spooler.installed:
                 message_parts = [
                     ngettext(
                         '%d prisoner location scheduled for upload.',

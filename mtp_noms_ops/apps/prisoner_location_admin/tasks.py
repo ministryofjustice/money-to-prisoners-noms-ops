@@ -1,8 +1,6 @@
 import json
 import logging
 import math
-import os
-import pickle
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -10,24 +8,11 @@ from django.core.urlresolvers import reverse
 from django.forms import ValidationError
 from django.utils.translation import activate, gettext, gettext_lazy as _
 from mtp_common.auth import api_client
-from mtp_common.email import send_email
+from mtp_common.spooling import Context, spoolable
+from mtp_common.tasks import send_email
 from slumber.exceptions import HttpClientError
-from smtplib import SMTPException
 
 logger = logging.getLogger('mtp')
-
-try:
-    import uwsgi  # noqa
-    from mtp_common.uwsgidecorators import spool
-
-    @spool(pass_arguments=True)
-    def schedule_locations_update(user, filename):
-        with open(filename, 'rb') as f:
-            locations = pickle.load(f)
-        os.unlink(filename)
-        update_locations(user, locations, async=True)
-except ImportError as e:
-    schedule_locations_update = None
 
 
 def format_errors(error_list):
@@ -37,11 +22,12 @@ def format_errors(error_list):
             field_errors = []
             for key in error:
                 field_errors += error[key]
-            output_list.append('Row %s: %s' % (i+1, ', '.join(field_errors)))
+            output_list.append('Row %s: %s' % (i + 1, ', '.join(field_errors)))
     return output_list
 
 
-def update_locations(user, locations, async=False):
+@spoolable(pre_condition=settings.ASYNC_LOCATION_UPLOAD, body_params=('user', 'locations'))
+def update_locations(*, user, locations, context: Context):
     client = api_client.get_authenticated_connection(
         settings.LOCATION_UPLOADER_USERNAME,
         settings.LOCATION_UPLOADER_PASSWORD
@@ -91,22 +77,18 @@ def update_locations(user, locations, async=False):
         errors.append(_('An unknown error occurred uploading prisoner locations'))
     logger.error(errors)
 
-    if async:
-        send_task_failure_notification(user.email, {'errors': errors})
+    if context.spooled:
+        if user.email:
+            send_task_failure_notification(user.email, {'errors': errors})
     else:
         raise ValidationError(errors)
 
 
 def send_task_failure_notification(email, context):
-    if not email:
-        return
     activate(settings.LANGUAGE_CODE)
     context['feedback_url'] = urljoin(settings.SITE_URL, reverse('submit_ticket'))
-    try:
-        send_email(
-            email, 'prisoner_location_admin/email/failure-notification.txt',
-            gettext('Send money to a prisoner: prisoner location update failed'),
-            context=context, html_template='prisoner_location_admin/email/failure-notification.html'
-        )
-    except SMTPException:
-        logger.exception('Could not send location upload failure notification')
+    send_email(
+        email, 'prisoner_location_admin/email/failure-notification.txt',
+        gettext('Send money to a prisoner: prisoner location update failed'),
+        context=context, html_template='prisoner_location_admin/email/failure-notification.html'
+    )

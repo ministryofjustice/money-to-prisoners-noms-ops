@@ -1,16 +1,13 @@
 import csv
 from datetime import datetime
 import io
-import pickle
 import re
-import uuid
 
 from django import forms
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 
-from .tasks import update_locations, schedule_locations_update
+from prisoner_location_admin.tasks import update_locations
 
 EXPECTED_ROW_LENGTH = 5
 DOB_PATTERN = re.compile(
@@ -91,13 +88,5 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
 
     def update_locations(self):
         locations = self.cleaned_data['location_file']
-
-        if schedule_locations_update and settings.ASYNC_LOCATION_UPLOAD:
-            filename = '/app/uploads/%s' % uuid.uuid4()
-            with open(filename, 'wb+') as f:
-                pickle.dump(locations, f)
-            schedule_locations_update(self.request.user, filename)
-        else:
-            update_locations(self.request.user, locations)
-
+        update_locations(user=self.request.user, locations=locations)
         return len(locations)
