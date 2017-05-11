@@ -7,8 +7,8 @@ ENV LC_CTYPE=en_GB.UTF-8
 ENV TERM=xterm
 
 # install libraries
-RUN apt-get update && apt-get install -y software-properties-common python-software-properties
-RUN apt-get update && apt-get install -y build-essential curl gettext git libpcre3-dev libpq-dev ntp
+RUN apt-get update && apt-get install -y software-properties-common python-software-properties python3-software-properties
+RUN apt-get update && apt-get install -y build-essential curl gettext git libpcre3-dev libpq-dev libffi-dev ntp
 
 # pre-create directories
 WORKDIR /app
