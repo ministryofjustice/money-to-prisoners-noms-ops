@@ -18,6 +18,7 @@ mtp_noms_ops/assets/
 mtp_noms_ops/settings/local.py
 static/
 media/
+spooler/
 
 # selenium
 geckodriver.log
