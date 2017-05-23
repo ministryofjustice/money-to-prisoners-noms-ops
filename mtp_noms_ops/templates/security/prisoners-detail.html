@@ -53,7 +53,7 @@
       {% endif %}
     </div>
 
-  {% include 'security/includes/save-search.html' %}
+  {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this prisoner on your home page') unpin_label=_('Stop monitoring this prisoner') only %}
 
   {% endif %}
 

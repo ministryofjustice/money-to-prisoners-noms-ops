@@ -124,7 +124,7 @@
     </div>
   {% endif %}
 
-  {% include 'security/includes/save-search.html' with form=form only %}
+  {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this sender on your home page') unpin_label=_('Stop monitoring this sender') only %}
 
   {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 

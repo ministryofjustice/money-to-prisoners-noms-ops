@@ -46,7 +46,7 @@
 
   {% if request.can_access_security and saved_searches|length > 0 %}
 
-    <h2 class="heading-medium">{% trans 'Activity from your pinned profiles' %}</h2>
+    <h2 class="heading-medium">{% trans 'Senders and prisoners you are monitoring' %}</h2>
     {% for search in saved_searches %}
       {% if forloop.counter0|divisibleby:3 %}
       <div class="grid-row">
