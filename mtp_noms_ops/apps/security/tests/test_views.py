@@ -715,7 +715,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             response = self.client.get(
                 reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
             )
-            self.assertContains(response, 'Unpin from home page')
+            self.assertContains(response, 'Stop monitoring this prisoner')
             self.assertEqual(rsps.calls[-1].request.body, '{"last_result_count": 4}')
 
     def test_pin_profile(self):
