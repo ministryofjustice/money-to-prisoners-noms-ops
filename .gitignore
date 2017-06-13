@@ -13,6 +13,7 @@ npm-debug.log
 # app-specific
 docker-compose.yml
 package.json
+package-lock.json
 webpack.config.js
 mtp_noms_ops/assets/
 mtp_noms_ops/settings/local.py
