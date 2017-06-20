@@ -3,28 +3,50 @@ import datetime
 from decimal import Decimal
 import io
 
+from django.utils.translation import gettext_lazy as _
+
+
+payment_methods = {
+    'bank_transfer': _('Bank transfer'),
+    'online': _('Debit card'),
+}
+credit_resolutions = {
+    'pending': _('Pending'),
+    'manual': _('Requires manual processing'),
+    'credited': _('Credited'),
+    'refunded': _('Refunded'),
+}
+
 
 def export_as_csv(credits):
     with io.StringIO() as out:
         writer = csv.writer(out)
 
         writer.writerow([
-            'prisoner_name', 'prisoner_number', 'prison', 'sender_name',
-            'sender_sort_code', 'sender_account_number', 'sender_roll_number',
-            'amount', 'resolution', 'received_at',
+            'Prisoner name', 'Prisoner number', 'Prison',
+            'Sender name', 'Payment method',
+            'Bank transfer sort code', 'Bank transfer account', 'Bank transfer roll number',
+            'Debit card number', 'Debit card expiry',
+            'Amount', 'Date received',
+            'Status', 'Date credited', 'NOMIS transaction',
         ])
         for credit in credits:
             cells = map(escape_csv_formula, [
                 credit['prisoner_name'],
                 credit['prisoner_number'],
-                credit['prison'],
+                credit['prison_name'],
                 credit['sender_name'],
+                payment_methods.get(credit['source'], credit['source']),
                 credit['sender_sort_code'],
                 credit['sender_account_number'],
                 credit['sender_roll_number'],
-                '%.2f' % (Decimal(credit['amount']) / 100),
-                credit['resolution'],
+                '**** **** **** %s' % credit['card_number_last_digits'] if credit['card_number_last_digits'] else '',
+                credit['card_expiry_date'],
+                '£%.2f' % (Decimal(credit['amount']) / 100),
                 credit['received_at'],
+                credit_resolutions.get(credit['resolution'], credit['resolution']),
+                credit['credited_at'],
+                credit['nomis_transaction_id'],
             ])
             writer.writerow(list(cells))
 
