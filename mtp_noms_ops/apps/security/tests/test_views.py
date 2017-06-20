@@ -427,7 +427,8 @@ class CreditsExportTestCase(SecurityBaseTestCase):
                     'prison': 'LEI', 'prison_name': 'HMP LEEDS',
                     'sender_name': None,
                     'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
-                    'resolution': 'credited',
+                    'card_number_last_digits': None, 'card_expiry_date': None,
+                    'resolution': 'credited', 'nomis_transaction_id': None,
                     'owner': None, 'owner_name': None,
                     'received_at': '2016-05-25T20:24:00Z', 'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,
                 },
@@ -440,7 +441,8 @@ class CreditsExportTestCase(SecurityBaseTestCase):
                     'prison': 'LEI', 'prison_name': 'HMP LEEDS',
                     'sender_name': 'HEIDENREICH X',
                     'sender_sort_code': '219657', 'sender_account_number': '88447894', 'sender_roll_number': '',
-                    'resolution': 'credited',
+                    'card_number_last_digits': None, 'card_expiry_date': None,
+                    'resolution': 'credited', 'nomis_transaction_id': '123456-7',
                     'owner': None, 'owner_name': None,
                     'received_at': '2016-05-22T23:00:00Z', 'credited_at': '2016-05-23T01:10:00Z', 'refunded_at': None,
                 },
@@ -449,12 +451,16 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         mocked_connection().credits.get.return_value = response_data
 
         expected_result = (
-            'prisoner_name,prisoner_number,prison,sender_name,'
-            'sender_sort_code,sender_account_number,sender_roll_number,'
-            'amount,resolution,received_at\r\n'
-            'GEORGE MELLEY,A1411AE,LEI,,,,,230.00,credited,2016-05-25 21:24:00\r\n'
-            'NORMAN STANLEY FLETCHER,A1413AE,LEI,HEIDENREICH X,219657,88447894,,'
-            '275.00,credited,2016-05-23 00:00:00\r\n'
+            'Prisoner name,Prisoner number,Prison,Sender name,Payment method,'
+            'Bank transfer sort code,Bank transfer account,Bank transfer roll number,'
+            'Debit card number,Debit card expiry,Amount,Date received,'
+            'Status,Date credited,NOMIS transaction\r\n'
+            'GEORGE MELLEY,A1411AE,HMP LEEDS,,Debit card,,,,,,'
+            '£230.00,2016-05-25 21:24:00,'
+            'Credited,2016-05-25 21:27:00,\r\n'
+            'NORMAN STANLEY FLETCHER,A1413AE,HMP LEEDS,HEIDENREICH X,Bank transfer,219657,88447894,,,,'
+            '£275.00,2016-05-23 00:00:00,'
+            'Credited,2016-05-23 02:10:00,123456-7\r\n'
         )
 
         self.login()
@@ -480,9 +486,10 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         mocked_connection().credits.get.return_value = response_data
 
         expected_result = (
-            'prisoner_name,prisoner_number,prison,sender_name,' +
-            'sender_sort_code,sender_account_number,sender_roll_number,' +
-            'amount,resolution,received_at\r\n'
+            'Prisoner name,Prisoner number,Prison,Sender name,Payment method,'
+            'Bank transfer sort code,Bank transfer account,Bank transfer roll number,'
+            'Debit card number,Debit card expiry,Amount,Date received,'
+            'Status,Date credited,NOMIS transaction\r\n'
         )
 
         self.login()
