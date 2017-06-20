@@ -136,7 +136,8 @@
         {% include 'security/forms/search-description.html' with form=form only %}
 
         <div class="print-hidden mtp-links">
-          <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
+          <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a> &nbsp;
+          <a href="{% url 'security:sender_detail_export' sender_id=sender.id %}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
         </div>
       </div>
 
