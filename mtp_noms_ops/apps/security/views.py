@@ -32,6 +32,8 @@ class SecurityView(FormView):
     template_name = NotImplemented
     form_template_name = NotImplemented
     object_list_context_key = NotImplemented
+    export_view = False
+    export_invalid_view = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -49,6 +51,13 @@ class SecurityView(FormView):
         return form_kwargs
 
     def form_valid(self, form):
+        if self.export_view:
+            data = form.get_complete_object_list()
+            csvdata = export_as_csv(data)
+            response = HttpResponse(csvdata, content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="export.csv"'
+            return response
+
         context = self.get_context_data(form=form)
         object_list = form.cleaned_data['object_list']
         form.check_and_update_saved_searches(self.title)
@@ -56,6 +65,11 @@ class SecurityView(FormView):
             return redirect(self.url_for_single_result(object_list[0]))
         context[self.object_list_context_key] = object_list
         return render(self.request, self.template_name, context)
+
+    def form_invalid(self, form):
+        if self.export_view:
+            return redirect('%s?%s' % (reverse(self.export_invalid_view, kwargs=self.kwargs), form.query_string))
+        return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
@@ -213,22 +227,6 @@ class PrisonerDetailView(SecurityDetailView):
     def get_title_for_object(self, detail_object):
         title = ' '.join(detail_object.get(key, '') for key in ('prisoner_number', 'prisoner_name'))
         return title.strip() or _('Unknown prisoner')
-
-
-class CreditExportView(SecurityView):
-    form_class = CreditsForm
-
-    def form_valid(self, form):
-        data = form.get_complete_object_list()
-        csvdata = export_as_csv(data)
-        response = HttpResponse(csvdata, content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="export.csv"'
-        return response
-
-    def form_invalid(self, form):
-        return redirect('?'.join(
-            filter(lambda x: x, [reverse('security:credit_list'), form.query_string])
-        ))
 
 
 class ReviewCreditsView(FormView):
