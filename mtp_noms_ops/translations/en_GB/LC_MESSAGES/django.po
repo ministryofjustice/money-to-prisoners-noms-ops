@@ -1,9 +1,10 @@
-# MTP noms-ops
+# Send money to a prisoner
+# Copyright (C) Crown copyright (Ministry of Justice)
 msgid ""
 msgstr ""
-"Project-Id-Version: MTP noms-ops\n"
+"Project-Id-Version: mtp-noms-ops\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-23 15:09+0100\n"
+"POT-Creation-Date: 2017-06-21 14:25+0100\n"
 "PO-Revision-Date: 2016-11-04 10:00+0000\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>\n"
 "Language-Team: Welsh (http://www.transifex.com/ministry-of-justice/mtp/language/cy/)\n"
@@ -68,16 +69,36 @@ msgid_plural "%d prisoner locations updated successfully"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/security/forms.py:29
-msgid "Any method"
-msgstr ""
-
-#: apps/security/forms.py:31 templates/security/review.html:53
+#: apps/security/export.py:10 apps/security/forms.py:31
+#: templates/security/review.html:53
 msgid "Bank transfer"
 msgstr ""
 
-#: apps/security/forms.py:31
+#: apps/security/export.py:11 apps/security/forms.py:31
 msgid "Debit card"
+msgstr ""
+
+#: apps/security/export.py:14 apps/security/templatetags/security.py:49
+msgid "Pending"
+msgstr ""
+
+#: apps/security/export.py:15
+msgid "Requires manual processing"
+msgstr ""
+
+#: apps/security/export.py:16 apps/security/templatetags/security.py:51
+msgid "Credited"
+msgstr ""
+
+#: apps/security/export.py:17 apps/security/templatetags/security.py:53
+#: templates/security/credits.html:109
+#: templates/security/prisoners-detail.html:140
+#: templates/security/senders-detail.html:209
+msgid "Refunded"
+msgstr ""
+
+#: apps/security/forms.py:29
+msgid "Any method"
 msgstr ""
 
 #: apps/security/forms.py:36
@@ -220,7 +241,7 @@ msgstr ""
 #: templates/security/forms/prisoners.html:11
 #: templates/security/forms/senders.html:11
 #: templates/security/prisoners.html:44
-#: templates/security/senders-detail.html:171
+#: templates/security/senders-detail.html:172
 msgid "Prison"
 msgstr ""
 
@@ -416,55 +437,40 @@ msgstr ""
 msgid "Initial"
 msgstr ""
 
-#: apps/security/templatetags/security.py:49
-msgid "Pending"
-msgstr ""
-
-#: apps/security/templatetags/security.py:51
-msgid "Credited"
-msgstr ""
-
-#: apps/security/templatetags/security.py:53
-#: templates/security/credits.html:109
-#: templates/security/prisoners-detail.html:139
-#: templates/security/senders-detail.html:208
-msgid "Refunded"
-msgstr ""
-
-#: apps/security/views.py:63 apps/security/views.py:101 templates/base.html:18
+#: apps/security/views.py:77 apps/security/views.py:115 templates/base.html:18
 #: utils.py:32
 msgid "Home"
 msgstr ""
 
-#: apps/security/views.py:115 templates/base.html:20
+#: apps/security/views.py:129 templates/base.html:20
 #: templates/dashboard.html:28
 msgid "Credits"
 msgstr ""
 
-#: apps/security/views.py:126 templates/base.html:21
+#: apps/security/views.py:140 templates/base.html:21
 #: templates/dashboard.html:34 templates/security/prisoners.html:56
 msgid "Senders"
 msgstr ""
 
-#: apps/security/views.py:179
+#: apps/security/views.py:193
 msgid "Unknown sender"
 msgstr ""
 
-#: apps/security/views.py:186 templates/base.html:22
+#: apps/security/views.py:200 templates/base.html:22
 #: templates/dashboard.html:40 templates/security/senders.html:48
 msgid "Prisoners"
 msgstr ""
 
-#: apps/security/views.py:215
+#: apps/security/views.py:229
 msgid "Unknown prisoner"
 msgstr ""
 
-#: apps/security/views.py:235 templates/dashboard.html:83
+#: apps/security/views.py:233 templates/dashboard.html:83
 #: templates/security/review.html:6
 msgid "New credits check"
 msgstr ""
 
-#: apps/security/views.py:249
+#: apps/security/views.py:247
 #, python-brace-format
 msgid "{count} credits have been marked as checked by security"
 msgstr ""
@@ -573,26 +579,28 @@ msgid "Print"
 msgstr ""
 
 #: templates/security/credits.html:30
+#: templates/security/prisoners-detail.html:71
+#: templates/security/senders-detail.html:140
 msgid "Export"
 msgstr ""
 
 #: templates/security/credits.html:40
 #: templates/security/forms/received-range-field.html:4
-#: templates/security/prisoners-detail.html:80
-#: templates/security/senders-detail.html:149
+#: templates/security/prisoners-detail.html:81
+#: templates/security/senders-detail.html:150
 msgid "Date received"
 msgstr ""
 
 #: templates/security/credits.html:45
-#: templates/security/prisoners-detail.html:85
+#: templates/security/prisoners-detail.html:86
 #: templates/security/senders.html:36
 msgid "Sender and type"
 msgstr ""
 
 #: templates/security/credits.html:49
-#: templates/security/prisoners-detail.html:90
+#: templates/security/prisoners-detail.html:91
 #: templates/security/prisoners.html:64 templates/security/review.html:37
-#: templates/security/senders-detail.html:166
+#: templates/security/senders-detail.html:167
 #: templates/security/senders.html:64
 msgid "Amount"
 msgstr ""
@@ -600,44 +608,44 @@ msgstr ""
 #: templates/security/credits.html:57 templates/security/forms/credits.html:13
 #: templates/security/forms/prisoners.html:10
 #: templates/security/prisoners.html:39 templates/security/review.html:36
-#: templates/security/senders-detail.html:158
+#: templates/security/senders-detail.html:159
 msgid "Prisoner"
 msgstr ""
 
 #: templates/security/credits.html:63
-#: templates/security/prisoners-detail.html:96
-#: templates/security/senders-detail.html:172
+#: templates/security/prisoners-detail.html:97
+#: templates/security/senders-detail.html:173
 msgid "Credited status"
 msgstr ""
 
 #: templates/security/credits.html:76
-#: templates/security/prisoners-detail.html:109
+#: templates/security/prisoners-detail.html:110
 #: templates/security/senders.html:87
 msgid "by debit card"
 msgstr ""
 
 #: templates/security/credits.html:81
-#: templates/security/prisoners-detail.html:115
+#: templates/security/prisoners-detail.html:116
 #: templates/security/senders.html:80
 msgid "by bank transfer"
 msgstr ""
 
 #: templates/security/credits.html:103
-#: templates/security/prisoners-detail.html:133
-#: templates/security/senders-detail.html:202
+#: templates/security/prisoners-detail.html:134
+#: templates/security/senders-detail.html:203
 #, python-format
 msgid "by %(name_of_clerk)s"
 msgstr ""
 
 #: templates/security/credits.html:113
-#: templates/security/prisoners-detail.html:143
-#: templates/security/senders-detail.html:212
+#: templates/security/prisoners-detail.html:144
+#: templates/security/senders-detail.html:213
 msgid "No"
 msgstr ""
 
 #: templates/security/credits.html:119
-#: templates/security/prisoners-detail.html:188
-#: templates/security/senders-detail.html:218
+#: templates/security/prisoners-detail.html:189
+#: templates/security/senders-detail.html:219
 msgid "No matching credits found"
 msgstr ""
 
@@ -647,7 +655,7 @@ msgstr ""
 
 #: templates/security/forms/credits.html:12
 #: templates/security/forms/senders.html:10 templates/security/review.html:35
-#: templates/security/senders-detail.html:154
+#: templates/security/senders-detail.html:155
 msgid "Sender"
 msgstr ""
 
@@ -750,30 +758,30 @@ msgstr ""
 msgid "Credits received"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:86
+#: templates/security/prisoners-detail.html:87
 msgid "Name entered by sender"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:95
+#: templates/security/prisoners-detail.html:96
 msgid "Received at prison"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:156
+#: templates/security/prisoners-detail.html:157
 #: templates/security/senders-detail.html:36
 msgid "account number"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:160
+#: templates/security/prisoners-detail.html:161
 #: templates/security/senders-detail.html:40
 msgid "sort code"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:165
+#: templates/security/prisoners-detail.html:166
 #: templates/security/senders-detail.html:45
 msgid "roll number (for building societies)"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:178
+#: templates/security/prisoners-detail.html:179
 #: templates/security/senders-detail.html:55
 msgid "card number"
 msgstr ""
