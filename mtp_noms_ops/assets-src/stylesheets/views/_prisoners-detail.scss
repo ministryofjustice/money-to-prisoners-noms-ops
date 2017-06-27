@@ -25,19 +25,16 @@
 }
 
 .mtp-prisoner-summary {
-  margin: 0 0;
+  margin: 0;
 
   .column-one-quarter {
     padding-left: 0;
     padding-right: 30px;
+    width: auto;
   }
 
   .column-full {
     padding: 0;
-  }
-
-  .column-one-quarter {
-    width: auto;
   }
 
   @media print {
