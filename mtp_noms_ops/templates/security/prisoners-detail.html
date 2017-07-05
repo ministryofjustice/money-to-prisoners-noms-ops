@@ -23,35 +23,41 @@
 
     <div class="grid-row mtp-prisoner-summary">
       <div class="column-one-quarter">
-        <strong>{{ prisoner.credit_count }}</strong>
-        <p>
+        {% random_string as profile_label %}
+        <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.credit_count }}</strong>
+        <p id="mtp-label-{{ profile_label }}" aria-hidden="true">
           {% blocktrans trimmed count count=prisoner.credit_count %}credit received{% plural %}credits received{% endblocktrans %}
         </p>
       </div>
 
       <div class="column-one-quarter">
-        <strong>{{ prisoner.sender_count }}</strong>
-        <p>
+        {% random_string as profile_label %}
+        <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.sender_count }}</strong>
+        <p id="mtp-label-{{ profile_label }}" aria-hidden="true">
           {% blocktrans trimmed count count=prisoner.sender_count %}sender{% plural %}senders{% endblocktrans %}
         </p>
       </div>
 
       <div class="column-one-quarter">
-        <strong>{{ prisoner.credit_total|currency }}</strong>
-        <p>{% trans 'total amount received' %}</p>
+        {% random_string as profile_label %}
+        <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.credit_total|currency }}</strong>
+        <p id="mtp-label-{{ profile_label }}" aria-hidden="true">{% trans 'total amount received' %}</p>
       </div>
 
       {% if recipient_names %}
         <div class="column-one-quarter">
-          {% for recipient_name in recipient_names %}
-            <strong>{{ recipient_name }}</strong>{% if not forloop.last %},{% endif %}
-          {% endfor %}
-          <p>{% trans 'names given by senders' %}</p>
+          {% random_string as profile_label %}
+          <span role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
+            {% for recipient_name in recipient_names %}
+              <strong>{{ recipient_name }}</strong>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          </span>
+          <p id="mtp-label-{{ profile_label }}" aria-hidden="true">{% trans 'names given by senders' %}</p>
         </div>
       {% endif %}
     </div>
 
-  {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this prisoner on your home page') unpin_label=_('Stop monitoring this prisoner') only %}
+    {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this prisoner on your home page') unpin_label=_('Stop monitoring this prisoner') only %}
 
   {% endif %}
 
