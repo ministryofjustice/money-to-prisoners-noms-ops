@@ -75,7 +75,6 @@ class UploadTests(PrisonerLocationAdminTestCase):
     def setUp(self):
         super().setUp()
         self.login('prisoner-location-admin', 'prisoner-location-admin')
-        self.click_on_text_substring('Upload prisoner location file')
         self.driver.execute_script('document.getElementById("id_location_file").style.left = 0')
 
     def test_checking_upload_page(self):
