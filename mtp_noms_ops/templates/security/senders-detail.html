@@ -33,17 +33,26 @@
 
         <div class="grid-row mtp-sender-summary__details mtp-sender-summary__bank-transfer">
           <div class="column-one-third col-1">
-            <strong>{{ sender.bank_transfer_details.0.sender_account_number|default:'—' }}</strong>
-            <p>{% trans 'account number' %}</p>
+            {% random_string as profile_label %}
+            <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
+              {{ sender.bank_transfer_details.0.sender_account_number|default:'—' }}
+            </strong>
+            <p id="mtp-label-{{ profile_label }}" aria-hidden="true">{% trans 'account number' %}</p>
           </div>
           <div class="column-one-third col-2">
-            <strong>{{ sender.bank_transfer_details.0.sender_sort_code|format_sort_code }}</strong>
-            <p>{% trans 'sort code' %}</p>
+            {% random_string as profile_label %}
+            <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
+              {{ sender.bank_transfer_details.0.sender_sort_code|format_sort_code }}
+            </strong>
+            <p id="mtp-label-{{ profile_label }}" aria-hidden="true">{% trans 'sort code' %}</p>
           </div>
           {% if sender.bank_transfer_details.0.sender_roll_number %}
             <div class="column-one-third col-3">
-              <strong>{{ sender.bank_transfer_details.0.sender_roll_number }}</strong>
-              <p>{% trans 'roll number (for building societies)' %}</p>
+              {% random_string as profile_label %}
+              <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
+                {{ sender.bank_transfer_details.0.sender_roll_number }}
+              </strong>
+              <p id="mtp-label-{{ profile_label }}" aria-hidden="true">{% trans 'roll number (for building societies)' %}</p>
             </div>
           {% endif %}
         </div>
@@ -52,12 +61,18 @@
 
         <div class="grid-row mtp-sender-summary__details mtp-sender-summary__debit-card">
           <div class="column-one-third">
-            <strong>{{ sender.debit_card_details.0.card_number_last_digits|format_card_number }}</strong>
-            <p>{% trans 'card number' %}</p>
+            {% random_string as profile_label %}
+            <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
+              {{ sender.debit_card_details.0.card_number_last_digits|format_card_number }}
+            </strong>
+            <p id="mtp-label-{{ profile_label }}" aria-hidden="true">{% trans 'card number' %}</p>
           </div>
           <div class="column-two-thirds">
-            <strong>{{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}</strong>
-            <p>{% trans 'expiry date' %}</p>
+            {% random_string as profile_label %}
+            <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
+              {{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}
+            </strong>
+            <p id="mtp-label-{{ profile_label }}" aria-hidden="true">{% trans 'expiry date' %}</p>
           </div>
         </div>
 
@@ -71,10 +86,13 @@
         <div class="grid-row mtp-sender-summary__details">
           {% if sender_emails %}
             <div class="column-half">
-              {% for sender_email in sender_emails %}
-                <strong>{{ sender_email }}</strong>{% if not forloop.last %},{% endif %}
-              {% endfor %}
-              <p>
+              {% random_string as profile_label %}
+              <span role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
+                {% for sender_email in sender_emails %}
+                  <strong>{{ sender_email }}</strong>{% if not forloop.last %},{% endif %}
+                {% endfor %}
+              </span>
+              <p id="mtp-label-{{ profile_label }}" aria-hidden="true">
                 {% if sender_emails|length > 1 %}
                   {% trans 'emails' %}
                 {% else %}
@@ -85,10 +103,13 @@
           {% endif %}
           {% if other_cardholder_names %}
             <div class="column-half">
-              {% for other_cardholder_name in other_cardholder_names %}
-                <strong>{{ other_cardholder_name }}</strong>{% if not forloop.last %},{% endif %}
-              {% endfor %}
-              <p>{% trans 'other names used' %}</p>
+              {% random_string as profile_label %}
+              <span role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
+                {% for other_cardholder_name in other_cardholder_names %}
+                  <strong>{{ other_cardholder_name }}</strong>{% if not forloop.last %},{% endif %}
+                {% endfor %}
+              </span>
+              <p id="mtp-label-{{ profile_label }}" aria-hidden="true">{% trans 'other names used' %}</p>
             </div>
           {% endif %}
         </div>
@@ -96,36 +117,41 @@
 
       <div class="grid-row mtp-sender-summary__details">
         <div class="column-one-third col-1">
-          <strong>{{ sender.credit_count }}</strong>
-          <p>
+          {% random_string as profile_label %}
+          <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ sender.credit_count }}</strong>
+          <p id="mtp-label-{{ profile_label }}" aria-hidden="true">
             {% blocktrans trimmed count count=sender.credit_count %}credit sent{% plural %}credits sent{% endblocktrans %}
           </p>
         </div>
 
         <div class="column-one-third col-2">
-          <strong>{{ sender.prisoner_count }}</strong>
-          <p>
+          {% random_string as profile_label %}
+          <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ sender.prisoner_count }}</strong>
+          <p id="mtp-label-{{ profile_label }}" aria-hidden="true">
             {% blocktrans trimmed count count=sender.prisoner_count %}prisoner{% plural %}prisoners{% endblocktrans %}
           </p>
         </div>
 
         <div class="column-one-third col-3">
           <div class="column-one-half">
-            <strong>{{ sender.prison_count }}</strong>
-            <p>
+            {% random_string as profile_label %}
+            <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ sender.prison_count }}</strong>
+            <p id="mtp-label-{{ profile_label }}" aria-hidden="true">
               {% blocktrans trimmed count count=sender.prison_count %}prison{% plural %}prisons{% endblocktrans %}
             </p>
           </div>
           <div class="column-one-half">
-            <strong>{{ sender.credit_total|currency }}</strong>
-            <p>{% trans 'total amount sent' %}</p>
+            {% random_string as profile_label %}
+            <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ sender.credit_total|currency }}</strong>
+            <p id="mtp-label-{{ profile_label }}" aria-hidden="true">{% trans 'total amount sent' %}</p>
           </div>
         </div>
       </div>
     </div>
-  {% endif %}
 
-  {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this sender on your home page') unpin_label=_('Stop monitoring this sender') only %}
+    {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this sender on your home page') unpin_label=_('Stop monitoring this sender') only %}
+
+  {% endif %}
 
   {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
