@@ -18,15 +18,14 @@
 
   <header>
     {% language_switch %}
-    <h1 class="heading-xlarge">
-      {{ view.title }}
-      {% if sender.bank_transfer_details %}
-        <p class="lede">{% trans 'Sent by bank transfer' %}</p>
-      {% elif sender.debit_card_details %}
-        <p class="lede">{% trans 'Sent by debit card' %}</p>
-      {% endif %}
-    </h1>
+    <h1 class="heading-xlarge">{{ view.title }}</h1>
   </header>
+
+  {% if sender.bank_transfer_details %}
+    <p class="lede">{% trans 'Sent by bank transfer' %}</p>
+  {% elif sender.debit_card_details %}
+    <p class="lede">{% trans 'Sent by debit card' %}</p>
+  {% endif %}
 
   {% if sender %}
     <div class="mtp-sender-summary">
