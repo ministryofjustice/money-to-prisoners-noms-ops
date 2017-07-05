@@ -3,7 +3,7 @@
 {% load mtp_common %}
 {% load security %}
 
-{% block page_title %}{% trans 'New credits check' %}{% endblock %}
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 {% block inner_content %}
 <header>
