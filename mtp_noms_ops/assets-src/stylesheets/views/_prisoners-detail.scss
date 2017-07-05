@@ -1,26 +1,24 @@
 .mtp-prisoner-image {
-  float: left;
   margin-right: 30px;
+  margin-bottom: 0.5em;
   width: 160px;
   height: 200px;
-  background-image: file-url('placeholder-image.png');
-  background-size: contain;
-  background-repeat: no-repeat;
+  background: file-url('placeholder-image.png') no-repeat;
 
   @include device-pixel-ratio {
     background-image: file-url('placeholder-image@2x.png');
+    background-size: contain;
   }
 
   img {
     width: 160px;
     height: 200px;
   }
-}
 
-@include media($max-width: 940px) {
-  .mtp-prisoner-image {
-    float: none;
-    padding-bottom: 0.5em;
+  @include media($min-width: $desktop-breakpoint) {
+    float: left;
+    margin-top: 30px;
+    margin-bottom: 0;
   }
 }
 

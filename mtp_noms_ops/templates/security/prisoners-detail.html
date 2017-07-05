@@ -10,21 +10,17 @@
 
   <header>
     {% language_switch %}
-    <h1 class="heading-xlarge">
-      {% if prisoner %}
-        {% if nomis_api_available %}
-          <div class="mtp-prisoner-image">
-              <img src="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}" srcset="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}?ratio=2x 2x" alt="{% trans 'Photo of the prisoner' %}"/>
-          </div>
-          {% endif %}
-        {{ view.title }}
-        <p class="lede">{% blocktrans with prison=prisoner.current_prison.name %}Held at {{prison}}{% endblocktrans %}</p>
-      {% endif %}
-    </h1>
+    {% if prisoner and nomis_api_available %}
+      <div class="mtp-prisoner-image">
+        <img src="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}" srcset="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}?ratio=2x 2x" alt="{% trans 'Photo of the prisoner' %}"/>
+      </div>
+    {% endif %}
+    <h1 class="heading-xlarge">{{ view.title }}</h1>
   </header>
 
-
   {% if prisoner %}
+    <p class="lede">{% blocktrans with prison=prisoner.current_prison.name %}Held at {{ prison }}{% endblocktrans %}</p>
+
     <div class="grid-row mtp-prisoner-summary">
       <div class="column-one-quarter">
         <strong>{{ prisoner.credit_count }}</strong>
