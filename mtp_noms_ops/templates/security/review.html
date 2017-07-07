@@ -44,7 +44,7 @@
         {% for credit in credits %}
           <tr>
             <td class="mtp-review__sender">
-              <div class="line1"><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default_if_none:'—' }}</a></div>
+              <div class="line1"><a class="mtp-print-url-hidden" href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default_if_none:'—' }}</a></div>
               {% if credit.source == 'online' %}
                 {{ credit.sender_email|default_if_none:'—' }}<br/>
                 {{ credit.card_number_last_digits|format_card_number }} {{ credit.card_expiry_date|default_if_none:'' }}<br/>
@@ -55,7 +55,7 @@
               {% endif %}
             </td>
             <td class="mtp-review__prisoner">
-              <div class="line1"><a href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
+              <div class="line1"><a class="mtp-print-url-hidden" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
               {{ credit.prisoner_name }}
             </td>
             <td class="numeric">

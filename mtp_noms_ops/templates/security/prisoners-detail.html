@@ -111,13 +111,13 @@
               <td>
                 {% if credit.source == 'online' %}
                   <p class="mtp-credit__card">
-                    <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
+                    <strong><a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
                     {% trans 'by debit card' %} <br />
                     —
                   </p>
                 {% else %}
                   <p class="mtp-credit__transfer">
-                    <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
+                    <strong><a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
                     {% trans 'by bank transfer' %} <br />
                     —
                   </p>

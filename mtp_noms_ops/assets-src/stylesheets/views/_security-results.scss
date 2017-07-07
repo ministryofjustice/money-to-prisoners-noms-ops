@@ -99,11 +99,6 @@
       width: 100%;
     }
   }
-
-  a:link:after, a:visited:after {
-    content: '';
-    display: none;
-  }
 }
 
 .mtp-credit__card, .mtp-credit__transfer, .mtp-credit__post {
