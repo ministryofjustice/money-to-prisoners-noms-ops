@@ -244,7 +244,7 @@ class ReviewCreditsView(FormView):
         count = form.review()
         messages.add_message(
             self.request, messages.INFO,
-            _('{count} credits have been marked as checked by security').format(count=count)
+            _('%(count)d credits have been marked as checked by security') % {'count': count}
         )
         return super().form_valid(form=form)
 

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mtp-noms-ops\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-07 11:41+0100\n"
+"POT-Creation-Date: 2017-07-07 16:41+0100\n"
 "PO-Revision-Date: 2016-11-04 10:00+0000\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>\n"
 "Language-Team: Welsh (http://www.transifex.com/ministry-of-justice/mtp/language/cy/)\n"
@@ -470,8 +470,8 @@ msgid "New credits check"
 msgstr ""
 
 #: apps/security/views.py:247
-#, python-brace-format
-msgid "{count} credits have been marked as checked by security"
+#, python-format
+msgid "%(count)d credits have been marked as checked by security"
 msgstr ""
 
 #: templates/base.html:24
