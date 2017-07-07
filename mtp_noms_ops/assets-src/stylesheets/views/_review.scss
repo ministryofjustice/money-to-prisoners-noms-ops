@@ -1,16 +1,6 @@
 .mtp-review {
   margin: 0;
 
-  .actions {
-    margin-top: $gutter;
-    margin-bottom: $gutter;
-
-    a {
-      line-height: 175%;
-      margin-left: $gutter;
-    }
-  }
-
   table {
     width: 100%;
     border-top: 1px solid $grey-2;
@@ -18,24 +8,38 @@
 
     textarea {
       width: 100%;
+      resize: vertical;
     }
 
-    tr {
-      td {
-        border-bottom: 0;
-      }
+    tr td {
+      border-bottom: 0;
+      vertical-align: top;
     }
 
     .numeric {
       font-size: 19px;
     }
-
-    .sender, .prisoner {
-      font-size: 16px;
-
-      .line1 {
-        font-size: 19px;
-      }
-    }
   }
+}
+
+.mtp-review__actions {
+  margin-top: $gutter;
+  margin-bottom: $gutter;
+
+  a {
+    line-height: 2.3em;
+    margin-left: $gutter;
+  }
+}
+
+.mtp-review__sender, .mtp-review__prisoner {
+  font-size: 16px;
+
+  .line1 {
+    font-size: 19px;
+  }
+}
+
+.mtp-numeric-th {
+  text-align: right;
 }
