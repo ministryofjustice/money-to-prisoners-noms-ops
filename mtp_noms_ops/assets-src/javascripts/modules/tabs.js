@@ -20,9 +20,10 @@ exports.Tabs = {
 
     function resetTabsAndPanels () {
       $tabButtons.attr({
-        tabindex: '-1',
+        'tabindex': '-1',
         'aria-selected': 'false'
       }).removeClass('mtp-tab--selected');
+      $tabPanels.attr('aria-hidden', 'true');
       $tabPanels.hide();
     }
 
@@ -36,10 +37,12 @@ exports.Tabs = {
     });
     $tabButtons.on('click', function (e) {
       var $tabButton = $(this);
+      var $tabPanel = $tabButton.data('mtp-tabpanel');
       var wasSelected = $tabButton.hasClass('mtp-tab--selected');
 
       resetTabsAndPanels();
 
+      $tabButton.focus();
       if (wasSelected) {
         selectedIndex = null;
         $tabContainer.addClass('mtp-tab-container--collapsed');
@@ -50,10 +53,11 @@ exports.Tabs = {
       } else {
         selectedIndex = $tabButtons.index($tabButton);
         $tabButton.attr({
-          tabindex: '0',
+          'tabindex': '0',
           'aria-selected': 'true'
         }).addClass('mtp-tab--selected');
-        $tabButton.data('mtp-tabpanel').show();
+        $tabPanel.attr('aria-hidden', 'false');
+        $tabPanel.show();
         $tabContainer.removeClass('mtp-tab-container--collapsed');
         $tabPanelContainer.attr('aria-expanded', 'true');
         if (tabCookieName) {
