@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-07 11:41+0100\n"
+"POT-Creation-Date: 2017-07-07 16:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Igor U <igor.ushkarev@digital.justice.gov.uk>, 2017\n"
 "Language-Team: Welsh (https://www.transifex.com/ministry-of-justice/teams/34553/cy/)\n"
@@ -474,9 +474,9 @@ msgid "New credits check"
 msgstr "Gwirio credydau newydd"
 
 #: apps/security/views.py:247
-#, python-brace-format
-msgid "{count} credits have been marked as checked by security"
-msgstr "Mae {count} o gredydau wedi cael eu marcio fel eu bod wedi cael eu gwirio gan y staff diogelwch"
+#, python-format
+msgid "%(count)d credits have been marked as checked by security"
+msgstr "Mae %(count)d o gredydau wedi cael eu marcio fel eu bod wedi cael eu gwirio gan y staff diogelwch"
 
 #: templates/base.html:24
 msgid "Change password"
