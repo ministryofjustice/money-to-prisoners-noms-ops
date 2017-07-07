@@ -138,12 +138,13 @@ def prisoner_profile_search_url(credit, redirect_on_single=True):
 
 @register.simple_tag
 def tab_aria_atts(field):
-    panel_id = 'mtp-tabpanel-%s' % field,
+    panel_id = 'mtp-tabpanel-%s' % field
     return flatatt({
         'id': 'mtp-tab-%s' % field,
         'href': '#%s' % panel_id,
         'role': 'tab',
         'aria-controls': panel_id,
+        'aria-flowto': panel_id,
     })
 
 
