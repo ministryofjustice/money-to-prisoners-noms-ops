@@ -75,7 +75,7 @@
             {% for prisoner in prisoners %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
-                  <a href="{% url 'security:prisoner_detail' prisoner.id %}">
+                  <a href="{% url 'security:prisoner_detail' prisoner.id %}" class="mtp-print-url-hidden">
                     <strong>{{ prisoner.prisoner_number }}</strong>
                   </a>
                   <br/>

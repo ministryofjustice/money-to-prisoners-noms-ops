@@ -75,12 +75,12 @@
                 <td>
                   {% if credit.source == 'online' %}
                     <p class="mtp-credit__card">
-                      <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default:'—' }}</a></strong><br/>
+                      <strong><a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name|default:'—' }}</a></strong><br/>
                       {% trans 'by debit card' %}
                     </p>
                   {% else %}
                     <p class="mtp-credit__transfer">
-                      <strong><a href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default:'—' }}</a></strong><br/>
+                      <strong><a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name|default:'—' }}</a></strong><br/>
                       {% trans 'by bank transfer' %}
                     </p>
                   {% endif %}
@@ -91,7 +91,7 @@
                 <td>
                   {% if credit.prisoner_number %}
                     <p>
-                      <strong><a href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></strong><br/>
+                      <strong><a href="{{ credit|prisoner_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.prisoner_number }}</a></strong><br/>
                       {{ credit.prisoner_name|default:'—' }}
                     </p>
                   {% endif %}

@@ -77,14 +77,14 @@
                 <td>
                   {% if sender.bank_transfer_details %}
                   <p class="mtp-credit__transfer">
-                    <a href="{% url 'security:sender_detail' sender.id %}">
+                    <a href="{% url 'security:sender_detail' sender.id %}" class="mtp-print-url-hidden">
                       <strong>{{ sender.bank_transfer_details.0.sender_name|default:'—' }}</strong>
                     </a><br />
                     {% trans 'by bank transfer' %}
                   </p>
                   {% elif sender.debit_card_details %}
                   <p class="mtp-credit__card">
-                    <a href="{% url 'security:sender_detail' sender.id %}">
+                    <a href="{% url 'security:sender_detail' sender.id %}" class="mtp-print-url-hidden">
                       <strong>{{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}</strong>
                     </a><br />
                     {% trans 'by debit card' %}
