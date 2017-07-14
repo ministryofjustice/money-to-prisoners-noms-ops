@@ -1,57 +1,52 @@
 .mtp-sender-summary {
   margin: 0;
+  display: inline-block;
+  margin-top: 1em;
+  margin-left: 0;
+  min-height: 2.5em;
+  padding-top: 0.5em;
+  padding-left: 6em;
+  width: 70%;
+
+  .heading-xlarge {
+    margin-top: 0;
+  }
 
   .col-1 {
-    width: 25%;
-  }
-
-  .col-2 {
-    width: 20%;
-  }
-
-  .col-3 {
-    width: 50%;
-
-    .column-one-half {
-      padding-left: 0;
-    }
+    padding-left: 0;
   }
 
   @media print {
-    .column-one-third, .column-one-half {
+    .column-two-thirds, .column-one-third, .column-one-half, .column-one-quarter {
       display: inline-block;
     }
   }
 }
 
 .mtp-sender-summary__details {
-  display: inline-block;
-  margin-top: 1em;
-  margin-left: 0;
-  min-height: 2.5em;
-  padding-left: 3em;
-  width: 70%;
+  margin-bottom: 1em;
+}
 
-  @media print {
-    padding-left: 0;
-  }
+.mtp-sender-label {
+  color: $secondary-text-colour;
+  font-size: 16px;
 }
 
 .mtp-sender-summary__bank-transfer {
-  background: file-url('icon-large-bank.png') no-repeat scroll 0 0;
+  background: file-url('icon-large-bank@2x.png') no-repeat scroll 0 0;
 
   @include device-pixel-ratio {
-    background-image: file-url('icon-large-bank@2x.png');
-    background-size: 50px 50px;
+    background-image: file-url('icon-large-bank@4x.png');
+    background-size: 100px 100px;
   }
 }
 
 .mtp-sender-summary__debit-card {
-  background: file-url('icon-large-card.png') no-repeat scroll 0 0;
+  background: file-url('icon-large-card@2x.png') no-repeat scroll 0 0;
 
   @include device-pixel-ratio {
-    background-image: file-url('icon-large-card@2x.png');
-    background-size: 50px 50px;
+    background-image: file-url('icon-large-card@4x.png');
+    background-size: 100px 100px;
   }
 }
 
@@ -63,4 +58,3 @@
   margin-top: 1em;
   text-align: center;
 }
-
