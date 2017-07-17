@@ -195,7 +195,7 @@
                 {% endif %}
                 <p>—</p>
                 <div class="mtp-sender-label">{% trans 'Prisoner name' %}</div>
-                <div>{{ credit.prisoner_name|default_if_none:'—' }}</div>
+                <div>{{ credit.prisoner_name|default_if_none:'—'|lower|title }}</div>
                 <br/>
                 <div class="mtp-sender-label">{% trans 'Prison' %}</div>
                 <div>{{ credit.prison_name|default_if_none:'—' }}</div>

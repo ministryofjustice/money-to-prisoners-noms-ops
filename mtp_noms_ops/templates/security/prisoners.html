@@ -79,7 +79,7 @@
                     <strong>{{ prisoner.prisoner_number }}</strong>
                   </a>
                   <br/>
-                  {{ prisoner.prisoner_name }}
+                  {{ prisoner.prisoner_name|default_if_none:'—'|lower|title }}
                 </td>
                 <td>{{ prisoner.prisons|list_prison_names }}</td>
                 <td>
