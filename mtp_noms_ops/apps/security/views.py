@@ -18,7 +18,7 @@ from security.forms import (
     SendersForm, SendersDetailForm, PrisonersForm, PrisonersDetailForm, CreditsForm,
     ReviewCreditsForm,
 )
-from security.utils import NameSet, EmailSet
+from security.utils import NameSet
 
 logger = logging.getLogger('mtp')
 

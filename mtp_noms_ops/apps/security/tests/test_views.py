@@ -161,6 +161,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
             {
                 'card_number_last_digits': '1234',
                 'card_expiry_date': '10/20',
+                'postcode': 'SW137NJ',
                 'sender_emails': ['m@outside.local', 'M@OUTSIDE.LOCAL', 'mn@outside.local'],
                 'cardholder_names': ['Maisie N', 'MAISIE N', 'Maisie Nolan'],
             }
@@ -253,7 +254,7 @@ class SenderListTestCase(SecurityViewTestCase):
         response_content = response.content.decode(response.charset)
         self.assertIn('MAISIE', response_content)
         self.assertIn('12312345', response_content)
-        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('James Halls', response_content)
         self.assertIn('£102.50', response_content)
 
     @mock_form_connection
@@ -268,12 +269,9 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertEqual(response.status_code, 200)
         response_content = response.content.decode(response.charset)
         self.assertIn('**** **** **** 1234', response_content)
-        self.assertSequenceEqual(response.context['other_cardholder_names'], ['Maisie Nolan'])
-        self.assertIn('<strong>Maisie Nolan</strong>', response_content)  # another name used
-        self.assertNotIn('<strong>MAISIE N</strong>', response_content)  # complete names list is not included
-        self.assertIn('m@outside.local', response_content)
-        self.assertNotIn('M@OUTSIDE.LOCAL', response_content)
-        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('10/20', response_content)
+        self.assertIn('SW137NJ', response_content)
+        self.assertIn('James Halls', response_content)
         self.assertIn('£102.50', response_content)
 
     @mock.patch('security.forms.get_connection')
@@ -315,7 +313,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
         mocked_connection().prisoners.get.return_value = response_data
 
         response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'JAMES HALLS')
+        self.assertContains(response, 'James Halls')
         response_content = response.content.decode(response.charset)
         self.assertIn('A1409AE', response_content)
         self.assertIn('310.00', response_content)
@@ -400,7 +398,7 @@ class CreditsListTestCase(SecurityViewTestCase):
 
         self.login()
         response = self.client.get(reverse(self.view_name), {'ordering': '-amount'})
-        self.assertContains(response, 'GEORGE MELLEY')
+        self.assertContains(response, 'George Melley')
         response_content = response.content.decode(response.charset)
         self.assertIn('A1413AE', response_content)
         self.assertIn('275.00', response_content)
