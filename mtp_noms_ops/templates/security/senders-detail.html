@@ -162,8 +162,8 @@
               </td>
               <td>
                 <strong>{{ credit.sender_name|default:'—' }}</strong>
-                <p>—</p>
                 {% if credit.source == 'online' %}
+                  <p>—</p>
                   <div class="mtp-sender-label">{% trans 'Address' %}</div>
                   <div>{{ credit.billing_address.line1 }}</div>
                   <div>{{ credit.billing_address.line2 }}</div>
@@ -176,17 +176,6 @@
                   <br/>
                   <div class="mtp-sender-label">{% trans 'Email' %}</div>
                   <div>{{ credit.sender_email }}</div>
-                {% elif credit.source == 'bank_transfer' %}
-                  <div class="mtp-sender-label">{% trans 'Account number' %}</div>
-                  <div>{{ credit.sender_account_number }}</div>
-                  <br/>
-                  <div class="mtp-sender-label">{% trans 'Sort code' %}</div>
-                  <div>{{ credit.sender_sort_code }}</div>
-                  {% if credit.sender_roll_number %}
-                    <br/>
-                    <div class="mtp-sender-label">{% trans 'Roll number' %}</div>
-                    <div>{{ credit.sender_roll_number }}</div>
-                  {% endif %}
                 {% endif %}
               </td>
               <td>
