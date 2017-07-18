@@ -25,7 +25,7 @@
 
     <div class="mtp-review__actions print-hidden">
       <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
-      <a class="js-Print" href="#print-dialog">{% trans 'Print these credits' %}</a>
+      <a class="js-print-trigger" href="#print-dialog">{% trans 'Print these credits' %}</a>
     </div>
 
     <table>
@@ -79,22 +79,15 @@
       <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
     </div>
 
-    <div id="confirm-checked"
-         class="Dialog"
-         style="display: none"
-         data-hide-close="true"
-         data-disable-backdrop-close="true">
-      <div class="Dialog-inner">
-        <p><strong>{% trans 'Have you checked these credits?' %}</strong></p>
-        <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
-        <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
-        <button type="submit"
-                class="button"
-                value="override">{% trans 'Yes, all credits checked' %}</button>
-        <button type="button"
-                class="button-secondary js-Dialog-close">{% trans 'No, continue checking' %}</button>
-      </div>
-    </div>
+    {% dialoguebox html_id='confirm-checked' title=_('Have you checked these credits?') %}
+      <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
+      <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
+      <button type="submit"
+              class="button"
+              value="override">{% trans 'Yes, all credits checked' %}</button>
+      <button type="button"
+              class="button-secondary {{ dialogue_close_class }}">{% trans 'No, continue checking' %}</button>
+    {% enddialoguebox %}
   </form>
 
 {% else %}
