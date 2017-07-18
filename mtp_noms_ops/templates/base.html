@@ -18,7 +18,7 @@
       <li><a href="{% url 'dashboard' %}">{% trans 'Home' %}</a></li>
       {% if request.can_access_security %}
         <li><a href="{% url 'security:credit_list' %}?{{ initial_params }}">{% trans 'Credits' %}</a></li>
-        <li><a href="{% url 'security:sender_list' %}?{{ initial_params }}">{% trans 'Senders' %}</a></li>
+        <li><a href="{% url 'security:sender_list' %}?{{ initial_params }}">{% trans 'Payment sources' %}</a></li>
         <li><a href="{% url 'security:prisoner_list' %}?{{ initial_params }}">{% trans 'Prisoners' %}</a></li>
       {% endif %}
       <li><a href="{% url 'password_change' %}">{% trans 'Change password' %}</a></li>

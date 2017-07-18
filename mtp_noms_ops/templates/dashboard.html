@@ -31,7 +31,7 @@
 
       <div class="column-one-third mtp-box">
         <a href="{% url 'security:sender_list' %}?{{ initial_params }}">
-          {% trans 'Senders' %}
+          {% trans 'Payment sources' %}
         </a>
       </div>
 
@@ -46,7 +46,7 @@
 
   {% if request.can_access_security and saved_searches|length > 0 %}
 
-    <h2 class="heading-medium">{% trans 'Senders and prisoners you are monitoring' %}</h2>
+    <h2 class="heading-medium">{% trans 'Payment sources and prisoners you are monitoring' %}</h2>
     {% for search in saved_searches %}
       {% if forloop.counter0|divisibleby:3 %}
       <div class="grid-row">

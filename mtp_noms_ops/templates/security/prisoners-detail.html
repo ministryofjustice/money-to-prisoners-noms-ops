@@ -33,7 +33,7 @@
 
         <div class="column-one-quarter">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label" aria-hidden="true">{% trans 'Senders' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label" aria-hidden="true">{% trans 'Payment sources' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.sender_count }}</strong>
         </div>
 
@@ -87,7 +87,7 @@
                 </span>
               </a>
             </th>
-            <th>{% trans 'Sender and type' %}</th>
+            <th>{% trans 'Payment source and type' %}</th>
             <th>{% trans 'Name entered by sender' %}</th>
             <th class="{{ form|ordering_classes:'amount' }} number">
               <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">

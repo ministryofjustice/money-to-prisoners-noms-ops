@@ -137,7 +137,7 @@ class SenderListView(SecurityView):
     """
     Sender search view
     """
-    title = _('Senders')
+    title = _('Payment sources')
     form_template_name = 'security/forms/senders.html'
     template_name = 'security/senders.html'
     form_class = SendersForm
