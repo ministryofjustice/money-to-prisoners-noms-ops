@@ -119,7 +119,7 @@ exports.SecurityForms = {
         }
       });
       if (disabledPrisonsCount === prisonCount) {
-        $allPrisonsOption.text(prisonData['_no_matches_label']).click();
+        $allPrisonsOption.text(django.gettext('No matching prisons')).click();
         $prisonSelect.prop('disabled', true);
       } else {
         $allPrisonsOption.text(allPrisonsOptionText);

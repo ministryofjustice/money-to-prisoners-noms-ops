@@ -4,9 +4,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-18 16:48+0100\n"
+"POT-Creation-Date: 2017-07-18 17:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Igor U <igor.ushkarev@digital.justice.gov.uk>, 2017\n"
+"Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>, 2017\n"
 "Language-Team: Welsh (https://www.transifex.com/ministry-of-justice/teams/34553/cy/)\n"
 "Language: cy\n"
 "MIME-Version: 1.0\n"
@@ -456,10 +456,8 @@ msgstr "Credydau"
 #: apps/security/views.py:140 templates/base.html:22
 #: templates/dashboard.html:34 templates/security/prisoners-detail.html:36
 #: templates/security/prisoners.html:59
-#, fuzzy
-#| msgid "Payment method"
 msgid "Payment sources"
-msgstr "Dull talu"
+msgstr ""
 
 #: apps/security/views.py:170
 msgid "Unknown sender"
@@ -507,10 +505,8 @@ msgid "View all"
 msgstr "Gweld bob un"
 
 #: templates/dashboard.html:49
-#, fuzzy
-#| msgid "Senders and prisoners you are monitoring"
 msgid "Payment sources and prisoners you are monitoring"
-msgstr "Anfonwyr a charcharorion yr ydych yn eu monitro"
+msgstr ""
 
 #: templates/dashboard.html:59
 #, python-format
@@ -608,10 +604,8 @@ msgstr "Dyddiad derbyn"
 #: templates/security/credits.html:48
 #: templates/security/prisoners-detail.html:90
 #: templates/security/senders.html:39
-#, fuzzy
-#| msgid "Sender and type"
 msgid "Payment source and type"
-msgstr "Anfonwr a math"
+msgstr ""
 
 #: templates/security/credits.html:52
 #: templates/security/prisoners-detail.html:95
@@ -671,12 +665,6 @@ msgstr "Dyddiad"
 msgid "Sender"
 msgstr "Anfonwr"
 
-#: templates/security/forms/credits.html:72
-#: templates/security/forms/prisoners.html:31
-#: templates/security/forms/senders.html:39
-msgid "No matching prisons"
-msgstr "Ni ddaethpwyd o hyd i unrhyw garchardai sy'n cyfateb"
-
 #: templates/security/forms/numeric-range-field.html:6
 msgid "Min"
 msgstr "Isafswm"
@@ -703,10 +691,8 @@ msgstr "Didoli"
 
 #: templates/security/forms/senders.html:10 templates/security/review.html:36
 #: templates/security/senders-detail.html:141
-#, fuzzy
-#| msgid "Payment method"
 msgid "Payment source"
-msgstr "Dull talu"
+msgstr ""
 
 #: templates/security/forms/total-range-fields.html:4
 msgid "Total sent (£)"
@@ -751,16 +737,12 @@ msgid "Credits received"
 msgstr "Credydau a gafwyd"
 
 #: templates/security/prisoners-detail.html:42
-#, fuzzy
-#| msgid "total amount received"
 msgid "Total amount received"
-msgstr "cyfanswm y swm a gafwyd"
+msgstr "Cyfanswm y swm a gafwyd"
 
 #: templates/security/prisoners-detail.html:49
-#, fuzzy
-#| msgid "names given by senders"
 msgid "Names given by senders"
-msgstr "enwau a roddwyd gan anfonwyr"
+msgstr "Enwau a roddwyd gan anfonwyr"
 
 #: templates/security/prisoners-detail.html:59
 msgid "Monitor this prisoner on your home page"
@@ -779,38 +761,28 @@ msgid "Received at prison"
 msgstr "Wedi cyrraedd y carchar"
 
 #: templates/security/prisoners-detail.html:117
-#, fuzzy
-#| msgid "card number"
 msgid "Card number"
-msgstr "rhif y cerdyn"
+msgstr "Rhif y cerdyn"
 
 #: templates/security/prisoners-detail.html:125
 #: templates/security/senders-detail.html:23
-#, fuzzy
-#| msgid "account number"
 msgid "Account number"
-msgstr "rhif y cyfrif"
+msgstr "Rhif y cyfrif"
 
 #: templates/security/prisoners-detail.html:128
 #: templates/security/senders-detail.html:30
-#, fuzzy
-#| msgid "sort code"
 msgid "Sort code"
-msgstr "cod didoli"
+msgstr "Cod didoli"
 
 #: templates/security/prisoners-detail.html:132
 #: templates/security/senders-detail.html:38
-#, fuzzy
-#| msgid "roll number (for building societies)"
 msgid "Roll number (for building societies)"
-msgstr "rhif rhestr (ar gyfer cymdeithasau adeiladu)"
+msgstr "Rhif rhestr (ar gyfer cymdeithasau adeiladu)"
 
 #: templates/security/prisoners-detail.html:157
 #: templates/security/senders-detail.html:210
-#, fuzzy
-#| msgid "Credited status"
 msgid "Crediting staff"
-msgstr "Statws credydu"
+msgstr ""
 
 #: templates/security/prisoners-detail.html:160
 #: templates/security/senders-detail.html:213
@@ -831,15 +803,13 @@ msgstr[2] "<strong>%(count)s</strong> credyd wedi'u cael"
 msgstr[3] "<strong>%(count)s</strong> credyd wedi'u cael"
 
 #: templates/security/prisoners.html:93
-#, fuzzy, python-format
-#| msgid "<strong>%(count)s</strong> prisoner"
-#| msgid_plural "<strong>%(count)s</strong> prisoners"
+#, python-format
 msgid "<strong>%(count)s</strong> payment source"
 msgid_plural "<strong>%(count)s</strong> payment sources"
-msgstr[0] "<strong>%(count)s</strong> carcharor"
-msgstr[1] "<strong>%(count)s</strong> carcharor"
-msgstr[2] "<strong>%(count)s</strong> carcharor"
-msgstr[3] "<strong>%(count)s</strong> carcharorion"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
 
 #: templates/security/prisoners.html:103
 msgid "No matching prisoners found"
@@ -880,7 +850,7 @@ msgstr "Taliad cerdyn debyd"
 #: templates/security/review.html:67
 #, python-format
 msgid "Add security comment for credit of %(amount)s to %(prisoner_name)s"
-msgstr ""
+msgstr "Ychwanegu sylwadau am ddiogelwch er mwyn credydu %(amount)s i %(prisoner_name)s"
 
 #: templates/security/review.html:82
 msgid "Have you checked these credits?"
@@ -911,26 +881,20 @@ msgid "Bank transfer payments with these details"
 msgstr ""
 
 #: templates/security/senders-detail.html:48
-#, fuzzy
-#| msgid "Debit card payment"
 msgid "Debit card payments with these details"
-msgstr "Taliad cerdyn debyd"
+msgstr ""
 
 #: templates/security/senders-detail.html:50
 msgid "How are these grouped?"
 msgstr ""
 
 #: templates/security/senders-detail.html:63
-#, fuzzy
-#| msgid "expiry date"
 msgid "Expiry date"
-msgstr "dyddiad daw i ben"
+msgstr "Dyddiad daw i ben"
 
 #: templates/security/senders-detail.html:70
-#, fuzzy
-#| msgid "sort code"
 msgid "Postcode"
-msgstr "cod didoli"
+msgstr ""
 
 #: templates/security/senders-detail.html:87
 #: templates/security/senders-detail.html:118
@@ -942,10 +906,8 @@ msgid "Prisons"
 msgstr "Carchardai"
 
 #: templates/security/senders-detail.html:106
-#, fuzzy
-#| msgid "total amount sent"
 msgid "Total amount sent"
-msgstr "cyfanswm y swm a anfonwyd"
+msgstr "Cyfanswm y swm a anfonwyd"
 
 #: templates/security/senders-detail.html:111
 msgid "Monitor this sender on your home page"
@@ -964,10 +926,8 @@ msgid "IP"
 msgstr ""
 
 #: templates/security/senders-detail.html:181
-#, fuzzy
-#| msgid "email"
 msgid "Email"
-msgstr "e-bost"
+msgstr "E-bost"
 
 #: templates/security/senders-detail.html:229
 msgid "How these credits are grouped"
@@ -1025,10 +985,8 @@ msgstr[2] "<strong>%(count)s</strong> carchar"
 msgstr[3] "<strong>%(count)s</strong> carchardai"
 
 #: templates/security/senders.html:121
-#, fuzzy
-#| msgid "No matching prisoners found"
 msgid "No matching payment sources found"
-msgstr "Ni daethpwyd o hyd i unrhyw garcharorion sy'n cyfateb"
+msgstr ""
 
 #: utils.py:27
 msgid "Contact us"
@@ -1037,69 +995,3 @@ msgstr "Cysylltu â ni"
 #: utils.py:40
 msgid "Prisoner location admin"
 msgstr "Lleoliad carcharor - gweinyddol"
-
-#~ msgid "Senders"
-#~ msgstr "Anfonwyr"
-
-#~ msgid "credit received"
-#~ msgid_plural "credits received"
-#~ msgstr[0] "credyd a gafwyd"
-#~ msgstr[1] "credyd a gafwyd"
-#~ msgstr[2] "credyd a gafwyd"
-#~ msgstr[3] "credydau a gafwyd"
-
-#~ msgid "sender"
-#~ msgid_plural "senders"
-#~ msgstr[0] "anfonwr"
-#~ msgstr[1] "anfonwr"
-#~ msgstr[2] "anfonwr"
-#~ msgstr[3] "anfonwyr"
-
-#~ msgid "<strong>%(count)s</strong> sender"
-#~ msgid_plural "<strong>%(count)s</strong> senders"
-#~ msgstr[0] "<strong>%(count)s</strong> anfonwr"
-#~ msgstr[1] "<strong>%(count)s</strong> anfonwr"
-#~ msgstr[2] "<strong>%(count)s</strong> anfonwr"
-#~ msgstr[3] "<strong>%(count)s</strong> anfonwr"
-
-#~ msgid "We’re currently fixing an issue where senders are being identified only by the last four digits of their card and its expiry date."
-#~ msgstr "Rydym yn cywirio nam ar hyn o bryd lle mae anfonwyr ond yn cael eu hadnabod gan bedwar digid olaf eu cardyn a'r dyddiad dirwyn i ben"
-
-#~ msgid "These credits may not all be from the same sender."
-#~ msgstr "Efallai nad yw'r holl gredydau hyn gan yr un anfonwr"
-
-#~ msgid "Sent by bank transfer"
-#~ msgstr "Anfon drwy drosglwyddiad banc"
-
-#~ msgid "Sent by debit card"
-#~ msgstr "Anfon gyda cherdyn debyd"
-
-#~ msgid "emails"
-#~ msgstr "negeseuon e-bost"
-
-#~ msgid "other names used"
-#~ msgstr "enwau eraill a ddefnyddiwyd"
-
-#~ msgid "credit sent"
-#~ msgid_plural "credits sent"
-#~ msgstr[0] "credyd a anfonwyd"
-#~ msgstr[1] "credyd a anfonwyd"
-#~ msgstr[2] "credyd a anfonwyd"
-#~ msgstr[3] "credydau a anfonwyd"
-
-#~ msgid "prisoner"
-#~ msgid_plural "prisoners"
-#~ msgstr[0] "carcharor"
-#~ msgstr[1] "carcharor"
-#~ msgstr[2] "carcharor"
-#~ msgstr[3] "carchrorion"
-
-#~ msgid "prison"
-#~ msgid_plural "prisons"
-#~ msgstr[0] "carchar"
-#~ msgstr[1] "carchar"
-#~ msgstr[2] "carchar"
-#~ msgstr[3] "carchardai"
-
-#~ msgid "No matching senders found"
-#~ msgstr "Ni ddaethpwyd o hyd i unrhyw anfonwr sy'n cyfateb"

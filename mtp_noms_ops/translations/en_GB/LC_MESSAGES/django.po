@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mtp-noms-ops\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-18 16:48+0100\n"
+"POT-Creation-Date: 2017-07-18 17:38+0100\n"
 "PO-Revision-Date: 2016-11-04 10:00+0000\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>\n"
 "Language-Team: Welsh (http://www.transifex.com/ministry-of-justice/mtp/language/cy/)\n"
@@ -657,12 +657,6 @@ msgstr ""
 
 #: templates/security/forms/credits.html:12
 msgid "Sender"
-msgstr ""
-
-#: templates/security/forms/credits.html:72
-#: templates/security/forms/prisoners.html:31
-#: templates/security/forms/senders.html:39
-msgid "No matching prisons"
 msgstr ""
 
 #: templates/security/forms/numeric-range-field.html:6
