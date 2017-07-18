@@ -9,7 +9,7 @@
   {% language_switch %}
   <div class="mtp-sender-summary {% if sender.bank_transfer_details %}mtp-sender-summary__bank-transfer{% elif sender.debit_card_details %}mtp-sender-summary__debit-card{% endif %}">
     <header>
-      <h1 class="heading-xlarge">{{ view.title }}{% if sender.debit_card_details %}*{% endif %}</h1>
+      <h1 class="heading-xlarge">{{ view.title }}</h1>
     </header>
 
     {% if sender.bank_transfer_details %}
@@ -44,7 +44,11 @@
       </div>
 
     {% elif sender.debit_card_details %}
-      <p class="lede">{% trans 'Debit card payments with these details' %}</p>
+      <p class="lede">
+        {% trans 'Debit card payments with these details' %}
+        &nbsp;
+        <a href="#grouping-info-dialogue" class="mtp-grouping-info js-dialogue-open">{% trans 'How are these grouped?' %}</a>
+      </p>
 
       <div class="grid-row mtp-sender-summary__details">
         <div class="column-one-third">
@@ -221,5 +225,19 @@
       {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
     </div>
   {% endif %}
+
+  {% dialoguebox html_id='grouping-info-dialogue' title=_('How these credits are grouped') html_classes="mtp-grouping-info-dialogue" %}
+    <p>
+      {% trans 'We group the payment sources by the debit card’s last 4 digits, expiry date and postcode.' %}
+      {% trans 'We do this because card industry compliance doesn’t allow using the full card number as a unique ID.' %}
+    </p>
+    <p>
+      {% trans 'In almost all cases, this results in one specific card and cardholder.' %}
+      {% trans 'But, for the avoidance of doubt, we’ve listed details for each transaction below.' %}
+    </p>
+    <div class="mtp-grouping-info-dialogue__button">
+      <button type="button" class="button {{ dialogue_close_class }}">{% trans 'OK' %}</button>
+    </div>
+  {% enddialoguebox %}
 
 {% endblock %}
