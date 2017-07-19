@@ -3,7 +3,9 @@ import logging
 from django import template
 from django.core.urlresolvers import reverse
 from django.forms.utils import flatatt
+from django.utils.html import format_html_join
 from django.utils.http import urlencode
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
 logger = logging.getLogger('mtp')
@@ -155,3 +157,9 @@ def panel_aria_atts(field):
         'role': 'tabpanel',
         'aria-labelledby': 'mtp-tab-%s' % field,
     })
+
+
+@register.filter
+def format_address(address):
+    lines = [(address[key],) for key in ('line1', 'line2', 'city', 'postcode', 'country') if address.get(key)]
+    return format_html_join(mark_safe('<br />'), '{}', lines)

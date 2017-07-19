@@ -25,6 +25,7 @@
             {{ sender.bank_transfer_details.0.sender_account_number|default:'—' }}
           </strong>
         </div>
+
         <div class="column-one-third">
           {% random_string as profile_label %}
           <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Sort code' %}</div>
@@ -32,6 +33,7 @@
             {{ sender.bank_transfer_details.0.sender_sort_code|format_sort_code }}
           </strong>
         </div>
+
         {% if sender.bank_transfer_details.0.sender_roll_number %}
           <div class="column-one-third">
             {% random_string as profile_label %}
@@ -58,6 +60,7 @@
             {{ sender.debit_card_details.0.card_number_last_digits|format_card_number }}
           </strong>
         </div>
+
         <div class="column-one-quarter">
           {% random_string as profile_label %}
           <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Expiry date' %}</div>
@@ -65,6 +68,7 @@
             {{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}
           </strong>
         </div>
+
         <div class="column-one-quarter">
           {% random_string as profile_label %}
           <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Postcode' %}</div>
@@ -168,18 +172,22 @@
                 <strong>{{ credit.sender_name|default:'—' }}</strong>
                 {% if credit.source == 'online' %}
                   <p>—</p>
-                  <div class="mtp-sender-label">{% trans 'Address' %}</div>
-                  <div>{{ credit.billing_address.line1 }}</div>
-                  <div>{{ credit.billing_address.line2 }}</div>
-                  <div>{{ credit.billing_address.city }}</div>
-                  <div>{{ credit.billing_address.postcode }}</div>
-                  <div>{{ credit.billing_address.country }}</div>
+
+                  {% random_string as profile_label %}
+                  <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Address' %}</div>
+                  <address aria-labelledby="mtp-label-{{ profile_label }}">
+                    {{ credit.billing_address|format_address }}
+                  </address>
                   <br/>
-                  <div class="mtp-sender-label">{% trans 'IP' %}</div>
-                  <div>{{ credit.ip_address }}</div>
+
+                  {% random_string as profile_label %}
+                  <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'IP' %}</div>
+                  <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.ip_address }}</div>
                   <br/>
-                  <div class="mtp-sender-label">{% trans 'Email' %}</div>
-                  <div>{{ credit.sender_email }}</div>
+
+                  {% random_string as profile_label %}
+                  <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Email' %}</div>
+                  <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_email }}</div>
                 {% endif %}
               </td>
               <td>
@@ -187,11 +195,15 @@
                   <strong><a href="{{ credit|prisoner_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.prisoner_number }}</a></strong>
                 {% endif %}
                 <p>—</p>
-                <div class="mtp-sender-label">{% trans 'Prisoner name' %}</div>
-                <div>{{ credit.prisoner_name|default_if_none:'—'|lower|title }}</div>
+
+                {% random_string as profile_label %}
+                <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Prisoner name' %}</div>
+                <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.prisoner_name|default_if_none:'—'|lower|title }}</div>
                 <br/>
-                <div class="mtp-sender-label">{% trans 'Prison' %}</div>
-                <div>{{ credit.prison_name|default_if_none:'—' }}</div>
+
+                {% random_string as profile_label %}
+                <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Prison' %}</div>
+                <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.prison_name|default_if_none:'—' }}</div>
               </td>
               <td class="number">
                 <strong>{{ credit.amount|currency }}</strong>
@@ -207,11 +219,15 @@
                   {% endif %}
                 </strong>
                 <p>—</p>
-                <div class="mtp-sender-label">{% trans 'Crediting staff' %}</div>
-                <div>{{ credit.owner_name|default:'—' }}</div>
+
+                {% random_string as profile_label %}
+                <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Crediting staff' %}</div>
+                <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.owner_name|default:'—' }}</div>
                 <br/>
-                <div class="mtp-sender-label">{% trans 'NOMIS ID' %}</div>
-                <div>{{ credit.nomis_transaction_id|default:'—' }}</div>
+
+                {% random_string as profile_label %}
+                <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'NOMIS ID' %}</div>
+                <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.nomis_transaction_id|default:'—' }}</div>
               </td>
             </tr>
           {% empty %}
