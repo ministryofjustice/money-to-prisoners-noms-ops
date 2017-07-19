@@ -49,6 +49,8 @@ def format_resolution(resolution):
         return gettext('Initial')
     if resolution == 'pending':
         return gettext('Pending')
+    if resolution == 'manual':
+        return gettext('Requires manual processing')
     if resolution == 'credited':
         return gettext('Credited')
     if resolution == 'refunded':
