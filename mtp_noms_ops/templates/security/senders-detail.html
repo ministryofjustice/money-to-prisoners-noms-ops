@@ -20,14 +20,14 @@
       <div class="grid-row mtp-sender-summary__details">
         <div class="column-one-third">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Account number' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Account number' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
             {{ sender.bank_transfer_details.0.sender_account_number|default:'—' }}
           </strong>
         </div>
         <div class="column-one-third">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Sort code' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Sort code' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
             {{ sender.bank_transfer_details.0.sender_sort_code|format_sort_code }}
           </strong>
@@ -35,7 +35,7 @@
         {% if sender.bank_transfer_details.0.sender_roll_number %}
           <div class="column-one-third">
             {% random_string as profile_label %}
-            <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Roll number (for building societies)' %}</div>
+            <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Roll number (for building societies)' %}</div>
             <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
               {{ sender.bank_transfer_details.0.sender_roll_number }}
             </strong>
@@ -53,21 +53,21 @@
       <div class="grid-row mtp-sender-summary__details">
         <div class="column-one-third">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Last 4 digits of card number' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Last 4 digits of card number' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
             {{ sender.debit_card_details.0.card_number_last_digits|format_card_number }}
           </strong>
         </div>
         <div class="column-one-quarter">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Expiry date' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Expiry date' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
             {{ sender.debit_card_details.0.card_expiry_date|default_if_none:'—' }}
           </strong>
         </div>
         <div class="column-one-quarter">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Postcode' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Postcode' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
             {{ sender.debit_card_details.0.postcode|default_if_none:'—' }}
           </strong>
@@ -84,26 +84,26 @@
       <div class="column-two-thirds">
         <div class="column-one-third col-1">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Credits sent' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Credits sent' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ sender.credit_count }}</strong>
         </div>
 
         <div class="column-one-third">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Prisoners' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Prisoners' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ sender.prisoner_count }}</strong>
         </div>
 
         <div class="column-one-third">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Prisons' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Prisons' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ sender.prison_count }}</strong>
         </div>
       </div>
 
       <div class="column-one-third">
         {% random_string as profile_label %}
-        <div id="mtp-label-{{ profile_label }}" class='mtp-sender-label' aria-hidden="true">{% trans 'Total amount sent' %}</div>
+        <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Total amount sent' %}</div>
         <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ sender.credit_total|currency }}</strong>
       </div>
     </div>

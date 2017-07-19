@@ -27,26 +27,26 @@
       <div class="mtp-prisoner-summary__details">
         <div class="column-one-quarter">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label" aria-hidden="true">{% trans 'Credits received' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Credits received' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.credit_count }}</strong>
         </div>
 
         <div class="column-one-quarter">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label" aria-hidden="true">{% trans 'Payment sources' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Payment sources' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.sender_count }}</strong>
         </div>
 
         <div class="column-one-quarter">
           {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label" aria-hidden="true">{% trans 'Total amount received' %}</div>
+          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Total amount received' %}</div>
           <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.credit_total|currency }}</strong>
         </div>
 
         {% if recipient_names %}
           <div class="column-one-quarter">
             {% random_string as profile_label %}
-            <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label" aria-hidden="true">{% trans 'Names given by senders' %}</div>
+            <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Names given by senders' %}</div>
             <span role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
               {% for recipient_name in recipient_names %}
                 <strong>{{ recipient_name }}</strong>{% if not forloop.last %},{% endif %}
