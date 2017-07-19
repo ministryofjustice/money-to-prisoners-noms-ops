@@ -28,7 +28,7 @@
           {% include 'security/forms/search-description.html' with form=form only %}
 
           <div class="print-hidden mtp-links">
-            <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a> &nbsp;
+            <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a> &nbsp;
             <a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
           </div>
         </div>
@@ -45,7 +45,7 @@
                   </span>
                 </a>
               </th>
-              <th>{% trans 'Sender and type' %}</th>
+              <th>{% trans 'Payment source and type' %}</th>
               <th class="{{ form|ordering_classes:'amount' }} number">
                 <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
                   <span>
@@ -92,7 +92,7 @@
                   {% if credit.prisoner_number %}
                     <p>
                       <strong><a href="{{ credit|prisoner_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.prisoner_number }}</a></strong><br/>
-                      {{ credit.prisoner_name|default:'—' }}
+                      {{ credit.prisoner_name|default_if_none:'—'|lower|title }}
                     </p>
                   {% endif %}
                 </td>

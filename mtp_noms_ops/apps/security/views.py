@@ -18,7 +18,7 @@ from security.forms import (
     SendersForm, SendersDetailForm, PrisonersForm, PrisonersDetailForm, CreditsForm,
     ReviewCreditsForm,
 )
-from security.utils import NameSet, EmailSet
+from security.utils import NameSet
 
 logger = logging.getLogger('mtp')
 
@@ -137,7 +137,7 @@ class SenderListView(SecurityView):
     """
     Sender search view
     """
-    title = _('Senders')
+    title = _('Payment sources')
     form_template_name = 'security/forms/senders.html'
     template_name = 'security/senders.html'
     form_class = SendersForm
@@ -157,29 +157,6 @@ class SenderDetailView(SecurityDetailView):
     form_class = SendersDetailForm
     id_kwarg_name = 'sender_id'
     object_context_key = 'sender'
-
-    def get_context_data(self, **kwargs):
-        context_data = super().get_context_data(**kwargs)
-        sender = context_data.get('sender', {})
-
-        all_cardholder_names = list(details['sender_name']
-                                    for details in sender.get('bank_transfer_details', ()))
-        all_cardholder_names.extend(cardholder_name
-                                    for details in sender.get('debit_card_details', ())
-                                    for cardholder_name in details['cardholder_names'])
-        context_data['all_cardholder_names'] = all_cardholder_names
-        other_cardholder_names = NameSet(strip_titles=True)
-        other_cardholder_names.extend(all_cardholder_names)
-        if other_cardholder_names:
-            other_cardholder_names.pop_first()
-        context_data['other_cardholder_names'] = other_cardholder_names
-
-        sender_emails = EmailSet(sender_email
-                                 for details in sender.get('debit_card_details', ())
-                                 for sender_email in details['sender_emails'])
-        context_data['sender_emails'] = sender_emails
-
-        return context_data
 
     def get_title_for_object(self, detail_object):
         try:

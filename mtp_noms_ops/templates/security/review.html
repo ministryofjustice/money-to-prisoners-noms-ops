@@ -25,7 +25,7 @@
 
     <div class="mtp-review__actions print-hidden">
       <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
-      <a class="js-Print" href="#print-dialog">{% trans 'Print these credits' %}</a>
+      <a class="js-print-trigger" href="#print-dialog">{% trans 'Print these credits' %}</a>
     </div>
 
     <table>
@@ -33,7 +33,7 @@
 
       <thead>
         <tr>
-          <th>{% trans 'Sender' %}</th>
+          <th>{% trans 'Payment source' %}</th>
           <th>{% trans 'Prisoner' %}</th>
           <th class="mtp-numeric-th">{% trans 'Amount' %}</th>
           <th>{% trans 'Security comments' %}</th>
@@ -56,7 +56,7 @@
             </td>
             <td class="mtp-review__prisoner">
               <div class="line1"><a class="mtp-print-url-hidden" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
-              {{ credit.prisoner_name }}
+              {{ credit.prisoner_name|default_if_none:'—'|lower|title }}
             </td>
             <td class="numeric">
               {{ credit.amount|currency }}
@@ -64,7 +64,7 @@
             <td>
               {% random_string as comment_label %}
               <label class="visually-hidden" for="mtp-review__comment-{{ comment_label }}">
-                {% blocktrans trimmed with amount=credit.amount|currency prisoner_name=credit.prisoner_name %}
+                {% blocktrans trimmed with amount=credit.amount|currency prisoner_name=credit.prisoner_name|default_if_none:'—'|lower|title %}
                   Add security comment for credit of {{ amount }} to {{ prisoner_name }}
                 {% endblocktrans %}
               </label>
@@ -79,22 +79,15 @@
       <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
     </div>
 
-    <div id="confirm-checked"
-         class="Dialog"
-         style="display: none"
-         data-hide-close="true"
-         data-disable-backdrop-close="true">
-      <div class="Dialog-inner">
-        <p><strong>{% trans 'Have you checked these credits?' %}</strong></p>
-        <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
-        <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
-        <button type="submit"
-                class="button"
-                value="override">{% trans 'Yes, all credits checked' %}</button>
-        <button type="button"
-                class="button-secondary js-Dialog-close">{% trans 'No, continue checking' %}</button>
-      </div>
-    </div>
+    {% dialoguebox html_id='confirm-checked' title=_('Have you checked these credits?') %}
+      <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
+      <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
+      <button type="submit"
+              class="button"
+              value="override">{% trans 'Yes, all credits checked' %}</button>
+      <button type="button"
+              class="button-secondary {{ dialogue_close_class }}">{% trans 'No, continue checking' %}</button>
+    {% enddialoguebox %}
   </form>
 
 {% else %}

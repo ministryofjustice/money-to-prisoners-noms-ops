@@ -28,7 +28,7 @@
           {% include 'security/forms/search-description.html' with form=form only %}
 
           <div class="print-hidden mtp-links">
-            <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
+            <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
           </div>
         </div>
 
@@ -56,7 +56,7 @@
               <th class="{{ form|ordering_classes:'sender_count' }}">
                 <a href="?{{ form|query_string_with_reversed_ordering:'sender_count' }}">
                   <span>
-                    {% trans 'Senders' %}
+                    {% trans 'Payment sources' %}
                     {% describe_ordering_for_screenreader form 'sender_count' %}
                   </span>
                 </a>
@@ -79,7 +79,7 @@
                     <strong>{{ prisoner.prisoner_number }}</strong>
                   </a>
                   <br/>
-                  {{ prisoner.prisoner_name }}
+                  {{ prisoner.prisoner_name|default_if_none:'—'|lower|title }}
                 </td>
                 <td>{{ prisoner.prisons|list_prison_names }}</td>
                 <td>
@@ -91,9 +91,9 @@
                 </td>
                 <td>
                   {% blocktrans trimmed count count=prisoner.sender_count %}
-                    <strong>{{ count }}</strong> sender
+                    <strong>{{ count }}</strong> payment source
                   {% plural %}
-                    <strong>{{ count }}</strong> senders
+                    <strong>{{ count }}</strong> payment sources
                   {% endblocktrans %}
                 </td>
                 <td class="number"><strong>{{ prisoner.credit_total|currency }}</strong></td>

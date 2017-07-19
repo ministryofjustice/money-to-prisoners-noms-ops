@@ -3,6 +3,7 @@
 {% load mtp_common %}
 
 {% block body_end %}
+  <script src="{% url 'js-i18n' %}?{{ APP_GIT_COMMIT_SHORT }}"></script>
   {{ block.super }}
   {% sentry_js %}
   <!-- {% if request.resolver_match.namespace %}{{ request.resolver_match.namespace }}:{% endif %}{{ request.resolver_match.url_name }} -->
@@ -18,7 +19,7 @@
       <li><a href="{% url 'dashboard' %}">{% trans 'Home' %}</a></li>
       {% if request.can_access_security %}
         <li><a href="{% url 'security:credit_list' %}?{{ initial_params }}">{% trans 'Credits' %}</a></li>
-        <li><a href="{% url 'security:sender_list' %}?{{ initial_params }}">{% trans 'Senders' %}</a></li>
+        <li><a href="{% url 'security:sender_list' %}?{{ initial_params }}">{% trans 'Payment sources' %}</a></li>
         <li><a href="{% url 'security:prisoner_list' %}?{{ initial_params }}">{% trans 'Prisoners' %}</a></li>
       {% endif %}
       <li><a href="{% url 'password_change' %}">{% trans 'Change password' %}</a></li>

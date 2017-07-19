@@ -24,6 +24,11 @@
     padding: .8em;
   }
 
+  address {
+    @include core-19;
+    font-style: normal;
+  }
+
   .number {
     padding-right: 1.2em;
     text-align: right;

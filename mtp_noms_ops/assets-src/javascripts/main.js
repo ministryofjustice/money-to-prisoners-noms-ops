@@ -2,7 +2,7 @@
   'use strict';
   require('polyfills').Polyfills.init();
 
-  require('dialog').Dialog.init();
+  require('dialogue-box').DialogueBox.init();
   require('upload').Upload.init();
   require('proposition-header').PropositionHeader.init();
   require('print').Print.init();

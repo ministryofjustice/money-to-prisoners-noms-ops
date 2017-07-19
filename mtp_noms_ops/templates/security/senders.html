@@ -28,7 +28,7 @@
           {% include 'security/forms/search-description.html' with form=form only %}
 
           <div class="print-hidden mtp-links">
-            <a class="js-Print" href="#print-dialog">{% trans 'Print' %}</a>
+            <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
           </div>
         </div>
 
@@ -36,7 +36,7 @@
           <caption class="visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
-              <th>{% trans 'Sender and type' %}</th>
+              <th>{% trans 'Payment source and type' %}</th>
               <th class="{{ form|ordering_classes:'credit_count' }}">
                 <a href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
                   <span>
@@ -118,7 +118,7 @@
               </tr>
             {% empty %}
               <tr class="no-border">
-                <td colspan="5">{% trans 'No matching senders found' %}</td>
+                <td colspan="5">{% trans 'No matching payment sources found' %}</td>
               </tr>
             {% endfor %}
           </tbody>

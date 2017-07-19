@@ -15,7 +15,6 @@ exports.ConfirmChecked = {
   },
 
   bindEvents: function () {
-    this.$body.on('ConfirmChecked.render', this.render);
     this.$form.on('click', ':submit', $.proxy(this.onSubmit, this));
   },
 
@@ -32,11 +31,6 @@ exports.ConfirmChecked = {
     }
 
     e.preventDefault();
-    this.$body.trigger({
-      type: 'Dialog.render',
-      target: e.target,
-      targetSelector: '#confirm-checked'
-    });
-    return;
+    $('#confirm-checked').trigger('dialogue:open');
   }
 };

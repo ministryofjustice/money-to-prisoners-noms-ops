@@ -5,7 +5,9 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
+from django.views.decorators.cache import cache_control
 from django.views.generic import RedirectView
+from django.views.i18n import JavaScriptCatalog
 from moj_irat.views import HealthcheckView, PingJsonView
 from mtp_common.auth import views as auth_views
 from mtp_common.auth.api_client import get_connection
@@ -69,6 +71,8 @@ urlpatterns = i18n_patterns(
     ),
 
     url(r'^', include('mtp_common.user_admin.urls')),
+
+    url(r'^js-i18n.js$', cache_control(public=True, max_age=86400)(JavaScriptCatalog.as_view()), name='js-i18n'),
 
     url(r'^404.html$', lambda request: TemplateResponse(request, 'mtp_common/errors/404.html', status=404)),
     url(r'^500.html$', lambda request: TemplateResponse(request, 'mtp_common/errors/500.html', status=500)),

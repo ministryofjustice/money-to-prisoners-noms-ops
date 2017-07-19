@@ -1,6 +1,5 @@
 .mtp-prisoner-image {
   margin-right: 30px;
-  margin-bottom: 0.5em;
   width: 160px;
   height: 200px;
   background: file-url('placeholder-image.png') no-repeat;
@@ -17,8 +16,6 @@
 
   @include media($min-width: $desktop-breakpoint) {
     float: left;
-    margin-top: 30px;
-    margin-bottom: 0;
   }
 }
 
@@ -31,59 +28,19 @@
     width: auto;
   }
 
-  .column-full {
-    padding: 0;
-  }
-
   @media print {
     .column-one-quarter {
-      display: inline-block;
+      display: block;
     }
   }
 }
 
-.mtp-prisoner-credits {
-  @media print {
-    .column-one-third {
-      display: inline-block;
-      width: 100%;
-    }
-  }
-
-  td {
-    border-bottom: 0;
-    vertical-align: top;
-  }
-
-  .mtp-prisoner-credits__credit-row {
-    td {
-      padding-bottom: 0;
-    }
-    p {
-      margin-bottom: 0;
-    }
-  }
-
-  .mtp-prisoner-credits__sender-row {
-    border-bottom: 1px solid $border-colour;
-
-    td {
-      padding-top: 0;
-    }
-  }
-
-  .mtp-credit-details__acc-no {
-    padding-left: 2.7em;
-    width: 27%;
-  }
-
-  .mtp-credit-details__sort-code {
-    width: 15%;
-  }
-
-  .mtp-credit-details__card {
-    padding-left: 2.7em;
-  }
+.mtp-prisoner-summary__details {
+  overflow: hidden;
+  margin-bottom: 1em;
 }
 
-
+.mtp-prisoner-label {
+  color: $secondary-text-colour;
+  font-size: 16px;
+}
