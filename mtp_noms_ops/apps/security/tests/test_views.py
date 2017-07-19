@@ -426,6 +426,7 @@ class CreditsExportTestCase(SecurityBaseTestCase):
                     'sender_name': None,
                     'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
                     'card_number_last_digits': None, 'card_expiry_date': None,
+                    'billing_address': {'line1': '102PF', 'city': 'London'}, 'ip_address': '127.0.0.1',
                     'resolution': 'credited', 'nomis_transaction_id': None,
                     'owner': None, 'owner_name': None,
                     'received_at': '2016-05-25T20:24:00Z', 'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,
@@ -440,6 +441,7 @@ class CreditsExportTestCase(SecurityBaseTestCase):
                     'sender_name': 'HEIDENREICH X',
                     'sender_sort_code': '219657', 'sender_account_number': '88447894', 'sender_roll_number': '',
                     'card_number_last_digits': None, 'card_expiry_date': None,
+                    'billing_address': None, 'ip_address': '127.0.0.1',
                     'resolution': 'credited', 'nomis_transaction_id': '123456-7',
                     'owner': None, 'owner_name': None,
                     'received_at': '2016-05-22T23:00:00Z', 'credited_at': '2016-05-23T01:10:00Z', 'refunded_at': None,
@@ -451,14 +453,14 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         expected_result = (
             'Prisoner name,Prisoner number,Prison,Sender name,Payment method,'
             'Bank transfer sort code,Bank transfer account,Bank transfer roll number,'
-            'Debit card number,Debit card expiry,Amount,Date received,'
-            'Status,Date credited,NOMIS transaction\r\n'
+            'Debit card number,Debit card expiry,Address,Amount,Date received,'
+            'Credited status,Date credited,NOMIS ID,IP\r\n'
             'GEORGE MELLEY,A1411AE,HMP LEEDS,,Debit card,,,,,,'
-            '£230.00,2016-05-25 21:24:00,'
-            'Credited,2016-05-25 21:27:00,\r\n'
-            'NORMAN STANLEY FLETCHER,A1413AE,HMP LEEDS,HEIDENREICH X,Bank transfer,219657,88447894,,,,'
-            '£275.00,2016-05-23 00:00:00,'
-            'Credited,2016-05-23 02:10:00,123456-7\r\n'
+            '"102PF, London",£230.00,2016-05-25 21:24:00,'
+            'Credited,2016-05-25 21:27:00,,127.0.0.1\r\n'
+            'NORMAN STANLEY FLETCHER,A1413AE,HMP LEEDS,HEIDENREICH X,Bank transfer,21-96-57,88447894,,,,'
+            ',£275.00,2016-05-23 00:00:00,'
+            'Credited,2016-05-23 02:10:00,123456-7,127.0.0.1\r\n'
         )
 
         self.login()
@@ -486,8 +488,8 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         expected_result = (
             'Prisoner name,Prisoner number,Prison,Sender name,Payment method,'
             'Bank transfer sort code,Bank transfer account,Bank transfer roll number,'
-            'Debit card number,Debit card expiry,Amount,Date received,'
-            'Status,Date credited,NOMIS transaction\r\n'
+            'Debit card number,Debit card expiry,Address,Amount,Date received,'
+            'Credited status,Date credited,NOMIS ID,IP\r\n'
         )
 
         self.login()

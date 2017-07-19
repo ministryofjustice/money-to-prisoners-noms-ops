@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-18 17:38+0100\n"
+"POT-Creation-Date: 2017-07-19 13:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>, 2017\n"
 "Language-Team: Welsh (https://www.transifex.com/ministry-of-justice/teams/34553/cy/)\n"
@@ -73,33 +73,102 @@ msgstr[1] "%d lleoliad carcharor wedi'i ddiweddaru'n llwyddiannus"
 msgstr[2] "%d lleoliad carcharor wedi'i ddiweddaru'n llwyddiannus"
 msgstr[3] "%d lleoliadau carcharor wedi'u diweddaru'n llwyddiannus"
 
-#: apps/security/export.py:10 apps/security/forms.py:31
+#: apps/security/export.py:14 apps/security/forms.py:31
 #: templates/security/review.html:54
 msgid "Bank transfer"
 msgstr "Trosglwyddiad banc"
 
-#: apps/security/export.py:11 apps/security/forms.py:31
+#: apps/security/export.py:15 apps/security/forms.py:31
 msgid "Debit card"
 msgstr "Cerdyn debyd"
 
-#: apps/security/export.py:14 apps/security/templatetags/security.py:49
-msgid "Pending"
-msgstr "Aros"
+#: apps/security/export.py:28 apps/security/forms.py:438
+#: apps/security/forms.py:566 templates/security/senders-detail.html:200
+msgid "Prisoner name"
+msgstr "Enw'r carcharor"
 
-#: apps/security/export.py:15
-msgid "Requires manual processing"
-msgstr "Rhaid ei brosesu â llaw"
+#: apps/security/export.py:28 apps/security/forms.py:436
+#: apps/security/forms.py:565
+msgid "Prisoner number"
+msgstr "Rhif y carcharor"
 
-#: apps/security/export.py:16 apps/security/templatetags/security.py:51
-msgid "Credited"
-msgstr "Wedi cael ei gredydu"
+#: apps/security/export.py:28 apps/security/forms.py:315
+#: apps/security/forms.py:439 apps/security/forms.py:567
+#: templates/security/credits.html:65 templates/security/forms/credits.html:14
+#: templates/security/forms/prisoners.html:11
+#: templates/security/forms/senders.html:11
+#: templates/security/prisoners.html:47
+#: templates/security/senders-detail.html:205
+msgid "Prison"
+msgstr "Carchar"
 
-#: apps/security/export.py:17 apps/security/templatetags/security.py:53
-#: templates/security/credits.html:112
-#: templates/security/prisoners-detail.html:151
-#: templates/security/senders-detail.html:204
-msgid "Refunded"
-msgstr "Wedi'i ad-dalu"
+#: apps/security/export.py:29 apps/security/forms.py:307
+#: apps/security/forms.py:572
+msgid "Sender name"
+msgstr "Enw'r anfonwr"
+
+#: apps/security/export.py:29 apps/security/forms.py:308
+#: apps/security/forms.py:573
+msgid "Payment method"
+msgstr "Dull talu"
+
+#: apps/security/export.py:30
+msgid "Bank transfer sort code"
+msgstr ""
+
+#: apps/security/export.py:30
+msgid "Bank transfer account"
+msgstr ""
+
+#: apps/security/export.py:30
+msgid "Bank transfer roll number"
+msgstr ""
+
+#: apps/security/export.py:31
+msgid "Debit card number"
+msgstr ""
+
+#: apps/security/export.py:31
+msgid "Debit card expiry"
+msgstr ""
+
+#: apps/security/export.py:31 templates/security/senders-detail.html:177
+msgid "Address"
+msgstr ""
+
+#: apps/security/export.py:32 templates/security/credits.html:52
+#: templates/security/prisoners-detail.html:95
+#: templates/security/prisoners.html:67 templates/security/review.html:38
+#: templates/security/senders-detail.html:157
+#: templates/security/senders.html:67
+msgid "Amount"
+msgstr "Swm"
+
+#: apps/security/export.py:32 templates/security/credits.html:43
+#: templates/security/forms/received-range-field.html:4
+#: templates/security/prisoners-detail.html:85
+#: templates/security/senders-detail.html:140
+msgid "Date received"
+msgstr "Dyddiad derbyn"
+
+#: apps/security/export.py:33 templates/security/credits.html:66
+#: templates/security/prisoners-detail.html:101
+#: templates/security/senders-detail.html:162
+msgid "Credited status"
+msgstr "Statws credydu"
+
+#: apps/security/export.py:33
+msgid "Date credited"
+msgstr ""
+
+#: apps/security/export.py:33 templates/security/prisoners-detail.html:172
+#: templates/security/senders-detail.html:229
+msgid "NOMIS ID"
+msgstr ""
+
+#: apps/security/export.py:34 templates/security/senders-detail.html:184
+msgid "IP"
+msgstr ""
 
 #: apps/security/forms.py:29
 msgid "Any method"
@@ -207,14 +276,6 @@ msgstr "Isafswm wedi'i anfon"
 msgid "Maximum total sent"
 msgstr "Uchafswm wedi'i anfon"
 
-#: apps/security/forms.py:307 apps/security/forms.py:572
-msgid "Sender name"
-msgstr "Enw'r anfonwr"
-
-#: apps/security/forms.py:308 apps/security/forms.py:573
-msgid "Payment method"
-msgstr "Dull talu"
-
 #: apps/security/forms.py:309 apps/security/forms.py:574
 msgid "Sender sort code"
 msgstr "Cod didoli'r anfonwr"
@@ -232,23 +293,13 @@ msgid "Sender roll number"
 msgstr "Rhif rhestr yr anfonwr"
 
 #: apps/security/forms.py:312 apps/security/forms.py:577
-#: templates/security/senders-detail.html:56
+#: templates/security/senders-detail.html:58
 msgid "Last 4 digits of card number"
 msgstr "4 digid olaf rhif y cerdyn"
 
 #: apps/security/forms.py:313 apps/security/forms.py:578
 msgid "Sender email"
 msgstr "E-bost yr anfonwr"
-
-#: apps/security/forms.py:315 apps/security/forms.py:439
-#: apps/security/forms.py:567 templates/security/credits.html:65
-#: templates/security/forms/credits.html:14
-#: templates/security/forms/prisoners.html:11
-#: templates/security/forms/senders.html:11
-#: templates/security/prisoners.html:47
-#: templates/security/senders-detail.html:193
-msgid "Prison"
-msgstr "Carchar"
 
 #: apps/security/forms.py:316 apps/security/forms.py:440
 #: apps/security/forms.py:568
@@ -349,15 +400,6 @@ msgstr "Isafswm wedi'u derbyn"
 msgid "Maximum total received"
 msgstr "Uchafswm wedi'u derbyn"
 
-#: apps/security/forms.py:436 apps/security/forms.py:565
-msgid "Prisoner number"
-msgstr "Rhif y carcharor"
-
-#: apps/security/forms.py:438 apps/security/forms.py:566
-#: templates/security/senders-detail.html:190
-msgid "Prisoner name"
-msgstr "Enw'r carcharor"
-
 #: apps/security/forms.py:504
 msgid "Not a whole number"
 msgstr "Nid yw'n gyfanrif"
@@ -439,9 +481,28 @@ msgstr "gorffen gyda %02d ceiniog"
 msgid "Not found"
 msgstr "Ni ellir dod o hyd iddo"
 
-#: apps/security/templatetags/security.py:47
+#: apps/security/templatetags/security.py:49
 msgid "Initial"
 msgstr "Arwyddo"
+
+#: apps/security/templatetags/security.py:51
+msgid "Pending"
+msgstr "Aros"
+
+#: apps/security/templatetags/security.py:53
+msgid "Requires manual processing"
+msgstr "Rhaid ei brosesu â llaw"
+
+#: apps/security/templatetags/security.py:55
+msgid "Credited"
+msgstr "Wedi cael ei gredydu"
+
+#: apps/security/templatetags/security.py:57
+#: templates/security/credits.html:112
+#: templates/security/prisoners-detail.html:159
+#: templates/security/senders-detail.html:216
+msgid "Refunded"
+msgstr "Wedi'i ad-dalu"
 
 #: apps/security/views.py:77 apps/security/views.py:115 templates/base.html:19
 #: utils.py:32
@@ -464,7 +525,7 @@ msgid "Unknown sender"
 msgstr "Anfonwr anhysbys"
 
 #: apps/security/views.py:177 templates/base.html:23
-#: templates/dashboard.html:40 templates/security/senders-detail.html:93
+#: templates/dashboard.html:40 templates/security/senders-detail.html:97
 #: templates/security/senders.html:51
 msgid "Prisoners"
 msgstr "Carcharorion"
@@ -583,23 +644,16 @@ msgstr "Hidlo yn ôl"
 #: templates/security/credits.html:31
 #: templates/security/prisoners-detail.html:73
 #: templates/security/prisoners.html:31
-#: templates/security/senders-detail.html:124
+#: templates/security/senders-detail.html:128
 #: templates/security/senders.html:31
 msgid "Print"
 msgstr "Argraffu"
 
 #: templates/security/credits.html:32
 #: templates/security/prisoners-detail.html:74
-#: templates/security/senders-detail.html:125
+#: templates/security/senders-detail.html:129
 msgid "Export"
 msgstr "Allforio"
-
-#: templates/security/credits.html:43
-#: templates/security/forms/received-range-field.html:4
-#: templates/security/prisoners-detail.html:85
-#: templates/security/senders-detail.html:136
-msgid "Date received"
-msgstr "Dyddiad derbyn"
 
 #: templates/security/credits.html:48
 #: templates/security/prisoners-detail.html:90
@@ -607,26 +661,12 @@ msgstr "Dyddiad derbyn"
 msgid "Payment source and type"
 msgstr ""
 
-#: templates/security/credits.html:52
-#: templates/security/prisoners-detail.html:95
-#: templates/security/prisoners.html:67 templates/security/review.html:38
-#: templates/security/senders-detail.html:153
-#: templates/security/senders.html:67
-msgid "Amount"
-msgstr "Swm"
-
 #: templates/security/credits.html:60 templates/security/forms/credits.html:13
 #: templates/security/forms/prisoners.html:10
 #: templates/security/prisoners.html:42 templates/security/review.html:37
-#: templates/security/senders-detail.html:145
+#: templates/security/senders-detail.html:149
 msgid "Prisoner"
 msgstr "Carcharor"
-
-#: templates/security/credits.html:66
-#: templates/security/prisoners-detail.html:101
-#: templates/security/senders-detail.html:158
-msgid "Credited status"
-msgstr "Statws credydu"
 
 #: templates/security/credits.html:79
 #: templates/security/prisoners-detail.html:114
@@ -635,7 +675,7 @@ msgid "by debit card"
 msgstr "gyda cherdyn debyd"
 
 #: templates/security/credits.html:84
-#: templates/security/prisoners-detail.html:122
+#: templates/security/prisoners-detail.html:124
 #: templates/security/senders.html:83
 msgid "by bank transfer"
 msgstr "trosglwyddiad banc"
@@ -646,14 +686,14 @@ msgid "by %(name_of_clerk)s"
 msgstr "gan %(name_of_clerk)s"
 
 #: templates/security/credits.html:116
-#: templates/security/prisoners-detail.html:153
-#: templates/security/senders-detail.html:206
+#: templates/security/prisoners-detail.html:161
+#: templates/security/senders-detail.html:218
 msgid "No"
 msgstr "Na"
 
 #: templates/security/credits.html:122
-#: templates/security/prisoners-detail.html:166
-#: templates/security/senders-detail.html:219
+#: templates/security/prisoners-detail.html:178
+#: templates/security/senders-detail.html:235
 msgid "No matching credits found"
 msgstr "Ni ddaethpwyd o hyd i unrhyw gredydau sy'n cyfateb"
 
@@ -690,7 +730,7 @@ msgid "Sort"
 msgstr "Didoli"
 
 #: templates/security/forms/senders.html:10 templates/security/review.html:36
-#: templates/security/senders-detail.html:141
+#: templates/security/senders-detail.html:145
 msgid "Payment source"
 msgstr ""
 
@@ -760,33 +800,28 @@ msgstr "Enw a nodwyd gan yr anfonwr"
 msgid "Received at prison"
 msgstr "Wedi cyrraedd y carchar"
 
-#: templates/security/prisoners-detail.html:117
+#: templates/security/prisoners-detail.html:119
 msgid "Card number"
 msgstr "Rhif y cerdyn"
 
-#: templates/security/prisoners-detail.html:125
+#: templates/security/prisoners-detail.html:129
 #: templates/security/senders-detail.html:23
 msgid "Account number"
 msgstr "Rhif y cyfrif"
 
-#: templates/security/prisoners-detail.html:128
-#: templates/security/senders-detail.html:30
+#: templates/security/prisoners-detail.html:134
+#: templates/security/senders-detail.html:31
 msgid "Sort code"
 msgstr "Cod didoli"
 
-#: templates/security/prisoners-detail.html:132
-#: templates/security/senders-detail.html:38
+#: templates/security/prisoners-detail.html:140
+#: templates/security/senders-detail.html:40
 msgid "Roll number (for building societies)"
 msgstr "Rhif rhestr (ar gyfer cymdeithasau adeiladu)"
 
-#: templates/security/prisoners-detail.html:157
-#: templates/security/senders-detail.html:210
+#: templates/security/prisoners-detail.html:167
+#: templates/security/senders-detail.html:224
 msgid "Crediting staff"
-msgstr ""
-
-#: templates/security/prisoners-detail.html:160
-#: templates/security/senders-detail.html:213
-msgid "NOMIS ID"
 msgstr ""
 
 #: templates/security/prisoners.html:51
@@ -880,76 +915,69 @@ msgstr "Dim credydau newydd i'w hadolygu."
 msgid "Bank transfer payments with these details"
 msgstr ""
 
-#: templates/security/senders-detail.html:48
+#: templates/security/senders-detail.html:50
 msgid "Debit card payments with these details"
 msgstr ""
 
-#: templates/security/senders-detail.html:50
+#: templates/security/senders-detail.html:52
 msgid "How are these grouped?"
 msgstr ""
 
-#: templates/security/senders-detail.html:63
+#: templates/security/senders-detail.html:66
 msgid "Expiry date"
 msgstr "Dyddiad daw i ben"
 
-#: templates/security/senders-detail.html:70
+#: templates/security/senders-detail.html:74
 msgid "Postcode"
 msgstr ""
 
-#: templates/security/senders-detail.html:87
-#: templates/security/senders-detail.html:118
+#: templates/security/senders-detail.html:91
+#: templates/security/senders-detail.html:122
 msgid "Credits sent"
 msgstr "Credydau a anfonwyd"
 
-#: templates/security/senders-detail.html:99 templates/security/senders.html:59
+#: templates/security/senders-detail.html:103
+#: templates/security/senders.html:59
 msgid "Prisons"
 msgstr "Carchardai"
 
-#: templates/security/senders-detail.html:106
+#: templates/security/senders-detail.html:110
 msgid "Total amount sent"
 msgstr "Cyfanswm y swm a anfonwyd"
 
-#: templates/security/senders-detail.html:111
+#: templates/security/senders-detail.html:115
 msgid "Monitor this sender on your home page"
 msgstr "Monitro'r anfonwr hwn ar eich tudalen gartref"
 
-#: templates/security/senders-detail.html:111
+#: templates/security/senders-detail.html:115
 msgid "Stop monitoring this sender"
 msgstr "Stopio monitro'r anfonwr hwn"
 
-#: templates/security/senders-detail.html:171
-msgid "Address"
-msgstr ""
-
-#: templates/security/senders-detail.html:178
-msgid "IP"
-msgstr ""
-
-#: templates/security/senders-detail.html:181
+#: templates/security/senders-detail.html:189
 msgid "Email"
 msgstr "E-bost"
 
-#: templates/security/senders-detail.html:229
+#: templates/security/senders-detail.html:245
 msgid "How these credits are grouped"
 msgstr ""
 
-#: templates/security/senders-detail.html:231
+#: templates/security/senders-detail.html:247
 msgid "We group the payment sources by the debit card’s last 4 digits, expiry date and postcode."
 msgstr ""
 
-#: templates/security/senders-detail.html:232
+#: templates/security/senders-detail.html:248
 msgid "We do this because card industry compliance doesn’t allow using the full card number as a unique ID."
 msgstr ""
 
-#: templates/security/senders-detail.html:235
+#: templates/security/senders-detail.html:251
 msgid "In almost all cases, this results in one specific card and cardholder."
 msgstr ""
 
-#: templates/security/senders-detail.html:236
+#: templates/security/senders-detail.html:252
 msgid "But, for the avoidance of doubt, we’ve listed details for each transaction below."
 msgstr ""
 
-#: templates/security/senders-detail.html:239
+#: templates/security/senders-detail.html:255
 msgid "OK"
 msgstr ""
 
