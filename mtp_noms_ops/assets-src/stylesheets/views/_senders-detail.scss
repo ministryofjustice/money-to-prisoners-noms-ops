@@ -38,6 +38,10 @@
   @include device-pixel-ratio {
     background-image: file-url('icon-large-bank@4x.png');
     background-size: 100px 100px;
+
+    @include media(mobile, $ignore-for-ie: true) {
+      background-size: 80px 80px;
+    }
   }
 }
 
@@ -47,6 +51,10 @@
   @include device-pixel-ratio {
     background-image: file-url('icon-large-card@4x.png');
     background-size: 100px 100px;
+
+    @include media(mobile, $ignore-for-ie: true) {
+      background-size: 80px 80px;
+    }
   }
 }
 
