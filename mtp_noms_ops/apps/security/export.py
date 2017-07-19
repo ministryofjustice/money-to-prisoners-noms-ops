@@ -1,56 +1,61 @@
 import csv
 import datetime
-from decimal import Decimal
-import io
+import re
 
-from django.utils.translation import gettext_lazy as _
+from django.http import HttpResponse
+from django.utils.text import slugify
+from django.utils.translation import gettext, gettext_lazy as _
 
-
-payment_methods = {
-    'bank_transfer': _('Bank transfer'),
-    'online': _('Debit card'),
-}
-credit_resolutions = {
-    'pending': _('Pending'),
-    'manual': _('Requires manual processing'),
-    'credited': _('Credited'),
-    'refunded': _('Refunded'),
-}
+from security.templatetags.security import currency, format_card_number, format_sort_code, format_resolution
 
 
-def export_as_csv(credits):
-    with io.StringIO() as out:
-        writer = csv.writer(out)
+class CreditCsvResponse(HttpResponse):
+    payment_methods = {
+        'bank_transfer': _('Bank transfer'),
+        'online': _('Debit card'),
+    }
 
-        writer.writerow([
-            'Prisoner name', 'Prisoner number', 'Prison',
-            'Sender name', 'Payment method',
-            'Bank transfer sort code', 'Bank transfer account', 'Bank transfer roll number',
-            'Debit card number', 'Debit card expiry',
-            'Amount', 'Date received',
-            'Status', 'Date credited', 'NOMIS transaction',
+    def __init__(self, credits, file_name='export', **kwargs):
+        kwargs.setdefault('content_type', 'text/csv')
+        super().__init__(**kwargs)
+        self['Content-Disposition'] = 'attachment; filename="%s.csv"' % slugify(file_name)
+        self.writer = csv.writer(self)
+        self.write_header()
+        self.write_credits(credits)
+
+    def write_header(self):
+        self.writer.writerow([
+            gettext('Prisoner name'), gettext('Prisoner number'), gettext('Prison'),
+            gettext('Sender name'), gettext('Payment method'),
+            gettext('Bank transfer sort code'), gettext('Bank transfer account'), gettext('Bank transfer roll number'),
+            gettext('Debit card number'), gettext('Debit card expiry'), gettext('Address'),
+            gettext('Amount'), gettext('Date received'),
+            gettext('Credited status'), gettext('Date credited'), gettext('NOMIS ID'),
+            gettext('IP'),
         ])
+
+    def write_credits(self, credits):
         for credit in credits:
-            cells = map(escape_csv_formula, [
+            cells = [
                 credit['prisoner_name'],
                 credit['prisoner_number'],
                 credit['prison_name'],
                 credit['sender_name'],
-                payment_methods.get(credit['source'], credit['source']),
-                credit['sender_sort_code'],
+                self.payment_methods.get(credit['source'], credit['source']),
+                format_sort_code(credit['sender_sort_code']) if credit['sender_sort_code'] else '',
                 credit['sender_account_number'],
                 credit['sender_roll_number'],
-                '**** **** **** %s' % credit['card_number_last_digits'] if credit['card_number_last_digits'] else '',
+                format_card_number(credit['card_number_last_digits']) if credit['card_number_last_digits'] else '',
                 credit['card_expiry_date'],
-                '£%.2f' % (Decimal(credit['amount']) / 100),
+                address_for_csv(credit['billing_address']),
+                currency(credit['amount']),
                 credit['received_at'],
-                credit_resolutions.get(credit['resolution'], credit['resolution']),
+                format_resolution(credit['resolution']),
                 credit['credited_at'],
                 credit['nomis_transaction_id'],
-            ])
-            writer.writerow(list(cells))
-
-        return out.getvalue()
+                credit['ip_address'],
+            ]
+            self.writer.writerow(list(map(escape_csv_formula, cells)))
 
 
 def escape_csv_formula(value):
@@ -66,3 +71,12 @@ def escape_csv_formula(value):
     if isinstance(value, datetime.date):
         return value.strftime('%Y-%m-%d')
     return value
+
+
+def address_for_csv(address):
+    if not address:
+        return ''
+    whitespace = re.compile(r'\s+')
+    keys = ('line1', 'line2', 'city', 'postcode', 'country')
+    lines = (whitespace.sub(' ', address[key]).strip() for key in keys if address.get(key))
+    return ', '.join(lines)

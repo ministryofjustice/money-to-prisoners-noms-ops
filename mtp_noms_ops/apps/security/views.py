@@ -7,13 +7,15 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.cache import patch_cache_control
+from django.utils.dateformat import format as date_format
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from mtp_common.nomis import get_photograph_data
 from requests.exceptions import RequestException
 
-from security.export import export_as_csv
+from security.export import CreditCsvResponse
 from security.forms import (
     SendersForm, SendersDetailForm, PrisonersForm, PrisonersDetailForm, CreditsForm,
     ReviewCreditsForm,
@@ -53,10 +55,8 @@ class SecurityView(FormView):
     def form_valid(self, form):
         if self.export_view:
             data = form.get_complete_object_list()
-            csvdata = export_as_csv(data)
-            response = HttpResponse(csvdata, content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="export.csv"'
-            return response
+            file_name = 'exported-%s' % date_format(timezone.now(), 'Y-m-d')
+            return CreditCsvResponse(credits=data, file_name=file_name)
 
         context = self.get_context_data(form=form)
         object_list = form.cleaned_data['object_list']
