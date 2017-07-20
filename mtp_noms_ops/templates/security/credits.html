@@ -28,9 +28,14 @@
           {% include 'security/forms/search-description.html' with form=form only %}
 
           <div class="print-hidden mtp-links">
-            <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a> &nbsp;
-            <a href="{% url 'security:credits_export' %}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
+            <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
+            &nbsp;
+            <a class="js-dialogue-open" href="#export-dialogue">{% trans 'Export' %}</a>
           </div>
+
+          {% url 'security:credits_export' as export_sync_view %}
+          {% url 'security:credits_email_export' as export_async_view %}
+          {% include 'security/includes/export-dialogue.html' %}
         </div>
 
         <table>

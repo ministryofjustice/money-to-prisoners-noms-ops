@@ -60,6 +60,8 @@
     </div>
   </div>
 
+  {% include 'mtp_common/includes/message_box.html' %}
+
   {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
   {% if form.is_valid %}
@@ -70,9 +72,14 @@
         {% include 'security/forms/search-description.html' with form=form only %}
 
         <div class="print-hidden mtp-links">
-          <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a> &nbsp;
-          <a href="{% url 'security:prisoner_detail_export' prisoner_id=prisoner.id %}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
+          <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
+          &nbsp;
+          <a class="js-dialogue-open" href="#export-dialogue">{% trans 'Export' %}</a>
         </div>
+
+        {% url 'security:prisoner_detail_export' prisoner_id=prisoner.id as export_sync_view %}
+        {% url 'security:prisoner_detail_email_export' prisoner_id=prisoner.id as export_async_view %}
+        {% include 'security/includes/export-dialogue.html' %}
       </div>
 
       <table>
