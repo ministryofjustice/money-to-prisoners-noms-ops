@@ -163,5 +163,6 @@ def panel_aria_atts(field):
 
 @register.filter
 def format_address(address):
-    lines = [(address[key],) for key in ('line1', 'line2', 'city', 'postcode', 'country') if address.get(key)]
-    return format_html_join(mark_safe('<br />'), '{}', lines)
+    if address:
+        lines = [(address[key],) for key in ('line1', 'line2', 'city', 'postcode', 'country') if address.get(key)]
+        return format_html_join(mark_safe('<br />'), '{}', lines)

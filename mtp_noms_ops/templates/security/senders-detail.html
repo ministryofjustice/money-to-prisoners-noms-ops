@@ -176,18 +176,18 @@
                   {% random_string as profile_label %}
                   <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Address' %}</div>
                   <address aria-labelledby="mtp-label-{{ profile_label }}">
-                    {{ credit.billing_address|format_address }}
+                    {{ credit.billing_address|format_address|default_if_none:'—' }}
                   </address>
                   <br/>
 
                   {% random_string as profile_label %}
                   <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'IP' %}</div>
-                  <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.ip_address }}</div>
+                  <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.ip_address|default_if_none:'—' }}</div>
                   <br/>
 
                   {% random_string as profile_label %}
                   <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Email' %}</div>
-                  <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_email }}</div>
+                  <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_email|default_if_none:'—' }}</div>
                 {% endif %}
               </td>
               <td>
