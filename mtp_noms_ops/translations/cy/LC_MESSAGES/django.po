@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-19 13:13+0100\n"
+"POT-Creation-Date: 2017-07-31 12:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>, 2017\n"
 "Language-Team: Welsh (https://www.transifex.com/ministry-of-justice/teams/34553/cy/)\n"
@@ -114,27 +114,27 @@ msgstr "Dull talu"
 
 #: apps/security/export.py:30
 msgid "Bank transfer sort code"
-msgstr ""
+msgstr "Cod didoli'r trosglwyddiad banc "
 
 #: apps/security/export.py:30
 msgid "Bank transfer account"
-msgstr ""
+msgstr "Cyfrif y trosglwyddiad banc "
 
 #: apps/security/export.py:30
 msgid "Bank transfer roll number"
-msgstr ""
+msgstr "Rhif rhestr y trosglwyddiad banc"
 
 #: apps/security/export.py:31
 msgid "Debit card number"
-msgstr ""
+msgstr "Rhif y cerdyn debyd"
 
 #: apps/security/export.py:31
 msgid "Debit card expiry"
-msgstr ""
+msgstr "Dyddiad dod i ben y cerdyn debyd"
 
 #: apps/security/export.py:31 templates/security/senders-detail.html:177
 msgid "Address"
-msgstr ""
+msgstr "Cyfeiriad"
 
 #: apps/security/export.py:32 templates/security/credits.html:52
 #: templates/security/prisoners-detail.html:95
@@ -159,16 +159,16 @@ msgstr "Statws credydu"
 
 #: apps/security/export.py:33
 msgid "Date credited"
-msgstr ""
+msgstr "Dyddiad cafodd ei gredydu "
 
 #: apps/security/export.py:33 templates/security/prisoners-detail.html:172
 #: templates/security/senders-detail.html:229
 msgid "NOMIS ID"
-msgstr ""
+msgstr "Rhif adnabod NOMIS "
 
 #: apps/security/export.py:34 templates/security/senders-detail.html:184
 msgid "IP"
-msgstr ""
+msgstr "iP"
 
 #: apps/security/forms.py:29
 msgid "Any method"
@@ -518,7 +518,7 @@ msgstr "Credydau"
 #: templates/dashboard.html:34 templates/security/prisoners-detail.html:36
 #: templates/security/prisoners.html:59
 msgid "Payment sources"
-msgstr ""
+msgstr "Dulliau talu"
 
 #: apps/security/views.py:170
 msgid "Unknown sender"
@@ -567,16 +567,16 @@ msgstr "Gweld bob un"
 
 #: templates/dashboard.html:49
 msgid "Payment sources and prisoners you are monitoring"
-msgstr ""
+msgstr "Dulliau talu a charcharorion yr ydych yn eu monitro "
 
 #: templates/dashboard.html:59
 #, python-format
 msgid "1 new credit"
 msgid_plural "%(count)s new credits"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "1 credyd newydd"
+msgstr[1] "%(count)s credyd newydd "
+msgstr[2] "%(count)s credyd newydd "
+msgstr[3] "%(count)s credyd newydd"
 
 #: templates/dashboard.html:77
 msgid "Admin options"
@@ -659,7 +659,7 @@ msgstr "Allforio"
 #: templates/security/prisoners-detail.html:90
 #: templates/security/senders.html:39
 msgid "Payment source and type"
-msgstr ""
+msgstr "Dull a math talu "
 
 #: templates/security/credits.html:60 templates/security/forms/credits.html:13
 #: templates/security/forms/prisoners.html:10
@@ -732,7 +732,7 @@ msgstr "Didoli"
 #: templates/security/forms/senders.html:10 templates/security/review.html:36
 #: templates/security/senders-detail.html:145
 msgid "Payment source"
-msgstr ""
+msgstr "Dull talu"
 
 #: templates/security/forms/total-range-fields.html:4
 msgid "Total sent (£)"
@@ -822,7 +822,7 @@ msgstr "Rhif rhestr (ar gyfer cymdeithasau adeiladu)"
 #: templates/security/prisoners-detail.html:167
 #: templates/security/senders-detail.html:224
 msgid "Crediting staff"
-msgstr ""
+msgstr "Staff credydu "
 
 #: templates/security/prisoners.html:51
 msgid "Received"
@@ -841,10 +841,10 @@ msgstr[3] "<strong>%(count)s</strong> credyd wedi'u cael"
 #, python-format
 msgid "<strong>%(count)s</strong> payment source"
 msgid_plural "<strong>%(count)s</strong> payment sources"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "<strong>%(count)s</strong> dull talu"
+msgstr[1] "<strong>%(count)s</strong> dull talu"
+msgstr[2] "<strong>%(count)s</strong> dull talu "
+msgstr[3] "<strong>%(count)s</strong> dulliau talu "
 
 #: templates/security/prisoners.html:103
 msgid "No matching prisoners found"
@@ -913,15 +913,15 @@ msgstr "Dim credydau newydd i'w hadolygu."
 
 #: templates/security/senders-detail.html:17
 msgid "Bank transfer payments with these details"
-msgstr ""
+msgstr "Taliadau trosglwyddiad banc gyda'r manylion hyn "
 
 #: templates/security/senders-detail.html:50
 msgid "Debit card payments with these details"
-msgstr ""
+msgstr "Taliadau cerdyn debyd gyda'r manylion hyn "
 
 #: templates/security/senders-detail.html:52
 msgid "How are these grouped?"
-msgstr ""
+msgstr "Sut caiff y rhain eu grwpio? "
 
 #: templates/security/senders-detail.html:66
 msgid "Expiry date"
@@ -929,7 +929,7 @@ msgstr "Dyddiad daw i ben"
 
 #: templates/security/senders-detail.html:74
 msgid "Postcode"
-msgstr ""
+msgstr "Cod post"
 
 #: templates/security/senders-detail.html:91
 #: templates/security/senders-detail.html:122
@@ -959,27 +959,27 @@ msgstr "E-bost"
 
 #: templates/security/senders-detail.html:245
 msgid "How these credits are grouped"
-msgstr ""
+msgstr "Sut mae'r credydau hyn yn cael eu grwpio "
 
 #: templates/security/senders-detail.html:247
 msgid "We group the payment sources by the debit card’s last 4 digits, expiry date and postcode."
-msgstr ""
+msgstr "Rydym yn grwpio'r dulliau talu yn ôl 4 digid olaf y cerdyn debyd, y dyddiad dod i ben a'r cod post. "
 
 #: templates/security/senders-detail.html:248
 msgid "We do this because card industry compliance doesn’t allow using the full card number as a unique ID."
-msgstr ""
+msgstr "Rydym yn gwneud hyn oherwydd nad yw trefniadau’r diwydiant cardiau yn caniatáu defnyddio’r rhif cerdyn llawn fel rhif adnabod unigryw.     "
 
 #: templates/security/senders-detail.html:251
 msgid "In almost all cases, this results in one specific card and cardholder."
-msgstr ""
+msgstr "Mewn bron pob achos, mae hyn yn arwain at un cerdyn a deiliad cerdyn penodol."
 
 #: templates/security/senders-detail.html:252
 msgid "But, for the avoidance of doubt, we’ve listed details for each transaction below."
-msgstr ""
+msgstr "Ond, er mwyn osgoi amheuaeth, rydym wedi rhestru manylion pob trafodyn isod. "
 
 #: templates/security/senders-detail.html:255
 msgid "OK"
-msgstr ""
+msgstr "Iawn"
 
 #: templates/security/senders.html:43
 msgid "Sent"
@@ -1014,7 +1014,7 @@ msgstr[3] "<strong>%(count)s</strong> carchardai"
 
 #: templates/security/senders.html:121
 msgid "No matching payment sources found"
-msgstr ""
+msgstr "Ni ddaethpwyd o hyd i unrhyw ddulliau talu sy'n cyfateb. "
 
 #: utils.py:27
 msgid "Contact us"
