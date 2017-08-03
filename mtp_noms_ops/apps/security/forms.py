@@ -132,6 +132,13 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             data[field.name] = value
         return data
 
+    def get_api_request_params(self):
+        filters = self.get_query_data()
+        for param in filters:
+            if param in self.exclusive_date_params:
+                filters[param] += datetime.timedelta(days=1)
+        return filters
+
     def get_object_list(self):
         """
         Gets the security object list: senders, prisoners or credits
@@ -141,10 +148,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         if not page:
             return []
         offset = (page - 1) * self.page_size
-        filters = self.get_query_data()
-        for param in filters:
-            if param in self.exclusive_date_params:
-                filters[param] += datetime.timedelta(days=1)
+        filters = self.get_api_request_params()
         try:
             data = self.get_object_list_endpoint().get(offset=offset, limit=self.page_size, **filters)
         except SlumberHttpBaseException:
@@ -156,7 +160,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         return data.get('results', [])
 
     def get_complete_object_list(self):
-        filters = self.get_query_data()
+        filters = self.get_api_request_params()
         return self.parse_date_fields(retrieve_all_pages(self.get_object_list_endpoint().get, **filters))
 
     @cached_property
@@ -271,7 +275,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             endpoint_path = urlparse(endpoint.url()).path
             self.existing_search = save_search(
                 self.client, page_title, endpoint_path, site_url,
-                filters=self.get_query_data(), last_result_count=self.total_count
+                filters=self.get_api_request_params(), last_result_count=self.total_count
             )
         elif self.request.GET.get('unpin') and self.existing_search:
             delete_search(self.client, self.existing_search['id'])
