@@ -44,7 +44,7 @@ class SecurityDashboardTests(SecurityDashboardTestCase):
     def test_login_redirects_to_security_dashboard(self):
         self.login('security-staff', 'security-staff')
         self.assertInSource('Credits')
-        self.assertInSource('Senders')
+        self.assertInSource('Payment sources')
         self.assertInSource('Prisoners')
         self.assertEqual(self.driver.title, 'Prisoner money intelligence')
         dashboard_url = reverse('dashboard')
@@ -67,7 +67,7 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         self.click_on_text('Credits')
 
     def test_perform_searches(self):
-        self.assertInSource('Sender and type')  # a results list header
+        self.assertInSource('Payment source and type')  # a results list header
 
         self.click_on_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
@@ -82,7 +82,7 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         self.click_on_tab('sender')
         self.type_in('id_sender_name', Keys.BACKSPACE * len('aaabbbccc111222333'))
         self.submit_tabpanel('sender')
-        self.assertInSource('JAMES HALLS')
+        self.assertInSource('James Halls')
 
     def test_ordering(self):
         self.click_on_tab('amount')
@@ -103,15 +103,15 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('Senders')
+        self.click_on_text('Payment sources')
 
     def test_perform_searches(self):
-        self.assertInSource('Sender and type')  # a results list header
+        self.assertInSource('Payment source and type')  # a results list header
 
         self.click_on_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
         self.submit_tabpanel('sender')
-        self.assertInSource('No matching senders found')
+        self.assertInSource('No matching payment sources found')
 
 
 class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
@@ -126,7 +126,7 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
         self.click_on_tab('prisoner')
         self.type_in('id_prisoner_name', 'James')
         self.submit_tabpanel('prisoner')
-        self.assertInSource('JAMES HALLS')
+        self.assertInSource('James Halls')
 
         # no need to click on tab as they're persistent
         self.type_in('id_prisoner_name', 'aaabbbccc111222333')  # not a likely prisoner name
