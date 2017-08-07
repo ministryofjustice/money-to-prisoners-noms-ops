@@ -618,7 +618,6 @@ class PinnedProfileTestCase(SecurityViewTestCase):
 
 
 override_nomis_settings = override_settings(
-    NOMIS_API_AVAILABLE=True,
     NOMIS_API_BASE_URL='https://nomis.local/',
     NOMIS_API_CLIENT_TOKEN='hello',
     NOMIS_API_PRIVATE_KEY=(
@@ -632,8 +631,6 @@ override_nomis_settings = override_settings(
 
 
 class PrisonerDetailViewTestCase(SecurityViewTestCase):
-    _overridden_settings = {'NOMIS_API_AVAILABLE': False}
-
     def _add_prisoner_data_responses(self, rsps):
         rsps.add(
             rsps.GET,

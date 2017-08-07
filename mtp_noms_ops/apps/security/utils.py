@@ -93,5 +93,7 @@ def initial_params(request):
     return {'initial_params': urlencode(initial_params, doseq=True)}
 
 
-def nomis_api_availability(request):
-    return {'nomis_api_available': settings.NOMIS_API_AVAILABLE}
+def nomis_api_available(_):
+    return {'nomis_api_available': (
+        settings.NOMIS_API_BASE_URL and settings.NOMIS_API_CLIENT_TOKEN and settings.NOMIS_API_PRIVATE_KEY
+    )}
