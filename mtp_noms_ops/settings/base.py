@@ -118,7 +118,7 @@ TEMPLATES = [
                 'mtp_noms_ops.utils.external_breadcrumbs',
                 'mtp_noms_ops.utils.user_specific_context',
                 'mtp_noms_ops.apps.security.utils.initial_params',
-                'mtp_noms_ops.apps.security.utils.nomis_api_availability',
+                'mtp_noms_ops.apps.security.utils.nomis_api_available',
             ],
         },
     },
@@ -253,7 +253,6 @@ LOCATION_UPLOADER_PASSWORD = os.environ.get('LOCATION_UPLOADER_PASSWORD', 'priso
 ASYNC_LOCATION_UPLOAD = os.environ.get('ASYNC_LOCATION_UPLOAD', 'True') == 'True'
 SHOW_LANGUAGE_SWITCH = os.environ.get('SHOW_LANGUAGE_SWITCH', 'False') == 'True'
 
-NOMIS_API_AVAILABLE = os.environ.get('NOMIS_API_AVAILABLE', 'False') == 'True'
 NOMIS_API_BASE_URL = os.environ.get('NOMIS_API_BASE_URL', '')
 NOMIS_API_CLIENT_TOKEN = os.environ.get('NOMIS_API_CLIENT_TOKEN', '')
 NOMIS_API_PRIVATE_KEY = os.environ.get('NOMIS_API_PRIVATE_KEY', '').encode('utf8').decode('unicode_escape')

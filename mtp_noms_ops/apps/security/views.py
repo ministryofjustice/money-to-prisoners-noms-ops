@@ -1,7 +1,6 @@
 import base64
 import logging
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -20,7 +19,7 @@ from security.forms import (
     SendersForm, SendersDetailForm, PrisonersForm, PrisonersDetailForm, CreditsForm,
     ReviewCreditsForm,
 )
-from security.utils import NameSet
+from security.utils import NameSet, nomis_api_available
 
 logger = logging.getLogger('mtp')
 
@@ -232,7 +231,7 @@ class ReviewCreditsView(FormView):
 
 
 def prisoner_image_view(request, prisoner_number):
-    if settings.NOMIS_API_AVAILABLE and prisoner_number:
+    if nomis_api_available(request) and prisoner_number:
         try:
             b64data = get_photograph_data(prisoner_number)
             if b64data:
