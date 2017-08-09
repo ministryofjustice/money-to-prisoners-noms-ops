@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mtp-noms-ops\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-31 12:52+0100\n"
+"POT-Creation-Date: 2017-08-09 12:09+0100\n"
 "PO-Revision-Date: 2016-11-04 10:00+0000\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>\n"
 "Language-Team: Welsh (http://www.transifex.com/ministry-of-justice/mtp/language/cy/)\n"
@@ -69,42 +69,42 @@ msgid_plural "%d prisoner locations updated successfully"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/security/export.py:14 apps/security/forms.py:31
+#: apps/security/export.py:11 apps/security/forms.py:31
 #: templates/security/review.html:54
 msgid "Bank transfer"
 msgstr ""
 
-#: apps/security/export.py:15 apps/security/forms.py:31
+#: apps/security/export.py:12 apps/security/forms.py:31
 msgid "Debit card"
 msgstr ""
 
-#: apps/security/export.py:28 apps/security/forms.py:438
-#: apps/security/forms.py:566 templates/security/senders-detail.html:200
+#: apps/security/export.py:28 apps/security/forms.py:420
+#: apps/security/forms.py:548 templates/security/senders-detail.html:203
 msgid "Prisoner name"
 msgstr ""
 
-#: apps/security/export.py:28 apps/security/forms.py:436
-#: apps/security/forms.py:565
+#: apps/security/export.py:28 apps/security/forms.py:418
+#: apps/security/forms.py:547
 msgid "Prisoner number"
 msgstr ""
 
-#: apps/security/export.py:28 apps/security/forms.py:315
-#: apps/security/forms.py:439 apps/security/forms.py:567
-#: templates/security/credits.html:65 templates/security/forms/credits.html:14
+#: apps/security/export.py:28 apps/security/forms.py:297
+#: apps/security/forms.py:421 apps/security/forms.py:549
+#: templates/security/credits.html:68 templates/security/forms/credits.html:14
 #: templates/security/forms/prisoners.html:11
 #: templates/security/forms/senders.html:11
 #: templates/security/prisoners.html:47
-#: templates/security/senders-detail.html:205
+#: templates/security/senders-detail.html:208
 msgid "Prison"
 msgstr ""
 
-#: apps/security/export.py:29 apps/security/forms.py:307
-#: apps/security/forms.py:572
+#: apps/security/export.py:29 apps/security/forms.py:289
+#: apps/security/forms.py:554
 msgid "Sender name"
 msgstr ""
 
-#: apps/security/export.py:29 apps/security/forms.py:308
-#: apps/security/forms.py:573
+#: apps/security/export.py:29 apps/security/forms.py:290
+#: apps/security/forms.py:555
 msgid "Payment method"
 msgstr ""
 
@@ -128,28 +128,28 @@ msgstr ""
 msgid "Debit card expiry"
 msgstr ""
 
-#: apps/security/export.py:31 templates/security/senders-detail.html:177
+#: apps/security/export.py:31 templates/security/senders-detail.html:180
 msgid "Address"
 msgstr ""
 
-#: apps/security/export.py:32 templates/security/credits.html:52
-#: templates/security/prisoners-detail.html:95
+#: apps/security/export.py:32 templates/security/credits.html:55
+#: templates/security/prisoners-detail.html:98
 #: templates/security/prisoners.html:67 templates/security/review.html:38
-#: templates/security/senders-detail.html:157
+#: templates/security/senders-detail.html:160
 #: templates/security/senders.html:67
 msgid "Amount"
 msgstr ""
 
-#: apps/security/export.py:32 templates/security/credits.html:43
+#: apps/security/export.py:32 templates/security/credits.html:46
 #: templates/security/forms/received-range-field.html:4
-#: templates/security/prisoners-detail.html:85
-#: templates/security/senders-detail.html:140
+#: templates/security/prisoners-detail.html:88
+#: templates/security/senders-detail.html:143
 msgid "Date received"
 msgstr ""
 
-#: apps/security/export.py:33 templates/security/credits.html:66
-#: templates/security/prisoners-detail.html:101
-#: templates/security/senders-detail.html:162
+#: apps/security/export.py:33 templates/security/credits.html:69
+#: templates/security/prisoners-detail.html:104
+#: templates/security/senders-detail.html:165
 msgid "Credited status"
 msgstr ""
 
@@ -157,12 +157,12 @@ msgstr ""
 msgid "Date credited"
 msgstr ""
 
-#: apps/security/export.py:33 templates/security/prisoners-detail.html:172
-#: templates/security/senders-detail.html:229
+#: apps/security/export.py:33 templates/security/prisoners-detail.html:175
+#: templates/security/senders-detail.html:232
 msgid "NOMIS ID"
 msgstr ""
 
-#: apps/security/export.py:34 templates/security/senders-detail.html:184
+#: apps/security/export.py:34 templates/security/senders-detail.html:187
 msgid "IP"
 msgstr ""
 
@@ -186,295 +186,305 @@ msgstr ""
 msgid "Must be greater than the lower bound"
 msgstr ""
 
-#: apps/security/forms.py:151 apps/security/forms.py:733
+#: apps/security/forms.py:158 apps/security/forms.py:724
 msgid "This service is currently unavailable"
 msgstr ""
 
-#: apps/security/forms.py:281
+#: apps/security/forms.py:263
 msgid "Must be larger than the minimum prisoners"
 msgstr ""
 
-#: apps/security/forms.py:282 apps/security/forms.py:411
+#: apps/security/forms.py:264 apps/security/forms.py:393
 msgid "Must be larger than the minimum credits"
 msgstr ""
 
-#: apps/security/forms.py:283 apps/security/forms.py:412
+#: apps/security/forms.py:265 apps/security/forms.py:394
 msgid "Must be larger than the minimum total"
 msgstr ""
 
-#: apps/security/forms.py:285 apps/security/forms.py:414
-#: apps/security/forms.py:544 apps/security/forms.py:738
-#: apps/security/forms.py:761
+#: apps/security/forms.py:267 apps/security/forms.py:396
+#: apps/security/forms.py:526 apps/security/forms.py:729
+#: apps/security/forms.py:755
 msgid "Order by"
 msgstr ""
 
-#: apps/security/forms.py:288
+#: apps/security/forms.py:270
 msgid "Number of prisoners (low to high)"
 msgstr ""
 
-#: apps/security/forms.py:289
+#: apps/security/forms.py:271
 msgid "Number of prisoners (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:290
+#: apps/security/forms.py:272
 msgid "Number of prisons (low to high)"
 msgstr ""
 
-#: apps/security/forms.py:291
+#: apps/security/forms.py:273
 msgid "Number of prisons (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:292 apps/security/forms.py:419
+#: apps/security/forms.py:274 apps/security/forms.py:401
 msgid "Number of credits (low to high)"
 msgstr ""
 
-#: apps/security/forms.py:293 apps/security/forms.py:420
+#: apps/security/forms.py:275 apps/security/forms.py:402
 msgid "Number of credits (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:294
+#: apps/security/forms.py:276
 msgid "Total sent (low to high)"
 msgstr ""
 
-#: apps/security/forms.py:295
+#: apps/security/forms.py:277
 msgid "Total sent (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:298
+#: apps/security/forms.py:280
 msgid "Number of prisoners (minimum)"
 msgstr ""
 
-#: apps/security/forms.py:299
+#: apps/security/forms.py:281
 msgid "Maximum prisoners sent to"
 msgstr ""
 
-#: apps/security/forms.py:300
+#: apps/security/forms.py:282
 msgid "Number of prisons (minimum)"
 msgstr ""
 
-#: apps/security/forms.py:301
+#: apps/security/forms.py:283
 msgid "Maximum prisons sent to"
 msgstr ""
 
-#: apps/security/forms.py:302
+#: apps/security/forms.py:284
 msgid "Minimum credits sent"
 msgstr ""
 
-#: apps/security/forms.py:303
+#: apps/security/forms.py:285
 msgid "Maximum credits sent"
 msgstr ""
 
-#: apps/security/forms.py:304
+#: apps/security/forms.py:286
 msgid "Minimum total sent"
 msgstr ""
 
-#: apps/security/forms.py:305
+#: apps/security/forms.py:287
 msgid "Maximum total sent"
 msgstr ""
 
-#: apps/security/forms.py:309 apps/security/forms.py:574
+#: apps/security/forms.py:291 apps/security/forms.py:556
 msgid "Sender sort code"
 msgstr ""
 
-#: apps/security/forms.py:309 apps/security/forms.py:574
+#: apps/security/forms.py:291 apps/security/forms.py:556
 msgid "for example 01-23-45"
 msgstr ""
 
-#: apps/security/forms.py:310 apps/security/forms.py:575
+#: apps/security/forms.py:292 apps/security/forms.py:557
 msgid "Sender account number"
 msgstr ""
 
-#: apps/security/forms.py:311 apps/security/forms.py:576
+#: apps/security/forms.py:293 apps/security/forms.py:558
 msgid "Sender roll number"
 msgstr ""
 
-#: apps/security/forms.py:312 apps/security/forms.py:577
+#: apps/security/forms.py:294 apps/security/forms.py:559
 #: templates/security/senders-detail.html:58
 msgid "Last 4 digits of card number"
 msgstr ""
 
-#: apps/security/forms.py:313 apps/security/forms.py:578
+#: apps/security/forms.py:295 apps/security/forms.py:560
 msgid "Sender email"
 msgstr ""
 
-#: apps/security/forms.py:316 apps/security/forms.py:440
-#: apps/security/forms.py:568
+#: apps/security/forms.py:298 apps/security/forms.py:422
+#: apps/security/forms.py:550
 msgid "Prison region"
 msgstr ""
 
-#: apps/security/forms.py:317 apps/security/forms.py:441
-#: apps/security/forms.py:569
+#: apps/security/forms.py:299 apps/security/forms.py:423
+#: apps/security/forms.py:551
 msgid "Prison type"
 msgstr ""
 
-#: apps/security/forms.py:318 apps/security/forms.py:442
-#: apps/security/forms.py:570
+#: apps/security/forms.py:300 apps/security/forms.py:424
+#: apps/security/forms.py:552
 msgid "Prison category"
 msgstr ""
 
-#: apps/security/forms.py:365 apps/security/forms.py:481
-#: apps/security/forms.py:623
+#: apps/security/forms.py:347 apps/security/forms.py:463
+#: apps/security/forms.py:605
 msgid "All prisons"
 msgstr ""
 
-#: apps/security/forms.py:367 apps/security/forms.py:483
-#: apps/security/forms.py:625
+#: apps/security/forms.py:349 apps/security/forms.py:465
+#: apps/security/forms.py:607
 msgid "All regions"
 msgstr ""
 
-#: apps/security/forms.py:369 apps/security/forms.py:485
-#: apps/security/forms.py:627
+#: apps/security/forms.py:351 apps/security/forms.py:467
+#: apps/security/forms.py:609
 msgid "All types"
 msgstr ""
 
-#: apps/security/forms.py:371 apps/security/forms.py:487
-#: apps/security/forms.py:629
+#: apps/security/forms.py:353 apps/security/forms.py:469
+#: apps/security/forms.py:611
 msgid "All categories"
 msgstr ""
 
-#: apps/security/forms.py:410
+#: apps/security/forms.py:392
 msgid "Must be larger than the minimum senders"
 msgstr ""
 
-#: apps/security/forms.py:417
+#: apps/security/forms.py:399
 msgid "Number of senders (low to high)"
 msgstr ""
 
-#: apps/security/forms.py:418
+#: apps/security/forms.py:400
 msgid "Number of senders (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:421
+#: apps/security/forms.py:403
 msgid "Total received (low to high)"
 msgstr ""
 
-#: apps/security/forms.py:422
+#: apps/security/forms.py:404
 msgid "Total received (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:423 apps/security/forms.py:551
-#: apps/security/forms.py:745
+#: apps/security/forms.py:405 apps/security/forms.py:533
+#: apps/security/forms.py:736
 msgid "Prisoner name (A to Z)"
 msgstr ""
 
-#: apps/security/forms.py:424 apps/security/forms.py:552
-#: apps/security/forms.py:746
+#: apps/security/forms.py:406 apps/security/forms.py:534
+#: apps/security/forms.py:737
 msgid "Prisoner name (Z to A)"
 msgstr ""
 
-#: apps/security/forms.py:425 apps/security/forms.py:553
-#: apps/security/forms.py:747
+#: apps/security/forms.py:407 apps/security/forms.py:535
+#: apps/security/forms.py:738
 msgid "Prisoner number (A to Z)"
 msgstr ""
 
-#: apps/security/forms.py:426 apps/security/forms.py:554
-#: apps/security/forms.py:748
+#: apps/security/forms.py:408 apps/security/forms.py:536
+#: apps/security/forms.py:739
 msgid "Prisoner number (Z to A)"
 msgstr ""
 
-#: apps/security/forms.py:429
+#: apps/security/forms.py:411
 msgid "Number of senders (minimum)"
 msgstr ""
 
-#: apps/security/forms.py:430
+#: apps/security/forms.py:412
 msgid "Maximum senders received from"
 msgstr ""
 
-#: apps/security/forms.py:431
+#: apps/security/forms.py:413
 msgid "Minimum credits received"
 msgstr ""
 
-#: apps/security/forms.py:432
+#: apps/security/forms.py:414
 msgid "Maximum credits received"
 msgstr ""
 
-#: apps/security/forms.py:433
+#: apps/security/forms.py:415
 msgid "Minimum total received"
 msgstr ""
 
-#: apps/security/forms.py:434
+#: apps/security/forms.py:416
 msgid "Maximum total received"
 msgstr ""
 
-#: apps/security/forms.py:504
+#: apps/security/forms.py:486
 msgid "Not a whole number"
 msgstr ""
 
-#: apps/security/forms.py:505
+#: apps/security/forms.py:487
 msgid "Not a multiple of £5"
 msgstr ""
 
-#: apps/security/forms.py:506
+#: apps/security/forms.py:488
 msgid "Not a multiple of £10"
 msgstr ""
 
-#: apps/security/forms.py:507
+#: apps/security/forms.py:489
 msgid "£100 or more"
 msgstr ""
 
-#: apps/security/forms.py:508
+#: apps/security/forms.py:490
 msgid "Exact amount"
 msgstr ""
 
-#: apps/security/forms.py:509
+#: apps/security/forms.py:491
 msgid "Exact number of pence"
 msgstr ""
 
-#: apps/security/forms.py:542
+#: apps/security/forms.py:524
 msgid "Must be after the start date"
 msgstr ""
 
-#: apps/security/forms.py:547 apps/security/forms.py:741
-#: apps/security/forms.py:764
+#: apps/security/forms.py:529 apps/security/forms.py:732
+#: apps/security/forms.py:758
 msgid "Received date (oldest to newest)"
 msgstr ""
 
-#: apps/security/forms.py:548 apps/security/forms.py:742
-#: apps/security/forms.py:765
+#: apps/security/forms.py:530 apps/security/forms.py:733
+#: apps/security/forms.py:759
 msgid "Received date (newest to oldest)"
 msgstr ""
 
-#: apps/security/forms.py:549 apps/security/forms.py:743
-#: apps/security/forms.py:766
+#: apps/security/forms.py:531 apps/security/forms.py:734
+#: apps/security/forms.py:760
 msgid "Amount sent (low to high)"
 msgstr ""
 
-#: apps/security/forms.py:550 apps/security/forms.py:744
-#: apps/security/forms.py:767
+#: apps/security/forms.py:532 apps/security/forms.py:735
+#: apps/security/forms.py:761
 msgid "Amount sent (high to low)"
 msgstr ""
 
-#: apps/security/forms.py:557
+#: apps/security/forms.py:539
 msgid "Received from"
 msgstr ""
 
-#: apps/security/forms.py:557 apps/security/forms.py:558
+#: apps/security/forms.py:539 apps/security/forms.py:540
 msgid "for example 01/06/2016"
 msgstr ""
 
-#: apps/security/forms.py:558
+#: apps/security/forms.py:540
 msgid "Received to"
 msgstr ""
 
-#: apps/security/forms.py:560 templates/security/forms/credits.html:11
+#: apps/security/forms.py:542 templates/security/forms/credits.html:11
 msgid "Amount (£)"
 msgstr ""
 
-#: apps/security/forms.py:561
+#: apps/security/forms.py:543
 msgid "Any amount"
 msgstr ""
 
-#: apps/security/forms.py:637 apps/security/forms.py:645
+#: apps/security/forms.py:619 apps/security/forms.py:627
 msgid "This field is required for the selected amount pattern"
 msgstr ""
 
-#: apps/security/forms.py:699
+#: apps/security/forms.py:684
 #, python-format
 msgid "ending in %02d pence"
 msgstr ""
 
-#: apps/security/forms.py:730
+#: apps/security/forms.py:721
 msgid "Not found"
+msgstr ""
+
+#: apps/security/tasks.py:53 templates/mtp_auth/login.html:4
+#: templates/security/email/export-credits.html:6
+#: templates/security/email/export-credits.txt:4 utils.py:42
+msgid "Prisoner money intelligence"
+msgstr ""
+
+#: apps/security/tasks.py:53
+msgid "Credits exported"
 msgstr ""
 
 #: apps/security/templatetags/security.py:49
@@ -494,47 +504,52 @@ msgid "Credited"
 msgstr ""
 
 #: apps/security/templatetags/security.py:57
-#: templates/security/credits.html:112
-#: templates/security/prisoners-detail.html:159
-#: templates/security/senders-detail.html:216
+#: templates/security/credits.html:115
+#: templates/security/prisoners-detail.html:162
+#: templates/security/senders-detail.html:219
 msgid "Refunded"
 msgstr ""
 
-#: apps/security/views.py:77 apps/security/views.py:115 templates/base.html:19
+#: apps/security/views.py:69
+#, python-format
+msgid "The spreadsheet will be emailed to you at %(email)s"
+msgstr ""
+
+#: apps/security/views.py:90 apps/security/views.py:134 templates/base.html:19
 #: utils.py:32
 msgid "Home"
 msgstr ""
 
-#: apps/security/views.py:129 templates/base.html:21
+#: apps/security/views.py:153 templates/base.html:21
 #: templates/dashboard.html:28
 msgid "Credits"
 msgstr ""
 
-#: apps/security/views.py:140 templates/base.html:22
+#: apps/security/views.py:164 templates/base.html:22
 #: templates/dashboard.html:34 templates/security/prisoners-detail.html:36
 #: templates/security/prisoners.html:59
 msgid "Payment sources"
 msgstr ""
 
-#: apps/security/views.py:170
+#: apps/security/views.py:194
 msgid "Unknown sender"
 msgstr ""
 
-#: apps/security/views.py:177 templates/base.html:23
+#: apps/security/views.py:201 templates/base.html:23
 #: templates/dashboard.html:40 templates/security/senders-detail.html:97
 #: templates/security/senders.html:51
 msgid "Prisoners"
 msgstr ""
 
-#: apps/security/views.py:206
+#: apps/security/views.py:230
 msgid "Unknown prisoner"
 msgstr ""
 
-#: apps/security/views.py:210 templates/dashboard.html:83
+#: apps/security/views.py:234 templates/dashboard.html:83
 msgid "New credits check"
 msgstr ""
 
-#: apps/security/views.py:224
+#: apps/security/views.py:248
 #, python-format
 msgid "%(count)d credits have been marked as checked by security"
 msgstr ""
@@ -586,10 +601,6 @@ msgstr ""
 msgid "Upload prisoner location file"
 msgstr ""
 
-#: templates/mtp_auth/login.html:4 utils.py:42
-msgid "Prisoner money intelligence"
-msgstr ""
-
 #: templates/prisoner_location_admin/email/failure-notification.html:6
 #: templates/prisoner_location_admin/email/failure-notification.txt:4
 msgid "The upload of the prisoner location file failed, with the following errors:"
@@ -607,6 +618,7 @@ msgid "If you are unsure what the problem might be, please contact us at %(feedb
 msgstr ""
 
 #: templates/prisoner_location_admin/email/failure-notification.txt:2
+#: templates/security/email/export-credits.txt:2
 msgid "Send money to a prisoner"
 msgstr ""
 
@@ -643,52 +655,58 @@ msgstr ""
 msgid "Print"
 msgstr ""
 
-#: templates/security/credits.html:32
-#: templates/security/prisoners-detail.html:74
-#: templates/security/senders-detail.html:129
-msgid "Export"
-msgstr ""
-
-#: templates/security/credits.html:48
-#: templates/security/prisoners-detail.html:90
+#: templates/security/credits.html:51
+#: templates/security/prisoners-detail.html:93
 #: templates/security/senders.html:39
 msgid "Payment source and type"
 msgstr ""
 
-#: templates/security/credits.html:60 templates/security/forms/credits.html:13
+#: templates/security/credits.html:63 templates/security/forms/credits.html:13
 #: templates/security/forms/prisoners.html:10
 #: templates/security/prisoners.html:42 templates/security/review.html:37
-#: templates/security/senders-detail.html:149
+#: templates/security/senders-detail.html:152
 msgid "Prisoner"
 msgstr ""
 
-#: templates/security/credits.html:79
-#: templates/security/prisoners-detail.html:114
+#: templates/security/credits.html:82
+#: templates/security/prisoners-detail.html:117
 #: templates/security/senders.html:90
 msgid "by debit card"
 msgstr ""
 
-#: templates/security/credits.html:84
-#: templates/security/prisoners-detail.html:124
+#: templates/security/credits.html:87
+#: templates/security/prisoners-detail.html:127
 #: templates/security/senders.html:83
 msgid "by bank transfer"
 msgstr ""
 
-#: templates/security/credits.html:106
+#: templates/security/credits.html:109
 #, python-format
 msgid "by %(name_of_clerk)s"
 msgstr ""
 
-#: templates/security/credits.html:116
-#: templates/security/prisoners-detail.html:161
-#: templates/security/senders-detail.html:218
+#: templates/security/credits.html:119
+#: templates/security/prisoners-detail.html:164
+#: templates/security/senders-detail.html:221
 msgid "No"
 msgstr ""
 
-#: templates/security/credits.html:122
-#: templates/security/prisoners-detail.html:178
-#: templates/security/senders-detail.html:235
+#: templates/security/credits.html:125
+#: templates/security/prisoners-detail.html:181
+#: templates/security/senders-detail.html:238
 msgid "No matching credits found"
+msgstr ""
+
+#: templates/security/email/export-credits.html:6
+#: templates/security/email/export-credits.txt:4
+#, python-format
+msgid "Attached are the credits you exported from ‘%(service_name)s’."
+msgstr ""
+
+#: templates/security/email/export-credits.html:12
+#: templates/security/email/export-credits.txt:10
+#, python-format
+msgid "The spreadsheet was generated at %(generated_at)s"
 msgstr ""
 
 #: templates/security/forms/credits.html:10
@@ -724,7 +742,7 @@ msgid "Sort"
 msgstr ""
 
 #: templates/security/forms/senders.html:10 templates/security/review.html:36
-#: templates/security/senders-detail.html:145
+#: templates/security/senders-detail.html:148
 msgid "Payment source"
 msgstr ""
 
@@ -738,6 +756,33 @@ msgstr ""
 
 #: templates/security/forms/update-search.html:4
 msgid "Update list"
+msgstr ""
+
+#: templates/security/includes/export-credits.html:6
+#: templates/security/includes/export-credits.html:10
+#: templates/security/includes/export-credits.html:12
+msgid "Export"
+msgstr ""
+
+#: templates/security/includes/export-credits.html:14
+msgid "There are too many credits to download."
+msgstr ""
+
+#: templates/security/includes/export-credits.html:15
+#, python-format
+msgid "We can email you the spreadsheet at %(email)s."
+msgstr ""
+
+#: templates/security/includes/export-credits.html:20
+msgid "This may take a few minutes."
+msgstr ""
+
+#: templates/security/includes/export-credits.html:23
+msgid "Email me the file"
+msgstr ""
+
+#: templates/security/includes/export-credits.html:24
+msgid "Close"
 msgstr ""
 
 #: templates/security/includes/result-ordering-for-screenreader.html:4
@@ -786,35 +831,35 @@ msgstr ""
 msgid "Stop monitoring this prisoner"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:91
+#: templates/security/prisoners-detail.html:94
 msgid "Name entered by sender"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:100
+#: templates/security/prisoners-detail.html:103
 msgid "Received at prison"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:119
+#: templates/security/prisoners-detail.html:122
 msgid "Card number"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:129
+#: templates/security/prisoners-detail.html:132
 #: templates/security/senders-detail.html:23
 msgid "Account number"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:134
+#: templates/security/prisoners-detail.html:137
 #: templates/security/senders-detail.html:31
 msgid "Sort code"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:140
+#: templates/security/prisoners-detail.html:143
 #: templates/security/senders-detail.html:40
 msgid "Roll number (for building societies)"
 msgstr ""
 
-#: templates/security/prisoners-detail.html:167
-#: templates/security/senders-detail.html:224
+#: templates/security/prisoners-detail.html:170
+#: templates/security/senders-detail.html:227
 msgid "Crediting staff"
 msgstr ""
 
@@ -943,31 +988,31 @@ msgstr ""
 msgid "Stop monitoring this sender"
 msgstr ""
 
-#: templates/security/senders-detail.html:189
+#: templates/security/senders-detail.html:192
 msgid "Email"
 msgstr ""
 
-#: templates/security/senders-detail.html:245
+#: templates/security/senders-detail.html:248
 msgid "How these credits are grouped"
 msgstr ""
 
-#: templates/security/senders-detail.html:247
+#: templates/security/senders-detail.html:250
 msgid "We group the payment sources by the debit card’s last 4 digits, expiry date and postcode."
 msgstr ""
 
-#: templates/security/senders-detail.html:248
+#: templates/security/senders-detail.html:251
 msgid "We do this because card industry compliance doesn’t allow using the full card number as a unique ID."
 msgstr ""
 
-#: templates/security/senders-detail.html:251
+#: templates/security/senders-detail.html:254
 msgid "In almost all cases, this results in one specific card and cardholder."
 msgstr ""
 
-#: templates/security/senders-detail.html:252
+#: templates/security/senders-detail.html:255
 msgid "But, for the avoidance of doubt, we’ve listed details for each transaction below."
 msgstr ""
 
-#: templates/security/senders-detail.html:255
+#: templates/security/senders-detail.html:258
 msgid "OK"
 msgstr ""
 
