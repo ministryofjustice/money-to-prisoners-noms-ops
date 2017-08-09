@@ -27,7 +27,7 @@ def zip_credit_export(attachment_name, output):
 def email_credit_csv(*, user, session, endpoint_path, filters, export_description,
                      attachment_name, zip_attachment=True):
     endpoint = get_connection_with_session(user, session)
-    for attr in endpoint_path.split('.'):
+    for attr in endpoint_path.split('/'):
         endpoint = getattr(endpoint, attr)
     generated_at = timezone.now()
     object_list = parse_date_fields(retrieve_all_pages(endpoint.get, **filters))

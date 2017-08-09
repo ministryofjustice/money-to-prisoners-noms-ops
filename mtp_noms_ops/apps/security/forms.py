@@ -699,7 +699,7 @@ class SecurityDetailForm(SecurityForm):
         return self.get_object_endpoint().credits
 
     def get_object_list_endpoint_path(self):
-        return '%s.%s' % (self.get_object_endpoint_path(), 'credits')
+        return '%s/%s' % (self.get_object_endpoint_path(), 'credits')
 
     def get_object_endpoint(self):
         raise NotImplementedError
@@ -748,7 +748,7 @@ class SendersDetailForm(SecurityDetailForm):
         return self.client.senders(self.object_id)
 
     def get_object_endpoint_path(self):
-        return 'senders.%s' % self.object_id
+        return 'senders/%s' % self.object_id
 
 
 class PrisonersDetailForm(SecurityDetailForm):
@@ -770,7 +770,7 @@ class PrisonersDetailForm(SecurityDetailForm):
         return self.client.prisoners(self.object_id)
 
     def get_object_endpoint_path(self):
-        return 'prisoners.%s' % self.object_id
+        return 'prisoners/%s' % self.object_id
 
 
 class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
