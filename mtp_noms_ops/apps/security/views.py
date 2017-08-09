@@ -1,6 +1,7 @@
 import base64
 import logging
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -36,6 +37,7 @@ class SecurityView(FormView):
     object_list_context_key = NotImplemented
     export_view = False
     export_redirect_view = None
+    export_download_limit = settings.MAX_CREDITS_TO_DOWNLOAD
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
