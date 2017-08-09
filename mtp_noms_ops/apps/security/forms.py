@@ -10,7 +10,6 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.dateformat import format as date_format
-from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.functional import cached_property
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _, override as override_locale
@@ -24,6 +23,7 @@ from security.searches import (
     save_search, update_result_count, delete_search, get_existing_search
 )
 from security.templatetags.security import currency as format_currency
+from security.utils import parse_date_fields
 
 
 def get_credit_source_choices(blank_option=_('Any method')):
@@ -115,6 +115,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     def get_object_list_endpoint(self):
         raise NotImplementedError
 
+    def get_object_list_endpoint_path(self):
+        raise NotImplementedError
+
     def get_query_data(self, allow_parameter_manipulation=True):
         """
         Serialises the form into a dictionary stripping empty and pagination fields.
@@ -161,36 +164,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_complete_object_list(self):
         filters = self.get_api_request_params()
-        return self.parse_date_fields(retrieve_all_pages(self.get_object_list_endpoint().get, **filters))
+        return parse_date_fields(retrieve_all_pages(self.get_object_list_endpoint().get, **filters))
 
     @cached_property
     def query_string(self):
         return urlencode(self.get_query_data(allow_parameter_manipulation=False), doseq=True)
-
-    def parse_date_fields(self, object_list):
-        """
-        MTP API responds with string date/time fields, this filter converts them to python objects
-        """
-        fields = ['received_at', 'credited_at', 'refunded_at']
-        parsers = [parse_datetime, parse_date]
-
-        def convert(credit):
-            for field in fields:
-                value = credit.get(field)
-                if not value or not isinstance(value, str):
-                    continue
-                for parser in parsers:
-                    try:
-                        value = parser(value)
-                        if isinstance(value, datetime.datetime):
-                            value = timezone.localtime(value)
-                        credit[field] = value
-                        break
-                    except (ValueError, TypeError):
-                        pass
-            return credit
-
-        return list(map(convert, object_list)) if object_list else object_list
 
     def _get_value_text(self, bf):
         f = bf.field
@@ -681,8 +659,11 @@ class CreditsForm(SecurityForm):
     def get_object_list_endpoint(self):
         return self.client.credits
 
+    def get_object_list_endpoint_path(self):
+        return 'credits'
+
     def get_object_list(self):
-        return self.parse_date_fields(super().get_object_list())
+        return parse_date_fields(super().get_object_list())
 
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
@@ -717,11 +698,17 @@ class SecurityDetailForm(SecurityForm):
     def get_object_list_endpoint(self):
         return self.get_object_endpoint().credits
 
+    def get_object_list_endpoint_path(self):
+        return '%s.%s' % (self.get_object_endpoint_path(), 'credits')
+
     def get_object_endpoint(self):
         raise NotImplementedError
 
+    def get_object_endpoint_path(self):
+        raise NotImplementedError
+
     def get_object_list(self):
-        return self.parse_date_fields(super().get_object_list())
+        return parse_date_fields(super().get_object_list())
 
     def get_object(self):
         """
@@ -760,6 +747,9 @@ class SendersDetailForm(SecurityDetailForm):
     def get_object_endpoint(self):
         return self.client.senders(self.object_id)
 
+    def get_object_endpoint_path(self):
+        return 'senders.%s' % self.object_id
+
 
 class PrisonersDetailForm(SecurityDetailForm):
     ordering = forms.ChoiceField(label=_('Order by'), required=False,
@@ -778,6 +768,9 @@ class PrisonersDetailForm(SecurityDetailForm):
 
     def get_object_endpoint(self):
         return self.client.prisoners(self.object_id)
+
+    def get_object_endpoint_path(self):
+        return 'prisoners.%s' % self.object_id
 
 
 class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):

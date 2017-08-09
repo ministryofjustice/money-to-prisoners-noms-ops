@@ -1,9 +1,12 @@
 import base64
 from functools import wraps
+import io
 import json
 import logging
 from unittest import mock
+import zipfile
 
+from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import SimpleTestCase, override_settings
 from mtp_common.auth.test_utils import generate_tokens
@@ -211,7 +214,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
 
     @mock_form_connection
     @mock.patch('security.forms.SecurityForm.get_object_list')
-    def test_can_access_security_view(self, mock_connection, mocked_form_method):
+    def test_can_access_security_view(self, _, mocked_form_method):
         mocked_form_method.return_value = []
         if not self.view_name:
             return
@@ -408,8 +411,9 @@ class CreditsListTestCase(SecurityViewTestCase):
 
 class CreditsExportTestCase(SecurityBaseTestCase):
 
+    @mock.patch('security.tasks.get_connection_with_session')
     @mock.patch('security.forms.get_connection')
-    def test_creates_csv(self, mocked_connection):
+    def test_creates_csv(self, mocked_connection, mocked_connection_async):
         sample_prison_list(mocked_connection)
         response_data = {
             'count': 2,
@@ -464,18 +468,20 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         )
 
         self.login()
-        response = self.client.get(
-            reverse('security:credits_export') + '?page=1'
-        )
+        response = self.client.get(reverse('security:credits_export'))
         self.assertEqual(200, response.status_code)
         self.assertEqual('text/csv', response['Content-Type'])
-        self.assertEqual(
-            bytes(expected_result, 'utf8'),
-            response.content
-        )
+        self.assertEqual(expected_result, response.content.decode(response.charset))
 
+        no_saved_searches(mocked_connection())
+        mocked_connection_async().credits.get.return_value = response_data
+        response = self.client.get(reverse('security:credits_email_export'), follow=False)
+        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
+        self.assertZipDataEqual(mail.outbox[0].attachments[0][1], expected_result)
+
+    @mock.patch('security.tasks.get_connection_with_session')
     @mock.patch('security.forms.get_connection')
-    def test_no_data(self, mocked_connection):
+    def test_no_data(self, mocked_connection, mocked_connection_async):
         sample_prison_list(mocked_connection)
         response_data = {
             'count': 0,
@@ -493,24 +499,34 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         )
 
         self.login()
-        response = self.client.get(
-            reverse('security:credits_export') + '?page=1'
-        )
+        response = self.client.get(reverse('security:credits_export'))
         self.assertEqual(200, response.status_code)
         self.assertEqual('text/csv', response['Content-Type'])
-        self.assertEqual(
-            bytes(expected_result, 'utf8'),
-            response.content
-        )
+        self.assertEqual(expected_result, response.content.decode(response.charset))
+
+        no_saved_searches(mocked_connection())
+        mocked_connection_async().credits.get.return_value = response_data
+        response = self.client.get(reverse('security:credits_email_export'), follow=False)
+        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
+        self.assertZipDataEqual(mail.outbox[0].attachments[0][1], expected_result)
 
     @mock_form_connection
     def test_invalid_params_redirects_to_form(self, mocked_connection):
         sample_prison_list(mocked_connection)
         self.login()
         response = self.client.get(
-            reverse('security:credits_export') + '?page=1&received_at__gte=LL'
+            reverse('security:credits_export') + '?received_at__gte=LL'
         )
         self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
+
+    def assertZipDataEqual(self, zip_data, expected_csv):  # noqa
+        zip_data = io.BytesIO(zip_data)
+        with zipfile.ZipFile(zip_data, 'r') as zip_file:
+            contents = zip_file.namelist()
+            self.assertEqual(len(contents), 1, msg='Zip should contain exactly 1 file')
+            with zip_file.open(contents[0]) as contents:
+                contents = contents.read().decode()
+        self.assertEqual(contents, expected_csv, msg='Zipped contents do not match expected')
 
 
 class PinnedProfileTestCase(SecurityViewTestCase):
