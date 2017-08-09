@@ -19,6 +19,7 @@ from security.forms import (
     SendersForm, SendersDetailForm, PrisonersForm, PrisonersDetailForm, CreditsForm,
     ReviewCreditsForm,
 )
+from security.tasks import email_credit_csv
 from security.utils import NameSet, nomis_api_available
 
 logger = logging.getLogger('mtp')
@@ -34,7 +35,7 @@ class SecurityView(FormView):
     form_template_name = NotImplemented
     object_list_context_key = NotImplemented
     export_view = False
-    export_invalid_view = None
+    export_redirect_view = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -53,9 +54,21 @@ class SecurityView(FormView):
 
     def form_valid(self, form):
         if self.export_view:
-            data = form.get_complete_object_list()
-            file_name = 'exported-%s' % date_format(timezone.now(), 'Y-m-d')
-            return CreditCsvResponse(credits=data, file_name=file_name)
+            attachment_name = 'exported-%s.csv' % date_format(timezone.now(), 'Y-m-d')
+            if self.export_view == 'email':
+                email_credit_csv(
+                    user=self.request.user,
+                    session=self.request.session,
+                    endpoint_path=form.get_object_list_endpoint_path(),
+                    filters=form.get_query_data(),
+                    attachment_name=attachment_name,
+                )
+                messages.info(
+                    self.request,
+                    _('The spreadsheet will be emailed to you at %(email)s') % {'email': self.request.user.email}
+                )
+                return self.get_export_redirect(form)
+            return CreditCsvResponse(form.get_complete_object_list(), attachment_name=attachment_name)
 
         context = self.get_context_data(form=form)
         object_list = form.cleaned_data['object_list']
@@ -67,7 +80,7 @@ class SecurityView(FormView):
 
     def form_invalid(self, form):
         if self.export_view:
-            return redirect('%s?%s' % (reverse(self.export_invalid_view, kwargs=self.kwargs), form.query_string))
+            return self.get_export_redirect(form)
         return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
@@ -77,6 +90,9 @@ class SecurityView(FormView):
             {'name': self.title}
         ]
         return context_data
+
+    def get_export_redirect(self, form):
+        return redirect('%s?%s' % (reverse(self.export_redirect_view, kwargs=self.kwargs), form.query_string))
 
     get = FormView.post
 

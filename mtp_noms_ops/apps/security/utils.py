@@ -1,8 +1,37 @@
 import collections
+import datetime
 import re
 from urllib.parse import urlencode
 
 from django.conf import settings
+from django.utils import timezone
+from django.utils.dateparse import parse_date, parse_datetime
+
+
+def parse_date_fields(object_list):
+    """
+    MTP API responds with string date/time fields, this filter converts them to python objects
+    """
+    fields = ('received_at', 'credited_at', 'refunded_at')
+    parsers = (parse_datetime, parse_date)
+
+    def convert(credit):
+        for field in fields:
+            value = credit.get(field)
+            if not value or not isinstance(value, str):
+                continue
+            for parser in parsers:
+                try:
+                    value = parser(value)
+                    if isinstance(value, datetime.datetime):
+                        value = timezone.localtime(value)
+                    credit[field] = value
+                    break
+                except (ValueError, TypeError):
+                    pass
+        return credit
+
+    return list(map(convert, object_list)) if object_list else object_list
 
 
 class OrderedSet(collections.MutableSet):

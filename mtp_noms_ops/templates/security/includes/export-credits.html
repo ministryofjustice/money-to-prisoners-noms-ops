@@ -1,0 +1,28 @@
+{% load i18n %}
+{% load mtp_common %}
+
+{% if form.total_count <= 5000 %}
+
+  <a href="{{ export_view }}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
+
+{% else %}
+
+  <a class="js-dialogue-open" href="#export-dialogue">{% trans 'Export' %}</a>
+
+  {% dialoguebox html_id='export-dialogue' title=_('Export') %}
+    <p>
+      {% trans 'There are too many credits to download in a spreadsheet.' %}
+      {% blocktrans trimmed with email=request.user.email %}
+        We can email you these credits at {{ email }}.
+      {% endblocktrans %}
+    </p>
+    <p>
+      {% trans 'This may take a few minutes.' %}
+    </p>
+    <p>
+      <a href="{{ email_export_view }}?{{ request.GET.urlencode }}" class="button" role="button">{% trans 'Email me the file' %}</a>
+      <a href="#" class="button button-secondary {{ dialogue_close_class }}" role="button">{% trans 'Close' %}</a>
+    </p>
+  {% enddialoguebox %}
+
+{% endif %}
