@@ -7,4 +7,10 @@
       Attached are the credits you exported from ‘{{ service_name }}’.
     {% endblocktrans %}
   </p>
+  <p>
+    {{ export_description }}
+    {% blocktrans trimmed with generated_at=generated_at|date:'SHORT_DATETIME_FORMAT' %}
+      The spreadsheet was generated at {{ generated_at }}
+    {% endblocktrans %}
+  </p>
 {% endblock %}

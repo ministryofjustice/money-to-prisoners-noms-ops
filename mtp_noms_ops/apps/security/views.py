@@ -61,6 +61,7 @@ class SecurityView(FormView):
                     session=self.request.session,
                     endpoint_path=form.get_object_list_endpoint_path(),
                     filters=form.get_query_data(),
+                    export_description=self.get_export_description(form),
                     attachment_name=attachment_name,
                 )
                 messages.info(
@@ -93,6 +94,9 @@ class SecurityView(FormView):
 
     def get_export_redirect(self, form):
         return redirect('%s?%s' % (reverse(self.export_redirect_view, kwargs=self.kwargs), form.query_string))
+
+    def get_export_description(self, form):
+        return str(form.search_description['description'])
 
     get = FormView.post
 
@@ -135,6 +139,11 @@ class SecurityDetailView(SecurityView):
 
     def get_title_for_object(self, detail_object):
         raise NotImplementedError
+
+    def get_export_description(self, form):
+        detail_object = form.cleaned_data['object']
+        title = self.get_title_for_object(detail_object)
+        return '%s: %s' % (title, super().get_export_description(form))
 
 
 class CreditListView(SecurityView):

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader as template_loader
 from django.utils.translation import gettext
+from django.utils import timezone
 from mtp_common.api import retrieve_all_pages
 from mtp_common.auth.api_client import get_connection_with_session
 from mtp_common.spooling import spoolable
@@ -23,10 +24,12 @@ def zip_credit_export(attachment_name, output):
 
 
 @spoolable(body_params=('user', 'session', 'filters'))
-def email_credit_csv(*, user, session, endpoint_path, filters, attachment_name, zip_attachment=True):
+def email_credit_csv(*, user, session, endpoint_path, filters, export_description,
+                     attachment_name, zip_attachment=True):
     endpoint = get_connection_with_session(user, session)
     for attr in endpoint_path.split('.'):
         endpoint = getattr(endpoint, attr)
+    generated_at = timezone.now()
     object_list = parse_date_fields(retrieve_all_pages(endpoint.get, **filters))
 
     with io.StringIO() as output:
@@ -44,6 +47,8 @@ def email_credit_csv(*, user, session, endpoint_path, filters, attachment_name, 
 
     template_context = {
         'static_url': urljoin(settings.SITE_URL, settings.STATIC_URL),
+        'export_description': export_description,
+        'generated_at': generated_at,
     }
     subject = '%s - %s' % (gettext('Prisoner money intelligence'), gettext('Credits exported'))
     from_address = getattr(settings, 'MAILGUN_FROM_ADDRESS', '') or settings.DEFAULT_FROM_EMAIL
