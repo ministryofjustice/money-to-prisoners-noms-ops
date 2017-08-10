@@ -1,4 +1,4 @@
-# Send money to a prisoner
+# Prisoner money
 # Copyright (C) Crown copyright (Ministry of Justice)
 msgid ""
 msgstr ""
