@@ -1,10 +1,10 @@
-# Send money to a prisoner
+# Prisoner money
 # Copyright (C) Crown copyright (Ministry of Justice)
 msgid ""
 msgstr ""
 "Project-Id-Version: mtp-noms-ops\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-09 12:09+0100\n"
+"POT-Creation-Date: 2017-08-10 14:38+0100\n"
 "PO-Revision-Date: 2016-11-04 10:00+0000\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>\n"
 "Language-Team: Welsh (http://www.transifex.com/ministry-of-justice/mtp/language/cy/)\n"
@@ -48,7 +48,7 @@ msgid "An unknown error occurred uploading prisoner locations"
 msgstr ""
 
 #: apps/prisoner_location_admin/tasks.py:92
-msgid "Send money to a prisoner: prisoner location update failed"
+msgid "Prisoner money: prisoner location update failed"
 msgstr ""
 
 #: apps/prisoner_location_admin/views.py:28
@@ -510,46 +510,46 @@ msgstr ""
 msgid "Refunded"
 msgstr ""
 
-#: apps/security/views.py:69
+#: apps/security/views.py:71
 #, python-format
 msgid "The spreadsheet will be emailed to you at %(email)s"
 msgstr ""
 
-#: apps/security/views.py:90 apps/security/views.py:134 templates/base.html:19
+#: apps/security/views.py:92 apps/security/views.py:136 templates/base.html:19
 #: utils.py:32
 msgid "Home"
 msgstr ""
 
-#: apps/security/views.py:153 templates/base.html:21
+#: apps/security/views.py:155 templates/base.html:21
 #: templates/dashboard.html:28
 msgid "Credits"
 msgstr ""
 
-#: apps/security/views.py:164 templates/base.html:22
+#: apps/security/views.py:166 templates/base.html:22
 #: templates/dashboard.html:34 templates/security/prisoners-detail.html:36
 #: templates/security/prisoners.html:59
 msgid "Payment sources"
 msgstr ""
 
-#: apps/security/views.py:194
+#: apps/security/views.py:196
 msgid "Unknown sender"
 msgstr ""
 
-#: apps/security/views.py:201 templates/base.html:23
+#: apps/security/views.py:203 templates/base.html:23
 #: templates/dashboard.html:40 templates/security/senders-detail.html:97
 #: templates/security/senders.html:51
 msgid "Prisoners"
 msgstr ""
 
-#: apps/security/views.py:230
+#: apps/security/views.py:232
 msgid "Unknown prisoner"
 msgstr ""
 
-#: apps/security/views.py:234 templates/dashboard.html:83
+#: apps/security/views.py:236 templates/dashboard.html:83
 msgid "New credits check"
 msgstr ""
 
-#: apps/security/views.py:248
+#: apps/security/views.py:250
 #, python-format
 msgid "%(count)d credits have been marked as checked by security"
 msgstr ""
@@ -569,7 +569,7 @@ msgstr ""
 
 #: templates/dashboard.html:18
 #, python-format
-msgid "Use this tool to monitor all credits sent to prisoners using the <a href=\"%(start_page_url)s\">send money to a prisoner</a> service."
+msgid "Use this tool to monitor all credits sent to prisoners using the <a href=\"%(start_page_url)s\">Send money to someone in prison</a> service."
 msgstr ""
 
 #: templates/dashboard.html:23
@@ -619,7 +619,7 @@ msgstr ""
 
 #: templates/prisoner_location_admin/email/failure-notification.txt:2
 #: templates/security/email/export-credits.txt:2
-msgid "Send money to a prisoner"
+msgid "Prisoner money"
 msgstr ""
 
 #: templates/prisoner_location_admin/location_file_upload.html:24

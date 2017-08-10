@@ -1,5 +1,5 @@
 {% load i18n %}
-GOV.UK - {% trans 'Send money to a prisoner' %}
+GOV.UK - {% trans 'Prisoner money' %}
 
 {% trans 'The upload of the prisoner location file failed, with the following errors:' %}
 {% for error in errors %}
