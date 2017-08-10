@@ -111,39 +111,53 @@
                 <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
               </td>
               <td>
-                {% if credit.source == 'online' %}
-                  <div class="mtp-credit__card">
-                    <strong><a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
-                    {% trans 'by debit card' %}
-                  </div>
-                  <p>—</p>
+                {% with known_sender=credit|credit_sender_identifiable %}
+                  {% if credit.source == 'online' %}
+                    <div class="mtp-credit__card">
+                      <strong>
+                        {% if known_sender %}
+                          <a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name|default:'—' }}</a>
+                        {% else %}
+                          {% trans 'Sender details not recorded' %}
+                        {% endif %}
+                      </strong><br />
+                      {% trans 'by debit card' %}
+                    </div>
+                    <p>—</p>
 
-                  {% random_string as profile_label %}
-                  <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Card number' %}</div>
-                  <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.card_number_last_digits|format_card_number }}</div>
-                {% else %}
-                  <div class="mtp-credit__transfer">
-                    <strong><a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name | default_if_none:'—' }}</a></strong><br />
-                    {% trans 'by bank transfer' %}
-                  </div>
-                  <p>—</p>
-
-                  {% random_string as profile_label %}
-                  <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Account number' %}</div>
-                  <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_account_number }}</div>
-                  <br/>
-
-                  {% random_string as profile_label %}
-                  <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Sort code' %}</div>
-                  <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_sort_code|format_sort_code }}</div>
-
-                  {% if credit.sender_roll_number %}
-                    <br/>
                     {% random_string as profile_label %}
-                    <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Roll number (for building societies)' %}</div>
-                    <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_roll_number }}</div>
+                    <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Card number' %}</div>
+                    <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.card_number_last_digits|format_card_number }}</div>
+                  {% else %}
+                    <div class="mtp-credit__transfer">
+                      <strong>
+                        {% if known_sender %}
+                          <a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name|default:'—' }}</a>
+                        {% else %}
+                          {% trans 'Sender details not recorded' %}
+                        {% endif %}
+                      </strong><br />
+                      {% trans 'by bank transfer' %}
+                    </div>
+                    <p>—</p>
+
+                    {% random_string as profile_label %}
+                    <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Account number' %}</div>
+                    <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_account_number }}</div>
+                    <br/>
+
+                    {% random_string as profile_label %}
+                    <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Sort code' %}</div>
+                    <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_sort_code|format_sort_code }}</div>
+
+                    {% if credit.sender_roll_number %}
+                      <br/>
+                      {% random_string as profile_label %}
+                      <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Roll number (for building societies)' %}</div>
+                      <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_roll_number }}</div>
+                    {% endif %}
                   {% endif %}
-                {% endif %}
+                {% endwith %}
               </td>
               <td>
                 {{ credit.intended_recipient|default_if_none:'—' }}

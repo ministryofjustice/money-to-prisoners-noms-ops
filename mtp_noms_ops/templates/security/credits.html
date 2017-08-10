@@ -76,17 +76,22 @@
                   <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
                 </td>
                 <td>
-                  {% if credit.source == 'online' %}
-                    <p class="mtp-credit__card">
-                      <strong><a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name|default:'—' }}</a></strong><br/>
-                      {% trans 'by debit card' %}
+                  {% with known_sender=credit|credit_sender_identifiable %}
+                    <p class="mtp-credit__{% if credit.source == 'online' %}card{% else %}transfer{% endif %}">
+                      <strong>
+                        {% if known_sender %}
+                          <a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name|default:'—' }}</a>
+                        {% else %}
+                          {% trans 'Sender details not recorded' %}
+                        {% endif %}
+                      </strong><br/>
+                      {% if credit.source == 'online' %}
+                        {% trans 'by debit card' %}
+                      {% else %}
+                        {% trans 'by bank transfer' %}
+                      {% endif %}
                     </p>
-                  {% else %}
-                    <p class="mtp-credit__transfer">
-                      <strong><a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name|default:'—' }}</a></strong><br/>
-                      {% trans 'by bank transfer' %}
-                    </p>
-                  {% endif %}
+                  {% endwith %}
                 </td>
                 <td class="number">
                   <p><strong>{{ credit.amount|currency }}</strong></p>

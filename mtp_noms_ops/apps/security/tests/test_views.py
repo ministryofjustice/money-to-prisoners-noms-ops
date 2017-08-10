@@ -378,6 +378,7 @@ class CreditsListTestCase(SecurityViewTestCase):
                     'prison': 'LEI', 'prison_name': 'HMP LEEDS',
                     'sender_name': None,
                     'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
+                    'card_number_last_digits': '4444', 'card_expiry_date': '07/18',
                     'resolution': 'credited',
                     'owner': None, 'owner_name': None,
                     'received_at': '2016-05-25T20:24:00Z', 'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,

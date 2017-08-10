@@ -12,6 +12,14 @@ logger = logging.getLogger('mtp')
 register = template.Library()
 
 
+BANK_TRANSFER_SENDER_KEYS = [
+    'sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number'
+]
+DEBIT_CARD_SENDER_KEYS = [
+    'card_number_last_digits', 'card_expiry_date'
+]
+
+
 @register.filter
 def currency(pence_value):
     try:
@@ -109,6 +117,17 @@ def get_profile_search_url(credit, keys, url, redirect_on_single=True):
     return url + '?' + params
 
 
+def get_sender_keys(credit):
+    keys = {'sender_name'}
+    if credit['source'] == 'bank_transfer':
+        keys.update(BANK_TRANSFER_SENDER_KEYS)
+    elif credit['source'] == 'online':
+        keys.update(DEBIT_CARD_SENDER_KEYS)
+    else:
+        logger.error('Credit %s had an unknown source' % credit.get('id'))
+    return keys
+
+
 @register.filter
 def sender_profile_search_url(credit, redirect_on_single=True):
     """
@@ -117,15 +136,24 @@ def sender_profile_search_url(credit, redirect_on_single=True):
     sender_id = credit.get('sender_profile')
     if sender_id:
         return reverse('security:sender_detail', kwargs={'sender_id': sender_id})
-    keys = ['sender_name']
-    if credit['source'] == 'bank_transfer':
-        keys.extend(['sender_sort_code', 'sender_account_number', 'sender_roll_number'])
-    elif credit['source'] == 'online':
-        keys.extend(['card_number_last_digits', 'card_expiry_date'])
-    else:
-        logger.error('Credit %s had an unknown source' % credit.get('id'))
+    keys = list(get_sender_keys(credit))
     return get_profile_search_url(credit, keys, reverse('security:sender_list'),
                                   redirect_on_single=redirect_on_single)
+
+
+@register.filter
+def credit_sender_identifiable(credit):
+    return any([credit[key] for key in get_sender_keys(credit)])
+
+
+@register.filter
+def sender_identifiable(sender):
+    if sender.get('bank_transfer_details'):
+        return any([sender['bank_transfer_details'][0][key] for key in BANK_TRANSFER_SENDER_KEYS])
+    elif sender.get('debit_card_details'):
+        return any([sender['debit_card_details'][0][key] for key in DEBIT_CARD_SENDER_KEYS])
+    else:
+        return False
 
 
 @register.filter
