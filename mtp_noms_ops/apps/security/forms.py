@@ -472,6 +472,12 @@ class PrisonersForm(SecurityForm):
     def get_object_list_endpoint(self):
         return self.client.prisoners
 
+    def clean_prisoner_number(self):
+        prisoner_number = self.cleaned_data.get('prisoner_number')
+        if prisoner_number:
+            return prisoner_number.upper()
+        return prisoner_number
+
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
