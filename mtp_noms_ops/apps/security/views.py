@@ -15,12 +15,12 @@ from django.views.generic import FormView
 from mtp_common.nomis import get_photograph_data
 from requests.exceptions import RequestException
 
-from security.export import CreditCsvResponse
+from security.export import CreditXlsxResponse
 from security.forms import (
     SendersForm, SendersDetailForm, PrisonersForm, PrisonersDetailForm, CreditsForm,
     ReviewCreditsForm,
 )
-from security.tasks import email_credit_csv
+from security.tasks import email_credit_xlsx
 from security.utils import NameSet, nomis_api_available
 
 logger = logging.getLogger('mtp')
@@ -56,9 +56,9 @@ class SecurityView(FormView):
 
     def form_valid(self, form):
         if self.export_view:
-            attachment_name = 'exported-%s.csv' % date_format(timezone.now(), 'Y-m-d')
+            attachment_name = 'exported-%s.xlsx' % date_format(timezone.now(), 'Y-m-d')
             if self.export_view == 'email':
-                email_credit_csv(
+                email_credit_xlsx(
                     user=self.request.user,
                     session=self.request.session,
                     endpoint_path=form.get_object_list_endpoint_path(),
@@ -71,7 +71,7 @@ class SecurityView(FormView):
                     _('The spreadsheet will be emailed to you at %(email)s') % {'email': self.request.user.email}
                 )
                 return self.get_export_redirect(form)
-            return CreditCsvResponse(form.get_complete_object_list(), attachment_name=attachment_name)
+            return CreditXlsxResponse(form.get_complete_object_list(), attachment_name=attachment_name)
 
         context = self.get_context_data(form=form)
         object_list = form.cleaned_data['object_list']

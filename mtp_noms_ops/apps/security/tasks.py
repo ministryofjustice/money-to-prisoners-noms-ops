@@ -1,7 +1,4 @@
-import csv
-import io
 from urllib.parse import urljoin
-import zipfile
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -11,39 +8,28 @@ from django.utils import timezone
 from mtp_common.api import retrieve_all_pages
 from mtp_common.auth.api_client import get_connection_with_session
 from mtp_common.spooling import spoolable
+from openpyxl import Workbook
+from openpyxl.writer.excel import save_virtual_workbook
 
 from security.export import write_header, write_credits
 from security.utils import parse_date_fields
 
 
-def zip_credit_export(attachment_name, output):
-    zip_data = io.BytesIO()
-    with zipfile.ZipFile(zip_data, mode='w', compression=zipfile.ZIP_DEFLATED, allowZip64=False) as zip_entry:
-        zip_entry.writestr(attachment_name, output)
-    return zip_data.getvalue()
-
-
 @spoolable(body_params=('user', 'session', 'filters'))
-def email_credit_csv(*, user, session, endpoint_path, filters, export_description,
-                     attachment_name, zip_attachment=True):
+def email_credit_xlsx(*, user, session, endpoint_path, filters, export_description,
+                      attachment_name):
     endpoint = get_connection_with_session(user, session)
     for attr in endpoint_path.split('/'):
         endpoint = getattr(endpoint, attr)
     generated_at = timezone.now()
     object_list = parse_date_fields(retrieve_all_pages(endpoint.get, **filters))
 
-    with io.StringIO() as output:
-        writer = csv.writer(output)
-        write_header(writer)
-        write_credits(writer, object_list)
-        output = output.getvalue()
+    wb = Workbook()
+    write_header(wb)
+    write_credits(wb, object_list)
+    output = save_virtual_workbook(wb)
 
-    if zip_attachment:
-        output = zip_credit_export(attachment_name, output)
-        attachment_name += '.zip'
-        attachment_type = 'application/zip'
-    else:
-        attachment_type = 'text/csv'
+    attachment_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
     template_context = {
         'static_url': urljoin(settings.SITE_URL, settings.STATIC_URL),

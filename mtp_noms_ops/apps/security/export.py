@@ -1,9 +1,9 @@
-import csv
 import datetime
 import re
 
 from django.http import HttpResponse
 from django.utils.translation import gettext, gettext_lazy as _
+from openpyxl import Workbook
 
 from security.templatetags.security import currency, format_card_number, format_sort_code, format_resolution
 
@@ -13,18 +13,23 @@ payment_methods = {
 }
 
 
-class CreditCsvResponse(HttpResponse):
-    def __init__(self, object_list, attachment_name='export.csv', **kwargs):
-        kwargs.setdefault('content_type', 'text/csv')
+class CreditXlsxResponse(HttpResponse):
+    def __init__(self, object_list, attachment_name='export.xlsx', **kwargs):
+        kwargs.setdefault(
+            'content_type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
         super().__init__(**kwargs)
         self['Content-Disposition'] = 'attachment; filename="%s"' % attachment_name
-        writer = csv.writer(self)
-        write_header(writer)
-        write_credits(writer, object_list)
+        wb = Workbook()
+        write_header(wb)
+        write_credits(wb, object_list)
+        wb.save(self)
 
 
-def write_header(writer):
-    writer.writerow([
+def write_header(workbook):
+    ws = workbook.active
+    headers = [
         gettext('Prisoner name'), gettext('Prisoner number'), gettext('Prison'),
         gettext('Sender name'), gettext('Payment method'),
         gettext('Bank transfer sort code'), gettext('Bank transfer account'), gettext('Bank transfer roll number'),
@@ -32,23 +37,26 @@ def write_header(writer):
         gettext('Amount'), gettext('Date received'),
         gettext('Credited status'), gettext('Date credited'), gettext('NOMIS ID'),
         gettext('IP'),
-    ])
+    ]
+    for col, header in enumerate(headers, start=1):
+        ws.cell(column=col, row=1, value=header)
 
 
-def write_credits(writer, object_list):
-    for credit in object_list:
+def write_credits(workbook, object_list):
+    ws = workbook.active
+    for row, credit in enumerate(object_list, start=2):
         cells = [
             credit['prisoner_name'],
             credit['prisoner_number'],
             credit['prison_name'],
             credit['sender_name'],
-            payment_methods.get(credit['source'], credit['source']),
+            str(payment_methods.get(credit['source'], credit['source'])),
             format_sort_code(credit['sender_sort_code']) if credit['sender_sort_code'] else '',
             credit['sender_account_number'],
             credit['sender_roll_number'],
             format_card_number(credit['card_number_last_digits']) if credit['card_number_last_digits'] else '',
             credit['card_expiry_date'],
-            address_for_csv(credit['billing_address']),
+            address_for_export(credit['billing_address']),
             currency(credit['amount']),
             credit['received_at'],
             format_resolution(credit['resolution']),
@@ -56,10 +64,11 @@ def write_credits(writer, object_list):
             credit['nomis_transaction_id'],
             credit['ip_address'],
         ]
-        writer.writerow(list(map(escape_csv_formula, cells)))
+        for col, cell in enumerate(list(map(escape_formulae, cells)), start=1):
+            ws.cell(column=col, row=row, value=cell)
 
 
-def escape_csv_formula(value):
+def escape_formulae(value):
     """
     Escapes formulae (strings that start with =) to prevent
     spreadsheet software vulnerabilities being exploited
@@ -74,7 +83,7 @@ def escape_csv_formula(value):
     return value
 
 
-def address_for_csv(address):
+def address_for_export(address):
     if not address:
         return ''
     whitespace = re.compile(r'\s+')

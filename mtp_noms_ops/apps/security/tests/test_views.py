@@ -1,16 +1,17 @@
 import base64
+from contextlib import contextmanager
 from functools import wraps
-import io
 import json
 import logging
+import tempfile
 from unittest import mock
-import zipfile
 
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import SimpleTestCase, override_settings
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
+from openpyxl import load_workbook
 from slumber.exceptions import HttpNotFoundError, HttpServerError
 import responses
 
@@ -410,11 +411,26 @@ class CreditsListTestCase(SecurityViewTestCase):
         self.assertIn('Debit card', response_content)
 
 
+@contextmanager
+def temp_spreadsheet(data):
+    with tempfile.TemporaryFile() as f:
+        f.write(data)
+        wb = load_workbook(f)
+        ws = wb.active
+        yield ws
+
+
 class CreditsExportTestCase(SecurityBaseTestCase):
+    expected_headers = [
+        'Prisoner name', 'Prisoner number', 'Prison', 'Sender name', 'Payment method',
+        'Bank transfer sort code', 'Bank transfer account', 'Bank transfer roll number',
+        'Debit card number', 'Debit card expiry', 'Address', 'Amount', 'Date received',
+        'Credited status', 'Date credited', 'NOMIS ID', 'IP'
+    ]
 
     @mock.patch('security.tasks.get_connection_with_session')
     @mock.patch('security.forms.get_connection')
-    def test_creates_csv(self, mocked_connection, mocked_connection_async):
+    def test_creates_xslx(self, mocked_connection, mocked_connection_async):
         sample_prison_list(mocked_connection)
         response_data = {
             'count': 2,
@@ -455,30 +471,33 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         }
         mocked_connection().credits.get.return_value = response_data
 
-        expected_result = (
-            'Prisoner name,Prisoner number,Prison,Sender name,Payment method,'
-            'Bank transfer sort code,Bank transfer account,Bank transfer roll number,'
-            'Debit card number,Debit card expiry,Address,Amount,Date received,'
-            'Credited status,Date credited,NOMIS ID,IP\r\n'
-            'GEORGE MELLEY,A1411AE,HMP LEEDS,,Debit card,,,,,,'
-            '"102PF, London",£230.00,2016-05-25 21:24:00,'
-            'Credited,2016-05-25 21:27:00,,127.0.0.1\r\n'
-            'NORMAN STANLEY FLETCHER,A1413AE,HMP LEEDS,HEIDENREICH X,Bank transfer,21-96-57,88447894,,,,'
-            ',£275.00,2016-05-23 00:00:00,'
-            'Credited,2016-05-23 02:10:00,123456-7,127.0.0.1\r\n'
-        )
+        expected_values = [
+            self.expected_headers,
+            ['GEORGE MELLEY', 'A1411AE', 'HMP LEEDS', None, 'Debit card', None, None, None,
+             None, None, '102PF, London', '£230.00', '2016-05-25 21:24:00',
+             'Credited', '2016-05-25 21:27:00', None, '127.0.0.1'],
+            ['NORMAN STANLEY FLETCHER', 'A1413AE', 'HMP LEEDS', 'HEIDENREICH X',
+             'Bank transfer', '21-96-57', '88447894', None, None, None, None,
+             '£275.00', '2016-05-23 00:00:00',
+             'Credited', '2016-05-23 02:10:00', '123456-7', '127.0.0.1']
+        ]
 
         self.login()
         response = self.client.get(reverse('security:credits_export'))
         self.assertEqual(200, response.status_code)
-        self.assertEqual('text/csv', response['Content-Type'])
-        self.assertEqual(expected_result, response.content.decode(response.charset))
+        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response['Content-Type'])
+
+        self.assertSpreadsheetEqual(response.content, expected_values)
 
         no_saved_searches(mocked_connection())
         mocked_connection_async().credits.get.return_value = response_data
         response = self.client.get(reverse('security:credits_email_export'), follow=False)
         self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
-        self.assertZipDataEqual(mail.outbox[0].attachments[0][1], expected_result)
+        self.assertSpreadsheetEqual(
+            mail.outbox[0].attachments[0][1],
+            expected_values,
+            msg='Emailed contents do not match expected'
+        )
 
     @mock.patch('security.tasks.get_connection_with_session')
     @mock.patch('security.forms.get_connection')
@@ -492,24 +511,24 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         }
         mocked_connection().credits.get.return_value = response_data
 
-        expected_result = (
-            'Prisoner name,Prisoner number,Prison,Sender name,Payment method,'
-            'Bank transfer sort code,Bank transfer account,Bank transfer roll number,'
-            'Debit card number,Debit card expiry,Address,Amount,Date received,'
-            'Credited status,Date credited,NOMIS ID,IP\r\n'
-        )
+        expected_values = [self.expected_headers]
 
         self.login()
         response = self.client.get(reverse('security:credits_export'))
         self.assertEqual(200, response.status_code)
-        self.assertEqual('text/csv', response['Content-Type'])
-        self.assertEqual(expected_result, response.content.decode(response.charset))
+        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response['Content-Type'])
+
+        self.assertSpreadsheetEqual(response.content, expected_values)
 
         no_saved_searches(mocked_connection())
         mocked_connection_async().credits.get.return_value = response_data
         response = self.client.get(reverse('security:credits_email_export'), follow=False)
         self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
-        self.assertZipDataEqual(mail.outbox[0].attachments[0][1], expected_result)
+        self.assertSpreadsheetEqual(
+            mail.outbox[0].attachments[0][1],
+            expected_values,
+            msg='Emailed contents do not match expected'
+        )
 
     @mock_form_connection
     def test_invalid_params_redirects_to_form(self, mocked_connection):
@@ -520,14 +539,11 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         )
         self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
 
-    def assertZipDataEqual(self, zip_data, expected_csv):  # noqa
-        zip_data = io.BytesIO(zip_data)
-        with zipfile.ZipFile(zip_data, 'r') as zip_file:
-            contents = zip_file.namelist()
-            self.assertEqual(len(contents), 1, msg='Zip should contain exactly 1 file')
-            with zip_file.open(contents[0]) as contents:
-                contents = contents.read().decode()
-        self.assertEqual(contents, expected_csv, msg='Zipped contents do not match expected')
+    def assertSpreadsheetEqual(self, spreadsheet_data, expected_values, msg=None):  # noqa
+        with temp_spreadsheet(spreadsheet_data) as ws:
+            for i, row in enumerate(expected_values, start=1):
+                for j, cell in enumerate(row, start=1):
+                    self.assertEqual(cell, ws.cell(column=j, row=i).value, msg=msg)
 
 
 class PinnedProfileTestCase(SecurityViewTestCase):
