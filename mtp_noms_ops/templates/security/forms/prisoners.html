@@ -19,9 +19,6 @@
             {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
             {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
           </div>
-          <div class="column-full">
-            {% include 'security/forms/update-search.html' %}
-          </div>
         </div>
       </div>
 
@@ -38,10 +35,10 @@
             {% include 'security/forms/select-field.html' with field=form.prison_category %}
             {% include 'security/forms/select-field.html' with field=form.prison_region %}
           </div>
-          <div class="column-full">
-            {% include 'security/forms/update-search.html' %}
-          </div>
         </div>
+      </div>
+      <div class="mtp-filter-list">
+        {% include 'security/forms/update-search.html' with search_description=form.search_description only %}
       </div>
     </div>
   </div>

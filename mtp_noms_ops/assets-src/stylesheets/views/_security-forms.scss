@@ -25,18 +25,34 @@
     clear: left;
     width: 15em;
   }
+
+  .mtp-filter-list {
+    margin-top: 1.5em;
+  }
 }
 
 .mtp-links {
   float: right;
   display: inline-block;
+
+  &__nopanel {
+    @extend .mtp-links;
+    padding: .78947em;
+    margin-bottom: .78947em;
+  }
 }
 
 // tabs
 
+$tab-border-width: 0.15em;
+
 .mtp-tab-container {
   .mtp-tab-wrapper {
     display: block;
+
+    @include media(mobile) {
+      margin-bottom: $tab-border-width * 2;
+    }
   }
 
   .mtp-tab-item {
@@ -44,19 +60,31 @@
   }
 
   .mtp-tab {
-    border: 3px solid transparent;
+    border: $tab-border-width solid;
+    border-color: $govuk-blue;
     border-bottom-width: 0;
+    margin-right: $tab-border-width;
     display: block;
     outline: none;
-    padding: em(9.5);
+    padding: $tab-border-width * 3;
+    background-color: $govuk-blue;
+    color: $page-colour;
+    text-decoration: none;
+    margin-bottom: $tab-border-width;
 
     @include media(mobile) {
-      border-bottom-width: 3px;
+      border-bottom-width: $tab-border-width;
     }
 
     &.mtp-tab--selected {
+      color: $govuk-blue;
       background: $page-colour;
       border-color: $border-colour;
+      padding-bottom: $tab-border-width * 5;
+
+      @include media(mobile) {
+        padding-bottom: $tab-border-width * 3;
+      }
 
       &:focus {
         background: $focus-colour;
@@ -69,36 +97,16 @@
   }
 
   .mtp-tabpanels {
-    margin-top: -3px;
-
-    @include media(mobile) {
-      margin-top: .5em;
-    }
+    margin-top: $tab-border-width * -2;
   }
 
   .mtp-tabpanel {
-    border: 3px solid $border-color;
+    border: $tab-border-width solid $border-color;
     padding: 1em;
   }
 
   &.mtp-tab-container--collapsed {
     display: inline-block;
-
-    .mtp-tab-wrapper {
-      border: 3px solid $border-color;
-    }
-
-    .mtp-tab {
-      border-top: 0;
-
-      &.mtp-tab--first {
-        border-left: 0;
-      }
-
-      &.mtp-tab--last {
-        border-right: 0;
-      }
-    }
 
     .mtp-tabpanels {
       display: none;

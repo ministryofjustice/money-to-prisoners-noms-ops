@@ -18,7 +18,6 @@
     <div class="mtp-tabpanels" aria-expanded="false">
       <div class="mtp-tabpanel" {% panel_aria_atts 'date' %}>
         {% include 'security/forms/received-range-field.html' %}
-        {% include 'security/forms/update-search.html' %}
       </div>
 
       <div class="mtp-tabpanel" {% panel_aria_atts 'amount' %}>
@@ -27,9 +26,6 @@
             {% include 'security/forms/select-field.html' with field=form.amount_pattern %}
             {% include 'mtp_common/forms/field.html' with field=form.amount_exact %}
             {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
-          </div>
-          <div class="column-full">
-            {% include 'security/forms/update-search.html' %}
           </div>
         </div>
       </div>
@@ -48,9 +44,6 @@
             {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
             {% include 'mtp_common/forms/field.html' with field=form.sender_email %}
           </div>
-          <div class="column-full">
-            {% include 'security/forms/update-search.html' %}
-          </div>
         </div>
       </div>
 
@@ -59,9 +52,6 @@
           <div class="column-full">
             {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
             {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
-          </div>
-          <div class="column-full">
-            {% include 'security/forms/update-search.html' %}
           </div>
         </div>
       </div>
@@ -79,10 +69,10 @@
             {% include 'security/forms/select-field.html' with field=form.prison_category %}
             {% include 'security/forms/select-field.html' with field=form.prison_region %}
           </div>
-          <div class="column-full">
-            {% include 'security/forms/update-search.html' %}
-          </div>
         </div>
+      </div>
+      <div class="mtp-filter-list">
+        {% include 'security/forms/update-search.html' with search_description=form.search_description only %}
       </div>
     </div>
   </div>

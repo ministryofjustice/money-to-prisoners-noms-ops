@@ -64,6 +64,17 @@ select[disabled] {
 
 .mtp-results-form__submit {
   margin-bottom: .3em;
+
+  a {
+    display: inline-block;
+    padding: 0.5em 1em 0.5em 1em;
+
+    @include media(mobile) {
+      display: block;
+      text-align: center;
+      padding: 1em 0 1em 0;
+    }
+  }
 }
 
 
