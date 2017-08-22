@@ -1,5 +1,10 @@
 {% load i18n %}
 
 <div class="form-group mtp-results-form__submit">
-  <button type="submit" class="button">{% trans 'Update list' %}</button>
+  <button type="submit" class="button">{% trans 'Filter list' %}</button>
+  {% if search_description.has_filters %}
+    <a href="?{% if form.ordering.value %}ordering={{ form.ordering.value }}{% endif %}">
+      {% trans 'Clear filters' %}
+    </a>
+  {% endif %}
 </div>
