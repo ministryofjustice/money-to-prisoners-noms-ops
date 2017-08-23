@@ -111,5 +111,11 @@ $tab-border-width: 0.15em;
     .mtp-tabpanels {
       display: none;
     }
+
+    .mtp-results-form__submit{
+      button {
+        display:none;
+      }
+    }
   }
 }
