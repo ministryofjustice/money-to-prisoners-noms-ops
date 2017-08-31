@@ -6,7 +6,7 @@
 
   <div class="mtp-tab-container mtp-tab-container--collapsed" data-tab-cookie-name="mtp-tab-prisoners">
     {% spaceless %}
-      <ul class="mtp-tab-wrapper" role="tablist">
+      <ul class="mtp-tab-wrapper" role="tablist" aria-label="{% trans 'Filter by' %}">
         <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--first" {% tab_aria_atts 'prisoner' %}>{% trans 'Prisoner' %}</a></li>
         <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--last" {% tab_aria_atts 'prison' %}>{% trans 'Prison' %}</a></li>
       </ul>
