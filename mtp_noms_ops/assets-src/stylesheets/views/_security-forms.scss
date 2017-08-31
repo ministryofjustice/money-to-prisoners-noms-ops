@@ -76,6 +76,12 @@
       border-bottom-width: $tab-border-width;
     }
 
+    &:focus {
+      background: $focus-colour;
+      color: $text-colour;
+      border-color: $focus-colour;
+    }
+
     &.mtp-tab--selected {
       color: $govuk-blue;
       background: $page-colour;
@@ -88,6 +94,7 @@
 
       &:focus {
         background: $focus-colour;
+        color: $text-colour;
       }
     }
 
