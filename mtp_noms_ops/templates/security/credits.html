@@ -17,7 +17,7 @@
   <form class="mtp-security-search" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <h2 class="heading-medium">{% include 'security/forms/search-description.html' with form=form only %}</h2>
+    <p class="lede">{{ form.search_description.description }}</p>
 
     <div class="print-hidden">
       {% include view.form_template_name with view=view form=form only %}
@@ -25,7 +25,7 @@
 
     {% if form.is_valid %}
       <div class="mtp-results-list">
-        <div class="print-hidden mtp-links__nopanel">
+        <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
           &nbsp;
           {% url 'security:credits_export' as export_view %}
