@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-31 12:39+0100\n"
+"POT-Creation-Date: 2017-08-31 14:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Welsh Language Unit <welsh.language.unit.manager@hmcts.gsi.gov.uk>, 2017\n"
 "Language-Team: Welsh (https://www.transifex.com/ministry-of-justice/teams/34553/cy/)\n"
@@ -766,7 +766,7 @@ msgstr "Cyfanswm y credydau a anfonwyd"
 
 #: templates/security/forms/update-search.html:4
 msgid "Filter list"
-msgstr ""
+msgstr "Rhestr hidlo"
 
 #: templates/security/forms/update-search.html:7
 msgid "Clear filters"
