@@ -1,7 +1,5 @@
 {% load i18n %}
 
-{% with search_description=form.search_description %}
-  <p class="mtp-search-description__text">
-    {{ search_description.description }}
-  </p>
-{% endwith %}
+<p class="mtp-search-description__text">
+  {{ form.search_description.description }}
+</p>

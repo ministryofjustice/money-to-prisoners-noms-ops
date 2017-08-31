@@ -35,7 +35,7 @@
   float: right;
   display: inline-block;
 
-  &__nopanel {
+  &--no-panel {
     @extend .mtp-links;
 
     padding: em(15, 19);

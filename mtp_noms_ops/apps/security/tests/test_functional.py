@@ -13,9 +13,9 @@ class SecurityDashboardTestCase(FunctionalTestCase):
     auto_load_test_data = True
     accessibility_scope_selector = '#content'
 
-    def load_test_data(self):
+    def load_test_data(self, *args, **kwargs):
         with silence_logger(name='mtp', level=logging.WARNING):
-            super().load_test_data()
+            super().load_test_data(*args, **kwargs)
         # only need it the first time as data is not modified by these tests:
         SecurityDashboardTestCase.auto_load_test_data = False
 
@@ -29,11 +29,6 @@ class SecurityDashboardTestCase(FunctionalTestCase):
     def click_on_tab(self, field):
         tab_element = self.driver.find_element_by_css_selector('#mtp-tab-%s' % field)
         tab_element.click()
-
-    def submit_tabpanel(self, field):
-        selector = '#mtp-tabpanel-%s button[type="submit"]' % field
-        update_list_button = self.driver.find_element_by_css_selector(selector)
-        update_list_button.click()
 
 
 class SecurityDashboardTests(SecurityDashboardTestCase):
@@ -71,30 +66,30 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
 
         self.click_on_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
-        self.submit_tabpanel('sender')
+        self.click_on_submit()
         self.assertInSource('No matching credits found')
 
         self.click_on_tab('prisoner')
         self.type_in('id_prisoner_name', 'James')  # combined search
-        self.submit_tabpanel('prisoner')
+        self.click_on_submit()
         self.assertInSource('No matching credits found')
 
         self.click_on_tab('sender')
         self.type_in('id_sender_name', Keys.BACKSPACE * len('aaabbbccc111222333'))
-        self.submit_tabpanel('sender')
+        self.click_on_submit()
         self.assertInSource('James Halls')
 
     def test_ordering(self):
         self.click_on_tab('amount')
         amount_pattern = self.get_element('id_amount_pattern')
         amount_pattern.find_element_by_xpath('//option[text()="Not a multiple of £5"]').click()
-        self.submit_tabpanel('amount')
-        search_description = self.get_element('.mtp-search-description__text')
+        self.click_on_submit()
+        search_description = self.get_element('.lede')
         self.assertIn('Showing credits sent that are not a multiple of £5, ordered by received date',
                       search_description.text)
 
         self.get_element('.mtp-results-list th:nth-child(3) a').click()
-        search_description = self.get_element('.mtp-search-description__text')
+        search_description = self.get_element('.lede')
         self.assertIn('Showing credits sent that are not a multiple of £5, ordered by amount sent (low to high)',
                       search_description.text)
 
@@ -110,7 +105,7 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
 
         self.click_on_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
-        self.submit_tabpanel('sender')
+        self.click_on_submit()
         self.assertInSource('No matching payment sources found')
 
 
@@ -125,10 +120,10 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
 
         self.click_on_tab('prisoner')
         self.type_in('id_prisoner_name', 'James')
-        self.submit_tabpanel('prisoner')
+        self.click_on_submit()
         self.assertInSource('James Halls')
 
         # no need to click on tab as they're persistent
         self.type_in('id_prisoner_name', 'aaabbbccc111222333')  # not a likely prisoner name
-        self.submit_tabpanel('prisoner')
+        self.click_on_submit()
         self.assertInSource('No matching prisoners found')
