@@ -37,16 +37,17 @@
 
   &__nopanel {
     @extend .mtp-links;
-    padding: .78947em;
-    margin-bottom: .78947em;
+
+    padding: em(15, 19);
+    margin-bottom: em(15, 19);
   }
 }
 
 // tabs
 
-$tab-border-width: 0.15em;
-
 .mtp-tab-container {
+  $tab-border-width: 3px;
+
   .mtp-tab-wrapper {
     display: block;
 
@@ -60,8 +61,7 @@ $tab-border-width: 0.15em;
   }
 
   .mtp-tab {
-    border: $tab-border-width solid;
-    border-color: $govuk-blue;
+    border: $tab-border-width solid $govuk-blue;
     border-bottom-width: 0;
     margin-right: $tab-border-width;
     display: block;
