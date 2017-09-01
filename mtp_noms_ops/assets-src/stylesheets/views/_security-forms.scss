@@ -25,10 +25,6 @@
     clear: left;
     width: 15em;
   }
-
-  .mtp-filter-list {
-    margin-top: 1.5em;
-  }
 }
 
 .mtp-links {
@@ -38,7 +34,6 @@
   &--no-panel {
     @extend .mtp-links;
 
-    padding: em(15, 19);
     margin-bottom: em(15, 19);
   }
 }
@@ -118,11 +113,30 @@
     .mtp-tabpanels {
       display: none;
     }
+  }
+}
 
-    .mtp-results-form__submit{
-      button {
-        display:none;
-      }
+.mtp-results-form__submit {
+  margin-top: $gutter;
+
+  button {
+    margin-right: 1em;
+  }
+
+  .mtp-tab-container--collapsed & {
+    margin-top: 0;
+
+    button {
+      display: none;
+    }
+  }
+
+  a {
+    display: inline-block;
+    margin: .526315em 0 .263157em;
+
+    @include media(mobile) {
+      margin: 1em 0 0;
     }
   }
 }
