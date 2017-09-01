@@ -62,26 +62,6 @@ select[disabled] {
   width: 28%;
 }
 
-.mtp-results-form__submit {
-  margin-bottom: .3em;
-
-  button {
-    margin-right: 1em;
-  }
-
-  a {
-    display: inline-block;
-    padding: 0.5em 0 0.5em 0;
-
-    @include media(mobile) {
-      display: block;
-      text-align: center;
-      padding: 1em 0 1em 0;
-    }
-  }
-}
-
-
 // govuk elements overrides
 
 .mtp-security-form {
