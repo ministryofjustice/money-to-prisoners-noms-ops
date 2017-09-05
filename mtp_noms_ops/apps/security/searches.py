@@ -1,6 +1,5 @@
-from mtp_common.api import retrieve_all_pages
-from slumber.exceptions import HttpNotFoundError
-from slumber.utils import url_join
+from mtp_common.api import retrieve_all_pages_for_path
+from mtp_common.auth.exceptions import HttpNotFoundError
 
 
 def filter_list_to_dict(filter_list):
@@ -10,41 +9,35 @@ def filter_list_to_dict(filter_list):
     }
 
 
-def get_saved_searches(client):
-    return retrieve_all_pages(client.searches.get)
+def get_saved_searches(session):
+    return retrieve_all_pages_for_path(session, '/searches/')
 
 
-def populate_new_result_counts(client, saved_searches, delete_invalid=True):
+def populate_new_result_counts(session, saved_searches, delete_invalid=True):
     modified = []
     for saved_search in saved_searches:
         filters = filter_list_to_dict(saved_search['filters'])
-        endpoint = get_slumber_resource_from_path(client, saved_search['endpoint'])
         try:
-            current_results = endpoint.get(**filters)
+            current_results = session.get(saved_search['endpoint'], params=filters).json()
             new_result_count = current_results['count'] - saved_search['last_result_count']
             saved_search['new_result_count'] = new_result_count if new_result_count > 0 else 0
             modified.append(saved_search)
         except HttpNotFoundError:
             if delete_invalid:
-                delete_search(client, saved_search['id'])
+                delete_search(session, saved_search['id'])
     return modified
 
 
-def get_existing_search(client, path):
-    saved_searches = get_saved_searches(client)
+def get_existing_search(session, path):
+    saved_searches = get_saved_searches(session)
     for search in saved_searches:
         if search['site_url'] == path:
             return search
     return None
 
 
-def get_slumber_resource_from_path(client, path):
-    resource = client._get_resource(**client._store)
-    return resource(url_override=url_join(resource._store['base_url'], path))
-
-
-def save_search(client, description, endpoint, site_url, filters=[], last_result_count=0):
-    return client.searches.post({
+def save_search(session, description, endpoint, site_url, filters=[], last_result_count=0):
+    return session.post('/searches/', json={
         'description': description,
         'endpoint': endpoint,
         'site_url': site_url,
@@ -53,9 +46,12 @@ def save_search(client, description, endpoint, site_url, filters=[], last_result
     })
 
 
-def update_result_count(client, search_id, new_result_count):
-    client.searches(search_id).patch({'last_result_count': new_result_count})
+def update_result_count(session, search_id, new_result_count):
+    session.patch(
+        '/searches/{search_id}/'.format(search_id=search_id),
+        json={'last_result_count': new_result_count}
+    )
 
 
-def delete_search(client, search_id):
-    client.searches(search_id).delete()
+def delete_search(session, search_id):
+    session.delete('/searches/{search_id}/'.format(search_id=search_id))

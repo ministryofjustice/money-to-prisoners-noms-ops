@@ -1,59 +1,85 @@
 import datetime
+import json
 import unittest
 from unittest import mock
+
+from mtp_common.auth.test_utils import generate_tokens
+import responses
 
 from security.forms import (
     SecurityForm, SendersForm, PrisonersForm, CreditsForm,
     ReviewCreditsForm
 )
+from security.tests import api_url
 
-mocked_prisons = [
-    {
-        'nomis_id': 'IXB', 'general_ledger_code': '10200042',
-        'name': 'HMP Prison 1', 'short_name': 'Prison 1',
-        'region': 'West Midlands',
-        'categories': [{'description': 'Category A', 'name': 'A'}],
-        'populations': [{'description': 'Adult', 'name': 'adult'}, {'description': 'Male', 'name': 'male'}],
-    },
-    {
-        'nomis_id': 'INP', 'general_ledger_code': '10200015',
-        'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
-        'region': 'London',
-        'categories': [{'description': 'Category B', 'name': 'B'}],
-        'populations': [{'description': 'Adult', 'name': 'adult'}, {'description': 'Female', 'name': 'female'}],
-    },
-]
+mocked_prisons = {
+    'count': 2,
+    'results': [
+        {
+            'nomis_id': 'IXB', 'general_ledger_code': '10200042',
+            'name': 'HMP Prison 1', 'short_name': 'Prison 1',
+            'region': 'West Midlands',
+            'categories': [{'description': 'Category A', 'name': 'A'}],
+            'populations': [{'description': 'Adult', 'name': 'adult'}, {'description': 'Male', 'name': 'male'}],
+        },
+        {
+            'nomis_id': 'INP', 'general_ledger_code': '10200015',
+            'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
+            'region': 'London',
+            'categories': [{'description': 'Category B', 'name': 'B'}],
+            'populations': [{'description': 'Adult', 'name': 'adult'}, {'description': 'Female', 'name': 'female'}],
+        },
+    ]
+}
+
+
+empty_response = {
+    'count': 0,
+    'results': [],
+}
 
 
 class SecurityFormTestCase(unittest.TestCase):
-    empty_response = {
-        'count': 0,
-        'results': [],
-    }
+
+    def set_security_form_responses(self):
+        responses.add(
+            responses.GET,
+            api_url('/prisons/'),
+            json=mocked_prisons
+        )
+        responses.add(
+            responses.GET,
+            api_url('/senders/'),
+            json=empty_response
+        )
+        responses.add(
+            responses.GET,
+            api_url('/prisoners/'),
+            json=empty_response
+        )
+        responses.add(
+            responses.GET,
+            api_url('/credits/'),
+            json=empty_response
+        )
 
     def setUp(self):
-        self.request = mock.MagicMock()
-        self.mocks = []
+        self.request = mock.MagicMock(
+            user=mock.MagicMock(
+                token=generate_tokens()
+            )
+        )
 
-        patch = mock.patch('security.forms.get_connection')
-        mocked_connection = patch.start()
-        mocked_connection().senders.get.return_value = self.empty_response
-        mocked_connection().prisoners.get.return_value = self.empty_response
-        mocked_connection().credits.get.return_value = self.empty_response
-        self.mocks.append(patch)
-
-        patch = mock.patch('security.models.retrieve_all_pages', return_value=mocked_prisons)
-        patch.start()
-        self.mocks.append(patch)
-
-    def tearDown(self):
-        for patch in self.mocks:
-            patch.stop()
-
-    @mock.patch.object(SecurityForm, 'get_object_list_endpoint')
-    def test_base_security_form(self, mocked_object_list_endpoint):
+    @responses.activate
+    @mock.patch.object(SecurityForm, 'get_object_list_endpoint_path')
+    def test_base_security_form(self, get_object_list_endpoint_path):
         # mock no results from API
-        mocked_object_list_endpoint().get.return_value = self.empty_response
+        get_object_list_endpoint_path.return_value = '/test/'
+        responses.add(
+            responses.GET,
+            api_url('/test/'),
+            json=empty_response
+        )
 
         form = SecurityForm(self.request, data={})
         self.assertFalse(form.is_valid())
@@ -67,8 +93,9 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertDictEqual(form.get_query_data(), {})
         self.assertEqual(form.query_string, '')
 
-    def test_sender_list_form(self):
-        # blank form
+    @responses.activate
+    def test_sender_list_blank_form(self):
+        self.set_security_form_responses()
         expected_data = {
             'page': 1,
             'ordering': '-prisoner_count',
@@ -86,7 +113,9 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertDictEqual(form.get_query_data(), {'ordering': '-prisoner_count'})
         self.assertEqual(form.query_string, 'ordering=-prisoner_count')
 
-        # valid forms
+    @responses.activate
+    def test_sender_list_valid_form(self):
+        self.set_security_form_responses()
         expected_data = {
             'page': 1,
             'ordering': '-credit_total',
@@ -104,7 +133,9 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertDictEqual(form.get_query_data(), {'ordering': '-credit_total', 'sender_name': 'Joh'})
         self.assertEqual(form.query_string, 'ordering=-credit_total&sender_name=Joh')
 
-        # invalid forms
+    @responses.activate
+    def test_sender_list_invalid_forms(self):
+        self.set_security_form_responses()
         form = SendersForm(self.request, data={})
         self.assertFalse(form.is_valid())
         form = SendersForm(self.request, data={'page': '0'})
@@ -114,8 +145,9 @@ class SecurityFormTestCase(unittest.TestCase):
         form = SendersForm(self.request, data={'page': '1', 'prison': 'ABC'})
         self.assertFalse(form.is_valid())
 
-    def test_prisoner_list_form(self):
-        # blank form
+    @responses.activate
+    def test_prisoner_list_blank_form(self):
+        self.set_security_form_responses()
         expected_data = {
             'page': 1,
             'ordering': '-sender_count',
@@ -131,7 +163,9 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertDictEqual(form.get_query_data(), {'ordering': '-sender_count'})
         self.assertEqual(form.query_string, 'ordering=-sender_count')
 
-        # valid forms
+    @responses.activate
+    def test_prisoner_list_valid_form(self):
+        self.set_security_form_responses()
         expected_data = {
             'page': 1,
             'ordering': '-credit_total',
@@ -147,7 +181,9 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertDictEqual(form.get_query_data(), {'ordering': '-credit_total', 'prison': 'IXB'})
         self.assertEqual(form.query_string, 'ordering=-credit_total&prison=IXB')
 
-        # invalid forms
+    @responses.activate
+    def test_prisoner_list_invalid_forms(self):
+        self.set_security_form_responses()
         form = PrisonersForm(self.request, data={})
         self.assertFalse(form.is_valid())
         form = PrisonersForm(self.request, data={'page': '0'})
@@ -157,8 +193,9 @@ class SecurityFormTestCase(unittest.TestCase):
         form = PrisonersForm(self.request, data={'page': '1', 'prison': 'ABC'})
         self.assertFalse(form.is_valid())
 
-    def test_credits_list_form(self):
-        # blank form
+    @responses.activate
+    def test_credits_list_blank_form(self):
+        self.set_security_form_responses()
         expected_data = {
             'page': 1,
             'ordering': '-received_at',
@@ -176,7 +213,9 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertDictEqual(form.get_query_data(), {'ordering': '-received_at'})
         self.assertEqual(form.query_string, 'ordering=-received_at')
 
-        # valid forms
+    @responses.activate
+    def test_credits_list_valid_forms(self):
+        self.set_security_form_responses()
         received_at__gte = datetime.date(2016, 5, 26)
         expected_data = {
             'page': 1,
@@ -201,7 +240,9 @@ class SecurityFormTestCase(unittest.TestCase):
                              {'ordering': '-received_at', 'amount_pattern': 'not_integral'})
         self.assertEqual(form.query_string, 'ordering=-received_at&amount_pattern=not_integral')
 
-        # invalid forms
+    @responses.activate
+    def test_credits_list_invalid_forms(self):
+        self.set_security_form_responses()
         form = CreditsForm(self.request, data={})
         self.assertFalse(form.is_valid())
         form = CreditsForm(self.request, data={'page': '0'})
@@ -214,50 +255,70 @@ class SecurityFormTestCase(unittest.TestCase):
 
 class ReviewCreditsFormTestCase(unittest.TestCase):
 
-    @mock.patch('security.forms.get_connection')
-    def test_review_credits_form(self, mock_get_connection):
-        mock_get_connection().credits.get.return_value = {
-            'count': 2,
-            'results': [
-                {
-                    'id': 1,
-                    'source': 'online',
-                    'amount': 23000,
-                    'intended_recipient': 'GEORGE MELLEY',
-                    'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
-                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-                    'sender_name': None, 'sender_email': 'HENRY MOORE',
-                    'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
-                    'resolution': 'pending',
-                    'owner': None, 'owner_name': None,
-                    'received_at': '2016-05-25T20:24:00Z', 'credited_at': None, 'refunded_at': None,
-                },
-                {
-                    'id': 2,
-                    'source': 'bank_transfer',
-                    'amount': 27500,
-                    'intended_recipient': None,
-                    'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
-                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-                    'sender_name': 'HEIDENREICH X',
-                    'sender_sort_code': '219657', 'sender_account_number': '88447894', 'sender_roll_number': '',
-                    'resolution': 'pending',
-                    'owner': None, 'owner_name': None,
-                    'received_at': '2016-05-22T23:00:00Z', 'credited_at': None, 'refunded_at': None,
-                },
-            ]
-        }
+    def setUp(self):
+        self.request = mock.MagicMock(
+            user=mock.MagicMock(
+                token=generate_tokens()
+            )
+        )
 
-        request = mock.MagicMock()
-        form = ReviewCreditsForm(request, data={'comment_1': 'hold up'})
+    @responses.activate
+    def test_review_credits_form(self):
+        responses.add(
+            responses.GET,
+            api_url('/credits/'),
+            json={
+                'count': 2,
+                'results': [
+                    {
+                        'id': 1,
+                        'source': 'online',
+                        'amount': 23000,
+                        'intended_recipient': 'GEORGE MELLEY',
+                        'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
+                        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+                        'sender_name': None, 'sender_email': 'HENRY MOORE',
+                        'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
+                        'resolution': 'pending',
+                        'owner': None, 'owner_name': None,
+                        'received_at': '2016-05-25T20:24:00Z', 'credited_at': None, 'refunded_at': None,
+                    },
+                    {
+                        'id': 2,
+                        'source': 'bank_transfer',
+                        'amount': 27500,
+                        'intended_recipient': None,
+                        'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
+                        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+                        'sender_name': 'HEIDENREICH X',
+                        'sender_sort_code': '219657', 'sender_account_number': '88447894', 'sender_roll_number': '',
+                        'resolution': 'pending',
+                        'owner': None, 'owner_name': None,
+                        'received_at': '2016-05-22T23:00:00Z', 'credited_at': None, 'refunded_at': None,
+                    },
+                ]
+            }
+        )
+        responses.add(
+            responses.POST,
+            api_url('/credits/comments/'),
+        )
+        responses.add(
+            responses.POST,
+            api_url('/credits/actions/review/'),
+        )
+
+        form = ReviewCreditsForm(self.request, data={'comment_1': 'hold up'})
         self.assertEqual(len(form.credits), 2)
         self.assertTrue(form.is_valid())
 
         form.review()
 
-        mock_get_connection().credits.comments.post.assert_called_once_with(
+        self.assertEqual(
+            json.loads(responses.calls[-2].request.body.decode('utf-8')),
             [{'credit': 1, 'comment': 'hold up'}]
         )
-        mock_get_connection().credits.actions.review.post.assert_called_once_with(
+        self.assertEqual(
+            json.loads(responses.calls[-1].request.body.decode('utf-8')),
             {'credit_ids': [1, 2]}
         )

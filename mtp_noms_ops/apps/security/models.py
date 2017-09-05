@@ -1,14 +1,14 @@
 import json
 
 from django.utils.safestring import mark_safe
-from mtp_common.api import retrieve_all_pages
+from mtp_common.api import retrieve_all_pages_for_path
 
 
 class PrisonList:
     excluded_nomis_ids = {'ZCH'}
 
-    def __init__(self, client):
-        self.prisons = retrieve_all_pages(client.prisons.get)
+    def __init__(self, session):
+        self.prisons = retrieve_all_pages_for_path(session, '/prisons/')
 
         prison_choices = []
         region_choices = set()

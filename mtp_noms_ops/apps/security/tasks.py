@@ -5,8 +5,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.template import loader as template_loader
 from django.utils.translation import gettext
 from django.utils import timezone
-from mtp_common.api import retrieve_all_pages
-from mtp_common.auth.api_client import get_connection_with_session
+from mtp_common.api import retrieve_all_pages_for_path
+from mtp_common.auth.api_client import get_api_session_with_session
 from mtp_common.spooling import spoolable
 from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
@@ -18,11 +18,11 @@ from security.utils import parse_date_fields
 @spoolable(body_params=('user', 'session', 'filters'))
 def email_credit_xlsx(*, user, session, endpoint_path, filters, export_description,
                       attachment_name):
-    endpoint = get_connection_with_session(user, session)
-    for attr in endpoint_path.split('/'):
-        endpoint = getattr(endpoint, attr)
+    api_session = get_api_session_with_session(user, session)
     generated_at = timezone.now()
-    object_list = parse_date_fields(retrieve_all_pages(endpoint.get, **filters))
+    object_list = parse_date_fields(
+        retrieve_all_pages_for_path(api_session, endpoint_path, **filters)
+    )
 
     wb = Workbook()
     write_header(wb)
