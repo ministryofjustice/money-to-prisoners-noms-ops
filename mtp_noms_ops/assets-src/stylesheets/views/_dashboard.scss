@@ -21,6 +21,7 @@
     &:hover,
     &:active,
     &:focus {
+      color: $page-colour;
       text-decoration: underline;
     }
   }
