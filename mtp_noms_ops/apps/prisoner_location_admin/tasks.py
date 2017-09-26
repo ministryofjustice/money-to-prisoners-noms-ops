@@ -8,9 +8,9 @@ from django.core.urlresolvers import reverse
 from django.forms import ValidationError
 from django.utils.translation import activate, gettext, gettext_lazy as _
 from mtp_common.auth import api_client
+from mtp_common.auth.exceptions import HttpClientError
 from mtp_common.spooling import Context, spoolable
 from mtp_common.tasks import send_email
-from slumber.exceptions import HttpClientError
 
 logger = logging.getLogger('mtp')
 
@@ -28,7 +28,7 @@ def format_errors(error_list):
 
 @spoolable(pre_condition=settings.ASYNC_LOCATION_UPLOAD, body_params=('user', 'locations'))
 def update_locations(*, user, locations, context: Context):
-    client = api_client.get_authenticated_connection(
+    session = api_client.get_authenticated_api_session(
         settings.LOCATION_UPLOADER_USERNAME,
         settings.LOCATION_UPLOADER_PASSWORD
     )
@@ -42,16 +42,17 @@ def update_locations(*, user, locations, context: Context):
     errors = []
     location_count = len(locations)
     try:
-        client.prisoner_locations.actions.delete_inactive.post()
+        session.post('/prisoner_locations/actions/delete_inactive/')
         pages = int(math.ceil(location_count / settings.UPLOAD_REQUEST_PAGE_SIZE))
         for page in range(pages):
-            client.prisoner_locations.post(
-                locations[
+            session.post(
+                '/prisoner_locations/',
+                json=locations[
                     page * settings.UPLOAD_REQUEST_PAGE_SIZE:
                     (page + 1) * settings.UPLOAD_REQUEST_PAGE_SIZE
                 ]
             )
-        client.prisoner_locations.actions.delete_old.post()
+        session.post('/prisoner_locations/actions/delete_old/')
 
         logger.info('%d prisoner locations updated successfully by %s' % (
             location_count,

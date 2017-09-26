@@ -3,7 +3,7 @@ import datetime
 import enum
 from math import ceil
 import re
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlencode, urlparse, urljoin
 
 from django import forms
 from django.conf import settings
@@ -14,9 +14,10 @@ from django.utils.functional import cached_property
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _, override as override_locale
 from form_error_reporting import GARequestErrorReportingMixin
-from mtp_common.api import retrieve_all_pages
-from mtp_common.auth.api_client import get_connection
-from slumber.exceptions import HttpNotFoundError, SlumberHttpBaseException
+from mtp_common.api import retrieve_all_pages_for_path
+from mtp_common.auth.api_client import get_api_session
+from mtp_common.auth.exceptions import HttpNotFoundError
+from requests.exceptions import RequestException
 
 from security.models import PrisonList
 from security.searches import (
@@ -100,7 +101,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
         self.request = request
-        self.client = get_connection(request)
+        self.session = get_api_session(request)
         self.total_count = None
         self.page_count = 0
         self.existing_search = None
@@ -111,9 +112,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     def clean(self):
         self.cleaned_data['object_list'] = self.get_object_list()
         return self.cleaned_data
-
-    def get_object_list_endpoint(self):
-        raise NotImplementedError
 
     def get_object_list_endpoint_path(self):
         raise NotImplementedError
@@ -153,8 +151,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         offset = (page - 1) * self.page_size
         filters = self.get_api_request_params()
         try:
-            data = self.get_object_list_endpoint().get(offset=offset, limit=self.page_size, **filters)
-        except SlumberHttpBaseException:
+            data = self.session.get(
+                self.get_object_list_endpoint_path(),
+                params=dict(offset=offset, limit=self.page_size, **filters)
+            ).json()
+        except RequestException:
             self.add_error(None, _('This service is currently unavailable'))
             return []
         count = data.get('count', 0)
@@ -164,7 +165,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_complete_object_list(self):
         filters = self.get_api_request_params()
-        return parse_date_fields(retrieve_all_pages(self.get_object_list_endpoint().get, **filters))
+        return parse_date_fields(retrieve_all_pages_for_path(
+            self.session, self.get_object_list_endpoint_path(), **filters)
+        )
 
     @cached_property
     def query_string(self):
@@ -243,20 +246,19 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def check_and_update_saved_searches(self, page_title):
         site_url = '?'.join([urlparse(self.request.path).path, self.query_string])
-        self.existing_search = get_existing_search(self.client, site_url)
+        self.existing_search = get_existing_search(self.session, site_url)
         if self.existing_search:
             update_result_count(
-                self.client, self.existing_search['id'], self.total_count
+                self.session, self.existing_search['id'], self.total_count
             )
         if self.request.GET.get('pin') and not self.existing_search:
-            endpoint = self.get_object_list_endpoint()
-            endpoint_path = urlparse(endpoint.url()).path
+            endpoint_path = self.get_object_list_endpoint_path()
             self.existing_search = save_search(
-                self.client, page_title, endpoint_path, site_url,
+                self.session, page_title, endpoint_path, site_url,
                 filters=self.get_api_request_params(), last_result_count=self.total_count
             )
         elif self.request.GET.get('unpin') and self.existing_search:
-            delete_search(self.client, self.existing_search['id'])
+            delete_search(self.session, self.existing_search['id'])
             self.existing_search = None
 
 
@@ -342,7 +344,7 @@ class SendersForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        prison_list = PrisonList(self.client)
+        prison_list = PrisonList(self.session)
         self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
@@ -376,8 +378,8 @@ class SendersForm(SecurityForm):
             return ''
         return self.cleaned_data.get('card_number_last_digits')
 
-    def get_object_list_endpoint(self):
-        return self.client.senders
+    def get_object_list_endpoint_path(self):
+        return '/senders/'
 
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
@@ -458,7 +460,7 @@ class PrisonersForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        prison_list = PrisonList(self.client)
+        prison_list = PrisonList(self.session)
         self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
@@ -469,8 +471,8 @@ class PrisonersForm(SecurityForm):
                                                                     title=_('All categories'))
         self.prison_list = prison_list
 
-    def get_object_list_endpoint(self):
-        return self.client.prisoners
+    def get_object_list_endpoint_path(self):
+        return '/prisoners/'
 
     def clean_prisoner_number(self):
         prisoner_number = self.cleaned_data.get('prisoner_number')
@@ -606,7 +608,7 @@ class CreditsForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        prison_list = PrisonList(self.client)
+        prison_list = PrisonList(self.session)
         self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
                                                            title=_('All prisons'))
         self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
@@ -662,11 +664,8 @@ class CreditsForm(SecurityForm):
             return ''
         return self.cleaned_data.get('card_number_last_digits')
 
-    def get_object_list_endpoint(self):
-        return self.client.credits
-
     def get_object_list_endpoint_path(self):
-        return 'credits'
+        return '/credits/'
 
     def get_object_list(self):
         return parse_date_fields(super().get_object_list())
@@ -701,14 +700,8 @@ class SecurityDetailForm(SecurityForm):
         self.cleaned_data['object'] = self.get_object()
         return super().clean()
 
-    def get_object_list_endpoint(self):
-        return self.get_object_endpoint().credits
-
     def get_object_list_endpoint_path(self):
-        return '%s/%s' % (self.get_object_endpoint_path(), 'credits')
-
-    def get_object_endpoint(self):
-        raise NotImplementedError
+        return urljoin(self.get_object_endpoint_path(), 'credits/')
 
     def get_object_endpoint_path(self):
         raise NotImplementedError
@@ -722,11 +715,11 @@ class SecurityDetailForm(SecurityForm):
         :return: dict or None if not found
         """
         try:
-            return self.get_object_endpoint().get()
+            return self.session.get(self.get_object_endpoint_path()).json()
         except HttpNotFoundError:
             self.add_error(None, _('Not found'))
             return None
-        except SlumberHttpBaseException:
+        except RequestException:
             self.add_error(None, _('This service is currently unavailable'))
             return {}
 
@@ -751,10 +744,10 @@ class SendersDetailForm(SecurityDetailForm):
     unfiltered_description_template = 'Showing all credits sent by this sender ordered by {ordering_description}.'
 
     def get_object_endpoint(self):
-        return self.client.senders(self.object_id)
+        return self.session.senders(self.object_id)
 
     def get_object_endpoint_path(self):
-        return 'senders/%s' % self.object_id
+        return '/senders/%s/' % self.object_id
 
 
 class PrisonersDetailForm(SecurityDetailForm):
@@ -773,17 +766,17 @@ class PrisonersDetailForm(SecurityDetailForm):
     unfiltered_description_template = 'Showing all credits received by this prisoner ordered by {ordering_description}.'
 
     def get_object_endpoint(self):
-        return self.client.prisoners(self.object_id)
+        return self.session.prisoners(self.object_id)
 
     def get_object_endpoint_path(self):
-        return 'prisoners/%s' % self.object_id
+        return '/prisoners/%s/' % self.object_id
 
 
 class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.request = request
-        self.client = get_connection(request)
+        self.session = get_api_session(request)
 
         for credit in self.credits:
             self.fields['comment_%s' % credit['id']] = forms.CharField(required=False)
@@ -795,8 +788,8 @@ class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
             for prison in self.request.user.user_data.get('prisons', [])
             if prison['pre_approval_required']
         ]
-        return retrieve_all_pages(
-            self.client.credits.get, valid=True, reviewed=False, prison=prisons, resolution='pending',
+        return retrieve_all_pages_for_path(
+            self.session, '/credits/', valid=True, reviewed=False, prison=prisons, resolution='pending',
             received_at__lt=datetime.datetime.combine(timezone.now().date(),
                                                       datetime.time(0, 0, 0, tzinfo=timezone.utc))
         )
@@ -814,8 +807,8 @@ class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
                     'comment': comment
                 })
         if comments:
-            self.client.credits.comments.post(comments)
-        self.client.credits.actions.review.post({
+            self.session.post('/credits/comments/', json=comments)
+        self.session.post('/credits/actions/review/', json={
             'credit_ids': list(reviewed)
         })
 

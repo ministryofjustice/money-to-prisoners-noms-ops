@@ -1,11 +1,13 @@
+import json
 import logging
 from unittest import mock
 
 from django.core.urlresolvers import reverse
 from mtp_common.auth.exceptions import Forbidden
 from mtp_common.test_utils import silence_logger
-from slumber.exceptions import HttpClientError
+import responses
 
+from security.tests import api_url
 from . import (
     PrisonerLocationUploadTestCase, generate_testable_location_data,
     get_csv_data_as_file
@@ -60,12 +62,24 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         self.assertNotContains(response, '<!-- security:credit_list -->')
         self.assertContains(response, '<!-- location_file_upload -->')
 
+    @responses.activate
     @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_upload(self, mock_api_client):
         self.login()
+        self.setup_mock_get_authenticated_api_session(mock_api_client)
 
-        conn = mock_api_client.get_authenticated_connection().prisoner_locations
-        conn.post.return_value = 200
+        responses.add(
+            responses.POST,
+            api_url('/prisoner_locations/actions/delete_inactive/')
+        )
+        responses.add(
+            responses.POST,
+            api_url('/prisoner_locations/')
+        )
+        responses.add(
+            responses.POST,
+            api_url('/prisoner_locations/actions/delete_old/')
+        )
 
         file_data, expected_data = generate_testable_location_data()
 
@@ -75,18 +89,39 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
                 {'location_file': get_csv_data_as_file(file_data)}
             )
 
-        conn.post.assert_called_with(expected_data)
+        expected_calls = [expected_data]
+
+        for call in responses.calls:
+            if call.request.url == api_url('/prisoner_locations/'):
+                self.assertEqual(
+                    json.loads(call.request.body.decode('utf-8')),
+                    expected_calls.pop()
+                )
+
+        if expected_calls:
+            self.fail('Not all location data was uploaded')
+
         self.assertRedirects(response, reverse('location_file_upload'))
 
+    @responses.activate
     @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_upload_api_error_displays_message(self, mock_api_client):
         self.login()
+        self.setup_mock_get_authenticated_api_session(mock_api_client)
 
         api_error_message = "prison not found"
         response_content = ('[{"prison": ["%s"]}]' % api_error_message).encode('utf-8')
 
-        conn = mock_api_client.get_authenticated_connection().prisoner_locations
-        conn.post.side_effect = HttpClientError(content=response_content)
+        responses.add(
+            responses.POST,
+            api_url('/prisoner_locations/actions/delete_inactive/')
+        )
+        responses.add(
+            responses.POST,
+            api_url('/prisoner_locations/'),
+            status=400,
+            body=response_content
+        )
 
         file_data, _ = generate_testable_location_data()
 

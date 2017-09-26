@@ -1,10 +1,13 @@
+import json
 import logging
 from unittest import mock
 
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory, override_settings
 from mtp_common.test_utils import silence_logger
+import responses
 
+from security.tests import api_url
 from prisoner_location_admin.forms import LocationFileUploadForm
 from . import (
     PrisonerLocationUploadTestCase, generate_testable_location_data,
@@ -100,12 +103,23 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
             ["Uploaded file must be a CSV"]
         )
 
-    @override_settings(UPLOAD_REQUEST_PAGE_SIZE=10)
+    @responses.activate
     @mock.patch('prisoner_location_admin.tasks.api_client')
+    @override_settings(UPLOAD_REQUEST_PAGE_SIZE=10)
     def test_location_file_batch_upload(self, mock_api_client):
-        create_conn = mock_api_client.get_authenticated_connection().prisoner_locations
-        delete_inactive_conn = create_conn.actions.delete_inactive
-        delete_old_conn = create_conn.actions.delete_old
+        self.setup_mock_get_authenticated_api_session(mock_api_client)
+        responses.add(
+            responses.POST,
+            api_url('/prisoner_locations/actions/delete_inactive/')
+        )
+        responses.add(
+            responses.POST,
+            api_url('/prisoner_locations/')
+        )
+        responses.add(
+            responses.POST,
+            api_url('/prisoner_locations/actions/delete_old/')
+        )
 
         file_data, expected_data = generate_testable_location_data(length=50)
 
@@ -122,12 +136,20 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
         with silence_logger(name='mtp', level=logging.WARNING):
             form.update_locations()
 
-        delete_inactive_conn.post.assert_called_once_with()
-        create_conn.post.assert_has_calls([
-            mock.call(expected_data[0:10]),
-            mock.call(expected_data[10:20]),
-            mock.call(expected_data[20:30]),
-            mock.call(expected_data[30:40]),
-            mock.call(expected_data[40:50]),
-        ])
-        delete_old_conn.post.assert_called_once_with()
+        expected_calls = [
+            expected_data[40:50],
+            expected_data[30:40],
+            expected_data[20:30],
+            expected_data[10:20],
+            expected_data[0:10]
+        ]
+
+        for call in responses.calls:
+            if call.request.url == api_url('/prisoner_locations/'):
+                self.assertEqual(
+                    json.loads(call.request.body.decode('utf-8')),
+                    expected_calls.pop()
+                )
+
+        if expected_calls:
+            self.fail('Not all location data was uploaded')

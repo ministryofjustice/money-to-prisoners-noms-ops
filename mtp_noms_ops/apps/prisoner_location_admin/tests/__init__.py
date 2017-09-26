@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import SimpleTestCase
 from django.utils.crypto import get_random_string
+from mtp_common.auth.api_client import MoJOAuth2Session
 from mtp_common.auth.test_utils import generate_tokens
 
 from prisoner_location_admin import required_permissions
@@ -35,6 +36,11 @@ class PrisonerLocationUploadTestCase(SimpleTestCase):
         )
         self.assertEqual(response.status_code, 200)
         return mock_api_client.authenticate.return_value
+
+    def setup_mock_get_authenticated_api_session(self, mock_api_client):
+        mock_session = MoJOAuth2Session()
+        mock_session.token = generate_tokens()
+        mock_api_client.get_authenticated_api_session.return_value = mock_session
 
 
 def get_csv_data_as_file(data, filename='example.csv'):
