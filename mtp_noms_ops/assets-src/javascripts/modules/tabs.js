@@ -12,22 +12,26 @@ exports.Tabs = {
       return;
     }
 
-    var selectedIndex = null;
+    var selectedIndex = 0;
+    var closed = true;
     var $tabContainer = $tabButtons.closest('.mtp-tab-container');
     var $tabPanels = $tabContainer.find('.mtp-tabpanel');
     var $tabPanelContainer = $tabPanels.closest('.mtp-tabpanels');
     var tabCookieName = $tabContainer.data('tab-cookie-name');
 
-    function resetTabsAndPanels () {
+    function resetTabsAndPanels (allowTabFocus) {
       $tabButtons.attr({
         'tabindex': '-1',
         'aria-selected': 'false'
       }).removeClass('mtp-tab--selected');
       $tabPanels.attr('aria-hidden', 'true');
       $tabPanels.hide();
+      if (allowTabFocus) {
+        $tabButtons.eq(selectedIndex).attr('tabindex', '0');
+      }
     }
 
-    resetTabsAndPanels();
+    resetTabsAndPanels(true);
 
     $tabButtons.each(function () {
       var $tabButton = $(this);
@@ -35,22 +39,24 @@ exports.Tabs = {
       $tabButton.data('mtp-tabpanel', $tabPanel);
       $tabPanel.data('mtp-tab', $tabButton);
     });
+
     $tabButtons.on('click', function (e) {
       var $tabButton = $(this);
       var $tabPanel = $tabButton.data('mtp-tabpanel');
       var wasSelected = $tabButton.hasClass('mtp-tab--selected');
 
-      resetTabsAndPanels();
+      resetTabsAndPanels(wasSelected);
 
       $tabButton.focus();
       if (wasSelected) {
-        selectedIndex = null;
+        closed = true;
         $tabContainer.addClass('mtp-tab-container--collapsed');
         $tabPanelContainer.attr('aria-expanded', 'false');
         if (tabCookieName) {
           Cookies.remove(tabCookieName);
         }
       } else {
+        closed = false;
         selectedIndex = $tabButtons.index($tabButton);
         $tabButton.attr({
           'tabindex': '0',
@@ -71,7 +77,7 @@ exports.Tabs = {
     $tabContainer.on('keydown', '.mtp-tab', function (e) {
       var key = e.which;
 
-      if (selectedIndex === null || key < 37 || key > 40) {
+      if (key < 37 || key > 40) {
         return;
       }
 
@@ -90,7 +96,15 @@ exports.Tabs = {
           selectedIndex = 0;
         }
       }
-      $($tabButtons[selectedIndex]).focus().click();
+
+      var $tabButton = $tabButtons.eq(selectedIndex);
+      $tabButton.focus();
+      if (closed) {
+        $tabButtons.attr('tabindex', '-1');
+        $tabButton.attr('tabindex', '0');
+      } else {
+        $tabButton.click();
+      }
 
       e.preventDefault();
     });
@@ -105,7 +119,7 @@ exports.Tabs = {
     } else if (tabCookieName) {
       var lastOpenTab = parseInt(Cookies.get(tabCookieName), 10);
       if ($.isNumeric(lastOpenTab) && lastOpenTab >= 0 && lastOpenTab < $tabButtons.length) {
-        $($tabButtons[lastOpenTab]).focus().click();
+        $tabButtons.eq(lastOpenTab).click().blur();
       }
     }
 
