@@ -26,3 +26,10 @@ h1.heading-xlarge {
 h2.heading-medium {
   margin-top: .5em;
 }
+
+// mtp header overrides
+
+.mtp-internal-site #global-header #logo {
+  padding-top: 8px;
+  font-size: 24px;
+}

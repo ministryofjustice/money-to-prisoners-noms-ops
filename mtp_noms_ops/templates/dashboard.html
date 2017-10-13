@@ -4,7 +4,6 @@
 
 {% block inner_content %}
   <header>
-    {% language_switch %}
     <h1 class="heading-xlarge">
       {% blocktrans trimmed with full_name=request.user.get_full_name|default:request.user.username %}
         Welcome {{ full_name }}

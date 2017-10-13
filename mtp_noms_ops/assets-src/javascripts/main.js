@@ -4,7 +4,7 @@
 
   require('dialogue-box').DialogueBox.init();
   require('upload').Upload.init();
-  require('proposition-header').PropositionHeader.init();
+  require('proposition-user-menu').PropositionUserMenu.init();
   require('print').Print.init();
   require('analytics').Analytics.init();
 

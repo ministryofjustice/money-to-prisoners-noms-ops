@@ -6,7 +6,6 @@
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 {% block inner_content %}
-  {% language_switch %}
   <div class="mtp-sender-summary {% if sender.bank_transfer_details %}mtp-sender-summary__bank-transfer{% elif sender.debit_card_details %}mtp-sender-summary__debit-card{% endif %}">
     <header>
       <h1 class="heading-xlarge">{{ view.title }}</h1>

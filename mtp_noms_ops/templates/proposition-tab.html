@@ -1,0 +1,5 @@
+<li>
+  <a href="{% url view_name %}{% if params %}?{{ params }}{% endif %}" class="{% if request.resolver_match.view_name in subview_names.split %}current{% endif %}">
+    {{ link_text }}
+  </a>
+</li>

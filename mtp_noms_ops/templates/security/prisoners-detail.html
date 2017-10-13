@@ -7,9 +7,6 @@
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 {% block inner_content %}
-
-  {% language_switch %}
-
   <div>
     {% if prisoner and nomis_api_available %}
       <div class="mtp-prisoner-image">
