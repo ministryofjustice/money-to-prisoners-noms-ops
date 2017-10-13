@@ -6,24 +6,42 @@
   <script src="{% url 'js-i18n' %}?{{ APP_GIT_COMMIT_SHORT }}"></script>
   {{ block.super }}
   {% sentry_js %}
-  <!-- {% if request.resolver_match.namespace %}{{ request.resolver_match.namespace }}:{% endif %}{{ request.resolver_match.url_name }} -->
+  <!-- {{ request.resolver_match.view_name }} -->
 {% endblock %}
 
 {% block page_title %}{{ app_title }}{% endblock %}
-
 {% block proposition %}{{ app_title }}{% endblock %}
 
-{% block proposition_menu %}
-  {% if request.user.is_authenticated %}
-    <ul id="proposition-links" class="print-hidden">
-      <li><a href="{% url 'dashboard' %}">{% trans 'Home' %}</a></li>
-      {% if request.can_access_security %}
-        <li><a href="{% url 'security:credit_list' %}?{{ initial_params }}">{% trans 'Credits' %}</a></li>
-        <li><a href="{% url 'security:sender_list' %}?{{ initial_params }}">{% trans 'Payment sources' %}</a></li>
-        <li><a href="{% url 'security:prisoner_list' %}?{{ initial_params }}">{% trans 'Prisoners' %}</a></li>
-      {% endif %}
-      <li><a href="{% url 'password_change' %}">{% trans 'Change password' %}</a></li>
-      <li><a href="{% url 'logout' %}">{% trans 'Sign out' %}</a></li>
-    </ul>
-  {% endif %}
+
+{% block proposition_extra %}
+  <nav id="mtp-proposition-extra" class="column-full print-hidden">
+    {% spaceless %}
+      <ul id="mtp-proposition-tabs">
+        {% if request.user.is_authenticated and request.can_access_security %}
+          {% if request.can_pre_approve %}
+            {% include 'proposition-tab.html' with view_name='security:review_credits' subview_names='security:review_credits' link_text=_('New credits check') %}
+          {% endif %}
+          {% include 'proposition-tab.html' with view_name='security:credit_list' subview_names='security:credit_list' link_text=_('Credits') params=initial_params %}
+          {% include 'proposition-tab.html' with view_name='security:sender_list' subview_names='security:sender_list security:sender_detail' link_text=_('Payment sources') params=initial_params %}
+          {% include 'proposition-tab.html' with view_name='security:prisoner_list' subview_names='security:prisoner_list security:prisoner_detail' link_text=_('Prisoners') params=initial_params %}
+        {% else %}
+          {% include 'proposition-tab.html' with view_name='login' subview_names='login' link_text=_('Sign in') %}
+        {% endif %}
+        {% include 'proposition-tab.html' with view_name='submit_ticket' subview_names='submit_ticket feedback_success' link_text=_('Get help') %}
+      </ul>
+    {% endspaceless %}
+  </nav>
+{% endblock %}
+
+
+{% block footer_support_links %}
+  <ul>
+    <li><a href="{% url 'submit_ticket' %}">{% trans 'Get help' %}</a></li>
+    <li>
+      {% trans 'Built by' %}
+      <a href="https://mojdigital.blog.gov.uk/">
+        <abbr title="{% trans 'Ministry of Justice' %}">MOJ</abbr> Digital
+      </a>
+    </li>
+  </ul>
 {% endblock %}

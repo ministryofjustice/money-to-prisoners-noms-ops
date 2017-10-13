@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
+from mtp_common.context_processors import govuk_localisation as inherited_localisation
 
 from prisoner_location_admin import required_permissions as prisoner_location_permissions
 from security import required_permissions as security_permissions
@@ -24,7 +25,7 @@ def external_breadcrumbs(request):
         return {}
     url_name = '%s:%s' % (request.resolver_match.namespace, request.resolver_match.url_name)
     if url_name in (':submit_ticket', ':feedback_success'):
-        section_title = _('Contact us')
+        section_title = _('Get help')
     else:
         return {}
     return {
@@ -35,14 +36,19 @@ def external_breadcrumbs(request):
     }
 
 
-def user_specific_context(request):
+def govuk_localisation(request):
+    data = inherited_localisation(request)
     if request.can_access_prisoner_location and not request.can_access_security:
         app_title = _('Prisoner location admin')
     else:
         app_title = _('Prisoner money intelligence')
-    return {
-        'app_title': app_title
-    }
+    data.update(
+        app_title=app_title,
+        homepage_url=data['home_url'],
+        logo_link_title=gettext('Go to the homepage'),
+        global_header_text=app_title,
+    )
+    return data
 
 
 def user_test(permissions):
