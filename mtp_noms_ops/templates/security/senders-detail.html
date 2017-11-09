@@ -8,7 +8,7 @@
 {% block inner_content %}
   <div class="mtp-sender-summary {% if sender.bank_transfer_details %}mtp-sender-summary__bank-transfer{% elif sender.debit_card_details %}mtp-sender-summary__debit-card{% endif %}">
     <header>
-      <h1 class="heading-xlarge">{{ view.title }}</h1>
+      <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
     </header>
 
     {% if sender.bank_transfer_details %}

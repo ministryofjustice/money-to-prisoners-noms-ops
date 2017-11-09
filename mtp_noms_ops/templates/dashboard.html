@@ -4,7 +4,7 @@
 
 {% block inner_content %}
   <header>
-    <h1 class="heading-xlarge">
+    <h1 class="heading-xlarge mtp-unpadded-heading">
       {% blocktrans trimmed with full_name=request.user.get_full_name|default:request.user.username %}
         Welcome {{ full_name }}
       {% endblocktrans %}
@@ -13,13 +13,17 @@
 
   {% if request.can_access_security %}
 
-    <p class="lede mtp-security-description">
-      {% blocktrans trimmed %}
-        Use this tool to monitor all credits sent to prisoners using the <a href="{{ start_page_url }}">Send money to someone in prison</a> service.
-      {% endblocktrans %}
-    </p>
+    <div class="grid-row">
+      <div class="column-two-thirds">
+        <p class="lede">
+          {% blocktrans trimmed %}
+            Use this tool to monitor all credits sent to prisoners using the <a href="{{ start_page_url }}">Send money to someone in prison</a> service.
+          {% endblocktrans %}
+        </p>
+      </div>
+    </div>
 
-    <h2 class="heading-medium">{% trans 'View all' %}</h2>
+    <h2 class="heading-medium mtp-dashboard-heading">{% trans 'View all' %}</h2>
 
     <div class="grid-row">
       <div class="column-one-third mtp-box">
@@ -45,7 +49,7 @@
 
   {% if request.can_access_security and saved_searches|length > 0 %}
 
-    <h2 class="heading-medium">{% trans 'Payment sources and prisoners you are monitoring' %}</h2>
+    <h2 class="heading-medium mtp-dashboard-heading">{% trans 'Payment sources and prisoners you are monitoring' %}</h2>
     {% for search in saved_searches %}
       {% if forloop.counter0|divisibleby:3 %}
       <div class="grid-row">
@@ -73,7 +77,7 @@
 
   {% if request.can_access_security and request.can_pre_approve or request.can_access_user_management or request.can_access_prisoner_location %}
 
-    <h2 class="heading-medium">{% trans 'Admin options' %}</h2>
+    <h2 class="heading-medium mtp-dashboard-heading">{% trans 'Admin options' %}</h2>
 
     <div class="grid-row">
       {% if request.can_access_security and request.can_pre_approve %}

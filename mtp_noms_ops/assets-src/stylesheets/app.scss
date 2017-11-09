@@ -11,20 +11,8 @@
 
 // govuk elements overrides
 
-form {
-  margin-top: 2em;
-
-  .form-group .form-hint {
-    margin-top: 0;
-  }
-}
-
-h1.heading-xlarge {
-  margin-bottom: 0;
-}
-
-h2.heading-medium {
-  margin-top: .5em;
+form .form-group .form-hint {
+  margin-top: 0;
 }
 
 // mtp header overrides
@@ -32,4 +20,8 @@ h2.heading-medium {
 .mtp-internal-site #global-header #logo {
   padding-top: 8px;
   font-size: 24px;
+}
+
+.mtp-unpadded-heading {
+  margin-bottom: 0;
 }
