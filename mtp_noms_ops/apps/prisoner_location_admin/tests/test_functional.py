@@ -54,6 +54,7 @@ class LoginTests(PrisonerLocationAdminTestCase):
 
     def test_logout(self):
         self.login('prisoner-location-admin', 'prisoner-location-admin')
+        self.driver.find_element_by_class_name('mtp-user-menu__toggle').click()
         self.driver.find_element_by_link_text('Sign out').click()
         self.assertCurrentUrl(reverse('login'))
 

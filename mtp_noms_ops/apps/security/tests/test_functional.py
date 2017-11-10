@@ -26,7 +26,12 @@ class SecurityDashboardTestCase(FunctionalTestCase):
     def click_on_submit(self):
         self.driver.find_element_by_xpath('//button[@type="submit"]').click()
 
-    def click_on_tab(self, field):
+    def click_on_nav_tab(self, tab_name):
+        container_element = self.driver.find_element_by_id('mtp-proposition-tabs')
+        tab_element = container_element.find_element_by_link_text(tab_name)
+        tab_element.click()
+
+    def click_on_filter_tab(self, field):
         tab_element = self.driver.find_element_by_css_selector('#mtp-tab-%s' % field)
         tab_element.click()
 
@@ -59,28 +64,28 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('Credits')
+        self.click_on_nav_tab('Credits')
 
     def test_perform_searches(self):
         self.assertInSource('Payment source and type')  # a results list header
 
-        self.click_on_tab('sender')
+        self.click_on_filter_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
         self.click_on_submit()
         self.assertInSource('No matching credits found')
 
-        self.click_on_tab('prisoner')
+        self.click_on_filter_tab('prisoner')
         self.type_in('id_prisoner_name', 'James')  # combined search
         self.click_on_submit()
         self.assertInSource('No matching credits found')
 
-        self.click_on_tab('sender')
+        self.click_on_filter_tab('sender')
         self.type_in('id_sender_name', Keys.BACKSPACE * len('aaabbbccc111222333'))
         self.click_on_submit()
         self.assertInSource('James Halls')
 
     def test_ordering(self):
-        self.click_on_tab('amount')
+        self.click_on_filter_tab('amount')
         amount_pattern = self.get_element('id_amount_pattern')
         amount_pattern.find_element_by_xpath('//option[text()="Not a multiple of £5"]').click()
         self.click_on_submit()
@@ -98,12 +103,12 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('Payment sources')
+        self.click_on_nav_tab('Payment sources')
 
     def test_perform_searches(self):
         self.assertInSource('Payment source and type')  # a results list header
 
-        self.click_on_tab('sender')
+        self.click_on_filter_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
         self.click_on_submit()
         self.assertInSource('No matching payment sources found')
@@ -113,12 +118,12 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
     def setUp(self):
         super().setUp()
         self.login('security-staff', 'security-staff')
-        self.click_on_text('Prisoners')
+        self.click_on_nav_tab('Prisoners')
 
     def test_perform_searches(self):
         self.assertInSource('Received')  # a results list header
 
-        self.click_on_tab('prisoner')
+        self.click_on_filter_tab('prisoner')
         self.type_in('id_prisoner_name', 'James')
         self.click_on_submit()
         self.assertInSource('James Halls')
