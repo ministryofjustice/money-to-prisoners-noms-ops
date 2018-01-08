@@ -1,44 +1,38 @@
 {% load i18n %}
+{% load mtp_common %}
 {% load security %}
 
 <div class="mtp-security-form">
   {{ form.ordering.as_hidden }}
 
-  <div class="mtp-tab-container mtp-tab-container--collapsed" data-tab-cookie-name="mtp-tab-prisoners">
-    {% spaceless %}
-      <ul class="mtp-tab-wrapper" role="tablist" aria-label="{% trans 'Filter by' %}">
-        <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--first" {% tab_aria_atts 'prisoner' %}>{% trans 'Prisoner' %}</a></li>
-        <li class="mtp-tab-item" role="presentation"><a class="mtp-tab mtp-tab--last" {% tab_aria_atts 'prison' %}>{% trans 'Prison' %}</a></li>
-      </ul>
-    {% endspaceless %}
+  {% tabbedpanel cookie_name='mtp-tab-prisoners' tab_label=_('Filter by') %}
 
-    <div class="mtp-tabpanels" aria-expanded="false">
-      <div class="mtp-tabpanel" {% panel_aria_atts 'prisoner' %}>
-        <div class="grid-row">
-          <div class="column-full">
-            {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
-            {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
-          </div>
+    {% paneltab name='prisoner' title=_('Prisoner') %}
+      <div class="grid-row">
+        <div class="column-full">
+          {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
+          {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
         </div>
       </div>
+    {% endpaneltab %}
 
-      <div class="mtp-tabpanel" {% panel_aria_atts 'prison' %}>
-        <script>
-          var prisonData={{ form.prison_list.mapping_as_json }};
-        </script>
-        <div class="grid-row">
-          <div class="column-one-third">
-            {% include 'security/forms/select-field.html' with field=form.prison %}
-            {% include 'security/forms/select-field.html' with field=form.prison_population %}
-          </div>
-          <div class="column-one-third">
-            {% include 'security/forms/select-field.html' with field=form.prison_category %}
-            {% include 'security/forms/select-field.html' with field=form.prison_region %}
-          </div>
+    {% paneltab name='prison' title=_('Prison') %}
+      <script>
+        var prisonData={{ form.prison_list.mapping_as_json }};
+      </script>
+      <div class="grid-row">
+        <div class="column-one-third">
+          {% include 'security/forms/select-field.html' with field=form.prison %}
+          {% include 'security/forms/select-field.html' with field=form.prison_population %}
+        </div>
+        <div class="column-one-third">
+          {% include 'security/forms/select-field.html' with field=form.prison_category %}
+          {% include 'security/forms/select-field.html' with field=form.prison_region %}
         </div>
       </div>
-    </div>
+    {% endpaneltab %}
 
     {% include 'security/forms/update-search.html' with search_description=form.search_description only %}
-  </div>
+
+  {% endtabbedpanel %}
 </div>
