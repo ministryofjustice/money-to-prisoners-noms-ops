@@ -2,7 +2,6 @@ import logging
 
 from django import template
 from django.core.urlresolvers import reverse
-from django.forms.utils import flatatt
 from django.utils.html import format_html_join
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
@@ -166,27 +165,6 @@ def prisoner_profile_search_url(credit, redirect_on_single=True):
         return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner_id})
     return get_profile_search_url(credit, ['prisoner_number'], reverse('security:prisoner_list'),
                                   redirect_on_single=redirect_on_single)
-
-
-@register.simple_tag
-def tab_aria_atts(field):
-    panel_id = 'mtp-tabpanel-%s' % field
-    return flatatt({
-        'id': 'mtp-tab-%s' % field,
-        'href': '#%s' % panel_id,
-        'role': 'tab',
-        'aria-controls': panel_id,
-        'aria-flowto': panel_id,
-    })
-
-
-@register.simple_tag
-def panel_aria_atts(field):
-    return flatatt({
-        'id': 'mtp-tabpanel-%s' % field,
-        'role': 'tabpanel',
-        'aria-labelledby': 'mtp-tab-%s' % field,
-    })
 
 
 @register.filter
