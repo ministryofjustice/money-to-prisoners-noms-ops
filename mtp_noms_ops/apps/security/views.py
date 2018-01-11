@@ -29,7 +29,7 @@ logger = logging.getLogger('mtp')
 class SecurityView(FormView):
     """
     Base view for retrieving security-related searches
-    Allows form submission via GET
+    Allows form submission via GET, i.e. form is always bound
     """
     title = NotImplemented
     template_name = NotImplemented
@@ -46,11 +46,10 @@ class SecurityView(FormView):
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
         form_kwargs['request'] = self.request
-        request_data = self.request.GET.dict()
+        request_data = self.get_initial()
+        request_data.update(self.request.GET.dict())
         if 'redirect-on-single' in request_data:
             self.redirect_on_single = True
-        if 'page' not in request_data:
-            request_data['page'] = '1'
         form_kwargs['data'] = request_data
         return form_kwargs
 
@@ -74,7 +73,7 @@ class SecurityView(FormView):
             return CreditXlsxResponse(form.get_complete_object_list(), attachment_name=attachment_name)
 
         context = self.get_context_data(form=form)
-        object_list = form.cleaned_data['object_list']
+        object_list = form.get_object_list()
         form.check_and_update_saved_searches(self.title)
         if self.redirect_on_single and len(object_list) == 1 and hasattr(self, 'url_for_single_result'):
             return redirect(self.url_for_single_result(object_list[0]))
@@ -122,7 +121,7 @@ class SecurityDetailView(SecurityView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        detail_object = context_data['form'].cleaned_data.get('object')
+        detail_object = context_data['form'].get_object()
         if detail_object is None:
             raise Http404('Detail object not found')
         self.title = self.get_title_for_object(detail_object)
@@ -143,7 +142,7 @@ class SecurityDetailView(SecurityView):
         raise NotImplementedError
 
     def get_export_description(self, form):
-        detail_object = form.cleaned_data['object']
+        detail_object = form.get_object()
         title = self.get_title_for_object(detail_object)
         return '%s: %s' % (title, super().get_export_description(form))
 

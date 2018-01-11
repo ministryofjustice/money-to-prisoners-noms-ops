@@ -81,15 +81,18 @@ class SecurityFormTestCase(unittest.TestCase):
             json=empty_response
         )
 
+        expected_data = {'page': 1}
         form = SecurityForm(self.request, data={})
-        self.assertFalse(form.is_valid())
+        self.assertTrue(form.is_valid())
+        self.assertDictEqual(form.cleaned_data, expected_data)
+        self.assertListEqual(form.get_object_list(), [])
+        self.assertDictEqual(form.get_query_data(), {})
+        self.assertEqual(form.query_string, '')
 
         form = SecurityForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
-        self.assertDictEqual(form.cleaned_data, {
-            'object_list': [],
-            'page': 1,
-        })
+        self.assertDictEqual(form.cleaned_data, expected_data)
+        self.assertListEqual(form.get_object_list(), [])
         self.assertDictEqual(form.get_query_data(), {})
         self.assertEqual(form.query_string, '')
 
@@ -105,11 +108,11 @@ class SecurityFormTestCase(unittest.TestCase):
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'prison_count__gte': None, 'prison_count__lte': None,
             'card_number_last_digits': '', 'source': '', 'sender_email': '',
-            'object_list': [],
         }
         form = SendersForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
+        self.assertListEqual(form.get_object_list(), [])
         self.assertDictEqual(form.get_query_data(), {'ordering': '-prisoner_count'})
         self.assertEqual(form.query_string, 'ordering=-prisoner_count')
 
@@ -125,19 +128,17 @@ class SecurityFormTestCase(unittest.TestCase):
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'prison_count__gte': None, 'prison_count__lte': None,
             'card_number_last_digits': '', 'source': '', 'sender_email': '',
-            'object_list': [],
         }
         form = SendersForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'sender_name': 'Joh '})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
+        self.assertListEqual(form.get_object_list(), [])
         self.assertDictEqual(form.get_query_data(), {'ordering': '-credit_total', 'sender_name': 'Joh'})
         self.assertEqual(form.query_string, 'ordering=-credit_total&sender_name=Joh')
 
     @responses.activate
     def test_sender_list_invalid_forms(self):
         self.set_security_form_responses()
-        form = SendersForm(self.request, data={})
-        self.assertFalse(form.is_valid())
         form = SendersForm(self.request, data={'page': '0'})
         self.assertFalse(form.is_valid())
         form = SendersForm(self.request, data={'page': '1', 'ordering': 'prison'})
@@ -155,11 +156,11 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'sender_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
-            'object_list': [],
         }
         form = PrisonersForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
+        self.assertListEqual(form.get_object_list(), [])
         self.assertDictEqual(form.get_query_data(), {'ordering': '-sender_count'})
         self.assertEqual(form.query_string, 'ordering=-sender_count')
 
@@ -173,19 +174,17 @@ class SecurityFormTestCase(unittest.TestCase):
             'prison': 'IXB', 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'sender_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
-            'object_list': [],
         }
         form = PrisonersForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'prison': 'IXB'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
+        self.assertListEqual(form.get_object_list(), [])
         self.assertDictEqual(form.get_query_data(), {'ordering': '-credit_total', 'prison': 'IXB'})
         self.assertEqual(form.query_string, 'ordering=-credit_total&prison=IXB')
 
     @responses.activate
     def test_prisoner_list_invalid_forms(self):
         self.set_security_form_responses()
-        form = PrisonersForm(self.request, data={})
-        self.assertFalse(form.is_valid())
         form = PrisonersForm(self.request, data={'page': '0'})
         self.assertFalse(form.is_valid())
         form = PrisonersForm(self.request, data={'page': '1', 'ordering': 'prison'})
@@ -205,11 +204,11 @@ class SecurityFormTestCase(unittest.TestCase):
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
             'source': '', 'sender_email': '',
-            'object_list': [],
         }
         form = CreditsForm(self.request, data={'page': '1'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
+        self.assertListEqual(form.get_object_list(), [])
         self.assertDictEqual(form.get_query_data(), {'ordering': '-received_at'})
         self.assertEqual(form.query_string, 'ordering=-received_at')
 
@@ -226,11 +225,11 @@ class SecurityFormTestCase(unittest.TestCase):
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
             'source': '', 'sender_email': '',
-            'object_list': [],
         }
         form = CreditsForm(self.request, data={'page': '1', 'ordering': '-amount', 'received_at__gte': '26/5/2016'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
+        self.assertListEqual(form.get_object_list(), [])
         self.assertDictEqual(form.get_query_data(), {'ordering': '-amount', 'received_at__gte': received_at__gte})
         self.assertEqual(form.query_string, 'ordering=-amount&received_at__gte=2016-05-26')
         form = CreditsForm(self.request, data={'page': '1', 'amount_pattern': 'not_integral'})
@@ -243,8 +242,6 @@ class SecurityFormTestCase(unittest.TestCase):
     @responses.activate
     def test_credits_list_invalid_forms(self):
         self.set_security_form_responses()
-        form = CreditsForm(self.request, data={})
-        self.assertFalse(form.is_valid())
         form = CreditsForm(self.request, data={'page': '0'})
         self.assertFalse(form.is_valid())
         form = CreditsForm(self.request, data={'page': '1', 'ordering': 'prison'})
