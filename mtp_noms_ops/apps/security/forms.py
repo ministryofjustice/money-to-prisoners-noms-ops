@@ -86,9 +86,9 @@ def validate_range_field(field_name, bound_ordering_msg):
 
 class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     """
-    Base form for security searches
+    Base form for security searches, always uses initial values as defaults
     """
-    page = forms.IntegerField(min_value=1)
+    page = forms.IntegerField(min_value=1, initial=1)
     page_size = 20
 
     exclusive_date_params = []
@@ -100,18 +100,23 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
+        if self.is_bound:
+            data = {
+                name: field.initial
+                for name, field in self.fields.items()
+                if field.initial is not None
+            }
+            data.update(self.initial)
+            data.update(self.data)
+            self.data = data
         self.request = request
-        self.session = get_api_session(request)
         self.total_count = None
         self.page_count = 0
         self.existing_search = None
 
-    def clean_ordering(self):
-        return self.cleaned_data['ordering'] or self.fields['ordering'].initial
-
-    def clean(self):
-        self.cleaned_data['object_list'] = self.get_object_list()
-        return self.cleaned_data
+    @cached_property
+    def session(self):
+        return get_api_session(self.request)
 
     def get_object_list_endpoint_path(self):
         raise NotImplementedError
@@ -696,10 +701,6 @@ class SecurityDetailForm(SecurityForm):
         super().__init__(**kwargs)
         self.object_id = object_id
 
-    def clean(self):
-        self.cleaned_data['object'] = self.get_object()
-        return super().clean()
-
     def get_object_list_endpoint_path(self):
         return urljoin(self.get_object_endpoint_path(), 'credits/')
 
@@ -776,10 +777,13 @@ class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.request = request
-        self.session = get_api_session(request)
 
         for credit in self.credits:
             self.fields['comment_%s' % credit['id']] = forms.CharField(required=False)
+
+    @cached_property
+    def session(self):
+        return get_api_session(self.request)
 
     @cached_property
     def credits(self):
