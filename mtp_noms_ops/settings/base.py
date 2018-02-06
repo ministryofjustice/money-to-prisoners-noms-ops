@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
 )
 PROJECT_APPS = (
+    'anymail',
     'mtp_common',
     'widget_tweaks',
     'prisoner_location_admin',
@@ -248,10 +249,17 @@ REQUEST_PAGE_SIZE = 500
 UPLOAD_REQUEST_PAGE_SIZE = 3000
 MAX_CREDITS_TO_DOWNLOAD = 2000
 
-EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
-MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY', '')
-MAILGUN_SERVER_NAME = os.environ.get('MAILGUN_SERVER_NAME', '')
+EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+ANYMAIL = {
+    'MAILGUN_API_KEY': os.environ.get('MAILGUN_ACCESS_KEY', ''),
+    'MAILGUN_SENDER_DOMAIN': os.environ.get('MAILGUN_SERVER_NAME', ''),
+    'SEND_DEFAULTS': {
+        'tags': [APP, ENVIRONMENT],
+    },
+}
 MAILGUN_FROM_ADDRESS = os.environ.get('MAILGUN_FROM_ADDRESS', '')
+if MAILGUN_FROM_ADDRESS:
+    DEFAULT_FROM_EMAIL = MAILGUN_FROM_ADDRESS
 
 LOCATION_UPLOADER_USERNAME = os.environ.get('LOCATION_UPLOADER_USERNAME', 'prisoner-location-admin')
 LOCATION_UPLOADER_PASSWORD = os.environ.get('LOCATION_UPLOADER_PASSWORD', 'prisoner-location-admin')
