@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block inner_content %}
+
+  <header>
+    <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <form class="mtp-security-search" method="get">
+    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+
+    <p class="lede">{{ form.search_description.description }}</p>
+
+    <div class="print-hidden">
+      {% include view.form_template_name with view=view form=form only %}
+    </div>
+
+    {% if form.is_valid %}
+      <div class="mtp-results-list">
+        <div class="print-hidden mtp-links--no-panel">
+          <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
+          &nbsp;
+          {% url 'security:disbursements_export' as export_view %}
+          {% url 'security:disbursements_email_export' as email_export_view %}
+          {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many disbursements to download.') %}
+        </div>
+
+        <table>
+          <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+          <thead>
+            <tr>
+              <th class="{{ form|ordering_classes:'created' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'created' }}">
+                  <span>
+                    {% trans 'Date entered' %}
+                    {% describe_ordering_for_screenreader form 'created' %}
+                  </span>
+                </a>
+              </th>
+              <th class="{{ form|ordering_classes:'prisoner_number' }}">
+                <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
+                  <span>
+                    {% trans 'Prisoner' %}
+                    {% describe_ordering_for_screenreader form 'prisoner_number' %}
+                  </span>
+                </a>
+              </th>
+              <th>{% trans 'Recipient' %}</th>
+              <th class="{{ form|ordering_classes:'amount' }} number">
+                <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
+                  <span>
+                    {% trans 'Amount' %}
+                    {% describe_ordering_for_screenreader form 'amount' %}
+                  </span>
+                </a>
+              </th>
+              <th>{% trans 'Prison' %}</th>
+              <th>{% trans 'Status' %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for disbursement in disbursements %}
+              <tr {% if forloop.last %}class="no-border"{% endif %}>
+                <td>
+                  {{ disbursement.created|date:'DATE_FORMAT' }}
+                </td>
+                <td>
+                  {% if disbursement.prisoner_number %}
+                    <strong><a href="{{ disbursement|prisoner_profile_search_url }}" class="mtp-print-url-hidden">{{ disbursement.prisoner_number }}</a></strong><br/>
+                    {{ disbursement.prisoner_name|default_if_none:'—' }}
+                  {% endif %}
+                </td>
+                <td>
+                  {{ disbursement.recipient_first_name }} {{ disbursement.recipient_last_name }}
+                  <br>
+                  {% blocktrans trimmed with payment_method=disbursement.method|disbursement_method|lower %}
+                    by {{ payment_method }}
+                  {% endblocktrans %}
+                </td>
+                <td class="number">
+                  <strong>{{ disbursement.amount|currency }}</strong>
+                </td>
+                <td>
+                  {{ disbursement.prison_name|default:'—' }}
+                </td>
+                <td>
+                  {{ disbursement.resolution|format_disbursement_resolution }}
+                </td>
+              </tr>
+            {% empty %}
+              <tr class="no-border">
+                <td colspan="6">{% trans 'No matching disbursements found' %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+      </div>
+    {% endif %}
+
+  </form>
+
+{% endblock %}

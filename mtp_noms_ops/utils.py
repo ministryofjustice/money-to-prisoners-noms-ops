@@ -18,6 +18,10 @@ class UserPermissionMiddleware:
             prison['pre_approval_required']
             for prison in request.user.user_data.get('prisons', [])
         ))
+        request.disbursements_available = request.user.is_authenticated and any(
+            prison['nomis_id'] in settings.DISBURSEMENT_PRISONS
+            for prison in request.user.user_data.get('prisons', [])
+        )
 
 
 def external_breadcrumbs(request):

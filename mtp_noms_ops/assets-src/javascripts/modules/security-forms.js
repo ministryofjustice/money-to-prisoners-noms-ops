@@ -39,9 +39,9 @@ exports.SecurityForms = {
   },
 
   bindPaymentSourceSelection: function () {
-    var $paymentSourceSelect = $('#id_source');
-    var $senderAccountNumber = $('#id_sender_account_number-wrapper');
-    var $senderSortCode = $('#id_sender_sort_code-wrapper');
+    var $paymentSourceSelect = $('#id_source, #id_method');
+    var $senderAccountNumber = $('#id_sender_account_number-wrapper, #id_account_number-wrapper');
+    var $senderSortCode = $('#id_sender_sort_code-wrapper, #id_sort_code-wrapper');
     var $cardNumberLastDigits = $('#id_card_number_last_digits-wrapper');
     var $senderEmail = $('#id_sender_email-wrapper');
 
@@ -54,6 +54,7 @@ exports.SecurityForms = {
           $senderEmail.hide();
           break;
         case 'online':
+        case 'cheque':
           $senderAccountNumber.hide();
           $senderSortCode.hide();
           $cardNumberLastDigits.show();

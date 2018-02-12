@@ -71,7 +71,7 @@
           &nbsp;
           {% url 'security:prisoner_detail_export' prisoner_id=prisoner.id as export_view %}
           {% url 'security:prisoner_detail_email_export' prisoner_id=prisoner.id as email_export_view %}
-          {% include 'security/includes/export-credits.html' %}
+          {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
         </div>
       </div>
 

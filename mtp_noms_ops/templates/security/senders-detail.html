@@ -128,7 +128,7 @@
           &nbsp;
           {% url 'security:sender_detail_export' sender_id=sender.id as export_view %}
           {% url 'security:sender_detail_email_export' sender_id=sender.id as email_export_view %}
-          {% include 'security/includes/export-credits.html' %}
+          {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
         </div>
       </div>
 
@@ -200,7 +200,7 @@
 
                 {% random_string as profile_label %}
                 <div id="mtp-label-{{ profile_label }}" class="mtp-sender-label">{% trans 'Prisoner name' %}</div>
-                <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.prisoner_name|default_if_none:'—'|lower|title }}</div>
+                <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.prisoner_name|default_if_none:'—' }}</div>
                 <br/>
 
                 {% random_string as profile_label %}

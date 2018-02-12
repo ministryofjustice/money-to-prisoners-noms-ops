@@ -29,7 +29,7 @@
           &nbsp;
           {% url 'security:credits_export' as export_view %}
           {% url 'security:credits_email_export' as email_export_view %}
-          {% include 'security/includes/export-credits.html' %}
+          {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
         </div>
 
         <table>
@@ -95,7 +95,7 @@
                 <td>
                   {% if credit.prisoner_number %}
                     <strong><a href="{{ credit|prisoner_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.prisoner_number }}</a></strong><br/>
-                    {{ credit.prisoner_name|default_if_none:'—'|lower|title }}
+                    {{ credit.prisoner_name|default_if_none:'—' }}
                   {% endif %}
                 </td>
                 <td>

@@ -1,0 +1,66 @@
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+<div class="mtp-security-form">
+  {{ form.ordering.as_hidden }}
+
+  {% tabbedpanel cookie_name='mtp-tab-disbursements' tab_label=_('Filter by') %}
+
+    {% paneltab name='date' title=_('Date') %}
+      {% include 'security/forms/created-range-field.html' %}
+    {% endpaneltab %}
+
+    {% paneltab name='amount' title=_('Amount (£)') %}
+      <div class="grid-row">
+        <div class="column-one-third">
+          {% include 'mtp_common/forms/field.html' with field=form.amount %}
+        </div>
+      </div>
+    {% endpaneltab %}
+
+    {% paneltab name='recipient' title=_('Recipient') %}
+      <div class="grid-row">
+        <div class="column-one-third">
+          {% include 'mtp_common/forms/select-field.html' with field=form.method %}
+          {% include 'mtp_common/forms/field.html' with field=form.recipient_name %}
+        </div>
+        <div class="column-two-thirds">
+          {% include 'mtp_common/forms/field.html' with field=form.account_number %}
+          {% include 'mtp_common/forms/field.html' with field=form.sort_code %}
+        </div>
+        <div class="column-two-thirds">
+          {% include 'mtp_common/forms/field.html' with field=form.recipient_email %}
+        </div>
+      </div>
+    {% endpaneltab %}
+
+    {% paneltab name='prisoner' title=_('Prisoner') %}
+      <div class="grid-row">
+        <div class="column-full">
+          {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
+          {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
+        </div>
+      </div>
+    {% endpaneltab %}
+
+    {% paneltab name='prison' title=_('Prison') %}
+      <script>
+        var prisonData={{ form.prison_list.mapping_as_json }};
+      </script>
+      <div class="grid-row">
+        <div class="column-one-third">
+          {% include 'security/forms/select-field.html' with field=form.prison %}
+          {% include 'security/forms/select-field.html' with field=form.prison_population %}
+        </div>
+        <div class="column-one-third">
+          {% include 'security/forms/select-field.html' with field=form.prison_category %}
+          {% include 'security/forms/select-field.html' with field=form.prison_region %}
+        </div>
+      </div>
+    {% endpaneltab %}
+
+    {% include 'security/forms/update-search.html' with search_description=form.search_description only %}
+
+  {% endtabbedpanel %}
+</div>

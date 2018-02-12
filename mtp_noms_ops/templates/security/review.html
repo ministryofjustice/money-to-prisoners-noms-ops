@@ -63,7 +63,7 @@
             </td>
             <td class="mtp-review__prisoner">
               <div class="line1"><a class="mtp-print-url-hidden" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
-              {{ credit.prisoner_name|default_if_none:'—'|lower|title }}
+              {{ credit.prisoner_name|default_if_none:'—' }}
             </td>
             <td class="numeric">
               {{ credit.amount|currency }}
@@ -71,7 +71,7 @@
             <td>
               {% random_string as comment_label %}
               <label class="visually-hidden" for="mtp-review__comment-{{ comment_label }}">
-                {% blocktrans trimmed with amount=credit.amount|currency prisoner_name=credit.prisoner_name|default_if_none:'—'|lower|title %}
+                {% blocktrans trimmed with amount=credit.amount|currency prisoner_name=credit.prisoner_name|default_if_none:'—' %}
                   Add security comment for credit of {{ amount }} to {{ prisoner_name }}
                 {% endblocktrans %}
               </label>

@@ -7,6 +7,8 @@ from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
+from security.models import disbursement_methods
+
 logger = logging.getLogger('mtp')
 register = template.Library()
 
@@ -172,3 +174,37 @@ def format_address(address):
     if address:
         lines = [(address[key],) for key in ('line1', 'line2', 'city', 'postcode', 'country') if address.get(key)]
         return format_html_join(mark_safe('<br />'), '{}', lines)
+
+
+@register.filter
+def disbursement_method(method_key):
+    return disbursement_methods.get(method_key, method_key)
+
+
+@register.filter
+def format_disbursement_action(value):
+    return {
+        'created': gettext('entered'),
+        'edited': gettext('edited'),
+        'rejected': gettext('cancelled'),
+        'confirmed': gettext('confirmed'),
+        'sent': gettext('sent'),
+    }.get(value, value)
+
+
+@register.filter
+def format_disbursement_resolution(value):
+    return {
+        'pending': gettext('Waiting for confirmation'),
+        'rejected': gettext('Cancelled'),
+        'preconfirmed': gettext('Confirmed'),
+        'confirmed': gettext('Confirmed'),
+        'sent': gettext('Sent'),
+    }.get(value, value)
+
+
+@register.filter
+def find_rejection_reason(comment_set):
+    for comment in filter(lambda comment: comment['category'] == 'reject', comment_set):
+        return comment['comment']
+    return ''
