@@ -6,7 +6,7 @@
     {{ export_message }}
   </p>
   <p>
-    {{ export_description }}
+    {{ export_description|safe }}
     {% blocktrans trimmed with generated_at=generated_at|date:'SHORT_DATETIME_FORMAT' %}
       The spreadsheet was generated at {{ generated_at }}
     {% endblocktrans %}
