@@ -45,6 +45,16 @@
       </div>
     </div>
 
+    {% if request.disbursements_available %}
+      <div class="grid-row">
+        <div class="column-one-third mtp-box">
+          <a href="{% url 'security:disbursement_list' %}?{{ initial_params }}">
+            {% trans 'Disbursements' %}
+          </a>
+        </div>
+      </div>
+    {% endif %}
+
   {% endif %}
 
   {% if request.can_access_security and saved_searches|length > 0 %}

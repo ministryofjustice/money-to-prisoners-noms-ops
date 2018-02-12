@@ -5,7 +5,7 @@ select[disabled] {
   color: $secondary-text-colour;
 }
 
-#id_sender_name, #id_sender_email {
+#id_sender_name, #id_sender_email, #id_recipient_name, #id_recipient_email {
   max-width: 16em;
   width: 100%;
 }
@@ -14,7 +14,7 @@ select[disabled] {
   width: 100%;
 }
 
-#id_sender_account_number {
+#id_sender_account_number, #id_account_number {
   width: 10em;
 }
 
@@ -76,7 +76,10 @@ select[disabled] {
   #id_sender_account_number-wrapper,
   #id_sender_sort_code-wrapper,
   #id_card_number_last_digits-wrapper,
-  #id_sender_email-wrapper {
+  #id_sender_email-wrapper,
+  #id_account_number-wrapper,
+  #id_sort_code-wrapper,
+  #id_recipient_email-wrapper {
     display: none;
 
     @include media(tablet) {

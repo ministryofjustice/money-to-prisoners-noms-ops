@@ -1,9 +1,7 @@
 {% load i18n %}
 GOV.UK - {% trans 'Prisoner money' %}
 
-{% blocktrans trimmed with service_name=_('Prisoner money intelligence') %}
-  Attached are the credits you exported from ‘{{ service_name }}’.
-{% endblocktrans %}
+{{ export_message }}
 
 {{ export_description }}
 

@@ -24,6 +24,9 @@
           {% include 'proposition-tab.html' with view_name='security:credit_list' subview_names='security:credit_list' link_text=_('Credits') params=initial_params %}
           {% include 'proposition-tab.html' with view_name='security:sender_list' subview_names='security:sender_list security:sender_detail' link_text=_('Payment sources') params=initial_params %}
           {% include 'proposition-tab.html' with view_name='security:prisoner_list' subview_names='security:prisoner_list security:prisoner_detail' link_text=_('Prisoners') params=initial_params %}
+          {% if request.disbursements_available %}
+            {% include 'proposition-tab.html' with view_name='security:disbursement_list' subview_names='security:disbursement_list' link_text=_('Disbursements') params=initial_params %}
+          {% endif %}
         {% else %}
           {% include 'proposition-tab.html' with view_name='login' subview_names='login' link_text=_('Sign in') %}
         {% endif %}

@@ -19,7 +19,7 @@ from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
-from security.models import PrisonList
+from security.models import PrisonList, credit_sources, disbursement_methods
 from security.searches import (
     save_search, update_result_count, delete_search, get_existing_search
 )
@@ -29,7 +29,14 @@ from security.utils import parse_date_fields
 
 def get_credit_source_choices(blank_option=_('Any method')):
     return insert_blank_option(
-        [('bank_transfer', _('Bank transfer')), ('online', _('Debit card'))],
+        list(credit_sources.items()),
+        title=blank_option
+    )
+
+
+def get_disbursement_method_choices(blank_option=_('Any method')):
+    return insert_blank_option(
+        list(disbursement_methods.items()),
         title=blank_option
     )
 
@@ -97,6 +104,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     unfiltered_description_template = NotImplemented
     description_templates = ()
     description_capitalisation = {}
+    default_prison_preposition = 'to'
 
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
@@ -113,6 +121,18 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         self.total_count = None
         self.page_count = 0
         self.existing_search = None
+
+        if 'prison' in self.fields:
+            prison_list = PrisonList(self.session)
+            self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
+                                                               title=_('All prisons'))
+            self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
+                                                                      title=_('All regions'))
+            self['prison_population'].field.choices = insert_blank_option(prison_list.population_choices,
+                                                                          title=_('All types'))
+            self['prison_category'].field.choices = insert_blank_option(prison_list.category_choices,
+                                                                        title=_('All categories'))
+            self.prison_list = prison_list
 
     @cached_property
     def session(self):
@@ -220,7 +240,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             if any(field in filters for field in ('prisoner_number', 'prisoner_name')):
                 filters['prison_preposition'] = 'in'
             else:
-                filters['prison_preposition'] = 'to'
+                filters['prison_preposition'] = self.default_prison_preposition
 
             descriptions = []
             for template_group in self.description_templates:
@@ -347,19 +367,6 @@ class SendersForm(SecurityForm):
         'prison_category': 'lowerfirst',
     }
 
-    def __init__(self, request, **kwargs):
-        super().__init__(request, **kwargs)
-        prison_list = PrisonList(self.session)
-        self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
-                                                           title=_('All prisons'))
-        self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
-                                                                  title=_('All regions'))
-        self['prison_population'].field.choices = insert_blank_option(prison_list.population_choices,
-                                                                      title=_('All types'))
-        self['prison_category'].field.choices = insert_blank_option(prison_list.category_choices,
-                                                                    title=_('All categories'))
-        self.prison_list = prison_list
-
     def clean_sender_sort_code(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
             return ''
@@ -463,19 +470,6 @@ class PrisonersForm(SecurityForm):
         'prison_category': 'lowerfirst',
     }
 
-    def __init__(self, request, **kwargs):
-        super().__init__(request, **kwargs)
-        prison_list = PrisonList(self.session)
-        self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
-                                                           title=_('All prisons'))
-        self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
-                                                                  title=_('All regions'))
-        self['prison_population'].field.choices = insert_blank_option(prison_list.population_choices,
-                                                                      title=_('All types'))
-        self['prison_category'].field.choices = insert_blank_option(prison_list.category_choices,
-                                                                    title=_('All categories'))
-        self.prison_list = prison_list
-
     def get_object_list_endpoint_path(self):
         return '/prisoners/'
 
@@ -549,8 +543,8 @@ class CreditsForm(SecurityForm):
                                      ('-prisoner_number', _('Prisoner number (Z to A)')),
                                  ])
 
-    received_at__gte = forms.DateField(label=_('Received from'), help_text=_('for example 01/06/2016'), required=False)
-    received_at__lt = forms.DateField(label=_('Received to'), help_text=_('for example 01/06/2016'), required=False)
+    received_at__gte = forms.DateField(label=_('Received since'), help_text=_('for example 13/02/2018'), required=False)
+    received_at__lt = forms.DateField(label=_('Received before'), help_text=_('for example 13/02/2018'), required=False)
 
     amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
                                        choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
@@ -610,19 +604,6 @@ class CreditsForm(SecurityForm):
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
     }
-
-    def __init__(self, request, **kwargs):
-        super().__init__(request, **kwargs)
-        prison_list = PrisonList(self.session)
-        self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
-                                                           title=_('All prisons'))
-        self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
-                                                                  title=_('All regions'))
-        self['prison_population'].field.choices = insert_blank_option(prison_list.population_choices,
-                                                                      title=_('All types'))
-        self['prison_category'].field.choices = insert_blank_option(prison_list.category_choices,
-                                                                    title=_('All categories'))
-        self.prison_list = prison_list
 
     def clean_amount_exact(self):
         if self.cleaned_data.get('amount_pattern') != 'exact':
@@ -694,6 +675,126 @@ class CreditsForm(SecurityForm):
             return _('ending in %02d pence') % amount_value
         description = dict(self['amount_pattern'].field.choices).get(value)
         return str(description).lower() if description else None
+
+
+@validate_range_field('created', _('Must be after the start date'))
+class DisbursementsForm(SecurityForm):
+    ordering = forms.ChoiceField(label=_('Order by'), required=False,
+                                 initial='-created',
+                                 choices=[
+                                     ('created', _('Date entered (oldest to newest)')),
+                                     ('-created', _('Date entered (newest to oldest)')),
+                                     ('amount', _('Amount sent (low to high)')),
+                                     ('-amount', _('Amount sent (high to low)')),
+                                     ('prisoner_name', _('Prisoner name (A to Z)')),
+                                     ('-prisoner_name', _('Prisoner name (Z to A)')),
+                                     ('prisoner_number', _('Prisoner number (A to Z)')),
+                                     ('-prisoner_number', _('Prisoner number (Z to A)')),
+                                 ])
+
+    created__gte = forms.DateField(label=_('Entered since'), help_text=_('for example 13/02/2018'), required=False)
+    created__lt = forms.DateField(label=_('Entered before'), help_text=_('for example 13/02/2018'), required=False)
+
+    amount = forms.CharField(label=_('Amount (£)'), validators=[validate_amount], required=False)
+
+    prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
+    prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
+    prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
+    prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
+    prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
+    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
+
+    method = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_disbursement_method_choices())
+    recipient_name = forms.CharField(label=_('Recipient name'), required=False)
+    recipient_email = forms.CharField(label=_('Recipient email'), required=False)
+    sort_code = forms.CharField(label=_('Recipient sort code'), help_text=_('for example 01-23-45'),
+                                required=False)
+    account_number = forms.CharField(label=_('Recipient account number'), required=False)
+    roll_number = forms.CharField(label=_('Recipient roll number'), required=False)
+
+    # search = forms.CharField(label=_('Prisoner name, prisoner number or recipient name'), required=False)
+
+    exclusive_date_params = ['created__lt']
+
+    # NB: ensure that these templates are HTML-safe
+    filtered_description_template = 'Showing disbursements entered {filter_description}, ' \
+                                    'ordered by {ordering_description}.'
+    unfiltered_description_template = 'Showing all disbursements ordered by {ordering_description}.'
+    description_templates = (
+        ('between {created__gte} and {created__lt}',
+         'since {created__gte}',
+         'before {created__lt}',),
+        ('that are {amount}',),
+        ('from {prisoner_name} ({prisoner_number})',
+         'from prisoners named ‘{prisoner_name}’',
+         'from prisoner {prisoner_number}',),
+        ('{prison_preposition} {prison}',),
+        ('{prison_preposition} {prison_population} {prison_category} prisons in {prison_region}',
+         '{prison_preposition} {prison_category} prisons in {prison_region}',
+         '{prison_preposition} {prison_population} prisons in {prison_region}',
+         '{prison_preposition} {prison_population} {prison_category} prisons',
+         '{prison_preposition} {prison_category} prisons',
+         '{prison_preposition} {prison_population} prisons',
+         '{prison_preposition} prisons in {prison_region}',),
+        ('using {method} to account {account_number} {sort_code}',
+         'using {method} to account {account_number}',
+         'using {method} to sort code {sort_code}',
+         'using {method}',),
+        ('to ‘{recipient_name}’ with email {recipient_email}',
+         'to {recipient_email}',
+         'to ‘{recipient_name}’',),
+    )
+    description_capitalisation = {
+        'ordering': 'lowerfirst',
+        'prison': 'preserve',
+        'prison_region': 'preserve',
+        'prison_category': 'lowerfirst',
+    }
+    default_prison_preposition = 'at'
+
+    def describe_field_amount(self):
+        value = self.cleaned_data.get('amount')
+        if not value:
+            return None
+        return format_currency(parse_amount(value))
+
+    def clean_prisoner_number(self):
+        prisoner_number = self.cleaned_data.get('prisoner_number')
+        if prisoner_number:
+            return prisoner_number.upper()
+        return prisoner_number
+
+    def clean_sort_code(self):
+        if self.cleaned_data.get('method') != 'bank_transfer':
+            return ''
+        sort_code = self.cleaned_data.get('sort_code')
+        if sort_code:
+            sort_code = sort_code.replace('-', '')
+        return sort_code
+
+    def clean_account_number(self):
+        if self.cleaned_data.get('method') != 'bank_transfer':
+            return ''
+        return self.cleaned_data.get('account_number')
+
+    def clean_roll_number(self):
+        if self.cleaned_data.get('method') != 'bank_transfer':
+            return ''
+        return self.cleaned_data.get('roll_number')
+
+    def get_object_list_endpoint_path(self):
+        return '/disbursements/'
+
+    def get_object_list(self):
+        return parse_date_fields(super().get_object_list())
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
+        if allow_parameter_manipulation:
+            amount = query_data.pop('amount', None)
+            if amount is not None:
+                query_data['amount'] = parse_amount(amount, as_int=False)
+        return query_data
 
 
 class SecurityDetailForm(SecurityForm):

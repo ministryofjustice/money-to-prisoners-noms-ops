@@ -2,19 +2,19 @@ import datetime
 import re
 
 from django.http import HttpResponse
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.dateparse import parse_datetime
+from django.utils.translation import gettext
 from openpyxl import Workbook
 
-from security.templatetags.security import currency, format_card_number, format_sort_code, format_resolution
+from security.models import credit_sources, disbursement_methods
+from security.templatetags.security import (
+    currency, format_card_number, format_sort_code, format_resolution,
+    format_disbursement_resolution,
+)
 
-payment_methods = {
-    'bank_transfer': _('Bank transfer'),
-    'online': _('Debit card'),
-}
 
-
-class CreditXlsxResponse(HttpResponse):
-    def __init__(self, object_list, attachment_name='export.xlsx', **kwargs):
+class ObjectListXlsxResponse(HttpResponse):
+    def __init__(self, object_list, object_type, attachment_name='export.xlsx', **kwargs):
         kwargs.setdefault(
             'content_type',
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -22,12 +22,22 @@ class CreditXlsxResponse(HttpResponse):
         super().__init__(**kwargs)
         self['Content-Disposition'] = 'attachment; filename="%s"' % attachment_name
         wb = Workbook()
-        write_header(wb)
-        write_credits(wb, object_list)
+        write_objects(wb, object_type, object_list)
         wb.save(self)
 
 
-def write_header(workbook):
+def write_objects(workbook, object_type, object_list):
+    if object_type == 'credits':
+        write_credit_header(workbook)
+        write_credits(workbook, object_list)
+    elif object_type == 'disbursements':
+        write_disbursement_header(workbook)
+        write_disbursements(workbook, object_list)
+    else:
+        raise ValueError
+
+
+def write_credit_header(workbook):
     ws = workbook.active
     headers = [
         gettext('Prisoner name'), gettext('Prisoner number'), gettext('Prison'),
@@ -50,19 +60,62 @@ def write_credits(workbook, object_list):
             credit['prisoner_number'],
             credit['prison_name'],
             credit['sender_name'],
-            str(payment_methods.get(credit['source'], credit['source'])),
+            str(credit_sources.get(credit['source'], credit['source'])),
             format_sort_code(credit['sender_sort_code']) if credit['sender_sort_code'] else '',
             credit['sender_account_number'],
             credit['sender_roll_number'],
             format_card_number(credit['card_number_last_digits']) if credit['card_number_last_digits'] else '',
             credit['card_expiry_date'],
-            address_for_export(credit['billing_address']),
+            credit_address_for_export(credit['billing_address']),
             currency(credit['amount']),
             credit['received_at'],
             format_resolution(credit['resolution']),
             credit['credited_at'],
             credit['nomis_transaction_id'],
             credit['ip_address'],
+        ]
+        for col, cell in enumerate(list(map(escape_formulae, cells)), start=1):
+            ws.cell(column=col, row=row, value=cell)
+
+
+def write_disbursement_header(workbook):
+    ws = workbook.active
+    headers = [
+        gettext('Prisoner name'), gettext('Prisoner number'), gettext('Prison'),
+        gettext('Recipient first name'), gettext('Recipient last name'), gettext('Payment method'),
+        gettext('Address'),
+        gettext('Bank transfer sort code'), gettext('Bank transfer account'), gettext('Bank transfer roll number'),
+        gettext('Amount'), gettext('Status'),
+        gettext('Date entered'), gettext('Date confirmed'),  gettext('Date sent'),
+        gettext('NOMIS ID'),
+    ]
+    for col, header in enumerate(headers, start=1):
+        ws.cell(column=col, row=1, value=header)
+
+
+def write_disbursements(workbook, object_list):
+    ws = workbook.active
+    for row, disbursement in enumerate(object_list, start=2):
+        last_action_dates = {
+            log_item['action']: parse_datetime(log_item['created'])
+            for log_item in disbursement['log_set']
+        }
+        cells = [
+            disbursement['prisoner_name'],
+            disbursement['prisoner_number'],
+            disbursement['prison_name'],
+            disbursement['recipient_first_name'], disbursement['recipient_last_name'],
+            str(disbursement_methods.get(disbursement['method'], disbursement['method'])),
+            disbursement_address_for_export(disbursement),
+            format_sort_code(disbursement['sort_code']) if disbursement['sort_code'] else '',
+            disbursement['account_number'],
+            disbursement['roll_number'],
+            currency(disbursement['amount']),
+            format_disbursement_resolution(disbursement['resolution']),
+            disbursement['created'],
+            last_action_dates.get('confirmed', ''),
+            last_action_dates.get('sent', ''),
+            disbursement['nomis_transaction_id'],
         ]
         for col, cell in enumerate(list(map(escape_formulae, cells)), start=1):
             ws.cell(column=col, row=row, value=cell)
@@ -83,10 +136,17 @@ def escape_formulae(value):
     return value
 
 
-def address_for_export(address):
+def credit_address_for_export(address):
     if not address:
         return ''
     whitespace = re.compile(r'\s+')
     keys = ('line1', 'line2', 'city', 'postcode', 'country')
     lines = (whitespace.sub(' ', address[key]).strip() for key in keys if address.get(key))
+    return ', '.join(lines)
+
+
+def disbursement_address_for_export(disbursement):
+    whitespace = re.compile(r'\s+')
+    keys = ('address_line1', 'address_line2', 'city', 'postcode', 'country')
+    lines = (whitespace.sub(' ', disbursement[key]).strip() for key in keys if disbursement.get(key))
     return ', '.join(lines)

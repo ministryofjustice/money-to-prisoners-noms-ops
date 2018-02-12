@@ -11,7 +11,7 @@
 
   {% dialoguebox html_id='export-dialogue' title=_('Export') %}
     <p>
-      {% trans 'There are too many credits to download.' %}
+      {{ export_message }}
       {% blocktrans trimmed with email=request.user.email %}
         We can email you the spreadsheet at {{ email }}.
       {% endblocktrans %}

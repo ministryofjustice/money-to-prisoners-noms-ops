@@ -81,6 +81,7 @@ class SecurityBaseTestCase(SimpleTestCase):
                 'last_name': 'Hall',
                 'username': 'shall',
                 'permissions': required_permissions,
+                'prisons': [{'nomis_id': 'BXI', 'name': 'HMP Brixton', 'pre_approval_required': False}],
             }
         }
 
@@ -263,7 +264,7 @@ class SenderListTestCase(SecurityViewTestCase):
         response_content = response.content.decode(response.charset)
         self.assertIn('MAISIE', response_content)
         self.assertIn('12312345', response_content)
-        self.assertIn('James Halls', response_content)
+        self.assertIn('JAMES HALLS', response_content)
         self.assertIn('£102.50', response_content)
 
     @responses.activate
@@ -288,7 +289,7 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertIn('**** **** **** 1234', response_content)
         self.assertIn('10/20', response_content)
         self.assertIn('SW137NJ', response_content)
-        self.assertIn('James Halls', response_content)
+        self.assertIn('JAMES HALLS', response_content)
         self.assertIn('£102.50', response_content)
 
     @responses.activate
@@ -359,7 +360,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
             }
         )
         response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'James Halls')
+        self.assertContains(response, 'JAMES HALLS')
         response_content = response.content.decode(response.charset)
         self.assertIn('A1409AE', response_content)
         self.assertIn('310.00', response_content)
@@ -486,12 +487,90 @@ class CreditsListTestCase(SecurityViewTestCase):
 
         self.login()
         response = self.client.get(reverse(self.view_name), {'ordering': '-amount'})
-        self.assertContains(response, 'George Melley')
+        self.assertContains(response, 'GEORGE MELLEY')
         response_content = response.content.decode(response.charset)
         self.assertIn('A1413AE', response_content)
         self.assertIn('275.00', response_content)
         self.assertIn('Bank transfer', response_content)
         self.assertIn('Debit card', response_content)
+
+
+@override_settings(DISBURSEMENT_PRISONS=['BXI'])
+class DisbursementsListTestCase(SecurityViewTestCase):
+    view_name = 'security:disbursement_list'
+
+    @responses.activate
+    def test_displays_results(self):
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url('/disbursements/'),
+            json={
+                'count': 2,
+                'previous': None,
+                'next': 'http://localhost:8000/disbursements/?limit=20&offset=20&ordering=-amount',
+                'results': [
+                    {
+                        'id': 1,
+                        'created': '2018-02-12T12:00:00Z', 'modified': '2018-02-12T12:00:00Z',
+                        'method': 'bank_transfer',
+                        'amount': 2000,
+                        'resolution': 'sent',
+                        'nomis_transaction_id': '1234567-1',
+                        'prisoner_number': 'A1409AE', 'prisoner_name': 'JAMES HALLS',
+                        'prison': 'ABC', 'prison_name': 'HMP Test1',
+                        'recipient_first_name': 'Jack', 'recipient_last_name': 'Halls', 'recipient_email': '',
+                        'address_line1': '102 Petty France', 'address_line2': '',
+                        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
+                        'account_number': '1234567', 'sort_code': '112233', 'roll_number': None,
+                        'comments': [],
+                        'log_set': [{'action': 'created',
+                                     'created': '2018-02-12T12:00:00Z',
+                                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
+                                    {'action': 'confirmed',
+                                     'created': '2018-02-12T12:00:00Z',
+                                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}},
+                                    {'action': 'sent',
+                                     'created': '2018-02-12T12:00:00Z',
+                                     'user': {'first_name': 'SSCL', 'last_name': '', 'username': 'sscl'}}],
+                    },
+                    {
+                        'id': 2,
+                        'created': '2018-02-10T10:00:00Z', 'modified': '2018-02-10T12:00:00Z',
+                        'method': 'cheque',
+                        'amount': 1000,
+                        'resolution': 'confirmed',
+                        'nomis_transaction_id': '1234568-1',
+                        'prisoner_number': 'A1401AE', 'prisoner_name': 'JILLY HALL',
+                        'prison': 'DEF', 'prison_name': 'HMP Test2',
+                        'recipient_first_name': 'Jilly', 'recipient_last_name': 'Halls', 'recipient_email': '',
+                        'address_line1': '102 Petty France', 'address_line2': '',
+                        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
+                        'account_number': '', 'sort_code': '', 'roll_number': None,
+                        'comments': [],
+                        'log_set': [{'action': 'created',
+                                     'created': '2018-02-10T10:00:00Z',
+                                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
+                                    {'action': 'confirmed',
+                                     'created': '2018-02-10T11:00:00Z',
+                                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}}]
+                    },
+                ]
+            }
+        )
+
+        self.login()
+        response = self.client.get(reverse(self.view_name), {'ordering': '-amount'})
+        self.assertContains(response, 'JAMES HALLS')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('A1409AE', response_content)
+        self.assertIn('£20.00', response_content)
+        self.assertIn('by bank transfer', response_content)
+        self.assertIn('Sent', response_content)
+        self.assertIn('A1401AE', response_content)
+        self.assertIn('£10.00', response_content)
+        self.assertIn('by cheque', response_content)
+        self.assertIn('Confirmed', response_content)
 
 
 @contextmanager

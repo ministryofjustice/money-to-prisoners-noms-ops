@@ -60,6 +60,21 @@ urlpatterns = [
         security_test(views.prisoner_image_view),
         name='prisoner_image'),
 
+    url(r'^disbursements/$', security_test(views.DisbursementListView.as_view()),
+        name='disbursement_list'),
+    url(r'^disbursements/export/$',
+        security_test(views.DisbursementListView.as_view(
+            export_view='download',
+            export_redirect_view='security:disbursement_list',
+        )),
+        name='disbursements_export'),
+    url(r'^disbursements/email-export/$',
+        security_test(views.DisbursementListView.as_view(
+            export_view='email',
+            export_redirect_view='security:disbursement_list',
+        )),
+        name='disbursements_email_export'),
+
     url(r'^review-credits/$', security_test(views.ReviewCreditsView.as_view()),
         name='review_credits'),
 ]

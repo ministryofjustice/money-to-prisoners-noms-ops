@@ -1,7 +1,17 @@
 import json
 
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 from mtp_common.api import retrieve_all_pages_for_path
+
+credit_sources = {
+    'bank_transfer': _('Bank transfer'),
+    'online': _('Debit card'),
+}
+disbursement_methods = {
+    'bank_transfer': _('Bank transfer'),
+    'cheque': _('Cheque'),
+}
 
 
 class PrisonList:

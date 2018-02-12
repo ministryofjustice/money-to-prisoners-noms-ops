@@ -271,6 +271,8 @@ NOMIS_API_BASE_URL = os.environ.get('NOMIS_API_BASE_URL', '')
 NOMIS_API_CLIENT_TOKEN = os.environ.get('NOMIS_API_CLIENT_TOKEN', '')
 NOMIS_API_PRIVATE_KEY = os.environ.get('NOMIS_API_PRIVATE_KEY', '').encode('utf8').decode('unicode_escape')
 
+DISBURSEMENT_PRISONS = os.environ.get('DISBURSEMENT_PRISONS', '').split(',')
+
 try:
     from .local import *  # noqa
 except ImportError:
