@@ -1,6 +1,7 @@
 // app-specific styles
 
 .mtp-results-list {
+  @extend %table-container;
   width: 100%;
   margin-top: 1.25em;
 
