@@ -107,6 +107,11 @@
   }
 }
 
+.mtp-detail-label {
+  color: $secondary-text-colour;
+  font-size: 16px;
+}
+
 .mtp-credit__card, .mtp-credit__transfer, .mtp-credit__post {
   display: inline-block;
   width: 70%;
