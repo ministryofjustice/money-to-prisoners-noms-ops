@@ -3,12 +3,12 @@ import logging
 from django import template
 from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
-from django.utils.html import format_html, format_html_join
+from django.utils.html import escape, format_html
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
-from security.models import disbursement_methods
+from security.models import credit_sources, disbursement_methods
 
 logger = logging.getLogger('mtp')
 register = template.Library()
@@ -51,6 +51,11 @@ def format_sort_code(sort_code):
 @register.filter
 def format_card_number(card_number_last_digits):
     return '**** **** **** %s' % (card_number_last_digits or '****')
+
+
+@register.filter
+def credit_source(source_key):
+    return credit_sources.get(source_key, source_key)
 
 
 @register.filter
@@ -171,10 +176,19 @@ def prisoner_profile_search_url(credit, redirect_on_single=True):
 
 
 @register.filter
-def format_address(address):
-    if address:
-        lines = [(address[key],) for key in ('line1', 'line2', 'city', 'postcode', 'country') if address.get(key)]
-        return format_html_join(mark_safe('<br />'), '{}', lines)
+def format_address(obj):
+    if obj:
+        if 'address_line1' in obj:
+            # disbursement object
+            keys = ('address_line1', 'address_line2', 'city', 'postcode', 'country')
+        else:
+            # credit's address sub-object
+            keys = ('line1', 'line2', 'city', 'postcode', 'country')
+        return mark_safe('<br/>'.join(
+            escape(obj[key])
+            for key in keys
+            if obj.get(key)
+        ))
 
 
 @register.filter

@@ -5,11 +5,64 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.dateformat import format as date_format
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
+from mtp_common.auth.api_client import get_api_session
+from mtp_common.auth.exceptions import HttpNotFoundError
+from requests.exceptions import RequestException
 
 from security.export import ObjectListXlsxResponse
 from security.tasks import email_export_xlsx
+
+
+class SimpleSecurityDetailView(TemplateView):
+    """
+    Base view for showing a single templated page without a form
+    """
+    title = NotImplemented
+    template_name = NotImplemented
+    object_context_key = NotImplemented
+    list_title = NotImplemented
+    list_url = NotImplemented
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.object = None
+
+    @cached_property
+    def session(self):
+        return get_api_session(self.request)
+
+    def get_object_request_params(self):
+        raise NotImplementedError
+
+    def get_object(self):
+        try:
+            return self.session.get(**self.get_object_request_params()).json()
+        except HttpNotFoundError:
+            raise Http404('%s not found' % self.object_context_key)
+        except (RequestException, ValueError):
+            messages.error(self.request, _('This service is currently unavailable'))
+            return {}
+
+    def get_context_data(self, **kwargs):
+        self.object = self.get_object()
+
+        context_data = super().get_context_data(**kwargs)
+        context_data[self.object_context_key] = self.object
+
+        list_url = self.request.build_absolute_uri(str(self.list_url))
+        referrer_url = self.request.META.get('HTTP_REFERER', '-')
+        if referrer_url.split('?', 1)[0] == list_url:
+            list_url = referrer_url
+
+        context_data['breadcrumbs'] = [
+            {'name': _('Home'), 'url': reverse('dashboard')},
+            {'name': self.list_title, 'url': list_url},
+            {'name': self.title}
+        ]
+        return context_data
 
 
 class SecurityView(FormView):

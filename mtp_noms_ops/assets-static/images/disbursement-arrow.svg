@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="33"
+   height="22"
+   viewBox="0 0 33 22"
+   version="1.1"
+   id="svg10"
+   sodipodi:docname="disbursement-arrow.svg"
+   inkscape:export-xdpi="192"
+   inkscape:export-ydpi="192"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06">
+  <metadata
+     id="metadata14">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Disbursement arrow</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1440"
+     inkscape:window-height="855"
+     id="namedview12"
+     showgrid="false"
+     inkscape:zoom="8"
+     inkscape:cx="16.400354"
+     inkscape:cy="7.3128492"
+     inkscape:window-x="0"
+     inkscape:window-y="1"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg10" />
+  <g
+     transform="matrix(1.0078302,0,0,0.99,0,-0.8799999)"
+     style="fill:none;fill-rule:evenodd;stroke:none;stroke-width:1">
+    <g
+       transform="translate(-359,-1268)"
+       style="fill:#6f72af">
+      <g
+         transform="translate(355,1268)">
+        <path
+           style="stroke-width:0.99887532"
+           d="M 0 0 L 5.3144531 11 L 0 22 L 24.925781 22 L 33 11 L 24.925781 0 L 0 0 z M 11 10 L 22 10 L 22 12 L 11 12 L 11 10 z "
+           transform="matrix(0.99223064,0,0,1.010101,4,0.88888879)"
+           id="Fill-1" />
+      </g>
+    </g>
+  </g>
+</svg>
