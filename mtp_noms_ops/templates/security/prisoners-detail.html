@@ -23,28 +23,22 @@
 
       <div class="mtp-prisoner-summary__details">
         <div class="column-one-quarter">
-          {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Credits received' %}</div>
-          <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.credit_count }}</strong>
+          {% labelled_data _('Credits received') prisoner.credit_count tag='strong' %}
         </div>
 
         <div class="column-one-quarter">
-          {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Payment sources' %}</div>
-          <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.sender_count }}</strong>
+          {% labelled_data _('Payment sources')  prisoner.sender_count tag='strong' %}
         </div>
 
         <div class="column-one-quarter">
-          {% random_string as profile_label %}
-          <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Total amount received' %}</div>
-          <strong role="definition" aria-labelledby="mtp-label-{{ profile_label }}">{{ prisoner.credit_total|currency }}</strong>
+          {% labelled_data _('Total amount received') prisoner.credit_total|currency tag='strong' %}
         </div>
 
         {% if recipient_names %}
           <div class="column-one-quarter">
             {% random_string as profile_label %}
-            <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Names given by senders' %}</div>
-            <span role="definition" aria-labelledby="mtp-label-{{ profile_label }}">
+            <div id="mtp-label-{{ profile_label }}" class="mtp-detail-label">{% trans 'Names given by senders' %}</div>
+            <span aria-labelledby="mtp-label-{{ profile_label }}">
               {% for recipient_name in recipient_names %}
                 <strong>{{ recipient_name }}</strong>{% if not forloop.last %},{% endif %}
               {% endfor %}
@@ -122,9 +116,7 @@
                     </div>
                     <p>—</p>
 
-                    {% random_string as profile_label %}
-                    <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Card number' %}</div>
-                    <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.card_number_last_digits|format_card_number }}</div>
+                    {% labelled_data _('Card number') credit.card_number_last_digits|format_card_number %}
                   {% else %}
                     <div class="mtp-credit__transfer">
                       <strong>
@@ -138,20 +130,12 @@
                     </div>
                     <p>—</p>
 
-                    {% random_string as profile_label %}
-                    <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Account number' %}</div>
-                    <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_account_number }}</div>
+                    {% labelled_data _('Account number') credit.sender_account_number %}
                     <br/>
-
-                    {% random_string as profile_label %}
-                    <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Sort code' %}</div>
-                    <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_sort_code|format_sort_code }}</div>
-
+                    {% labelled_data _('Sort code') credit.sender_sort_code|format_sort_code %}
                     {% if credit.sender_roll_number %}
                       <br/>
-                      {% random_string as profile_label %}
-                      <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Roll number (for building societies)' %}</div>
-                      <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.sender_roll_number }}</div>
+                      {% labelled_data _('Roll number (for building societies)') credit.sender_roll_number %}
                     {% endif %}
                   {% endif %}
                 {% endwith %}
@@ -177,14 +161,10 @@
                 </strong>
                 <p>—</p>
 
-                {% random_string as profile_label %}
-                <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'Crediting staff' %}</div>
-                <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.owner_name|default:'—' }}</div>
+                {% labelled_data _('Crediting staff') credit.owner_name|default:'—' %}
                 <br/>
 
-                {% random_string as profile_label %}
-                <div id="mtp-label-{{ profile_label }}" class="mtp-prisoner-label">{% trans 'NOMIS ID' %}</div>
-                <div aria-labelledby="mtp-label-{{ profile_label }}">{{ credit.nomis_transaction_id|default:'—' }}</div>
+                {% labelled_data _('NOMIS ID') credit.nomis_transaction_id|default:'—' %}
               </td>
             </tr>
           {% empty %}
