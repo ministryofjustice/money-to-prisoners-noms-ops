@@ -717,14 +717,14 @@ class DisbursementsForm(SecurityForm):
     exclusive_date_params = ['created__lt']
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Showing disbursements entered {filter_description}, ' \
+    filtered_description_template = 'Showing disbursements {filter_description}, ' \
                                     'ordered by {ordering_description}.'
     unfiltered_description_template = 'Showing all disbursements ordered by {ordering_description}.'
     description_templates = (
-        ('between {created__gte} and {created__lt}',
-         'since {created__gte}',
-         'before {created__lt}',),
-        ('that are {amount}',),
+        ('entered between {created__gte} and {created__lt}',
+         'entered since {created__gte}',
+         'entered before {created__lt}',),
+        ('of {amount}',),
         ('from {prisoner_name} ({prisoner_number})',
          'from prisoners named ‘{prisoner_name}’',
          'from prisoner {prisoner_number}',),
@@ -740,9 +740,9 @@ class DisbursementsForm(SecurityForm):
          'using {method} to account {account_number}',
          'using {method} to sort code {sort_code}',
          'using {method}',),
-        ('to ‘{recipient_name}’ with email {recipient_email}',
-         'to {recipient_email}',
-         'to ‘{recipient_name}’',),
+        ('to recipients named ‘{recipient_name}’ with email {recipient_email}',
+         'to recipients named {recipient_email}',
+         'to recipients named ‘{recipient_name}’',),
     )
     description_capitalisation = {
         'ordering': 'lowerfirst',
@@ -750,7 +750,7 @@ class DisbursementsForm(SecurityForm):
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
     }
-    default_prison_preposition = 'at'
+    default_prison_preposition = 'from'
 
     def describe_field_amount(self):
         value = self.cleaned_data.get('amount')
