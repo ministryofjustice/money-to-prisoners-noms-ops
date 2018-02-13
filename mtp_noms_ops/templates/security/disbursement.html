@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load security %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block inner_content %}
+
+  <header>
+    <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <p class="lede">
+    {% trans 'Date entered' %}
+    {{ disbursement.created|date:'DATE_FORMAT' }}
+  </p>
+
+  <div class="mtp-results-list mtp-result-detail">
+    <table>
+      <caption class="visually-hidden">{% trans 'Disbursement details' %}</caption>
+      <tbody>
+        <tr>
+          <td>
+
+            {% labelled_data _('Prisoner name') disbursement.prisoner_name %}
+            <br/>
+            {% labelled_data _('Prisoner number') disbursement.prisoner_number %}
+            <br/>
+            {% labelled_data _('Prison') disbursement.prison_name %}
+            <br/>
+
+          </td>
+          <td class="mtp-credit-arrow-cell">
+
+            <div class="mtp-disbursement-arrow">{{ disbursement.method|disbursement_method }}</div>
+
+          </td>
+          <td>
+
+            {% labelled_data _('Recipient name') disbursement.recipient_name %}
+            <br/>
+            {% if disbursement.method == 'bank_transfer' %}
+              {% labelled_data _('Account number') disbursement.account_number %}
+              <br/>
+              {% labelled_data _('Sort code') disbursement.sort_code|format_sort_code %}
+              <br/>
+              {% if disbursement.sender_roll_number %}
+                {% labelled_data _('Roll number (for building societies)') disbursement.sender_roll_number %}
+                <br/>
+              {% endif %}
+            {% endif %}
+
+          </td>
+          <td>
+
+            {% labelled_data _('Address') disbursement|format_address %}
+            <br/>
+            {% if disbursement.recipient_email %}
+              {% labelled_data _('Email') disbursement.recipient_email %}
+              <br/>
+            {% endif %}
+
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+
+            {% labelled_data _('Status') disbursement.resolution|format_disbursement_resolution %}
+            <br/>
+            {% if disbursement.nomis_transaction_id %}
+              {% labelled_data _('NOMIS ID') disbursement.nomis_transaction_id %}
+              <br/>
+            {% endif %}
+            {% if disbursement.resolution == 'sent' %}
+              {% labelled_data _('Invoice number') disbursement.invoice_number %}
+              <span class="mtp-detail-label">
+                {% trans 'Use this to track the disbursement in AP or SOP.' %}
+              </span>
+              <br/>
+            {% endif %}
+
+          </td>
+          <td colspan="2">
+
+            <div id="mtp-label-history" class="mtp-detail-label">{% trans 'History' %}</div>
+            <div aria-labelledby="mtp-label-history">
+              {% for log_item in disbursement.log_set %}
+                {% if log_item.action == 'created' %}
+                  {{ log_item.created|date:'j M Y H:i' }}
+                  {% blocktrans trimmed with staff_name=log_item.staff_name %}
+                    Entered by {{ staff_name }}
+                  {% endblocktrans %}
+                  <br/>
+
+                {% elif log_item.action == 'edited' %}
+                  {{ log_item.created|date:'j M Y H:i' }}
+                  {% blocktrans trimmed with staff_name=log_item.staff_name %}
+                    Edited by {{ staff_name }}
+                  {% endblocktrans %}
+                  <br/>
+
+                {% elif log_item.action == 'confirmed' %}
+                  {{ log_item.created|date:'j M Y H:i' }}
+                  {% blocktrans trimmed with staff_name=log_item.staff_name %}
+                    Confirmed by {{ staff_name }}
+                  {% endblocktrans %}
+                  <br/>
+
+                {% elif log_item.action == 'sent' %}
+                  {{ log_item.created|date:'DATE_FORMAT' }}
+                  {% blocktrans trimmed %}
+                    Sent by SSCL
+                  {% endblocktrans %}
+                  <br/>
+
+                {% elif log_item.action == 'rejected' %}
+                  {{ log_item.created|date:'j M Y H:i' }}
+                  {% blocktrans trimmed with staff_name=log_item.staff_name %}
+                    Cancelled by {{ staff_name }}
+                  {% endblocktrans %}
+                  <br/>
+                  {% with rejection_reason=disbursement.comments|find_rejection_reason %}
+                    <small>
+                      {{ rejection_reason|truncatewords:5 }}
+                    </small>
+                    <br/>
+                  {% endwith %}
+
+                {% endif %}
+              {% endfor %}
+            </div>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load security %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block inner_content %}
+
+  <header>
+    <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <p class="lede">
+    {% trans 'Date received' %}
+    {{ credit.received_at|date:'DATE_FORMAT'|default:'–' }}
+  </p>
+
+  <div class="mtp-results-list mtp-result-detail">
+    <table>
+      <caption class="visually-hidden">{% trans 'Credit details' %}</caption>
+      <tbody>
+        <tr>
+          <td>
+
+            {% labelled_data _('Prisoner name') credit.prisoner_name %}
+            <br/>
+            {% labelled_data _('Prisoner number') credit.prisoner_number %}
+            <br/>
+            {% labelled_data _('Prison') credit.prison_name %}
+            <br/>
+
+            {% if credit.intended_recipient %}
+              {% labelled_data _('Name given by sender') credit.intended_recipient %}
+              <br/>
+            {% endif %}
+
+          </td>
+          <td class="mtp-credit-arrow-cell">
+
+            <div class="mtp-credit-arrow">{{ credit.source|credit_source }}</div>
+
+          </td>
+          <td>
+            {% labelled_data _('Sender name') credit.sender_name %}
+            <br/>
+
+            {% if credit.source == 'online' %}
+
+              {% labelled_data _('Last 4 digits of card number') credit.card_number_last_digits|format_card_number %}
+              <br/>
+              {% labelled_data _('Expiry date') credit.card_expiry_date|default:'—' %}
+              <br/>
+              {% if credit.short_payment_ref %}
+                {% labelled_data _('Confirmation number') credit.short_payment_ref %}
+                <br/>
+              {% endif %}
+
+            {% elif credit.source == 'bank_transfer' %}
+
+              {% labelled_data _('Account number') credit.sender_account_number|default:'—' %}
+              <br/>
+              {% labelled_data _('Sort code') credit.sender_sort_code|format_sort_code|default:'—' %}
+              <br/>
+              {% if credit.sender_roll_number %}
+                {% labelled_data _('Roll number (for building societies)') credit.sender_roll_number %}
+                <br/>
+              {% endif %}
+
+            {% endif %}
+          </td>
+          <td>
+
+            {% if credit.billing_address %}
+              {% labelled_data _('Address') credit.billing_address|format_address %}
+              <br/>
+            {% endif %}
+            {% if credit.sender_email %}
+              {% labelled_data _('Email') credit.sender_email %}
+              <br/>
+            {% endif %}
+            {% if credit.ip_address %}
+              {% labelled_data _('IP') credit.ip_address %}
+              <br/>
+            {% endif %}
+
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+
+            {% labelled_data _('Status') credit.resolution|format_resolution %}
+            <br/>
+            {% if credit.nomis_transaction_id %}
+              {% labelled_data _('NOMIS ID') credit.nomis_transaction_id %}
+              <br/>
+            {% endif %}
+
+          </td>
+          <td colspan="2">
+
+            <div id="mtp-label-history" class="mtp-detail-label">{% trans 'History' %}</div>
+            <div aria-labelledby="mtp-label-history">
+              {{ credit.received_at|date:'DATE_FORMAT'|default:'–' }} {% trans 'Received' %}
+              <br/>
+              {% if credit.credited_at %}
+                {{ credit.credited_at|date:'DATE_FORMAT'|default:'–' }}
+                {% blocktrans trimmed with name_of_clerk=credit.owner_name|default:_('Unknown') %}
+                  Credited by {{ name_of_clerk }}
+                {% endblocktrans %}
+                <br/>
+              {% endif %}
+            </div>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}

@@ -9,6 +9,8 @@ app_name = 'security'
 urlpatterns = [
     url(r'^credits/$', security_test(views.CreditListView.as_view()),
         name='credit_list'),
+    url(r'^credits/(?P<credit_id>[0-9]+)/$', security_test(views.CreditDetailView.as_view()),
+        name='credit_detail'),
     url(r'^credits/export/$',
         security_test(views.CreditListView.as_view(
             export_view='download',
@@ -62,6 +64,8 @@ urlpatterns = [
 
     url(r'^disbursements/$', security_test(views.DisbursementListView.as_view()),
         name='disbursement_list'),
+    url(r'^disbursements/(?P<disbursement_id>[0-9]+)/$', security_test(views.DisbursementDetailView.as_view()),
+        name='disbursement_detail'),
     url(r'^disbursements/export/$',
         security_test(views.DisbursementListView.as_view(
             export_view='download',
