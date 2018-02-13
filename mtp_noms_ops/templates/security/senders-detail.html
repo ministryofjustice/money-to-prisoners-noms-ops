@@ -136,7 +136,11 @@
           {% for credit in credits %}
             <tr class="{% if forloop.last %}no-border{% endif %}">
               <td>
-                <strong>{{ credit.received_at|date:'DATE_FORMAT' }}</strong>
+                <strong>
+                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}">
+                    {{ credit.received_at|date:'DATE_FORMAT' }}
+                  </a>
+                </strong>
               </td>
               <td>
                 <strong>{{ credit.sender_name|default:'—' }}</strong>

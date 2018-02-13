@@ -72,7 +72,11 @@
             {% for disbursement in disbursements %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
-                  {{ disbursement.created|date:'DATE_FORMAT' }}
+                  <strong>
+                    <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}">
+                      {{ disbursement.created|date:'DATE_FORMAT' }}
+                    </a>
+                  </strong>
                 </td>
                 <td>
                   {% if disbursement.prisoner_number %}

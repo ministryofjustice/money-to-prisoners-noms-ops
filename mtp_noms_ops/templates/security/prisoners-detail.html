@@ -99,7 +99,11 @@
           {% for credit in credits %}
             <tr class="mtp-prisoner-credits__credit-row">
               <td>
-                <p>{{ credit.received_at|date:'DATE_FORMAT' }}</p>
+                <strong>
+                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}">
+                    {{ credit.received_at|date:'DATE_FORMAT' }}
+                  </a>
+                </strong>
               </td>
               <td>
                 {% with known_sender=credit|credit_sender_identifiable %}
@@ -144,7 +148,7 @@
                 {{ credit.intended_recipient|default_if_none:'—' }}
               </td>
               <td class="number">
-                {{ credit.amount|currency }}
+                <strong>{{ credit.amount|currency }}</strong>
               </td>
               <td>
                 {{ credit.prison_name|default_if_none:'—' }}
