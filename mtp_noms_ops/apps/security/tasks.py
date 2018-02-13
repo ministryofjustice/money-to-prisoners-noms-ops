@@ -21,7 +21,11 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
     if object_type == 'credits':
         export_message = gettext('Attached are the credits you exported from ‘%(service_name)s’.')
     elif object_type == 'disbursements':
-        export_message = gettext('Attached are the disbursements you exported from ‘%(service_name)s’.')
+        export_message = (
+            gettext('Attached are the bank transfer and cheque disbursements you exported from ‘%(service_name)s’.') +
+            ' ' +
+            gettext('You can’t see cash or postal orders here.')
+        )
     else:
         raise ValueError
 

@@ -16,7 +16,10 @@
   <form class="mtp-security-search" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <p class="lede">{{ form.search_description.description }}</p>
+    <p class="lede">
+      {{ form.search_description.description }}
+      {% trans 'You can’t see cash or postal orders here.' %}
+    </p>
 
     <div class="print-hidden">
       {% include view.form_template_name with view=view form=form only %}
