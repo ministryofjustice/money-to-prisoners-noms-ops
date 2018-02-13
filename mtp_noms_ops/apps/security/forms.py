@@ -69,10 +69,10 @@ def validate_prisoner_number(prisoner_number):
         raise ValidationError(_('Invalid prisoner number'), code='invalid')
 
 
-def validate_range_field(field_name, bound_ordering_msg):
+def validate_range_field(field_name, bound_ordering_msg, upper_limit='__lte'):
     def inner(cls):
         lower = field_name + '__gte'
-        upper = field_name + '__lte'
+        upper = field_name + upper_limit
 
         base_clean = cls.clean
 
@@ -528,7 +528,7 @@ class AmountPattern(enum.Enum):
             raise NotImplementedError
 
 
-@validate_range_field('received_at', _('Must be after the start date'))
+@validate_range_field('received_at', _('Must be after the start date'), upper_limit='__lt')
 class CreditsForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-received_at',
@@ -677,7 +677,7 @@ class CreditsForm(SecurityForm):
         return str(description).lower() if description else None
 
 
-@validate_range_field('created', _('Must be after the start date'))
+@validate_range_field('created', _('Must be after the start date'), upper_limit='__lt')
 class DisbursementsForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-created',
