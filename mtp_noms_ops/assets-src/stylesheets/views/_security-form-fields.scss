@@ -10,10 +10,6 @@ select[disabled] {
   width: 100%;
 }
 
-#id_source {
-  width: 100%;
-}
-
 #id_sender_account_number, #id_account_number {
   width: 10em;
 }
@@ -44,7 +40,9 @@ select[disabled] {
   padding-left: 15px;
 }
 
+#id_source,
 #id_amount_pattern,
+#id_method,
 #id_prison,
 #id_prison_region,
 #id_prison_population,
@@ -78,8 +76,7 @@ select[disabled] {
   #id_card_number_last_digits-wrapper,
   #id_sender_email-wrapper,
   #id_account_number-wrapper,
-  #id_sort_code-wrapper,
-  #id_recipient_email-wrapper {
+  #id_sort_code-wrapper {
     display: none;
 
     @include media(tablet) {
