@@ -14,7 +14,9 @@
     {% paneltab name='amount' title=_('Amount (£)') %}
       <div class="grid-row">
         <div class="column-one-third">
-          {% include 'mtp_common/forms/field.html' with field=form.amount %}
+          {% include 'security/forms/select-field.html' with field=form.amount_pattern %}
+          {% include 'mtp_common/forms/field.html' with field=form.amount_exact %}
+          {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
         </div>
       </div>
     {% endpaneltab %}
@@ -23,14 +25,15 @@
       <div class="grid-row">
         <div class="column-one-third">
           {% include 'mtp_common/forms/select-field.html' with field=form.method %}
-          {% include 'mtp_common/forms/field.html' with field=form.recipient_name %}
         </div>
-        <div class="column-two-thirds">
+        <div class="column-one-third">
+          {% include 'mtp_common/forms/field.html' with field=form.recipient_name %}
+          {% include 'mtp_common/forms/field.html' with field=form.recipient_email %}
+          {% include 'mtp_common/forms/field.html' with field=form.postcode %}
+        </div>
+        <div class="column-one-third">
           {% include 'mtp_common/forms/field.html' with field=form.account_number %}
           {% include 'mtp_common/forms/field.html' with field=form.sort_code %}
-        </div>
-        <div class="column-two-thirds">
-          {% include 'mtp_common/forms/field.html' with field=form.recipient_email %}
         </div>
       </div>
     {% endpaneltab %}

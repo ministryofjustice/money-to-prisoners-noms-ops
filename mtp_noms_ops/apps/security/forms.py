@@ -389,7 +389,10 @@ class DisbursementsForm(SecurityForm):
     created__gte = forms.DateField(label=_('Entered since'), help_text=_('for example 13/02/2018'), required=False)
     created__lt = forms.DateField(label=_('Entered before'), help_text=_('for example 13/02/2018'), required=False)
 
-    amount = forms.CharField(label=_('Amount (£)'), validators=[validate_amount], required=False)
+    amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
+                                       choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
+    amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
+    amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 
     prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
@@ -401,10 +404,12 @@ class DisbursementsForm(SecurityForm):
     method = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_disbursement_method_choices())
     recipient_name = forms.CharField(label=_('Recipient name'), required=False)
     recipient_email = forms.CharField(label=_('Recipient email'), required=False)
-    sort_code = forms.CharField(label=_('Recipient sort code'), help_text=_('for example 01-23-45'),
+    city = forms.CharField(label=_('City'), required=False)
+    postcode = forms.CharField(label=_('Post code'), required=False)
+    sort_code = forms.CharField(label=_('Sort code'), help_text=_('for example 01-23-45'),
                                 required=False)
-    account_number = forms.CharField(label=_('Recipient account number'), required=False)
-    roll_number = forms.CharField(label=_('Recipient roll number'), required=False)
+    account_number = forms.CharField(label=_('Account number'), required=False)
+    roll_number = forms.CharField(label=_('Roll number'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or recipient name'), required=False)
 
@@ -418,7 +423,7 @@ class DisbursementsForm(SecurityForm):
         ('entered between {created__gte} and {created__lt}',
          'entered since {created__gte}',
          'entered before {created__lt}',),
-        ('of {amount}',),
+        ('that are {amount_pattern}',),
         ('from {prisoner_name} ({prisoner_number})',
          'from prisoners named ‘{prisoner_name}’',
          'from prisoner {prisoner_number}',),
@@ -437,6 +442,9 @@ class DisbursementsForm(SecurityForm):
         ('to recipients named ‘{recipient_name}’ with email {recipient_email}',
          'to recipients named {recipient_email}',
          'to recipients named ‘{recipient_name}’',),
+        ('to {postcode}, {city}',
+         'to {postcode} postcode',
+         'to {city}',),
     )
     description_capitalisation = {
         'ordering': 'lowerfirst',
@@ -446,11 +454,21 @@ class DisbursementsForm(SecurityForm):
     }
     default_prison_preposition = 'from'
 
-    def describe_field_amount(self):
-        value = self.cleaned_data.get('amount')
-        if not value:
+    def clean_amount_exact(self):
+        if self.cleaned_data.get('amount_pattern') != 'exact':
+            return ''
+        amount = self.cleaned_data.get('amount_exact')
+        if not amount:
+            raise ValidationError(_('This field is required for the selected amount pattern'), code='required')
+        return amount
+
+    def clean_amount_pence(self):
+        if self.cleaned_data.get('amount_pattern') != 'pence':
             return None
-        return format_currency(parse_amount(value))
+        amount = self.cleaned_data.get('amount_pence')
+        if amount is None:
+            raise ValidationError(_('This field is required for the selected amount pattern'), code='required')
+        return amount
 
     def clean_prisoner_number(self):
         prisoner_number = self.cleaned_data.get('prisoner_number')
@@ -485,10 +503,22 @@ class DisbursementsForm(SecurityForm):
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
-            amount = query_data.pop('amount', None)
-            if amount is not None:
-                query_data['amount'] = parse_amount(amount, as_int=False)
+            AmountPattern.update_query_data(query_data)
         return query_data
+
+    def describe_field_amount_pattern(self):
+        value = self.cleaned_data.get('amount_pattern')
+        if not value:
+            return None
+        if value in ('exact', 'pence'):
+            amount_value = self.cleaned_data.get('amount_%s' % value)
+            if amount_value is None:
+                return None
+            if value == 'exact':
+                return format_currency(parse_amount(amount_value))
+            return _('ending in %02d pence') % amount_value
+        description = dict(self['amount_pattern'].field.choices).get(value)
+        return str(description).lower() if description else None
 
 
 class SendersDetailForm(SecurityDetailForm):
