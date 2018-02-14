@@ -72,11 +72,7 @@
             {% for disbursement in disbursements %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
-                  <strong>
-                    <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}">
-                      {{ disbursement.created|date:'DATE_FORMAT' }}
-                    </a>
-                  </strong>
+                  {{ disbursement.created|date:'DATE_FORMAT' }}
                 </td>
                 <td>
                   {% if disbursement.prisoner_number %}
@@ -92,7 +88,11 @@
                   {% endblocktrans %}
                 </td>
                 <td class="number">
-                  <strong>{{ disbursement.amount|currency }}</strong>
+                  <strong>
+                    <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}">
+                      {{ disbursement.amount|currency }}
+                    </a>
+                  </strong>
                 </td>
                 <td>
                   {{ disbursement.prison_name|default:'—' }}

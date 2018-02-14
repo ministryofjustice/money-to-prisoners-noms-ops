@@ -99,11 +99,7 @@
           {% for credit in credits %}
             <tr class="mtp-prisoner-credits__credit-row">
               <td>
-                <strong>
-                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}">
-                    {{ credit.received_at|date:'DATE_FORMAT' }}
-                  </a>
-                </strong>
+                {{ credit.received_at|date:'DATE_FORMAT' }}
               </td>
               <td>
                 {% with known_sender=credit|credit_sender_identifiable %}
@@ -148,21 +144,23 @@
                 {{ credit.intended_recipient|default_if_none:'—' }}
               </td>
               <td class="number">
-                <strong>{{ credit.amount|currency }}</strong>
+                <strong>
+                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}">
+                    {{ credit.amount|currency }}
+                  </a>
+                </strong>
               </td>
               <td>
                 {{ credit.prison_name|default_if_none:'—' }}
               </td>
               <td>
-                <strong>
-                  {% if credit.resolution == 'credited' %}
-                    {{ credit.credited_at.date }}
-                  {% elif credit.resolution == 'refunded' %}
-                    {% trans 'Refunded' %}
-                  {% else %}
-                    {% trans 'No' %}
-                  {% endif %}
-                </strong>
+                {% if credit.resolution == 'credited' %}
+                  {{ credit.credited_at.date }}
+                {% elif credit.resolution == 'refunded' %}
+                  {% trans 'Refunded' %}
+                {% else %}
+                  {% trans 'No' %}
+                {% endif %}
                 <p>—</p>
 
                 {% labelled_data _('Crediting staff') credit.owner_name|default:'—' %}

@@ -69,11 +69,7 @@
             {% for credit in credits %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
-                  <strong>
-                    <a href="{% url 'security:credit_detail' credit_id=credit.id %}">
-                      {{ credit.received_at|date:'DATE_FORMAT' }}
-                    </a>
-                  </strong>
+                  {{ credit.received_at|date:'DATE_FORMAT' }}
                 </td>
                 <td>
                   {% with known_sender=credit|credit_sender_identifiable %}
@@ -94,7 +90,11 @@
                   {% endwith %}
                 </td>
                 <td class="number">
-                  <strong>{{ credit.amount|currency }}</strong>
+                  <strong>
+                    <a href="{% url 'security:credit_detail' credit_id=credit.id %}">
+                      {{ credit.amount|currency }}
+                    </a>
+                  </strong>
                 </td>
                 <td>
                   {% if credit.prisoner_number %}

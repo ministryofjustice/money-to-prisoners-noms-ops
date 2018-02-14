@@ -136,14 +136,10 @@
           {% for credit in credits %}
             <tr class="{% if forloop.last %}no-border{% endif %}">
               <td>
-                <strong>
-                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}">
-                    {{ credit.received_at|date:'DATE_FORMAT' }}
-                  </a>
-                </strong>
+                {{ credit.received_at|date:'DATE_FORMAT' }}
               </td>
               <td>
-                <strong>{{ credit.sender_name|default:'—' }}</strong>
+                {{ credit.sender_name|default:'—' }}
                 {% if credit.source == 'online' %}
                   <p>—</p>
 
@@ -168,18 +164,20 @@
                 {% labelled_data _('Prison') credit.prison_name|default_if_none:'—' %}
               </td>
               <td class="number">
-                <strong>{{ credit.amount|currency }}</strong>
+                <strong>
+                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}">
+                    {{ credit.amount|currency }}
+                  </a>
+                </strong>
               </td>
               <td>
-                <strong>
-                  {% if credit.resolution == 'credited' %}
-                    {{ credit.credited_at.date }}
-                  {% elif credit.resolution == 'refunded' %}
-                    {% trans 'Refunded' %}
-                  {% else %}
-                    {% trans 'No' %}
-                  {% endif %}
-                </strong>
+                {% if credit.resolution == 'credited' %}
+                  {{ credit.credited_at.date }}
+                {% elif credit.resolution == 'refunded' %}
+                  {% trans 'Refunded' %}
+                {% else %}
+                  {% trans 'No' %}
+                {% endif %}
                 <p>—</p>
 
                 {% labelled_data _('Crediting staff') credit.owner_name|default:'—' %}
