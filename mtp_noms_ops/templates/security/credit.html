@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load mtp_common %}
 {% load security %}
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
@@ -87,6 +88,7 @@
 
           </td>
         </tr>
+
         <tr>
           <td colspan="2">
 
@@ -100,8 +102,9 @@
           </td>
           <td colspan="2">
 
-            <div id="mtp-label-history" class="mtp-detail-label">{% trans 'History' %}</div>
-            <div aria-labelledby="mtp-label-history">
+            {% random_string as comment_label %}
+            <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'History' %}</div>
+            <div aria-labelledby="mtp-label-{{ comment_label }}">
               {{ credit.received_at|date:'DATE_FORMAT'|default:'–' }} {% trans 'Received' %}
               <br/>
               {% if credit.credited_at %}
@@ -115,6 +118,23 @@
 
           </td>
         </tr>
+
+        {% if credit.comments %}
+          <tr>
+            <td colspan="4">
+
+              {% random_string as comment_label %}
+              <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'Security check' %}</div>
+              <div aria-labelledby="mtp-label-{{ comment_label }}">
+                {% for comment in credit.comments %}
+                  <cite>{{ comment.user_full_name }}</cite>:
+                  <q>{{ comment.comment }}</q>
+                {% endfor %}
+              </div>
+
+            </td>
+          </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>
