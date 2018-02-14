@@ -123,6 +123,10 @@
   small {
     color: $secondary-text-colour;
   }
+
+  cite, q {
+    font-style: normal;
+  }
 }
 
 .mtp-detail-label {

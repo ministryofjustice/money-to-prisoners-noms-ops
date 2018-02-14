@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load mtp_common %}
 {% load security %}
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
@@ -84,8 +85,9 @@
           </td>
           <td colspan="2">
 
-            <div id="mtp-label-history" class="mtp-detail-label">{% trans 'History' %}</div>
-            <div aria-labelledby="mtp-label-history">
+            {% random_string as comment_label %}
+            <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'History' %}</div>
+            <div aria-labelledby="mtp-label-{{ comment_label }}">
               {% for log_item in disbursement.log_set %}
                 {% if log_item.action == 'created' %}
                   {{ log_item.created|date:'j M Y H:i' }}
