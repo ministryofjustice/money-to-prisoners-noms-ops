@@ -439,6 +439,40 @@ class PrisonerListTestCase(SecurityViewTestCase):
 
 class CreditsListTestCase(SecurityViewTestCase):
     view_name = 'security:credit_list'
+    detail_view_name = 'security:credit_detail'
+
+    debit_card_credit = {
+        'id': 1,
+        'source': 'online',
+        'amount': 23000,
+        'intended_recipient': 'Mr G Melley',
+        'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
+        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+        'sender_name': None,
+        'sender_sort_code': None, 'sender_account_number': None,
+        'sender_roll_number': None,
+        'card_number_last_digits': '4444', 'card_expiry_date': '07/18',
+        'resolution': 'credited',
+        'owner': None, 'owner_name': 'Maria',
+        'received_at': '2016-05-25T20:24:00Z',
+        'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,
+        'comments': [{'user_full_name': 'Eve', 'comment': 'OK'}],
+    }
+    bank_transfer_credit = {
+        'id': 2,
+        'source': 'bank_transfer',
+        'amount': 27500,
+        'intended_recipient': None,
+        'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
+        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
+        'sender_name': 'HEIDENREICH X',
+        'sender_sort_code': '219657', 'sender_account_number': '88447894',
+        'sender_roll_number': '', 'resolution': 'credited',
+        'owner': None, 'owner_name': 'Maria',
+        'received_at': '2016-05-22T23:00:00Z',
+        'credited_at': '2016-05-23T01:10:00Z', 'refunded_at': None,
+        'comments': [],
+    }
 
     @responses.activate
     def test_displays_results(self):
@@ -451,36 +485,8 @@ class CreditsListTestCase(SecurityViewTestCase):
                 'previous': None,
                 'next': 'http://localhost:8000/credits/?limit=20&offset=20&ordering=-amount',
                 'results': [
-                    {
-                        'id': 1,
-                        'source': 'online',
-                        'amount': 23000,
-                        'intended_recipient': 'GEORGE MELLEY',
-                        'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
-                        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-                        'sender_name': None,
-                        'sender_sort_code': None, 'sender_account_number': None,
-                        'sender_roll_number': None,
-                        'card_number_last_digits': '4444', 'card_expiry_date': '07/18',
-                        'resolution': 'credited',
-                        'owner': None, 'owner_name': None,
-                        'received_at': '2016-05-25T20:24:00Z',
-                        'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,
-                    },
-                    {
-                        'id': 2,
-                        'source': 'bank_transfer',
-                        'amount': 27500,
-                        'intended_recipient': None,
-                        'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
-                        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-                        'sender_name': 'HEIDENREICH X',
-                        'sender_sort_code': '219657', 'sender_account_number': '88447894',
-                        'sender_roll_number': '', 'resolution': 'credited',
-                        'owner': None, 'owner_name': None,
-                        'received_at': '2016-05-22T23:00:00Z',
-                        'credited_at': '2016-05-23T01:10:00Z', 'refunded_at': None,
-                    },
+                    self.debit_card_credit,
+                    self.bank_transfer_credit,
                 ]
             }
         )
@@ -494,10 +500,103 @@ class CreditsListTestCase(SecurityViewTestCase):
         self.assertIn('Bank transfer', response_content)
         self.assertIn('Debit card', response_content)
 
+    @responses.activate
+    def test_debit_card_detail(self):
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url('/credits/'),
+            json={
+                'count': 1, 'previous': None, 'next': None,
+                'results': [self.debit_card_credit]
+            }
+        )
+
+        self.login()
+        response = self.client.get(reverse(self.detail_view_name, kwargs={'credit_id': '1'}))
+        self.assertContains(response, 'Debit card')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('£230.00', response_content)
+        self.assertIn('GEORGE MELLEY', response_content)
+        self.assertIn('Mr G Melley', response_content)
+        self.assertIn('A1411AE', response_content)
+        self.assertIn('Credited by Maria', response_content)
+        self.assertIn('Eve', response_content)
+        self.assertIn('OK', response_content)
+
+    @responses.activate
+    def test_bank_transfer_detail(self):
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url('/credits/'),
+            json={
+                'count': 1, 'previous': None, 'next': None,
+                'results': [self.bank_transfer_credit]
+            }
+        )
+
+        self.login()
+        response = self.client.get(reverse(self.detail_view_name, kwargs={'credit_id': '2'}))
+        self.assertContains(response, 'Bank transfer')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('£275.00', response_content)
+        self.assertIn('NORMAN STANLEY FLETCHER', response_content)
+        self.assertIn('21-96-57', response_content)
+        self.assertIn('88447894', response_content)
+        self.assertIn('Credited by Maria', response_content)
+
 
 @override_settings(DISBURSEMENT_PRISONS=['BXI'])
 class DisbursementsListTestCase(SecurityViewTestCase):
     view_name = 'security:disbursement_list'
+    detail_view_name = 'security:disbursement_detail'
+
+    bank_transfer_disbursement = {
+        'id': 99,
+        'created': '2018-02-12T12:00:00Z', 'modified': '2018-02-12T12:00:00Z',
+        'method': 'bank_transfer',
+        'amount': 2000,
+        'resolution': 'sent',
+        'nomis_transaction_id': '1234567-1', 'invoice_number': '1000099',
+        'prisoner_number': 'A1409AE', 'prisoner_name': 'JAMES HALLS',
+        'prison': 'ABC', 'prison_name': 'HMP Test1',
+        'recipient_first_name': 'Jack', 'recipient_last_name': 'Halls', 'recipient_email': '',
+        'address_line1': '102 Petty France', 'address_line2': '',
+        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
+        'account_number': '1234567', 'sort_code': '112233', 'roll_number': None,
+        'comments': [],
+        'log_set': [{'action': 'created',
+                     'created': '2018-02-12T12:00:00Z',
+                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
+                    {'action': 'confirmed',
+                     'created': '2018-02-12T12:00:00Z',
+                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}},
+                    {'action': 'sent',
+                     'created': '2018-02-12T12:00:00Z',
+                     'user': {'first_name': 'SSCL', 'last_name': '', 'username': 'sscl'}}],
+    }
+    cheque_disbursement = {
+        'id': 100,
+        'created': '2018-02-10T10:00:00Z', 'modified': '2018-02-10T12:00:00Z',
+        'method': 'cheque',
+        'amount': 1000,
+        'resolution': 'confirmed',
+        'nomis_transaction_id': '1234568-1', '': 'PMD1000100',
+        'prisoner_number': 'A1401AE', 'prisoner_name': 'JILLY HALL',
+        'prison': 'DEF', 'prison_name': 'HMP Test2',
+        'recipient_first_name': 'Jilly', 'recipient_last_name': 'Halls', 'recipient_email': '',
+        'address_line1': '102 Petty France', 'address_line2': '',
+        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
+        'account_number': '', 'sort_code': '', 'roll_number': None,
+        'comments': [],
+        'log_set': [{'action': 'created',
+                     'created': '2018-02-10T10:00:00Z',
+                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
+                    {'action': 'confirmed',
+                     'created': '2018-02-10T11:00:00Z',
+                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}}]
+    }
 
     @responses.activate
     def test_displays_results(self):
@@ -510,51 +609,8 @@ class DisbursementsListTestCase(SecurityViewTestCase):
                 'previous': None,
                 'next': 'http://localhost:8000/disbursements/?limit=20&offset=20&ordering=-amount',
                 'results': [
-                    {
-                        'id': 1,
-                        'created': '2018-02-12T12:00:00Z', 'modified': '2018-02-12T12:00:00Z',
-                        'method': 'bank_transfer',
-                        'amount': 2000,
-                        'resolution': 'sent',
-                        'nomis_transaction_id': '1234567-1',
-                        'prisoner_number': 'A1409AE', 'prisoner_name': 'JAMES HALLS',
-                        'prison': 'ABC', 'prison_name': 'HMP Test1',
-                        'recipient_first_name': 'Jack', 'recipient_last_name': 'Halls', 'recipient_email': '',
-                        'address_line1': '102 Petty France', 'address_line2': '',
-                        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
-                        'account_number': '1234567', 'sort_code': '112233', 'roll_number': None,
-                        'comments': [],
-                        'log_set': [{'action': 'created',
-                                     'created': '2018-02-12T12:00:00Z',
-                                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
-                                    {'action': 'confirmed',
-                                     'created': '2018-02-12T12:00:00Z',
-                                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}},
-                                    {'action': 'sent',
-                                     'created': '2018-02-12T12:00:00Z',
-                                     'user': {'first_name': 'SSCL', 'last_name': '', 'username': 'sscl'}}],
-                    },
-                    {
-                        'id': 2,
-                        'created': '2018-02-10T10:00:00Z', 'modified': '2018-02-10T12:00:00Z',
-                        'method': 'cheque',
-                        'amount': 1000,
-                        'resolution': 'confirmed',
-                        'nomis_transaction_id': '1234568-1',
-                        'prisoner_number': 'A1401AE', 'prisoner_name': 'JILLY HALL',
-                        'prison': 'DEF', 'prison_name': 'HMP Test2',
-                        'recipient_first_name': 'Jilly', 'recipient_last_name': 'Halls', 'recipient_email': '',
-                        'address_line1': '102 Petty France', 'address_line2': '',
-                        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
-                        'account_number': '', 'sort_code': '', 'roll_number': None,
-                        'comments': [],
-                        'log_set': [{'action': 'created',
-                                     'created': '2018-02-10T10:00:00Z',
-                                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
-                                    {'action': 'confirmed',
-                                     'created': '2018-02-10T11:00:00Z',
-                                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}}]
-                    },
+                    self.bank_transfer_disbursement,
+                    self.cheque_disbursement,
                 ]
             }
         )
@@ -571,6 +627,46 @@ class DisbursementsListTestCase(SecurityViewTestCase):
         self.assertIn('£10.00', response_content)
         self.assertIn('by cheque', response_content)
         self.assertIn('Confirmed', response_content)
+
+    @responses.activate
+    def test_bank_transfer_detail(self):
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url('/disbursements/99/'),
+            json=self.bank_transfer_disbursement
+        )
+
+        self.login()
+        response = self.client.get(reverse(self.detail_view_name, kwargs={'disbursement_id': '99'}))
+        self.assertContains(response, 'Bank transfer')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('£20.00', response_content)
+        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('Jack Halls', response_content)
+        self.assertIn('1234567-1', response_content)
+        self.assertIn('1000099', response_content)
+        self.assertIn('Confirmed by John Smith', response_content)
+
+    @responses.activate
+    def test_cheque_detail(self):
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url('/disbursements/100/'),
+            json=self.cheque_disbursement
+        )
+
+        self.login()
+        response = self.client.get(reverse(self.detail_view_name, kwargs={'disbursement_id': '100'}))
+        self.assertContains(response, 'Cheque')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('£10.00', response_content)
+        self.assertIn('JILLY HALL', response_content)
+        self.assertIn('Jilly Halls', response_content)
+        self.assertIn('1234568-1', response_content)
+        self.assertNotIn('PMD1000100', response_content)
+        self.assertIn('Confirmed by John Smith', response_content)
 
 
 @contextmanager
