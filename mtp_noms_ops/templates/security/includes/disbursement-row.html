@@ -7,7 +7,7 @@
 
 <td>
   {% if disbursement.prisoner_number %}
-    <a href="{{ disbursement|prisoner_profile_search_url }}" class="mtp-print-url-hidden">
+    <a href="{{ disbursement|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
       {{ disbursement.prisoner_number }}
     </a>
     <br/>

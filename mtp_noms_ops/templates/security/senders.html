@@ -78,13 +78,13 @@
                   <tr {% if forloop.last %}class="no-border"{% endif %}>
                     <td>
                       {% if sender.bank_transfer_details %}
-                        <a href="{% url 'security:sender_detail' sender.id %}" class="mtp-print-url-hidden">
+                        <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}" class="mtp-print-url-hidden">
                           {{ sender.bank_transfer_details.0.sender_name|default:'—' }}
                         </a>
                         <br />
                         {% trans 'by bank transfer' %}
                       {% elif sender.debit_card_details %}
-                        <a href="{% url 'security:sender_detail' sender.id %}" class="mtp-print-url-hidden">
+                        <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}" class="mtp-print-url-hidden">
                           {{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}
                         </a>
                         <br />
