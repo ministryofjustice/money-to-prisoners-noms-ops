@@ -22,8 +22,8 @@
             {% include 'proposition-tab.html' with view_name='security:review_credits' subview_names='security:review_credits' link_text=_('New credits check') %}
           {% endif %}
           {% include 'proposition-tab.html' with view_name='security:credit_list' subview_names='security:credit_list security:credit_detail' link_text=_('Credits') params=initial_params %}
-          {% include 'proposition-tab.html' with view_name='security:sender_list' subview_names='security:sender_list security:sender_detail' link_text=_('Payment sources') params=initial_params %}
-          {% include 'proposition-tab.html' with view_name='security:prisoner_list' subview_names='security:prisoner_list security:prisoner_detail' link_text=_('Prisoners') params=initial_params %}
+          {% include 'proposition-tab.html' with view_name='security:sender_list' subview_names='security:sender_list security:sender_detail' link_text=_('Payment sources') params=initial_params hide_on_mobile=True %}
+          {% include 'proposition-tab.html' with view_name='security:prisoner_list' subview_names='security:prisoner_list security:prisoner_detail' link_text=_('Prisoners') params=initial_params hide_on_mobile=True %}
           {% if request.disbursements_available %}
             {% include 'proposition-tab.html' with view_name='security:disbursement_list' subview_names='security:disbursement_list security:disbursement_detail' link_text=_('Disbursements') params=initial_params %}
           {% endif %}

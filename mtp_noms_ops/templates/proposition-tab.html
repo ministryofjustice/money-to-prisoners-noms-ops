@@ -1,4 +1,4 @@
-<li>
+<li {% if hide_on_mobile %}class="mtp-proposition-tab__show-on-desktop"{% endif %}>
   <a href="{% url view_name %}{% if params %}?{{ params }}{% endif %}" class="{% if request.resolver_match.view_name in subview_names.split %}current{% endif %}">
     {{ link_text }}
   </a>

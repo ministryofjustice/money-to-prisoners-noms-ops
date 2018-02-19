@@ -39,3 +39,9 @@ form .form-group .form-hint {
     }
   }
 }
+
+@include media($max-width: $mtp-proposition-tab-breakpoint, $ignore-for-ie: true) {
+  #mtp-proposition-tabs li.mtp-proposition-tab__show-on-desktop {
+    display: none;
+  }
+}
