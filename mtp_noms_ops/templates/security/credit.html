@@ -20,11 +20,11 @@
         <tr>
           <td>
 
-            {% labelled_data _('Prisoner name') credit.prisoner_name %}
+            {% labelled_data _('Prisoner name') credit.prisoner_name|default:_('Unknown prisoner') %}
             <br/>
             {% labelled_data _('Prisoner number') credit.prisoner_number %}
             <br/>
-            {% labelled_data _('Prison') credit.prison_name %}
+            {% labelled_data _('Prison') credit.prison_name|default:'–' %}
             <br/>
 
             {% if credit.intended_recipient %}
