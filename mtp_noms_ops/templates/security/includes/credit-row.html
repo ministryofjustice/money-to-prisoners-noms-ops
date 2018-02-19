@@ -1,0 +1,64 @@
+{% load i18n %}
+{% load security %}
+
+<td>
+  {{ credit.received_at|date:'DATE_FORMAT' }}
+</td>
+
+<td>
+  {% if not credit.prisoner_name %}
+    {% trans 'Unknown prisoner' %}
+  {% elif link_prisoner %}
+    <strong>
+      <a href="{{ credit|prisoner_profile_search_url }}" class="mtp-print-url-hidden">
+        {{ credit.prisoner_number }}
+      </a>
+    </strong>
+    <br/>
+    {{ credit.prisoner_name }}
+  {% else %}
+    <strong>{{ credit.prisoner_number }}</strong>
+    <br/>
+    {{ credit.prisoner_name }}
+  {% endif %}
+</td>
+
+<td>
+  {% if link_sender %}
+    <strong>
+      <a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">
+        {{ credit.sender_name|default:_('Sender details not recorded') }}
+      </a>
+    </strong>
+  {% else %}
+    <strong>
+      {{ credit.sender_name|default:_('Sender details not recorded') }}
+    </strong>
+  {% endif %}
+  <br/>
+  {% blocktrans trimmed with payment_method=credit.source|credit_source|lower %}
+    by {{ payment_method }}
+  {% endblocktrans %}
+</td>
+
+<td class="number">
+  <strong>
+    <a href="{% url 'security:credit_detail' credit_id=credit.id %}" title="{% trans 'View credit details' %}" class="mtp-print-url-hidden">
+      {{ credit.amount|currency }}
+    </a>
+  </strong>
+</td>
+
+<td>
+  {{ credit.prison_name|default_if_none:'—' }}
+</td>
+
+<td>
+  {% if credit.resolution == 'credited' %}
+    {{ credit.credited_at.date }}
+  {% elif credit.resolution == 'refunded' %}
+    {% trans 'Refunded' %}
+  {% else %}
+    {% trans 'No' %}
+  {% endif %}
+</td>
