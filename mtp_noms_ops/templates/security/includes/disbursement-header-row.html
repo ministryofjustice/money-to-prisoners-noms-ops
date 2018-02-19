@@ -1,0 +1,35 @@
+{% load i18n %}
+{% load security %}
+
+<th class="{{ form|ordering_classes:'created' }}">
+  <a href="?{{ form|query_string_with_reversed_ordering:'created' }}">
+    <span>
+      {% trans 'Date entered' %}
+      {% describe_ordering_for_screenreader form 'created' %}
+    </span>
+  </a>
+</th>
+
+<th class="{{ form|ordering_classes:'prisoner_number' }}">
+  <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
+    <span>
+      {% trans 'Prisoner' %}
+      {% describe_ordering_for_screenreader form 'prisoner_number' %}
+    </span>
+  </a>
+</th>
+
+<th>{% trans 'Recipient' %}</th>
+
+<th class="{{ form|ordering_classes:'amount' }} number">
+  <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
+    <span>
+      {% trans 'Amount' %}
+      {% describe_ordering_for_screenreader form 'amount' %}
+    </span>
+  </a>
+</th>
+
+<th>{% trans 'Prison' %}</th>
+
+<th>{% trans 'Status' %}</th>

@@ -36,7 +36,7 @@
           <caption class="visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
-              <th>{% trans 'Payment source and type' %}</th>
+              <th>{% trans 'Payment source' %}</th>
               <th class="{{ form|ordering_classes:'credit_count' }}">
                 <a href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
                   <span>

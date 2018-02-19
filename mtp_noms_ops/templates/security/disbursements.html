@@ -39,67 +39,13 @@
           <caption class="visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
-              <th class="{{ form|ordering_classes:'created' }}">
-                <a href="?{{ form|query_string_with_reversed_ordering:'created' }}">
-                  <span>
-                    {% trans 'Date entered' %}
-                    {% describe_ordering_for_screenreader form 'created' %}
-                  </span>
-                </a>
-              </th>
-              <th class="{{ form|ordering_classes:'prisoner_number' }}">
-                <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
-                  <span>
-                    {% trans 'Prisoner' %}
-                    {% describe_ordering_for_screenreader form 'prisoner_number' %}
-                  </span>
-                </a>
-              </th>
-              <th>{% trans 'Recipient' %}</th>
-              <th class="{{ form|ordering_classes:'amount' }} number">
-                <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
-                  <span>
-                    {% trans 'Amount' %}
-                    {% describe_ordering_for_screenreader form 'amount' %}
-                  </span>
-                </a>
-              </th>
-              <th>{% trans 'Prison' %}</th>
-              <th>{% trans 'Status' %}</th>
+              {% include 'security/includes/disbursement-header-row.html' %}
             </tr>
           </thead>
           <tbody>
             {% for disbursement in disbursements %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
-                <td>
-                  {{ disbursement.created|date:'DATE_FORMAT' }}
-                </td>
-                <td>
-                  {% if disbursement.prisoner_number %}
-                    <strong><a href="{{ disbursement|prisoner_profile_search_url }}" class="mtp-print-url-hidden">{{ disbursement.prisoner_number }}</a></strong><br/>
-                    {{ disbursement.prisoner_name|default_if_none:'—' }}
-                  {% endif %}
-                </td>
-                <td>
-                  {{ disbursement.recipient_first_name }} {{ disbursement.recipient_last_name }}
-                  <br>
-                  {% blocktrans trimmed with payment_method=disbursement.method|disbursement_method|lower %}
-                    by {{ payment_method }}
-                  {% endblocktrans %}
-                </td>
-                <td class="number">
-                  <strong>
-                    <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}">
-                      {{ disbursement.amount|currency }}
-                    </a>
-                  </strong>
-                </td>
-                <td>
-                  {{ disbursement.prison_name|default:'—' }}
-                </td>
-                <td>
-                  {{ disbursement.resolution|format_disbursement_resolution }}
-                </td>
+                {% include 'security/includes/disbursement-row.html' %}
               </tr>
             {% empty %}
               <tr class="no-border">
