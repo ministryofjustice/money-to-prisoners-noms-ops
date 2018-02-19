@@ -15,6 +15,12 @@
   {% endif %}
 </td>
 
+<td class="mtp-credit-arrow-cell__condensed">
+  <div class="mtp-disbursement-arrow">
+    <span class="visually-hidden">{{ disbursement.method|disbursement_method }}</span>
+  </div>
+</td>
+
 <td>
   {{ disbursement.recipient_first_name }} {{ disbursement.recipient_last_name }}
   <br/>
