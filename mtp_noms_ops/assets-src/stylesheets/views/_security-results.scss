@@ -134,46 +134,6 @@
   font-size: 16px;
 }
 
-.mtp-credit__card, .mtp-credit__transfer, .mtp-credit__post {
-  display: inline-block;
-  width: 70%;
-  min-height: 2.5em;
-  margin-left: 0;
-  margin-top: 0;
-  padding-left: 2em;
-  background: file-url('icon-card.png') no-repeat scroll 0 0;
-
-  @include device-pixel-ratio {
-    background-image: file-url('icon-card@2x.png');
-    background-size: 30px 30px;
-  }
-}
-
-.mtp-credit__transfer {
-  background-image: file-url('icon-bank.png');
-
-  @include device-pixel-ratio {
-    background-image: file-url('icon-bank@2x.png');
-  }
-}
-
-.mtp-credit__post {
-  background: file-url('icon-post.png');
-
-  @include device-pixel-ratio {
-    background-image: file-url('icon-post@2x.png');
-  }
-}
-
-@media print {
-  .mtp-credit__card, .mtp-credit__transfer, .mtp-credit__post {
-    padding-left: 0;
-    background: none;
-    min-height: 0;
-    width: auto;
-  }
-}
-
 .mtp-credit-arrow, .mtp-disbursement-arrow {
   display: inline-block;
   min-width: 33px;
