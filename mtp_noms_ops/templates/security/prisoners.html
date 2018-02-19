@@ -76,7 +76,7 @@
               <tr {% if forloop.last %}class="no-border"{% endif %}>
                 <td>
                   <a href="{% url 'security:prisoner_detail' prisoner.id %}" class="mtp-print-url-hidden">
-                    <strong>{{ prisoner.prisoner_number }}</strong>
+                    {{ prisoner.prisoner_number }}
                   </a>
                   <br/>
                   {{ prisoner.prisoner_name|default_if_none:'—' }}
@@ -84,19 +84,21 @@
                 <td>{{ prisoner.prisons|list_prison_names }}</td>
                 <td>
                   {% blocktrans trimmed count count=prisoner.credit_count %}
-                    <strong>{{ count }}</strong> credit received
+                    {{ count }} credit received
                   {% plural %}
-                    <strong>{{ count }}</strong> credits received
+                    {{ count }} credits received
                   {% endblocktrans %}
                 </td>
                 <td>
                   {% blocktrans trimmed count count=prisoner.sender_count %}
-                    <strong>{{ count }}</strong> payment source
+                    {{ count }} payment source
                   {% plural %}
-                    <strong>{{ count }}</strong> payment sources
+                    {{ count }} payment sources
                   {% endblocktrans %}
                 </td>
-                <td class="number"><strong>{{ prisoner.credit_total|currency }}</strong></td>
+                <td class="number">
+                  {{ prisoner.credit_total|currency }}
+                </td>
               </tr>
             {% empty %}
               <tr class="no-border">
