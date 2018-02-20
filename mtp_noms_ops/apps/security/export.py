@@ -21,25 +21,25 @@ class ObjectListXlsxResponse(HttpResponse):
         )
         super().__init__(**kwargs)
         self['Content-Disposition'] = 'attachment; filename="%s"' % attachment_name
-        wb = Workbook()
+        wb = Workbook(write_only=True)
         write_objects(wb, object_type, object_list)
         wb.save(self)
 
 
 def write_objects(workbook, object_type, object_list):
     if object_type == 'credits':
-        write_credit_header(workbook)
-        write_credits(workbook, object_list)
+        rows = credit_row_generator(object_list)
     elif object_type == 'disbursements':
-        write_disbursement_header(workbook)
-        write_disbursements(workbook, object_list)
+        rows = disbursement_row_generator(object_list)
     else:
         raise ValueError
+    worksheet = workbook.create_sheet()
+    for row in rows:
+        worksheet.append([escape_formulae(cell) for cell in row])
 
 
-def write_credit_header(workbook):
-    ws = workbook.active
-    headers = [
+def credit_row_generator(object_list):
+    yield [
         gettext('Prisoner name'), gettext('Prisoner number'), gettext('Prison'),
         gettext('Sender name'), gettext('Payment method'),
         gettext('Bank transfer sort code'), gettext('Bank transfer account'), gettext('Bank transfer roll number'),
@@ -48,14 +48,8 @@ def write_credit_header(workbook):
         gettext('Credited status'), gettext('Date credited'), gettext('NOMIS ID'),
         gettext('IP'),
     ]
-    for col, header in enumerate(headers, start=1):
-        ws.cell(column=col, row=1, value=header)
-
-
-def write_credits(workbook, object_list):
-    ws = workbook.active
-    for row, credit in enumerate(object_list, start=2):
-        cells = [
+    for credit in object_list:
+        yield [
             credit['prisoner_name'],
             credit['prisoner_number'],
             credit['prison_name'],
@@ -74,13 +68,10 @@ def write_credits(workbook, object_list):
             credit['nomis_transaction_id'],
             credit['ip_address'],
         ]
-        for col, cell in enumerate(list(map(escape_formulae, cells)), start=1):
-            ws.cell(column=col, row=row, value=cell)
 
 
-def write_disbursement_header(workbook):
-    ws = workbook.active
-    headers = [
+def disbursement_row_generator(object_list):
+    yield [
         gettext('Prisoner name'), gettext('Prisoner number'), gettext('Prison'),
         gettext('Recipient first name'), gettext('Recipient last name'), gettext('Payment method'),
         gettext('Address'),
@@ -89,18 +80,12 @@ def write_disbursement_header(workbook):
         gettext('Date entered'), gettext('Date confirmed'),  gettext('Date sent'),
         gettext('NOMIS ID'),
     ]
-    for col, header in enumerate(headers, start=1):
-        ws.cell(column=col, row=1, value=header)
-
-
-def write_disbursements(workbook, object_list):
-    ws = workbook.active
-    for row, disbursement in enumerate(object_list, start=2):
+    for disbursement in object_list:
         last_action_dates = {
             log_item['action']: parse_datetime(log_item['created'])
             for log_item in disbursement['log_set']
         }
-        cells = [
+        yield [
             disbursement['prisoner_name'],
             disbursement['prisoner_number'],
             disbursement['prison_name'],
@@ -117,8 +102,6 @@ def write_disbursements(workbook, object_list):
             last_action_dates.get('sent', ''),
             disbursement['nomis_transaction_id'],
         ]
-        for col, cell in enumerate(list(map(escape_formulae, cells)), start=1):
-            ws.cell(column=col, row=row, value=cell)
 
 
 def escape_formulae(value):
