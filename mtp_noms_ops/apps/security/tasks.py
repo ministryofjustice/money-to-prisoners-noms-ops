@@ -35,7 +35,7 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
         retrieve_all_pages_for_path(api_session, endpoint_path, **filters)
     )
 
-    wb = Workbook()
+    wb = Workbook(write_only=True)
     write_objects(wb, object_type, object_list)
     output = save_virtual_workbook(wb)
 
