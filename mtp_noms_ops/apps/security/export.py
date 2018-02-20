@@ -8,9 +8,11 @@ from openpyxl import Workbook
 
 from security.models import credit_sources, disbursement_methods
 from security.templatetags.security import (
-    currency, format_card_number, format_sort_code, format_resolution,
-    format_disbursement_resolution,
+    currency, format_card_number, format_sort_code,
+    format_resolution, format_disbursement_resolution,
+    list_prison_names,
 )
+from security.utils import EmailSet, NameSet
 
 
 class ObjectListXlsxResponse(HttpResponse):
@@ -29,6 +31,10 @@ class ObjectListXlsxResponse(HttpResponse):
 def write_objects(workbook, object_type, object_list):
     if object_type == 'credits':
         rows = credit_row_generator(object_list)
+    elif object_type == 'senders':
+        rows = sender_row_generator(object_list)
+    elif object_type == 'prisoners':
+        rows = prisoner_row_generator(object_list)
     elif object_type == 'disbursements':
         rows = disbursement_row_generator(object_list)
     else:
@@ -67,6 +73,65 @@ def credit_row_generator(object_list):
             credit['credited_at'],
             credit['nomis_transaction_id'],
             credit['ip_address'],
+        ]
+
+
+def sender_row_generator(object_list):
+    yield [
+        gettext('Sender name'), gettext('Payment source'),
+        gettext('Credits sent'), gettext('Total amount sent'),
+        gettext('Prisoners sent to'), gettext('Prisons sent to'),
+        gettext('Bank transfer sort code'), gettext('Bank transfer account'), gettext('Bank transfer roll number'),
+        gettext('Debit card number'), gettext('Debit card expiry'), gettext('Debit card postcode'),
+        gettext('Other cardholder names'), gettext('Cardholder emails'),
+    ]
+    for sender in object_list:
+        if sender['bank_transfer_details']:
+            payment_source = gettext('Bank transfer')
+            bank_transfer = sender['bank_transfer_details'][0]
+            sender_name = bank_transfer['sender_name']
+            bank_transfer = [format_sort_code(bank_transfer['sender_sort_code']),
+                             bank_transfer['sender_account_number'],
+                             bank_transfer['sender_roll_number']]
+            debit_card = ['', '', '', '', '']
+        elif sender['debit_card_details']:
+            payment_source = gettext('Debit card')
+            bank_transfer = ['', '', '']
+            debit_card = sender['debit_card_details'][0]
+            sender_name = debit_card['cardholder_names'][0]
+            other_sender_names = NameSet(debit_card['cardholder_names'])
+            if sender_name in other_sender_names:
+                other_sender_names.remove(sender_name)
+            debit_card = [format_card_number(debit_card['card_number_last_digits']),
+                          debit_card['card_expiry_date'],
+                          debit_card['postcode'] or gettext('Unknown'),
+                          ', '.join(other_sender_names),
+                          ', '.join(EmailSet(debit_card['sender_emails']))]
+        else:
+            continue
+        yield [
+            sender_name, payment_source,
+            sender['credit_count'], currency(sender['credit_total']),
+            sender['prisoner_count'], sender['prison_count'],
+        ] + bank_transfer + debit_card
+
+
+def prisoner_row_generator(object_list):
+    yield [
+        gettext('Prisoner number'), gettext('Prisoner name'), gettext('Date of birth'),
+        gettext('Credits received'), gettext('Total amount received'), gettext('Payment sources'),
+        gettext('Current prison'), gettext('Prisons where received credits'), gettext('Names given by senders'),
+    ]
+    for prisoner in object_list:
+        if prisoner['current_prison']:
+            current_prison = prisoner['current_prison']['name']
+        else:
+            current_prison = gettext('Not in a public prison')
+        recipient_names = NameSet(prisoner['recipient_names'])
+        yield [
+            prisoner['prisoner_number'], prisoner['prisoner_name'], prisoner['prisoner_dob'],
+            prisoner['credit_count'], currency(prisoner['credit_total']), prisoner['sender_count'],
+            current_prison, list_prison_names(prisoner['prisons']), ', '.join(recipient_names),
         ]
 
 
