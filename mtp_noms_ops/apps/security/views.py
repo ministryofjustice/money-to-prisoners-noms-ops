@@ -94,6 +94,11 @@ class DisbursementDetailView(SimpleSecurityDetailView):
     list_title = _('Disbursements')
     list_url = reverse_lazy('security:disbursement_list')
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.disbursements_available:
+            raise Http404('Disbursements not available to current user')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_object_request_params(self):
         return {
             'url': '/disbursements/%s/' % self.kwargs['disbursement_id']
