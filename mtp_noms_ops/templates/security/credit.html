@@ -39,7 +39,7 @@
 
           </td>
           <td>
-            {% labelled_data _('Sender name') credit.sender_name %}
+            {% labelled_data _('Sender name') credit.sender_name url=credit|sender_profile_search_url %}
             <br/>
 
             {% if credit.source == 'online' %}
