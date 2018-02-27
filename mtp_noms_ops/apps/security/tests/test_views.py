@@ -80,6 +80,7 @@ class SecurityBaseTestCase(SimpleTestCase):
                 'first_name': 'Sam',
                 'last_name': 'Hall',
                 'username': 'shall',
+                'email': 'sam@mtp.local',
                 'permissions': required_permissions,
                 'prisons': [{'nomis_id': 'BXI', 'name': 'HMP Brixton', 'pre_approval_required': False}],
             }
