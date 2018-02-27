@@ -226,8 +226,10 @@ def find_rejection_reason(comment_set):
 
 
 @register.simple_tag
-def labelled_data(label, value, tag='div'):
+def labelled_data(label, value, tag='div', url=None):
     element_id = get_random_string(length=4)
+    if url:
+        value = format_html('<a href="{url}">{value}</a>', value=value, url=url)
     return format_html(
         '''
         <div id="mtp-label-{element_id}" class="mtp-detail-label">{label}</div>
