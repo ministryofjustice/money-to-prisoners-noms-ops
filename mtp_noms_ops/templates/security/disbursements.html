@@ -45,7 +45,7 @@
           <tbody>
             {% for disbursement in disbursements %}
               <tr {% if forloop.last %}class="no-border"{% endif %}>
-                {% include 'security/includes/disbursement-row.html' %}
+                {% include 'security/includes/disbursement-row.html' with link_prisoner=True %}
               </tr>
             {% empty %}
               <tr class="no-border">
