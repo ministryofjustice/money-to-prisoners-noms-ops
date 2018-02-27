@@ -52,11 +52,5 @@
 </td>
 
 <td>
-  {% if credit.resolution == 'credited' %}
-    {{ credit.credited_at.date }}
-  {% elif credit.resolution == 'refunded' %}
-    {% trans 'Refunded' %}
-  {% else %}
-    {% trans 'No' %}
-  {% endif %}
+  {{ credit.resolution|format_resolution }}
 </td>
