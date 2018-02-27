@@ -32,10 +32,12 @@ form .form-group .form-hint {
 
 %table-container {
   @include media($max-width: $desktop-breakpoint, $ignore-for-ie: true) {
-    overflow-x: scroll;
+    @media screen {
+      overflow-x: scroll;
 
-    table {
-      min-width: 900px;
+      table {
+        min-width: 900px;
+      }
     }
   }
 }
