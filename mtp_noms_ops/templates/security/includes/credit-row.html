@@ -42,9 +42,7 @@
 </td>
 
 <td class="number">
-  <a href="{% url 'security:credit_detail' credit_id=credit.id %}" title="{% trans 'View credit details' %}" class="mtp-print-url-hidden">
-    {{ credit.amount|currency }}
-  </a>
+  {{ credit.amount|currency }}
 </td>
 
 <td>
@@ -53,4 +51,8 @@
 
 <td>
   {{ credit.resolution|format_resolution }}
+  <br/>
+  <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}" class="print-hidden">
+    {% trans 'View details' %}
+  </a>
 </td>
