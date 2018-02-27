@@ -47,6 +47,14 @@
         {% endif %}
       </div>
 
+      {% if request.disbursements_available %}
+        <div class="mtp-prisoner-summary__details">
+          <div class="column-one-quarter">
+            {% labelled_data _('Disbursements sent') disbursement_count|default_if_none:_('Unknown') tag='strong' %}
+          </div>
+        </div>
+      {% endif %}
+
       {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this prisoner on your home page') unpin_label=_('Stop monitoring this prisoner') only %}
     </div>
   </div>
@@ -55,39 +63,49 @@
 
   {% if form.is_valid %}
     <div class="mtp-results-list">
-      <h2 class="heading-large">{% trans 'Credits received' %}</h2>
+      {% block object_list %}
+        {% if request.disbursements_available %}
+          <aside class="mtp-object-list-toggle print-hidden">
+            <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" class="button-secondary">
+              {% trans 'View disbursements' %}
+            </a>
+          </aside>
+        {% endif %}
 
-      <div class="panel panel-border-narrow">
-        {% include 'security/forms/search-description.html' with form=form only %}
+        <h2 class="heading-large">{% trans 'Credits received' %}</h2>
 
-        <div class="print-hidden mtp-links">
-          <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
-          &nbsp;
-          {% url 'security:prisoner_detail_export' prisoner_id=prisoner.id as export_view %}
-          {% url 'security:prisoner_detail_email_export' prisoner_id=prisoner.id as email_export_view %}
-          {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
+        <div class="panel panel-border-narrow">
+          {% include 'security/forms/search-description.html' with form=form only %}
+
+          <div class="print-hidden mtp-links">
+            <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
+            &nbsp;
+            {% url 'security:prisoner_detail_export' prisoner_id=prisoner.id as export_view %}
+            {% url 'security:prisoner_detail_email_export' prisoner_id=prisoner.id as email_export_view %}
+            {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
+          </div>
         </div>
-      </div>
 
-      <table>
-        <caption class="visually-hidden">{{ form.search_description.description }}</caption>
-        <thead>
-          <tr>
-            {% include 'security/includes/credit-header-row.html' %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for credit in credits %}
-            <tr class="{% if forloop.last %}no-border{% endif %}">
-              {% include 'security/includes/credit-row.html' with link_sender=True %}
+        <table>
+          <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+          <thead>
+            <tr>
+              {% include 'security/includes/credit-header-row.html' %}
             </tr>
-          {% empty %}
-            <tr class="no-border">
-              <td colspan="7">{% trans 'No matching credits found' %}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for credit in credits %}
+              <tr class="{% if forloop.last %}no-border{% endif %}">
+                {% include 'security/includes/credit-row.html' with link_sender=True %}
+              </tr>
+            {% empty %}
+              <tr class="no-border">
+                <td colspan="7">{% trans 'No matching credits found' %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endblock %}
     </div>
     {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
   {% endif %}

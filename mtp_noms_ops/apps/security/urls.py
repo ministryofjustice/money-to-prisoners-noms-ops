@@ -84,6 +84,21 @@ urlpatterns = [
             export_redirect_view='security:prisoner_detail',
         )),
         name='prisoner_detail_email_export'),
+    url(r'^prisoners/(?P<prisoner_id>[0-9]+)/disbursements/$',
+        security_test(views.PrisonerDisbursementDetailView.as_view()),
+        name='prisoner_disbursement_detail'),
+    url(r'^prisoners/(?P<prisoner_id>[0-9]+)/disbursements/export/$',
+        security_test(views.PrisonerDisbursementDetailView.as_view(
+            export_view='download',
+            export_redirect_view='security:prisoner_disbursement_detail',
+        )),
+        name='prisoner_disbursement_detail_export'),
+    url(r'^prisoners/(?P<prisoner_id>[0-9]+)/disbursements/email-export/$',
+        security_test(views.PrisonerDisbursementDetailView.as_view(
+            export_view='email',
+            export_redirect_view='security:prisoner_disbursement_detail',
+        )),
+        name='prisoner_disbursement_detail_email_export'),
 
     url(r'^prisoner_image/(?P<prisoner_number>[A-Za-z0-9]+)/$',
         security_test(views.prisoner_image_view),

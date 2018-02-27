@@ -13,7 +13,7 @@ from requests.exceptions import RequestException
 
 from security.forms import (
     SendersForm, SendersDetailForm,
-    PrisonersForm, PrisonersDetailForm,
+    PrisonersForm, PrisonersDetailForm, PrisonersDisbursementDetailForm,
     CreditsForm,
     DisbursementsForm,
     ReviewCreditsForm,
@@ -185,7 +185,7 @@ class PrisonerListView(SecurityView):
 
 class PrisonerDetailView(SecurityDetailView):
     """
-    Prisoner profile view
+    Prisoner profile view showing credit list
     """
     list_title = PrisonerListView.title
     list_url = reverse_lazy('security:prisoner_list')
@@ -198,11 +198,41 @@ class PrisonerDetailView(SecurityDetailView):
         context_data = super().get_context_data(**kwargs)
         prisoner = context_data.get('prisoner', {})
         context_data['recipient_names'] = NameSet(prisoner.get('recipient_names', ()), strip_titles=True)
+        if self.request.disbursements_available:
+            context_data['disbursement_count'] = self.get_disbursement_count(
+                context_data['form'].session, prisoner['prisoner_number']
+            )
         return context_data
 
     def get_title_for_object(self, detail_object):
         title = ' '.join(detail_object.get(key, '') for key in ('prisoner_number', 'prisoner_name'))
         return title.strip() or _('Unknown prisoner')
+
+    def get_disbursement_count(self, session, prisoner_number):
+        try:
+            response = session.get('/disbursements/', params={
+                'prisoner_number': prisoner_number,
+                # exclude rejected/cancelled disbursements
+                'resolution': ['pending', 'preconfirmed', 'confirmed', 'sent'],
+                'limit': 1,
+            }).json()
+            return response['count']
+        except (RequestException, ValueError, KeyError):
+            return None
+
+
+class PrisonerDisbursementDetailView(PrisonerDetailView):
+    """
+    Prisoner profile view showing disbursement list
+    """
+    template_name = 'security/prisoners-disbursement-detail.html'
+    form_class = PrisonersDisbursementDetailForm
+    object_list_context_key = 'disbursements'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.disbursements_available:
+            raise Http404('Disbursements not available to current user')
+        return super().dispatch(request, *args, **kwargs)
 
 
 class ReviewCreditsView(FormView):

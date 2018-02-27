@@ -1,0 +1,47 @@
+{% extends 'security/prisoners-detail.html' %}
+{% load i18n %}
+
+
+{% block object_list %}
+  {% if request.disbursements_available %}
+    <aside class="mtp-object-list-toggle print-hidden">
+      <a href="{% url 'security:prisoner_detail' prisoner.id %}" class="button-secondary">
+        {% trans 'View credits' %}
+      </a>
+    </aside>
+  {% endif %}
+
+  <h2 class="heading-large">{% trans 'Disbursements sent' %}</h2>
+
+  <div class="panel panel-border-narrow">
+    {% include 'security/forms/search-description.html' with form=form only %}
+
+    <div class="print-hidden mtp-links">
+      <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
+      &nbsp;
+      {% url 'security:prisoner_disbursement_detail_export' prisoner_id=prisoner.id as export_view %}
+      {% url 'security:prisoner_disbursement_detail_email_export' prisoner_id=prisoner.id as email_export_view %}
+      {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many disbursements to download.') %}
+    </div>
+  </div>
+
+  <table>
+    <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+    <thead>
+      <tr>
+        {% include 'security/includes/disbursement-header-row.html' %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for disbursement in disbursements %}
+        <tr class="{% if forloop.last %}no-border{% endif %}">
+          {% include 'security/includes/disbursement-row.html' %}
+        </tr>
+      {% empty %}
+        <tr class="no-border">
+          <td colspan="7">{% trans 'No matching disbursements found' %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
