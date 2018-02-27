@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.views.generic import RedirectView
 
 from . import required_permissions, views
 from mtp_noms_ops.utils import user_test
@@ -7,6 +8,8 @@ security_test = user_test(required_permissions)
 
 app_name = 'security'
 urlpatterns = [
+    url(r'^$', RedirectView.as_view(pattern_name='dashboard')),
+
     url(r'^credits/$', security_test(views.CreditListView.as_view()),
         name='credit_list'),
     url(r'^credits/(?P<credit_id>[0-9]+)/$', security_test(views.CreditDetailView.as_view()),
