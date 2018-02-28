@@ -67,7 +67,7 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         self.click_on_nav_tab('Credits')
 
     def test_perform_searches(self):
-        self.assertInSource('Payment source and type')  # a results list header
+        self.assertInSource('Status')  # a results list header
 
         self.click_on_filter_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
@@ -82,7 +82,7 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         self.click_on_filter_tab('sender')
         self.type_in('id_sender_name', Keys.BACKSPACE * len('aaabbbccc111222333'))
         self.click_on_submit()
-        self.assertInSource('James Halls')
+        self.assertInSource('JAMES HALLS')
 
     def test_ordering(self):
         self.click_on_filter_tab('amount')
@@ -93,7 +93,7 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         self.assertIn('Showing credits sent that are not a multiple of £5, ordered by received date',
                       search_description.text)
 
-        self.get_element('.mtp-results-list th:nth-child(3) a').click()
+        self.get_element('.mtp-results-list th:nth-child(5) a').click()
         search_description = self.get_element('.lede')
         self.assertIn('Showing credits sent that are not a multiple of £5, ordered by amount sent (low to high)',
                       search_description.text)
@@ -106,7 +106,7 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
         self.click_on_nav_tab('Payment sources')
 
     def test_perform_searches(self):
-        self.assertInSource('Payment source and type')  # a results list header
+        self.assertInSource('Amount')  # a results list header
 
         self.click_on_filter_tab('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
@@ -121,12 +121,12 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
         self.click_on_nav_tab('Prisoners')
 
     def test_perform_searches(self):
-        self.assertInSource('Received')  # a results list header
+        self.assertInSource('Amount')  # a results list header
 
         self.click_on_filter_tab('prisoner')
         self.type_in('id_prisoner_name', 'James')
         self.click_on_submit()
-        self.assertInSource('James Halls')
+        self.assertInSource('JAMES HALLS')
 
         # no need to click on tab as they're persistent
         self.type_in('id_prisoner_name', 'aaabbbccc111222333')  # not a likely prisoner name
