@@ -562,7 +562,8 @@ class DisbursementsListTestCase(SecurityViewTestCase):
         'nomis_transaction_id': '1234567-1', 'invoice_number': '1000099',
         'prisoner_number': 'A1409AE', 'prisoner_name': 'JAMES HALLS',
         'prison': 'ABC', 'prison_name': 'HMP Test1',
-        'recipient_first_name': 'Jack', 'recipient_last_name': 'Halls', 'recipient_email': '',
+        'recipient_first_name': 'Jack', 'recipient_last_name': 'Halls',
+        'recipient_email': '', 'remittance_description': '',
         'address_line1': '102 Petty France', 'address_line2': '',
         'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
         'account_number': '1234567', 'sort_code': '112233', 'roll_number': None,
@@ -586,7 +587,8 @@ class DisbursementsListTestCase(SecurityViewTestCase):
         'nomis_transaction_id': '1234568-1', '': 'PMD1000100',
         'prisoner_number': 'A1401AE', 'prisoner_name': 'JILLY HALL',
         'prison': 'DEF', 'prison_name': 'HMP Test2',
-        'recipient_first_name': 'Jilly', 'recipient_last_name': 'Halls', 'recipient_email': '',
+        'recipient_first_name': 'Jilly', 'recipient_last_name': 'Halls',
+        'recipient_email': 'jilly@mtp.local', 'remittance_description': 'PRESENT',
         'address_line1': '102 Petty France', 'address_line2': '',
         'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
         'account_number': '', 'sort_code': '', 'roll_number': None,
@@ -648,6 +650,7 @@ class DisbursementsListTestCase(SecurityViewTestCase):
         self.assertIn('1234567-1', response_content)
         self.assertIn('1000099', response_content)
         self.assertIn('Confirmed by John Smith', response_content)
+        self.assertIn('None given', response_content)
 
     @responses.activate
     def test_cheque_detail(self):
@@ -668,6 +671,8 @@ class DisbursementsListTestCase(SecurityViewTestCase):
         self.assertIn('1234568-1', response_content)
         self.assertNotIn('PMD1000100', response_content)
         self.assertIn('Confirmed by John Smith', response_content)
+        self.assertIn('jilly@mtp.local', response_content)
+        self.assertIn('PRESENT', response_content)
 
 
 @contextmanager

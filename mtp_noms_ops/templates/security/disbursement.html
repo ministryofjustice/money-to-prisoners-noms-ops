@@ -61,6 +61,21 @@
           </td>
         </tr>
         <tr>
+
+          <td colspan="4">
+            {% random_string as comment_label %}
+            <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'Payment description on remittance advice' %}</div>
+            <div aria-labelledby="mtp-label-{{ comment_label }}">
+              {% if disbursement.remittance_description %}
+                {{ disbursement.remittance_description }}
+              {% else %}
+                <span class="text-secondary">({% trans 'None given' %})</span>
+              {% endif %}
+            </div>
+          </td>
+
+        </tr>
+        <tr>
           <td colspan="2">
 
             {% labelled_data _('Status') disbursement.resolution|format_disbursement_resolution %}
