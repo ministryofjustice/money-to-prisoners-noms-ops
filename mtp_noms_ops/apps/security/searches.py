@@ -36,12 +36,12 @@ def get_existing_search(session, path):
     return None
 
 
-def save_search(session, description, endpoint, site_url, filters=[], last_result_count=0):
+def save_search(session, description, endpoint, site_url, filters=None, last_result_count=0):
     return session.post('/searches/', json={
         'description': description,
         'endpoint': endpoint,
         'site_url': site_url,
-        'filters': [{'field': field, 'value': filters[field]} for field in filters],
+        'filters': [{'field': field, 'value': value} for field, value in (filters or {}).items()],
         'last_result_count': last_result_count
     })
 
