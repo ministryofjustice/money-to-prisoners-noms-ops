@@ -8,7 +8,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.utils.cache import patch_cache_control
 from django.utils.translation import gettext, gettext_lazy as _
 from django.views.generic import FormView
-from mtp_common.nomis import get_photograph_data
+from mtp_common.nomis import get_photograph_data, get_location
 from requests.exceptions import RequestException
 
 from security.forms import (
@@ -197,11 +197,26 @@ class PrisonerDetailView(SecurityDetailView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         prisoner = context_data.get('prisoner', {})
-        context_data['recipient_names'] = NameSet(prisoner.get('recipient_names', ()), strip_titles=True)
-        if self.request.disbursements_available:
-            context_data['disbursement_count'] = self.get_disbursement_count(
-                context_data['form'].session, prisoner['prisoner_number']
+        if prisoner:
+            context_data['recipient_names'] = NameSet(
+                prisoner.get('recipient_names', ()), strip_titles=True
             )
+            if self.request.disbursements_available:
+                context_data['disbursement_count'] = self.get_disbursement_count(
+                    context_data['form'].session, prisoner['prisoner_number']
+                )
+            try:
+                location = get_location(prisoner['prisoner_number'])
+                if 'housing_location' in location:
+                    levels = {
+                        level['type']: level['value'] for level in
+                        location['housing_location']['levels']
+                    }
+                    context_data['housing_location'] = '-'.join([
+                        levels['Wing'], levels['Landing'], levels['Cell']
+                    ])
+            except RequestException:
+                pass
         return context_data
 
     def get_title_for_object(self, detail_object):
