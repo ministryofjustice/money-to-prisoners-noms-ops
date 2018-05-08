@@ -17,6 +17,19 @@ from security import required_permissions
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
 
 
+override_nomis_settings = override_settings(
+    NOMIS_API_BASE_URL='https://nomis.local/',
+    NOMIS_API_CLIENT_TOKEN='hello',
+    NOMIS_API_PRIVATE_KEY=(
+        '-----BEGIN EC PRIVATE KEY-----\n'
+        'MHcCAQEEIOhhs3RXk8dU/YQE3j2s6u97mNxAM9s+13S+cF9YVgluoAoGCCqGSM49\n'
+        'AwEHoUQDQgAE6l49nl7NN6k6lJBfGPf4QMeHNuER/o+fLlt8mCR5P7LXBfMG6Uj6\n'
+        'TUeoge9H2N/cCafyhCKdFRdQF9lYB2jB+A==\n'
+        '-----END EC PRIVATE KEY-----\n'
+    ),  # this key is just for tests, doesn't do anything
+)
+
+
 def sample_prison_list():
     responses.add(
         responses.GET,
@@ -367,6 +380,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
         self.assertIn('310.00', response_content)
 
     @responses.activate
+    @override_nomis_settings
     def test_displays_detail(self):
         no_saved_searches()
         responses.add(
@@ -930,19 +944,6 @@ class PinnedProfileTestCase(SecurityViewTestCase):
         self.assertContains(response, '3 new credits')
 
 
-override_nomis_settings = override_settings(
-    NOMIS_API_BASE_URL='https://nomis.local/',
-    NOMIS_API_CLIENT_TOKEN='hello',
-    NOMIS_API_PRIVATE_KEY=(
-        '-----BEGIN EC PRIVATE KEY-----\n'
-        'MHcCAQEEIOhhs3RXk8dU/YQE3j2s6u97mNxAM9s+13S+cF9YVgluoAoGCCqGSM49\n'
-        'AwEHoUQDQgAE6l49nl7NN6k6lJBfGPf4QMeHNuER/o+fLlt8mCR5P7LXBfMG6Uj6\n'
-        'TUeoge9H2N/cCafyhCKdFRdQF9lYB2jB+A==\n'
-        '-----END EC PRIVATE KEY-----\n'
-    ),  # this key is just for tests, doesn't do anything
-)
-
-
 class PrisonerDetailViewTestCase(SecurityViewTestCase):
     def _add_prisoner_data_responses(self):
         responses.add(
@@ -1004,6 +1005,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
         self.assertRedirects(response, '/static/images/placeholder-image.png', fetch_redirect_response=False)
 
     @responses.activate
+    @override_nomis_settings
     def test_display_pinned_profile(self):
         self._add_prisoner_data_responses()
         responses.add(
@@ -1036,6 +1038,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
         self.assertEqual(responses.calls[-1].request.body, b'{"last_result_count": 4}')
 
     @responses.activate
+    @override_nomis_settings
     def test_pin_profile(self):
         self._add_prisoner_data_responses()
         responses.add(

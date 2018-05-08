@@ -19,7 +19,7 @@
         <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
       </header>
 
-      <p class="lede">{% blocktrans with prison=prisoner.current_prison.name %}Held at {{ prison }}{% endblocktrans %}</p>
+      <p />
 
       <div class="mtp-prisoner-summary__details">
         <div class="column-one-quarter">
@@ -31,9 +31,17 @@
         </div>
 
         <div class="column-one-quarter">
-          {% labelled_data _('Total amount received') prisoner.credit_total|currency tag='strong' %}
+          {% labelled_data _('Total received') prisoner.credit_total|currency tag='strong' %}
         </div>
 
+        {% if request.disbursements_available %}
+          <div class="column-one-quarter">
+            {% labelled_data _('Disbursements sent') disbursement_count|default_if_none:_('Unknown') tag='strong' %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="mtp-prisoner-summary__details">
         {% if recipient_names %}
           <div class="column-one-quarter">
             {% random_string as profile_label %}
@@ -45,15 +53,15 @@
             </span>
           </div>
         {% endif %}
-      </div>
 
-      {% if request.disbursements_available %}
-        <div class="mtp-prisoner-summary__details">
-          <div class="column-one-quarter">
-            {% labelled_data _('Disbursements sent') disbursement_count|default_if_none:_('Unknown') tag='strong' %}
-          </div>
+        <div class="column-one-quarter">
+          {% labelled_data _('Prison') prisoner.current_prison.name tag='strong' %}
         </div>
-      {% endif %}
+
+        <div class="column-one-quarter">
+          {% labelled_data _('Location') housing_location|default:'–' tag='strong' %}
+        </div>
+      </div>
 
       {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this prisoner on your home page') unpin_label=_('Stop monitoring this prisoner') only %}
     </div>
