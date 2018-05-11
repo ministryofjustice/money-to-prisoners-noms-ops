@@ -1,5 +1,89 @@
-{% extends 'mtp_common/auth/login.html' %}{% load i18n %}
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% load mtp_common %}
 
-{% block auth_title %}
-  {% trans 'Prisoner money intelligence' %}
+{% block body_classes %}{{ block.super }} mtp-login{% endblock %}
+{% block page_title %}{% trans 'Sign in' %} – {{ block.super }}{% endblock %}
+
+{% block proposition_extra %}{% endblock %}
+
+{% block inner_content %}
+
+  <div class="mtp-login__header">
+    <div class="mtp-login__content">
+      <div class="grid-row">
+        <div class="column-full">
+          {% language_switch %}
+        </div>
+      </div>
+
+      <div class="grid-row">
+        <header class="column-two-thirds">
+          <h1 class="heading-xlarge">
+            {% trans 'Monitor prisoner money' %}
+          </h1>
+
+          <aside>
+            {% blocktrans trimmed %}
+              Use this tool to monitor and investigate money sent using the <a href="{{ start_page_url }}">Send money to someone in prison</a> service.
+            {% endblocktrans %}
+            {% trans 'The tool also gives insight into the digital movement of money, not only in your prison, but in all other public sector prisons in England and Wales.' %}
+          </aside>
+        </header>
+
+        <div class="column-one-third">
+          <img alt="{% trans 'Prisoner money intelligence' %}" src="{% static 'images/landing-noms-ops.png' %}" srcset="{% static 'images/landing-noms-ops@2x.png' %} 2x"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mtp-login__content">
+    <div class="grid-row">
+      <section class="column-half">
+        <h2 class="heading-medium">{% trans 'How to get access' %}</h2>
+        <p>
+          {% trans 'Your business hub administrator can set up an account for you if you don’t have access already.' %}
+        </p>
+        <p>
+          <a href="{% url 'submit_ticket' %}">
+            {% trans 'Need more help?' %}
+          </a>
+        </p>
+
+        <h2 class="heading-medium">{% trans 'What’s new?' %}</h2>
+        <p>
+          {% trans 'You can see more details about incoming credits.' %}
+        </p>
+        <p>
+          <a href="{% url 'submit_ticket' %}">
+            {% trans 'Tell us how we can improve this tool' %}
+          </a>
+        </p>
+      </section>
+
+      <section class="column-half">
+        <h2 class="heading-medium">{% trans 'Sign in' %}</h2>
+
+        {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+
+        <form action="{{ app_path }}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+
+          {% include 'mtp_common/forms/field.html' with field=form.username input_classes='form-control-3-4' only %}
+          {% include 'mtp_common/forms/field.html' with field=form.password input_classes='form-control-3-4' only %}
+
+          <div class="form-group">
+            <button type="submit" class="button" name="signin">{% trans 'Sign in' %}</button>
+          </div>
+        </form>
+
+        <p><a href="{% url 'reset_password' %}">{% trans 'Forgotten your password?' %}</a></p>
+
+      </section>
+    </div>
+  </div>
+
 {% endblock %}
