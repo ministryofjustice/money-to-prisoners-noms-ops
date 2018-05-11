@@ -38,6 +38,9 @@ urlpatterns = i18n_patterns(
     url(
         r'^login/$', auth_views.login, {
             'template_name': 'mtp_auth/login.html',
+            'extra_context': {
+                'start_page_url': settings.START_PAGE_URL,
+            },
         }, name='login'),
     url(
         r'^logout/$', auth_views.logout, {
