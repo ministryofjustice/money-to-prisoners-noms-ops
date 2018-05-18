@@ -3,6 +3,8 @@
 {% load mtp_common %}
 
 {% block inner_content %}
+  {% notifications_box request 'noms_ops_security_dashboard' %}
+
   <header>
     <h1 class="heading-xlarge mtp-unpadded-heading">
       {% blocktrans trimmed with full_name=request.user.get_full_name|default:request.user.username %}
