@@ -13,6 +13,7 @@
     ['hmps.gsi.gov.uk', 'noms.gsi.gov.uk', 'justice.gsi.gov.uk'],
     ['gsi.gov.uk', 'gov.uk']
   );
+  require('notifications').Notifications.init();
 
   require('confirm-checked').ConfirmChecked.init();
   require('security-forms').SecurityForms.init();
