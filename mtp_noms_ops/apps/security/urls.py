@@ -100,9 +100,12 @@ urlpatterns = [
         )),
         name='prisoner_disbursement_detail_email_export'),
 
-    url(r'^prisoner_image/(?P<prisoner_number>[A-Za-z0-9]+)/$',
+    url(r'^prisoner_image/(?P<prisoner_number>[A-Za-z0-9]*)/$',
         security_test(views.prisoner_image_view),
         name='prisoner_image'),
+    url(r'^prisoner_nomis_info/(?P<prisoner_number>[A-Za-z0-9]*)/$',
+        security_test(views.prisoner_nomis_info_view),
+        name='prisoner_nomis_info'),
 
     url(r'^disbursements/$', security_test(views.DisbursementListView.as_view()),
         name='disbursement_list'),

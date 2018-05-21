@@ -14,6 +14,7 @@
     ['gsi.gov.uk', 'gov.uk']
   );
   require('notifications').Notifications.init();
+  require('async-load').AsyncLoad.init();
 
   require('confirm-checked').ConfirmChecked.init();
   require('security-forms').SecurityForms.init();

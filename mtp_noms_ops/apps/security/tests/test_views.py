@@ -76,6 +76,16 @@ def no_saved_searches():
 
 class SecurityBaseTestCase(SimpleTestCase):
 
+    def setUp(self):
+        super().setUp()
+        self.notifications_mock = mock.patch('mtp_common.templatetags.mtp_common.notifications_for_request',
+                                             return_value=[])
+        self.notifications_mock.start()
+
+    def tearDown(self):
+        self.notifications_mock.stop()
+        super().tearDown()
+
     @mock.patch('mtp_common.auth.backends.api_client')
     def login(self, mock_api_client, follow=True):
         no_saved_searches()
