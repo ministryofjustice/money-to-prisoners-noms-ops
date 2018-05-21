@@ -4,7 +4,7 @@ import logging
 from django.contrib import messages
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.cache import patch_cache_control
 from django.utils.translation import gettext, gettext_lazy as _
 from django.views.generic import FormView
@@ -205,18 +205,6 @@ class PrisonerDetailView(SecurityDetailView):
                 context_data['disbursement_count'] = self.get_disbursement_count(
                     context_data['form'].session, prisoner['prisoner_number']
                 )
-            try:
-                location = get_location(prisoner['prisoner_number'])
-                if 'housing_location' in location:
-                    levels = {
-                        level['type']: level['value'] for level in
-                        location['housing_location']['levels']
-                    }
-                    context_data['housing_location'] = '-'.join([
-                        levels['Wing'], levels['Landing'], levels['Cell']
-                    ])
-            except RequestException:
-                pass
         return context_data
 
     def get_title_for_object(self, detail_object):
@@ -291,3 +279,23 @@ def prisoner_image_view(request, prisoner_number):
         return HttpResponseRedirect(static('images/placeholder-image@2x.png'))
     else:
         return HttpResponseRedirect(static('images/placeholder-image.png'))
+
+
+def prisoner_nomis_info_view(request, prisoner_number):
+    response_data = {}
+    if nomis_api_available(request) and prisoner_number:
+        try:
+            location = get_location(prisoner_number)
+            if 'housing_location' in location:
+                levels = {
+                    level['type']: level['value'] for level in
+                    location['housing_location']['levels']
+                }
+                response_data['housing_location'] = '-'.join([
+                    levels['Wing'], levels['Landing'], levels['Cell']
+                ])
+        except RequestException:
+            logger.warning('Could not load location for %s' % prisoner_number)
+    response = JsonResponse(response_data)
+    patch_cache_control(response, private=True, max_age=3600)
+    return response

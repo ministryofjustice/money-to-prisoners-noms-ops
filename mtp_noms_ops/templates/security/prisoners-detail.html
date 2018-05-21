@@ -8,11 +8,9 @@
 
 {% block inner_content %}
   <div>
-    {% if prisoner and nomis_api_available %}
-      <div class="mtp-prisoner-image">
-        <img src="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}" srcset="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}?ratio=2x 2x" alt="{% trans 'Photo of the prisoner' %}"/>
-      </div>
-    {% endif %}
+    <div class="mtp-prisoner-image">
+      <img src="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}" srcset="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}?ratio=2x 2x" alt="{% trans 'Photo of the prisoner' %}"/>
+    </div>
 
     <div class="mtp-prisoner-summary">
       <header>
@@ -59,7 +57,8 @@
         </div>
 
         <div class="column-one-quarter">
-          {% labelled_data _('Location') housing_location|default:'–' tag='strong' %}
+          <div id="location-label" class="mtp-detail-label">{% trans 'Location' %}</div>
+          <strong class="js-async-load" data-path="{% url 'security:prisoner_nomis_info' prisoner_number=prisoner.prisoner_number %}" data-key="housing_location" aria-labelledby="location-label">–</strong>
         </div>
       </div>
 
