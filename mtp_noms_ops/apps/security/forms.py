@@ -273,6 +273,7 @@ class CreditsForm(SecurityForm):
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
     sender_email = forms.CharField(label=_('Sender email'), required=False)
     sender_postcode = forms.CharField(label=_('Sender postcode'), required=False)
+    sender_ip_address = forms.CharField(label=_('Sender IP address'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
@@ -296,6 +297,7 @@ class CreditsForm(SecurityForm):
          'by {source} **** **** **** {card_number_last_digits}',
          'by {source}',),
         ('from postcode {sender_postcode}',),
+        ('from IP {sender_ip_address}',),
         ('to prisoner {prisoner_name} ({prisoner_number})',
          'to prisoners named ‘{prisoner_name}’',
          'to prisoner {prisoner_number}',),
