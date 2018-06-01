@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -53,6 +54,7 @@ class SendersForm(SecurityForm):
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
     sender_email = forms.CharField(label=_('Sender email'), required=False)
+    sender_postcode = forms.CharField(label=_('Sender postcode'), required=False)
 
     prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
@@ -67,6 +69,7 @@ class SendersForm(SecurityForm):
     description_templates = (
         ('are named ‘{sender_name}’',),
         ('have email {sender_email}',),
+        ('are from postcode {sender_postcode}',),
         ('sent by {source} from account {sender_account_number} {sender_sort_code}',
          'sent by {source} from account {sender_account_number}',
          'sent by {source} from sort code {sender_sort_code}',
@@ -122,6 +125,12 @@ class SendersForm(SecurityForm):
         if self.cleaned_data.get('source') != 'online':
             return ''
         return self.cleaned_data.get('card_number_last_digits')
+
+    def clean_sender_postcode(self):
+        sender_postcode = self.cleaned_data.get('sender_postcode')
+        if sender_postcode:
+            sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
+        return sender_postcode
 
     def get_object_list_endpoint_path(self):
         return '/senders/'
@@ -259,6 +268,7 @@ class CreditsForm(SecurityForm):
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
     sender_email = forms.CharField(label=_('Sender email'), required=False)
+    sender_postcode = forms.CharField(label=_('Sender postcode'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
@@ -280,6 +290,7 @@ class CreditsForm(SecurityForm):
          'by {source} from sort code {sender_sort_code}',
          'by {source} **** **** **** {card_number_last_digits}',
          'by {source}',),
+        ('from postcode {sender_postcode}',),
         ('to prisoner {prisoner_name} ({prisoner_number})',
          'to prisoners named ‘{prisoner_name}’',
          'to prisoner {prisoner_number}',),
@@ -343,6 +354,12 @@ class CreditsForm(SecurityForm):
         if self.cleaned_data.get('source') != 'online':
             return ''
         return self.cleaned_data.get('card_number_last_digits')
+
+    def clean_sender_postcode(self):
+        sender_postcode = self.cleaned_data.get('sender_postcode')
+        if sender_postcode:
+            sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
+        return sender_postcode
 
     def get_object_list_endpoint_path(self):
         return '/credits/'
