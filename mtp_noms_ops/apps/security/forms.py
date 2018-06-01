@@ -64,8 +64,9 @@ class SendersForm(SecurityForm):
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Showing senders who {filter_description}, ordered by {ordering_description}.'
-    unfiltered_description_template = 'Showing all senders ordered by {ordering_description}.'
+    filtered_description_template = 'Below are senders who {filter_description}, ordered by {ordering_description}.'
+    unfiltered_description_template = 'All senders are shown below ordered by {ordering_description}. ' \
+                                      'Add filters to narrow down your search.'
     description_templates = (
         ('are named ‘{sender_name}’',),
         ('have email {sender_email}',),
@@ -182,8 +183,9 @@ class PrisonersForm(SecurityForm):
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Showing prisoners who {filter_description}, ordered by {ordering_description}.'
-    unfiltered_description_template = 'Showing all prisoners ordered by {ordering_description}.'
+    filtered_description_template = 'Below are prisoners who {filter_description}, ordered by {ordering_description}.'
+    unfiltered_description_template = 'All prisoners are shown below ordered by {ordering_description}. ' \
+                                      'Add filters to narrow down your search.'
     description_templates = (
         ('are named ‘{prisoner_name}’',),
         ('have prisoner number {prisoner_number}',),
@@ -275,8 +277,9 @@ class CreditsForm(SecurityForm):
     exclusive_date_params = ['received_at__lt']
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Showing credits sent {filter_description}, ordered by {ordering_description}.'
-    unfiltered_description_template = 'Showing all credits ordered by {ordering_description}.'
+    filtered_description_template = 'Below are credits sent {filter_description}, ordered by {ordering_description}.'
+    unfiltered_description_template = 'All credits are shown below ordered by {ordering_description}. ' \
+                                      'Add filters to narrow down your search.'
     description_templates = (
         ('between {received_at__gte} and {received_at__lt}',
          'since {received_at__gte}',
@@ -433,9 +436,10 @@ class DisbursementsForm(SecurityForm):
     exclusive_date_params = ['created__lt']
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Showing disbursements {filter_description}, ' \
+    filtered_description_template = 'Below are disbursements {filter_description}, ' \
                                     'ordered by {ordering_description}.'
-    unfiltered_description_template = 'Showing all disbursements ordered by {ordering_description}.'
+    unfiltered_description_template = 'All disbursements are shown below ordered by {ordering_description}. ' \
+                                      'Add filters to narrow down your search.'
     description_templates = (
         ('entered between {created__gte} and {created__lt}',
          'entered since {created__gte}',
@@ -553,9 +557,10 @@ class SendersDetailForm(SecurityDetailForm):
                                  ])
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Showing credits sent by this sender that {filter_description}, ' \
+    filtered_description_template = 'Below are credits sent by this sender that {filter_description}, ' \
                                     'ordered by {ordering_description}.'
-    unfiltered_description_template = 'Showing all credits sent by this sender ordered by {ordering_description}.'
+    unfiltered_description_template = 'All credits sent by this sender are shown below ordered by ' \
+                                      '{ordering_description}.'
 
     def get_object_endpoint(self):
         return self.session.senders(self.object_id)
@@ -575,9 +580,10 @@ class PrisonersDetailForm(SecurityDetailForm):
                                  ])
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Showing credits received by this prisoner that {filter_description}, ' \
+    filtered_description_template = 'Below are credits received by this prisoner that {filter_description}, ' \
                                     'ordered by {ordering_description}.'
-    unfiltered_description_template = 'Showing all credits received by this prisoner ordered by {ordering_description}.'
+    unfiltered_description_template = 'All credits received by this prisoner are shown below ordered by ' \
+                                      '{ordering_description}.'
 
     def get_object_endpoint(self):
         return self.session.prisoners(self.object_id)
@@ -588,9 +594,9 @@ class PrisonersDetailForm(SecurityDetailForm):
 
 class PrisonersDisbursementDetailForm(PrisonersDetailForm):
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Showing disbursements sent by this prisoner that {filter_description}, ' \
+    filtered_description_template = 'Below are disbursements sent by this prisoner that {filter_description}, ' \
                                     'ordered by {ordering_description}.'
-    unfiltered_description_template = 'Showing all disbursements sent by this prisoner ordered by ' \
+    unfiltered_description_template = 'All disbursements sent by this prisoner are shown below ordered by ' \
                                       '{ordering_description}.'
 
     def __init__(self, *args, **kwargs):
