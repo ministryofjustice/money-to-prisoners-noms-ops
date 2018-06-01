@@ -40,31 +40,20 @@ exports.SecurityForms = {
 
   bindPaymentSourceSelection: function () {
     var $paymentSourceSelect = $('#id_source, #id_method');
-    var $senderAccountNumber = $('#id_sender_account_number-wrapper, #id_account_number-wrapper');
-    var $senderSortCode = $('#id_sender_sort_code-wrapper, #id_sort_code-wrapper');
-    var $cardNumberLastDigits = $('#id_card_number_last_digits-wrapper');
-    var $senderEmail = $('#id_sender_email-wrapper');
+    var $bankTransferContainers = $('.mtp-payment-method-options--bank-transfer');
+    var $debitCardContainers = $('.mtp-payment-method-options--debit-card');
 
     function update () {
+      $bankTransferContainers.hide();
+      $debitCardContainers.hide();
       switch ($paymentSourceSelect.val()) {
         case 'bank_transfer':
-          $senderAccountNumber.show();
-          $senderSortCode.show();
-          $cardNumberLastDigits.hide();
-          $senderEmail.hide();
+          $bankTransferContainers.show();
           break;
         case 'online':
         case 'cheque':
-          $senderAccountNumber.hide();
-          $senderSortCode.hide();
-          $cardNumberLastDigits.show();
-          $senderEmail.show();
+          $debitCardContainers.show();
           break;
-        default:
-          $senderAccountNumber.hide();
-          $senderSortCode.hide();
-          $cardNumberLastDigits.hide();
-          $senderEmail.hide();
       }
     }
 
