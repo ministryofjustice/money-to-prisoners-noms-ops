@@ -189,7 +189,7 @@ class PrisonerDetailView(SecurityDetailView):
     """
     list_title = PrisonerListView.title
     list_url = reverse_lazy('security:prisoner_list')
-    template_name = 'security/prisoners-detail.html'
+    template_name = 'security/prisoner.html'
     form_class = PrisonersDetailForm
     id_kwarg_name = 'prisoner_id'
     object_context_key = 'prisoner'
@@ -228,7 +228,7 @@ class PrisonerDisbursementDetailView(PrisonerDetailView):
     """
     Prisoner profile view showing disbursement list
     """
-    template_name = 'security/prisoners-disbursement-detail.html'
+    template_name = 'security/prisoner-disbursements.html'
     form_class = PrisonersDisbursementDetailForm
     object_list_context_key = 'disbursements'
 
