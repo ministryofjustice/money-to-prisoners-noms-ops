@@ -37,6 +37,7 @@
         </div>
         <div class="column-one-third mtp-payment-method-options--debit-card">
           {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
+          {% include 'mtp_common/forms/field.html' with field=form.sender_ip_address %}
         </div>
       </div>
     {% endpaneltab %}

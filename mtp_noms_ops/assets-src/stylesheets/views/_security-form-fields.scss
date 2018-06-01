@@ -10,7 +10,7 @@ select[disabled] {
   width: 100%;
 }
 
-#id_sender_account_number, #id_account_number {
+#id_sender_account_number, #id_account_number, #id_sender_ip_address {
   width: 10em;
 }
 
@@ -76,6 +76,7 @@ select[disabled] {
   #id_card_number_last_digits-wrapper,
   #id_sender_email-wrapper,
   #id_sender_postcode-wrapper,
+  #id_sender_ip_address-wrapper,
   #id_account_number-wrapper,
   #id_sort_code-wrapper {
     @include media(tablet) {
