@@ -48,7 +48,8 @@ class SendersForm(SecurityForm):
     credit_total__lte = forms.IntegerField(label=_('Maximum total sent'), required=False)
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
-    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices())
+    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices(),
+                               help_text=_('Select to see more filters e.g. card number or postcode'))
     sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('for example 01-23-45'), required=False)
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
@@ -264,7 +265,8 @@ class CreditsForm(SecurityForm):
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
-    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices())
+    source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices(),
+                               help_text=_('Select to see more filters e.g. card number or postcode'))
     sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('for example 01-23-45'), required=False)
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
