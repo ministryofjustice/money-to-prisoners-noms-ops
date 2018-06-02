@@ -64,6 +64,7 @@ class SecurityFormTestCase(unittest.TestCase):
         )
 
     def setUp(self):
+        super().setUp()
         self.request = mock.MagicMock(
             user=mock.MagicMock(
                 token=generate_tokens()
@@ -253,6 +254,7 @@ class SecurityFormTestCase(unittest.TestCase):
 class ReviewCreditsFormTestCase(unittest.TestCase):
 
     def setUp(self):
+        super().setUp()
         self.request = mock.MagicMock(
             user=mock.MagicMock(
                 token=generate_tokens()

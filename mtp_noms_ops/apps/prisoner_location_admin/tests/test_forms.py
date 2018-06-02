@@ -18,6 +18,7 @@ from . import (
 class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
     def setUp(self):
+        super().setUp()
         self.factory = RequestFactory()
 
     def test_location_file_valid(self):
