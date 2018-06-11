@@ -91,5 +91,6 @@ def send_task_failure_notification(email, context):
     send_email(
         email, 'prisoner_location_admin/email/failure-notification.txt',
         gettext('Prisoner money: prisoner location update failed'),
-        context=context, html_template='prisoner_location_admin/email/failure-notification.html'
+        context=context, html_template='prisoner_location_admin/email/failure-notification.html',
+        anymail_tags=['locations-failed'],
     )

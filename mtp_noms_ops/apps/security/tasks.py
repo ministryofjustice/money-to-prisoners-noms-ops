@@ -1,7 +1,7 @@
 from urllib.parse import urljoin
 
+from anymail.message import AnymailMessage
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.template import loader as template_loader
 from django.utils.translation import gettext
 from django.utils import timezone
@@ -54,11 +54,12 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
     from_address = getattr(settings, 'MAILGUN_FROM_ADDRESS', '') or settings.DEFAULT_FROM_EMAIL
     text_body = template_loader.get_template('security/email/export.txt').render(template_context)
     html_body = template_loader.get_template('security/email/export.html').render(template_context)
-    email = EmailMultiAlternatives(
+    email = AnymailMessage(
         subject=subject,
         body=text_body.strip('\n'),
         from_email=from_address,
-        to=[user.email]
+        to=[user.email],
+        tags=['export'],
     )
     email.attach_alternative(html_body, mimetype='text/html')
     email.attach(attachment_name, output, mimetype=attachment_type)
