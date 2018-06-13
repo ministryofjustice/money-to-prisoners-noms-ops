@@ -287,13 +287,14 @@ def prisoner_nomis_info_view(request, prisoner_number):
         try:
             location = get_location(prisoner_number)
             if 'housing_location' in location:
-                levels = {
-                    level['type']: level['value'] for level in
-                    location['housing_location']['levels']
-                }
-                response_data['housing_location'] = '-'.join([
-                    levels['Wing'], levels['Landing'], levels['Cell']
-                ])
+                housing = location['housing_location']
+                if housing['levels']:
+                    # effectively drops prison code prefix from description
+                    response_data['housing_location'] = '-'.join(
+                        level['value'] for level in housing['levels']
+                    )
+                else:
+                    response_data['housing_location'] = housing['description']
         except RequestException:
             logger.warning('Could not load location for %s' % prisoner_number)
     response = JsonResponse(response_data)
