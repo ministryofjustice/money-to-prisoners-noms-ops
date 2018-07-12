@@ -26,8 +26,12 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
             ' ' +
             gettext('You can’t see cash or postal orders here.')
         )
+    elif object_type == 'senders':
+        export_message = gettext('Attached is a list of payment sources you exported from ‘%(service_name)s’.')
+    elif object_type == 'prisoners':
+        export_message = gettext('Attached is a list of prisoners you exported from ‘%(service_name)s’.')
     else:
-        raise ValueError
+        export_message = None
 
     api_session = get_api_session_with_session(user, session)
     generated_at = timezone.now()

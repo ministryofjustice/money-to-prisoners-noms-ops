@@ -2,9 +2,11 @@
 {% load i18n %}
 
 {% block inner_content %}
-  <p>
-    {{ export_message }}
-  </p>
+  {% if export_message %}
+    <p>
+      {{ export_message }}
+    </p>
+  {% endif %}
   <p>
     {{ export_description|safe }}
     {% blocktrans trimmed with generated_at=generated_at|date:'SHORT_DATETIME_FORMAT' %}

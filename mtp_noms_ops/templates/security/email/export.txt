@@ -1,9 +1,9 @@
 {% load i18n %}
 GOV.UK - {% trans 'Prisoner money' %}
 
-{{ export_message }}
+{% if export_message %}{{ export_message }}
 
-{{ export_description|striptags }}
+{% endif %}{{ export_description|striptags }}
 
 {% blocktrans trimmed with generated_at=generated_at|date:'SHORT_DATETIME_FORMAT' %}
   The spreadsheet was generated at {{ generated_at }}
