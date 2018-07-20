@@ -27,60 +27,63 @@
       <a class="js-print-trigger" href="#print-dialog">{% trans 'Print these credits' %}</a>
     </div>
 
-    <table>
-      <caption class="visually-hidden">{% trans 'Please check the following credits' %}</caption>
+    <div class="mtp-results-list">
+      <table class="mtp-table">
+        <caption class="visually-hidden">{% trans 'Please check the following credits' %}</caption>
 
-      <thead>
-        <tr>
-          <th>{% trans 'Payment source' %}</th>
-          <th>{% trans 'Prisoner' %}</th>
-          <th class="mtp-numeric-th">{% trans 'Amount' %}</th>
-          <th>{% trans 'Security comments' %}</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for credit in credits %}
+        <thead>
           <tr>
-            <td class="mtp-review__sender">
-              <div class="line1">
-                {% with known_sender=credit|credit_sender_identifiable %}
-                  {% if known_sender %}
-                    <a class="mtp-print-url-hidden" href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default_if_none:'—' }}</a>
-                  {% else %}
-                    {% trans 'Sender details not recorded' %}
-                  {% endif %}
-                {% endwith %}
-              </div>
-              {% if credit.source == 'online' %}
-                {{ credit.sender_email|default_if_none:'—' }}<br/>
-                {{ credit.card_number_last_digits|format_card_number }} {{ credit.card_expiry_date|default_if_none:'' }}<br/>
-                {% trans 'Debit card payment' %}
-              {% else %}
-                {{ credit.sender_account_number }} {{ credit.sender_sort_code|format_sort_code }}<br/>
-                {% trans 'Bank transfer' %}
-              {% endif %}
-            </td>
-            <td class="mtp-review__prisoner">
-              <div class="line1"><a class="mtp-print-url-hidden" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
-              {{ credit.prisoner_name|default_if_none:'—' }}
-            </td>
-            <td class="numeric">
-              {{ credit.amount|currency }}
-            </td>
-            <td>
-              {% random_string as comment_label %}
-              <label class="visually-hidden" for="mtp-review__comment-{{ comment_label }}">
-                {% blocktrans trimmed with amount=credit.amount|currency prisoner_name=credit.prisoner_name|default_if_none:'—' %}
-                  Add security comment for credit of {{ amount }} to {{ prisoner_name }}
-                {% endblocktrans %}
-              </label>
-              <textarea id="mtp-review__comment-{{ comment_label }}" class="form-control" rows="4" name="comment_{{ credit.id }}"></textarea>
-            </td>
+            <th>{% trans 'Payment source' %}</th>
+            <th>{% trans 'Prisoner' %}</th>
+            <th class="numeric">{% trans 'Amount' %}</th>
+            <th>{% trans 'Security comments' %}</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+
+        <tbody>
+          {% for credit in credits %}
+            <tr>
+              <td class="font-xsmall">
+                <div class="font-small">
+                  {% with known_sender=credit|credit_sender_identifiable %}
+                    {% if known_sender %}
+                      <a class="mtp-print-url-hidden" href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default_if_none:'—' }}</a>
+                    {% else %}
+                      {% trans 'Sender details not recorded' %}
+                    {% endif %}
+                  {% endwith %}
+                </div>
+                {% if credit.source == 'online' %}
+                  {{ credit.sender_email|default_if_none:'—' }}<br/>
+                  {{ credit.card_number_last_digits|format_card_number }} {{ credit.card_expiry_date|default_if_none:'' }}<br/>
+                  {% trans 'Debit card payment' %}
+                {% else %}
+                  {{ credit.sender_account_number }} {{ credit.sender_sort_code|format_sort_code }}<br/>
+                  {% trans 'Bank transfer' %}
+                {% endif %}
+              </td>
+              <td class="font-xsmall">
+                <div class="font-small"><a class="mtp-print-url-hidden" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
+                {{ credit.prisoner_name|default_if_none:'—' }}
+              </td>
+              <td class="numeric">
+                {{ credit.amount|currency }}
+              </td>
+              <td>
+                {% random_string as comment_label %}
+                <label class="visually-hidden" for="mtp-review__comment-{{ comment_label }}">
+                  {% blocktrans trimmed with amount=credit.amount|currency prisoner_name=credit.prisoner_name|default_if_none:'—' %}
+                    Add security comment for credit of {{ amount }} to {{ prisoner_name }}
+                  {% endblocktrans %}
+                </label>
+                <textarea id="mtp-review__comment-{{ comment_label }}" class="form-control" rows="4" name="comment_{{ credit.id }}"></textarea>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
 
     <div class="mtp-review__actions print-hidden">
       <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
@@ -89,11 +92,13 @@
     {% dialoguebox html_id='confirm-checked' title=_('Have you checked these credits?') %}
       <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
       <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
-      <button type="submit"
-              class="button"
-              value="override">{% trans 'Yes, all credits checked' %}</button>
-      <button type="button"
-              class="button-secondary {{ dialogue_close_class }}">{% trans 'No, continue checking' %}</button>
+      <br/>
+      <button type="submit" class="button" value="override">
+        {% trans 'Yes, all credits checked' %}
+      </button>
+      <button type="button" class="button-secondary {{ dialogue_close_class }}">
+        {% trans 'No, continue checking' %}
+      </button>
     {% enddialoguebox %}
   </form>
 
