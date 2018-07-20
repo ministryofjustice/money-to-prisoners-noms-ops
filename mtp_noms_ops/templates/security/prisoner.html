@@ -96,7 +96,7 @@
           </div>
         </div>
 
-        <table>
+        <table class="mtp-table">
           <caption class="visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
@@ -105,11 +105,11 @@
           </thead>
           <tbody>
             {% for credit in credits %}
-              <tr class="{% if forloop.last %}no-border{% endif %}">
+              <tr>
                 {% include 'security/includes/credit-row.html' with link_sender=True %}
               </tr>
             {% empty %}
-              <tr class="no-border">
+              <tr>
                 <td colspan="7">{% trans 'No matching credits found' %}</td>
               </tr>
             {% endfor %}

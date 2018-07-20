@@ -32,48 +32,20 @@
           {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many prisoners to download.') %}
         </div>
 
-        <table>
+        <table class="mtp-table">
           <caption class="visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
-              <th class="{{ form|ordering_classes:'prisoner_number' }}">
-                <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
-                  <span>
-                    {% trans 'Prisoner' %}
-                    {% describe_ordering_for_screenreader form 'prisoner_number' %}
-                  </span>
-                </a>
-              </th>
+              {% sortable_cell _('Prisoner') form.cleaned_data 'prisoner_number' %}
               <th>{% trans 'Prison' %}</th>
-              <th class="{{ form|ordering_classes:'credit_count' }}">
-                <a href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
-                  <span>
-                    {% trans 'Received' %}
-                    {% describe_ordering_for_screenreader form 'credit_count' %}
-                  </span>
-                </a>
-              </th>
-              <th class="{{ form|ordering_classes:'sender_count' }}">
-                <a href="?{{ form|query_string_with_reversed_ordering:'sender_count' }}">
-                  <span>
-                    {% trans 'Payment sources' %}
-                    {% describe_ordering_for_screenreader form 'sender_count' %}
-                  </span>
-                </a>
-              </th>
-              <th class="{{ form|ordering_classes:'credit_total' }} number">
-                <a href="?{{ form|query_string_with_reversed_ordering:'credit_total' }}">
-                  <span>
-                    {% trans 'Amount' %}
-                    {% describe_ordering_for_screenreader form 'credit_total' %}
-                  </span>
-                </a>
-              </th>
+              {% sortable_cell _('Received') form.cleaned_data 'credit_count' %}
+              {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' %}
+              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
             </tr>
           </thead>
           <tbody>
             {% for prisoner in prisoners %}
-              <tr {% if forloop.last %}class="no-border"{% endif %}>
+              <tr>
                 <td>
                   <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
                     {{ prisoner.prisoner_number }}
@@ -96,12 +68,14 @@
                     {{ count }} payment sources
                   {% endblocktrans %}
                 </td>
-                <td class="number">
-                  {{ prisoner.credit_total|currency }}
+                <td class="numeric">
+                  <span class="mtp-sortable-cell--pad">
+                    {{ prisoner.credit_total|currency }}
+                  </span>
                 </td>
               </tr>
             {% empty %}
-              <tr class="no-border">
+              <tr>
                 <td colspan="5">{% trans 'No matching prisoners found' %}</td>
               </tr>
             {% endfor %}

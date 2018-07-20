@@ -1,24 +1,10 @@
 {% load i18n %}
-{% load security %}
+{% load mtp_common %}
 
-<th class="{{ form|ordering_classes:'received_at' }}">
-  <a href="?{{ form|query_string_with_reversed_ordering:'received_at' }}">
-    <span>
-      {% trans 'Date received' %}
-      {% describe_ordering_for_screenreader form 'received_at' %}
-    </span>
-  </a>
-</th>
+{% sortable_cell _('Date received') form.cleaned_data 'received_at' %}
 
 {% if link_prisoner %}
-  <th class="{{ form|ordering_classes:'prisoner_number' }}">
-    <a href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
-      <span>
-        {% trans 'Prisoner' %}
-        {% describe_ordering_for_screenreader form 'prisoner_number' %}
-      </span>
-    </a>
-  </th>
+  {% sortable_cell _('Prisoner') form.cleaned_data 'prisoner_number' %}
 {% else %}
   <th>
     {% trans 'Prisoner' %}
@@ -31,14 +17,7 @@
 
 <th>{% trans 'Payment source' %}</th>
 
-<th class="{{ form|ordering_classes:'amount' }} number">
-  <a href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
-    <span>
-      {% trans 'Amount' %}
-      {% describe_ordering_for_screenreader form 'amount' %}
-    </span>
-  </a>
-</th>
+{% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
 
 <th>{% trans 'Prison' %}</th>
 
