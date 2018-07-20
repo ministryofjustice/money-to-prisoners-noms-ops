@@ -597,6 +597,15 @@ class PrisonersDetailForm(SecurityDetailForm):
 
 
 class PrisonersDisbursementDetailForm(PrisonersDetailForm):
+    ordering = forms.ChoiceField(label=_('Order by'), required=False,
+                                 initial='-created',
+                                 choices=[
+                                     ('created', _('Date entered (oldest to newest)')),
+                                     ('-created', _('Date entered (newest to oldest)')),
+                                     ('amount', _('Amount sent (low to high)')),
+                                     ('-amount', _('Amount sent (high to low)')),
+                                 ])
+
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are disbursements sent by this prisoner that {filter_description}, ' \
                                     'ordered by {ordering_description}.'

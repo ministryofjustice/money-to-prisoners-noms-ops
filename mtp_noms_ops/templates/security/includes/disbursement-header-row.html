@@ -3,7 +3,13 @@
 
 {% sortable_cell _('Date entered') form.cleaned_data 'created' %}
 
-{% sortable_cell _('Prisoner') form.cleaned_data 'prisoner_number' %}
+{% if link_prisoner %}
+  {% sortable_cell _('Prisoner') form.cleaned_data 'prisoner_number' %}
+{% else %}
+  <th>
+    {% trans 'Prisoner' %}
+  </th>
+{% endif %}
 
 <th>
   <span class="visually-hidden">{% trans 'Method' %}</span>
