@@ -32,7 +32,7 @@
           {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
         </div>
 
-        <table>
+        <table class="mtp-table">
           <caption class="visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
@@ -41,11 +41,11 @@
           </thead>
           <tbody>
             {% for credit in credits %}
-              <tr {% if forloop.last %}class="no-border"{% endif %}>
+              <tr>
                 {% include 'security/includes/credit-row.html' with link_prisoner=True link_sender=True %}
               </tr>
             {% empty %}
-              <tr class="no-border">
+              <tr>
                 <td colspan="7">{% trans 'No matching credits found' %}</td>
               </tr>
             {% endfor %}

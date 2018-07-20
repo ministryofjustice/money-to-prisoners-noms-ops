@@ -41,8 +41,10 @@
   {% endblocktrans %}
 </td>
 
-<td class="number">
-  {{ credit.amount|currency }}
+<td class="numeric">
+  <span class="mtp-sortable-cell--pad">
+    {{ credit.amount|currency }}
+  </span>
 </td>
 
 <td>
