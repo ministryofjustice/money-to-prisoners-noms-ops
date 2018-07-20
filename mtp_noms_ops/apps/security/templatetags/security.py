@@ -79,38 +79,6 @@ def list_prison_names(prisons):
 
 
 @register.filter
-def ordering_classes(form, ordering):
-    current_ordering = form.cleaned_data.get('ordering')
-    if current_ordering == ordering:
-        return 'mtp-results-ordering mtp-results-ordering--asc'
-    if current_ordering == '-%s' % ordering:
-        return 'mtp-results-ordering mtp-results-ordering--desc'
-    return 'mtp-results-ordering'
-
-
-@register.inclusion_tag('security/includes/result-ordering-for-screenreader.html')
-def describe_ordering_for_screenreader(form, ordering):
-    current_ordering = form.cleaned_data.get('ordering')
-    if current_ordering == ordering:
-        ordering = 'ascending'
-    elif current_ordering == '-%s' % ordering:
-        ordering = 'descending'
-    else:
-        ordering = None
-    return {'ordering': ordering}
-
-
-@register.filter
-def query_string_with_reversed_ordering(form, ordering):
-    data = form.get_query_data(allow_parameter_manipulation=False)
-    current_ordering = data.get('ordering')
-    if current_ordering == ordering:
-        ordering = '-%s' % ordering
-    data['ordering'] = ordering
-    return urlencode(data, doseq=True)
-
-
-@register.filter
 def query_string_with_additional_parameter(form, param):
     data = form.get_query_data(allow_parameter_manipulation=False)
     data[param] = 1
