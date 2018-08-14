@@ -40,7 +40,7 @@
               <th>{% trans 'Prison' %}</th>
               {% sortable_cell _('Received') form.cleaned_data 'credit_count' %}
               {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' %}
-              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
+              {% sortable_cell _('Amount') form.cleaned_data 'credit_total' cell_classes='numeric' %}
             </tr>
           </thead>
           <tbody>
