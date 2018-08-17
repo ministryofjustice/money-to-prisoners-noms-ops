@@ -2,8 +2,7 @@ import logging
 
 from django import template
 from django.core.urlresolvers import reverse
-from django.utils.crypto import get_random_string
-from django.utils.html import escape, format_html
+from django.utils.html import escape
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
@@ -191,17 +190,3 @@ def find_rejection_reason(comment_set):
     for comment in filter(lambda comment: comment['category'] == 'reject', comment_set):
         return comment['comment']
     return ''
-
-
-@register.simple_tag
-def labelled_data(label, value, tag='div', url=None):
-    element_id = get_random_string(length=4)
-    if url:
-        value = format_html('<a href="{url}">{value}</a>', value=value, url=url)
-    return format_html(
-        '''
-        <div id="mtp-label-{element_id}" class="mtp-detail-label">{label}</div>
-        <{tag} aria-labelledby="mtp-label-{element_id}">{value}</{tag}>
-        ''',
-        element_id=element_id, label=label, value=value, tag=tag
-    )
