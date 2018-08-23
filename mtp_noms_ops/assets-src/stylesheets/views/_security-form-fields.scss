@@ -40,6 +40,11 @@ select[disabled] {
   padding-left: 15px;
 }
 
+#id_invoice_number {
+  max-width: 12em;
+  width: 100%;
+}
+
 #id_source,
 #id_amount_pattern,
 #id_method,

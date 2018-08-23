@@ -434,6 +434,7 @@ class DisbursementsForm(SecurityForm):
                                 required=False)
     account_number = forms.CharField(label=_('Account number'), required=False)
     roll_number = forms.CharField(label=_('Roll number'), required=False)
+    invoice_number = forms.CharField(label=_('Invoice number'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or recipient name'), required=False)
 
