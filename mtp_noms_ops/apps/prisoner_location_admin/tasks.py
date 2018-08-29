@@ -68,7 +68,7 @@ def update_locations(*, user, locations, context: Context):
         logger.exception('Prisoner locations update by %s failed!' % user_description)
         if hasattr(e, 'content') and e.content:
             try:
-                errors += format_errors(json.loads(e.content.decode('utf-8')))
+                errors += format_errors(json.loads(e.content.decode()))
             except ValueError:
                 errors.append(e.content)
     except:  # noqa: E722

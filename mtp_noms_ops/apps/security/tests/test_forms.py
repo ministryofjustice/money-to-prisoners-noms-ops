@@ -314,10 +314,10 @@ class ReviewCreditsFormTestCase(unittest.TestCase):
         form.review()
 
         self.assertEqual(
-            json.loads(responses.calls[-2].request.body.decode('utf-8')),
+            json.loads(responses.calls[-2].request.body.decode()),
             [{'credit': 1, 'comment': 'hold up'}]
         )
         self.assertEqual(
-            json.loads(responses.calls[-1].request.body.decode('utf-8')),
+            json.loads(responses.calls[-1].request.body.decode()),
             {'credit_ids': [1, 2]}
         )

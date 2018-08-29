@@ -14,7 +14,7 @@ class SecurityDashboardTestCase(FunctionalTestCase):
     accessibility_scope_selector = '#content'
 
     def load_test_data(self, *args, **kwargs):
-        with silence_logger(name='mtp', level=logging.WARNING):
+        with silence_logger(level=logging.WARNING):
             super().load_test_data(*args, **kwargs)
         # only need it the first time as data is not modified by these tests:
         SecurityDashboardTestCase.auto_load_test_data = False

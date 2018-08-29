@@ -134,7 +134,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
         form = LocationFileUploadForm(request.POST, request.FILES, request=request)
 
         self.assertTrue(form.is_valid())
-        with silence_logger(name='mtp', level=logging.WARNING):
+        with silence_logger(level=logging.WARNING):
             form.update_locations()
 
         expected_calls = [
@@ -148,7 +148,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
         for call in responses.calls:
             if call.request.url == api_url('/prisoner_locations/'):
                 self.assertEqual(
-                    json.loads(call.request.body.decode('utf-8')),
+                    json.loads(call.request.body.decode()),
                     expected_calls.pop()
                 )
 
