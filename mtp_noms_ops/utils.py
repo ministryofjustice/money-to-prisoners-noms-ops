@@ -14,10 +14,10 @@ class UserPermissionMiddleware:
         request.can_access_prisoner_location = request.user.has_perms(prisoner_location_permissions)
         request.can_access_security = request.user.has_perms(security_permissions)
         request.can_access_user_management = request.user.has_perm('auth.change_user')
-        request.can_pre_approve = any((
+        request.can_pre_approve = request.user.is_authenticated and any(
             prison['pre_approval_required']
             for prison in request.user.user_data.get('prisons', [])
-        ))
+        )
         request.disbursements_available = request.user.is_authenticated and any(
             prison['nomis_id'] in settings.DISBURSEMENT_PRISONS
             for prison in request.user.user_data.get('prisons', [])
@@ -35,7 +35,7 @@ def external_breadcrumbs(request):
     return {
         'breadcrumbs': [
             {'name': _('Home'), 'url': reverse('dashboard')},
-            {'name': section_title}
+            {'name': section_title},
         ]
     }
 

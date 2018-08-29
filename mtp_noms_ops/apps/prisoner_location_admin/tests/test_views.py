@@ -83,7 +83,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
 
         file_data, expected_data = generate_testable_location_data()
 
-        with silence_logger(name='mtp', level=logging.WARNING):
+        with silence_logger(level=logging.WARNING):
             response = self.client.post(
                 reverse('location_file_upload'),
                 {'location_file': get_csv_data_as_file(file_data)}
@@ -94,7 +94,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         for call in responses.calls:
             if call.request.url == api_url('/prisoner_locations/'):
                 self.assertEqual(
-                    json.loads(call.request.body.decode('utf-8')),
+                    json.loads(call.request.body.decode()),
                     expected_calls.pop()
                 )
 
@@ -109,8 +109,8 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         self.login()
         self.setup_mock_get_authenticated_api_session(mock_api_client)
 
-        api_error_message = "prison not found"
-        response_content = ('[{"prison": ["%s"]}]' % api_error_message).encode('utf-8')
+        api_error_message = 'prison not found'
+        response_content = ('[{"prison": ["%s"]}]' % api_error_message).encode()
 
         responses.add(
             responses.POST,
@@ -125,13 +125,10 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
 
         file_data, _ = generate_testable_location_data()
 
-        logger = logging.getLogger('mtp')
-        previous_logging_level = logger.level
-        logger.setLevel(logging.CRITICAL)
-        response = self.client.post(
-            reverse('location_file_upload'),
-            {'location_file': get_csv_data_as_file(file_data)}
-        )
-        logger.setLevel(previous_logging_level)
+        with silence_logger():
+            response = self.client.post(
+                reverse('location_file_upload'),
+                {'location_file': get_csv_data_as_file(file_data)}
+            )
 
         self.assertContains(response, api_error_message)

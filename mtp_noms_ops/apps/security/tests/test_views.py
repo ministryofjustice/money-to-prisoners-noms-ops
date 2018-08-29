@@ -1071,7 +1071,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             '?pin=1'
         )
         self.assertEqual(
-            json.loads(responses.calls[-1].request.body.decode('utf-8')),
+            json.loads(responses.calls[-1].request.body.decode()),
             {
                 'description': 'A1409AE JAMES HALLS',
                 'endpoint': '/prisoners/1/credits/',

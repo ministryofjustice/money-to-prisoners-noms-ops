@@ -33,7 +33,7 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
             raise forms.ValidationError(_('Uploaded file must be a CSV'))
 
         try:
-            location_file = io.StringIO(self.cleaned_data['location_file'].read().decode('utf-8'))
+            location_file = io.StringIO(self.cleaned_data['location_file'].read().decode())
         except UnicodeDecodeError:
             raise forms.ValidationError(_('Can’t read CSV file'))
 

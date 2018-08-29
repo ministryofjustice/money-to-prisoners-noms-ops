@@ -12,7 +12,7 @@ urlpatterns = [
 
     url(r'^credits/$', security_test(views.CreditListView.as_view()),
         name='credit_list'),
-    url(r'^credits/(?P<credit_id>[0-9]+)/$', security_test(views.CreditDetailView.as_view()),
+    url(r'^credits/(?P<credit_id>\d+)/$', security_test(views.CreditDetailView.as_view()),
         name='credit_detail'),
     url(r'^credits/export/$',
         security_test(views.CreditListView.as_view(
@@ -41,15 +41,15 @@ urlpatterns = [
             export_redirect_view='security:sender_list',
         )),
         name='senders_email_export'),
-    url(r'^senders/(?P<sender_id>[0-9]+)/$', security_test(views.SenderDetailView.as_view()),
+    url(r'^senders/(?P<sender_id>\d+)/$', security_test(views.SenderDetailView.as_view()),
         name='sender_detail'),
-    url(r'^senders/(?P<sender_id>[0-9]+)/export/$',
+    url(r'^senders/(?P<sender_id>\d+)/export/$',
         security_test(views.SenderDetailView.as_view(
             export_view='download',
             export_redirect_view='security:sender_detail',
         )),
         name='sender_detail_export'),
-    url(r'^senders/(?P<sender_id>[0-9]+)/email-export/$',
+    url(r'^senders/(?P<sender_id>\d+)/email-export/$',
         security_test(views.SenderDetailView.as_view(
             export_view='email',
             export_redirect_view='security:sender_detail',
@@ -70,30 +70,30 @@ urlpatterns = [
             export_redirect_view='security:prisoner_list',
         )),
         name='prisoners_email_export'),
-    url(r'^prisoners/(?P<prisoner_id>[0-9]+)/$', security_test(views.PrisonerDetailView.as_view()),
+    url(r'^prisoners/(?P<prisoner_id>\d+)/$', security_test(views.PrisonerDetailView.as_view()),
         name='prisoner_detail'),
-    url(r'^prisoners/(?P<prisoner_id>[0-9]+)/export/$',
+    url(r'^prisoners/(?P<prisoner_id>\d+)/export/$',
         security_test(views.PrisonerDetailView.as_view(
             export_view='download',
             export_redirect_view='security:prisoner_detail',
         )),
         name='prisoner_detail_export'),
-    url(r'^prisoners/(?P<prisoner_id>[0-9]+)/email-export/$',
+    url(r'^prisoners/(?P<prisoner_id>\d+)/email-export/$',
         security_test(views.PrisonerDetailView.as_view(
             export_view='email',
             export_redirect_view='security:prisoner_detail',
         )),
         name='prisoner_detail_email_export'),
-    url(r'^prisoners/(?P<prisoner_id>[0-9]+)/disbursements/$',
+    url(r'^prisoners/(?P<prisoner_id>\d+)/disbursements/$',
         security_test(views.PrisonerDisbursementDetailView.as_view()),
         name='prisoner_disbursement_detail'),
-    url(r'^prisoners/(?P<prisoner_id>[0-9]+)/disbursements/export/$',
+    url(r'^prisoners/(?P<prisoner_id>\d+)/disbursements/export/$',
         security_test(views.PrisonerDisbursementDetailView.as_view(
             export_view='download',
             export_redirect_view='security:prisoner_disbursement_detail',
         )),
         name='prisoner_disbursement_detail_export'),
-    url(r'^prisoners/(?P<prisoner_id>[0-9]+)/disbursements/email-export/$',
+    url(r'^prisoners/(?P<prisoner_id>\d+)/disbursements/email-export/$',
         security_test(views.PrisonerDisbursementDetailView.as_view(
             export_view='email',
             export_redirect_view='security:prisoner_disbursement_detail',
@@ -109,7 +109,7 @@ urlpatterns = [
 
     url(r'^disbursements/$', security_test(views.DisbursementListView.as_view()),
         name='disbursement_list'),
-    url(r'^disbursements/(?P<disbursement_id>[0-9]+)/$', security_test(views.DisbursementDetailView.as_view()),
+    url(r'^disbursements/(?P<disbursement_id>\d+)/$', security_test(views.DisbursementDetailView.as_view()),
         name='disbursement_detail'),
     url(r'^disbursements/export/$',
         security_test(views.DisbursementListView.as_view(

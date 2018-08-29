@@ -13,7 +13,7 @@ class PrisonerLocationAdminTestCase(FunctionalTestCase):
     accessibility_scope_selector = '#content'
 
     def load_test_data(self):
-        with silence_logger(name='mtp', level=logging.WARNING):
+        with silence_logger(level=logging.WARNING):
             super().load_test_data()
 
     def login(self, *args, **kwargs):
@@ -83,7 +83,7 @@ class UploadTests(PrisonerLocationAdminTestCase):
         self.assertInSource('upload the file on this page in CSV format')
         self.assertCssProperty('.upload-otherfilelink', 'display', 'none')
 
-    @silence_logger(name='mtp', level=logging.WARNING)
+    @silence_logger(level=logging.WARNING)
     def test_upload_valid_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'valid.csv'))
