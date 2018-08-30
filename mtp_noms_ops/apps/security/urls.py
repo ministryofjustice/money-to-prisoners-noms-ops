@@ -1,14 +1,25 @@
 from django.conf.urls import url
-from django.views.generic import RedirectView
+from django.contrib.auth.decorators import login_required, user_passes_test
 
-from . import required_permissions, views
+from . import required_permissions, hmpps_employee_flag, views
 from mtp_noms_ops.utils import user_test
 
-security_test = user_test(required_permissions)
+
+def is_hmpps_employee(user):
+    flags = user.user_data.get('flags') or []
+    return hmpps_employee_flag in flags
+
+
+def security_test(view):
+    view = user_passes_test(is_hmpps_employee, login_url='security:hmpps_employee')(view)
+    view = user_test(required_permissions)(view)
+    return view
+
 
 app_name = 'security'
 urlpatterns = [
-    url(r'^$', RedirectView.as_view(pattern_name='dashboard')),
+    url(r'^$', login_required(views.HMPPSEmployeeView.as_view()), name='hmpps_employee'),
+    url(r'^not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
 
     url(r'^credits/$', security_test(views.CreditListView.as_view()),
         name='credit_list'),
