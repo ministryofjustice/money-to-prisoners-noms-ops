@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
@@ -13,6 +13,7 @@ from mtp_common.auth import views as auth_views
 from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import Unauthorized
 
+from security import hmpps_employee_flag
 from security.searches import get_saved_searches, populate_new_result_counts
 
 
@@ -21,7 +22,10 @@ def dashboard_view(request):
         raise Unauthorized()  # middleware causes user to be logged-out
     if request.can_access_prisoner_location and not (
             request.can_access_security or request.can_access_user_management):
-        return redirect(reverse_lazy('location_file_upload'))
+        return redirect(reverse('location_file_upload'))
+    flags = request.user.user_data.get('flags') or []
+    if request.can_access_security and hmpps_employee_flag not in flags:
+        return redirect(reverse('security:hmpps_employee'))
     session = get_api_session(request)
     return render(request, 'dashboard.html', {
         'start_page_url': settings.START_PAGE_URL,

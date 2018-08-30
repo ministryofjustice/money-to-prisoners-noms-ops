@@ -34,7 +34,10 @@ class PrisonerLocationUploadTestCase(SimpleTestCase):
                 'first_name': 'Sam',
                 'last_name': 'Hall',
                 'username': 'shall',
+                'email': 'sam@mtp.local',
                 'permissions': required_permissions,
+                'prisons': [],
+                'flags': [],
             }
         }
 
