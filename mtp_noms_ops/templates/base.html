@@ -27,6 +27,8 @@
           {% if request.disbursements_available %}
             {% include 'proposition-tab.html' with view_name='security:disbursement_list' subview_names='security:disbursement_list security:disbursement_detail' link_text=_('Disbursements') params=initial_params %}
           {% endif %}
+        {% elif request.user.is_authenticated and request.can_access_prisoner_location %}
+          {% include 'proposition-tab.html' with view_name='location_file_upload' subview_names='location_file_upload' link_text=_('Upload location file') %}
         {% else %}
           {% include 'proposition-tab.html' with view_name='login' subview_names='login' link_text=_('Sign in') %}
         {% endif %}
