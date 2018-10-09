@@ -204,7 +204,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'prisoner_dob': '1986-12-09',
         'current_prison': {'nomis_id': 'PRN', 'name': 'Prison'},
         'prisons': [{'nomis_id': 'PRN', 'name': 'Prison'}],
-        'recipient_names': ['Jim Halls', 'JAMES HALLS', 'James Halls '],
+        'provided_names': ['Jim Halls', 'JAMES HALLS', 'James Halls '],
         'created': '2016-05-25T20:24:00Z',
         'modified': '2016-05-25T20:24:00Z',
     }

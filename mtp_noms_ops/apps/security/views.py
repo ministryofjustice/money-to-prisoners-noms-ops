@@ -198,8 +198,8 @@ class PrisonerDetailView(SecurityDetailView):
         context_data = super().get_context_data(**kwargs)
         prisoner = context_data.get('prisoner', {})
         if prisoner:
-            context_data['recipient_names'] = NameSet(
-                prisoner.get('recipient_names', ()), strip_titles=True
+            context_data['provided_names'] = NameSet(
+                prisoner.get('provided_names', ()), strip_titles=True
             )
             if self.request.disbursements_available:
                 context_data['disbursement_count'] = self.get_disbursement_count(

@@ -127,11 +127,11 @@ def prisoner_row_generator(object_list):
             current_prison = prisoner['current_prison']['name']
         else:
             current_prison = gettext('Not in a public prison')
-        recipient_names = NameSet(prisoner['recipient_names'])
+        provided_names = NameSet(prisoner['provided_names'])
         yield [
             prisoner['prisoner_number'], prisoner['prisoner_name'], prisoner['prisoner_dob'],
             prisoner['credit_count'], currency(prisoner['credit_total']), prisoner['sender_count'],
-            current_prison, list_prison_names(prisoner['prisons']), ', '.join(recipient_names),
+            current_prison, list_prison_names(prisoner['prisons']), ', '.join(provided_names),
         ]
 
 
