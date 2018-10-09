@@ -43,13 +43,13 @@
       </div>
 
       <div class="mtp-prisoner-summary__details">
-        {% if recipient_names %}
+        {% if provided_names %}
           <div class="column-one-quarter">
             {% random_string as profile_label %}
             <div id="mtp-label-{{ profile_label }}" class="mtp-detail-label">{% trans 'Names given by senders' %}</div>
             <span aria-labelledby="mtp-label-{{ profile_label }}">
-              {% for recipient_name in recipient_names %}
-                <strong>{{ recipient_name }}</strong>{% if not forloop.last %},{% endif %}
+              {% for provided_name in provided_names %}
+                <strong>{{ provided_name }}</strong>{% if not forloop.last %},{% endif %}
               {% endfor %}
             </span>
           </div>
