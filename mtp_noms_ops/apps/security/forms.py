@@ -425,7 +425,8 @@ class DisbursementsForm(SecurityForm):
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
-    method = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_disbursement_method_choices())
+    method = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_disbursement_method_choices(),
+                               help_text=_('Select to see more filters e.g. account number'))
     recipient_name = forms.CharField(label=_('Recipient name'), required=False)
     recipient_email = forms.CharField(label=_('Recipient email'), required=False)
     city = forms.CharField(label=_('City'), required=False)
