@@ -1,5 +1,6 @@
 import json
 
+from django.core.cache import cache
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from mtp_common.api import retrieve_all_pages_for_path
@@ -18,7 +19,7 @@ class PrisonList:
     excluded_nomis_ids = {'ZCH'}
 
     def __init__(self, session):
-        self.prisons = retrieve_all_pages_for_path(session, '/prisons/')
+        self.prisons = self.get_prisons(session)
 
         prison_choices = []
         region_choices = set()
@@ -40,6 +41,13 @@ class PrisonList:
         self.region_choices = [(label, label) for label in sorted(region_choices)]
         self.category_choices = sorted(category_choices.items(), key=sorter)
         self.population_choices = sorted(population_choices.items(), key=sorter)
+
+    def get_prisons(self, session):
+        prisons = cache.get('PrisonList')
+        if prisons is None:
+            prisons = retrieve_all_pages_for_path(session, '/prisons/')
+            cache.set('PrisonList', prisons, timeout=60 * 15)
+        return prisons
 
     @property
     def mapping(self):
