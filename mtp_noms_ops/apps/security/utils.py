@@ -115,11 +115,12 @@ class EmailSet(OrderedSet):
 
 
 def initial_params(request):
-    user_prisons = request.user.user_data.get('prisons', [])
-    initial_params = {}
-    if len(user_prisons) == 1:
-        initial_params['prison'] = user_prisons[0]['nomis_id']
-    return {'initial_params': urlencode(initial_params, doseq=True)}
+    if not request.user_prisons:
+        return {}
+    return {'initial_params': urlencode([
+        ('prison', prison['nomis_id'])
+        for prison in request.user_prisons
+    ], doseq=True)}
 
 
 def nomis_api_available(_):

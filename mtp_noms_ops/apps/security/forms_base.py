@@ -1,6 +1,7 @@
 import collections
 import datetime
 import enum
+import itertools
 from math import ceil
 import re
 from urllib.parse import urlencode, urlparse, urljoin
@@ -146,14 +147,13 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     def __init__(self, request, **kwargs):
         super().__init__(**kwargs)
         if self.is_bound:
-            data = {
-                name: field.initial
-                for name, field in self.fields.items()
-                if field.initial is not None
-            }
-            data.update(self.initial)
-            data.update(self.data)
-            self.data = data
+            for name, field in self.fields.items():
+                if name in self.data:
+                    continue
+                if name in self.initial:
+                    self.data[name] = self.initial[name]
+                elif field.initial is not None:
+                    self.data[name] = field.initial
         self.request = request
         self.total_count = None
         self.page_count = 0
@@ -161,8 +161,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
         if 'prison' in self.fields:
             prison_list = PrisonList(self.session)
-            self['prison'].field.choices = insert_blank_option(prison_list.prison_choices,
-                                                               title=_('All prisons'))
+            self['prison'].field.choices = prison_list.prison_choices
             self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
                                                                       title=_('All regions'))
             self['prison_population'].field.choices = insert_blank_option(prison_list.population_choices,
@@ -170,6 +169,13 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             self['prison_category'].field.choices = insert_blank_option(prison_list.category_choices,
                                                                         title=_('All categories'))
             self.prison_list = prison_list
+            if 'prison' in self.data and hasattr(self.data, 'getlist'):
+                selected_prisons = itertools.chain.from_iterable(
+                    selection.split(',')
+                    for selection in self.data.getlist('prison')
+                )
+                selected_prisons = sorted(set(filter(None, selected_prisons)))
+                self.data.setlist('prison', selected_prisons)
 
     @cached_property
     def session(self):
@@ -235,9 +241,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     def query_string(self):
         return urlencode(self.get_query_data(allow_parameter_manipulation=False), doseq=True)
 
-    def _get_value_text(self, bf):
-        f = bf.field
-        v = self.cleaned_data.get(bf.name) or f.initial
+    def _get_value_text(self, bf, f, v):
         if isinstance(f, forms.ChoiceField):
             v = dict(f.choices).get(v)
             if not v:
@@ -255,11 +259,18 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             return str(v)
         return v or None
 
+    def _describe_field(self, bf):
+        f = bf.field
+        v = self.cleaned_data.get(bf.name) or f.initial
+        if isinstance(v, list):
+            return ', '.join(filter(None, (self._get_value_text(bf, f, i) for i in v)))
+        return self._get_value_text(bf, f, v)
+
     @property
     def search_description(self):
         with override_locale(settings.LANGUAGE_CODE):
             description_kwargs = {
-                'ordering_description': self._get_value_text(self['ordering']),
+                'ordering_description': self._describe_field(self['ordering']),
             }
 
             filters = {}
@@ -270,7 +281,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 if hasattr(self, description_override):
                     value = getattr(self, description_override)()
                 else:
-                    value = self._get_value_text(bound_field)
+                    value = self._describe_field(bound_field)
                 if value is None:
                     continue
                 filters[bound_field.name] = format_html('<strong>{}</strong>', value)
@@ -305,6 +316,13 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 'has_filters': has_filters,
                 'description': format_html(description_template, **description_kwargs),
             }
+
+    def describe_field_prison(self):
+        prisons = self.cleaned_data.get('prison')
+        if not prisons:
+            return
+        choices = dict(self.prison_list.prison_choices)
+        return ', '.join(sorted(filter(None, map(lambda prison: choices.get(prison), prisons))))
 
     def check_and_update_saved_searches(self, page_title):
         site_url = '?'.join([urlparse(self.request.path).path, self.query_string])

@@ -57,7 +57,7 @@ class SendersForm(SecurityForm):
     sender_email = forms.CharField(label=_('Sender email'), required=False)
     sender_postcode = forms.CharField(label=_('Sender postcode'), required=False)
 
-    prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
@@ -176,7 +176,7 @@ class PrisonersForm(SecurityForm):
     prisoner_number = forms.CharField(label=_('Prisoner number'),
                                       validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
-    prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
@@ -259,7 +259,7 @@ class CreditsForm(SecurityForm):
 
     prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
-    prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
@@ -420,7 +420,7 @@ class DisbursementsForm(SecurityForm):
 
     prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
-    prison = forms.ChoiceField(label=_('Prison'), required=False, choices=[])
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])

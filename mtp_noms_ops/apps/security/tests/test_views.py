@@ -30,36 +30,39 @@ override_nomis_settings = override_settings(
     ),  # this key is just for tests, doesn't do anything
 )
 
+sample_prisons = [
+    {
+        'nomis_id': 'AAI',
+        'general_ledger_code': '001',
+        'name': 'HMP & YOI Test 1', 'short_name': 'Test 1',
+        'region': 'London',
+        'categories': [{'description': 'Category D', 'name': 'D'},
+                       {'description': 'Young Offender Institution', 'name': 'YOI'}],
+        'populations': [{'description': 'Female', 'name': 'female'},
+                        {'description': 'Male', 'name': 'male'},
+                        {'description': 'Young offenders', 'name': 'young'}],
+        'pre_approval_required': False,
+    },
+    {
+        'nomis_id': 'BBI',
+        'general_ledger_code': '002',
+        'name': 'HMP Test 2', 'short_name': 'Test 2',
+        'region': 'London',
+        'categories': [{'description': 'Category D', 'name': 'D'}],
+        'populations': [{'description': 'Male', 'name': 'male'}],
+        'pre_approval_required': False,
+    },
+]
+default_user_prisons = (sample_prisons[1],)
+
 
 def sample_prison_list():
     responses.add(
         responses.GET,
         api_url('/prisons/'),
         json={
-            'count': 2,
-            'results': [
-                {
-                    'nomis_id': 'AAI',
-                    'general_ledger_code': '001',
-                    'name': 'HMP & YOI Test 1', 'short_name': 'Test 1',
-                    'region': 'London',
-                    'categories': [{'description': 'Category D', 'name': 'D'},
-                                   {'description': 'Young Offender Institution', 'name': 'YOI'}],
-                    'populations': [{'description': 'Female', 'name': 'female'},
-                                    {'description': 'Male', 'name': 'male'},
-                                    {'description': 'Young offenders', 'name': 'young'}],
-                    'pre_approval_required': False,
-                },
-                {
-                    'nomis_id': 'BBI',
-                    'general_ledger_code': '002',
-                    'name': 'HMP Test 2', 'short_name': 'Test 2',
-                    'region': 'London',
-                    'categories': [{'description': 'Category D', 'name': 'D'}],
-                    'populations': [{'description': 'Male', 'name': 'male'}],
-                    'pre_approval_required': False,
-                },
-            ],
+            'count': len(sample_prisons),
+            'results': sample_prisons,
         }
     )
 
@@ -97,7 +100,7 @@ class SecurityBaseTestCase(SimpleTestCase):
     def login_test_searches(self, mock_api_client, follow=True):
         return self._login(mock_api_client, follow=follow)
 
-    def _login(self, mock_api_client, follow=True, flags=(hmpps_employee_flag,)):
+    def _login(self, mock_api_client, follow=True, prisons=default_user_prisons, flags=(hmpps_employee_flag,)):
         mock_api_client.authenticate.return_value = {
             'pk': 5,
             'token': generate_tokens(),
@@ -107,7 +110,7 @@ class SecurityBaseTestCase(SimpleTestCase):
                 'username': 'shall',
                 'email': 'sam@mtp.local',
                 'permissions': required_permissions,
-                'prisons': [{'nomis_id': 'BXI', 'name': 'HMP Brixton', 'pre_approval_required': False}],
+                'prisons': prisons,
                 'flags': flags,
             }
         }
@@ -241,6 +244,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
 
 class SecurityViewTestCase(SecurityBaseTestCase):
     view_name = None
+    api_list_path = None
     bank_transfer_sender = {
         'id': 9,
         'credit_count': 4,
@@ -321,23 +325,64 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         response = self.client.get(reverse(self.view_name), follow=True)
         self.assertContains(response, '<!-- %s -->' % self.view_name)
 
+    @responses.activate
+    def test_filtering_by_one_prison(self):
+        if not self.api_list_path:
+            return
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
+        response = self.client.get(reverse(self.view_name) + '?page=1&prison=BBI', follow=False)
+        self.assertContains(response, 'HMP Test 2')
+        calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
+        self.assertEqual(len(calls), 1)
+        self.assertIn('prison=BBI', calls[0].request.url)
+
+    @responses.activate
+    def test_filtering_by_many_prisons(self):
+        if not self.api_list_path:
+            return
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
+        response = self.client.get(reverse(self.view_name) + '?page=1&prison=BBI&prison=AAI', follow=False)
+        self.assertContains(response, 'HMP &amp; YOI Test 1')
+        self.assertContains(response, 'HMP Test 2')
+        calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
+        self.assertEqual(len(calls), 1)
+        self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
+
+    @responses.activate
+    def test_filtering_by_many_prisons_alternate(self):
+        if not self.api_list_path:
+            return
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
+        response = self.client.get(reverse(self.view_name) + '?page=1&prison=BBI,AAI', follow=False)
+        self.assertContains(response, 'HMP &amp; YOI Test 1')
+        self.assertContains(response, 'HMP Test 2')
+        calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
+        self.assertEqual(len(calls), 1)
+        self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
+
 
 class SenderListTestCase(SecurityViewTestCase):
     view_name = 'security:sender_list'
     detail_view_name = 'security:sender_detail'
-
-    @responses.activate
-    def setUp(self):
-        super().setUp()
-        self.login()
+    api_list_path = '/senders/'
 
     @responses.activate
     def test_displays_results(self):
+        self.login()
         no_saved_searches()
         sample_prison_list()
         responses.add(
             responses.GET,
-            api_url('/senders/'),
+            api_url(self.api_list_path),
             json={
                 'count': 2,
                 'results': [self.bank_transfer_sender, self.debit_card_sender],
@@ -351,6 +396,7 @@ class SenderListTestCase(SecurityViewTestCase):
 
     @responses.activate
     def test_displays_bank_transfer_detail(self):
+        self.login()
         no_saved_searches()
         responses.add(
             responses.GET,
@@ -376,6 +422,7 @@ class SenderListTestCase(SecurityViewTestCase):
 
     @responses.activate
     def test_displays_debit_card_detail(self):
+        self.login()
         no_saved_searches()
         responses.add(
             responses.GET,
@@ -401,6 +448,7 @@ class SenderListTestCase(SecurityViewTestCase):
 
     @responses.activate
     def test_detail_not_found(self):
+        self.login()
         no_saved_searches()
         responses.add(
             responses.GET,
@@ -418,6 +466,7 @@ class SenderListTestCase(SecurityViewTestCase):
 
     @responses.activate
     def test_connection_errors(self):
+        self.login()
         no_saved_searches()
         sample_prison_list()
         responses.add(
@@ -448,19 +497,16 @@ class SenderListTestCase(SecurityViewTestCase):
 class PrisonerListTestCase(SecurityViewTestCase):
     view_name = 'security:prisoner_list'
     detail_view_name = 'security:prisoner_detail'
-
-    @responses.activate
-    def setUp(self):
-        super().setUp()
-        self.login()
+    api_list_path = '/prisoners/'
 
     @responses.activate
     def test_displays_results(self):
+        self.login()
         no_saved_searches()
         sample_prison_list()
         responses.add(
             responses.GET,
-            api_url('/prisoners/'),
+            api_url(self.api_list_path),
             json={
                 'count': 1,
                 'results': [self.prisoner_profile],
@@ -475,6 +521,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
     @responses.activate
     @override_nomis_settings
     def test_displays_detail(self):
+        self.login()
         no_saved_searches()
         responses.add(
             responses.GET,
@@ -501,6 +548,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
 
     @responses.activate
     def test_detail_not_found(self):
+        self.login()
         no_saved_searches()
         responses.add(
             responses.GET,
@@ -518,6 +566,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
 
     @responses.activate
     def test_connection_errors(self):
+        self.login()
         no_saved_searches()
         sample_prison_list()
         responses.add(
@@ -548,6 +597,7 @@ class PrisonerListTestCase(SecurityViewTestCase):
 class CreditsListTestCase(SecurityViewTestCase):
     view_name = 'security:credit_list'
     detail_view_name = 'security:credit_detail'
+    api_list_path = '/credits/'
 
     debit_card_credit = {
         'id': 1,
@@ -587,7 +637,7 @@ class CreditsListTestCase(SecurityViewTestCase):
         sample_prison_list()
         responses.add(
             responses.GET,
-            api_url('/credits/'),
+            api_url(self.api_list_path),
             json={
                 'count': 2,
                 'previous': None,
@@ -655,10 +705,11 @@ class CreditsListTestCase(SecurityViewTestCase):
         self.assertIn('Credited by Maria', response_content)
 
 
-@override_settings(DISBURSEMENT_PRISONS=['BXI'])
+@override_settings(DISBURSEMENT_PRISONS=['BBI'])
 class DisbursementsListTestCase(SecurityViewTestCase):
     view_name = 'security:disbursement_list'
     detail_view_name = 'security:disbursement_detail'
+    api_list_path = '/disbursements/'
 
     bank_transfer_disbursement = {
         'id': 99,
@@ -713,7 +764,7 @@ class DisbursementsListTestCase(SecurityViewTestCase):
         sample_prison_list()
         responses.add(
             responses.GET,
-            api_url('/disbursements/'),
+            api_url(self.api_list_path),
             json={
                 'count': 2,
                 'previous': None,
