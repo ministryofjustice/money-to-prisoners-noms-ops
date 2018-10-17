@@ -70,6 +70,11 @@ class SecurityFormTestCase(unittest.TestCase):
                 token=generate_tokens()
             )
         )
+        self.disable_cache = mock.patch('security.models.cache')
+        self.disable_cache.start().get.return_value = None
+
+    def tearDown(self):
+        self.disable_cache.stop()
 
     @responses.activate
     @mock.patch.object(SecurityForm, 'get_object_list_endpoint_path')

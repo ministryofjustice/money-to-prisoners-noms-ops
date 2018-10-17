@@ -75,6 +75,7 @@ def no_saved_searches():
     )
 
 
+@override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}})
 class SecurityBaseTestCase(SimpleTestCase):
 
     def setUp(self):
