@@ -85,8 +85,7 @@ class SecurityView(FormView):
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
         form_kwargs['request'] = self.request
-        request_data = self.get_initial()
-        request_data.update(self.request.GET.dict())
+        request_data = self.request.GET.copy()
         if 'redirect-on-single' in request_data:
             self.redirect_on_single = True
         form_kwargs['data'] = request_data

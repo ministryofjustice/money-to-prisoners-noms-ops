@@ -3,6 +3,7 @@ import json
 import unittest
 from unittest import mock
 
+from django.http import QueryDict
 from mtp_common.auth.test_utils import generate_tokens
 import responses
 
@@ -109,7 +110,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '-prisoner_count',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'prison_count__gte': None, 'prison_count__lte': None,
@@ -129,7 +130,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '-credit_total',
             'sender_name': 'Joh', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'prison_count__gte': None, 'prison_count__lte': None,
@@ -159,7 +160,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'page': 1,
             'ordering': '-sender_count',
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'sender_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
         }
@@ -176,17 +177,17 @@ class SecurityFormTestCase(unittest.TestCase):
         expected_data = {
             'page': 1,
             'ordering': '-credit_total',
-            'prisoner_number': '', 'prisoner_name': '',
-            'prison': 'IXB', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prisoner_number': '', 'prisoner_name': 'John',
+            'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'sender_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
         }
-        form = PrisonersForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'prison': 'IXB'})
+        form = PrisonersForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'prisoner_name': ' John'})
         self.assertTrue(form.is_valid())
         self.assertDictEqual(form.cleaned_data, expected_data)
         self.assertListEqual(form.get_object_list(), [])
-        self.assertDictEqual(form.get_query_data(), {'ordering': '-credit_total', 'prison': 'IXB'})
-        self.assertEqual(form.query_string, 'ordering=-credit_total&prison=IXB')
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-credit_total', 'prisoner_name': 'John'})
+        self.assertEqual(form.query_string, 'ordering=-credit_total&prisoner_name=John')
 
     @responses.activate
     def test_prisoner_list_invalid_forms(self):
@@ -206,7 +207,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '-received_at',
             'received_at__gte': None, 'received_at__lt': None,
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
             'source': '', 'sender_email': '', 'sender_postcode': '', 'sender_ip_address': '',
@@ -227,7 +228,7 @@ class SecurityFormTestCase(unittest.TestCase):
             'ordering': '-amount',
             'received_at__gte': received_at__gte, 'received_at__lt': None,
             'prisoner_number': '', 'prisoner_name': '',
-            'prison': '', 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
             'source': '', 'sender_email': '', 'sender_postcode': '', 'sender_ip_address': '',
@@ -254,6 +255,36 @@ class SecurityFormTestCase(unittest.TestCase):
         self.assertFalse(form.is_valid())
         form = CreditsForm(self.request, data={'page': '1', 'prison': 'ABC'})
         self.assertFalse(form.is_valid())
+
+    @responses.activate
+    def test_filtering_by_one_prison(self):
+        self.set_security_form_responses()
+        for form_class in (SendersForm, PrisonersForm, CreditsForm):
+            form = form_class(self.request, data=QueryDict('prison=INP', mutable=True))
+            initial_ordering = form['ordering'].initial
+            self.assertTrue(form.is_valid())
+            self.assertDictEqual(form.get_query_data(), {'ordering': initial_ordering, 'prison': ['INP']})
+            self.assertEqual(form.query_string, 'ordering=%s&prison=INP' % initial_ordering)
+
+    @responses.activate
+    def test_filtering_by_many_prisons(self):
+        self.set_security_form_responses()
+        for form_class in (SendersForm, PrisonersForm, CreditsForm):
+            form = form_class(self.request, data=QueryDict('prison=IXB&prison=INP', mutable=True))
+            initial_ordering = form['ordering'].initial
+            self.assertTrue(form.is_valid())
+            self.assertDictEqual(form.get_query_data(), {'ordering': initial_ordering, 'prison': ['INP', 'IXB']})
+            self.assertEqual(form.query_string, 'ordering=%s&prison=INP&prison=IXB' % initial_ordering)
+
+    @responses.activate
+    def test_filtering_by_many_prisons_alternate(self):
+        self.set_security_form_responses()
+        for form_class in (SendersForm, PrisonersForm, CreditsForm):
+            form = form_class(self.request, data=QueryDict('prison=IXB,INP,', mutable=True))
+            initial_ordering = form['ordering'].initial
+            self.assertTrue(form.is_valid())
+            self.assertDictEqual(form.get_query_data(), {'ordering': initial_ordering, 'prison': ['INP', 'IXB']})
+            self.assertEqual(form.query_string, 'ordering=%s&prison=INP&prison=IXB' % initial_ordering)
 
 
 class ReviewCreditsFormTestCase(unittest.TestCase):
