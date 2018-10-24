@@ -100,7 +100,7 @@
             <div aria-labelledby="mtp-label-{{ comment_label }}">
               {% for log_item in disbursement.log_set %}
                 {% if log_item.action == 'created' %}
-                  {{ log_item.created|date:'j M Y H:i' }}
+                  {{ log_item.created|date:'SHORT_DATETIME_FORMAT' }}
                   –
                   {% blocktrans trimmed with staff_name=log_item.staff_name %}
                     Entered by {{ staff_name }}
@@ -108,7 +108,7 @@
                   <br/>
 
                 {% elif log_item.action == 'edited' %}
-                  {{ log_item.created|date:'j M Y H:i' }}
+                  {{ log_item.created|date:'SHORT_DATETIME_FORMAT' }}
                   –
                   {% blocktrans trimmed with staff_name=log_item.staff_name %}
                     Edited by {{ staff_name }}
@@ -116,7 +116,7 @@
                   <br/>
 
                 {% elif log_item.action == 'confirmed' %}
-                  {{ log_item.created|date:'j M Y H:i' }}
+                  {{ log_item.created|date:'SHORT_DATETIME_FORMAT' }}
                   –
                   {% blocktrans trimmed with staff_name=log_item.staff_name %}
                     Confirmed by {{ staff_name }}
@@ -124,7 +124,7 @@
                   <br/>
 
                 {% elif log_item.action == 'sent' %}
-                  {{ log_item.created|date:'DATE_FORMAT' }}
+                  {{ log_item.created|date:'SHORT_DATE_FORMAT' }}
                   –
                   {% blocktrans trimmed %}
                     Sent by SSCL
@@ -132,7 +132,7 @@
                   <br/>
 
                 {% elif log_item.action == 'rejected' %}
-                  {{ log_item.created|date:'j M Y H:i' }}
+                  {{ log_item.created|date:'SHORT_DATETIME_FORMAT' }}
                   –
                   {% blocktrans trimmed with staff_name=log_item.staff_name %}
                     Cancelled by {{ staff_name }}

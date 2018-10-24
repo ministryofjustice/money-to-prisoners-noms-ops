@@ -100,12 +100,12 @@
             {% random_string as comment_label %}
             <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'History' %}</div>
             <div aria-labelledby="mtp-label-{{ comment_label }}">
-              {{ credit.received_at|date:'DATE_FORMAT'|default:'–' }}
+              {{ credit.received_at|date:'SHORT_DATE_FORMAT'|default:'–' }}
               –
               {% trans 'Received' %}
               <br/>
               {% if credit.credited_at %}
-                {{ credit.credited_at|date:'DATE_FORMAT'|default:'–' }}
+                {{ credit.credited_at|date:'SHORT_DATE_FORMAT'|default:'–' }}
                 –
                 {% blocktrans trimmed with name_of_clerk=credit.owner_name|default:_('Unknown') %}
                   Credited by {{ name_of_clerk }}
