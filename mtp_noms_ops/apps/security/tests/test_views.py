@@ -315,7 +315,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
     }
 
     @responses.activate
-    @mock.patch('security.forms.SecurityForm.get_object_list')
+    @mock.patch('security.forms.object_base.SecurityForm.get_object_list')
     def test_can_access_security_view(self, mocked_form_method):
         mocked_form_method.return_value = []
         if not self.view_name:

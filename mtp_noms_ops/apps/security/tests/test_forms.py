@@ -7,10 +7,9 @@ from django.http import QueryDict
 from mtp_common.auth.test_utils import generate_tokens
 import responses
 
-from security.forms import (
-    SecurityForm, SendersForm, PrisonersForm, CreditsForm, DisbursementsForm,
-    ReviewCreditsForm
-)
+from security.forms.object_base import SecurityForm
+from security.forms.object_list import SendersForm, PrisonersForm, CreditsForm, DisbursementsForm
+from security.forms.review import ReviewCreditsForm
 from security.tests import api_url
 
 
