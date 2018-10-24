@@ -1,8 +1,8 @@
 {% load i18n %}
 {% load security %}
 
-<td>
-  {{ credit.received_at|date:'DATE_FORMAT' }}
+<td class="mtp-numeric-left">
+  {{ credit.received_at|date:'SHORT_DATE_FORMAT' }}
 </td>
 
 <td>
