@@ -54,7 +54,7 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
         }
 
     }
-    subject = '%s - %s' % (gettext('Prisoner money intelligence'), gettext('Credits exported'))
+    subject = '%s - %s' % (gettext('Prisoner money intelligence'), gettext('Exported data'))
     from_address = getattr(settings, 'MAILGUN_FROM_ADDRESS', '') or settings.DEFAULT_FROM_EMAIL
     text_body = template_loader.get_template('security/email/export.txt').render(template_context)
     html_body = template_loader.get_template('security/email/export.html').render(template_context)

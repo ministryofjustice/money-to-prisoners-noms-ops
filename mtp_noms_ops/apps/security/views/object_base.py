@@ -77,6 +77,7 @@ class SecurityView(FormView):
     export_view = False
     export_redirect_view = None
     export_download_limit = settings.MAX_CREDITS_TO_DOWNLOAD
+    export_email_limit = settings.MAX_CREDITS_TO_EMAIL
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
