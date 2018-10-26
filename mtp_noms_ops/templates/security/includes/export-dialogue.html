@@ -5,11 +5,11 @@
 
   <a href="{{ export_view }}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
 
-{% else %}
+{% elif form.total_count <= view.export_email_limit %}
 
   <a class="js-dialogue-open" href="#export-dialogue">{% trans 'Export' %}</a>
 
-  {% dialoguebox html_id='export-dialogue' title=_('Export') %}
+  {% dialoguebox html_id="export-dialogue" title=_('Export') %}
     <p>
       {{ export_message }}
       {% blocktrans trimmed with email=request.user.email %}
@@ -21,6 +21,20 @@
     </p>
     <p>
       <a href="{{ email_export_view }}?{{ request.GET.urlencode }}" class="button" role="button">{% trans 'Email me the file' %}</a>
+      <a href="#" class="button button-secondary {{ dialogue_close_class }}" role="button">{% trans 'Close' %}</a>
+    </p>
+  {% enddialoguebox %}
+
+{% else %}
+
+  <a class="js-dialogue-open" href="#export-dialogue">{% trans 'Export' %}</a>
+
+  {% dialoguebox html_id="export-dialogue" title=_('Export') %}
+    <p>
+      {{ export_message }}
+      {% trans 'Try filtering the results to get a shorter list.' %}
+    </p>
+    <p>
       <a href="#" class="button button-secondary {{ dialogue_close_class }}" role="button">{% trans 'Close' %}</a>
     </p>
   {% enddialoguebox %}
