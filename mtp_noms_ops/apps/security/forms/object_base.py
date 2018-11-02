@@ -26,6 +26,20 @@ from security.searches import (
 from security.utils import parse_date_fields
 
 
+TIME_PERIOD_CHOICES = [
+    ('all_time', _('all time')),
+    ('last_7_days', _('last 7 days')),
+    ('last_30_days', _('last 30 days')),
+    ('last_6_months', _('last 6 months')),
+]
+
+
+TOTALS_FIELDS = [
+    'prisoner_count', 'sender_count', 'prison_count', 'credit_count',
+    'credit_total', 'time_period'
+]
+
+
 def get_credit_source_choices(blank_option=_('Any method')):
     return insert_blank_option(
         list(credit_sources.items()),
@@ -88,6 +102,15 @@ def validate_range_field(field_name, bound_ordering_msg, upper_limit='__lte'):
         return cls
 
     return inner
+
+
+def populate_totals(record, time_period):
+    if 'totals' in record:
+        for total in record['totals']:
+            if total['time_period'] == (time_period or TIME_PERIOD_CHOICES[0][0]):
+                for field in total:
+                    if field in TOTALS_FIELDS:
+                        record[field] = total[field]
 
 
 class AmountPattern(enum.Enum):
@@ -206,10 +229,19 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_api_request_params(self):
         filters = self.get_query_data()
+        api_filters = {}
         for param in filters:
             if param in self.exclusive_date_params:
-                filters[param] += datetime.timedelta(days=1)
-        return filters
+                api_filters[param] = filters[param] + datetime.timedelta(days=1)
+            elif param in TOTALS_FIELDS:
+                api_filters['totals__' + param] = filters[param]
+            elif param == 'ordering' and filters[param] in TOTALS_FIELDS:
+                api_filters[param] = 'totals__' + filters[param]
+            elif param == 'ordering' and filters[param][1:] in TOTALS_FIELDS:
+                api_filters[param] = '-totals__' + filters[param][1:]
+            else:
+                api_filters[param] = filters[param]
+        return api_filters
 
     def get_object_list(self):
         """
@@ -232,6 +264,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         count = data.get('count', 0)
         self.total_count = count
         self.page_count = int(ceil(count / self.page_size))
+        for record in data.get('results', []):
+            time_period = self.cleaned_data.get('time_period')
+            populate_totals(record, time_period)
         return data.get('results', [])
 
     def get_complete_object_list(self):
@@ -365,7 +400,10 @@ class SecurityDetailForm(SecurityForm):
         :return: dict or None if not found
         """
         try:
-            return self.session.get(self.get_object_endpoint_path()).json()
+            record = self.session.get(self.get_object_endpoint_path()).json()
+            time_period = self.cleaned_data.get('time_period')
+            populate_totals(record, time_period)
+            return record
         except HttpNotFoundError:
             self.add_error(None, _('Not found'))
             return None
