@@ -15,6 +15,7 @@
   );
   require('notifications').Notifications.init();
   require('async-load').AsyncLoad.init();
+  require('date-picker').DatePicker.init();
 
   require('confirm-checked').ConfirmChecked.init();
   require('security-forms').SecurityForms.init();

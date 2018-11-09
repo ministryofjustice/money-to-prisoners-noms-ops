@@ -5,6 +5,10 @@ select[disabled] {
   color: $secondary-text-colour;
 }
 
+#id_received_at__gte, #id_received_at__lt, #id_created__gte, #id_created__lt {
+  width: 8em;
+}
+
 #id_sender_name, #id_sender_email, #id_recipient_name, #id_recipient_email {
   max-width: 16em;
   width: 100%;
