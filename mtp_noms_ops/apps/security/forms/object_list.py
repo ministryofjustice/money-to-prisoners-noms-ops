@@ -2,6 +2,7 @@ import re
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_ipv4_address
 from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_base import (
@@ -266,7 +267,8 @@ class CreditsForm(SecurityForm):
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
     sender_email = forms.CharField(label=_('Sender email'), required=False)
     sender_postcode = forms.CharField(label=_('Sender postcode'), required=False)
-    sender_ip_address = forms.CharField(label=_('Sender IP address'), required=False)
+    sender_ip_address = forms.CharField(label=_('Sender IP address'),
+                                        validators=[validate_ipv4_address], required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
