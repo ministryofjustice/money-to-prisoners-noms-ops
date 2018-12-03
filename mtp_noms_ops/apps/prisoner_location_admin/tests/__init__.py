@@ -11,7 +11,7 @@ from mtp_common.auth.test_utils import generate_tokens
 
 from prisoner_location_admin import required_permissions
 
-TEST_PRISONS = ['AGI', 'OGS', 'BBB']
+TEST_PRISONS = ['IXB', 'INP']
 
 
 class PrisonerLocationUploadTestCase(SimpleTestCase):
@@ -20,9 +20,12 @@ class PrisonerLocationUploadTestCase(SimpleTestCase):
         self.notifications_mock = mock.patch('mtp_common.templatetags.mtp_common.notifications_for_request',
                                              return_value=[])
         self.notifications_mock.start()
+        self.disable_cache = mock.patch('security.models.cache')
+        self.disable_cache.start().get.return_value = None
 
     def tearDown(self):
         self.notifications_mock.stop()
+        self.disable_cache.stop()
         super().tearDown()
 
     @mock.patch('mtp_common.auth.backends.api_client')
@@ -105,12 +108,12 @@ def random_dob():
     )
 
 
-def generate_testable_location_data(length=20, extra_row=None, excel_csv=False):
+def generate_testable_location_data(length=20, extra_rows=None, excel_csv=False):
     file_data = ['NOMS Number,Offender Surname,Offender Given Name 1,Date of Birth,Establishment Code']
     expected_data = []
 
-    if extra_row:
-        file_data.append(extra_row)
+    if extra_rows:
+        file_data.extend(extra_rows)
 
     for _ in range(length):
         firstname, surname = random_prisoner_name()

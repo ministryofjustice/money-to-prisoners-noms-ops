@@ -8,6 +8,7 @@ from mtp_common.test_utils import silence_logger
 import responses
 
 from security.tests import api_url
+from security.tests.test_forms import mock_prison_response
 from . import (
     PrisonerLocationUploadTestCase, generate_testable_location_data,
     get_csv_data_as_file
@@ -71,6 +72,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         expected_calls = [expected_data]
 
         with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
+            mock_prison_response(rsps)
             rsps.add(
                 rsps.POST,
                 api_url('/prisoner_locations/actions/delete_inactive/')
@@ -101,6 +103,53 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         self.assertRedirects(response, reverse('location_file_upload'))
 
     @mock.patch('prisoner_location_admin.tasks.api_client')
+    def test_location_file_with_ignored_prisons(self, mock_api_client):
+        self.login()
+        self.setup_mock_get_authenticated_api_session(mock_api_client)
+
+        file_data, expected_data = generate_testable_location_data(length=20, extra_rows=[
+            'A1234ZZ,Smith,John,2/9/1997,TRN',
+            'A1235ZZ,Smith,Fred,2/9/1997,ZCH',
+        ])
+        expected_calls = [expected_data]
+
+        with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
+            mock_prison_response(rsps)
+            rsps.add(
+                rsps.POST,
+                api_url('/prisoner_locations/actions/delete_inactive/')
+            )
+            rsps.add(
+                rsps.POST,
+                api_url('/prisoner_locations/')
+            )
+            rsps.add(
+                rsps.POST,
+                api_url('/prisoner_locations/actions/delete_old/')
+            )
+            response = self.client.post(
+                reverse('location_file_upload'),
+                {'location_file': get_csv_data_as_file(file_data)},
+                follow=True
+            )
+
+            for call in rsps.calls:
+                if call.request.url == api_url('/prisoner_locations/'):
+                    self.assertEqual(
+                        json.loads(call.request.body.decode()),
+                        expected_calls.pop()
+                    )
+
+        if expected_calls:
+            self.fail('Not all location data was uploaded')
+
+        self.assertRedirects(response, reverse('location_file_upload'))
+        response_content = response.content.decode()
+        self.assertIn('Ignored 1 prisoner in transfer', response_content)
+        self.assertIn('Ignored 1 prisoner in unsupported prison', response_content)
+        self.assertIn('NOMIS code: ZCH', response_content)
+
+    @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_upload_api_error_displays_message(self, mock_api_client):
         self.login()
         self.setup_mock_get_authenticated_api_session(mock_api_client)
@@ -111,6 +160,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         file_data, _ = generate_testable_location_data()
 
         with responses.RequestsMock() as rsps, silence_logger():
+            mock_prison_response(rsps)
             rsps.add(
                 rsps.POST,
                 api_url('/prisoner_locations/actions/delete_inactive/')
