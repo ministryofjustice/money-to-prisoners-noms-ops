@@ -62,48 +62,44 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         self.assertNotContains(response, '<!-- security:credit_list -->')
         self.assertContains(response, '<!-- location_file_upload -->')
 
-    @responses.activate
     @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_upload(self, mock_api_client):
         self.login()
         self.setup_mock_get_authenticated_api_session(mock_api_client)
 
-        responses.add(
-            responses.POST,
-            api_url('/prisoner_locations/actions/delete_inactive/')
-        )
-        responses.add(
-            responses.POST,
-            api_url('/prisoner_locations/')
-        )
-        responses.add(
-            responses.POST,
-            api_url('/prisoner_locations/actions/delete_old/')
-        )
-
         file_data, expected_data = generate_testable_location_data()
+        expected_calls = [expected_data]
 
-        with silence_logger(level=logging.WARNING):
+        with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
+            rsps.add(
+                rsps.POST,
+                api_url('/prisoner_locations/actions/delete_inactive/')
+            )
+            rsps.add(
+                rsps.POST,
+                api_url('/prisoner_locations/')
+            )
+            rsps.add(
+                rsps.POST,
+                api_url('/prisoner_locations/actions/delete_old/')
+            )
             response = self.client.post(
                 reverse('location_file_upload'),
                 {'location_file': get_csv_data_as_file(file_data)}
             )
 
-        expected_calls = [expected_data]
-
-        for call in responses.calls:
-            if call.request.url == api_url('/prisoner_locations/'):
-                self.assertEqual(
-                    json.loads(call.request.body.decode()),
-                    expected_calls.pop()
-                )
+            for call in rsps.calls:
+                if call.request.url == api_url('/prisoner_locations/'):
+                    self.assertEqual(
+                        json.loads(call.request.body.decode()),
+                        expected_calls.pop()
+                    )
 
         if expected_calls:
             self.fail('Not all location data was uploaded')
 
         self.assertRedirects(response, reverse('location_file_upload'))
 
-    @responses.activate
     @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_upload_api_error_displays_message(self, mock_api_client):
         self.login()
@@ -112,20 +108,19 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         api_error_message = 'prison not found'
         response_content = ('[{"prison": ["%s"]}]' % api_error_message).encode()
 
-        responses.add(
-            responses.POST,
-            api_url('/prisoner_locations/actions/delete_inactive/')
-        )
-        responses.add(
-            responses.POST,
-            api_url('/prisoner_locations/'),
-            status=400,
-            body=response_content
-        )
-
         file_data, _ = generate_testable_location_data()
 
-        with silence_logger():
+        with responses.RequestsMock() as rsps, silence_logger():
+            rsps.add(
+                rsps.POST,
+                api_url('/prisoner_locations/actions/delete_inactive/')
+            )
+            rsps.add(
+                rsps.POST,
+                api_url('/prisoner_locations/'),
+                status=400,
+                body=response_content
+            )
             response = self.client.post(
                 reverse('location_file_upload'),
                 {'location_file': get_csv_data_as_file(file_data)}
