@@ -2,7 +2,7 @@ from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
-from django.utils.translation import ngettext, gettext as _
+from django.utils.translation import gettext, ngettext
 from django.views.generic.edit import FormView
 from mtp_common.spooling import spooler
 
@@ -21,25 +21,50 @@ class LocationFileUploadView(FormView):
 
     def form_valid(self, form):
         try:
-            location_count = form.update_locations()
+            form.update_locations()
+            location_count = len(form.cleaned_data['location_file'])
+            transfer_count = form.cleaned_data['transfer_count']
+            skipped_counts = form.cleaned_data['skipped_counts']
+
             if settings.ASYNC_LOCATION_UPLOAD and spooler.installed:
-                message_parts = [
+                messages.info(self.request, ' '.join([
                     ngettext(
                         '%d prisoner location scheduled for upload.',
                         '%d prisoner locations scheduled for upload.',
                         location_count
                     ) % location_count,
-                    _('You will receive an email notification if the upload fails.')
-                ]
+                    gettext('You will receive an email notification if the upload fails.')
+                ]))
             else:
-                message_parts = [
-                    ngettext(
-                        '%d prisoner location updated successfully',
-                        '%d prisoner locations updated successfully',
-                        location_count
-                    ) % location_count,
-                ]
-            messages.info(self.request, ' '.join(message_parts))
+                messages.info(self.request, ngettext(
+                    '%d prisoner location updated successfully',
+                    '%d prisoner locations updated successfully',
+                    location_count
+                ) % location_count)
+
+            message_parts = []
+            if transfer_count:
+                message_parts.append(ngettext(
+                    'Ignored %(number)d prisoner in transfer.',
+                    'Ignored %(number)d prisoners in transfer.',
+                    transfer_count
+                ) % {
+                    'number': transfer_count,
+                })
+            if skipped_counts:
+                prisons = ', '.join(sorted(skipped_counts.keys()))
+                skipped_count = sum(skipped_counts.values())
+                message_parts.append(ngettext(
+                    'Ignored %(number)d prisoner in unsupported prison (NOMIS code: %(prisons)s).',
+                    'Ignored %(number)d prisoners in unsupported prisons (NOMIS codes: %(prisons)s).',
+                    skipped_count
+                ) % {
+                    'number': skipped_count,
+                    'prisons': prisons,
+                })
+            if message_parts:
+                messages.warning(self.request, ' '.join(message_parts))
+
             return super().form_valid(form)
         except forms.ValidationError as e:
             form.add_error(None, e)
