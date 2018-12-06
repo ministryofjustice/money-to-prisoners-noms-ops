@@ -705,7 +705,6 @@ class CreditsListTestCase(SecurityViewTestCase):
         self.assertIn('Credited by Maria', response_content)
 
 
-@override_settings(DISBURSEMENT_PRISONS=['BBI'])
 class DisbursementsListTestCase(SecurityViewTestCase):
     view_name = 'security:disbursement_list'
     detail_view_name = 'security:disbursement_detail'

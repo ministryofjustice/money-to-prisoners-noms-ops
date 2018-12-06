@@ -55,11 +55,6 @@ class DisbursementDetailView(SimpleSecurityDetailView):
     list_title = _('Disbursements')
     list_url = reverse_lazy('security:disbursement_list')
 
-    def dispatch(self, request, *args, **kwargs):
-        if not request.disbursements_available:
-            raise Http404('Disbursements not available to current user')
-        return super().dispatch(request, *args, **kwargs)
-
     def get_object_request_params(self):
         return {
             'url': '/disbursements/%s/' % self.kwargs['disbursement_id']
@@ -134,10 +129,9 @@ class PrisonerDetailView(SecurityDetailView):
             context_data['provided_names'] = NameSet(
                 prisoner.get('provided_names', ()), strip_titles=True
             )
-            if self.request.disbursements_available:
-                context_data['disbursement_count'] = self.get_disbursement_count(
-                    context_data['form'].session, prisoner['prisoner_number']
-                )
+            context_data['disbursement_count'] = self.get_disbursement_count(
+                context_data['form'].session, prisoner['prisoner_number']
+            )
         return context_data
 
     def get_title_for_object(self, detail_object):
@@ -164,8 +158,3 @@ class PrisonerDisbursementDetailView(PrisonerDetailView):
     template_name = 'security/prisoner-disbursements.html'
     form_class = PrisonersDisbursementDetailForm
     object_list_context_key = 'disbursements'
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.disbursements_available:
-            raise Http404('Disbursements not available to current user')
-        return super().dispatch(request, *args, **kwargs)
