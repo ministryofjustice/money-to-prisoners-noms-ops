@@ -3,13 +3,11 @@
 
 
 {% block object_list %}
-  {% if request.disbursements_available %}
-    <aside class="mtp-object-list-toggle print-hidden">
-      <a href="{% url 'security:prisoner_detail' prisoner.id %}" class="button-secondary">
-        {% trans 'View credits' %}
-      </a>
-    </aside>
-  {% endif %}
+  <aside class="mtp-object-list-toggle print-hidden">
+    <a href="{% url 'security:prisoner_detail' prisoner.id %}" class="button-secondary">
+      {% trans 'View credits' %}
+    </a>
+  </aside>
 
   <h2 class="heading-large">{% trans 'Disbursements sent' %}</h2>
 

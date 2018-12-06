@@ -1,5 +1,4 @@
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_list import (
@@ -30,11 +29,6 @@ class DisbursementListView(SecurityView):
     template_name = 'security/disbursements.html'
     form_class = DisbursementsForm
     object_list_context_key = 'disbursements'
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.disbursements_available:
-            raise Http404('Disbursements not available to current user')
-        return super().dispatch(request, *args, **kwargs)
 
 
 class SenderListView(SecurityView):

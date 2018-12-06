@@ -35,11 +35,9 @@
           {% labelled_data _('Total received') prisoner.credit_total|currency tag='strong' %}
         </div>
 
-        {% if request.disbursements_available %}
-          <div class="column-one-quarter">
-            {% labelled_data _('Disbursements sent') disbursement_count|default_if_none:_('Unknown') tag='strong' %}
-          </div>
-        {% endif %}
+        <div class="column-one-quarter">
+          {% labelled_data _('Disbursements sent') disbursement_count|default_if_none:_('Unknown') tag='strong' %}
+        </div>
       </div>
 
       <div class="mtp-prisoner-summary__details">
@@ -74,13 +72,11 @@
   {% if form.is_valid %}
     <div class="mtp-results-list">
       {% block object_list %}
-        {% if request.disbursements_available %}
-          <aside class="mtp-object-list-toggle print-hidden">
-            <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" class="button-secondary">
-              {% trans 'View disbursements' %}
-            </a>
-          </aside>
-        {% endif %}
+        <aside class="mtp-object-list-toggle print-hidden">
+          <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" class="button-secondary">
+            {% trans 'View disbursements' %}
+          </a>
+        </aside>
 
         <h2 class="heading-large">{% trans 'Credits received' %}</h2>
 
