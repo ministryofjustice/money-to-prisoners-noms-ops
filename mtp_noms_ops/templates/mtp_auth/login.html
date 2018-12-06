@@ -25,9 +25,11 @@
           </h1>
 
           <aside>
-            {% blocktrans trimmed %}
-              Use this tool to monitor and investigate money sent using the <a href="{{ start_page_url }}">Send money to someone in prison</a> service.
-            {% endblocktrans %}
+            <p>
+              {% blocktrans trimmed %}
+                Use this tool to monitor and investigate money sent using the <a href="{{ start_page_url }}">Send money to someone in prison</a> service.
+              {% endblocktrans %}
+            </p>
             {% trans 'The tool also gives insight into the digital movement of money, not only in your prison, but in all other public sector prisons in England and Wales.' %}
           </aside>
         </header>
@@ -55,14 +57,15 @@
           </a>
         </p>
 
-        <h2 class="heading-medium">{% trans 'What’s new?' %}</h2>
+        <h2 class="heading-medium">{% trans 'New disbursement tool' %}</h2>
         <p>
-          {% trans 'You can see more details about incoming credits.' %}
+          {% trans 'We’re piloting a new digital disbursement tool which will track money sent out of prisons.' %}
         </p>
         <p>
-          <a href="{% url 'submit_ticket' %}">
-            {% trans 'Tell us how we can improve this tool' %}
-          </a>
+          {% trans 'You now have access to the data from 12 pilot prisons.' %}
+        </p>
+        <p>
+          {% trans 'All public UK prisons will have access soon.' %}
         </p>
       </section>
 
