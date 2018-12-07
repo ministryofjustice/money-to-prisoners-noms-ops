@@ -43,8 +43,9 @@ class SendersForm(SecurityForm):
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
     source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices(),
-                               help_text=_('Select to see more filters e.g. card number or postcode'))
-    sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('for example 01-23-45'), required=False)
+                               help_text=_('Select to see filters like card number or postcode'))
+    sender_sort_code = forms.CharField(label=_('Sender sort code'), required=False,
+                                       help_text=_('For example, 01-23-45'))
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
@@ -243,8 +244,10 @@ class CreditsForm(SecurityForm):
                                      ('-prisoner_number', _('Prisoner number (Z to A)')),
                                  ])
 
-    received_at__gte = forms.DateField(label=_('Received since'), help_text=_('for example 13/02/2018'), required=False)
-    received_at__lt = forms.DateField(label=_('Received before'), help_text=_('for example 13/02/2018'), required=False)
+    received_at__gte = forms.DateField(label=_('Received since'), required=False,
+                                       help_text=_('For example, 13/02/2018'))
+    received_at__lt = forms.DateField(label=_('Received before'), required=False,
+                                      help_text=_('For example, 13/02/2018'))
 
     amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
                                        choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
@@ -260,8 +263,9 @@ class CreditsForm(SecurityForm):
 
     sender_name = forms.CharField(label=_('Sender name'), required=False)
     source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices(),
-                               help_text=_('Select to see more filters e.g. card number or postcode'))
-    sender_sort_code = forms.CharField(label=_('Sender sort code'), help_text=_('for example 01-23-45'), required=False)
+                               help_text=_('Select to see filters like card number or postcode'))
+    sender_sort_code = forms.CharField(label=_('Sender sort code'), required=False,
+                                       help_text=_('For example, 01-23-45'))
     sender_account_number = forms.CharField(label=_('Sender account number'), required=False)
     sender_roll_number = forms.CharField(label=_('Sender roll number'), required=False)
     card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
@@ -405,8 +409,8 @@ class DisbursementsForm(SecurityForm):
                                      ('-prisoner_number', _('Prisoner number (Z to A)')),
                                  ])
 
-    created__gte = forms.DateField(label=_('Entered since'), help_text=_('for example 13/02/2018'), required=False)
-    created__lt = forms.DateField(label=_('Entered before'), help_text=_('for example 13/02/2018'), required=False)
+    created__gte = forms.DateField(label=_('Entered since'), help_text=_('For example, 13/02/2018'), required=False)
+    created__lt = forms.DateField(label=_('Entered before'), help_text=_('For example, 13/02/2018'), required=False)
 
     amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
                                        choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
@@ -421,12 +425,12 @@ class DisbursementsForm(SecurityForm):
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
     method = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_disbursement_method_choices(),
-                               help_text=_('Select to see more filters e.g. account number'))
+                               help_text=_('Select to see filters like account number'))
     recipient_name = forms.CharField(label=_('Recipient name'), required=False)
     recipient_email = forms.CharField(label=_('Recipient email'), required=False)
     city = forms.CharField(label=_('City'), required=False)
-    postcode = forms.CharField(label=_('Post code'), required=False)
-    sort_code = forms.CharField(label=_('Sort code'), help_text=_('for example 01-23-45'),
+    postcode = forms.CharField(label=_('Postcode'), required=False)
+    sort_code = forms.CharField(label=_('Sort code'), help_text=_('For example, 01-23-45'),
                                 required=False)
     account_number = forms.CharField(label=_('Account number'), required=False)
     roll_number = forms.CharField(label=_('Roll number'), required=False)
