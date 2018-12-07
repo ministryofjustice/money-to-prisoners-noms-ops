@@ -19,4 +19,5 @@
 
   require('confirm-checked').ConfirmChecked.init();
   require('security-forms').SecurityForms.init();
+  require('form-analytics').FormAnalytics.init();
 }());
