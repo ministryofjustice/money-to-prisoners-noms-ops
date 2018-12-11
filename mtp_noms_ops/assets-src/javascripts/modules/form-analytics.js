@@ -18,11 +18,11 @@ exports.FormAnalytics = {
     this.$form.on('submit', $.proxy(this.onSubmit, this));
   },
 
-  onSubmit: function (e) {
+  onSubmit: function () {
     var inputs = this.$form.serializeArray();
-    var formId = this.$form.attr('id')
+    var formId = this.$form.attr('id');
 
-    $.each(inputs, function() {
+    $.each(inputs, function () {
       if (this.value) {
         analytics.Analytics.send(
           'event', {
