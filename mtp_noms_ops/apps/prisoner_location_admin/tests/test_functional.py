@@ -104,7 +104,7 @@ class UploadTests(PrisonerLocationAdminTestCase):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
         el.send_keys(os.path.join(os.path.dirname(__file__), 'files', 'empty.csv'))
         el.submit()
-        self.assertInSource('The file doesn’t contain valid rows')
+        self.assertInSource('The uploaded report contains no valid prisoner locations')
 
     def test_submit_file_upload_without_selecting_file(self):
         el = self.driver.find_element_by_xpath('//input[@type="file"]')
