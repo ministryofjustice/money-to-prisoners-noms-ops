@@ -143,6 +143,9 @@ class SecurityView(FormView):
     def get_export_description(self, form):
         return str(form.search_description['description'])
 
+    def get_class_name(self):
+        return self.__class__.__name__
+
     get = FormView.post
 
 
