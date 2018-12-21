@@ -4,6 +4,7 @@ import unittest
 from unittest import mock
 
 from django.http import QueryDict
+from django.test import SimpleTestCase, override_settings
 from mtp_common.auth.test_utils import generate_tokens
 import responses
 
@@ -25,15 +26,20 @@ def mock_prison_response(rsps):
                     'name': 'HMP Prison 1', 'short_name': 'Prison 1',
                     'region': 'West Midlands',
                     'categories': [{'description': 'Category A', 'name': 'A'}],
-                    'populations': [{'description': 'Adult', 'name': 'adult'}, {'description': 'Male', 'name': 'male'}],
+                    'populations': [
+                        {'description': 'Adult', 'name': 'adult'},
+                        {'description': 'Male', 'name': 'male'}
+                    ],
                 },
                 {
                     'nomis_id': 'INP', 'general_ledger_code': '10200015',
                     'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
                     'region': 'London',
                     'categories': [{'description': 'Category B', 'name': 'B'}],
-                    'populations': [{'description': 'Adult', 'name': 'adult'},
-                                    {'description': 'Female', 'name': 'female'}],
+                    'populations': [
+                        {'description': 'Adult', 'name': 'adult'},
+                        {'description': 'Female', 'name': 'female'}
+                    ],
                 },
             ]
         }
@@ -51,7 +57,8 @@ def mock_empty_response(rsps, path):
     )
 
 
-class SecurityFormTestCase(unittest.TestCase):
+@override_settings(DISBURSEMENT_PRISONS=['IXB', 'INP'])
+class SecurityFormTestCase(SimpleTestCase):
     form_class = None
 
     def setUp(self):
