@@ -123,6 +123,17 @@ def initial_params(request):
     ], doseq=True)}
 
 
+def initial_disbursement_params(request):
+    if not request.user_prisons:
+        return {}
+    return {'initial_disbursement_params': urlencode([
+        ('prison', prison['nomis_id'])
+        for prison in request.user_prisons
+        if not settings.DISBURSEMENT_PRISONS or
+        prison['nomis_id'] in settings.DISBURSEMENT_PRISONS
+    ], doseq=True)}
+
+
 def nomis_api_available(_):
     return {'nomis_api_available': (
         settings.NOMIS_API_BASE_URL and settings.NOMIS_API_CLIENT_TOKEN and settings.NOMIS_API_PRIVATE_KEY

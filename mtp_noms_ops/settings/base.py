@@ -125,6 +125,7 @@ TEMPLATES = [
                 'mtp_noms_ops.utils.govuk_localisation',
                 'mtp_noms_ops.utils.external_breadcrumbs',
                 'mtp_noms_ops.apps.security.utils.initial_params',
+                'mtp_noms_ops.apps.security.utils.initial_disbursement_params',
                 'mtp_noms_ops.apps.security.utils.nomis_api_available',
             ],
         },
