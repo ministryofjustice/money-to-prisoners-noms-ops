@@ -1,8 +1,18 @@
 // app-specific styles
 
-select[disabled] {
-  border-color: $secondary-text-colour;
-  color: $secondary-text-colour;
+.mtp-security-search {
+  input.form-control {
+    width: 6em;
+  }
+
+  select.form-control {
+    width: auto;
+  }
+
+  select[disabled] {
+    border-color: $secondary-text-colour;
+    color: $secondary-text-colour;
+  }
 }
 
 #id_received_at__gte, #id_received_at__lt, #id_created__gte, #id_created__lt {
@@ -34,14 +44,11 @@ select[disabled] {
 #id_prisoner_name-wrapper,
 #id_prisoner_number-wrapper {
   width: 18em;
-  display: inline-block;
 }
 
 #id_amount_exact-wrapper,
 #id_amount_pence-wrapper {
-  border-left: 10px solid $border-colour;
   display: none;
-  padding-left: 15px;
 }
 
 #id_invoice_number {
@@ -49,47 +56,7 @@ select[disabled] {
   width: 100%;
 }
 
-#id_source,
-#id_amount_pattern,
-#id_method,
-#id_prison,
-#id_prison_region,
-#id_prison_population,
-#id_prison_category {
-  width: 100%;
-}
-
-.column-narrow {
-  width: 4em;
-  display: block;
-  float: left;
-}
-
-.narrow {
-  width: 28%;
-}
-
-// govuk elements overrides
-
-.mtp-security-form {
-  .form-label {
-    font-weight: bold;
-
-    &.sublabel {
-      font-weight: normal;
-    }
-  }
-
-  #id_sender_account_number-wrapper,
-  #id_sender_sort_code-wrapper,
-  #id_card_number_last_digits-wrapper,
-  #id_sender_email-wrapper,
-  #id_sender_postcode-wrapper,
-  #id_sender_ip_address-wrapper,
-  #id_account_number-wrapper,
-  #id_sort_code-wrapper {
-    @include media(tablet) {
-      padding-left: 1em;
-    }
-  }
+#id_amount_pattern-label,
+#id_invoice_number-label {
+  @extend .visually-hidden;
 }

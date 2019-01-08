@@ -2,6 +2,7 @@ import logging
 
 from django import template
 from django.core.urlresolvers import reverse
+from django.template.base import token_kwargs
 from django.utils.html import escape
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
@@ -190,3 +191,44 @@ def find_rejection_reason(comment_set):
     for comment in filter(lambda comment: comment['category'] == 'reject', comment_set):
         return comment['comment']
     return ''
+
+
+class FilterGroupNode(template.Node):
+    def __init__(self, node_list, form=None, fields=None, group=None, label=None):
+        self.node_list = node_list
+        if not form or not fields or not group or not label:
+            raise template.TemplateSyntaxError('missing parameters')
+        self.form = form
+        self.fields = fields
+        self.group = group
+        self.label = label
+
+    def render(self, context):
+        templates = context.render_context.get(self)
+        if templates is None:
+            templates = {
+                'group': context.template.engine.get_template('security/forms/filter-group.html'),
+            }
+            context.render_context[self] = templates
+
+        form = self.form.resolve(context)
+        fields = self.fields.resolve(context).split()
+        selected = any(form.cleaned_data.get(field) or form.has_error(field) for field in fields)
+
+        content = self.node_list.render(context)
+        context = context.new({
+            'content': content,
+            'label': self.label.resolve(context),
+            'group': self.group.resolve(context),
+            'selected': selected,
+        })
+        rendered_html = templates['group'].render(context)
+        return rendered_html
+
+
+@register.tag
+def filtergroup(parser, token):
+    kwargs = token_kwargs(token.split_contents()[1:], parser)
+    node_list = parser.parse(('endfiltergroup',))
+    parser.delete_first_token()
+    return FilterGroupNode(node_list, **kwargs)

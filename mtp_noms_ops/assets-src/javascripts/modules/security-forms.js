@@ -4,13 +4,21 @@
 
 exports.SecurityForms = {
   init: function () {
-    $('#id_ordering').change(function () {
-      $(this).closest('form').submit();
-    });
-
     this.bindAmountPatternSelection();
     this.bindPaymentSourceSelection();
     this.bindPrisonSelection();
+
+    $('form.mtp-security-search').submit(function () {
+      $('input.mtp-filter-group-check').each(function () {
+        var $filterGroupInput = $(this);
+        if (!$filterGroupInput.prop('checked')) {
+          var $filterGroup = $('#' + $filterGroupInput.parent().data('target'));
+          $('input, select, textarea', $filterGroup[0]).each(function () {
+            this.disabled = true;
+          });
+        }
+      });
+    });
   },
 
   bindAmountPatternSelection: function () {

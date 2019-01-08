@@ -1,38 +1,19 @@
+{% extends 'security/forms/filter-form.html' %}
 {% load i18n %}
-{% load mtp_common %}
 {% load security %}
 
-<div class="mtp-security-form">
-  {{ form.ordering.as_hidden }}
+{% block filters %}
 
-  {% tabbedpanel cookie_name='mtp-tab-prisoners' tab_label=_('Filter by') %}
+  {% filtergroup form=form fields='prisoner_number prisoner_name' group='prisoner' label=_('Prisoner') %}
+    {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
+    {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
+  {% endfiltergroup %}
 
-    {% paneltab name='prisoner' title=_('Prisoner') %}
-      <div class="grid-row">
-        <div class="column-full">
-          {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
-          {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
-        </div>
-      </div>
-    {% endpaneltab %}
+  {% filtergroup form=form fields='prison prison_region prison_population prison_category' group='prison' label=_('Prison') %}
+    {% include 'security/forms/prison-select-field.html' with field=form.prison %}
+    {% include 'security/forms/select-field.html' with field=form.prison_population %}
+    {% include 'security/forms/select-field.html' with field=form.prison_category %}
+    {% include 'security/forms/select-field.html' with field=form.prison_region %}
+  {% endfiltergroup %}
 
-    {% paneltab name='prison' title=_('Prison') %}
-      <script>
-        var prisonData={{ form.prison_list.mapping_as_json }};
-      </script>
-      <div class="grid-row">
-        <div class="column-one-third">
-          {% include 'security/forms/prison-select-field.html' with field=form.prison %}
-          {% include 'security/forms/select-field.html' with field=form.prison_population %}
-        </div>
-        <div class="column-one-third">
-          {% include 'security/forms/select-field.html' with field=form.prison_category %}
-          {% include 'security/forms/select-field.html' with field=form.prison_region %}
-        </div>
-      </div>
-    {% endpaneltab %}
-
-    {% include 'security/forms/update-search.html' with search_description=form.search_description only %}
-
-  {% endtabbedpanel %}
-</div>
+{% endblock %}

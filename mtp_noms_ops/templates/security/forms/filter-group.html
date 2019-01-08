@@ -1,0 +1,7 @@
+<div class="multiple-choice" data-target="mtp-filter-group-{{ group }}">
+  <input id="mtp-filter-group-{{ group }}-check" class="mtp-filter-group-check" type="checkbox" {% if selected %}checked{% endif %}>
+  <label for="mtp-filter-group-{{ group }}-check">{{ label }}</label>
+</div>
+<div class="panel panel-border-narrow mtp-filter-group-panel {% if not selected %}js-hidden{% endif %}" id="mtp-filter-group-{{ group }}">
+  {{ content }}
+</div>

@@ -31,9 +31,9 @@ class SecurityDashboardTestCase(FunctionalTestCase):
         tab_element = container_element.find_element_by_link_text(tab_name)
         tab_element.click()
 
-    def click_on_filter_tab(self, field):
-        tab_element = self.driver.find_element_by_css_selector('#mtp-tab-%s' % field)
-        tab_element.click()
+    def click_on_filter_group(self, field):
+        group_label = self.driver.find_element_by_css_selector('#mtp-filter-group-%s-check' % field)
+        group_label.click()
 
 
 class SecurityDashboardTests(SecurityDashboardTestCase):
@@ -69,23 +69,23 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
     def test_perform_searches(self):
         self.assertInSource('Status')  # a results list header
 
-        self.click_on_filter_tab('sender')
+        self.click_on_filter_group('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
         self.click_on_submit()
         self.assertInSource('No matching credits found')
 
-        self.click_on_filter_tab('prisoner')
+        self.click_on_filter_group('prisoner')
         self.type_in('id_prisoner_name', 'James')  # combined search
         self.click_on_submit()
         self.assertInSource('No matching credits found')
 
-        self.click_on_filter_tab('sender')
+        # sender group already open
         self.type_in('id_sender_name', Keys.BACKSPACE * len('aaabbbccc111222333'))
         self.click_on_submit()
         self.assertInSource('JAMES HALLS')
 
     def test_ordering(self):
-        self.click_on_filter_tab('amount')
+        self.click_on_filter_group('amount')
         amount_pattern = self.get_element('id_amount_pattern')
         amount_pattern.find_element_by_xpath('//option[text()="Not a multiple of £5"]').click()
         self.click_on_submit()
@@ -108,7 +108,7 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
     def test_perform_searches(self):
         self.assertInSource('Amount')  # a results list header
 
-        self.click_on_filter_tab('sender')
+        self.click_on_filter_group('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
         self.click_on_submit()
         self.assertInSource('No matching payment sources found')
@@ -123,7 +123,7 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
     def test_perform_searches(self):
         self.assertInSource('Amount')  # a results list header
 
-        self.click_on_filter_tab('prisoner')
+        self.click_on_filter_group('prisoner')
         self.type_in('id_prisoner_name', 'James')
         self.click_on_submit()
         self.assertInSource('JAMES HALLS')
