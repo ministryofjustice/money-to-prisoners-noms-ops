@@ -869,7 +869,8 @@ class CreditsExportTestCase(SecurityBaseTestCase):
                     'sender_name': None,
                     'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
                     'card_number_last_digits': None, 'card_expiry_date': None,
-                    'billing_address': {'line1': '102PF', 'city': 'London'}, 'ip_address': '127.0.0.1',
+                    'billing_address': {'line1': '102PF', 'city': 'London'},
+                    'ip_address': '127.0.0.1', 'sender_email': 'ian@mail.local',
                     'resolution': 'credited', 'nomis_transaction_id': None,
                     'owner': None, 'owner_name': None,
                     'received_at': '2016-05-25T20:24:00Z',
@@ -883,7 +884,8 @@ class CreditsExportTestCase(SecurityBaseTestCase):
                     'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
                     'prison': 'LEI', 'prison_name': 'HMP LEEDS',
                     'sender_name': 'HEIDENREICH X',
-                    'sender_sort_code': '219657', 'sender_account_number': '88447894', 'sender_roll_number': '',
+                    'sender_sort_code': '219657', 'sender_account_number': '88447894',
+                    'sender_roll_number': '', 'sender_email': None,
                     'card_number_last_digits': None, 'card_expiry_date': None,
                     'billing_address': None, 'ip_address': '127.0.0.1',
                     'resolution': 'credited', 'nomis_transaction_id': '123456-7',
@@ -904,11 +906,11 @@ class CreditsExportTestCase(SecurityBaseTestCase):
             self.expected_headers,
             ['GEORGE MELLEY', 'A1411AE', 'HMP LEEDS', None, 'Debit card', None, None, None,
              None, None, '102PF, London', '£230.00', '2016-05-25 21:24:00',
-             'Credited', '2016-05-25 21:27:00', None, '127.0.0.1'],
+             'Credited', '2016-05-25 21:27:00', None, '127.0.0.1', 'ian@mail.local'],
             ['NORMAN STANLEY FLETCHER', 'A1413AE', 'HMP LEEDS', 'HEIDENREICH X',
              'Bank transfer', '21-96-57', '88447894', None, None, None, None,
              '£275.00', '2016-05-23 00:00:00',
-             'Credited', '2016-05-23 02:10:00', '123456-7', '127.0.0.1']
+             'Credited', '2016-05-23 02:10:00', '123456-7', '127.0.0.1', None]
         ]
 
         self.login()
