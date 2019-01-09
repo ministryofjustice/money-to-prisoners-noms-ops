@@ -52,7 +52,7 @@ def credit_row_generator(object_list):
         gettext('Debit card number'), gettext('Debit card expiry'), gettext('Address'),
         gettext('Amount'), gettext('Date received'),
         gettext('Credited status'), gettext('Date credited'), gettext('NOMIS ID'),
-        gettext('IP'),
+        gettext('IP'), gettext('Email'),
     ]
     for credit in object_list:
         yield [
@@ -73,6 +73,7 @@ def credit_row_generator(object_list):
             credit['credited_at'],
             credit['nomis_transaction_id'],
             credit['ip_address'],
+            credit['sender_email'],
         ]
 
 
@@ -139,7 +140,7 @@ def disbursement_row_generator(object_list):
     yield [
         gettext('Prisoner name'), gettext('Prisoner number'), gettext('Prison'),
         gettext('Recipient first name'), gettext('Recipient last name'), gettext('Payment method'),
-        gettext('Address'),
+        gettext('Address'), gettext('Recipient email'),
         gettext('Bank transfer sort code'), gettext('Bank transfer account'), gettext('Bank transfer roll number'),
         gettext('Amount'), gettext('Status'),
         gettext('Date entered'), gettext('Date confirmed'),  gettext('Date sent'),
@@ -157,6 +158,7 @@ def disbursement_row_generator(object_list):
             disbursement['recipient_first_name'], disbursement['recipient_last_name'],
             str(disbursement_methods.get(disbursement['method'], disbursement['method'])),
             disbursement_address_for_export(disbursement),
+            disbursement['recipient_email'],
             format_sort_code(disbursement['sort_code']) if disbursement['sort_code'] else '',
             disbursement['account_number'],
             disbursement['roll_number'],
