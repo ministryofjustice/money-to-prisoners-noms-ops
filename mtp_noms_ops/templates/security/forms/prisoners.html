@@ -7,12 +7,12 @@
   <div class="grid-row">
     <div class="column-half">
 
-      {% filtergroup form=form group='prisoner' label=_('Prisoner') %}
+      {% filtergroup form=form group='prisoner' %}
         {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
         {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
       {% endfiltergroup %}
 
-      {% filtergroup form=form group='prison' label=_('Prison') %}
+      {% filtergroup form=form group='prison' %}
         {% include 'security/forms/prison-select-field.html' with field=form.prison %}
         {% include 'security/forms/select-field.html' with field=form.prison_population %}
         {% include 'security/forms/select-field.html' with field=form.prison_category %}

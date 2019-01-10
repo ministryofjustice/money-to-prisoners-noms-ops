@@ -12,17 +12,17 @@
   <div class="grid-row">
     <div class="column-half">
 
-      {% filtergroup form=form group='date' label=_('Date entered') %}
-        {% include 'security/forms/date-range-field.html' with range_label=_('Date entered') since_field=form.created__gte until_field=form.created__lt %}
+      {% filtergroup form=form group='created' %}
+        {% include 'security/forms/date-range-field.html' with range_label=form.group_labels.created since_field=form.created__gte until_field=form.created__lt %}
       {% endfiltergroup %}
 
-      {% filtergroup form=form group='amount' label=_('Amount (£)') %}
+      {% filtergroup form=form group='amount' %}
         {% include 'security/forms/select-field.html' with field=form.amount_pattern %}
         {% include 'mtp_common/forms/field.html' with field=form.amount_exact %}
         {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
       {% endfiltergroup %}
 
-      {% filtergroup form=form group='recipient' label=_('Recipient') %}
+      {% filtergroup form=form group='recipient' %}
         {% include 'mtp_common/forms/select-field.html' with field=form.method %}
         {% include 'mtp_common/forms/field.html' with field=form.recipient_name %}
         {% include 'mtp_common/forms/field.html' with field=form.recipient_email %}
@@ -33,19 +33,19 @@
         </div>
       {% endfiltergroup %}
 
-      {% filtergroup form=form group='invoice' label=_('Invoice number') %}
+      {% filtergroup form=form group='invoice' %}
         {% include 'mtp_common/forms/field.html' with field=form.invoice_number %}
       {% endfiltergroup %}
 
     </div>
     <div class="column-half">
 
-      {% filtergroup form=form group='prisoner' label=_('Prisoner') %}
+      {% filtergroup form=form group='prisoner' %}
         {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
         {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
       {% endfiltergroup %}
 
-      {% filtergroup form=form group='prison' label=_('Prison') %}
+      {% filtergroup form=form group='prison' %}
         {% include 'security/forms/prison-select-field.html' with field=form.prison %}
         {% include 'security/forms/select-field.html' with field=form.prison_population %}
         {% include 'security/forms/select-field.html' with field=form.prison_category %}

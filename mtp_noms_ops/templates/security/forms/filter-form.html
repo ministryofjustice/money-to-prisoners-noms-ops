@@ -9,7 +9,8 @@
 {% if not form.errors %}
   <p class="mtp-search-description">
     {% block search_description %}
-      {{ form.search_description.description }}
+      <span class="print-only-inline">{{ form.search_description.description }}</span>
+      <span class="print-hidden">{{ form.search_description.simple_description }}</span>
     {% endblock %}
   </p>
 

@@ -12,7 +12,8 @@ from django.core.exceptions import ValidationError
 from django.utils.dateformat import format as date_format
 from django.utils.functional import cached_property
 from django.utils.html import format_html, format_html_join
-from django.utils.translation import gettext_lazy as _, override as override_locale
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext, gettext_lazy as _, override as override_locale
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.auth.api_client import get_api_session
@@ -162,6 +163,18 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     exclusive_date_params = []
 
     groups = {}
+    # NB: ensure that these templates are HTML-safe
+    group_labels = collections.OrderedDict((
+        ('received_at', _('Date received')),
+        ('created', _('Date entered')),
+        ('amount', _('Amount')),
+        ('prisoner', _('Prisoner')),
+        ('prison', _('Prison')),
+        ('sender', _('Payment source')),
+        ('recipient', _('Recipient')),
+        ('invoice', _('Invoice number')),
+    ))
+    unfiltered_simple_description = _('No filters applied.')
 
     filtered_description_template = NotImplemented
     unfiltered_description_template = NotImplemented
@@ -313,6 +326,17 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             for group, fields in self.groups.items()
             if any(self.cleaned_data.get(field) or self.has_error(field) for field in fields)
         )
+        if selected_groups:
+            labels = [
+                '<strong>%s</strong>' % str(label).lower()
+                for group, label in self.group_labels.items()
+                if group in selected_groups
+            ]
+            if len(labels) > 1:
+                labels = labels[:-2] + [gettext('%s and %s') % (labels[-2], labels[-1])]
+            simple_description = mark_safe(_('Filtered by %s.') % ', '.join(labels))
+        else:
+            simple_description = self.unfiltered_simple_description
 
         with override_locale(settings.LANGUAGE_CODE):
             description_kwargs = {
@@ -362,6 +386,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 'has_filters': has_filters,
                 'selected_groups': selected_groups,
                 'description': format_html(description_template, **description_kwargs),
+                'simple_description': simple_description,
             }
 
     def describe_field_prison(self):

@@ -58,3 +58,11 @@ form .form-group .form-hint {
     display: none;
   }
 }
+
+.print-only-inline {
+  display: none;
+
+  @media print {
+    display: inline;
+  }
+}

@@ -13,7 +13,8 @@
 
   <div class="panel panel-border-narrow">
     <p class="mtp-search-description--aside">
-      {{ form.search_description.description }}
+      <span class="print-only-inline">{{ form.search_description.description }}</span>
+      <span class="print-hidden">{{ form.search_description.simple_description }}</span>
       {% trans 'You can’t see cash or postal orders here.' %}
     </p>
 

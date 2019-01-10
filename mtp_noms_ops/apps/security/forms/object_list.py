@@ -76,6 +76,7 @@ class SendersForm(SecurityForm):
         ),
         'prison': ('prison', 'prison_region', 'prison_population', 'prison_category',),
     }
+    unfiltered_simple_description = _('Showing all payment sources.')
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are senders who {filter_description}, ordered by {ordering_description}.'
@@ -207,6 +208,7 @@ class PrisonersForm(SecurityForm):
         'prisoner': ('prisoner_number', 'prisoner_name',),
         'prison': ('prison', 'prison_region', 'prison_population', 'prison_category',),
     }
+    unfiltered_simple_description = _('Showing all known prisoners.')
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are prisoners who {filter_description}, ordered by {ordering_description}.'
@@ -309,7 +311,7 @@ class CreditsForm(SecurityForm):
     exclusive_date_params = ['received_at__lt']
 
     groups = {
-        'date': ('received_at__gte', 'received_at__lt',),
+        'received_at': ('received_at__gte', 'received_at__lt',),
         'amount': ('amount_pattern', 'amount_exact', 'amount_pence',),
         'sender': (
             'source', 'sender_name',
@@ -319,6 +321,7 @@ class CreditsForm(SecurityForm):
         'prisoner': ('prisoner_number', 'prisoner_name',),
         'prison': ('prison', 'prison_region', 'prison_population', 'prison_category',),
     }
+    unfiltered_simple_description = _('Showing all credits.')
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are credits sent {filter_description}, ordered by {ordering_description}.'
@@ -484,7 +487,7 @@ class DisbursementsForm(SecurityForm):
     exclusive_date_params = ['created__lt']
 
     groups = {
-        'date': ('created__gte', 'created__lt',),
+        'created': ('created__gte', 'created__lt',),
         'amount': ('amount_pattern', 'amount_exact', 'amount_pence',),
         'prisoner': ('prisoner_number', 'prisoner_name',),
         'prison': ('prison', 'prison_region', 'prison_population', 'prison_category',),
@@ -495,6 +498,7 @@ class DisbursementsForm(SecurityForm):
         ),
         'invoice': ('invoice_number',),
     }
+    unfiltered_simple_description = _('Showing all disbursements.')
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are disbursements {filter_description}, ' \

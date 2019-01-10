@@ -1,6 +1,7 @@
 import logging
 
 from django.core.urlresolvers import reverse
+from django.utils.html import strip_tags
 from mtp_common.test_utils.functional_tests import FunctionalTestCase
 from mtp_common.test_utils import silence_logger
 from selenium.webdriver.common.keys import Keys
@@ -93,14 +94,12 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         amount_pattern = self.get_element('id_amount_pattern')
         amount_pattern.find_element_by_xpath('//option[text()="Not a multiple of £5"]').click()
         self.click_on_submit()
-        search_description = self.get_element('.mtp-search-description')
         self.assertIn('Below are credits sent that are not a multiple of £5, ordered by received date',
-                      search_description.text)
+                      strip_tags(self.driver.page_source))
 
         self.get_element('.mtp-results-list th:nth-child(5) a').click()
-        search_description = self.get_element('.mtp-search-description')
         self.assertIn('Below are credits sent that are not a multiple of £5, ordered by amount sent (low to high)',
-                      search_description.text)
+                      strip_tags(self.driver.page_source))
 
 
 class SecuritySenderSearchTests(SecurityDashboardTestCase):

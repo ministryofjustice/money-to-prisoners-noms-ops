@@ -18,6 +18,8 @@ class SendersDetailForm(SecurityDetailForm):
                                      ('-prisoner_number', _('Prisoner number (Z to A)')),
                                  ])
 
+    unfiltered_simple_description = _('Showing all credits.')
+
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are credits sent by this sender that {filter_description}, ' \
                                     'ordered by {ordering_description}.'
@@ -41,6 +43,8 @@ class PrisonersDetailForm(SecurityDetailForm):
                                      ('-amount', _('Amount sent (high to low)')),
                                  ])
 
+    unfiltered_simple_description = _('Showing all credits.')
+
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are credits received by this prisoner that {filter_description}, ' \
                                     'ordered by {ordering_description}.'
@@ -63,6 +67,8 @@ class PrisonersDisbursementDetailForm(PrisonersDetailForm):
                                      ('amount', _('Amount sent (low to high)')),
                                      ('-amount', _('Amount sent (high to low)')),
                                  ])
+
+    unfiltered_simple_description = _('Showing all disbursements.')
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are disbursements sent by this prisoner that {filter_description}, ' \

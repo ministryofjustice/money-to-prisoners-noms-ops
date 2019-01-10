@@ -194,13 +194,12 @@ def find_rejection_reason(comment_set):
 
 
 class FilterGroupNode(template.Node):
-    def __init__(self, node_list, form=None, group=None, label=None):
+    def __init__(self, node_list, form=None, group=None):
         self.node_list = node_list
-        if not form or not group or not label:
+        if not form or not group:
             raise template.TemplateSyntaxError('missing parameters')
         self.form = form
         self.group = group
-        self.label = label
 
     def render(self, context):
         templates = context.render_context.get(self)
@@ -212,13 +211,14 @@ class FilterGroupNode(template.Node):
 
         form = self.form.resolve(context)
         group = self.group.resolve(context)
+        label = form.group_labels[group]
         selected = group in form.search_description['selected_groups']
 
         content = self.node_list.render(context)
         context = context.new({
             'content': content,
-            'label': self.label.resolve(context),
             'group': group,
+            'label': label,
             'selected': selected,
         })
         rendered_html = templates['group'].render(context)

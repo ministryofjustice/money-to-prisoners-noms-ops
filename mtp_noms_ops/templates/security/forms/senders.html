@@ -7,7 +7,7 @@
   <div class="grid-row">
     <div class="column-half">
 
-      {% filtergroup form=form group='sender' label=_('Payment source') %}
+      {% filtergroup form=form group='sender' %}
         {% include 'mtp_common/forms/select-field.html' with field=form.source %}
         {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
         <div class="form-group mtp-payment-method-options--bank-transfer">
@@ -21,7 +21,7 @@
         </div>
       {% endfiltergroup %}
 
-      {% filtergroup form=form group='prison' label=_('Prison') %}
+      {% filtergroup form=form group='prison' %}
         {% include 'security/forms/prison-select-field.html' with field=form.prison %}
         {% include 'security/forms/select-field.html' with field=form.prison_population %}
         {% include 'security/forms/select-field.html' with field=form.prison_category %}
