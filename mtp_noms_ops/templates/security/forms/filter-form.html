@@ -7,7 +7,7 @@
 {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
 {% if not form.errors %}
-  <p class="lede">
+  <p class="mtp-search-description">
     {% block search_description %}
       {{ form.search_description.description }}
     {% endblock %}
