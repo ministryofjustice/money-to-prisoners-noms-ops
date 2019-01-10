@@ -12,6 +12,11 @@
   }
 }
 
+#id_received_at__gte-wrapper,
+#id_created__gte-wrapper{
+  margin-top: 0;
+}
+
 .mtp-filter-group-panel {
   margin-bottom: ($gutter * 2);
 

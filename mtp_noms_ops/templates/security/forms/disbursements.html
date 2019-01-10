@@ -9,41 +9,50 @@
 
 {% block filters %}
 
-  {% filtergroup form=form group='date' label=_('Date entered') %}
-    {% include 'security/forms/date-range-field.html' with range_label=_('Date entered') since_field=form.created__gte until_field=form.created__lt %}
-  {% endfiltergroup %}
+  <div class="grid-row">
+    <div class="column-half">
 
-  {% filtergroup form=form group='amount' label=_('Amount (£)') %}
-    {% include 'security/forms/select-field.html' with field=form.amount_pattern %}
-    {% include 'mtp_common/forms/field.html' with field=form.amount_exact %}
-    {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
-  {% endfiltergroup %}
+      {% filtergroup form=form group='date' label=_('Date entered') %}
+        {% include 'security/forms/date-range-field.html' with range_label=_('Date entered') since_field=form.created__gte until_field=form.created__lt %}
+      {% endfiltergroup %}
 
-  {% filtergroup form=form group='recipient' label=_('Recipient') %}
-    {% include 'mtp_common/forms/select-field.html' with field=form.method %}
-    {% include 'mtp_common/forms/field.html' with field=form.recipient_name %}
-    {% include 'mtp_common/forms/field.html' with field=form.recipient_email %}
-    {% include 'mtp_common/forms/field.html' with field=form.postcode %}
-    <div class="form-group mtp-payment-method-options--bank-transfer">
-      {% include 'mtp_common/forms/field.html' with field=form.account_number %}
-      {% include 'mtp_common/forms/field.html' with field=form.sort_code %}
+      {% filtergroup form=form group='amount' label=_('Amount (£)') %}
+        {% include 'security/forms/select-field.html' with field=form.amount_pattern %}
+        {% include 'mtp_common/forms/field.html' with field=form.amount_exact %}
+        {% include 'mtp_common/forms/field.html' with field=form.amount_pence %}
+      {% endfiltergroup %}
+
+      {% filtergroup form=form group='recipient' label=_('Recipient') %}
+        {% include 'mtp_common/forms/select-field.html' with field=form.method %}
+        {% include 'mtp_common/forms/field.html' with field=form.recipient_name %}
+        {% include 'mtp_common/forms/field.html' with field=form.recipient_email %}
+        {% include 'mtp_common/forms/field.html' with field=form.postcode %}
+        <div class="form-group mtp-payment-method-options--bank-transfer">
+          {% include 'mtp_common/forms/field.html' with field=form.account_number %}
+          {% include 'mtp_common/forms/field.html' with field=form.sort_code %}
+        </div>
+      {% endfiltergroup %}
+
+      {% filtergroup form=form group='invoice' label=_('Invoice number') %}
+        {% include 'mtp_common/forms/field.html' with field=form.invoice_number %}
+      {% endfiltergroup %}
+
     </div>
-  {% endfiltergroup %}
+    <div class="column-half">
 
-  {% filtergroup form=form group='prisoner' label=_('Prisoner') %}
-    {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
-    {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
-  {% endfiltergroup %}
+      {% filtergroup form=form group='prisoner' label=_('Prisoner') %}
+        {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
+        {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
+      {% endfiltergroup %}
 
-  {% filtergroup form=form group='prison' label=_('Prison') %}
-    {% include 'security/forms/prison-select-field.html' with field=form.prison %}
-    {% include 'security/forms/select-field.html' with field=form.prison_population %}
-    {% include 'security/forms/select-field.html' with field=form.prison_category %}
-    {% include 'security/forms/select-field.html' with field=form.prison_region %}
-  {% endfiltergroup %}
+      {% filtergroup form=form group='prison' label=_('Prison') %}
+        {% include 'security/forms/prison-select-field.html' with field=form.prison %}
+        {% include 'security/forms/select-field.html' with field=form.prison_population %}
+        {% include 'security/forms/select-field.html' with field=form.prison_category %}
+        {% include 'security/forms/select-field.html' with field=form.prison_region %}
+      {% endfiltergroup %}
 
-  {% filtergroup form=form group='invoice' label=_('Invoice number') %}
-    {% include 'mtp_common/forms/field.html' with field=form.invoice_number %}
-  {% endfiltergroup %}
+    </div>
+  </div>
 
 {% endblock %}
