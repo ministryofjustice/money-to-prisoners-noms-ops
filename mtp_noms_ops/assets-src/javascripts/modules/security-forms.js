@@ -8,6 +8,13 @@ exports.SecurityForms = {
     this.bindPaymentSourceSelection();
     this.bindPrisonSelection();
 
+    $('.js-filters-trigger').click(function (e) {
+      e.preventDefault();
+      var $button = $(this);
+      $('#' + $button.data('target')).removeClass('js-hidden');
+      $button.remove();
+    });
+
     $('form.mtp-security-search').submit(function () {
       $('input.mtp-filter-group-check').each(function () {
         var $filterGroupInput = $(this);

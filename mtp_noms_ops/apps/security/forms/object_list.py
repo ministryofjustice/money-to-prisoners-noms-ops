@@ -68,6 +68,15 @@ class SendersForm(SecurityForm):
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
+    groups = {
+        'sender': (
+            'source', 'sender_name',
+            'sender_sort_code', 'sender_account_number', 'sender_roll_number',
+            'card_number_last_digits', 'sender_email', 'sender_postcode',
+        ),
+        'prison': ('prison', 'prison_region', 'prison_population', 'prison_category',),
+    }
+
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are senders who {filter_description}, ordered by {ordering_description}.'
     unfiltered_description_template = 'All senders are shown below ordered by {ordering_description}. ' \
@@ -194,6 +203,11 @@ class PrisonersForm(SecurityForm):
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
+    groups = {
+        'prisoner': ('prisoner_number', 'prisoner_name',),
+        'prison': ('prison', 'prison_region', 'prison_population', 'prison_category',),
+    }
+
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are prisoners who {filter_description}, ordered by {ordering_description}.'
     unfiltered_description_template = 'All prisoners are shown below ordered by {ordering_description}. ' \
@@ -293,6 +307,18 @@ class CreditsForm(SecurityForm):
     # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
     exclusive_date_params = ['received_at__lt']
+
+    groups = {
+        'date': ('received_at__gte', 'received_at__lt',),
+        'amount': ('amount_pattern', 'amount_exact', 'amount_pence',),
+        'sender': (
+            'source', 'sender_name',
+            'sender_sort_code', 'sender_account_number', 'sender_roll_number',
+            'card_number_last_digits', 'sender_email', 'sender_postcode', 'sender_ip_address',
+        ),
+        'prisoner': ('prisoner_number', 'prisoner_name',),
+        'prison': ('prison', 'prison_region', 'prison_population', 'prison_category',),
+    }
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are credits sent {filter_description}, ordered by {ordering_description}.'
@@ -450,11 +476,25 @@ class DisbursementsForm(SecurityForm):
                                 required=False)
     account_number = forms.CharField(label=_('Account number'), required=False)
     roll_number = forms.CharField(label=_('Roll number'), required=False)
+
     invoice_number = forms.CharField(label=_('Invoice number'), required=False)
 
     # search = forms.CharField(label=_('Prisoner name, prisoner number or recipient name'), required=False)
 
     exclusive_date_params = ['created__lt']
+
+    groups = {
+        'date': ('created__gte', 'created__lt',),
+        'amount': ('amount_pattern', 'amount_exact', 'amount_pence',),
+        'prisoner': ('prisoner_number', 'prisoner_name',),
+        'prison': ('prison', 'prison_region', 'prison_population', 'prison_category',),
+        'recipient': (
+            'method', 'recipient_name', 'recipient_email',
+            'city', 'postcode',
+            'sort_code', 'account_number', 'roll_number',
+        ),
+        'invoice': ('invoice_number',),
+    }
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are disbursements {filter_description}, ' \

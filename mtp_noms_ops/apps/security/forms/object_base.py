@@ -161,6 +161,8 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     exclusive_date_params = []
 
+    groups = {}
+
     filtered_description_template = NotImplemented
     unfiltered_description_template = NotImplemented
     description_templates = ()
@@ -304,8 +306,14 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             return ', '.join(filter(None, (self._get_value_text(bf, f, i) for i in v)))
         return self._get_value_text(bf, f, v)
 
-    @property
+    @cached_property
     def search_description(self):
+        selected_groups = set(
+            group
+            for group, fields in self.groups.items()
+            if any(self.cleaned_data.get(field) or self.has_error(field) for field in fields)
+        )
+
         with override_locale(settings.LANGUAGE_CODE):
             description_kwargs = {
                 'ordering_description': self._describe_field(self['ordering']),
@@ -352,6 +360,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
             return {
                 'has_filters': has_filters,
+                'selected_groups': selected_groups,
                 'description': format_html(description_template, **description_kwargs),
             }
 

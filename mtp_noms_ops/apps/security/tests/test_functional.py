@@ -69,22 +69,26 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
     def test_perform_searches(self):
         self.assertInSource('Status')  # a results list header
 
+        self.get_element('.js-filters-trigger').click()
         self.click_on_filter_group('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
         self.click_on_submit()
         self.assertInSource('No matching credits found')
 
+        self.get_element('.js-filters-trigger').click()
         self.click_on_filter_group('prisoner')
         self.type_in('id_prisoner_name', 'James')  # combined search
         self.click_on_submit()
         self.assertInSource('No matching credits found')
 
+        self.get_element('.js-filters-trigger').click()
         # sender group already open
         self.type_in('id_sender_name', Keys.BACKSPACE * len('aaabbbccc111222333'))
         self.click_on_submit()
         self.assertInSource('JAMES HALLS')
 
     def test_ordering(self):
+        self.get_element('.js-filters-trigger').click()
         self.click_on_filter_group('amount')
         amount_pattern = self.get_element('id_amount_pattern')
         amount_pattern.find_element_by_xpath('//option[text()="Not a multiple of £5"]').click()
@@ -108,6 +112,7 @@ class SecuritySenderSearchTests(SecurityDashboardTestCase):
     def test_perform_searches(self):
         self.assertInSource('Amount')  # a results list header
 
+        self.get_element('.js-filters-trigger').click()
         self.click_on_filter_group('sender')
         self.type_in('id_sender_name', 'aaabbbccc111222333')  # not a likely sender name
         self.click_on_submit()
@@ -123,12 +128,13 @@ class SecurityPrisonerSearchTests(SecurityDashboardTestCase):
     def test_perform_searches(self):
         self.assertInSource('Amount')  # a results list header
 
+        self.get_element('.js-filters-trigger').click()
         self.click_on_filter_group('prisoner')
         self.type_in('id_prisoner_name', 'James')
         self.click_on_submit()
         self.assertInSource('JAMES HALLS')
 
-        # no need to click on tab as they're persistent
+        self.get_element('.js-filters-trigger').click()
         self.type_in('id_prisoner_name', 'aaabbbccc111222333')  # not a likely prisoner name
         self.click_on_submit()
         self.assertInSource('No matching prisoners found')

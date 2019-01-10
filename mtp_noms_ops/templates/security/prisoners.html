@@ -14,13 +14,7 @@
   {% include 'mtp_common/includes/message_box.html' %}
 
   <form id="filter-prisoners" class="mtp-security-search js-FormAnalytics" method="get">
-    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
-
-    <p class="lede">{{ form.search_description.description }}</p>
-
-    <div class="print-hidden">
-      {% include view.form_template_name with view=view form=form only %}
-    </div>
+    {% include view.form_template_name with view=view form=form only %}
 
     {% if form.is_valid %}
       <div class="mtp-results-list">

@@ -4,17 +4,37 @@
   var prisonData={{ form.prison_list.mapping_as_json }};
 </script>
 
-{{ form.ordering.as_hidden }}
+{% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-<div class="form-group">
-  {% block filters %}{% endblock %}
-</div>
+{% if not form.errors %}
+  <p class="lede">
+    {% block search_description %}
+      {{ form.search_description.description }}
+    {% endblock %}
+  </p>
 
-<div class="form-group">
-  <button type="submit" class="button">{% trans 'Filter list' %}</button>
-  {% if form.search_description.has_filters %}
-    <a href="?{% if form.ordering.value %}ordering={{ form.ordering.value }}{% endif %}" role="button" class="mtp-cancel-button">
-      {% trans 'Clear filters' %}
-    </a>
-  {% endif %}
+  <a href="#" class="button js-filters-trigger print-hidden" data-target="js-hidden-filters">
+    {% if form.search_description.has_filters %}
+      {% trans 'Edit filters' %}
+    {% else %}
+      {% trans 'Add filters' %}
+    {% endif %}
+  </a>
+{% endif %}
+
+<div id="js-hidden-filters" class="print-hidden {% if not form.errors %}js-hidden{% endif %}">
+  <div class="form-group">
+    {{ form.ordering.as_hidden }}
+
+    {% block filters %}{% endblock %}
+  </div>
+
+  <div class="form-group">
+    <button type="submit" class="button">{% trans 'Filter list' %}</button>
+    {% if form.search_description.has_filters %}
+      <a href="?{% if form.ordering.value %}ordering={{ form.ordering.value }}{% endif %}" role="button" class="mtp-cancel-button">
+        {% trans 'Clear filters' %}
+      </a>
+    {% endif %}
+  </div>
 </div>
