@@ -2,6 +2,11 @@
 {% load i18n %}
 {% load security %}
 
+{% block search_description %}
+  {{ block.super }}
+  {% trans 'You can’t see credits received by post.' %}
+{% endblock %}
+
 {% block filters %}
 
   {% filtergroup form=form group='date' label=_('Date received') %}
