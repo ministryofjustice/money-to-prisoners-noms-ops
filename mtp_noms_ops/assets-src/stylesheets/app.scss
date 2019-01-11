@@ -59,6 +59,29 @@ form .form-group .form-hint {
   }
 }
 
+.mtp-page-list-container {
+  position: relative;
+
+  .mtp-object-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 0;
+
+    @include media(mobile, $ignore-for-ie: true) {
+      position: static;
+      margin-top: 0.25em;
+      text-align: center;
+    }
+
+    @media print {
+      position: static;
+      font-size: 0.75em;
+      text-align: left;
+    }
+  }
+}
+
 .print-only-inline {
   display: none;
 

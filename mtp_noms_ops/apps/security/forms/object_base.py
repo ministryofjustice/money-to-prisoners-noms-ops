@@ -193,7 +193,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 elif field.initial is not None:
                     self.data[name] = field.initial
         self.request = request
-        self.total_count = None
+        self.total_count = 0
         self.page_count = 0
         self.existing_search = None
 

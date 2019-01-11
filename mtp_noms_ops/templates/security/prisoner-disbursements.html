@@ -1,6 +1,6 @@
 {% extends 'security/prisoner.html' %}
 {% load i18n %}
-
+{% load mtp_common %}
 
 {% block object_list %}
   <aside class="mtp-object-list-toggle print-hidden">
@@ -46,4 +46,14 @@
       {% endfor %}
     </tbody>
   </table>
+{% endblock %}
+
+{% block list_object_count %}
+  <p class="mtp-object-count">
+    {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+      {{ number }} disbursement
+    {% plural %}
+      {{ number }} disbursements
+    {% endblocktrans %}
+  </p>
 {% endblock %}
