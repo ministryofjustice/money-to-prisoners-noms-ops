@@ -1,7 +1,22 @@
 import unittest
 
 from security.templatetags.security import currency, pence, format_sort_code
-from security.utils import NameSet, EmailSet
+from security.utils import NameSet, EmailSet, and_join
+
+
+class AndJoinTestCase(unittest.TestCase):
+    def test_empty(self):
+        self.assertEqual(and_join([]), '')
+
+    def test_one(self):
+        self.assertEqual(and_join(['abc']), 'abc')
+
+    def test_two(self):
+        self.assertEqual(and_join(['abc', 'def']), 'abc and def')
+
+    def test_many(self):
+        self.assertEqual(and_join(['a', 'b', 'c']), 'a, b and c')
+        self.assertEqual(and_join(['a', 'b', 'c', 'd']), 'a, b, c and d')
 
 
 class UtilTestCase(unittest.TestCase):

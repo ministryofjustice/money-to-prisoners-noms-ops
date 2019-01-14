@@ -5,6 +5,7 @@ import re
 from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
+from django.utils.translation import gettext
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
@@ -12,6 +13,12 @@ from . import (
     prison_choice_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag,
     notifications_pilot_flag
 )
+
+
+def and_join(values):
+    if len(values) > 1:
+        values = values[:-2] + [gettext('%s and %s') % (values[-2], values[-1])]
+    return ', '.join(values)
 
 
 def parse_date_fields(object_list):

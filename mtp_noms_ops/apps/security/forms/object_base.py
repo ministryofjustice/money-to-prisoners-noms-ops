@@ -11,9 +11,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.dateformat import format as date_format
 from django.utils.functional import cached_property
-from django.utils.html import format_html, format_html_join
+from django.utils.html import escape, format_html, format_html_join
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext, gettext_lazy as _, override as override_locale
+from django.utils.translation import gettext_lazy as _, override as override_locale
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.auth.api_client import get_api_session
@@ -24,7 +24,7 @@ from security.models import PrisonList, credit_sources, disbursement_methods
 from security.searches import (
     save_search, update_result_count, delete_search, get_existing_search
 )
-from security.utils import parse_date_fields
+from security.utils import and_join, parse_date_fields
 
 
 TIME_PERIOD_CHOICES = [
@@ -163,7 +163,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     exclusive_date_params = []
 
     groups = {}
-    # NB: ensure that these templates are HTML-safe
     group_labels = collections.OrderedDict((
         ('received_at', _('Date received')),
         ('created', _('Date entered')),
@@ -328,13 +327,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         )
         if selected_groups:
             labels = [
-                '<strong>%s</strong>' % str(label).lower()
+                '<strong>%s</strong>' % escape(label).lower()
                 for group, label in self.group_labels.items()
                 if group in selected_groups
             ]
-            if len(labels) > 1:
-                labels = labels[:-2] + [gettext('%s and %s') % (labels[-2], labels[-1])]
-            simple_description = mark_safe(_('Filtered by %s.') % ', '.join(labels))
+            simple_description = mark_safe(_('Filtered by %s.') % and_join(labels))
         else:
             simple_description = self.unfiltered_simple_description
 
@@ -394,7 +391,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         if not prisons:
             return
         choices = dict(self.prison_list.prison_choices)
-        return ', '.join(sorted(filter(None, map(lambda prison: choices.get(prison), prisons))))
+        return and_join(sorted(filter(None, map(lambda prison: choices.get(prison), prisons))))
 
     def check_and_update_saved_searches(self, page_title):
         site_url = '?'.join([urlparse(self.request.path).path, self.query_string])
