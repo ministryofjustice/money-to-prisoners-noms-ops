@@ -11,6 +11,7 @@ from mtp_common.auth.api_client import get_api_session
 
 from security import hmpps_employee_flag, not_hmpps_employee_flag
 from security.forms.eligibility import HMPPSEmployeeForm
+from security.utils import save_user_flags
 
 logger = logging.getLogger('mtp')
 
@@ -37,29 +38,18 @@ class HMPPSEmployeeView(FormView):
         initial['next'] = self.request.META.get('HTTP_REFERER', '')
         return initial
 
-    def save_user(self, flag, deactivate=False):
-        request = self.request
-        api_session = get_api_session(request)
-        api_session.put('/users/%s/flags/%s/' % (request.user.username, flag), json={})
-        if deactivate:
-            api_session.delete('/users/%s/' % request.user.username)
-        else:
-            flags = set(request.user.user_data.get('flags') or [])
-            flags.add(flag)
-            flags = list(flags)
-            request.user.user_data['flags'] = flags
-            request.session[USER_DATA_SESSION_KEY] = request.user.user_data
-
     def form_valid(self, form):
+        api_session = get_api_session(self.request)
         confirmation = form.cleaned_data['confirmation']
         if confirmation == 'yes':
-            self.save_user(hmpps_employee_flag)
+            save_user_flags(self.request, hmpps_employee_flag, api_session)
             success_url = form.cleaned_data['next']
             if success_url and is_safe_url(success_url, host=self.request.get_host()):
                 self.success_url = success_url
             return super().form_valid(form)
         else:
-            self.save_user(not_hmpps_employee_flag, True)
+            save_user_flags(self.request, not_hmpps_employee_flag, api_session)
+            api_session.delete('/users/%s/' % self.request.user.username)
             self.request.session.flush()
             return redirect(self.not_employee_url)
 

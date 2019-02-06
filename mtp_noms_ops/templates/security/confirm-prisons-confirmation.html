@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block inner_content %}
+  <div class="govuk-box-highlight">
+    <h1 class="heading-xlarge">
+      {% trans 'Your prisons have been saved' %}
+    </h1>
+  </div>
+
+  <div class="grid-row">
+    <div class="column-two-thirds">
+      <h3 class="heading-medium">
+        {% trans 'You’ll see data for:' %}
+      </h3>
+      <ul class="list list-bullet">
+        {% if prisons %}
+          {% for prison in prisons %}
+            <li>{{ prison.name }}</li>
+          {% endfor %}
+        {% else %}
+          <li>{% trans 'All prisons' %}</li>
+        {% endif %}
+      </ul>
+      <p>
+        {% url 'security:confirm_prisons' as link %}
+        {% blocktrans trimmed %}
+          Go back and <a href="{{ link }}">change this</a> or edit your settings at any time from the user menu.
+        {% endblocktrans %}
+      </p>
+      <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'dashboard' %}{% endif %}" class="button">
+        {% trans 'Continue' %}
+      </a>
+    </div>
+  </div>
+{% endblock %}

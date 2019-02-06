@@ -6,6 +6,8 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
+from mtp_common.auth import USER_DATA_SESSION_KEY
+from mtp_common.auth.api_client import get_api_session
 
 
 def parse_date_fields(object_list):
@@ -138,3 +140,22 @@ def nomis_api_available(_):
     return {'nomis_api_available': (
         settings.NOMIS_API_BASE_URL and settings.NOMIS_API_CLIENT_TOKEN and settings.NOMIS_API_PRIVATE_KEY
     )}
+
+
+def save_user_flags(request, flag, api_session=None):
+    api_session = api_session or get_api_session(request)
+    api_session.put('/users/%s/flags/%s/' % (request.user.username, flag), json={})
+    flags = set(request.user.user_data.get('flags') or [])
+    flags.add(flag)
+    flags = list(flags)
+    request.user.user_data['flags'] = flags
+    request.session[USER_DATA_SESSION_KEY] = request.user.user_data
+
+
+def refresh_user_data(request, api_session=None):
+    api_session = api_session or get_api_session(request)
+    user = request.user
+    user.user_data = api_session.get(
+        '/users/{username}/'.format(username=user.username)
+    ).json()
+    request.session[USER_DATA_SESSION_KEY] = user.user_data

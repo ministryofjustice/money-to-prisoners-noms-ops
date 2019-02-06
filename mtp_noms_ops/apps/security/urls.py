@@ -1,7 +1,9 @@
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-from . import required_permissions, hmpps_employee_flag, views
+from . import (
+    required_permissions, hmpps_employee_flag, confirmed_prisons_flag, views
+)
 from mtp_noms_ops.utils import user_test
 
 
@@ -10,7 +12,14 @@ def is_hmpps_employee(user):
     return hmpps_employee_flag in flags
 
 
+def has_confirmed_prisons(user):
+    # if security user, put it on dashboard
+    flags = user.user_data.get('flags') or []
+    return confirmed_prisons_flag in flags
+
+
 def security_test(view):
+    view = user_passes_test(has_confirmed_prisons, login_url='security:confirm_prisons')(view)
     view = user_passes_test(is_hmpps_employee, login_url='security:hmpps_employee')(view)
     view = user_test(required_permissions)(view)
     return view
@@ -19,6 +28,16 @@ def security_test(view):
 app_name = 'security'
 urlpatterns = [
     url(r'^$', login_required(views.HMPPSEmployeeView.as_view()), name='hmpps_employee'),
+    url(
+        r'^confirm_prisons/$',
+        login_required(views.ConfirmPrisonsView.as_view()),
+        name='confirm_prisons'
+    ),
+    url(
+        r'^confirm_prisons_confirmation/$',
+        login_required(views.ConfirmPrisonsConfirmationView.as_view()),
+        name='confirm_prisons_confirmation'
+    ),
     url(r'^not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
 
     url(r'^credits/$', security_test(views.CreditListView.as_view()),

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block inner_content %}
+
+  <header>
+    <h1 class="heading-xlarge">{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <div class="grid-row">
+    <div class="column-two-thirds">
+
+      <form method="post" class="mtp-autocomplete mtp-choose-prison">
+        {% csrf_token %}
+        {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+
+        <div>
+          {% trans 'You’ll see data for:' %}
+        </div>
+
+        <div class="mtp-prison-list">
+          {% for label, removal_link in form.selected_prisons %}
+            <div class="mtp-prison-row">
+              <div class="mtp-prison-row__prison">
+                <strong>{{ label }}</strong>
+              </div>
+              <div class="mtp-prison-row__remove">
+                <a href="?{{ removal_link }}">Remove</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if 'ALL' in form.prisons.initial %}
+          <div class="mtp-info-box">
+            <h3 class="mtp-info-box__heading">{% trans 'You’ve chosen ‘All prisons’' %}</h3>
+            <p>
+              {% trans 'Good job.' %}
+            </p>
+          </div>
+        {% endif %}
+
+        {% include 'mtp_common/forms/select-field.html' with field=form.new_prison input_classes='mtp-autocomplete mtp-choose-prison-select' attrs=autocomplete_errors only %}
+
+        <div class="form-group mtp-choose-prisons">
+          <button type="submit" name="submit_choose" class="mtp-choose-prisons__add-button">
+            {% trans 'Add prison' %}
+          </button>
+          <a class="mtp-choose-prisons__add-all" href="?prisons=ALL">{% trans 'Add all prisons' %}</a>
+        </div>
+
+        <span class="hidden">
+          {{ form.prisons }}
+        </span>
+        <div class="form-group">
+          <button type="submit" name="submit_confirm" class="button">
+            {% trans 'Confirm prisons' %}
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+{% endblock %}
