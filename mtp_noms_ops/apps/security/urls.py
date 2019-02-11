@@ -29,12 +29,12 @@ app_name = 'security'
 urlpatterns = [
     url(r'^$', login_required(views.HMPPSEmployeeView.as_view()), name='hmpps_employee'),
     url(
-        r'^confirm_prisons/$',
+        r'^confirm-prisons/$',
         login_required(views.ConfirmPrisonsView.as_view()),
         name='confirm_prisons'
     ),
     url(
-        r'^confirm_prisons_confirmation/$',
+        r'^confirm-prisons/confirmation/$',
         login_required(views.ConfirmPrisonsConfirmationView.as_view()),
         name='confirm_prisons_confirmation'
     ),

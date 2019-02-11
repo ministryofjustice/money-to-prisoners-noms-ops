@@ -19,10 +19,6 @@
         {% csrf_token %}
         {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-        <div>
-          {% trans 'You’ll see data for:' %}
-        </div>
-
         <div class="mtp-prison-list">
           {% for label, removal_link in form.selected_prisons %}
             <div class="mtp-prison-row">
@@ -38,9 +34,10 @@
 
         {% if 'ALL' in form.prisons.initial %}
           <div class="mtp-info-box">
-            <h3 class="mtp-info-box__heading">{% trans 'You’ve chosen ‘All prisons’' %}</h3>
+            <h3 class="mtp-info-box__heading">{% trans 'Your data will be better if you confirm prisons relevant to you' %}</h3>
             <p>
-              {% trans 'Good job.' %}
+              {% trans 'If you wish to confirm ‘All prisons’, click ‘Confirm prisons’.' %}
+              {% trans 'If not, select and add the prisons you want.' %}
             </p>
           </div>
         {% endif %}
