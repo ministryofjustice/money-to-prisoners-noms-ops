@@ -6,7 +6,6 @@ from django.shortcuts import redirect
 from django.utils.http import is_safe_url
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
-from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
 from security import hmpps_employee_flag, not_hmpps_employee_flag

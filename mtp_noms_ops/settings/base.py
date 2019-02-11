@@ -228,7 +228,7 @@ API_CLIENT_SECRET = os.environ.get('API_CLIENT_SECRET', 'noms-ops')
 API_URL = os.environ.get('API_URL', find_api_url())
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_REDIRECT_URL = 'root'
 LOGOUT_URL = 'logout'
 
 OAUTHLIB_INSECURE_TRANSPORT = True

@@ -31,7 +31,7 @@
           Go back and <a href="{{ link }}">change this</a> or edit your settings at any time from the user menu.
         {% endblocktrans %}
       </p>
-      <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'dashboard' %}{% endif %}" class="button">
+      <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'security:dashboard' %}{% endif %}" class="button">
         {% trans 'Continue' %}
       </a>
     </div>

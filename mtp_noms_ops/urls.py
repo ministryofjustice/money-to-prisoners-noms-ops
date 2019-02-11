@@ -3,42 +3,26 @@ from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.views.decorators.cache import cache_control
 from django.views.generic import RedirectView
 from django.views.i18n import JavaScriptCatalog
 from moj_irat.views import HealthcheckView, PingJsonView
 from mtp_common.auth import views as auth_views
-from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import Unauthorized
 
-from security import hmpps_employee_flag
-from security.searches import get_saved_searches, populate_new_result_counts
 
-
-def dashboard_view(request):
+def root_view(request):
     if not (request.can_access_prisoner_location or request.can_access_security):
         raise Unauthorized()  # middleware causes user to be logged-out
-    if request.can_access_prisoner_location and not (
-            request.can_access_security or request.can_access_user_management):
+    if request.can_access_prisoner_location and not request.can_access_security:
         return redirect(reverse('location_file_upload'))
-    flags = request.user.user_data.get('flags') or []
-    if request.can_access_security and hmpps_employee_flag not in flags:
-        return redirect(reverse('security:hmpps_employee'))
-    session = get_api_session(request)
-    return render(request, 'dashboard.html', {
-        'start_page_url': settings.START_PAGE_URL,
-        'saved_searches': populate_new_result_counts(session, get_saved_searches(session)),
-        'in_disbursement_pilot': any(
-            prison['nomis_id'] in settings.DISBURSEMENT_PRISONS
-            for prison in request.user_prisons
-        ),
-    })
+    return redirect(reverse('security:dashboard'))
 
 
 urlpatterns = i18n_patterns(
-    url(r'^$', dashboard_view, name='dashboard'),
+    url(r'^$', root_view, name='root'),
     url(r'^prisoner-location/', include('prisoner_location_admin.urls')),
     url(r'^security/', include('security.urls', namespace='security')),
     url(r'^feedback/', include('feedback.urls')),

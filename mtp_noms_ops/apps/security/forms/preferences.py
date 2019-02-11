@@ -43,7 +43,8 @@ class ChoosePrisonForm(ApiForm):
     error_messages = {
         'no_prison_selected': _('Choose a prison'),
         'already_chosen': _('You have already added that prison'),
-        'no_prisons_added': _('You must add at least one prison')
+        'no_prisons_added': _('You must add at least one prison'),
+        'generic': _('This service is currently unavailable'),
     }
     actions = ['choose', 'confirm']
 
