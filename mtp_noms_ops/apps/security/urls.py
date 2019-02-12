@@ -8,6 +8,7 @@ from . import (
     required_permissions, hmpps_employee_flag, confirmed_prisons_flag, views
 )
 from .searches import get_saved_searches, populate_new_result_counts
+from .utils import can_choose_prisons
 from mtp_noms_ops.utils import user_test
 
 
@@ -17,10 +18,9 @@ def is_hmpps_employee(user):
 
 
 def can_skip_confirming_prisons(user):
-    has_non_security_roles = user.user_data['roles'] != ['security']
-    is_user_admin = user.has_perm('auth.change_user')
     already_confirmed = confirmed_prisons_flag in user.user_data.get('flags', [])
-    return has_non_security_roles or is_user_admin or already_confirmed
+    cannot_choose_prisons = not can_choose_prisons(user)
+    return already_confirmed or cannot_choose_prisons
 
 
 def security_test(view):

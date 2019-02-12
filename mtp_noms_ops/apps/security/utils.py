@@ -142,6 +142,16 @@ def nomis_api_available(_):
     )}
 
 
+def prison_choice_available(request):
+    return {'prison_choice_available': can_choose_prisons(request.user)}
+
+
+def can_choose_prisons(user):
+    has_only_security_roles = user.user_data['roles'] == ['security']
+    is_user_admin = user.has_perm('auth.change_user')
+    return has_only_security_roles and not is_user_admin
+
+
 def save_user_flags(request, flag, api_session=None):
     api_session = api_session or get_api_session(request)
     api_session.put('/users/%s/flags/%s/' % (request.user.username, flag), json={})

@@ -127,6 +127,7 @@ TEMPLATES = [
                 'mtp_noms_ops.apps.security.utils.initial_params',
                 'mtp_noms_ops.apps.security.utils.initial_disbursement_params',
                 'mtp_noms_ops.apps.security.utils.nomis_api_available',
+                'mtp_noms_ops.apps.security.utils.prison_choice_available',
             ],
         },
     },

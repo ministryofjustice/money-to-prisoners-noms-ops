@@ -1,0 +1,8 @@
+{% extends 'mtp_common/includes/proposition-user-menu.html' %}
+{% load i18n %}
+
+{% block user_menu_links %}
+  {% if prison_choice_available %}
+  <li><a href="{% url 'security:confirm_prisons' %}">{% trans 'Your prisons' %}</a></li>
+  {% endif %}
+{% endblock %}
