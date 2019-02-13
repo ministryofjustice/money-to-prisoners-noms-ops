@@ -9,6 +9,8 @@ from django.utils.dateparse import parse_date, parse_datetime
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
+from . import prison_choice_pilot_flag
+
 
 def parse_date_fields(object_list):
     """
@@ -151,9 +153,10 @@ def prison_choice_available(request):
 
 
 def can_choose_prisons(user):
+    in_pilot = prison_choice_pilot_flag in user.user_data.get('flags', [])
     has_only_security_roles = user.user_data['roles'] == ['security']
     is_user_admin = user.has_perm('auth.change_user')
-    return has_only_security_roles and not is_user_admin
+    return in_pilot and has_only_security_roles and not is_user_admin
 
 
 def save_user_flags(request, flag, api_session=None):
