@@ -132,5 +132,4 @@ class ChoosePrisonForm(ApiForm):
             )
             refresh_user_data(self.request, self.api_session)
         except RequestException as e:
-            print(e)
             self.api_validation_error(e)

@@ -41,6 +41,7 @@ class PrisonerLocationUploadTestCase(SimpleTestCase):
                 'permissions': required_permissions,
                 'prisons': [],
                 'flags': [],
+                'roles': ['prisoner-location-upload']
             }
         }
 

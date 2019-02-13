@@ -143,7 +143,11 @@ def nomis_api_available(_):
 
 
 def prison_choice_available(request):
-    return {'prison_choice_available': can_choose_prisons(request.user)}
+    return {
+        'prison_choice_available': (
+            request.user.is_authenticated and can_choose_prisons(request.user)
+        )
+    }
 
 
 def can_choose_prisons(user):
