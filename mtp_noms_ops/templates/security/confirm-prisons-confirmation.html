@@ -5,14 +5,13 @@
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 {% block inner_content %}
-  <div class="govuk-box-highlight">
-    <h1 class="heading-xlarge">
-      {% trans 'Your prisons have been saved' %}
-    </h1>
-  </div>
-
   <div class="grid-row">
     <div class="column-two-thirds">
+      <div class="govuk-box-highlight">
+        <strong class="bold-xlarge">
+          {% trans 'Your prisons have been saved' %}
+        </strong>
+      </div>
       <h3 class="heading-medium">
         {% trans 'You have chosen:' %}
       </h3>
