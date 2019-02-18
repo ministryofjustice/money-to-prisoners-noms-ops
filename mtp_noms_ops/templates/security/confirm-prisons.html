@@ -25,13 +25,13 @@
                   <strong>{{ label }}</strong>
                 </div>
                 <div class="mtp-prison-row__remove">
-                  <a href="?{{ removal_link }}">Remove</a>
+                  <a href="?{{ removal_link }}">{% trans 'Remove' %}</a>
                 </div>
               </div>
             {% endfor %}
           </div>
 
-          {% if 'ALL' in form.prisons.initial %}
+          {% if form.all_prisons_code in form.prisons.initial %}
             <div class="mtp-info-box">
               <h3 class="mtp-info-box__heading">{% trans 'Your data will be better if you confirm prisons relevant to you' %}</h3>
               <p>
@@ -47,7 +47,7 @@
             <button type="submit" name="submit_choose" class="mtp-choose-prisons__add-button">
               {% trans 'Add prison' %}
             </button>
-            <a class="mtp-choose-prisons__add-all" href="?prisons=ALL">{% trans 'Add all prisons' %}</a>
+            <a class="mtp-choose-prisons__add-all" href="?prisons={{ form.all_prisons_code }}">{% trans 'Add all prisons' %}</a>
           </div>
 
           <span class="hidden">

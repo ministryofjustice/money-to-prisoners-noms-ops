@@ -13,8 +13,6 @@ from security.utils import refresh_user_data
 
 logger = logging.getLogger('mtp')
 
-ALL_PRISONS_VALUE = 'ALL'
-
 
 def prison_choices(api_session):
     choices = cache.get('prison-list')
@@ -47,6 +45,7 @@ class ChoosePrisonForm(ApiForm):
         'generic': _('This service is currently unavailable'),
     }
     actions = ['choose', 'confirm']
+    all_prisons_code = 'ALL'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -54,11 +53,11 @@ class ChoosePrisonForm(ApiForm):
         prison_list = prison_choices(self.api_session)
 
         self.fields['new_prison'].choices = [
-            ['', 'Select a prison'],
+            ['', _('Select a prison')],
         ] + prison_list
 
         self.fields['prisons'].choices = [
-            [ALL_PRISONS_VALUE, _('All prisons')]
+            [self.all_prisons_code, _('All prisons')]
         ] + prison_list
 
         selected_prisons = self.request.GET.getlist('prisons')
@@ -70,7 +69,7 @@ class ChoosePrisonForm(ApiForm):
                     prison['nomis_id'] for prison in self.request.user_prisons
                 ]
             else:
-                self.fields['prisons'].initial = [ALL_PRISONS_VALUE]
+                self.fields['prisons'].initial = [self.all_prisons_code]
 
         self.selected_prisons = []
         for prison, label in self.fields['prisons'].choices:
@@ -87,10 +86,10 @@ class ChoosePrisonForm(ApiForm):
 
         if self.is_bound:
             self.action = None
-            for key in self.request.POST:
-                for action in self.actions:
-                    if key.startswith('submit_%s' % action):
-                        self.action = action
+            for action in self.actions:
+                key = 'submit_%s' % action
+                if key in self.request.POST:
+                    self.action = action
 
     def clean_new_prison(self):
         if self.action == 'choose':
@@ -111,7 +110,7 @@ class ChoosePrisonForm(ApiForm):
     def get_query_string(self):
         query_dict = self.request.GET.copy()
         current_prisons = self.fields['prisons'].initial
-        if current_prisons == [ALL_PRISONS_VALUE]:
+        if current_prisons == [self.all_prisons_code]:
             current_prisons = []
         current_prisons.append(self.cleaned_data['new_prison'])
         query_dict['prisons'] = current_prisons or ''
@@ -120,7 +119,7 @@ class ChoosePrisonForm(ApiForm):
     def save(self):
         try:
             prisons = self.cleaned_data['prisons']
-            if ALL_PRISONS_VALUE in prisons:
+            if self.all_prisons_code in prisons:
                 prisons = []
             self.api_session.patch(
                 '/users/%s/' % (self.request.user.username),
