@@ -1,0 +1,66 @@
+.mtp-prison-list {
+  margin-bottom: 1.5em;
+
+  .mtp-prison-row {
+    border-bottom: 1px solid $border-colour;
+    padding: 0.5em 0 0.5em 0;
+
+    .mtp-prison-row__prison {
+      width: 50%;
+      float: left;
+    }
+
+    .mtp-prison-row__remove {
+      width: 50%;
+      float: left;
+      text-align: right;
+    }
+
+    &:after {
+      content: "";
+      clear: both;
+      display: block;
+    }
+  }
+}
+
+.mtp-choose-prison-select {
+  width: 100%;
+}
+
+.mtp-choose-prisons {
+  border-bottom: 1px solid $border-colour;
+  padding-bottom: 2em;
+  margin-bottom: 1em;
+
+  .mtp-choose-prisons__add-button {
+    @include button ($grey-3);
+
+    float: left;
+    margin-right: 1em;
+  }
+
+  .mtp-choose-prisons__add-all {
+    float: left;
+    display: block;
+    padding: .526315em .789473em .263157em
+  }
+
+  &:after {
+    content: "";
+    clear: both;
+    display: block;
+  }
+}
+
+.mtp-info-box {
+  background-color: $govuk-blue;
+  color: white;
+  margin-bottom: 1em;
+  padding: 1em;
+
+  .mtp-info-box__heading {
+    font-size: 24px;
+    font-weight: bold;
+  }
+}

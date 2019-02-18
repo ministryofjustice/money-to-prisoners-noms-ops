@@ -31,7 +31,7 @@ def external_breadcrumbs(request):
         return {}
     return {
         'breadcrumbs': [
-            {'name': _('Home'), 'url': reverse('dashboard')},
+            {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': section_title},
         ]
     }

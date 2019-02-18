@@ -14,7 +14,10 @@ from mtp_common.test_utils import silence_logger
 from openpyxl import load_workbook
 import responses
 
-from security import required_permissions, hmpps_employee_flag, not_hmpps_employee_flag
+from security import (
+    required_permissions, hmpps_employee_flag, not_hmpps_employee_flag,
+    confirmed_prisons_flag
+)
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
 
 
@@ -95,27 +98,19 @@ class SecurityBaseTestCase(SimpleTestCase):
         super().tearDown()
 
     @mock.patch('mtp_common.auth.backends.api_client')
-    def login(self, mock_api_client, follow=True, flags=(hmpps_employee_flag,)):
+    def login(self, mock_api_client, follow=True, user_data=None):
         no_saved_searches()
-        return self._login(mock_api_client, follow=follow, flags=flags)
+        return self._login(mock_api_client, follow=follow, user_data=user_data)
 
     @mock.patch('mtp_common.auth.backends.api_client')
     def login_test_searches(self, mock_api_client, follow=True):
         return self._login(mock_api_client, follow=follow)
 
-    def _login(self, mock_api_client, follow=True, prisons=default_user_prisons, flags=(hmpps_employee_flag,)):
+    def _login(self, mock_api_client, follow=True, user_data=None):
         mock_api_client.authenticate.return_value = {
             'pk': 5,
             'token': generate_tokens(),
-            'user_data': {
-                'first_name': 'Sam',
-                'last_name': 'Hall',
-                'username': 'shall',
-                'email': 'sam@mtp.local',
-                'permissions': required_permissions,
-                'prisons': prisons,
-                'flags': flags,
-            }
+            'user_data': user_data or self.get_user_data()
         }
 
         response = self.client.post(
@@ -128,6 +123,24 @@ class SecurityBaseTestCase(SimpleTestCase):
         else:
             self.assertEqual(response.status_code, 302)
         return response
+
+    def get_user_data(
+        self, first_name='Sam', last_name='Hall', username='shall',
+        email='sam@mtp.local', permissions=required_permissions,
+        prisons=default_user_prisons,
+        flags=(hmpps_employee_flag, confirmed_prisons_flag,),
+        roles=['security']
+    ):
+        return {
+            'first_name': first_name,
+            'last_name': last_name,
+            'username': username,
+            'email': email,
+            'permissions': permissions,
+            'prisons': prisons,
+            'flags': flags,
+            'roles': roles,
+        }
 
 
 class LocaleTestCase(SecurityBaseTestCase):
@@ -154,7 +167,7 @@ class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_can_access_security_dashboard(self):
         response = self.login()
-        self.assertContains(response, '<!-- dashboard -->')
+        self.assertContains(response, '<!-- security:dashboard -->')
 
     @responses.activate
     def test_cannot_access_prisoner_location_admin(self):
@@ -162,22 +175,24 @@ class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
         no_saved_searches()
         response = self.client.get(reverse('location_file_upload'), follow=True)
         self.assertNotContains(response, '<!-- location_file_upload -->')
-        self.assertContains(response, '<!-- dashboard -->')
+        self.assertContains(response, '<!-- security:dashboard -->')
 
 
 class HMPPSEmployeeTestCase(SecurityBaseTestCase):
-    protected_views = ['dashboard', 'security:credit_list', 'security:sender_list', 'security:prisoner_list']
+    protected_views = ['security:dashboard', 'security:credit_list', 'security:sender_list', 'security:prisoner_list']
 
     @responses.activate
     def test_redirects_when_no_flag(self):
-        self.login(flags=[])
+        self.login(user_data=self.get_user_data(flags=[confirmed_prisons_flag]))
         for view in self.protected_views:
             response = self.client.get(reverse(view), follow=True)
             self.assertContains(response, '<!-- security:hmpps_employee -->')
 
     @responses.activate
     def test_non_employee_flag_disallows_entry(self):
-        self.login(flags=[not_hmpps_employee_flag])
+        self.login(user_data=self.get_user_data(
+            flags=[not_hmpps_employee_flag, confirmed_prisons_flag])
+        )
         for view in self.protected_views:
             response = self.client.get(reverse(view), follow=True)
             self.assertContains(response, '<!-- security:not_hmpps_employee -->')
@@ -185,19 +200,23 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_employee_can_access(self):
-        self.login(flags=[hmpps_employee_flag])
+        self.login(user_data=self.get_user_data(
+            flags=[hmpps_employee_flag, confirmed_prisons_flag])
+        )
 
         def assertViewAccessible(view):  # noqa: N802
             response = self.client.get(reverse(view), follow=True)
             self.assertContains(response, '<!-- %s -->' % view)
 
-        assertViewAccessible('dashboard')
+        assertViewAccessible('security:dashboard')
         sample_prison_list()
         assertViewAccessible('security:credit_list')
 
     @responses.activate
     def test_employee_flag_set(self):
-        self.login(flags=['abc'])
+        self.login(user_data=self.get_user_data(
+            flags=['abc', confirmed_prisons_flag])
+        )
         responses.add(
             responses.PUT,
             api_url('/users/shall/flags/%s/' % hmpps_employee_flag),
@@ -206,13 +225,13 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
         response = self.client.post(reverse('security:hmpps_employee'), data={
             'confirmation': 'yes',
         }, follow=True)
-        self.assertContains(response, '<!-- dashboard -->')
+        self.assertContains(response, '<!-- security:dashboard -->')
         self.assertIn(hmpps_employee_flag, self.client.session[USER_DATA_SESSION_KEY]['flags'])
         self.assertIn(hmpps_employee_flag, response.context['user'].user_data['flags'])
 
     @responses.activate
     def test_redirects_to_referrer(self):
-        self.login(flags=[])
+        self.login(user_data=self.get_user_data(flags=[confirmed_prisons_flag]))
         responses.add(
             responses.PUT,
             api_url('/users/shall/flags/%s/' % hmpps_employee_flag),
@@ -227,7 +246,9 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_non_employee_flag_set(self):
-        self.login(flags=['123'])
+        self.login(user_data=self.get_user_data(
+            flags=['123', confirmed_prisons_flag])
+        )
         responses.add(
             responses.PUT,
             api_url('/users/shall/flags/%s/' % not_hmpps_employee_flag),

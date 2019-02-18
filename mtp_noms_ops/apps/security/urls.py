@@ -1,7 +1,14 @@
+from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render
+from mtp_common.auth.api_client import get_api_session
 
-from . import required_permissions, hmpps_employee_flag, views
+from . import (
+    required_permissions, hmpps_employee_flag, confirmed_prisons_flag, views
+)
+from .searches import get_saved_searches, populate_new_result_counts
+from .utils import can_choose_prisons
 from mtp_noms_ops.utils import user_test
 
 
@@ -10,16 +17,52 @@ def is_hmpps_employee(user):
     return hmpps_employee_flag in flags
 
 
+def can_skip_confirming_prisons(user):
+    already_confirmed = confirmed_prisons_flag in user.user_data.get('flags', [])
+    cannot_choose_prisons = not can_choose_prisons(user)
+    return already_confirmed or cannot_choose_prisons
+
+
 def security_test(view):
-    view = user_passes_test(is_hmpps_employee, login_url='security:hmpps_employee')(view)
+    view = user_passes_test(
+        can_skip_confirming_prisons,
+        login_url='security:confirm_prisons'
+    )(view)
+    view = user_passes_test(
+        is_hmpps_employee,
+        login_url='security:hmpps_employee'
+    )(view)
     view = user_test(required_permissions)(view)
     return view
 
 
+def dashboard_view(request):
+    session = get_api_session(request)
+    return render(request, 'dashboard.html', {
+        'start_page_url': settings.START_PAGE_URL,
+        'saved_searches': populate_new_result_counts(session, get_saved_searches(session)),
+        'in_disbursement_pilot': any(
+            prison['nomis_id'] in settings.DISBURSEMENT_PRISONS
+            for prison in request.user_prisons
+        ),
+    })
+
+
 app_name = 'security'
 urlpatterns = [
-    url(r'^$', login_required(views.HMPPSEmployeeView.as_view()), name='hmpps_employee'),
+    url(r'^$', security_test(dashboard_view), name='dashboard'),
+    url(r'^confirm-hmpps-employee/$', login_required(views.HMPPSEmployeeView.as_view()), name='hmpps_employee'),
     url(r'^not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
+    url(
+        r'^confirm-prisons/$',
+        login_required(views.ConfirmPrisonsView.as_view()),
+        name='confirm_prisons'
+    ),
+    url(
+        r'^confirm-prisons/confirmation/$',
+        login_required(views.ConfirmPrisonsConfirmationView.as_view()),
+        name='confirm_prisons_confirmation'
+    ),
 
     url(r'^credits/$', security_test(views.CreditListView.as_view()),
         name='credit_list'),

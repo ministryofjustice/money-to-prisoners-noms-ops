@@ -58,7 +58,7 @@ class SimpleSecurityDetailView(TemplateView):
             list_url = referrer_url
 
         context_data['breadcrumbs'] = [
-            {'name': _('Home'), 'url': reverse('dashboard')},
+            {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
@@ -132,7 +132,7 @@ class SecurityView(FormView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         context_data['breadcrumbs'] = [
-            {'name': _('Home'), 'url': reverse('dashboard')},
+            {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.title}
         ]
         return context_data
@@ -179,7 +179,7 @@ class SecurityDetailView(SecurityView):
         context_data[self.object_context_key] = detail_object
 
         context_data['breadcrumbs'] = [
-            {'name': _('Home'), 'url': reverse('dashboard')},
+            {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]

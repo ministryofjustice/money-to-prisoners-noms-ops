@@ -47,14 +47,14 @@ class SecurityDashboardTests(SecurityDashboardTestCase):
         self.assertInSource('Payment sources')
         self.assertInSource('Prisoners')
         self.assertEqual(self.driver.title, 'Prisoner money intelligence')
-        dashboard_url = reverse('dashboard')
+        dashboard_url = reverse('security:dashboard')
         prisoner_location_url = reverse('location_file_upload')
         self.assertCurrentUrl(dashboard_url)
         self.assertNotInSource(prisoner_location_url)
 
     def test_superuser_can_see_prisoner_location_link(self):
         self.login('admin', 'adminadmin')
-        dashboard_url = reverse('dashboard')
+        dashboard_url = reverse('security:dashboard')
         prisoner_location_url = reverse('location_file_upload')
         self.assertCurrentUrl(dashboard_url)
         self.assertInSource(prisoner_location_url)
