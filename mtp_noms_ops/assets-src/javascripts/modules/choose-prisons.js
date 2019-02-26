@@ -31,10 +31,7 @@ exports.ChoosePrisons = {
             '  <h2 class="heading-medium error-summary-heading" id="error-summary-heading">' + error_summary_title + '</h2>' +
             '  <ul class="error-summary-list">' +
             '      <li class="field-specific-error">' +
-            '        <a href="#id_new_prison-label">' + label_text + '</a>' +
-            '        <ul>' +
-            '            <li>' + empty_error_msg + '</li>' +
-            '        </ul>' +
+            '        <a href="#id_new_prison-label">' + empty_error_msg + '</a>' +
             '      </li>' +
             '  </ul>' +
             '</div>'

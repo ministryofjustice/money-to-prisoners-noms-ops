@@ -100,11 +100,14 @@ class ChoosePrisonForm(ApiForm):
                 raise forms.ValidationError(self.error_messages['already_chosen'])
         return self.cleaned_data['new_prison']
 
-    def clean_prisons(self):
+    def clean(self):
         if self.action == 'confirm':
             if not self.cleaned_data['prisons'] and not self.cleaned_data['new_prison']:
-                raise forms.ValidationError(self.error_messages['no_prisons_added'])
-        return self.cleaned_data['prisons']
+                self.add_error(
+                    'new_prison',
+                    forms.ValidationError(self.error_messages['no_prisons_added'])
+                )
+        return self.cleaned_data
 
     def get_query_string(self):
         query_dict = self.request.GET.copy()
