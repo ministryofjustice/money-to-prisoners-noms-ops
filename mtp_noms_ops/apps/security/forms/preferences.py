@@ -75,9 +75,8 @@ class ChoosePrisonForm(ApiForm):
         for prison, label in self.fields['prisons'].choices:
             if prison in self.fields['prisons'].initial:
                 query_dict = self.request.GET.copy()
-                other_prisons = set(query_dict.getlist('prisons'))
-                if prison in other_prisons:
-                    other_prisons.remove(prison)
+                other_prisons = set(self.fields['prisons'].initial)
+                other_prisons.remove(prison)
                 query_dict['prisons'] = list(other_prisons) or ''
                 removal_link = urlencode(query_dict, doseq=True)
                 self.selected_prisons.append(
@@ -103,7 +102,7 @@ class ChoosePrisonForm(ApiForm):
 
     def clean_prisons(self):
         if self.action == 'confirm':
-            if not self.cleaned_data['prisons']:
+            if not self.cleaned_data['prisons'] and not self.cleaned_data['new_prison']:
                 raise forms.ValidationError(self.error_messages['no_prisons_added'])
         return self.cleaned_data['prisons']
 
@@ -119,6 +118,8 @@ class ChoosePrisonForm(ApiForm):
     def save(self):
         try:
             prisons = self.cleaned_data['prisons']
+            if self.cleaned_data['new_prison']:
+                prisons.append(self.cleaned_data['new_prison'])
             if self.all_prisons_code in prisons:
                 prisons = []
             self.api_session.patch(
