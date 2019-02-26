@@ -22,7 +22,8 @@ class ConfirmPrisonsView(FormView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['autocomplete_errors'] = {
-            'data-autocomplete-error-empty': _('Type a prison name')
+            'data-autocomplete-error-empty': _('Type a prison name'),
+            'data-autocomplete-error-summary': _('There was a problem')
         }
         return context
 
