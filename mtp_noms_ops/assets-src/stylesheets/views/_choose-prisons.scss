@@ -14,6 +14,10 @@
       width: 50%;
       float: left;
       text-align: right;
+
+      a:visited {
+        color: $link-colour;
+      }
     }
 
     &:after {
@@ -42,8 +46,11 @@
 
   .mtp-choose-prisons__add-all {
     float: left;
-    display: block;
-    padding: .526315em .789473em .263157em
+    padding: .526315em .789473em .263157em;
+
+    a:visited {
+      color: $link-colour;
+    }
   }
 
   &:after {
@@ -57,7 +64,7 @@
   background-color: $govuk-blue;
   color: white;
   margin-bottom: 1em;
-  padding: 1em;
+  padding: 1em 1em 1.75em;
 
   .mtp-info-box__heading {
     font-size: 24px;
