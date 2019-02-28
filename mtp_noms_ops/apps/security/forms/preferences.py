@@ -76,7 +76,7 @@ class ChoosePrisonForm(ApiForm):
                 query_dict['prisons'] = list(other_prisons) or ''
                 removal_link = urlencode(query_dict, doseq=True)
                 self.selected_prisons.append(
-                    (label, removal_link)
+                    (prison, label, removal_link)
                 )
 
         if self.is_bound:
@@ -119,6 +119,14 @@ class ChoosePrisonForm(ApiForm):
                 prisons.append(self.cleaned_data['new_prison'])
             if self.all_prisons_code in prisons:
                 prisons = []
+
+            logger.info('{user} confirmed prisons {current} > {new}'.format(
+                user=self.request.user.username,
+                current=[
+                    prison['nomis_id'] for prison in self.request.user_prisons
+                ],
+                new=prisons
+            ))
             self.api_session.patch(
                 '/users/%s/' % (self.request.user.username),
                 json={

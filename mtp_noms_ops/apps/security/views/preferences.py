@@ -21,10 +21,14 @@ class ConfirmPrisonsView(FormView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['autocomplete_errors'] = {
+        context['data_attrs'] = {
             'data-autocomplete-error-empty': _('Type a prison name'),
-            'data-autocomplete-error-summary': _('There was a problem')
+            'data-autocomplete-error-summary': _('There was a problem'),
+            'data-event-category': 'ConfirmPrisons',
         }
+        context['current_prisons'] = ','.join([
+            p['nomis_id'] for p in self.request.user.user_data['prisons']
+        ] if self.request.user.user_data.get('prisons') else ['ALL'])
         context['can_navigate_away'] = can_skip_confirming_prisons(self.request.user)
         return context
 
