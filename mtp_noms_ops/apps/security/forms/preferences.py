@@ -6,7 +6,6 @@ from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
 from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.user_admin.forms import ApiForm
-from oauthlib.oauth2 import OAuth2Error
 from requests import RequestException
 
 from security.utils import refresh_user_data
@@ -17,12 +16,9 @@ logger = logging.getLogger('mtp')
 def prison_choices(api_session):
     choices = cache.get('prison-list')
     if not choices:
-        try:
-            choices = retrieve_all_pages_for_path(api_session, '/prisons/', exclude_empty_prisons=True)
-            choices = [[prison['nomis_id'], prison['name']] for prison in choices]
-            cache.set('prison-list', choices, timeout=60 * 60 * 6)
-        except (RequestException, OAuth2Error, ValueError):
-            logger.exception('Could not look up prison list')
+        choices = retrieve_all_pages_for_path(api_session, '/prisons/', exclude_empty_prisons=True)
+        choices = [[prison['nomis_id'], prison['name']] for prison in choices]
+        cache.set('prison-list', choices, timeout=60 * 60 * 6)
     return choices
 
 
