@@ -94,10 +94,8 @@ class ChoosePrisonForm(ApiForm):
         if self.action == 'choose':
             if not self.cleaned_data['new_prison']:
                 raise forms.ValidationError(self.error_messages['no_prison_selected'])
-            query_dict = self.request.GET.copy()
-            current_prisons = query_dict.getlist('prisons')
-            if self.cleaned_data['new_prison'] in current_prisons:
-                raise forms.ValidationError(self.error_messages['already_chosen'])
+        if self.cleaned_data['new_prison'] in self.fields['prisons'].initial:
+            raise forms.ValidationError(self.error_messages['already_chosen'])
         return self.cleaned_data['new_prison']
 
     def clean(self):
