@@ -38,8 +38,6 @@
   margin-bottom: 1em;
 
   .mtp-choose-prisons__add-button {
-    @include button ($grey-3);
-
     float: left;
     margin-right: 1em;
   }

@@ -4,23 +4,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 from mtp_common.auth.api_client import get_api_session
 
-from . import (
-    required_permissions, hmpps_employee_flag, confirmed_prisons_flag, views
-)
+from . import required_permissions, views
 from .searches import get_saved_searches, populate_new_result_counts
-from .utils import can_choose_prisons
+from .utils import can_skip_confirming_prisons, is_hmpps_employee
 from mtp_noms_ops.utils import user_test
-
-
-def is_hmpps_employee(user):
-    flags = user.user_data.get('flags') or []
-    return hmpps_employee_flag in flags
-
-
-def can_skip_confirming_prisons(user):
-    already_confirmed = confirmed_prisons_flag in user.user_data.get('flags', [])
-    cannot_choose_prisons = not can_choose_prisons(user)
-    return already_confirmed or cannot_choose_prisons
 
 
 def security_test(view):

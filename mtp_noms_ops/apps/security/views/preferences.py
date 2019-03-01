@@ -8,7 +8,7 @@ from django.views.generic import FormView, TemplateView
 
 from security import confirmed_prisons_flag
 from security.forms.preferences import ChoosePrisonForm
-from security.utils import save_user_flags
+from security.utils import save_user_flags, can_skip_confirming_prisons
 
 logger = logging.getLogger('mtp')
 
@@ -21,10 +21,15 @@ class ConfirmPrisonsView(FormView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['autocomplete_errors'] = {
+        context['data_attrs'] = {
             'data-autocomplete-error-empty': _('Type a prison name'),
-            'data-autocomplete-error-summary': _('There was a problem')
+            'data-autocomplete-error-summary': _('There was a problem'),
+            'data-event-category': 'ConfirmPrisons',
         }
+        context['current_prisons'] = ','.join([
+            p['nomis_id'] for p in self.request.user.user_data['prisons']
+        ] if self.request.user.user_data.get('prisons') else ['ALL'])
+        context['can_navigate_away'] = can_skip_confirming_prisons(self.request.user)
         return context
 
     def get_form_kwargs(self):

@@ -6,7 +6,6 @@ from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
 from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.user_admin.forms import ApiForm
-from oauthlib.oauth2 import OAuth2Error
 from requests import RequestException
 
 from security.utils import refresh_user_data
@@ -17,12 +16,9 @@ logger = logging.getLogger('mtp')
 def prison_choices(api_session):
     choices = cache.get('prison-list')
     if not choices:
-        try:
-            choices = retrieve_all_pages_for_path(api_session, '/prisons/', exclude_empty_prisons=True)
-            choices = [[prison['nomis_id'], prison['name']] for prison in choices]
-            cache.set('prison-list', choices, timeout=60 * 60 * 6)
-        except (RequestException, OAuth2Error, ValueError):
-            logger.exception('Could not look up prison list')
+        choices = retrieve_all_pages_for_path(api_session, '/prisons/', exclude_empty_prisons=True)
+        choices = [[prison['nomis_id'], prison['name']] for prison in choices]
+        cache.set('prison-list', choices, timeout=60 * 60 * 6)
     return choices
 
 
@@ -80,7 +76,7 @@ class ChoosePrisonForm(ApiForm):
                 query_dict['prisons'] = list(other_prisons) or ''
                 removal_link = urlencode(query_dict, doseq=True)
                 self.selected_prisons.append(
-                    (label, removal_link)
+                    (prison, label, removal_link)
                 )
 
         if self.is_bound:
@@ -94,10 +90,8 @@ class ChoosePrisonForm(ApiForm):
         if self.action == 'choose':
             if not self.cleaned_data['new_prison']:
                 raise forms.ValidationError(self.error_messages['no_prison_selected'])
-            query_dict = self.request.GET.copy()
-            current_prisons = query_dict.getlist('prisons')
-            if self.cleaned_data['new_prison'] in current_prisons:
-                raise forms.ValidationError(self.error_messages['already_chosen'])
+        if self.cleaned_data['new_prison'] in self.fields['prisons'].initial:
+            raise forms.ValidationError(self.error_messages['already_chosen'])
         return self.cleaned_data['new_prison']
 
     def clean(self):
@@ -125,6 +119,14 @@ class ChoosePrisonForm(ApiForm):
                 prisons.append(self.cleaned_data['new_prison'])
             if self.all_prisons_code in prisons:
                 prisons = []
+
+            logger.info('{user} confirmed prisons {current} > {new}'.format(
+                user=self.request.user.username,
+                current=[
+                    prison['nomis_id'] for prison in self.request.user_prisons
+                ],
+                new=prisons
+            ))
             self.api_session.patch(
                 '/users/%s/' % (self.request.user.username),
                 json={
