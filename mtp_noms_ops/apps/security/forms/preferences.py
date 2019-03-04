@@ -96,7 +96,10 @@ class ChoosePrisonForm(ApiForm):
 
     def clean(self):
         if self.action == 'confirm':
-            if not self.cleaned_data['prisons'] and not self.cleaned_data['new_prison']:
+            if (
+                not self.cleaned_data.get('prisons') and
+                not self.cleaned_data.get('new_prison')
+            ):
                 self.add_error(
                     'new_prison',
                     forms.ValidationError(self.error_messages['no_prisons_added'])
