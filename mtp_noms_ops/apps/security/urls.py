@@ -13,7 +13,7 @@ from mtp_noms_ops.utils import user_test
 def security_test(view):
     view = user_passes_test(
         can_skip_confirming_prisons,
-        login_url='security:confirm_prisons'
+        login_url='settings:confirm_prisons'
     )(view)
     view = user_passes_test(
         is_hmpps_employee,
@@ -40,17 +40,8 @@ urlpatterns = [
     url(r'^$', security_test(dashboard_view), name='dashboard'),
     url(r'^confirm-hmpps-employee/$', login_required(views.HMPPSEmployeeView.as_view()), name='hmpps_employee'),
     url(r'^not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
-    url(
-        r'^confirm-prisons/$',
-        login_required(views.ConfirmPrisonsView.as_view()),
-        name='confirm_prisons'
-    ),
-    url(
-        r'^confirm-prisons/confirmation/$',
-        login_required(views.ConfirmPrisonsConfirmationView.as_view()),
-        name='confirm_prisons_confirmation'
-    ),
 
+    # credits
     url(r'^credits/$', security_test(views.CreditListView.as_view()),
         name='credit_list'),
     url(r'^credits/(?P<credit_id>\d+)/$', security_test(views.CreditDetailView.as_view()),
@@ -68,6 +59,7 @@ urlpatterns = [
         )),
         name='credits_email_export'),
 
+    # senders
     url(r'^senders/$', security_test(views.SenderListView.as_view()),
         name='sender_list'),
     url(r'^senders/export/$',
@@ -97,6 +89,7 @@ urlpatterns = [
         )),
         name='sender_detail_email_export'),
 
+    # prisoners
     url(r'^prisoners/$', security_test(views.PrisonerListView.as_view()),
         name='prisoner_list'),
     url(r'^prisoners/export/$',
@@ -141,6 +134,7 @@ urlpatterns = [
         )),
         name='prisoner_disbursement_detail_email_export'),
 
+    # async-loaded nomis info
     url(r'^prisoner_image/(?P<prisoner_number>[A-Za-z0-9]*)/$',
         security_test(views.prisoner_image_view),
         name='prisoner_image'),
@@ -148,6 +142,7 @@ urlpatterns = [
         security_test(views.prisoner_nomis_info_view),
         name='prisoner_nomis_info'),
 
+    # disbursements
     url(r'^disbursements/$', security_test(views.DisbursementListView.as_view()),
         name='disbursement_list'),
     url(r'^disbursements/(?P<disbursement_id>\d+)/$', security_test(views.DisbursementDetailView.as_view()),
@@ -165,6 +160,7 @@ urlpatterns = [
         )),
         name='disbursements_email_export'),
 
+    # review credits
     url(r'^review-credits/$', security_test(views.ReviewCreditsView.as_view()),
         name='review_credits'),
 ]

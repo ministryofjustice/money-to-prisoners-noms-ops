@@ -3,6 +3,6 @@
 
 {% block user_menu_links %}
   {% if prison_choice_available %}
-  <li><a href="{% url 'security:confirm_prisons' %}">{% trans 'Your prisons' %}</a></li>
+  <li><a href="{% url 'settings:confirm_prisons' %}">{% trans 'Your prisons' %}</a></li>
   {% endif %}
 {% endblock %}

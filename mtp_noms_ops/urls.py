@@ -25,6 +25,7 @@ urlpatterns = i18n_patterns(
     url(r'^$', root_view, name='root'),
     url(r'^prisoner-location/', include('prisoner_location_admin.urls')),
     url(r'^security/', include('security.urls', namespace='security')),
+    url(r'^settings/', include('settings.urls', namespace='settings')),
     url(r'^feedback/', include('feedback.urls')),
 
     url(

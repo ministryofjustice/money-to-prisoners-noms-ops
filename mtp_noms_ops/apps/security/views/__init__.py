@@ -9,4 +9,3 @@ from .object_list import (  # noqa: F401
     CreditListView, DisbursementListView,
 )
 from .review import ReviewCreditsView  # noqa: F401
-from .preferences import ConfirmPrisonsView, ConfirmPrisonsConfirmationView  # noqa: F401

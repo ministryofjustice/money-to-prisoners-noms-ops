@@ -42,7 +42,8 @@ PROJECT_APPS = (
     'widget_tweaks',
     'prisoner_location_admin',
     'security',
-    'zendesk_tickets'
+    'zendesk_tickets',
+    'settings',
 )
 INSTALLED_APPS += PROJECT_APPS
 

@@ -7,17 +7,17 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 
 from security import confirmed_prisons_flag
-from security.forms.preferences import ChoosePrisonForm
 from security.utils import save_user_flags, can_skip_confirming_prisons
+from settings.forms import ChoosePrisonForm
 
 logger = logging.getLogger('mtp')
 
 
 class ConfirmPrisonsView(FormView):
     title = _('Confirm your prisons')
-    template_name = 'security/confirm-prisons.html'
+    template_name = 'settings/confirm-prisons.html'
     form_class = ChoosePrisonForm
-    success_url = reverse_lazy('security:confirm_prisons_confirmation')
+    success_url = reverse_lazy('settings:confirm_prisons_confirmation')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
@@ -45,7 +45,7 @@ class ConfirmPrisonsView(FormView):
 
         new_query_string = form.get_query_string()
         return redirect('{path}?{query}'.format(
-            path=reverse_lazy('security:confirm_prisons'),
+            path=reverse_lazy('settings:confirm_prisons'),
             query=new_query_string
         ))
 
@@ -60,7 +60,7 @@ class ConfirmPrisonsView(FormView):
 
 class ConfirmPrisonsConfirmationView(TemplateView):
     title = _('Your prisons have been saved')
-    template_name = 'security/confirm-prisons-confirmation.html'
+    template_name = 'settings/confirm-prisons-confirmation.html'
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
