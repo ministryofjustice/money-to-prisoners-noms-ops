@@ -4,8 +4,12 @@ from django.contrib.auth.decorators import login_required
 from . import views
 
 
-app_name = 'settings'
 urlpatterns = [
+    url(
+        r'^$',
+        login_required(views.NomsOpsSettingsView.as_view()),
+        name='settings'
+    ),
     url(
         r'^confirm-prisons/$',
         login_required(views.ConfirmPrisonsView.as_view()),

@@ -13,7 +13,7 @@ from mtp_noms_ops.utils import user_test
 def security_test(view):
     view = user_passes_test(
         can_skip_confirming_prisons,
-        login_url='settings:confirm_prisons'
+        login_url='confirm_prisons'
     )(view)
     view = user_passes_test(
         is_hmpps_employee,
