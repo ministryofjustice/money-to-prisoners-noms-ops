@@ -5,19 +5,41 @@ from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
+from mtp_common.auth.api_client import get_api_session
 
 from security import confirmed_prisons_flag
-from security.forms.preferences import ChoosePrisonForm
 from security.utils import save_user_flags, can_skip_confirming_prisons
+from settings.forms import ChoosePrisonForm
 
 logger = logging.getLogger('mtp')
 
 
+class NomsOpsSettingsView(TemplateView):
+    template_name = 'settings/settings.html'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        session = get_api_session(self.request)
+        context['email_notifications'] = False
+        email_preferences = session.get('/emailpreferences').json()
+        context['email_notifications'] = email_preferences['frequency'] == 'weekly'
+        return context
+
+    def post(self, *args, **kwargs):
+        if 'submit_email_preferences' in self.request.POST:
+            session = get_api_session(self.request)
+            if 'toggle' in self.request.POST:
+                session.post('/emailpreferences', json={'frequency': 'weekly'})
+            else:
+                session.post('/emailpreferences', json={'frequency': 'never'})
+        return redirect(reverse_lazy('settings'))
+
+
 class ConfirmPrisonsView(FormView):
     title = _('Confirm your prisons')
-    template_name = 'security/confirm-prisons.html'
+    template_name = 'settings/confirm-prisons.html'
     form_class = ChoosePrisonForm
-    success_url = reverse_lazy('security:confirm_prisons_confirmation')
+    success_url = reverse_lazy('confirm_prisons_confirmation')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
@@ -45,7 +67,7 @@ class ConfirmPrisonsView(FormView):
 
         new_query_string = form.get_query_string()
         return redirect('{path}?{query}'.format(
-            path=reverse_lazy('security:confirm_prisons'),
+            path=reverse_lazy('confirm_prisons'),
             query=new_query_string
         ))
 
@@ -60,7 +82,7 @@ class ConfirmPrisonsView(FormView):
 
 class ConfirmPrisonsConfirmationView(TemplateView):
     title = _('Your prisons have been saved')
-    template_name = 'security/confirm-prisons-confirmation.html'
+    template_name = 'settings/confirm-prisons-confirmation.html'
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)

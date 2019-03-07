@@ -8,11 +8,11 @@ from security import (
     hmpps_employee_flag, confirmed_prisons_flag, required_permissions,
     prison_choice_pilot_flag
 )
-from security.forms.preferences import ChoosePrisonForm
 from security.tests import api_url
 from security.tests.test_views import (
     SecurityBaseTestCase, sample_prison_list, sample_prisons
 )
+from settings.forms import ChoosePrisonForm
 
 
 class ConfirmPrisonTestCase(SecurityBaseTestCase):
@@ -29,7 +29,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
         )
         for view in self.protected_views:
             response = self.client.get(reverse(view), follow=True)
-            self.assertContains(response, '<!-- security:confirm_prisons -->')
+            self.assertContains(response, '<!-- confirm_prisons -->')
 
     @responses.activate
     def test_does_not_redirect_if_not_in_pilot(self):
@@ -88,7 +88,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
             json={}
         )
 
-        response = self.client.post(reverse('security:confirm_prisons'), data={
+        response = self.client.post(reverse('confirm_prisons'), data={
             'prisons': [new_prison['nomis_id']],
             'submit_confirm': True
         }, follow=True)
@@ -100,7 +100,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
             ),
             set([new_prison['nomis_id']])
         )
-        self.assertContains(response, '<!-- security:confirm_prisons_confirmation -->')
+        self.assertContains(response, '<!-- confirm_prisons_confirmation -->')
         self.assertIn(
             confirmed_prisons_flag,
             self.client.session[USER_DATA_SESSION_KEY]['flags']
@@ -142,7 +142,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
             json={}
         )
 
-        response = self.client.post(reverse('security:confirm_prisons'), data={
+        response = self.client.post(reverse('confirm_prisons'), data={
             'prisons': [current_prison['nomis_id']],
             'new_prison': new_prison['nomis_id'],
             'submit_confirm': True
@@ -155,7 +155,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
             ),
             set([current_prison['nomis_id'], new_prison['nomis_id']])
         )
-        self.assertContains(response, '<!-- security:confirm_prisons_confirmation -->')
+        self.assertContains(response, '<!-- confirm_prisons_confirmation -->')
         self.assertIn(
             confirmed_prisons_flag,
             self.client.session[USER_DATA_SESSION_KEY]['flags']
@@ -181,10 +181,10 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
             prisons=[current_prison], flags=[hmpps_employee_flag, prison_choice_pilot_flag])
         )
 
-        response = self.client.post(reverse('security:confirm_prisons'), data={
+        response = self.client.post(reverse('confirm_prisons'), data={
             'prisons': [],
             'submit_confirm': True
         }, follow=True)
 
-        self.assertContains(response, '<!-- security:confirm_prisons -->')
+        self.assertContains(response, '<!-- confirm_prisons -->')
         self.assertContains(response, ChoosePrisonForm.error_messages['no_prisons_added'])

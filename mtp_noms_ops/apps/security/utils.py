@@ -9,7 +9,10 @@ from django.utils.dateparse import parse_date, parse_datetime
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
-from . import prison_choice_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag
+from . import (
+    prison_choice_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag,
+    notifications_pilot_flag
+)
 
 
 def parse_date_fields(object_list):
@@ -187,3 +190,12 @@ def can_skip_confirming_prisons(user):
     already_confirmed = confirmed_prisons_flag in user.user_data.get('flags', [])
     cannot_choose_prisons = not can_choose_prisons(user)
     return already_confirmed or cannot_choose_prisons
+
+
+def notifications_available(request):
+    return {
+        'notifications_available': (
+            request.user.is_authenticated and
+            notifications_pilot_flag in request.user.user_data.get('flags', [])
+        )
+    }

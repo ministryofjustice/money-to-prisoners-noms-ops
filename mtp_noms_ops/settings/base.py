@@ -42,7 +42,8 @@ PROJECT_APPS = (
     'widget_tweaks',
     'prisoner_location_admin',
     'security',
-    'zendesk_tickets'
+    'zendesk_tickets',
+    'settings',
 )
 INSTALLED_APPS += PROJECT_APPS
 
@@ -128,6 +129,7 @@ TEMPLATES = [
                 'mtp_noms_ops.apps.security.utils.initial_disbursement_params',
                 'mtp_noms_ops.apps.security.utils.nomis_api_available',
                 'mtp_noms_ops.apps.security.utils.prison_choice_available',
+                'mtp_noms_ops.apps.security.utils.notifications_available',
             ],
         },
     },
