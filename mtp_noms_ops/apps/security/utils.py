@@ -1,7 +1,6 @@
 import collections
 import datetime
 import re
-from urllib.parse import urlencode
 
 from django.conf import settings
 from django.utils import timezone
@@ -121,40 +120,6 @@ class EmailSet(OrderedSet):
         return (item or '').strip().lower()
 
 
-def initial_params(request):
-    if not request.user_prisons:
-        return {}
-    return {'initial_params': urlencode([
-        ('prison', prison['nomis_id'])
-        for prison in request.user_prisons
-    ], doseq=True)}
-
-
-def initial_disbursement_params(request):
-    if not request.user_prisons:
-        return {}
-    return {'initial_disbursement_params': urlencode([
-        ('prison', prison['nomis_id'])
-        for prison in request.user_prisons
-        if not settings.DISBURSEMENT_PRISONS or
-        prison['nomis_id'] in settings.DISBURSEMENT_PRISONS
-    ], doseq=True)}
-
-
-def nomis_api_available(_):
-    return {'nomis_api_available': (
-        settings.NOMIS_API_BASE_URL and settings.NOMIS_API_CLIENT_TOKEN and settings.NOMIS_API_PRIVATE_KEY
-    )}
-
-
-def prison_choice_available(request):
-    return {
-        'prison_choice_available': (
-            request.user.is_authenticated and can_choose_prisons(request.user)
-        )
-    }
-
-
 def can_choose_prisons(user):
     in_pilot = prison_choice_pilot_flag in user.user_data.get('flags', [])
     has_only_security_roles = user.user_data['roles'] == ['security']
@@ -192,10 +157,16 @@ def can_skip_confirming_prisons(user):
     return already_confirmed or cannot_choose_prisons
 
 
-def notifications_available(request):
-    return {
-        'notifications_available': (
-            request.user.is_authenticated and
-            notifications_pilot_flag in request.user.user_data.get('flags', [])
-        )
-    }
+def can_see_notifications(user):
+    return (
+        user.is_authenticated and
+        notifications_pilot_flag in user.user_data.get('flags', [])
+    )
+
+
+def is_nomis_api_configured():
+    return (
+        settings.NOMIS_API_BASE_URL and
+        settings.NOMIS_API_CLIENT_TOKEN and
+        settings.NOMIS_API_PRIVATE_KEY
+    )
