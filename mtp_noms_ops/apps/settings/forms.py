@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import logging
 from urllib.parse import urlencode
 
@@ -12,6 +13,8 @@ from security.utils import refresh_user_data
 
 logger = logging.getLogger('mtp')
 
+ALL_PRISONS_CODE = 'ALL'
+
 
 def prison_choices(api_session):
     choices = cache.get('prison-list')
@@ -22,41 +25,26 @@ def prison_choices(api_session):
     return choices
 
 
-class ChoosePrisonForm(ApiForm):
-    new_prison = forms.ChoiceField(
-        label=_('Add a prison'),
-        help_text=_('We only have data for public prisons'),
-        choices=[],
-        required=False,
-    )
+class ConfirmPrisonForm(ApiForm):
     prisons = forms.MultipleChoiceField(
         choices=[],
         widget=forms.CheckboxSelectMultiple(),
         required=False,
     )
+    all_prisons_code = ALL_PRISONS_CODE
     error_messages = {
-        'no_prison_selected': _('Choose a prison'),
-        'already_chosen': _('You have already added that prison'),
-        'no_prisons_added': _('You must add at least one prison'),
         'generic': _('This service is currently unavailable'),
     }
-    actions = ['choose', 'confirm']
-    all_prisons_code = 'ALL'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.selected_prisons = self.request.GET.getlist('prisons') or []
         prison_list = prison_choices(self.api_session)
-
-        self.fields['new_prison'].choices = [
-            ['', _('Select a prison')],
-        ] + prison_list
 
         self.fields['prisons'].choices = [
             [self.all_prisons_code, _('All prisons')]
         ] + prison_list
 
-        selected_prisons = self.request.GET.getlist('prisons')
+        selected_prisons = self.request.GET.getlist('prisons') or []
         if selected_prisons:
             self.fields['prisons'].initial = selected_prisons
         else:
@@ -70,59 +58,13 @@ class ChoosePrisonForm(ApiForm):
         self.selected_prisons = []
         for prison, label in self.fields['prisons'].choices:
             if prison in self.fields['prisons'].initial:
-                query_dict = self.request.GET.copy()
-                other_prisons = set(self.fields['prisons'].initial)
-                other_prisons.remove(prison)
-                query_dict['prisons'] = list(other_prisons) or ''
-                removal_link = urlencode(query_dict, doseq=True)
                 self.selected_prisons.append(
-                    (prison, label, removal_link)
+                    (prison, label)
                 )
-
-        if self.is_bound:
-            self.action = None
-            for action in self.actions:
-                key = 'submit_%s' % action
-                if key in self.request.POST:
-                    self.action = action
-
-    def clean_new_prison(self):
-        if self.action == 'choose':
-            if not self.cleaned_data['new_prison']:
-                raise forms.ValidationError(self.error_messages['no_prison_selected'])
-        if (
-            self.cleaned_data['new_prison'] and
-            self.cleaned_data['new_prison'] in self.fields['prisons'].initial
-        ):
-            raise forms.ValidationError(self.error_messages['already_chosen'])
-        return self.cleaned_data['new_prison']
-
-    def clean(self):
-        if self.action == 'confirm':
-            if (
-                not self.cleaned_data.get('prisons') and
-                not self.cleaned_data.get('new_prison')
-            ):
-                self.add_error(
-                    'new_prison',
-                    forms.ValidationError(self.error_messages['no_prisons_added'])
-                )
-        return self.cleaned_data
-
-    def get_query_string(self):
-        query_dict = self.request.GET.copy()
-        current_prisons = self.fields['prisons'].initial
-        if current_prisons == [self.all_prisons_code]:
-            current_prisons = []
-        current_prisons.append(self.cleaned_data['new_prison'])
-        query_dict['prisons'] = current_prisons or ''
-        return urlencode(query_dict, doseq=True)
 
     def save(self):
         try:
             prisons = self.cleaned_data['prisons']
-            if self.cleaned_data['new_prison']:
-                prisons.append(self.cleaned_data['new_prison'])
             if self.all_prisons_code in prisons:
                 prisons = []
 
@@ -144,3 +86,166 @@ class ChoosePrisonForm(ApiForm):
             refresh_user_data(self.request, self.api_session)
         except RequestException as e:
             self.api_validation_error(e)
+
+
+class ChangePrisonForm(ApiForm):
+    all_prisons = forms.BooleanField(required=False)
+    error_messages = {
+        'already_chosen': _('You have already added that prison'),
+        'no_prisons_added': _('You must add at least one prison'),
+        'generic': _('This service is currently unavailable'),
+    }
+    all_prisons_code = ALL_PRISONS_CODE
+    actions = ['save', 'add', 'remove', 'all', 'notall']
+
+    def __init__(self, **kwargs):
+        self.action = None
+        removed_item = None
+        for action in self.actions:
+            for key in kwargs['request'].POST:
+                if key.startswith('submit_%s' % action):
+                    self.action = action
+                    if action == 'remove':
+                        removed_item = key[14:]
+
+        if self.action == 'all':
+            kwargs['data'] = kwargs['data'].copy()
+            kwargs['data']['all_prisons'] = True
+        elif self.action == 'notall':
+            kwargs['data'] = kwargs['data'].copy()
+            kwargs['data']['all_prisons'] = False
+
+        super().__init__(**kwargs)
+        self.build_prison_fields(removed_item)
+
+    def build_prison_fields(self, removed_item):
+        prison_list = prison_choices(self.api_session)
+        self.new_prisons = set()
+
+        if self.is_bound:
+            self.prison_keys = sorted([
+                key for key in self.request.POST
+                if key.startswith('prison_') and
+                key != removed_item
+            ])
+            for key in self.prison_keys:
+                self.create_prison_field(key, prison_list)
+        else:
+            if 'prisons' in self.request.GET:
+                initial_prisons = self.request.GET.getlist('prisons') or []
+                if self.all_prisons_code in initial_prisons:
+                    self.fields['all_prisons'].initial = True
+                else:
+                    for i, prison in enumerate(initial_prisons):
+                        field_name = 'prison_%s' % i
+                        self.create_prison_field(
+                            field_name, prison_list, initial=prison
+                        )
+            else:
+                if self.request.user_prisons:
+                    for i, prison in enumerate(self.request.user_prisons):
+                        field_name = 'prison_%s' % i
+                        self.create_prison_field(
+                            field_name, prison_list, initial=prison['nomis_id']
+                        )
+                else:
+                    self.fields['all_prisons'].initial = True
+
+        if self.action == 'add' or not self.prison_fields:
+            next_prison_id = 0
+            for prison_field in self.prison_fields:
+                if next_prison_id < int(key[7:]):
+                    next_prison_id = int(key[7:])
+            field_name = 'prison_%s' % (next_prison_id + 1)
+            self.create_prison_field(field_name, prison_list)
+
+    def create_prison_field(self, fieldname, prison_list, initial=None):
+        self.fields[fieldname] = forms.ChoiceField(
+            label=_('Prison'),
+            choices=[['', _('Select a prison')]] + prison_list,
+            required=False,
+            initial=initial
+        )
+        setattr(
+            self,
+            'clean_%s' % fieldname,
+            self.get_clean_prison_method(fieldname)
+        )
+
+    @property
+    def prison_fields(self):
+        return OrderedDict(sorted([
+            (k, self.fields[k]) for k in self.fields if k.startswith('prison_')
+        ], key=lambda f: f[0]))
+
+    def is_valid(self):
+        if self.action != 'save':
+            return False
+        return super().is_valid()
+
+    def get_clean_prison_method(self, field_name):
+        def clean_prison():
+            if (
+                self.cleaned_data[field_name] and
+                self.cleaned_data[field_name] in self.new_prisons
+            ):
+                raise forms.ValidationError(self.error_messages['already_chosen'])
+            self.new_prisons.add(self.cleaned_data[field_name])
+            return self.cleaned_data[field_name]
+        return clean_prison
+
+    def clean(self):
+        if self.action == 'save' and not self.cleaned_data['all_prisons']:
+            some_values = False
+            for field_name in self.prison_fields:
+                if self.cleaned_data[field_name]:
+                    some_values = True
+
+            if not some_values:
+                if self.prison_fields:
+                    self.add_error(
+                        list(self.prison_fields.keys())[0],
+                        forms.ValidationError(self.error_messages['no_prisons_added'])
+                    )
+                else:
+                    raise forms.ValidationError(self.error_messages['no_prisons_added'])
+        return self.cleaned_data
+
+    def save(self):
+        try:
+            prisons = []
+            if not self.cleaned_data['all_prisons']:
+                for field_name in self.prison_fields:
+                    if self.cleaned_data[field_name]:
+                        prisons.append(self.cleaned_data[field_name])
+
+            logger.info('{user} confirmed prisons {current} > {new}'.format(
+                user=self.request.user.username,
+                current=[
+                    prison['nomis_id'] for prison in self.request.user_prisons
+                ],
+                new=prisons
+            ))
+            self.api_session.patch(
+                '/users/%s/' % (self.request.user.username),
+                json={
+                    'prisons': [
+                        {'nomis_id': prison} for prison in prisons
+                    ]
+                }
+            )
+            refresh_user_data(self.request, self.api_session)
+        except RequestException as e:
+            self.api_validation_error(e)
+
+    def get_confirmation_query_string(self):
+        prisons = []
+        if self.cleaned_data['all_prisons']:
+            prisons.append(self.all_prisons_code)
+        for field_name in self.prison_fields:
+            if self.cleaned_data[field_name]:
+                prisons.append(self.cleaned_data[field_name])
+
+        query_dict = self.request.GET.copy()
+        query_dict['prisons'] = prisons
+        return urlencode(query_dict, doseq=True)

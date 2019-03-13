@@ -22,7 +22,7 @@
     <div class="grid-row">
       <div class="column-two-thirds">
 
-        <form method="post" class="mtp-autocomplete mtp-choose-prison">
+        <form method="post">
           {% csrf_token %}
 
           {% if form.errors %}
@@ -48,19 +48,6 @@
             </div>
           {% endif %}
 
-          <div class="mtp-prison-list">
-            {% for prison, label, removal_link in form.selected_prisons %}
-              <div class="mtp-prison-row">
-                <div class="mtp-prison-row__prison">
-                  <strong>{{ label }}</strong>
-                </div>
-                <div class="mtp-prison-row__remove">
-                  <a href="?{{ removal_link }}" data-analytics="event,PrisonConfirmation,Remove,{{ prison }}">{% trans 'Remove' %}</a>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-
           {% if form.all_prisons_code in form.prisons.initial %}
             <div class="mtp-info-box">
               <div class="mtp-info-box__heading">{% trans 'The data you see will be more useful if you confirm prisons relevant to you' %}</div>
@@ -72,15 +59,12 @@
             </div>
           {% endif %}
 
-          {% include 'mtp_common/forms/select-field.html' with field=form.new_prison input_classes='mtp-autocomplete mtp-choose-prison-select' attrs=data_attrs only %}
-
-          <div class="form-group mtp-choose-prisons">
-            <button type="submit" name="submit_choose" class="mtp-choose-prisons__add-button button-secondary">
-              {% trans 'Add prison' %}
-            </button>
-            <div class="mtp-choose-prisons__add-all">
-            <a href="?prisons={{ form.all_prisons_code }}" data-analytics="event,PrisonConfirmation,Add,ALL">{% trans 'Add all prisons' %}</a>
-            </div>
+          <div class="mtp-prison-list">
+            {% for prison, label in form.selected_prisons %}
+              <div class="mtp-prison-row">
+                <strong>{{ label }}</strong>
+              </div>
+            {% endfor %}
           </div>
 
           <span class="hidden">
@@ -92,6 +76,12 @@
             </button>
           </div>
         </form>
+
+        <div>
+          <a class="mtp-ignore-visited" href="{% url 'confirm_prisons_add_remove' %}?{{ change_prison_query }}">
+            {% trans 'Add or remove prisons ' %}
+          </a>
+        </div>
 
       </div>
     </div>

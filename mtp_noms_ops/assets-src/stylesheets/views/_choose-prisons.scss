@@ -28,27 +28,22 @@
   }
 }
 
-.mtp-choose-prison-select {
-  width: 100%;
-}
+.mtp-prison-selection-row {
+  width: 80%;
+  padding: 0.5em 0 0.5em 0;
+  display: table;
 
-.mtp-choose-prisons {
-  border-bottom: 1px solid $border-colour;
-  padding-bottom: 2em;
-  margin-bottom: 1em;
-
-  .mtp-choose-prisons__add-button {
-    float: left;
-    margin-right: 1em;
+  .mtp-prison-selection-row__prison {
+    width: 80%;
+    display: table-cell;
+    vertical-align: middle;
   }
 
-  .mtp-choose-prisons__add-all {
-    float: left;
-    padding: .526315em .789473em .263157em;
-
-    a:visited {
-      color: $link-colour;
-    }
+  .mtp-prison-selection-row__remove {
+    width: 20%;
+    text-align: right;
+    display: table-cell;
+    vertical-align: middle;
   }
 
   &:after {
@@ -56,6 +51,14 @@
     clear: both;
     display: block;
   }
+}
+
+a.mtp-ignore-visited:visited {
+  color: $link-colour;
+}
+
+.mtp-choose-prison-select {
+  width: 100%;
 }
 
 .mtp-info-box {
@@ -67,5 +70,22 @@
   .mtp-info-box__heading {
     font-size: 24px;
     font-weight: bold;
+  }
+}
+
+input.mtp-link-submit {
+  background: none;
+  color: $link-colour;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:active {
+    background-color: $focus-colour;
+  }
+
+  &:focus {
+    outline: none;
   }
 }
