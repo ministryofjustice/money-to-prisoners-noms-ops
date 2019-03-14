@@ -5,6 +5,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.dateformat import format as date_format
+from django.utils.encoding import escape_uri_path
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
@@ -135,6 +136,14 @@ class SecurityView(FormView):
             {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.title}
         ]
+        location = self.request.build_absolute_uri().split('?')[0]
+        if location.startswith('//'):
+            location = 'https://%s' % location
+        context_data['google_analytics_pageview'] = {
+            'page': escape_uri_path(self.request.path),
+            'location': location,
+            'title': self.get_generic_title(),
+        }
         return context_data
 
     def get_export_redirect(self, form):
@@ -145,6 +154,17 @@ class SecurityView(FormView):
 
     def get_class_name(self):
         return self.__class__.__name__
+
+    def get_generic_title(self):
+        # not customised for specifc search or detail object
+        return self.__class__.title
+
+    def get_used_request_params(self):
+        return sorted(
+            param
+            for param, value in self.request.GET.items()
+            if value
+        )
 
     get = FormView.post
 

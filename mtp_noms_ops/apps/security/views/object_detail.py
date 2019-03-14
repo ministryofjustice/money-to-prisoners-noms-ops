@@ -92,6 +92,7 @@ class SenderDetailView(SecurityDetailView):
     """
     Sender profile view
     """
+    title = _('Payment source')
     list_title = SenderListView.title
     list_url = reverse_lazy('security:sender_list')
     template_name = 'security/senders-detail.html'
@@ -115,6 +116,7 @@ class PrisonerDetailView(SecurityDetailView):
     """
     Prisoner profile view showing credit list
     """
+    title = _('Prisoner')
     list_title = PrisonerListView.title
     list_url = reverse_lazy('security:prisoner_list')
     template_name = 'security/prisoner.html'
