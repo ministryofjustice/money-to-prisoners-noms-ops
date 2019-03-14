@@ -60,6 +60,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'mtp_noms_ops.utils.UserPermissionMiddleware',
+    'mtp_noms_ops.utils.SecurityMiddleware',
 )
 
 HEALTHCHECKS = []
