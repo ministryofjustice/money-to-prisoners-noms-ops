@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import gettext, gettext_lazy as _
 from mtp_common.context_processors import govuk_localisation as inherited_localisation
 
@@ -19,6 +20,12 @@ class UserPermissionMiddleware:
             prison['pre_approval_required']
             for prison in request.user_prisons
         )
+
+
+class SecurityMiddleware(MiddlewareMixin):
+    def process_response(self, _, response):
+        response['Referrer-Policy'] = 'same-origin'
+        return response
 
 
 def external_breadcrumbs(request):
