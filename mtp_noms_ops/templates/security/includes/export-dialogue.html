@@ -3,7 +3,7 @@
 
 {% if form.total_count <= view.export_download_limit %}
 
-  <a data-analytics="event,SecurityForms,export-{{ view.get_class_name }},{{ request.GET.urlencode }}" href="{{ export_view }}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
+  <a href="{{ export_view }}?{{ request.GET.urlencode }}">{% trans 'Export' %}</a>
 
 {% elif form.total_count <= view.export_email_limit %}
 

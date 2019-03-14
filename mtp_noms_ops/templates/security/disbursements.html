@@ -28,7 +28,7 @@
     {% if form.is_valid %}
       <div class="mtp-results-list">
         <div class="print-hidden mtp-links--no-panel">
-          <a class="js-print-trigger" data-analytics="event,SecurityForms,print-{{ view.get_class_name }},{{ request.GET.urlencode }}" href="#print-dialog">{% trans 'Print' %}</a>
+          <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
           &nbsp;
           {% url 'security:disbursements_export' as export_view %}
           {% url 'security:disbursements_email_export' as email_export_view %}
