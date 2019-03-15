@@ -95,7 +95,7 @@ class SenderDetailView(SecurityDetailView):
     title = _('Payment source')
     list_title = SenderListView.title
     list_url = reverse_lazy('security:sender_list')
-    template_name = 'security/senders-detail.html'
+    template_name = 'security/sender.html'
     form_class = SendersDetailForm
     id_kwarg_name = 'sender_id'
     object_context_key = 'sender'
