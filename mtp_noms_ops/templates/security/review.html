@@ -19,12 +19,12 @@
 </p>
 
 {% if credits %}
-  <form method="post" action="" class="mtp-review js-ConfirmChecked">
+  <form method="post" class="mtp-review js-ConfirmChecked js-FormAnalytics">
     {% csrf_token %}
 
     <div class="mtp-review__actions print-hidden">
       <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
-      <a class="js-print-trigger" href="#print-dialog">{% trans 'Print these credits' %}</a>
+      <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print these credits' %}</a>
     </div>
 
     <div class="mtp-results-list">
