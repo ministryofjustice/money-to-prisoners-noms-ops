@@ -15,12 +15,16 @@ exports.FormAnalytics = {
   },
 
   bindEvents: function () {
-    this.$form.on('submit', $.proxy(this.onSubmit, this));
+    this.$form.on('submit', this.onSubmit);
   },
 
   onSubmit: function () {
-    var inputs = this.$form.serializeArray();
-    var formId = this.$form.attr('id');
+    var $form = $(this);
+    var inputs = $form.serializeArray();
+    var formId = $form.attr('id');
+    var location = $form.data('ga-location');
+    var page = $form.data('ga-page');
+    var title = $form.data('ga-title');
 
     $.each(inputs, function () {
       if (this.value) {
@@ -28,7 +32,10 @@ exports.FormAnalytics = {
           'event', {
             eventCategory: 'SecurityForms',
             eventAction: formId,
-            eventLabel: this.name
+            eventLabel: this.name,
+            location: location,
+            page: page,
+            title: title
           }
         );
       }

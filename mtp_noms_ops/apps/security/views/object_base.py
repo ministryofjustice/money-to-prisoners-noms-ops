@@ -138,7 +138,7 @@ class SecurityView(FormView):
         ]
         location = self.request.build_absolute_uri().split('?')[0]
         if location.startswith('//'):
-            location = 'https://%s' % location
+            location = 'https:%s' % location
         context_data['google_analytics_pageview'] = {
             'page': escape_uri_path(self.request.path),
             'location': location,

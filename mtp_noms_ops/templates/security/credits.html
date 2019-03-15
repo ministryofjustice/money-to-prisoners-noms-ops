@@ -13,7 +13,7 @@
 
   {% include 'mtp_common/includes/message_box.html' %}
 
-  <form id="filter-credits" class="mtp-security-search" method="get">
+  <form id="filter-credits" class="mtp-security-search js-FormAnalytics" method="get" data-ga-location="{{ google_analytics_pageview.location }}" data-ga-page="{{ google_analytics_pageview.page }}" data-ga-title="{{ google_analytics_pageview.title }}">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
     <p class="lede">{{ form.search_description.description }}</p>
