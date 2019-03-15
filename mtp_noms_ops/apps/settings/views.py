@@ -17,10 +17,11 @@ logger = logging.getLogger('mtp')
 
 
 class NomsOpsSettingsView(TemplateView):
+    title = _('Settings')
     template_name = 'settings/settings.html'
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         session = get_api_session(self.request)
         if can_see_notifications(self.request.user):
             context['email_notifications'] = False

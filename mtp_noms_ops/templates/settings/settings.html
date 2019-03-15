@@ -13,7 +13,6 @@
           <p>
             {% trans 'You’re currently receiving email notifications every Monday.' %}
           </p>
-          <span class="hidden"><input type="checkbox" name="toggle" /></span>
           <input type="submit" class="button" name="submit_email_preferences" value="{% trans 'Turn off email notifications' %}"/>
         {% else %}
           <h2 class="heading-large">
@@ -22,7 +21,7 @@
           <p>
             {% trans 'You’re not currently receiving email notifications.' %}
           </p>
-          <span class="hidden"><input type="checkbox" name="toggle" checked /></span>
+          <input type="hidden" name="toggle" value="True" />
           <input type="submit" class="button" name="submit_email_preferences" value="{% trans 'Turn on email notifications' %}"/>
         {% endif %}
       </form>
@@ -34,7 +33,6 @@
       <h2 class="heading-large">
         {% trans 'Your prisons' %}
       </h2>
-      <p>{% trans 'You’ll see data for:' %}
       <ul class="list list-bullet">
         {% for prison in request.user.user_data.prisons %}
           <li>{{ prison.name }}</li>
