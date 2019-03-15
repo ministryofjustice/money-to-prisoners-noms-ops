@@ -36,6 +36,8 @@
       <ul class="list list-bullet">
         {% for prison in request.user.user_data.prisons %}
           <li>{{ prison.name }}</li>
+        {% empty %}
+          <li>{% trans 'All prisons' %}</li>
         {% endfor %}
       </ul>
       <a class="button" href="{% url 'confirm_prisons' %}">{% trans 'Change prisons' %}</a>
