@@ -5,7 +5,6 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.dateformat import format as date_format
-from django.utils.encoding import escape_uri_path
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
@@ -13,6 +12,7 @@ from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
+from mtp_noms_ops.utils import genericised_pageview
 from security.export import ObjectListXlsxResponse
 from security.tasks import email_export_xlsx
 
@@ -136,14 +136,7 @@ class SecurityView(FormView):
             {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.title}
         ]
-        location = self.request.build_absolute_uri().split('?')[0]
-        if location.startswith('//'):
-            location = 'https:%s' % location
-        context_data['google_analytics_pageview'] = {
-            'page': escape_uri_path(self.request.path),
-            'location': location,
-            'title': self.get_generic_title(),
-        }
+        context_data['google_analytics_pageview'] = genericised_pageview(self.request, self.get_generic_title())
         return context_data
 
     def get_export_redirect(self, form):

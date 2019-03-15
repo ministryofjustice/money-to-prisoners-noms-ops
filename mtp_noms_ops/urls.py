@@ -5,12 +5,22 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
 from django.views.generic import RedirectView
 from django.views.i18n import JavaScriptCatalog
 from moj_irat.views import HealthcheckView, PingJsonView
 from mtp_common.auth import views as auth_views
 from mtp_common.auth.exceptions import Unauthorized
+
+from mtp_noms_ops.utils import genericised_pageview
+
+
+def login_view(request):
+    return auth_views.login(request, template_name='mtp_auth/login.html', extra_context={
+        'start_page_url': settings.START_PAGE_URL,
+        'google_analytics_pageview': genericised_pageview(request, _('Sign in')),
+    })
 
 
 def root_view(request):
@@ -28,13 +38,7 @@ urlpatterns = i18n_patterns(
     url(r'^settings/', include('settings.urls')),
     url(r'^feedback/', include('feedback.urls')),
 
-    url(
-        r'^login/$', auth_views.login, {
-            'template_name': 'mtp_auth/login.html',
-            'extra_context': {
-                'start_page_url': settings.START_PAGE_URL,
-            },
-        }, name='login'),
+    url(r'^login/$', login_view, name='login'),
     url(
         r'^logout/$', auth_views.logout, {
             'template_name': 'mtp_auth/login.html',
