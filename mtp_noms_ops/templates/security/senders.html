@@ -25,7 +25,7 @@
     {% if form.is_valid %}
       <div class="mtp-results-list">
         <div class="print-hidden mtp-links--no-panel">
-          <a class="js-print-trigger" href="#print-dialog">{% trans 'Print' %}</a>
+          <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
           &nbsp;
           {% url 'security:senders_export' as export_view %}
           {% url 'security:senders_email_export' as email_export_view %}

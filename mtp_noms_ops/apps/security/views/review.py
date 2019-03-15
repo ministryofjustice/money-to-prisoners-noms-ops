@@ -29,3 +29,9 @@ class ReviewCreditsView(FormView):
         context_data = super().get_context_data(**kwargs)
         context_data['credits'] = context_data['form'].credits
         return context_data
+
+    def get_class_name(self):
+        return self.__class__.__name__
+
+    def get_used_request_params(self):
+        return []
