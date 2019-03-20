@@ -4,87 +4,121 @@ var analytics = require('analytics');
 
 exports.ChoosePrisons = {
   init: function () {
+    this.initChangePrisons();
+    this.initConfirmPrisons();
+  },
+
+  initChangePrisons: function () {
     var $form = $('form.mtp-choose-prison');
     if ($form.length !== 1) {
       return;
     }
 
-    var selected_prisons = this.selected_prisons();
+    var $hiddenInputs = $form.find('input.mtp-autocomplete-hidden');
+    var currentPrisons = '';
+    if ($form.find('input[name=all_prisons]:checked')) {
+      currentPrisons = 'ALL';
+    }
+    currentPrisons = this.addedPrisons($hiddenInputs);
     analytics.Analytics.send(
       'event', {
         eventCategory: 'PrisonConfirmation',
-        eventAction: 'Selected',
-        eventLabel: selected_prisons
+        eventAction: 'Change',
+        eventLabel: currentPrisons
       }
     );
 
-    var $hiddenInput = $form.find('input.mtp-autocomplete-hidden');
-    var $chooseButton = $form.find('button[name=submit_save]');
+    var $saveButton = $form.find('button[name=submit_save]');
+    var self = this;
+    $saveButton.click(function (e) {
+      var noSelection = false;
 
-    $chooseButton.click(function (e) {
-      var no_selection = false;
-      if (!$hiddenInput.val()) {
-        $hiddenInput.data('visualInput').addClass('form-control-error');
-        var $hiddenInputFormGroup = $hiddenInput.data('visualInput').parents('.form-group')
-        $hiddenInputFormGroup.addClass('form-group-error');
-        $hiddenInputFormGroup.find('.error-message').remove();
-        $('div.error-summary').remove();
-        var empty_error_msg = $hiddenInput.data('autocomplete-error-empty');
-        var error_summary_title = $hiddenInput.data('autocomplete-error-summary');
-        if (empty_error_msg) {
-          $hiddenInput.data('visualInput').before(
-            '<span class="error-message">' + empty_error_msg + '</span>'
-          );
+      $hiddenInputs.each(function () {
+        var $hiddenInput = $(this);
+        var $visualInput = $('input#id_' + $hiddenInput.attr('name'));
+        // error if they type something but don't select anything
+        if (!$hiddenInput.val() && $visualInput.val()) {
+          $hiddenInput.data('visualInput').addClass('form-control-error');
+          var $hiddenInputFormGroup = $hiddenInput.data('visualInput').parents('.form-group')
+          $hiddenInputFormGroup.addClass('form-group-error');
+          $hiddenInputFormGroup.find('.error-message').remove();
+          $('div.error-summary').remove();
+          var emptyErrorMsg = $hiddenInput.data('autocomplete-error-empty');
+          var errorSummaryTitle = $hiddenInput.data('autocomplete-error-summary');
+          if (emptyErrorMsg) {
+            $hiddenInput.data('visualInput').before(
+              '<span class="error-message">' + emptyErrorMsg + '</span>'
+            );
 
-          var label = $('label[for=' + $hiddenInput.data('visualInput').attr('id') + ']');
-          var label_text = label.contents().get(0).nodeValue;
-          $('div.mtp-prison-selection').before(
-            '<div class="error-summary" aria-labeledby="error-summary-heading" tabindex="-1" role="alert">' +
-            '  <h2 class="heading-medium error-summary-heading" id="error-summary-heading">' + error_summary_title + '</h2>' +
-            '  <ul class="error-summary-list">' +
-            '      <li class="field-specific-error">' +
-            '        <a href="#' + $hiddenInput.attr('id') + '-label">' + empty_error_msg + '</a>' +
-            '      </li>' +
-            '  </ul>' +
-            '</div>'
-          );
+            var label = $('label[for=' + $hiddenInput.data('visualInput').attr('id') + ']');
+            var label_text = label.contents().get(0).nodeValue;
+            $('div.mtp-prison-selection').before(
+              '<div class="error-summary" aria-labeledby="error-summary-heading" tabindex="-1" role="alert">' +
+              '  <h2 class="heading-medium error-summary-heading" id="error-summary-heading">' + errorSummaryTitle + '</h2>' +
+              '  <ul class="error-summary-list">' +
+              '      <li class="field-specific-error">' +
+              '        <a href="#' + $hiddenInput.attr('id') + '-label">' + emptyErrorMsg + '</a>' +
+              '      </li>' +
+              '  </ul>' +
+              '</div>'
+            );
 
-          analytics.Analytics.send(
-            'event', {
-              eventCategory: 'security.forms.preferences.ChoosePrisonForm',
-              eventAction: 'new_prison',
-              eventLabel: empty_error_msg
-            }
-          );
+            analytics.Analytics.send(
+              'event', {
+                eventCategory: 'security.forms.preferences.ChoosePrisonForm',
+                eventAction: 'new_prison',
+                eventLabel: emptyErrorMsg
+              }
+            );
+          }
+          noSelection = true;
         }
-        no_selection = true;
-      }
+      });
 
-      if (no_selection) {
+      if (noSelection) {
         e.preventDefault();
         return false;
       }
 
+      var addedPrisons = '';
+      if ($form.find('input[name=all_prisons]:checked')) {
+        addedPrisons = 'ALL';
+      }
+      var addedPrisons = self.addedPrisons($hiddenInputs);
       analytics.Analytics.send(
         'event', {
           eventCategory: 'PrisonConfirmation',
-          eventAction: 'Add',
-          eventLabel: $hiddenInput.val()
+          eventAction: 'Save',
+          eventLabel: addedPrisons
         }
       );
       return true;
     });
+  },
 
-    var $confirmButton = $form.find('button[name=submit_confirm]');
+  addedPrisons: function(inputs) {
+    var newPrisons = [];
+    inputs.each(function () {
+      var $input = $(this);
+      newPrisons.push($input.val());
+    });
+    return newPrisons.join(',');
+  },
+
+  initConfirmPrisons: function () {
+    var $form = $('form.mtp-confirm-prison');
     var self = this;
+    if ($form.length !== 1) {
+      return;
+    }
+
+    var $confirmButton = $form.find('button[name=submit_save]');
     $confirmButton.click(function (e) {
-      var new_prisons_str = self.selected_prisons();
+      var newPrisons = [];
+      var $chosenPrisons = $form.find('input[name=prisons]:checked');
+      var newPrisonsStr = self.addedPrisons($chosenPrisons)
 
-      if ($hiddenInput.val()) {
-        new_prisons_str = new_prisons_str + ' + ' + $hiddenInput.val();
-      }
-
-      var event_label = $confirmButton.data('current-prisons') + ' > ' + new_prisons_str;
+      var event_label = $confirmButton.data('current-prisons') + ' > ' + newPrisonsStr;
       analytics.Analytics.send(
         'event', {
           eventCategory: 'PrisonConfirmation',
@@ -93,19 +127,6 @@ exports.ChoosePrisons = {
         }
       );
     });
-  },
-
-  selected_prisons: function () {
-    var new_prisons = [];
-    var $chosen_prisons = $('form.mtp-choose-prison').find(
-      'input[name=prisons]:checked'
-    );
-    $chosen_prisons.each(function() {
-      var $chosen_prison = $(this);
-      new_prisons.push($chosen_prison.val());
-    });
-    var new_prisons_str = new_prisons.join(',');
-    return new_prisons_str;
   }
 };
 
