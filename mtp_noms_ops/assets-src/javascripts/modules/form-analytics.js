@@ -10,20 +10,10 @@ exports.FormAnalytics = {
   bindForm: function () {
     var $form = $(this);
     var formId = $form.attr('id');
-    var location = $form.data('ga-location');
-    var page = $form.data('ga-page');
-    var title = $form.data('ga-title');
 
     function sendEvent (action, label) {
       analytics.Analytics.send(
-        'event', {
-          eventCategory: 'SecurityForms',
-          eventAction: action,
-          eventLabel: label,
-          location: location,
-          page: page,
-          title: title
-        }
+        'event', 'SecurityForms', action, label
       );
     }
 

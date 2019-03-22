@@ -60,7 +60,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'mtp_noms_ops.utils.UserPermissionMiddleware',
-    'mtp_noms_ops.utils.SecurityMiddleware',
+    'mtp_common.analytics.ReferrerPolicyMiddleware',
 )
 
 HEALTHCHECKS = []
@@ -131,6 +131,7 @@ TEMPLATES = [
                 'mtp_noms_ops.apps.security.context_processors.nomis_api_available',
                 'mtp_noms_ops.apps.security.context_processors.prison_choice_available',
                 'mtp_noms_ops.apps.security.context_processors.notifications_available',
+                'mtp_common.analytics.default_genericised_pageview',
             ],
         },
     },
