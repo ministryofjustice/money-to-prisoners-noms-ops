@@ -22,11 +22,7 @@ exports.ChoosePrisons = {
       currentPrisons = this.addedPrisons($hiddenInputs);
     }
     analytics.Analytics.send(
-      'event', {
-        eventCategory: 'PrisonConfirmation',
-        eventAction: 'Change',
-        eventLabel: currentPrisons
-      }
+      'event', 'PrisonConfirmation', 'Change', currentPrisons
     );
 
     $form.find('input[type=text]').keydown(function(e) {
@@ -70,11 +66,10 @@ exports.ChoosePrisons = {
             );
 
             analytics.Analytics.send(
-              'event', {
-                eventCategory: 'security.forms.preferences.ChoosePrisonForm',
-                eventAction: 'new_prison',
-                eventLabel: emptyErrorMsg
-              }
+              'event',
+              'security.forms.preferences.ChoosePrisonForm',
+              'new_prison',
+              emptyErrorMsg
             );
           }
           noSelection = true;
@@ -93,11 +88,7 @@ exports.ChoosePrisons = {
         addedPrisons = self.addedPrisons($hiddenInputs);
       }
       analytics.Analytics.send(
-        'event', {
-          eventCategory: 'PrisonConfirmation',
-          eventAction: 'Save',
-          eventLabel: addedPrisons
-        }
+        'event', 'PrisonConfirmation', 'Save', addedPrisons
       );
       return true;
     });
@@ -126,11 +117,7 @@ exports.ChoosePrisons = {
 
       var event_label = $confirmButton.data('current-prisons') + ' > ' + newPrisonsStr;
       analytics.Analytics.send(
-        'event', {
-          eventCategory: 'PrisonConfirmation',
-          eventAction: 'Confirm',
-          eventLabel: event_label
-        }
+        'event', 'PrisonConfirmation', 'Confirm', event_label
       );
     });
   }

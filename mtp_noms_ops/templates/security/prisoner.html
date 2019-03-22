@@ -67,7 +67,7 @@
     </div>
   </div>
 
-  <form class="js-FormAnalytics" method="get" data-ga-location="{{ google_analytics_pageview.location }}" data-ga-page="{{ google_analytics_pageview.page }}" data-ga-title="{{ google_analytics_pageview.title }}">
+  <form class="js-FormAnalytics" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
     {% if form.is_valid %}
