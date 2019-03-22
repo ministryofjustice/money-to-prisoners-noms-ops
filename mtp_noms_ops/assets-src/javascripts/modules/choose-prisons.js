@@ -18,8 +18,9 @@ exports.ChoosePrisons = {
     var currentPrisons = '';
     if ($form.find('input[name=all_prisons]:checked')) {
       currentPrisons = 'ALL';
+    } else {
+      currentPrisons = this.addedPrisons($hiddenInputs);
     }
-    currentPrisons = this.addedPrisons($hiddenInputs);
     analytics.Analytics.send(
       'event', {
         eventCategory: 'PrisonConfirmation',
@@ -39,7 +40,7 @@ exports.ChoosePrisons = {
         // error if they type something but don't select anything
         if (!$hiddenInput.val() && $visualInput.val()) {
           $hiddenInput.data('visualInput').addClass('form-control-error');
-          var $hiddenInputFormGroup = $hiddenInput.data('visualInput').parents('.form-group')
+          var $hiddenInputFormGroup = $hiddenInput.data('visualInput').parents('.form-group');
           $hiddenInputFormGroup.addClass('form-group-error');
           $hiddenInputFormGroup.find('.error-message').remove();
           $('div.error-summary').remove();
@@ -50,8 +51,6 @@ exports.ChoosePrisons = {
               '<span class="error-message">' + emptyErrorMsg + '</span>'
             );
 
-            var label = $('label[for=' + $hiddenInput.data('visualInput').attr('id') + ']');
-            var label_text = label.contents().get(0).nodeValue;
             $('div.mtp-prison-selection').before(
               '<div class="error-summary" aria-labeledby="error-summary-heading" tabindex="-1" role="alert">' +
               '  <h2 class="heading-medium error-summary-heading" id="error-summary-heading">' + errorSummaryTitle + '</h2>' +
@@ -83,8 +82,9 @@ exports.ChoosePrisons = {
       var addedPrisons = '';
       if ($form.find('input[name=all_prisons]:checked')) {
         addedPrisons = 'ALL';
+      } else {
+        addedPrisons = self.addedPrisons($hiddenInputs);
       }
-      var addedPrisons = self.addedPrisons($hiddenInputs);
       analytics.Analytics.send(
         'event', {
           eventCategory: 'PrisonConfirmation',
@@ -113,10 +113,9 @@ exports.ChoosePrisons = {
     }
 
     var $confirmButton = $form.find('button[name=submit_save]');
-    $confirmButton.click(function (e) {
-      var newPrisons = [];
+    $confirmButton.click(function () {
       var $chosenPrisons = $form.find('input[name=prisons]:checked');
-      var newPrisonsStr = self.addedPrisons($chosenPrisons)
+      var newPrisonsStr = self.addedPrisons($chosenPrisons);
 
       var event_label = $confirmButton.data('current-prisons') + ' > ' + newPrisonsStr;
       analytics.Analytics.send(
