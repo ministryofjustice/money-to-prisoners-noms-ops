@@ -29,6 +29,13 @@ exports.ChoosePrisons = {
       }
     );
 
+    $form.find('input[type=text]').keydown(function(e) {
+      if (e.keyCode === 13) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
     var $saveButton = $form.find('button[name=submit_save]');
     var self = this;
     $saveButton.click(function (e) {
