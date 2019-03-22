@@ -28,28 +28,36 @@
   }
 }
 
-.mtp-prison-selection-row {
+.mtp-prison-selection {
   width: 80%;
-  padding: 0.5em 0 0.5em 0;
-  display: table;
+  display: block;
 
-  .mtp-prison-selection-row__prison {
-    width: 80%;
-    display: table-cell;
-    vertical-align: middle;
-  }
+  .mtp-prison-selection-row {
+    padding: 0.5em 0 0.5em 0;
+    position: relative;
+    width: 100%;
 
-  .mtp-prison-selection-row__remove {
-    width: 20%;
-    text-align: right;
-    display: table-cell;
-    vertical-align: middle;
-  }
+    .mtp-prison-selection-row__prison {
+      width: 80%;
+    }
 
-  &:after {
-    content: "";
-    clear: both;
-    display: block;
+    .mtp-prison-selection-row__remove {
+      width: 20%;
+      position: absolute;
+      text-align: right;
+      right: 0;
+      bottom: 0;
+
+      input {
+        margin-bottom: 2.3875em;
+      }
+    }
+
+    &:after {
+      content: "";
+      clear: both;
+      display: block;
+    }
   }
 }
 
