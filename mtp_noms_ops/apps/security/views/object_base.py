@@ -8,11 +8,11 @@ from django.utils.dateformat import format as date_format
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
+from mtp_common.analytics import genericised_pageview
 from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
-from mtp_noms_ops.utils import genericised_pageview
 from security.export import ObjectListXlsxResponse
 from security.tasks import email_export_xlsx
 

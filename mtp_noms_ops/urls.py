@@ -10,10 +10,9 @@ from django.views.decorators.cache import cache_control
 from django.views.generic import RedirectView
 from django.views.i18n import JavaScriptCatalog
 from moj_irat.views import HealthcheckView, PingJsonView
+from mtp_common.analytics import genericised_pageview
 from mtp_common.auth import views as auth_views
 from mtp_common.auth.exceptions import Unauthorized
-
-from mtp_noms_ops.utils import genericised_pageview
 
 
 def login_view(request):

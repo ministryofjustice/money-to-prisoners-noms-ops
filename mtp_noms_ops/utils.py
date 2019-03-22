@@ -2,23 +2,11 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.encoding import escape_uri_path
 from django.utils.translation import gettext, gettext_lazy as _
 from mtp_common.context_processors import govuk_localisation as inherited_localisation
 
 from prisoner_location_admin import required_permissions as prisoner_location_permissions
 from security import required_permissions as security_permissions
-
-
-def genericised_pageview(request, title):
-    location = request.build_absolute_uri().split('?')[0]
-    if location.startswith('//'):
-        location = 'https:%s' % location
-    return {
-        'page': escape_uri_path(request.path),
-        'location': escape_uri_path(location),
-        'title': title,
-    }
 
 
 class UserPermissionMiddleware:

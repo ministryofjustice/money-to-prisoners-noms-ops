@@ -11,9 +11,19 @@ urlpatterns = [
         name='settings'
     ),
     url(
+        r'^change-prisons/$',
+        login_required(views.ChangePrisonsView.as_view()),
+        name='change_prisons'
+    ),
+    url(
         r'^confirm-prisons/$',
         login_required(views.ConfirmPrisonsView.as_view()),
         name='confirm_prisons'
+    ),
+    url(
+        r'^confirm-prisons/add-remove/$',
+        login_required(views.AddOrRemovePrisonsView.as_view()),
+        name='confirm_prisons_add_remove'
     ),
     url(
         r'^confirm-prisons/confirmation/$',
