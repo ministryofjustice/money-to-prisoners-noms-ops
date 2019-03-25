@@ -49,9 +49,10 @@
           <div class="mtp-prison-selection">
             {% for field in form %}
               {% if field.name == 'all_prisons' %}
-                <span class="hidden">{{ field }}</span>
-              {% elif not form.all_prisons.value %}
-                <div class="mtp-prison-selection-row">
+                <span class="hidden">{{ form.all_prisons }}</span>
+              {% elif field.name == 'template_prison_selection' %}
+              {% elif not form.all_prisons.value  %}
+                <div class="mtp-prison-selection-row" id="row_{{ field.name }}">
                   <div class="mtp-prison-selection-row__prison">
                     {% include 'mtp_common/forms/select-field.html' with field=field  input_classes='mtp-autocomplete mtp-choose-prison-select' attrs=data_attrs only %}
                   </div>
@@ -110,4 +111,21 @@
       <h1 class="heading-large">{% trans 'You cannot choose your prisons at this time' %}</h1>
     </header>
   {% endif %}
+{% endblock %}
+
+
+{% block body_end %}
+  {{ block.super }}
+  <div id="prison-field-template" class="hidden">
+    {% with field=form.template_prison_selection %}
+      <div class="mtp-prison-selection-row" id="row_{{ field.name }}">
+        <div class="mtp-prison-selection-row__prison">
+          {% include 'mtp_common/forms/select-field.html' with field=field input_classes='mtp-autocomplete mtp-choose-prison-select' attrs=data_attrs only %}
+        </div>
+        <div class="mtp-prison-selection-row__remove">
+          <input class="mtp-link-submit" type="submit" name="submit_remove_{{ field.name }}" value="{% trans 'Remove' %}"/>
+        </div>
+      </div>
+    {% endwith %}
+  </div>
 {% endblock %}
