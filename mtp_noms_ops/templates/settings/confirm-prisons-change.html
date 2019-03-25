@@ -57,7 +57,7 @@
                     {% include 'mtp_common/forms/select-field.html' with field=field  input_classes='mtp-autocomplete mtp-choose-prison-select' attrs=data_attrs only %}
                   </div>
                   <div class="mtp-prison-selection-row__remove">
-                    <input class="mtp-link-submit" type="submit" name="submit_remove_{{ field.name }}" value="{% trans 'Remove' %}"/>
+                    <input class="mtp-link-submit" type="submit" name="submit_remove_{{ field.name }}" data-analytics="event,PrisonConfirmation,Remove," value="{% trans 'Remove' %}"/>
                   </div>
                 </div>
               {% endif %}
