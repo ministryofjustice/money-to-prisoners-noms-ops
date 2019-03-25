@@ -90,6 +90,12 @@ class ConfirmPrisonForm(ApiForm):
 
 class ChangePrisonForm(ApiForm):
     all_prisons = forms.BooleanField(required=False)
+    template_prison_selection = forms.ChoiceField(
+        label=_('Prison'),
+        choices=[],
+        required=False,
+        initial=''
+    )
     error_messages = {
         'already_chosen': _('You have already added that prison'),
         'no_prisons_added': _('You must add at least one prison'),
@@ -123,6 +129,10 @@ class ChangePrisonForm(ApiForm):
     def build_prison_fields(self, removed_item):
         prison_list = prison_choices(self.api_session)
         self.new_prisons = set()
+
+        self.fields['template_prison_selection'].choices = [
+            ['', _('Select a prison')]
+        ] + prison_list
 
         if self.is_bound:
             self.prison_keys = sorted([
@@ -196,11 +206,14 @@ class ChangePrisonForm(ApiForm):
             return self.cleaned_data[field_name]
         return clean_prison
 
+    def clean_template_prison_selection(self):
+        return None
+
     def clean(self):
         if self.action == 'save' and not self.cleaned_data['all_prisons']:
             some_values = False
             for field_name in self.prison_fields:
-                if self.cleaned_data[field_name]:
+                if self.cleaned_data.get(field_name):
                     some_values = True
 
             if not some_values:
