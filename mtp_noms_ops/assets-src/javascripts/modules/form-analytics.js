@@ -10,19 +10,30 @@ exports.FormAnalytics = {
   bindForm: function () {
     var $form = $(this);
     var formId = $form.attr('id');
+    var initialInputs = $form.serializeArray();
 
-    function sendEvent (action, label) {
+    function sendEvent (category, action, label) {
       analytics.Analytics.send(
-        'event', 'SecurityForms', action, label
+        'event', category, action, label
       );
     }
 
     $form.on('submit', function () {
-      // send event for every used form field name
+      // send event for every changed form field name
       var inputs = $form.serializeArray();
       $.each(inputs, function () {
+        var changed = true;
+        for (var i = 0; i < initialInputs.length; i++) {
+          if (initialInputs[i].name === this.name &&
+              initialInputs[i].value === this.value) {
+              changed = false;
+          }
+        }
         if (this.value) {
-          sendEvent(formId, this.name);
+          if (changed) {
+            sendEvent('SecurityFormsFilter', formId, this.name);
+          }
+          sendEvent('SecurityForms', formId, this.name);
         }
       });
     });
@@ -32,7 +43,7 @@ exports.FormAnalytics = {
       var $element = $(this);
       var eventDetails = $element.data('click-track').split(',');
       if (eventDetails.length === 2) {
-        sendEvent(eventDetails[0], eventDetails[1]);
+        sendEvent('SecurityFormsExport', eventDetails[0], eventDetails[1]);
       }
     });
   }
