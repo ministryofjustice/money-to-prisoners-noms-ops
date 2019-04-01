@@ -24,7 +24,12 @@
   </div>
 
   <div class="panel panel-border-wide">
-    {% trans 'Please note that the uploaded prisoner locations will replace all those currently stored in the system.' %}
+    <p>
+      {% blocktrans trimmed %}
+        Ensure you use the full report <strong>including the private estate</strong>.
+      {% endblocktrans %}
+    </p>
+    <p>{% trans 'Please note the uploaded prisoner locations will replace all those currently stored in the system.' %}</p>
   </div>
 
   {% with field=form.location_file %}
