@@ -59,5 +59,4 @@ python_dependencies --common-path [path]
 
 ## Deploying
 
-This is handled by MOJ Digital's CI server. Request access and head there. Consult the dev
-runbook if necessary.
+This is handled by [money-to-prisoners-deploy](https://github.com/ministryofjustice/money-to-prisoners-deploy/).
