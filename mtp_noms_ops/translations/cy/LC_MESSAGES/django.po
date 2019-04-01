@@ -633,8 +633,8 @@ msgid "Prisoner money"
 msgstr "Arian carcharor"
 
 #: templates/prisoner_location_admin/location_file_upload.html:23
-msgid "Run the “Electronic Credits and Prisoner Establishment Locations” report in P-NOMIS, then upload the file on this page in CSV format (.csv)"
-msgstr "Creu adroddiad “Credydau Electronig a Lleoliadau Carcharorion” yn P-NOMIS, ac yna llwytho'r ffeil ar y dudalen hon mewn fformat CSV (.csv)"
+msgid "Run the ‘Electronic Credits and Prisoner Establishment Locations’ report in P-NOMIS, then upload the file on this page in CSV format (.csv)"
+msgstr "Creu adroddiad ‘Credydau Electronig a Lleoliadau Carcharorion’ yn P-NOMIS, ac yna llwytho'r ffeil ar y dudalen hon mewn fformat CSV (.csv)"
 
 #: templates/prisoner_location_admin/location_file_upload.html:27
 msgid "Please note that the uploaded prisoner locations will replace all those currently stored in the system."
