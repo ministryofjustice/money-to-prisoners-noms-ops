@@ -1,13 +1,12 @@
-from urllib.parse import urljoin
-
 from anymail.message import AnymailMessage
 from django.conf import settings
 from django.template import loader as template_loader
-from django.utils.translation import gettext
+from django.utils.translation import gettext, activate, get_language
 from django.utils import timezone
 from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.auth.api_client import get_api_session_with_session
 from mtp_common.spooling import spoolable
+from mtp_common.tasks import default_from_address, prepare_context
 from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 
@@ -18,6 +17,10 @@ from security.utils import parse_date_fields
 @spoolable(body_params=('user', 'session', 'filters'))
 def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, export_description,
                       attachment_name):
+    if not get_language():
+        language = getattr(settings, 'LANGUAGE_CODE', 'en')
+        activate(language)
+
     if object_type == 'credits':
         export_message = gettext('Attached are the credits you exported from ‘%(service_name)s’.')
     elif object_type == 'disbursements':
@@ -45,23 +48,21 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
 
     attachment_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
-    template_context = {
-        'static_url': urljoin(settings.SITE_URL, settings.STATIC_URL),
+    template_context = prepare_context({
         'export_description': export_description,
         'generated_at': generated_at,
         'export_message': export_message % {
             'service_name': gettext('Prisoner money intelligence')
         }
+    })
 
-    }
     subject = '%s - %s' % (gettext('Prisoner money intelligence'), gettext('Exported data'))
-    from_address = getattr(settings, 'MAILGUN_FROM_ADDRESS', '') or settings.DEFAULT_FROM_EMAIL
     text_body = template_loader.get_template('security/email/export.txt').render(template_context)
     html_body = template_loader.get_template('security/email/export.html').render(template_context)
     email = AnymailMessage(
         subject=subject,
         body=text_body.strip('\n'),
-        from_email=from_address,
+        from_email=default_from_address(),
         to=[user.email],
         tags=['export'],
     )
