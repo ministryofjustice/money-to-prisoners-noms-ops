@@ -30,6 +30,8 @@ def root_view(request):
     return redirect(reverse('security:dashboard'))
 
 
+# NB: API settings has certain Noms Ops URLs which will need to be updated
+# if they change: settings, feedback, and notifications
 urlpatterns = i18n_patterns(
     url(r'^$', root_view, name='root'),
     url(r'^prisoner-location/', include('prisoner_location_admin.urls')),
