@@ -1,5 +1,9 @@
 // app-specific styles
 
+.mtp-search-description {
+  @extend .lede;
+}
+
 .mtp-results-list {
   @extend %table-container;
   width: 100%;
@@ -35,7 +39,7 @@
     }
   }
 
-  .mtp-search-description__text {
+  .mtp-search-description--aside {
     float: left;
     margin-bottom: 0;
     width: 80%;
