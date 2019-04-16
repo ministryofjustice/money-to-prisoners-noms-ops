@@ -4,10 +4,6 @@
 
 exports.SecurityForms = {
   init: function () {
-    $('#id_ordering').change(function () {
-      $(this).closest('form').submit();
-    });
-
     this.bindAmountPatternSelection();
     this.bindPaymentSourceSelection();
     this.bindPrisonSelection();
