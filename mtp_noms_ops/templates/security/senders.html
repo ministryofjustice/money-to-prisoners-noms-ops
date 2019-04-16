@@ -16,7 +16,9 @@
   <form id="filter-senders" class="mtp-security-search js-FormAnalytics" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <p class="lede">{{ form.search_description.description }}</p>
+    <p class="mtp-search-description">
+      {{ form.search_description.description }}
+    </p>
 
     <div class="print-hidden">
       {% include view.form_template_name with view=view form=form only %}
