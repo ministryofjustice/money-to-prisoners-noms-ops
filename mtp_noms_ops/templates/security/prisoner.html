@@ -82,7 +82,10 @@
           <h2 class="heading-large">{% trans 'Credits received' %}</h2>
 
           <div class="panel panel-border-narrow">
-            {% include 'security/forms/search-description.html' with form=form only %}
+            <p class="mtp-search-description--aside">
+              {{ form.search_description.description }}
+              {% trans 'You can’t see credits received by post.' %}
+            </p>
 
             <div class="print-hidden mtp-links">
               <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -116,7 +119,7 @@
       </div>
 
       <div class="mtp-page-list-container">
-      {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
 
         {% block list_object_count %}
           <p class="mtp-object-count">

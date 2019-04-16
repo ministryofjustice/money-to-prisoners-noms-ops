@@ -16,7 +16,7 @@
   <form id="filter-disbursements" class="mtp-security-search js-FormAnalytics" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <p class="lede">
+    <p class="mtp-search-description">
       {{ form.search_description.description }}
       {% trans 'You can’t see cash or postal orders here.' %}
     </p>
