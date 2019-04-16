@@ -121,7 +121,18 @@
           </tbody>
         </table>
       </div>
+
+      <div class="mtp-page-list-container">
       {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+        <p class="mtp-object-count">
+          {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+            {{ number }} credit
+          {% plural %}
+            {{ number }} credits
+          {% endblocktrans %}
+        </p>
+      </div>
     {% endif %}
   </form>
 
