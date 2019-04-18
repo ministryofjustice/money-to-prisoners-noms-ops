@@ -1,0 +1,27 @@
+{% load security %}
+{% load i18n %}
+
+<tr>
+  <td>{{ credit.received_at|date:'SHORT_DATE_FORMAT' }}</td>
+  <td>{{ credit.amount|currency }}</td>
+  <td>
+    <a href="{% url 'security:prisoner_detail' credit.prisoner_profile %}" title="{% trans 'View prisoner details' %}">{{ credit.prisoner_name }}</a><br/>
+    {{ credit.prisoner_number }}
+  </td>
+  <td>{{ credit.prison_name|default_if_none:'—' }}</td>
+  <td>{{ credit.sender_name }}</td>
+  <td>
+  {% if credit.source == 'bank_transfer' %}
+    <a href="{% url 'security:sender_detail' credit.sender_profile %}" title="{% trans 'View payment source details' %}">
+      {% trans 'Account:' %} {{ credit.sender_account_number|default:'—' }}
+    </a>
+  {% elif credit.source == 'online' %}
+    <a href="{% url 'security:sender_detail' credit.sender_profile %}" title="{% trans 'View payment source details' %}">
+      {% trans 'Card ending:' %} {{ credit.card_number_last_digits|default:'—' }}
+    </a>
+  {% else %}
+    —
+  {% endif %}
+  </td>
+  <td><a href="{% url 'security:credit_detail' credit.id %}" title="{% trans 'View credit details' %}">{% trans 'View' %}</td>
+</tr>

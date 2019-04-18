@@ -9,11 +9,11 @@ from security.forms.object_base import (
     SecurityForm,
     AmountPattern, parse_amount,
     validate_amount, validate_prisoner_number, validate_range_fields,
-    insert_blank_option, TIME_PERIOD_CHOICES,
+    insert_blank_option,
     get_credit_source_choices, get_disbursement_method_choices,
 )
 from security.templatetags.security import currency as format_currency
-from security.utils import parse_date_fields
+from security.utils import parse_date_fields, TIME_PERIOD_CHOICES
 
 
 @validate_range_fields(

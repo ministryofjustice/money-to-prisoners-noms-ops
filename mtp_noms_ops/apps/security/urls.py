@@ -159,4 +159,11 @@ urlpatterns = [
     # review credits
     url(r'^review-credits/$', security_test(views.ReviewCreditsView.as_view()),
         name='review_credits'),
+
+    # notifications
+    url(r'^notifications/$', security_test(views.NotificationListView.as_view()),
+        name='notification_list_current'),
+    url(r'^notifications/(?P<week_start>[0-9]{4}-[0-9]{2}-[0-9]{2})/$',
+        security_test(views.NotificationListView.as_view()),
+        name='notification_list'),
 ]
