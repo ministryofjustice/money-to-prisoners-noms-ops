@@ -9,9 +9,31 @@ credit_sources = {
     'bank_transfer': _('Bank transfer'),
     'online': _('Debit card'),
 }
+credit_resolutions = {
+    'initial': _('Initial'),
+    'pending': _('Pending'),
+    'manual': _('Requires manual processing'),
+    'credited': _('Credited'),
+    'refunded': _('Refunded'),
+}
+
 disbursement_methods = {
     'bank_transfer': _('Bank transfer'),
     'cheque': _('Cheque'),
+}
+disbursement_actions = {
+    'created': _('Entered'),
+    'edited': _('Edited'),
+    'rejected': _('Cancelled'),
+    'confirmed': _('Confirmed'),
+    'sent': _('Sent'),
+}
+disbursement_resolutions = {
+    'pending': _('Waiting for confirmation'),
+    'rejected': _('Cancelled'),
+    'preconfirmed': _('Confirmed'),
+    'confirmed': _('Confirmed'),
+    'sent': _('Sent'),
 }
 
 
