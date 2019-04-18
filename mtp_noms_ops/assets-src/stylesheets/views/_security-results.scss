@@ -19,9 +19,21 @@
     margin-bottom: 1em;
   }
 
-  address {
-    @include core-19;
-    font-style: normal;
+  table.mtp-table {
+    th, td {
+      padding: 0.75em 1em 0.75em 0;
+      font-size: 14px;
+      line-height: 1.42857;
+
+      &:last-child {
+        padding-right: 0;
+      }
+
+      @include media(mobile, $ignore-for-ie: true) {
+        font-size: 12px;
+        line-height: 1.25;
+      }
+    }
   }
 
   @media print {
@@ -32,10 +44,6 @@
       p {
         margin-bottom: 0;
       }
-    }
-
-    p {
-      font-size: 14px;
     }
   }
 
