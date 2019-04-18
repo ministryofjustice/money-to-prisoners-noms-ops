@@ -695,7 +695,7 @@ class CreditsListTestCase(SecurityViewTestCase):
 
         self.login()
         response = self.client.get(reverse(self.detail_view_name, kwargs={'credit_id': '1'}))
-        self.assertContains(response, 'Debit card')
+        self.assertContains(response, 'by debit card')
         response_content = response.content.decode(response.charset)
         self.assertIn('£230.00', response_content)
         self.assertIn('GEORGE MELLEY', response_content)
@@ -719,7 +719,7 @@ class CreditsListTestCase(SecurityViewTestCase):
 
         self.login()
         response = self.client.get(reverse(self.detail_view_name, kwargs={'credit_id': '2'}))
-        self.assertContains(response, 'Bank transfer')
+        self.assertContains(response, 'by bank transfer')
         response_content = response.content.decode(response.charset)
         self.assertIn('£275.00', response_content)
         self.assertIn('NORMAN STANLEY FLETCHER', response_content)
@@ -822,7 +822,7 @@ class DisbursementsListTestCase(SecurityViewTestCase):
 
         self.login()
         response = self.client.get(reverse(self.detail_view_name, kwargs={'disbursement_id': '99'}))
-        self.assertContains(response, 'Bank transfer')
+        self.assertContains(response, 'by bank transfer')
         response_content = response.content.decode(response.charset)
         self.assertIn('£20.00', response_content)
         self.assertIn('JAMES HALLS', response_content)
@@ -843,7 +843,7 @@ class DisbursementsListTestCase(SecurityViewTestCase):
 
         self.login()
         response = self.client.get(reverse(self.detail_view_name, kwargs={'disbursement_id': '100'}))
-        self.assertContains(response, 'Cheque')
+        self.assertContains(response, 'by cheque')
         response_content = response.content.decode(response.charset)
         self.assertIn('£10.00', response_content)
         self.assertIn('JILLY HALL', response_content)

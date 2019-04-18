@@ -28,11 +28,6 @@
             <br/>
 
           </td>
-          <td class="mtp-credit-arrow-cell">
-
-            <div class="mtp-disbursement-arrow">{{ disbursement.method|disbursement_method }}</div>
-
-          </td>
           <td>
 
             {% labelled_data _('Recipient name') disbursement.recipient_name %}
@@ -62,7 +57,7 @@
         </tr>
         <tr>
 
-          <td colspan="4">
+          <td colspan="3">
             {% random_string as comment_label %}
             <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'Payment description on remittance advice' %}</div>
             <div aria-labelledby="mtp-label-{{ comment_label }}">
@@ -93,7 +88,7 @@
             {% endif %}
 
           </td>
-          <td colspan="2">
+          <td>
 
             {% random_string as comment_label %}
             <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'History' %}</div>

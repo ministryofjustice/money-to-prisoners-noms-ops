@@ -33,11 +33,6 @@
             {% endif %}
 
           </td>
-          <td class="mtp-credit-arrow-cell">
-
-            <div class="mtp-credit-arrow">{{ credit.source|credit_source }}</div>
-
-          </td>
           <td>
             {% labelled_data _('Sender name') credit.sender_name url=credit|sender_profile_search_url %}
             <br/>
@@ -95,7 +90,7 @@
             {% endif %}
 
           </td>
-          <td colspan="2">
+          <td>
 
             {% random_string as comment_label %}
             <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'History' %}</div>
@@ -119,7 +114,7 @@
 
         {% if credit.comments %}
           <tr>
-            <td colspan="4">
+            <td colspan="3">
 
               {% random_string as comment_label %}
               <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'Security check' %}</div>

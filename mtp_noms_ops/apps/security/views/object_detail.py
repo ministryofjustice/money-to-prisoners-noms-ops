@@ -6,7 +6,10 @@ from security.forms.object_detail import (
     SendersDetailForm,
     PrisonersDetailForm, PrisonersDisbursementDetailForm,
 )
-from security.templatetags.security import currency as format_currency
+from security.templatetags.security import (
+    currency as format_currency, credit_source as format_credit_source,
+    disbursement_method as format_disbursement_method
+)
 from security.utils import NameSet, parse_date_fields
 from security.views.object_base import SimpleSecurityDetailView, SecurityDetailView
 from security.views.object_list import SenderListView, PrisonerListView
@@ -40,7 +43,10 @@ class CreditDetailView(SimpleSecurityDetailView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         if self.object:
-            self.title = ' '.join((format_currency(self.object['amount']) or '', gettext('credit')))
+            self.title = gettext('%(amount)s credit by %(payment_source)s') % {
+                'amount': format_currency(self.object['amount']) or '',
+                'payment_source': format_credit_source(self.object['source']).lower(),
+            }
         return context_data
 
 
@@ -70,8 +76,10 @@ class DisbursementDetailView(SimpleSecurityDetailView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        if self.object:
-            self.title = ' '.join((format_currency(self.object['amount']) or '', gettext('disbursement')))
+        self.title = gettext('%(amount)s disbursement by %(method)s') % {
+            'amount': format_currency(self.object['amount']) or '',
+            'method': format_disbursement_method(self.object['method']).lower(),
+        }
         return context_data
 
     def format_log_set(self, disbursement):
