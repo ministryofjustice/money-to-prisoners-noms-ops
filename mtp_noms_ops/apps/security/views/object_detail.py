@@ -141,7 +141,7 @@ class PrisonerDetailView(SecurityDetailView):
         return context_data
 
     def get_title_for_object(self, detail_object):
-        title = ' '.join(detail_object.get(key, '') for key in ('prisoner_number', 'prisoner_name'))
+        title = ' '.join(detail_object.get(key, '') for key in ('prisoner_name', 'prisoner_number'))
         return title.strip() or _('Unknown prisoner')
 
 

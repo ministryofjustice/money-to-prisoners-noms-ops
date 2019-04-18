@@ -2,6 +2,7 @@ import logging
 
 from django import template
 from django.core.urlresolvers import reverse
+from django.utils.encoding import force_text
 from django.utils.html import escape
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
@@ -21,6 +22,15 @@ BANK_TRANSFER_SENDER_KEYS = [
 DEBIT_CARD_SENDER_KEYS = [
     'card_number_last_digits', 'card_expiry_date', 'postcode',
 ]
+
+
+@register.filter
+def append(prefix, suffix):
+    if prefix is None:
+        prefix = ''
+    if suffix is None:
+        suffix = ''
+    return force_text(prefix) + force_text(suffix)
 
 
 @register.filter

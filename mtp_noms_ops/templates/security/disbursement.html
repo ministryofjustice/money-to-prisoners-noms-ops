@@ -20,9 +20,9 @@
         <tr>
           <td>
 
-            {% labelled_data _('Prisoner number') disbursement.prisoner_number url=disbursement|prisoner_profile_search_url %}
+            {% labelled_data _('Prisoner name') disbursement.prisoner_name url=disbursement|prisoner_profile_search_url %}
             <br/>
-            {% labelled_data _('Prisoner name') disbursement.prisoner_name %}
+            {% labelled_data _('Prisoner number') disbursement.prisoner_number %}
             <br/>
             {% labelled_data _('Prison') disbursement.prison_name %}
             <br/>

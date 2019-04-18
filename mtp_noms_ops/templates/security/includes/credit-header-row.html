@@ -1,20 +1,23 @@
 {% load i18n %}
 {% load mtp_common %}
+{% load security %}
 
 {% sortable_cell _('Date received') form.cleaned_data 'received_at' %}
 
+<th>{% trans 'Payment source' %} ({% trans 'from' %})</th>
+
 {% if link_prisoner %}
-  {% sortable_cell _('Prisoner') form.cleaned_data 'prisoner_number' %}
+  {% with title=_('Prisoner')|append:' ('|append:_('to')|append:')' %}
+    {% sortable_cell title form.cleaned_data 'prisoner_number' %}
+  {% endwith %}
 {% else %}
   <th>
-    {% trans 'Prisoner' %}
+    {% trans 'Prisoner' %} ({% trans 'to' %})
   </th>
 {% endif %}
 
-<th>{% trans 'Payment source' %}</th>
+<th>{% trans 'Prison' %}</th>
 
 {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
-
-<th>{% trans 'Prison' %}</th>
 
 <th>{% trans 'Status' %}</th>

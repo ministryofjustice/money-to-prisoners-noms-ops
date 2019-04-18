@@ -50,10 +50,10 @@
               <tr>
                 <td>
                   <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
-                    {{ prisoner.prisoner_number }}
+                    {{ prisoner.prisoner_name|default_if_none:'—' }}
                   </a>
                   <br/>
-                  {{ prisoner.prisoner_name|default_if_none:'—' }}
+                  {{ prisoner.prisoner_number }}
                 </td>
                 <td>{{ prisoner.prisons|list_prison_names }}</td>
                 <td>

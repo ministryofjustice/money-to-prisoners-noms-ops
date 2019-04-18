@@ -62,9 +62,9 @@
                 {% endif %}
               </td>
               <td>
-                <a class="mtp-print-url-hidden" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a>
+                <a class="mtp-print-url-hidden" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_name|default_if_none:'—' }}</a>
                 <br />
-                {{ credit.prisoner_name|default_if_none:'—' }}
+                {{ credit.prisoner_number }}
               </td>
               <td class="numeric">
                 {{ credit.amount|currency }}

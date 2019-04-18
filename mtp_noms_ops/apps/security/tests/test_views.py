@@ -678,8 +678,8 @@ class CreditsListTestCase(SecurityViewTestCase):
         response_content = response.content.decode(response.charset)
         self.assertIn('A1413AE', response_content)
         self.assertIn('275.00', response_content)
-        self.assertIn('Bank transfer', response_content)
-        self.assertIn('Debit card', response_content)
+        self.assertIn('by bank transfer', response_content)
+        self.assertIn('by debit card', response_content)
 
     @responses.activate
     def test_debit_card_detail(self):
@@ -1241,7 +1241,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
                 self.assertEqual(
                     json.loads(call.request.body.decode()),
                     {
-                        'description': 'A1409AE JAMES HALLS',
+                        'description': 'JAMES HALLS A1409AE',
                         'endpoint': '/prisoners/1/credits/',
                         'last_result_count': 4,
                         'site_url': '/en-gb/security/prisoners/1/',

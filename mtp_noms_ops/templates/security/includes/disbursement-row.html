@@ -6,16 +6,16 @@
 </td>
 
 <td>
-  {% if link_prisoner and disbursement.prisoner_number %}
+  {% if link_prisoner %}
     <a href="{{ disbursement|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
-      {{ disbursement.prisoner_number }}
+      {{ disbursement.prisoner_name|default_if_none:_('Unknown prisoner') }}
     </a>
     <br/>
-  {% elif disbursement.prisoner_number %}
-    {{ disbursement.prisoner_number }}
+  {% else %}
+    {{ disbursement.prisoner_name|default_if_none:_('Unknown prisoner') }}
     <br/>
   {% endif %}
-  {{ disbursement.prisoner_name|default_if_none:'—' }}
+  {{ disbursement.prisoner_number }}
 </td>
 
 <td>
@@ -26,14 +26,14 @@
   {% endblocktrans %}
 </td>
 
+<td>
+  {{ disbursement.prison_name|default:'—' }}
+</td>
+
 <td class="numeric">
   <span class="mtp-sortable-cell--pad">
     {{ disbursement.amount|currency }}
   </span>
-</td>
-
-<td>
-  {{ disbursement.prison_name|default:'—' }}
 </td>
 
 <td>
