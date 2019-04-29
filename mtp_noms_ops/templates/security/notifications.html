@@ -19,13 +19,13 @@
   <div class="mtp-notifications-navigation">
     <div class="mtp-notifications-previous-week">
       {% with date=previous_week|date:'Y-m-d' %}
-        <a href="{% url 'security:notification_list' date %}">🡨 {% trans 'Previous week' %}</a>
+        <a href="{% url 'security:notification_list' date %}">&#8592; {% trans 'Previous week' %}</a>
       {% endwith %}
     </div>
     {% if next_week %}
       <div class="mtp-notifications-next-week">
         {% with date=next_week|date:'Y-m-d' %}
-          <a href="{% url 'security:notification_list' date %}">{% trans 'Next week' %} 🡪</a>
+          <a href="{% url 'security:notification_list' date %}">{% trans 'Next week' %} &#8594;</a>
         {% endwith %}
       </div>
     {% endif %}
