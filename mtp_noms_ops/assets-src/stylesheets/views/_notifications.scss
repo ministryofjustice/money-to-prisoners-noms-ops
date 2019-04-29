@@ -42,3 +42,9 @@
 .mtp-fade-out {
   color: $secondary-text-colour;
 }
+
+table.mtp-notifications-table{
+  th, td {
+    font-size: 16px;
+  }
+}

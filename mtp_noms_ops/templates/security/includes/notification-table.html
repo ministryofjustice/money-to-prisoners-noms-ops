@@ -1,8 +1,9 @@
 {% load security %}
+{% load mtp_common %}
 {% load i18n %}
 
 {% if notifications.total_count %}
-  <a class="mtp-disclosure" href="#" aria-controls="{{ notification_class }}" aria-expanded="false" role="button" data-analytics="pageview,/-open/frequent-recipients/">
+  <a id="{{ notification_class }}" class="mtp-disclosure" href="#" aria-controls="{{ notification_class }}_list" aria-expanded="{% if notifications.page_param in request.GET %}true{% else %}false{% endif %}" role="button" data-analytics="pageview,/-open/frequent-recipients/">
     <span></span>
     {% blocktrans trimmed count count=notifications.total_count with num=notifications.total_count %}
       {{ num }} notification
@@ -10,8 +11,8 @@
       {{ num }} notifications
     {% endblocktrans %}
   </a>
-  <div id="{{ notification_class }}" class="mtp-disclosure__contents panel panel-border-narrow">
-    <table class="mtp-table">
+  <div id="{{ notification_class }}_list" class="mtp-disclosure__contents panel panel-border-narrow mtp-results-list">
+    <table class="mtp-table mtp-notifications-table">
       {% if datatype == 'credit' %}
         <thead>
           <tr>
@@ -152,6 +153,7 @@
         {% endfor %}
       {% endif %}
     </table>
+    {% page_list page=notifications.page page_count=notifications.page_count page_param=notifications.page_param bookmark=notification_class %}
   </div>
 {% else %}
   {% trans 'No notifications' %}
