@@ -25,7 +25,9 @@
           {% include 'proposition-tab.html' with view_name='security:sender_list' subview_names='security:sender_list security:sender_detail' link_text=_('Payment sources') params=initial_params hide_on_mobile=True %}
           {% include 'proposition-tab.html' with view_name='security:prisoner_list' subview_names='security:prisoner_list security:prisoner_detail security:prisoner_disbursement_detail' link_text=_('Prisoners') params=initial_params hide_on_mobile=True %}
           {% include 'proposition-tab.html' with view_name='security:disbursement_list' subview_names='security:disbursement_list security:disbursement_detail' link_text=_('Disbursements') params=initial_disbursement_params %}
-          {% include 'proposition-tab.html' with view_name='security:notification_list_current' subview_names='security:notification_list security:notification_list_current' link_text=_('Notifications') %}
+          {% if notifications_available %}
+            {% include 'proposition-tab.html' with view_name='security:notification_list_current' subview_names='security:notification_list security:notification_list_current' link_text=_('Notifications') %}
+          {% endif %}
         {% elif request.user.is_authenticated and request.can_access_prisoner_location %}
           {% include 'proposition-tab.html' with view_name='location_file_upload' subview_names='location_file_upload' link_text=_('Upload location file') %}
         {% else %}

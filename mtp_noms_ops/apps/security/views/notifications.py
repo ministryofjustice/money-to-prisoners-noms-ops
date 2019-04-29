@@ -1,6 +1,9 @@
 from datetime import timedelta
 from math import ceil
 
+from django.conf import settings
+from django.core.urlresolvers import reverse_lazy
+from django.shortcuts import redirect
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -8,13 +11,20 @@ from django.views.generic import TemplateView
 from mtp_common.auth.api_client import get_api_session
 from requests.exceptions import RequestException
 
-from security.utils import populate_totals, parse_date_fields
+from security.utils import (
+    populate_totals, parse_date_fields, can_see_notifications
+)
 
 
 class NotificationListView(TemplateView):
     title = _('Notifications')
     template_name = 'security/notifications.html'
     page_size = 20
+
+    def dispatch(self, request, *args, **kwargs):
+        if not can_see_notifications(request.user):
+            return redirect(reverse_lazy(settings.LOGIN_REDIRECT_URL))
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
