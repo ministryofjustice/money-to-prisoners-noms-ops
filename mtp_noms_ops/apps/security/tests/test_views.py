@@ -1204,7 +1204,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
         )
         self.assertContains(response, 'Stop monitoring this prisoner')
-        self.assertEqual(responses.calls[-1].request.body, b'{"last_result_count": 4}')
+        self.assertEqual(responses.calls[-2].request.body, b'{"last_result_count": 4}')
 
     @responses.activate
     @override_nomis_settings
@@ -1223,19 +1223,25 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             api_url('/searches/'),
             status=201,
         )
+        responses.add(
+            responses.POST,
+            api_url('/prisoners/1/monitor'),
+            status=204,
+        )
 
         self.login(follow=False)
         self.client.get(
             reverse('security:prisoner_detail', kwargs={'prisoner_id': 1}) +
             '?pin=1'
         )
+
         self.assertEqual(
-            json.loads(responses.calls[-1].request.body.decode()),
+            json.loads(responses.calls[-3].request.body.decode()),
             {
                 'description': 'A1409AE JAMES HALLS',
                 'endpoint': '/prisoners/1/credits/',
                 'last_result_count': 4,
-                'site_url': '/en-gb/security/prisoners/1/?ordering=-received_at',
+                'site_url': '/en-gb/security/prisoners/1/',
                 'filters': [{'field': 'ordering', 'value': '-received_at'}],
             },
         )
