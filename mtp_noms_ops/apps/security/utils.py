@@ -9,7 +9,7 @@ from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
 from . import (
-    prison_choice_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag,
+    hmpps_employee_flag, confirmed_prisons_flag,
     notifications_pilot_flag
 )
 
@@ -121,10 +121,9 @@ class EmailSet(OrderedSet):
 
 
 def can_choose_prisons(user):
-    in_pilot = prison_choice_pilot_flag in user.user_data.get('flags', [])
     has_only_security_roles = user.user_data['roles'] == ['security']
     is_user_admin = user.has_perm('auth.change_user')
-    return in_pilot and has_only_security_roles and not is_user_admin
+    return has_only_security_roles and not is_user_admin
 
 
 def save_user_flags(request, flag, api_session=None):
