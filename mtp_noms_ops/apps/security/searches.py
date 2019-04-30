@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.auth.exceptions import HttpNotFoundError
 
@@ -31,7 +33,7 @@ def populate_new_result_counts(session, saved_searches, delete_invalid=True):
 def get_existing_search(session, path):
     saved_searches = get_saved_searches(session)
     for search in saved_searches:
-        if search['site_url'] == path:
+        if urlparse(search['site_url']).path == path:
             return search
     return None
 
