@@ -117,9 +117,8 @@ class SecurityView(FormView):
                                           object_type=self.object_list_context_key,
                                           attachment_name=attachment_name)
 
-        context = self.get_context_data(form=form)
         object_list = form.get_object_list()
-        form.check_and_update_saved_searches(self.title)
+        context = self.get_context_data(form=form)
         if self.redirect_on_single and len(object_list) == 1 and hasattr(self, 'url_for_single_result'):
             return redirect(self.url_for_single_result(object_list[0]))
         context[self.object_list_context_key] = object_list
@@ -196,6 +195,7 @@ class SecurityDetailView(SecurityView):
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
+        context_data['form'].check_and_update_saved_searches(str(self.title))
         return context_data
 
     def get_title_for_object(self, detail_object):

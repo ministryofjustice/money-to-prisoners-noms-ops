@@ -11,10 +11,10 @@ from security.forms.object_base import (
     AmountPattern, parse_amount,
     validate_amount, validate_prisoner_number, validate_range_field,
     insert_blank_option, get_credit_source_choices,
-    get_disbursement_method_choices, TIME_PERIOD_CHOICES
+    get_disbursement_method_choices
 )
 from security.templatetags.security import currency as format_currency
-from security.utils import parse_date_fields
+from security.utils import parse_date_fields, TIME_PERIOD_CHOICES
 
 
 @validate_range_field('prisoner_count', _('Must be larger than the minimum prisoners'))

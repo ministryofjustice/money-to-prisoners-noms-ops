@@ -1,0 +1,160 @@
+{% load security %}
+{% load mtp_common %}
+{% load i18n %}
+
+{% if notifications.total_count %}
+  <a id="{{ notification_class }}" class="mtp-disclosure" href="#" aria-controls="{{ notification_class }}_list" aria-expanded="{% if notifications.page_param in request.GET %}true{% else %}false{% endif %}" role="button" data-analytics="pageview,/-open/frequent-recipients/">
+    <span></span>
+    {% blocktrans trimmed count count=notifications.total_count with num=notifications.total_count %}
+      {{ num }} notification
+    {% plural %}
+      {{ num }} notifications
+    {% endblocktrans %}
+  </a>
+  <div id="{{ notification_class }}_list" class="mtp-disclosure__contents panel panel-border-narrow mtp-results-list">
+    <table class="mtp-table mtp-notifications-table">
+      {% if datatype == 'credit' %}
+        <thead>
+          <tr>
+            <th>{% trans 'Date' %}</th>
+            <th>{% trans 'Amount' %}</th>
+            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Prison' %}</th>
+            <th>{% trans 'Sender name' %}</th>
+            <th>{% trans 'Sender card number or bank account' %}</th>
+            <th>{% trans 'Action' %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for notification in notifications.results %}
+            {% if notification_class == 'monitored_credits' %}
+              {% include 'security/includes/credit-notification-row.html' with credit=notification %}
+            {% else %}
+              {% include 'security/includes/credit-notification-row.html' with credit=notification.credit %}
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      {% elif datatype == 'disbursement' %}
+        <thead>
+          <tr>
+            <th>{% trans 'Date' %}</th>
+            <th>{% trans 'Amount' %}</th>
+            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Prison' %}</th>
+            <th>{% trans 'Recipient name' %}</th>
+            <th>{% trans 'Recipient bank account' %}</th>
+            <th>{% trans 'Action' %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for notification in notifications.results %}
+            {% if notification_class == 'monitored_disbursements' %}
+              {% include 'security/includes/disbursement-notification-row.html' with disbursement=notification %}
+            {% else %}
+              {% include 'security/includes/disbursement-notification-row.html' with disbursement=notification.disbursement %}
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      {% elif datatype == 'sender_profile' %}
+        <thead>
+          <tr>
+            <th>{% trans 'Sender name' %}</th>
+            <th>{% trans 'Sender card number or bank account' %}</th>
+            {% if notification_class == 'frequent_senders' %}
+              <th>{% trans 'Number of credits' %}</th>
+            {% else %}
+              <th>{% trans 'Number of prisoners' %}</th>
+            {% endif %}
+            <th>{% trans 'Action' %}</th>
+          </tr>
+        </thead>
+        {% for notification in notifications.results %}
+          <tbody>
+            <tr>
+              <td>{{ notification.credit.sender_name }}</td>
+              <td>
+                {% if notification.credit.source == 'bank_transfer' %}
+                    {% trans 'Account:' %} {{ notification.credit.sender_account_number|default:'—' }}
+                {% elif notification.credit.source == 'online' %}
+                    {% trans 'Card ending:' %} {{ notification.credit.card_number_last_digits|default:'—' }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              {% if notification_class == 'frequent_senders' %}
+                <td>{{ notification.sender_profile.credit_count }}</td>
+              {% else %}
+                <td>{{ notification.sender_profile.prisoner_count }}</td>
+              {% endif %}
+              <td><a href="{% url 'security:sender_detail' notification.sender_profile.id %}" title="{% trans 'View payment source details' %}">{% trans 'View' %}</a></td>
+            </tr>
+          </tbody>
+        {% endfor %}
+      {% elif datatype == 'recipient_profile' %}
+        <thead>
+          <tr>
+            <th>{% trans 'Recipient name' %}</th>
+            <th>{% trans 'Bank account' %}</th>
+            {% if notification_class == 'frequent_recipients' %}
+              <th>{% trans 'Number of disbursements' %}</th>
+            {% else %}
+              <th>{% trans 'Number of prisoners' %}</th>
+            {% endif %}
+            <th>{% trans 'Action' %}</th>
+          </tr>
+        </thead>
+        {% for notification in notifications.results %}
+          <tbody>
+            <tr>
+              <td>{{ notification.disbursement.recipient_first_name }} {{ notification.disbursement.recipient_last_name }}</td>
+              <td>{{ notification.disbursement.account_number|default:'—' }}</td>
+              {% if notification_class == 'frequent_recipients' %}
+                <td>{{ notification.recipient_profile.disbursement_count }}</td>
+              {% else %}
+                <td>{{ notification.recipient_profile.prisoner_count }}</td>
+              {% endif %}
+              <td><a href="{% url 'security:disbursement_list' %}?sort_code={{ notification.disbursement.sort_code }}&account_number={{ notification.disbursement.account_number }}&method=bank_transfer">{% trans 'View' %}</a></td>
+            </tr>
+          </tbody>
+        {% endfor %}
+      {% elif datatype == 'prisoner_profile' %}
+        <thead>
+          <tr>
+            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Prison' %}</th>
+            {% if notification_class == 'from_many_senders' %}
+              <th>{% trans 'Number of senders' %}</th>
+            {% else %}
+              <th>{% trans 'Number of recipients' %}</th>
+            {% endif %}
+            <th>{% trans 'Action' %}</th>
+          </tr>
+        </thead>
+        {% for notification in notifications.results %}
+          <tbody>
+            <tr>
+              <td>
+                {{ notification.prisoner_profile.prisoner_name }}<br/>
+                {{ notification.prisoner_profile.prisoner_number }}
+              </td>
+              {% if notification.credit %}
+                <td>{{ notification.credit.prison_name|default_if_none:'—' }}</td>
+              {% else %}
+                <td>{{ notification.disbursement.prison_name|default_if_none:'—' }}</td>
+              {% endif %}
+              {% if notification_class == 'from_many_senders' %}
+                <td>{{ notification.prisoner_profile.sender_count }}</td>
+              {% else %}
+                <td>{{ notification.prisoner_profile.recipient_count }}</td>
+              {% endif %}
+              <td><a href="{% url 'security:prisoner_detail' notification.prisoner_profile.id %}" title="{% trans 'View prisoner details' %}">{% trans 'View' %}</a></td>
+            </tr>
+          </tbody>
+        {% endfor %}
+      {% endif %}
+    </table>
+    {% page_list page=notifications.page page_count=notifications.page_count page_param=notifications.page_param bookmark=notification_class %}
+  </div>
+{% else %}
+  {% trans 'No notifications' %}
+{% endif %}
