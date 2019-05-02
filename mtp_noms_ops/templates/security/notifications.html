@@ -44,7 +44,7 @@
   <div class="mtp-notifications-group{% if not monitored_credits.total_count and not monitored_disbursements.total_count %} mtp-fade-out{% endif %}">
     <h2 class="heading-large">{% trans 'Monitored transactions' %}</h2>
     <div class="mtp-notifications">
-      <h3 class="heading-medium">{% trans 'Credits for prisoners, debit card, bank accounts you’re monitoring' %}</h3>
+      <h3 class="heading-medium">{% trans 'Credits for prisoners, debit cards, bank accounts you’re monitoring' %}</h3>
       {% include 'security/includes/notification-table.html' with notifications=monitored_credits notification_class='monitored_credits' datatype='credit' %}
     </div>
     <div class="mtp-notifications">
@@ -54,7 +54,7 @@
   </div>
 
   <div class="mtp-notifications-group{% if not not_whole_credits.total_count and not not_whole_disbursements.total_count and not high_amount_credits.total_count and not high_amount_disbursements.total_count %} mtp-fade-out{% endif %}">
-    <h2 class="heading-large">{% trans 'Credits and disbursements' %}</h2>
+    <h2 class="heading-large">{% trans 'Credits or disbursements' %}</h2>
     <div class="mtp-notifications">
       <h3 class="heading-medium">{% trans 'Credits not a whole number, for example £25.19' %}</h3>
       {% include 'security/includes/notification-table.html' with notifications=not_whole_credits notification_class='not_whole_credits' datatype='credit' %}
