@@ -18,10 +18,10 @@
           <tr>
             <th>{% trans 'Date' %}</th>
             <th>{% trans 'Amount' %}</th>
-            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Prisoner’s name and number' %}</th>
             <th>{% trans 'Prison' %}</th>
-            <th>{% trans 'Sender name' %}</th>
-            <th>{% trans 'Sender card number or bank account' %}</th>
+            <th>{% trans 'Sender’s name' %}</th>
+            <th>{% trans 'Sender’s card number or bank account' %}</th>
             <th>{% trans 'Action' %}</th>
           </tr>
         </thead>
@@ -39,10 +39,10 @@
           <tr>
             <th>{% trans 'Date' %}</th>
             <th>{% trans 'Amount' %}</th>
-            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Prisoner’s name and number' %}</th>
             <th>{% trans 'Prison' %}</th>
-            <th>{% trans 'Recipient name' %}</th>
-            <th>{% trans 'Recipient bank account' %}</th>
+            <th>{% trans 'Recipient’s name' %}</th>
+            <th>{% trans 'Recipient’s bank account' %}</th>
             <th>{% trans 'Action' %}</th>
           </tr>
         </thead>
@@ -58,8 +58,8 @@
       {% elif datatype == 'sender_profile' %}
         <thead>
           <tr>
-            <th>{% trans 'Sender name' %}</th>
-            <th>{% trans 'Sender card number or bank account' %}</th>
+            <th>{% trans 'Sender’s name' %}</th>
+            <th>{% trans 'Sender’s card number or bank account' %}</th>
             {% if notification_class == 'frequent_senders' %}
               <th>{% trans 'Number of credits' %}</th>
             {% else %}
@@ -93,8 +93,8 @@
       {% elif datatype == 'recipient_profile' %}
         <thead>
           <tr>
-            <th>{% trans 'Recipient name' %}</th>
-            <th>{% trans 'Bank account' %}</th>
+            <th>{% trans 'Recipient’s name' %}</th>
+            <th>{% trans 'Recipient’s bank account' %}</th>
             {% if notification_class == 'frequent_recipients' %}
               <th>{% trans 'Number of disbursements' %}</th>
             {% else %}
@@ -120,7 +120,7 @@
       {% elif datatype == 'prisoner_profile' %}
         <thead>
           <tr>
-            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Prisoner’s name and number' %}</th>
             <th>{% trans 'Prison' %}</th>
             {% if notification_class == 'from_many_senders' %}
               <th>{% trans 'Number of senders' %}</th>
