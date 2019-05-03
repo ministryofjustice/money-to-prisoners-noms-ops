@@ -5,7 +5,7 @@
   <td>{{ disbursement.created|date:'SHORT_DATE_FORMAT' }}</td>
   <td>{{ disbursement.amount|currency }}</td>
   <td>
-    <a href="{% url 'security:prisoner_detail' disbursement.prisoner_profile %}" title="{% trans 'View prisoner details' %}">{{ disbursement.prisoner_name }}</a><br/>
+    {{ disbursement.prisoner_name }}<br/>
     {{ disbursement.prisoner_number }}
   </td>
   <td>{{ disbursement.prison_name|default_if_none:'—' }}</td>
