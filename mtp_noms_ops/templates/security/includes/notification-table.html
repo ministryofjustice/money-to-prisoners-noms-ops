@@ -14,14 +14,15 @@
   <div id="{{ notification_class }}_list" class="mtp-disclosure__contents panel panel-border-narrow mtp-results-list">
     <table class="mtp-table mtp-notifications-table">
       {% if datatype == 'credit' %}
+        <caption class="visually-hidden">{% trans 'Credit notifications' %}</caption>
         <thead>
           <tr>
             <th>{% trans 'Date' %}</th>
             <th>{% trans 'Amount' %}</th>
-            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Prisoner’s name and number' %}</th>
             <th>{% trans 'Prison' %}</th>
-            <th>{% trans 'Sender name' %}</th>
-            <th>{% trans 'Sender card number or bank account' %}</th>
+            <th>{% trans 'Sender’s name' %}</th>
+            <th>{% trans 'Sender’s card number or bank account' %}</th>
             <th>{% trans 'Action' %}</th>
           </tr>
         </thead>
@@ -35,14 +36,15 @@
           {% endfor %}
         </tbody>
       {% elif datatype == 'disbursement' %}
+        <caption class="visually-hidden">{% trans 'Disbursement notifications' %}</caption>
         <thead>
           <tr>
             <th>{% trans 'Date' %}</th>
             <th>{% trans 'Amount' %}</th>
-            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Prisoner’s name and number' %}</th>
             <th>{% trans 'Prison' %}</th>
-            <th>{% trans 'Recipient name' %}</th>
-            <th>{% trans 'Recipient bank account' %}</th>
+            <th>{% trans 'Recipient’s name' %}</th>
+            <th>{% trans 'Recipient’s bank account' %}</th>
             <th>{% trans 'Action' %}</th>
           </tr>
         </thead>
@@ -56,10 +58,11 @@
           {% endfor %}
         </tbody>
       {% elif datatype == 'sender_profile' %}
+        <caption class="visually-hidden">{% trans 'Sender notifications' %}</caption>
         <thead>
           <tr>
-            <th>{% trans 'Sender name' %}</th>
-            <th>{% trans 'Sender card number or bank account' %}</th>
+            <th>{% trans 'Sender’s name' %}</th>
+            <th>{% trans 'Sender’s card number or bank account' %}</th>
             {% if notification_class == 'frequent_senders' %}
               <th>{% trans 'Number of credits' %}</th>
             {% else %}
@@ -91,10 +94,11 @@
           </tbody>
         {% endfor %}
       {% elif datatype == 'recipient_profile' %}
+        <caption class="visually-hidden">{% trans 'Recipient notifications' %}</caption>
         <thead>
           <tr>
-            <th>{% trans 'Recipient name' %}</th>
-            <th>{% trans 'Bank account' %}</th>
+            <th>{% trans 'Recipient’s name' %}</th>
+            <th>{% trans 'Recipient’s bank account' %}</th>
             {% if notification_class == 'frequent_recipients' %}
               <th>{% trans 'Number of disbursements' %}</th>
             {% else %}
@@ -118,9 +122,10 @@
           </tbody>
         {% endfor %}
       {% elif datatype == 'prisoner_profile' %}
+        <caption class="visually-hidden">{% trans 'Prisoner notifications' %}</caption>
         <thead>
           <tr>
-            <th>{% trans 'Prisoner' %}</th>
+            <th>{% trans 'Prisoner’s name and number' %}</th>
             <th>{% trans 'Prison' %}</th>
             {% if notification_class == 'from_many_senders' %}
               <th>{% trans 'Number of senders' %}</th>
