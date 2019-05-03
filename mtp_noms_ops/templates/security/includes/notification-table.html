@@ -14,6 +14,7 @@
   <div id="{{ notification_class }}_list" class="mtp-disclosure__contents panel panel-border-narrow mtp-results-list">
     <table class="mtp-table mtp-notifications-table">
       {% if datatype == 'credit' %}
+        <caption class="visually-hidden">{% trans 'Credit notifications' %}</caption>
         <thead>
           <tr>
             <th>{% trans 'Date' %}</th>
@@ -35,6 +36,7 @@
           {% endfor %}
         </tbody>
       {% elif datatype == 'disbursement' %}
+        <caption class="visually-hidden">{% trans 'Disbursement notifications' %}</caption>
         <thead>
           <tr>
             <th>{% trans 'Date' %}</th>
@@ -56,6 +58,7 @@
           {% endfor %}
         </tbody>
       {% elif datatype == 'sender_profile' %}
+        <caption class="visually-hidden">{% trans 'Sender notifications' %}</caption>
         <thead>
           <tr>
             <th>{% trans 'Sender’s name' %}</th>
@@ -91,6 +94,7 @@
           </tbody>
         {% endfor %}
       {% elif datatype == 'recipient_profile' %}
+        <caption class="visually-hidden">{% trans 'Recipient notifications' %}</caption>
         <thead>
           <tr>
             <th>{% trans 'Recipient’s name' %}</th>
@@ -118,6 +122,7 @@
           </tbody>
         {% endfor %}
       {% elif datatype == 'prisoner_profile' %}
+        <caption class="visually-hidden">{% trans 'Prisoner notifications' %}</caption>
         <thead>
           <tr>
             <th>{% trans 'Prisoner’s name and number' %}</th>
