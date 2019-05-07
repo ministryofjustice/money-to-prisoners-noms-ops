@@ -1203,7 +1203,9 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
         )
         self.assertContains(response, 'Stop monitoring this prisoner')
-        self.assertEqual(responses.calls[-2].request.body, b'{"last_result_count": 4}')
+        for call in responses.calls:
+            if call.request.path_url == '/searches/1/':
+                self.assertEqual(call.request.body, b'{"last_result_count": 4}')
 
     @responses.activate
     @override_nomis_settings
@@ -1234,13 +1236,15 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             '?pin=1'
         )
 
-        self.assertEqual(
-            json.loads(responses.calls[-3].request.body.decode()),
-            {
-                'description': 'A1409AE JAMES HALLS',
-                'endpoint': '/prisoners/1/credits/',
-                'last_result_count': 4,
-                'site_url': '/en-gb/security/prisoners/1/',
-                'filters': [{'field': 'ordering', 'value': '-received_at'}],
-            },
-        )
+        for call in responses.calls:
+            if call.request.path_url == '/searches/':
+                self.assertEqual(
+                    json.loads(call.request.body.decode()),
+                    {
+                        'description': 'A1409AE JAMES HALLS',
+                        'endpoint': '/prisoners/1/credits/',
+                        'last_result_count': 4,
+                        'site_url': '/en-gb/security/prisoners/1/',
+                        'filters': [{'field': 'ordering', 'value': '-received_at'}],
+                    },
+                )
