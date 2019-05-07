@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -70,27 +72,5 @@ class PrisonersDisbursementDetailForm(PrisonersDetailForm):
     unfiltered_description_template = 'All disbursements sent by this prisoner are shown below ordered by ' \
                                       '{ordering_description}.'
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.prisoner_number = None
-
-    def get_object(self):
-        obj = super().get_object()
-        if obj:
-            self.prisoner_number = obj.get('prisoner_number')
-        return obj
-
-    def get_object_list(self):
-        if not self.prisoner_number:
-            return []
-        return super().get_object_list()
-
     def get_object_list_endpoint_path(self):
-        return '/disbursements/'
-
-    def get_query_data(self, allow_parameter_manipulation=True):
-        data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
-        if not self.prisoner_number:
-            self.get_object()
-        data['prisoner_number'] = self.prisoner_number
-        return data
+        return urljoin(self.get_object_endpoint_path(), 'disbursements/')

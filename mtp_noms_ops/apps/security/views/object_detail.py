@@ -1,7 +1,6 @@
 from django.core.urlresolvers import reverse_lazy
 from django.http import Http404
 from django.utils.translation import gettext, gettext_lazy as _
-from requests.exceptions import RequestException
 
 from security.forms.object_detail import (
     SendersDetailForm,
@@ -131,26 +130,11 @@ class PrisonerDetailView(SecurityDetailView):
             context_data['provided_names'] = NameSet(
                 prisoner.get('provided_names', ()), strip_titles=True
             )
-            context_data['disbursement_count'] = self.get_disbursement_count(
-                context_data['form'].session, prisoner['prisoner_number']
-            )
         return context_data
 
     def get_title_for_object(self, detail_object):
         title = ' '.join(detail_object.get(key, '') for key in ('prisoner_number', 'prisoner_name'))
         return title.strip() or _('Unknown prisoner')
-
-    def get_disbursement_count(self, session, prisoner_number):
-        try:
-            response = session.get('/disbursements/', params={
-                'prisoner_number': prisoner_number,
-                # exclude rejected/cancelled disbursements
-                'resolution': ['pending', 'preconfirmed', 'confirmed', 'sent'],
-                'limit': 1,
-            }).json()
-            return response['count']
-        except (RequestException, ValueError, KeyError):
-            return None
 
 
 class PrisonerDisbursementDetailView(PrisonerDetailView):
