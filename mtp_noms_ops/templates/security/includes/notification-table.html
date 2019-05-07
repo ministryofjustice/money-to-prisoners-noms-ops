@@ -149,10 +149,11 @@
               {% endif %}
               {% if notification_class == 'from_many_senders' %}
                 <td>{{ notification.prisoner_profile.sender_count }}</td>
+                <td><a href="{% url 'security:prisoner_detail' notification.prisoner_profile.id %}" title="{% trans 'View prisoner details' %}">{% trans 'View' %}</a></td>
               {% else %}
                 <td>{{ notification.prisoner_profile.recipient_count }}</td>
+                <td><a href="{% url 'security:prisoner_disbursement_detail' notification.prisoner_profile.id %}" title="{% trans 'View prisoner details' %}">{% trans 'View' %}</a></td>
               {% endif %}
-              <td><a href="{% url 'security:prisoner_detail' notification.prisoner_profile.id %}" title="{% trans 'View prisoner details' %}">{% trans 'View' %}</a></td>
             </tr>
           </tbody>
         {% endfor %}
