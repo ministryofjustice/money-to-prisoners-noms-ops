@@ -77,6 +77,11 @@ urlpatterns = i18n_patterns(
             'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='reset_password_done'
     ),
+    url(
+        r'^email_change/$', auth_views.email_change, {
+            'cancel_url': reverse_lazy('settings'),
+        }, name='email_change'
+    ),
 
     url(r'^', include('mtp_common.user_admin.urls')),
 
