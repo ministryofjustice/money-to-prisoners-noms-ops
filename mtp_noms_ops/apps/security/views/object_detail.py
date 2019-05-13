@@ -150,5 +150,6 @@ class PrisonerDisbursementDetailView(PrisonerDetailView):
     Prisoner profile view showing disbursement list
     """
     template_name = 'security/prisoner-disbursements.html'
+    list_url = reverse_lazy('security:prisoner_disbursement_list')
     form_class = PrisonersDisbursementDetailForm
     object_list_context_key = 'disbursements'

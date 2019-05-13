@@ -25,6 +25,28 @@
     </div>
 
     {% if form.is_valid %}
+      <ul class="mtp-section-tabs">
+        {% if view.showing == 'credits' %}
+          <li class="mtp-section-tab mtp-section-tab--selected">
+            <h2 class="mtp-section-tab-content">{% trans 'Credits received' %}</h2>
+          </li>
+          <li class="mtp-section-tab">
+            <a href="{% url 'security:prisoner_disbursement_list' %}?{{ form.query_string_with_page }}" class="mtp-section-tab-content" aria-label="{% trans 'View prisoner’s disbursements' %}">
+              {% trans 'Disbursements sent' %}
+            </a>
+          </li>
+        {% else %}
+          <li class="mtp-section-tab">
+            <a href="{% url 'security:prisoner_list' %}?{{ form.query_string_with_page }}" class="mtp-section-tab-content" aria-label="{% trans 'View prisoner’s credits' %}">
+              {% trans 'Credits received' %}
+            </a>
+          </li>
+          <li class="mtp-section-tab mtp-section-tab--selected">
+            <h2 class="mtp-section-tab-content">{% trans 'Disbursements sent' %}</h2>
+          </li>
+        {% endif %}
+      </ul>
+
       <div class="mtp-results-list">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -39,42 +61,75 @@
           <thead>
             <tr>
               {% sortable_cell _('Prisoner') form.cleaned_data 'prisoner_number' %}
-              <th>{% trans 'Prison' %}</th>
-              {% sortable_cell _('Received') form.cleaned_data 'credit_count' %}
-              {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' %}
-              {% sortable_cell _('Amount') form.cleaned_data 'credit_total' cell_classes='numeric' %}
+              <th>{% trans 'Prisons' %}</th>
+              {% if view.showing == 'credits' %}
+                {% sortable_cell _('Received') form.cleaned_data 'credit_count' %}
+                {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' %}
+                {% sortable_cell _('Amount') form.cleaned_data 'credit_total' cell_classes='numeric' %}
+              {% elif view.showing == 'disbursements' %}
+                {% sortable_cell _('Sent') form.cleaned_data 'disbursement_count' %}
+                {% sortable_cell _('Bank accounts') form.cleaned_data 'recipient_count' %}
+                {% sortable_cell _('Amount') form.cleaned_data 'disbursement_total' cell_classes='numeric' %}
+              {% endif %}
             </tr>
           </thead>
           <tbody>
             {% for prisoner in prisoners %}
               <tr>
                 <td>
-                  <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
+                  {% if view.showing == 'credits' %}
+                    {% url 'security:prisoner_detail' prisoner.id as prosioner_profile_url %}
+                  {% elif view.showing == 'disbursements' %}
+                    {% url 'security:prisoner_disbursement_detail' prisoner.id as prosioner_profile_url %}
+                  {% endif %}
+                  <a href="{{ prosioner_profile_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
                     {{ prisoner.prisoner_name|default_if_none:'—' }}
                   </a>
                   <br/>
                   {{ prisoner.prisoner_number }}
                 </td>
                 <td>{{ prisoner.prisons|list_prison_names }}</td>
-                <td>
-                  {% blocktrans trimmed count count=prisoner.credit_count %}
-                    {{ count }} credit received
-                  {% plural %}
-                    {{ count }} credits received
-                  {% endblocktrans %}
-                </td>
-                <td>
-                  {% blocktrans trimmed count count=prisoner.sender_count %}
-                    {{ count }} payment source
-                  {% plural %}
-                    {{ count }} payment sources
-                  {% endblocktrans %}
-                </td>
-                <td class="numeric">
-                  <span class="mtp-sortable-cell--pad">
-                    {{ prisoner.credit_total|currency }}
-                  </span>
-                </td>
+                {% if view.showing == 'credits' %}
+                  <td>
+                    {% blocktrans trimmed count count=prisoner.credit_count %}
+                      {{ count }} credit received
+                    {% plural %}
+                      {{ count }} credits received
+                    {% endblocktrans %}
+                  </td>
+                  <td>
+                    {% blocktrans trimmed count count=prisoner.sender_count %}
+                      {{ count }} payment source
+                    {% plural %}
+                      {{ count }} payment sources
+                    {% endblocktrans %}
+                  </td>
+                  <td class="numeric">
+                    <span class="mtp-sortable-cell--pad">
+                      {{ prisoner.credit_total|currency }}
+                    </span>
+                  </td>
+                {% elif view.showing == 'disbursements' %}
+                  <td>
+                    {% blocktrans trimmed count count=prisoner.disbursement_count %}
+                      {{ count }} disbursement sent
+                    {% plural %}
+                      {{ count }} disbursements sent
+                    {% endblocktrans %}
+                  </td>
+                  <td>
+                    {% blocktrans trimmed count count=prisoner.recipient_count %}
+                      {{ count }} bank account
+                    {% plural %}
+                      {{ count }} bank accounts
+                    {% endblocktrans %}
+                  </td>
+                  <td class="numeric">
+                    <span class="mtp-sortable-cell--pad">
+                      {{ prisoner.disbursement_total|currency }}
+                    </span>
+                  </td>
+                {% endif %}
               </tr>
             {% empty %}
               <tr>

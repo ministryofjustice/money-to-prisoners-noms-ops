@@ -88,6 +88,8 @@ urlpatterns = [
     # prisoners
     url(r'^prisoners/$', security_test(views.PrisonerListView.as_view()),
         name='prisoner_list'),
+    url(r'^prisoners/disbursements/$', security_test(views.PrisonerListView.as_view(showing='disbursements')),
+        name='prisoner_disbursement_list'),
     url(r'^prisoners/export/$',
         security_test(views.PrisonerListView.as_view(
             export_view='download',

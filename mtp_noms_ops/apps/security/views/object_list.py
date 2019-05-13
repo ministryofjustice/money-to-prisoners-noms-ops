@@ -54,6 +54,7 @@ class PrisonerListView(SecurityView):
     template_name = 'security/prisoners.html'
     form_class = PrisonersForm
     object_list_context_key = 'prisoners'
+    showing = 'credits'
 
     def url_for_single_result(self, prisoner):
         return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner['id']})

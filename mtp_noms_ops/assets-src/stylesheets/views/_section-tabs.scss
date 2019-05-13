@@ -1,0 +1,30 @@
+.mtp-section-tabs {
+  margin: $gutter 0;
+  border-bottom: 1px solid $border-colour;
+}
+
+.mtp-section-tab {
+  display: inline-block;
+  margin-bottom: -1px;
+  border: 1px solid $page-colour;
+  border-bottom-color: $border-colour;
+
+  @media print {
+    display: none;
+  }
+}
+
+.mtp-section-tab--selected {
+  border-color: $border-colour;
+  border-bottom-color: $page-colour;
+
+  @media print {
+    display: inline-block;
+  }
+}
+
+.mtp-section-tab-content {
+  display: block;
+  padding: $gutter-half;
+  outline: none !important;
+}

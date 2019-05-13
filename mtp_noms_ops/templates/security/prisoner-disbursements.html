@@ -3,13 +3,16 @@
 {% load mtp_common %}
 
 {% block object_list %}
-  <aside class="mtp-object-list-toggle print-hidden">
-    <a href="{% url 'security:prisoner_detail' prisoner.id %}" class="button-secondary">
-      {% trans 'View credits' %}
-    </a>
-  </aside>
-
-  <h2 class="heading-large">{% trans 'Disbursements sent' %}</h2>
+  <ul class="mtp-section-tabs">
+    <li class="mtp-section-tab">
+      <a href="{% url 'security:prisoner_detail' prisoner.id %}?{{ form.query_string_without_ordering }}" class="mtp-section-tab-content" aria-label="{% trans 'View prisoner’s credits' %}">
+        {% trans 'Credits received' %}
+      </a>
+    </li>
+    <li class="mtp-section-tab mtp-section-tab--selected">
+      <h2 class="mtp-section-tab-content">{% trans 'Disbursements sent' %}</h2>
+    </li>
+  </ul>
 
   <div class="panel panel-border-narrow">
     <p class="mtp-search-description--aside">

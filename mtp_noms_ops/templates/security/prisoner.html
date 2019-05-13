@@ -73,13 +73,16 @@
     {% if form.is_valid %}
       <div class="mtp-results-list">
         {% block object_list %}
-          <aside class="mtp-object-list-toggle print-hidden">
-            <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" class="button-secondary">
-              {% trans 'View disbursements' %}
+          <ul class="mtp-section-tabs">
+            <li class="mtp-section-tab mtp-section-tab--selected">
+              <h2 class="mtp-section-tab-content">{% trans 'Credits received' %}</h2>
+            </li>
+            <li class="mtp-section-tab">
+              <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}?{{ form.query_string_without_ordering }}" class="mtp-section-tab-content" aria-label="{% trans 'View prisoner’s disbursements' %}">
+                {% trans 'Disbursements sent' %}
             </a>
-          </aside>
-
-          <h2 class="heading-large">{% trans 'Credits received' %}</h2>
+            </li>
+          </ul>
 
           <div class="panel panel-border-narrow">
             <p class="mtp-search-description--aside">

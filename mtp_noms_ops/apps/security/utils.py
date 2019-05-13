@@ -22,9 +22,10 @@ TIME_PERIOD_CHOICES = [
 ]
 
 TOTALS_FIELDS = [
-    'prisoner_count', 'sender_count', 'prison_count', 'credit_count',
-    'credit_total', 'recipient_count', 'disbursement_count',
-    'disbursement_total', 'time_period'
+    'time_period',
+    'prisoner_count', 'prison_count',
+    'credit_count', 'credit_total', 'sender_count',
+    'disbursement_count', 'disbursement_total', 'recipient_count',
 ]
 
 
