@@ -1,6 +1,23 @@
 {% extends 'security/prisoner.html' %}
 {% load i18n %}
 {% load mtp_common %}
+{% load security %}
+
+{% block prisoner_stats %}
+  <div class="grid-row">
+    <div class="column-flexible">
+      {% labelled_data _('Disbursements sent') prisoner.disbursement_count tag='strong' %}
+    </div>
+
+    <div class="column-flexible">
+      {% labelled_data _('Bank accounts sent to')  prisoner.recipient_count tag='strong' %}
+    </div>
+
+    <div class="column-flexible">
+      {% labelled_data _('Total sent') prisoner.disbursement_total|currency tag='strong' %}
+    </div>
+  </div>
+{% endblock %}
 
 {% block object_list %}
   <ul class="mtp-section-tabs">

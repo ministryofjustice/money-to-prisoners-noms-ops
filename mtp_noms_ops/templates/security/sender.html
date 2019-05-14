@@ -6,7 +6,7 @@
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 {% block inner_content %}
-  <div class="mtp-sender-summary {% if sender.bank_transfer_details %}mtp-sender-summary__bank-transfer{% elif sender.debit_card_details %}mtp-sender-summary__debit-card{% endif %}">
+  <div class="mtp-security-detail {% if sender.bank_transfer_details %}mtp-security-detail--bank-transfer{% elif sender.debit_card_details %}mtp-security-detail--debit-card{% endif %}">
     <header>
       <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
     </header>
@@ -16,17 +16,17 @@
         {% trans 'Bank transfer payments with these details' %}
       </p>
 
-      <div class="grid-row mtp-sender-summary__details">
-        <div class="column-one-third">
+      <div class="grid-row">
+        <div class="column-flexible">
           {% labelled_data _('Account number') sender.bank_transfer_details.0.sender_account_number|default:'—' tag='strong' %}
         </div>
 
-        <div class="column-one-third">
+        <div class="column-flexible">
           {% labelled_data _('Sort code') sender.bank_transfer_details.0.sender_sort_code|format_sort_code tag='strong' %}
         </div>
 
         {% if sender.bank_transfer_details.0.sender_roll_number %}
-          <div class="column-one-third">
+          <div class="column-flexible">
             {% labelled_data _('Roll number (for building societies)') sender.bank_transfer_details.0.sender_roll_number tag='strong' %}
           </div>
         {% endif %}
@@ -39,16 +39,16 @@
         <a href="#grouping-info-dialogue" class="js-dialogue-open">{% trans 'How are these grouped?' %}</a>
       </p>
 
-      <div class="grid-row mtp-sender-summary__details">
-        <div class="column-one-third">
+      <div class="grid-row">
+        <div class="column-flexible">
           {% labelled_data _('Last 4 digits of card number') sender.debit_card_details.0.card_number_last_digits|format_card_number tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="column-flexible">
           {% labelled_data _('Expiry date') sender.debit_card_details.0.card_expiry_date|default_if_none:'—' tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="column-flexible">
           {% labelled_data _('Postcode') sender.debit_card_details.0.postcode|default_if_none:'—' tag='strong' %}
         </div>
       </div>
@@ -59,28 +59,26 @@
 
     {% endif %}
 
-    <div class="grid-row mtp-sender-summary__details">
-      <div class="column-two-thirds">
-        <div class="column-one-third col-1">
-          {% labelled_data _('Credits sent') sender.credit_count tag='strong' %}
-        </div>
-
-        <div class="column-one-third">
-          {% labelled_data _('Prisoners') sender.prisoner_count tag='strong' %}
-        </div>
-
-        <div class="column-one-third">
-          {% labelled_data _('Prisons') sender.prison_count tag='strong' %}
-        </div>
+    <div class="grid-row">
+      <div class="column-flexible">
+        {% labelled_data _('Credits sent') sender.credit_count tag='strong' %}
       </div>
 
-      <div class="column-one-third">
+      <div class="column-flexible">
+        {% labelled_data _('Prisoners') sender.prisoner_count tag='strong' %}
+      </div>
+
+      <div class="column-flexible">
+        {% labelled_data _('Prisons') sender.prison_count tag='strong' %}
+      </div>
+
+      <div class="column-flexible">
         {% labelled_data _('Total amount sent') sender.credit_total|currency tag='strong' %}
       </div>
     </div>
-
-    {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this sender on your home page') unpin_label=_('Stop monitoring this sender') only %}
   </div>
+
+  {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this sender on your home page') unpin_label=_('Stop monitoring this sender') only %}
 
   <form class="js-FormAnalytics" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}

@@ -1,0 +1,84 @@
+.mtp-security-detail {
+  overflow: hidden;
+
+  .grid-row {
+    margin-bottom: $gutter-half;
+
+    .column-flexible {
+      @extend .column-full;
+
+      @include media(tablet) {
+        width: auto;
+      }
+
+      @media print {
+        display: inline-block;
+      }
+    }
+  }
+}
+
+.mtp-security-detail--bank-transfer, .mtp-security-detail--debit-card {
+  padding-left: 130px;
+  background: file-url('icon-large-bank@2x.png') no-repeat scroll 0 25px;
+
+  @include device-pixel-ratio {
+    background-image: file-url('icon-large-bank@4x.png');
+    background-size: 100px 100px;
+  }
+
+  @include media(mobile, $ignore-for-ie: true) {
+    padding-left: 110px;
+    background-size: 80px 80px;
+  }
+
+  @media print {
+    padding: 0;
+    background: none !important;
+  }
+}
+
+.mtp-security-detail--debit-card {
+  background-image: file-url('icon-large-card@2x.png');
+
+  @include device-pixel-ratio {
+    background-image: file-url('icon-large-card@4x.png');
+  }
+}
+
+.mtp-security-detail__image {
+  width: 160px;
+  height: 200px;
+  margin-bottom: 1em;
+  background: file-url('placeholder-image.png') no-repeat;
+
+  @include device-pixel-ratio {
+    background-image: file-url('placeholder-image@2x.png');
+    background-size: 160px 200px;
+  }
+
+  @include media(tablet) {
+    float: left;
+    padding-right: 30px;
+  }
+
+  @media print {
+    display: none;
+  }
+
+  img {
+    width: 100%;
+  }
+}
+
+.mtp-security-detail__floated {
+  @include media(tablet) {
+    float: left;
+    max-width: 770px;
+    width: calc(100% - 190px);
+  }
+
+  @include ie(8) {
+    width: 770px;
+  }
+}
