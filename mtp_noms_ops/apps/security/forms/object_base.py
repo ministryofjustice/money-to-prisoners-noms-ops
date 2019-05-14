@@ -247,9 +247,13 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_complete_object_list(self):
         filters = self.get_api_request_params()
-        return parse_date_fields(retrieve_all_pages_for_path(
+        object_list = parse_date_fields(retrieve_all_pages_for_path(
             self.session, self.get_object_list_endpoint_path(), **filters)
         )
+        time_period = self.cleaned_data.get('time_period')
+        for record in object_list:
+            populate_totals(record, time_period)
+        return object_list
 
     @cached_property
     def query_string(self):

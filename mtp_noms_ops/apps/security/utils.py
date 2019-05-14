@@ -192,9 +192,12 @@ def is_nomis_api_configured():
 
 
 def populate_totals(record, time_period):
-    if 'totals' in record:
-        for total in record['totals']:
-            if total['time_period'] == (time_period or TIME_PERIOD_CHOICES[0][0]):
-                for field in total:
-                    if field in TOTALS_FIELDS:
-                        record[field] = total[field]
+    if 'totals' not in record:
+        return
+    time_period = time_period or TIME_PERIOD_CHOICES[0][0]
+    for total in record['totals']:
+        if total['time_period'] != time_period:
+            continue
+        for field in total:
+            if field in TOTALS_FIELDS:
+                record[field] = total[field]
