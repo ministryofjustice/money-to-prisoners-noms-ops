@@ -21,7 +21,7 @@
     </p>
 
     <div class="print-hidden">
-      {% include view.form_template_name with view=view form=form only %}
+      {% include 'security/forms/simple.html' %}
     </div>
 
     {% if form.is_valid %}

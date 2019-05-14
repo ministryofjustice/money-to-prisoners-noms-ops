@@ -9,7 +9,7 @@ from security.forms.object_base import (
     SecurityForm,
     AmountPattern, parse_amount,
     validate_amount, validate_prisoner_number, validate_range_fields,
-    insert_blank_option,
+    insert_blank_option, split_search_tokens,
     get_credit_source_choices, get_disbursement_method_choices,
 )
 from security.templatetags.security import currency as format_currency
@@ -51,6 +51,10 @@ class SendersForm(SecurityForm):
     credit_total__gte = forms.IntegerField(label=_('Minimum total sent'), required=False)
     credit_total__lte = forms.IntegerField(label=_('Maximum total sent'), required=False)
 
+    # meta field
+    search = forms.CharField(label=_('Sender name or email address'), required=False)
+
+    sender = forms.CharField(label=_('Sender name or email'), required=False)
     sender_name = forms.CharField(label=_('Sender name'), required=False)
     source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices(),
                                help_text=_('Select to see filters like card number or postcode'))
@@ -67,13 +71,12 @@ class SendersForm(SecurityForm):
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
-
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are senders who {filter_description}, ordered by {ordering_description}.'
     unfiltered_description_template = 'All senders are shown below ordered by {ordering_description}. ' \
                                       'Add filters to narrow down your search.'
     description_templates = (
+        ('have ‘{search}’ in their name or email address',),
         ('are named ‘{sender_name}’',),
         ('have email {sender_email}',),
         ('are from postcode {sender_postcode}',),
@@ -146,11 +149,24 @@ class SendersForm(SecurityForm):
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
+            self.update_search_query_data(query_data)
             for field in ('credit_total__gte', 'credit_total__lte'):
                 value = query_data.get(field)
                 if value is not None:
                     query_data[field] = value * 100
         return query_data
+
+    def update_search_query_data(self, query_data):
+        search = query_data.pop('search', None)
+        if not search:
+            return
+        search = split_search_tokens(search)
+        if search['prisoner_numbers']:
+            query_data['prisoner_number'] = (
+                f"{query_data.get('prisoner_number', '')},{','.join(search['prisoner_numbers'])}".strip(',')
+            )
+        if search['words']:
+            query_data['sender'] = f"{query_data.get('sender', '')} {' '.join(search['words'])}".strip()
 
 
 @validate_range_fields(
@@ -204,6 +220,9 @@ class PrisonersForm(SecurityForm):
     disbursement_total__gte = forms.IntegerField(label=_('Minimum total sent'), required=False)
     disbursement_total__lte = forms.IntegerField(label=_('Maximum total sent'), required=False)
 
+    # meta field
+    search = forms.CharField(label=_('Prisoner number or name'), required=False)
+
     prisoner_number = forms.CharField(label=_('Prisoner number'),
                                       validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
@@ -212,13 +231,12 @@ class PrisonersForm(SecurityForm):
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
-
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are prisoners who {filter_description}, ordered by {ordering_description}.'
     unfiltered_description_template = 'All prisoners are shown below ordered by {ordering_description}. ' \
                                       'Add filters to narrow down your search.'
     description_templates = (
+        ('have ‘{search}’ in their name or as their number',),
         ('are named ‘{prisoner_name}’',),
         ('have prisoner number {prisoner_number}',),
         ('are at {prison}',),
@@ -268,6 +286,7 @@ class PrisonersForm(SecurityForm):
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
+            self.update_search_query_data(query_data)
             fields = (
                 'credit_total__gte', 'credit_total__lte',
                 'disbursement_total__gte', 'disbursement_total__lte',
@@ -277,6 +296,18 @@ class PrisonersForm(SecurityForm):
                 if value is not None:
                     query_data[field] = value * 100
         return query_data
+
+    def update_search_query_data(self, query_data):
+        search = query_data.pop('search', None)
+        if not search:
+            return
+        search = split_search_tokens(search)
+        if search['prisoner_numbers']:
+            query_data['prisoner_number'] = (
+                f"{query_data.get('prisoner_number', '')},{','.join(search['prisoner_numbers'])}".strip(',')
+            )
+        if search['words']:
+            query_data['prisoner_name'] = f"{query_data.get('prisoner_name', '')} {' '.join(search['words'])}".strip()
 
 
 @validate_range_fields(
@@ -306,6 +337,9 @@ class CreditsForm(SecurityForm):
     amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
     amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 
+    # meta field
+    search = forms.CharField(label=_('Sender name, sender email address or prisoner number'), required=False)
+
     prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
     prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
@@ -313,6 +347,7 @@ class CreditsForm(SecurityForm):
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
+    sender = forms.CharField(label=_('Sender name or email'), required=False)
     sender_name = forms.CharField(label=_('Sender name'), required=False)
     source = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_credit_source_choices(),
                                help_text=_('Select to see filters like card number or postcode'))
@@ -326,8 +361,6 @@ class CreditsForm(SecurityForm):
     sender_ip_address = forms.CharField(label=_('Sender IP address'),
                                         validators=[validate_ipv4_address], required=False)
 
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
-
     exclusive_date_params = ['received_at__lt']
 
     # NB: ensure that these templates are HTML-safe
@@ -338,6 +371,7 @@ class CreditsForm(SecurityForm):
         ('between {received_at__gte} and {received_at__lt}',
          'since {received_at__gte}',
          'before {received_at__lt}',),
+        ('that have ‘{search}’ as the prisoner number or in the sender’s name or email address',),
         ('that are {amount_pattern}',),
         ('by ‘{sender_name}’ with email {sender_email}',
          'by {sender_email}',
@@ -429,8 +463,21 @@ class CreditsForm(SecurityForm):
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
+            self.update_search_query_data(query_data)
             AmountPattern.update_query_data(query_data)
         return query_data
+
+    def update_search_query_data(self, query_data):
+        search = query_data.pop('search', None)
+        if not search:
+            return
+        search = split_search_tokens(search)
+        if search['prisoner_numbers']:
+            query_data['prisoner_number'] = (
+                f"{query_data.get('prisoner_number', '')},{','.join(search['prisoner_numbers'])}".strip(',')
+            )
+        if search['words']:
+            query_data['sender'] = f"{query_data.get('sender', '')} {' '.join(search['words'])}".strip()
 
     def describe_field_amount_pattern(self):
         value = self.cleaned_data.get('amount_pattern')
@@ -467,6 +514,9 @@ class DisbursementsForm(SecurityForm):
     created__gte = forms.DateField(label=_('Entered since'), help_text=_('For example, 13/02/2018'), required=False)
     created__lt = forms.DateField(label=_('Entered before'), help_text=_('For example, 13/02/2018'), required=False)
 
+    # meta field
+    search = forms.CharField(label=_('Recipient name or prisoner number'), required=False)
+
     amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
                                        choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
     amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
@@ -491,8 +541,6 @@ class DisbursementsForm(SecurityForm):
     roll_number = forms.CharField(label=_('Roll number'), required=False)
     invoice_number = forms.CharField(label=_('Invoice number'), required=False)
 
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or recipient name'), required=False)
-
     exclusive_date_params = ['created__lt']
     exclude_private_estate = True
 
@@ -505,6 +553,7 @@ class DisbursementsForm(SecurityForm):
         ('entered between {created__gte} and {created__lt}',
          'entered since {created__gte}',
          'entered before {created__lt}',),
+        ('that have ‘{search}’ as the prisoner number or in the sender’s name',),
         ('that are {amount_pattern}',),
         ('from {prisoner_name} ({prisoner_number})',
          'from prisoners named ‘{prisoner_name}’',
@@ -586,8 +635,21 @@ class DisbursementsForm(SecurityForm):
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
+            self.update_search_query_data(query_data)
             AmountPattern.update_query_data(query_data)
         return query_data
+
+    def update_search_query_data(self, query_data):
+        search = query_data.pop('search', None)
+        if not search:
+            return
+        search = split_search_tokens(search)
+        if search['prisoner_numbers']:
+            query_data['prisoner_number'] = (
+                f"{query_data.get('prisoner_number', '')},{','.join(search['prisoner_numbers'])}".strip(',')
+            )
+        if search['words']:
+            query_data['recipient_name'] = f"{query_data.get('recipient_name', '')} {' '.join(search['words'])}".strip()
 
     def describe_field_amount_pattern(self):
         value = self.cleaned_data.get('amount_pattern')

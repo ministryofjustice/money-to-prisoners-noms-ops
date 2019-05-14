@@ -172,13 +172,14 @@ class SenderFormTestCase(SecurityFormTestCase):
         expected_data = {
             'page': 1,
             'ordering': '-prisoner_count',
+            'search': '', 'sender': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
+            'card_number_last_digits': '', 'source': '', 'sender_email': '', 'sender_postcode': '',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'prison_count__gte': None, 'prison_count__lte': None,
-            'card_number_last_digits': '', 'source': '', 'sender_email': '', 'sender_postcode': '',
-            'time_period': 'all_time'
+            'time_period': 'all_time',
         }
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
@@ -194,13 +195,14 @@ class SenderFormTestCase(SecurityFormTestCase):
         expected_data = {
             'page': 1,
             'ordering': '-credit_total',
+            'search': '', 'sender': '',
             'sender_name': 'Joh', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
+            'card_number_last_digits': '', 'source': '', 'sender_email': '', 'sender_postcode': '',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'prisoner_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'prison_count__gte': None, 'prison_count__lte': None,
-            'card_number_last_digits': '', 'source': '', 'sender_email': '', 'sender_postcode': '',
-            'time_period': 'all_time'
+            'time_period': 'all_time',
         }
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
@@ -240,6 +242,7 @@ class PrisonerFormTestCase(SecurityFormTestCase):
         expected_data = {
             'page': 1,
             'ordering': '-sender_count',
+            'search': '',
             'prisoner_number': '', 'prisoner_name': '',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'credit_count__gte': None, 'credit_count__lte': None,
@@ -267,6 +270,7 @@ class PrisonerFormTestCase(SecurityFormTestCase):
         expected_data = {
             'page': 1,
             'ordering': '-credit_total',
+            'search': '',
             'prisoner_number': '', 'prisoner_name': 'John',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
             'credit_count__gte': None, 'credit_count__lte': None,
@@ -324,6 +328,7 @@ class CreditFormTestCase(SecurityFormTestCase):
             'received_at__gte': None, 'received_at__lt': None,
             'prisoner_number': '', 'prisoner_name': '',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'search': '', 'sender': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
             'source': '', 'sender_email': '', 'sender_postcode': '', 'sender_ip_address': '',
@@ -346,6 +351,7 @@ class CreditFormTestCase(SecurityFormTestCase):
             'received_at__gte': received_at__gte, 'received_at__lt': None,
             'prisoner_number': '', 'prisoner_name': '',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'search': '', 'sender': '',
             'sender_name': '', 'sender_sort_code': '', 'sender_account_number': '', 'sender_roll_number': '',
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None, 'card_number_last_digits': '',
             'source': '', 'sender_email': '', 'sender_postcode': '', 'sender_ip_address': '',
@@ -398,6 +404,7 @@ class DisbursementFormTestCase(SecurityFormTestCase):
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
             'prisoner_number': '', 'prisoner_name': '',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'search': '',
             'method': '', 'recipient_name': '', 'recipient_email': '', 'city': '', 'postcode': '',
             'sort_code': '', 'account_number': '', 'roll_number': '',
             'invoice_number': '',
@@ -421,6 +428,7 @@ class DisbursementFormTestCase(SecurityFormTestCase):
             'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
             'prisoner_number': '', 'prisoner_name': '',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
+            'search': '',
             'method': '', 'recipient_name': '', 'recipient_email': '', 'city': '', 'postcode': '',
             'sort_code': '', 'account_number': '', 'roll_number': '',
             'invoice_number': '',

@@ -25,6 +25,8 @@ from security.searches import (
 )
 from security.utils import parse_date_fields, populate_totals, TOTALS_FIELDS
 
+re_prisoner_number = re.compile(r'^[a-z]\d\d\d\d[a-z]{2}$', flags=re.I)
+
 
 def get_credit_source_choices(blank_option=_('Any method')):
     return insert_blank_option(
@@ -64,7 +66,7 @@ def validate_amount(amount):
 
 
 def validate_prisoner_number(prisoner_number):
-    if not re.match(r'^[a-z]\d\d\d\d[a-z]{2}$', prisoner_number, flags=re.I):
+    if not re_prisoner_number.match(prisoner_number):
         raise ValidationError(_('Invalid prisoner number'), code='invalid')
 
 
@@ -88,6 +90,21 @@ def validate_range_fields(*fields):
         return cls
 
     return inner
+
+
+def split_search_tokens(search: str):
+    search = search.split()
+    words = []
+    prisoner_numbers = []
+    for term in search:
+        if re_prisoner_number.match(term):
+            prisoner_numbers.append(term.upper())
+        else:
+            words.append(term)
+    return {
+        'words': words,
+        'prisoner_numbers': prisoner_numbers,
+    }
 
 
 class AmountPattern(enum.Enum):

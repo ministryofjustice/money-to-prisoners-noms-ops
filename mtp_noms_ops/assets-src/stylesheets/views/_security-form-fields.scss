@@ -69,6 +69,10 @@ select[disabled] {
   width: 28%;
 }
 
+.mtp-security-form--simple #id_search {
+  padding: 6px 4px 5px;
+}
+
 // govuk elements overrides
 
 .mtp-security-form {
