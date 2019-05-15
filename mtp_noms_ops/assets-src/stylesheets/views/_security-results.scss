@@ -58,6 +58,16 @@
   }
 }
 
+.mtp-results-actions {
+  float: right;
+  display: inline-block;
+  margin-bottom: em(15, 19);
+
+  .panel & {
+    margin-bottom: 0;
+  }
+}
+
 .mtp-result-detail {
   td {
     padding-left: 0;

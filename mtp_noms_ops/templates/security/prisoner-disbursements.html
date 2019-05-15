@@ -36,7 +36,7 @@
       {{ form.search_description.description }}
     </p>
 
-    <div class="print-hidden mtp-links">
+    <div class="print-hidden mtp-results-actions">
       <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
       &nbsp;
       {% url 'security:prisoner_disbursement_detail_export' prisoner_id=prisoner.id as export_view %}
