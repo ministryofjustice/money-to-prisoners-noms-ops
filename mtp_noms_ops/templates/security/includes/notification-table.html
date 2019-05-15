@@ -28,11 +28,7 @@
         </thead>
         <tbody>
           {% for notification in notifications.results %}
-            {% if notification_class == 'monitored_credits' %}
-              {% include 'security/includes/credit-notification-row.html' with credit=notification %}
-            {% else %}
-              {% include 'security/includes/credit-notification-row.html' with credit=notification.credit %}
-            {% endif %}
+            {% include 'security/includes/credit-notification-row.html' with credit=notification.credit %}
           {% endfor %}
         </tbody>
       {% elif datatype == 'disbursement' %}
@@ -50,11 +46,7 @@
         </thead>
         <tbody>
           {% for notification in notifications.results %}
-            {% if notification_class == 'monitored_disbursements' %}
-              {% include 'security/includes/disbursement-notification-row.html' with disbursement=notification %}
-            {% else %}
-              {% include 'security/includes/disbursement-notification-row.html' with disbursement=notification.disbursement %}
-            {% endif %}
+            {% include 'security/includes/disbursement-notification-row.html' with disbursement=notification.disbursement %}
           {% endfor %}
         </tbody>
       {% elif datatype == 'sender_profile' %}

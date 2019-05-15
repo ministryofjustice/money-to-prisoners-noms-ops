@@ -45,19 +45,23 @@ class NotificationListView(TemplateView):
         start_date = context['current_week'],
         end_date = context['current_week'] + timedelta(days=7)
         prison_filter = ','.join(p['nomis_id'] for p in self.request.user_prisons)
-        context['monitored_credits'] = self.get_credit_list(
+        context['monitored_credits'] = self.get_event_list(
             session,
             'monitored_credits_page',
-            monitored=True,
-            received_at__gte=start_date,
-            received_at__lt=end_date
+            rule=['MONP', 'MONS'],
+            group_by='credit',
+            for_credit=True,
+            triggered_at__gte=start_date,
+            triggered_at__lt=end_date
         )
-        context['monitored_disbursements'] = self.get_disbursement_list(
+        context['monitored_disbursements'] = self.get_event_list(
             session,
             'monitored_disbursements_page',
-            monitored=True,
-            created__gte=start_date,
-            created__lt=end_date
+            rule=['MONP', 'MONR'],
+            group_by='disbursement',
+            for_disbursement=True,
+            triggered_at__gte=start_date,
+            triggered_at__lt=end_date
         )
         context['not_whole_credits'] = self.get_event_list(
             session,
@@ -159,12 +163,6 @@ class NotificationListView(TemplateView):
             if 'group_by' in filters:
                 populate_totals(event[filters['group_by']], 'last_4_weeks')
         return event_list
-
-    def get_credit_list(self, session, page_param, **filters):
-        return self.get_object_list('/credits', session, page_param, **filters)
-
-    def get_disbursement_list(self, session, page_param, **filters):
-        return self.get_object_list('/disbursements', session, page_param, **filters)
 
     def get_object_list(self, path, session, page_param, **filters):
         page = int(self.request.GET.get(page_param, 1))
