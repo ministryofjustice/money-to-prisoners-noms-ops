@@ -41,6 +41,12 @@
   </nav>
 {% endblock %}
 
+{% block licence_message %}
+  <p>
+    <strong>OFFICIAL</strong> — {% trans 'Permission is required to share this content with individuals who are not direct employees of HMPPS working in an intelligence function' %}.
+  </p>
+{% endblock %}
+
 {% block footer_support_links %}
   <ul>
     <li><a href="{% url 'submit_ticket' %}">{% trans 'Help and feedback' %}</a></li>
