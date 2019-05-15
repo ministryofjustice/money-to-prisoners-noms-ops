@@ -164,6 +164,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     filtered_description_template = NotImplemented
     unfiltered_description_template = NotImplemented
+    unlisted_description = ''
     description_templates = ()
     description_capitalisation = {}
     default_prison_preposition = 'to'
@@ -350,7 +351,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
             return {
                 'has_filters': has_filters,
-                'description': format_html(description_template, **description_kwargs),
+                'description': format_html(
+                    description_template + ' {unlisted}',
+                    unlisted=self.unlisted_description,
+                    **description_kwargs
+                ),
             }
 
     def describe_field_prison(self):

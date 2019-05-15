@@ -107,6 +107,7 @@ class SendersForm(SecurityForm):
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
     }
+    unlisted_description = 'You can’t see credits sent by post.'
 
     def clean_sender_sort_code(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
@@ -224,6 +225,7 @@ class PrisonersForm(SecurityForm):
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
     }
+    unlisted_description = 'You can only see prisoners who received or sent money.'
 
     def get_object_list_endpoint_path(self):
         return '/prisoners/'
@@ -330,6 +332,7 @@ class CreditsForm(SecurityForm):
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
     }
+    unlisted_description = 'You can’t see credits received by post.'
 
     def clean_amount_exact(self):
         if self.cleaned_data.get('amount_pattern') != 'exact':
@@ -495,6 +498,7 @@ class DisbursementsForm(SecurityForm):
         'prison_category': 'lowerfirst',
     }
     default_prison_preposition = 'from'
+    unlisted_description = 'You can’t see cash or postal orders here.'
 
     def clean_amount_exact(self):
         if self.cleaned_data.get('amount_pattern') != 'exact':

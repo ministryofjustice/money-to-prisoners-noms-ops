@@ -2,6 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_base import SecurityDetailForm
+from security.forms.object_list import SendersForm, CreditsForm, DisbursementsForm
 
 
 class SendersDetailForm(SecurityDetailForm):
@@ -23,6 +24,7 @@ class SendersDetailForm(SecurityDetailForm):
                                     'ordered by {ordering_description}.'
     unfiltered_description_template = 'All credits sent by this sender are shown below ordered by ' \
                                       '{ordering_description}.'
+    unlisted_description = SendersForm.unlisted_description
 
     def get_object_endpoint(self):
         return self.session.senders(self.object_id)
@@ -46,6 +48,7 @@ class PrisonersDetailForm(SecurityDetailForm):
                                     'ordered by {ordering_description}.'
     unfiltered_description_template = 'All credits received by this prisoner are shown below ordered by ' \
                                       '{ordering_description}.'
+    unlisted_description = CreditsForm.unlisted_description
 
     def get_object_endpoint(self):
         return self.session.prisoners(self.object_id)
@@ -71,6 +74,7 @@ class PrisonersDisbursementDetailForm(PrisonersDetailForm):
                                     'ordered by {ordering_description}.'
     unfiltered_description_template = 'All disbursements sent by this prisoner are shown below ordered by ' \
                                       '{ordering_description}.'
+    unlisted_description = DisbursementsForm.unlisted_description
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
