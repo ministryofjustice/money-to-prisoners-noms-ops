@@ -68,20 +68,20 @@ def validate_prisoner_number(prisoner_number):
         raise ValidationError(_('Invalid prisoner number'), code='invalid')
 
 
-def validate_range_field(field_name, bound_ordering_msg, upper_limit='__lte'):
+def validate_range_fields(*fields):
     def inner(cls):
-        lower = field_name + '__gte'
-        upper = field_name + upper_limit
-
         base_clean = cls.clean
 
         def clean(self):
             base_clean(self)
-            lower_value = self.cleaned_data.get(lower)
-            upper_value = self.cleaned_data.get(upper)
-            if lower_value is not None and upper_value is not None and lower_value > upper_value:
-                self.add_error(upper, ValidationError(bound_ordering_msg or _('Must be greater than the lower bound'),
-                                                      code='bound_ordering'))
+            for field in fields:
+                field_name, bound_ordering_msg, *upper_limit = field
+                lower = field_name + '__gte'
+                upper = field_name + (upper_limit[0] if upper_limit else '__lte')
+                lower_value = self.cleaned_data.get(lower)
+                upper_value = self.cleaned_data.get(upper)
+                if lower_value is not None and upper_value is not None and lower_value > upper_value:
+                    self.add_error(upper, ValidationError(bound_ordering_msg, code='bound_ordering'))
             return self.cleaned_data
 
         setattr(cls, 'clean', clean)

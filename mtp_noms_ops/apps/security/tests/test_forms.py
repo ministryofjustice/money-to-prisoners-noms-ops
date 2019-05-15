@@ -207,8 +207,12 @@ class PrisonerFormTestCase(SecurityFormTestCase):
             'ordering': '-sender_count',
             'prisoner_number': '', 'prisoner_name': '',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
-            'sender_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
-            'sender_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
+            'credit_count__gte': None, 'credit_count__lte': None,
+            'credit_total__gte': None, 'credit_total__lte': None,
+            'sender_count__gte': None, 'sender_count__lte': None,
+            'disbursement_count__gte': None, 'disbursement_count__lte': None,
+            'disbursement_total__gte': None, 'disbursement_total__lte': None,
+            'recipient_count__gte': None, 'recipient_count__lte': None,
         }
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
@@ -226,8 +230,12 @@ class PrisonerFormTestCase(SecurityFormTestCase):
             'ordering': '-credit_total',
             'prisoner_number': '', 'prisoner_name': 'John',
             'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
-            'sender_count__gte': None, 'credit_count__gte': None, 'credit_total__gte': None,
-            'sender_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
+            'credit_count__gte': None, 'credit_count__lte': None,
+            'credit_total__gte': None, 'credit_total__lte': None,
+            'sender_count__gte': None, 'sender_count__lte': None,
+            'disbursement_count__gte': None, 'disbursement_count__lte': None,
+            'disbursement_total__gte': None, 'disbursement_total__lte': None,
+            'recipient_count__gte': None, 'recipient_count__lte': None,
         }
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
