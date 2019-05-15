@@ -134,14 +134,19 @@ def sender_identifiable(sender):
 
 
 @register.filter
-def prisoner_profile_search_url(credit, redirect_on_single=True):
+def prisoner_profile_search_url(credit_or_disbursement, redirect_on_single=True):
     """
     Given an API credit response object, returns the URL for searching this prisoner
     """
-    prisoner_id = credit.get('prisoner_profile')
+    is_disbursement = 'method' in credit_or_disbursement
+    prisoner_id = credit_or_disbursement.get('prisoner_profile')
     if prisoner_id:
-        return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner_id})
-    return get_profile_search_url(credit, ['prisoner_number'], reverse('security:prisoner_list'),
+        return reverse(
+            'security:prisoner_disbursement_detail' if is_disbursement else 'security:prisoner_detail',
+            kwargs={'prisoner_id': prisoner_id}
+        )
+    url = reverse('security:prisoner_disbursement_list' if is_disbursement else 'security:prisoner_list')
+    return get_profile_search_url(credit_or_disbursement, ['prisoner_number'], url,
                                   redirect_on_single=redirect_on_single)
 
 
