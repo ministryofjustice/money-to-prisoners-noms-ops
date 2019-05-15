@@ -52,7 +52,8 @@ class SendersForm(SecurityForm):
     credit_total__lte = forms.IntegerField(label=_('Maximum total sent'), required=False)
 
     # meta field
-    search = forms.CharField(label=_('Sender name or email address'), required=False)
+    search = forms.CharField(label=_('Sender name or email address'),
+                             required=False, min_length=4)
 
     sender = forms.CharField(label=_('Sender name or email'), required=False)
     sender_name = forms.CharField(label=_('Sender name'), required=False)
@@ -221,7 +222,8 @@ class PrisonersForm(SecurityForm):
     disbursement_total__lte = forms.IntegerField(label=_('Maximum total sent'), required=False)
 
     # meta field
-    search = forms.CharField(label=_('Prisoner number or name'), required=False)
+    search = forms.CharField(label=_('Prisoner number or name'),
+                             required=False, min_length=4)
 
     prisoner_number = forms.CharField(label=_('Prisoner number'),
                                       validators=[validate_prisoner_number], required=False)
@@ -338,7 +340,8 @@ class CreditsForm(SecurityForm):
     amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 
     # meta field
-    search = forms.CharField(label=_('Sender name, sender email address or prisoner number'), required=False)
+    search = forms.CharField(label=_('Sender name, sender email address or prisoner number'),
+                             required=False, min_length=4)
 
     prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
@@ -515,7 +518,8 @@ class DisbursementsForm(SecurityForm):
     created__lt = forms.DateField(label=_('Entered before'), help_text=_('For example, 13/02/2018'), required=False)
 
     # meta field
-    search = forms.CharField(label=_('Recipient name or prisoner number'), required=False)
+    search = forms.CharField(label=_('Recipient name or prisoner number'),
+                             required=False, min_length=4)
 
     amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
                                        choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
