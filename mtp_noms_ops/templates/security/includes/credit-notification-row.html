@@ -19,5 +19,7 @@
     —
   {% endif %}
   </td>
-  <td><a href="{% url 'security:credit_detail' credit.id %}" title="{% trans 'View credit details' %}">{% trans 'View' %}</td>
+  <td>
+    <a href="{% url 'security:credit_detail' credit.id %}" title="{% trans 'View credit details' %}">{% trans 'View' %}</a>
+  </td>
 </tr>
