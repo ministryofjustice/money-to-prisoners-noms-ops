@@ -37,8 +37,6 @@
 </td>
 
 <td>
-  {{ disbursement.resolution|format_disbursement_resolution }}
-  <br/>
   <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="print-hidden">
     {% trans 'View details' %}
   </a>

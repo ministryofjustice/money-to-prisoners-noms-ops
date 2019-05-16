@@ -805,11 +805,9 @@ class DisbursementsListTestCase(SecurityViewTestCase):
         self.assertIn('A1409AE', response_content)
         self.assertIn('£20.00', response_content)
         self.assertIn('by bank transfer', response_content)
-        self.assertIn('Sent', response_content)
         self.assertIn('A1401AE', response_content)
         self.assertIn('£10.00', response_content)
         self.assertIn('by cheque', response_content)
-        self.assertIn('Confirmed', response_content)
 
     @responses.activate
     def test_bank_transfer_detail(self):
