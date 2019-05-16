@@ -19,7 +19,7 @@ BANK_TRANSFER_SENDER_KEYS = [
     'sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number',
 ]
 DEBIT_CARD_SENDER_KEYS = [
-    'card_number_last_digits', 'card_expiry_date',
+    'card_number_last_digits', 'card_expiry_date', 'postcode',
 ]
 
 
