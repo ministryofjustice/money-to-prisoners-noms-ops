@@ -39,63 +39,68 @@
           <thead>
             <tr>
               <th>{% trans 'Payment source' %}</th>
-              {% sortable_cell _('Sent') form.cleaned_data 'credit_count' %}
+              {% sortable_cell _('Credits sent') form.cleaned_data 'credit_count' %}
               {% sortable_cell _('Prisoners') form.cleaned_data 'prisoner_count' %}
               {% sortable_cell _('Prisons') form.cleaned_data 'prison_count' %}
-              {% sortable_cell _('Amount') form.cleaned_data 'credit_total' cell_classes='numeric' %}
+              {% sortable_cell _('Amount sent') form.cleaned_data 'credit_total' cell_classes='numeric' %}
+              <th>{% trans 'Action' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for sender in senders %}
-              {% with known_sender=sender|sender_identifiable %}
-                {% if known_sender %}
-                  <tr>
-                    <td>
-                      {% if sender.bank_transfer_details %}
-                        <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}" class="mtp-print-url-hidden">
-                          {{ sender.bank_transfer_details.0.sender_name|default:'—' }}
-                        </a>
-                        <br />
-                        {% trans 'by bank transfer' %}
-                      {% elif sender.debit_card_details %}
-                        <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}" class="mtp-print-url-hidden">
-                          {{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}
-                        </a>
-                        <br />
-                        {% trans 'by debit card' %}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% blocktrans trimmed count count=sender.credit_count %}
-                        {{ count }} credit sent
-                      {% plural %}
-                        {{ count }} credits sent
-                      {% endblocktrans %}
-                    </td>
-                    <td>
-                      {% blocktrans trimmed count count=sender.prisoner_count %}
-                        {{ count }} prisoner
-                      {% plural %}
-                        {{ count }} prisoners
-                      {% endblocktrans %}
-                    </td>
-                    <td>
-                      {% blocktrans trimmed count count=sender.prison_count %}
-                        {{ count }} prison
-                      {% plural %}
-                        {{ count }} prisons
-                      {% endblocktrans %}
-                    </td>
-                    <td class="numeric">
-                      <span class="mtp-sortable-cell--pad">
-                        {{ sender.credit_total|currency }}
-                      </span>
-                    </td>
-                  </tr>
-                {% endif %}
-              {% endwith %}
+              {% if sender|sender_identifiable %}
+                {% url 'security:sender_detail' sender.id as sender_profile_url %}
+                <tr>
+                  <td>
+                    {% if sender.bank_transfer_details %}
+                      <a href="{{ sender_profile_url }}" title="{% trans 'View bank transfer details' %}" class="mtp-print-url-hidden">
+                        {{ sender.bank_transfer_details.0.sender_name|default:'—' }}
+                      </a>
+                      <br />
+                      {% trans 'by bank transfer' %}
+                    {% elif sender.debit_card_details %}
+                      <a href="{{ sender_profile_url }}" title="{% trans 'View debit card details' %}" class="mtp-print-url-hidden">
+                        {{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}
+                      </a>
+                      <br />
+                      {% trans 'by debit card' %}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% blocktrans trimmed count count=sender.credit_count %}
+                      {{ count }} credit sent
+                    {% plural %}
+                      {{ count }} credits sent
+                    {% endblocktrans %}
+                  </td>
+                  <td>
+                    {% blocktrans trimmed count count=sender.prisoner_count %}
+                      {{ count }} prisoner
+                    {% plural %}
+                      {{ count }} prisoners
+                    {% endblocktrans %}
+                  </td>
+                  <td>
+                    {% blocktrans trimmed count count=sender.prison_count %}
+                      {{ count }} prison
+                    {% plural %}
+                      {{ count }} prisons
+                    {% endblocktrans %}
+                  </td>
+                  <td class="numeric">
+                    <span class="mtp-sortable-cell--pad">
+                      {{ sender.credit_total|currency }}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{{ sender_profile_url }}">
+                      {% trans 'View details' %}
+                    </a>
+                  </td>
+                </tr>
+              {% endif %}
             {% empty %}
               <tr>
                 <td colspan="5">{% trans 'No matching payment sources found' %}</td>

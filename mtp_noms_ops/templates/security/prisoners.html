@@ -62,25 +62,26 @@
             <tr>
               {% sortable_cell _('Prisoner') form.cleaned_data 'prisoner_number' %}
               {% if view.showing == 'credits' %}
-                {% sortable_cell _('Received') form.cleaned_data 'credit_count' %}
+                {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' %}
                 {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' %}
-                {% sortable_cell _('Amount') form.cleaned_data 'credit_total' cell_classes='numeric' %}
+                {% sortable_cell _('Amount received') form.cleaned_data 'credit_total' cell_classes='numeric' %}
               {% elif view.showing == 'disbursements' %}
-                {% sortable_cell _('Sent') form.cleaned_data 'disbursement_count' %}
+                {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' %}
                 {% sortable_cell _('Bank accounts') form.cleaned_data 'recipient_count' %}
-                {% sortable_cell _('Amount') form.cleaned_data 'disbursement_total' cell_classes='numeric' %}
+                {% sortable_cell _('Amount sent') form.cleaned_data 'disbursement_total' cell_classes='numeric' %}
               {% endif %}
+              <th>{% trans 'Action' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for prisoner in prisoners %}
+              {% if view.showing == 'credits' %}
+                {% url 'security:prisoner_detail' prisoner.id as prosioner_profile_url %}
+              {% elif view.showing == 'disbursements' %}
+                {% url 'security:prisoner_disbursement_detail' prisoner.id as prosioner_profile_url %}
+              {% endif %}
               <tr>
                 <td>
-                  {% if view.showing == 'credits' %}
-                    {% url 'security:prisoner_detail' prisoner.id as prosioner_profile_url %}
-                  {% elif view.showing == 'disbursements' %}
-                    {% url 'security:prisoner_disbursement_detail' prisoner.id as prosioner_profile_url %}
-                  {% endif %}
                   <a href="{{ prosioner_profile_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
                     {{ prisoner.prisoner_name|default_if_none:'—' }}
                   </a>
@@ -128,6 +129,11 @@
                     </span>
                   </td>
                 {% endif %}
+                <td>
+                  <a href="{{ prosioner_profile_url }}">
+                    {% trans 'View details' %}
+                  </a>
+                </td>
               </tr>
             {% empty %}
               <tr>
