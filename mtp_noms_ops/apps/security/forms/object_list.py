@@ -454,6 +454,7 @@ class DisbursementsForm(SecurityForm):
     # search = forms.CharField(label=_('Prisoner name, prisoner number or recipient name'), required=False)
 
     exclusive_date_params = ['created__lt']
+    exclude_private_estate = True
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are disbursements {filter_description}, ' \

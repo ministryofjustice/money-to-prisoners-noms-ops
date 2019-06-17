@@ -18,7 +18,7 @@ disbursement_methods = {
 class PrisonList:
     excluded_nomis_ids = {'ZCH'}
 
-    def __init__(self, session):
+    def __init__(self, session, exclude_private_estate=False):
         self.prisons = self.get_prisons(session)
 
         prison_choices = []
@@ -27,6 +27,8 @@ class PrisonList:
         population_choices = {}
         for prison in self.prisons:
             if prison['nomis_id'] in self.excluded_nomis_ids:
+                continue
+            if exclude_private_estate and prison.get('private_estate') is True:
                 continue
             prison_choices.append((prison['nomis_id'], prison['name']))
             if prison['region']:

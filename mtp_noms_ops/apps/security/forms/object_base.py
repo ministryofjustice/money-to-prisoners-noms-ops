@@ -160,6 +160,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     page_size = 20
 
     exclusive_date_params = []
+    exclude_private_estate = False
 
     filtered_description_template = NotImplemented
     unfiltered_description_template = NotImplemented
@@ -183,7 +184,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         self.existing_search = None
 
         if 'prison' in self.fields:
-            prison_list = PrisonList(self.session)
+            prison_list = PrisonList(self.session, exclude_private_estate=self.exclude_private_estate)
             self['prison'].field.choices = prison_list.prison_choices
             self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
                                                                       title=_('All regions'))

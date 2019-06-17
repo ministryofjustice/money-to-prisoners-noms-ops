@@ -64,6 +64,8 @@ class PrisonersDisbursementDetailForm(PrisonersDetailForm):
                                      ('-amount', _('Amount sent (high to low)')),
                                  ])
 
+    exclude_private_estate = True
+
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are disbursements sent by this prisoner that {filter_description}, ' \
                                     'ordered by {ordering_description}.'
