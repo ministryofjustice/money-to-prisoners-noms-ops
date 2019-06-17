@@ -26,20 +26,6 @@ from security.searches import (
 from security.utils import parse_date_fields
 
 
-TIME_PERIOD_CHOICES = [
-    ('all_time', _('all time')),
-    ('last_7_days', _('last 7 days')),
-    ('last_30_days', _('last 30 days')),
-    ('last_6_months', _('last 6 months')),
-]
-
-
-TOTALS_FIELDS = [
-    'prisoner_count', 'sender_count', 'prison_count', 'credit_count',
-    'credit_total', 'time_period'
-]
-
-
 def get_credit_source_choices(blank_option=_('Any method')):
     return insert_blank_option(
         list(credit_sources.items()),
@@ -104,15 +90,6 @@ def validate_range_field(field_name, bound_ordering_msg, upper_limit='__lte'):
     return inner
 
 
-def populate_totals(record, time_period):
-    if 'totals' in record:
-        for total in record['totals']:
-            if total['time_period'] == (time_period or TIME_PERIOD_CHOICES[0][0]):
-                for field in total:
-                    if field in TOTALS_FIELDS:
-                        record[field] = total[field]
-
-
 class AmountPattern(enum.Enum):
     not_integral = _('Not a whole number')
     not_multiple_5 = _('Not a multiple of £5')
@@ -160,9 +137,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     page_size = 20
 
     exclusive_date_params = []
+    exclude_private_estate = False
 
     filtered_description_template = NotImplemented
     unfiltered_description_template = NotImplemented
+    unlisted_description = ''
     description_templates = ()
     description_capitalisation = {}
     default_prison_preposition = 'to'
@@ -178,15 +157,12 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 elif field.initial is not None:
                     self.data[name] = field.initial
         self.request = request
-        self.total_count = None
+        self.total_count = 0
         self.page_count = 0
         self.existing_search = None
 
         if 'prison' in self.fields:
-            prison_list = PrisonList(
-                self.session,
-                included_nomis_ids=getattr(self, 'included_nomis_ids', None)
-            )
+            prison_list = PrisonList(self.session, exclude_private_estate=self.exclude_private_estate)
             self['prison'].field.choices = prison_list.prison_choices
             self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
                                                                       title=_('All regions'))
@@ -229,19 +205,10 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_api_request_params(self):
         filters = self.get_query_data()
-        api_filters = {}
         for param in filters:
             if param in self.exclusive_date_params:
-                api_filters[param] = filters[param] + datetime.timedelta(days=1)
-            elif param in TOTALS_FIELDS:
-                api_filters['totals__' + param] = filters[param]
-            elif param == 'ordering' and filters[param] in TOTALS_FIELDS:
-                api_filters[param] = 'totals__' + filters[param]
-            elif param == 'ordering' and filters[param][1:] in TOTALS_FIELDS:
-                api_filters[param] = '-totals__' + filters[param][1:]
-            else:
-                api_filters[param] = filters[param]
-        return api_filters
+                filters[param] += datetime.timedelta(days=1)
+        return filters
 
     def get_object_list(self):
         """
@@ -264,9 +231,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         count = data.get('count', 0)
         self.total_count = count
         self.page_count = int(ceil(count / self.page_size))
-        for record in data.get('results', []):
-            time_period = self.cleaned_data.get('time_period')
-            populate_totals(record, time_period)
         return data.get('results', [])
 
     def get_complete_object_list(self):
@@ -352,7 +316,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
             return {
                 'has_filters': has_filters,
-                'description': format_html(description_template, **description_kwargs),
+                'description': format_html(
+                    description_template + ' {unlisted}',
+                    unlisted=self.unlisted_description,
+                    **description_kwargs
+                ),
             }
 
     def describe_field_prison(self):
@@ -400,10 +368,7 @@ class SecurityDetailForm(SecurityForm):
         :return: dict or None if not found
         """
         try:
-            record = self.session.get(self.get_object_endpoint_path()).json()
-            time_period = self.cleaned_data.get('time_period')
-            populate_totals(record, time_period)
-            return record
+            return self.session.get(self.get_object_endpoint_path()).json()
         except HttpNotFoundError:
             self.add_error(None, _('Not found'))
             return None

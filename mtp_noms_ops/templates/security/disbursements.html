@@ -16,9 +16,8 @@
   <form id="filter-disbursements" class="mtp-security-search js-FormAnalytics" method="get">
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <p class="lede">
+    <p class="mtp-search-description">
       {{ form.search_description.description }}
-      {% trans 'You can’t see cash or postal orders here.' %}
     </p>
 
     <div class="print-hidden">
@@ -55,7 +54,18 @@
           </tbody>
         </table>
       </div>
-      {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+      <div class="mtp-page-list-container">
+        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+        <p class="mtp-object-count">
+          {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+            {{ number }} disbursement
+          {% plural %}
+            {{ number }} disbursements
+          {% endblocktrans %}
+        </p>
+      </div>
     {% endif %}
 
   </form>

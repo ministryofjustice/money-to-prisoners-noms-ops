@@ -1,6 +1,6 @@
 {% extends 'security/prisoner.html' %}
 {% load i18n %}
-
+{% load mtp_common %}
 
 {% block object_list %}
   <aside class="mtp-object-list-toggle print-hidden">
@@ -12,7 +12,9 @@
   <h2 class="heading-large">{% trans 'Disbursements sent' %}</h2>
 
   <div class="panel panel-border-narrow">
-    {% include 'security/forms/search-description.html' with form=form only %}
+    <p class="mtp-search-description--aside">
+      {{ form.search_description.description }}
+    </p>
 
     <div class="print-hidden mtp-links">
       <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -42,4 +44,14 @@
       {% endfor %}
     </tbody>
   </table>
+{% endblock %}
+
+{% block list_object_count %}
+  <p class="mtp-object-count">
+    {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+      {{ number }} disbursement
+    {% plural %}
+      {{ number }} disbursements
+    {% endblocktrans %}
+  </p>
 {% endblock %}

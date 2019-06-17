@@ -9,16 +9,38 @@ credit_sources = {
     'bank_transfer': _('Bank transfer'),
     'online': _('Debit card'),
 }
+credit_resolutions = {
+    'initial': _('Initial'),
+    'pending': _('Pending'),
+    'manual': _('Requires manual processing'),
+    'credited': _('Credited'),
+    'refunded': _('Refunded'),
+}
+
 disbursement_methods = {
     'bank_transfer': _('Bank transfer'),
     'cheque': _('Cheque'),
+}
+disbursement_actions = {
+    'created': _('Entered'),
+    'edited': _('Edited'),
+    'rejected': _('Cancelled'),
+    'confirmed': _('Confirmed'),
+    'sent': _('Sent'),
+}
+disbursement_resolutions = {
+    'pending': _('Waiting for confirmation'),
+    'rejected': _('Cancelled'),
+    'preconfirmed': _('Confirmed'),
+    'confirmed': _('Confirmed'),
+    'sent': _('Sent'),
 }
 
 
 class PrisonList:
     excluded_nomis_ids = {'ZCH'}
 
-    def __init__(self, session, included_nomis_ids=None):
+    def __init__(self, session, exclude_private_estate=False):
         self.prisons = self.get_prisons(session)
 
         prison_choices = []
@@ -26,10 +48,9 @@ class PrisonList:
         category_choices = {}
         population_choices = {}
         for prison in self.prisons:
-            if (
-                (prison['nomis_id'] in self.excluded_nomis_ids) or
-                (included_nomis_ids and prison['nomis_id'] not in included_nomis_ids)
-            ):
+            if prison['nomis_id'] in self.excluded_nomis_ids:
+                continue
+            if exclude_private_estate and prison.get('private_estate') is True:
                 continue
             prison_choices.append((prison['nomis_id'], prison['name']))
             if prison['region']:

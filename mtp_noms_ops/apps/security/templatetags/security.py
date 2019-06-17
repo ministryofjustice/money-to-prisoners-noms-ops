@@ -5,19 +5,21 @@ from django.core.urlresolvers import reverse
 from django.utils.html import escape
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext
 
-from security.models import credit_sources, disbursement_methods
+from security.models import (
+    credit_sources, credit_resolutions,
+    disbursement_methods, disbursement_actions, disbursement_resolutions,
+)
 
 logger = logging.getLogger('mtp')
 register = template.Library()
 
 
 BANK_TRANSFER_SENDER_KEYS = [
-    'sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number'
+    'sender_name', 'sender_sort_code', 'sender_account_number', 'sender_roll_number',
 ]
 DEBIT_CARD_SENDER_KEYS = [
-    'card_number_last_digits', 'card_expiry_date'
+    'card_number_last_digits', 'card_expiry_date', 'postcode',
 ]
 
 
@@ -59,17 +61,7 @@ def credit_source(source_key):
 
 @register.filter
 def format_resolution(resolution):
-    if resolution == 'initial':
-        return gettext('Initial')
-    if resolution == 'pending':
-        return gettext('Pending')
-    if resolution == 'manual':
-        return gettext('Requires manual processing')
-    if resolution == 'credited':
-        return gettext('Credited')
-    if resolution == 'refunded':
-        return gettext('Refunded')
-    return resolution
+    return credit_resolutions.get(resolution, resolution)
 
 
 @register.filter
@@ -165,24 +157,12 @@ def disbursement_method(method_key):
 
 @register.filter
 def format_disbursement_action(value):
-    return {
-        'created': gettext('entered'),
-        'edited': gettext('edited'),
-        'rejected': gettext('cancelled'),
-        'confirmed': gettext('confirmed'),
-        'sent': gettext('sent'),
-    }.get(value, value)
+    return disbursement_actions.get(value, value)
 
 
 @register.filter
 def format_disbursement_resolution(value):
-    return {
-        'pending': gettext('Waiting for confirmation'),
-        'rejected': gettext('Cancelled'),
-        'preconfirmed': gettext('Confirmed'),
-        'confirmed': gettext('Confirmed'),
-        'sent': gettext('Sent'),
-    }.get(value, value)
+    return disbursement_resolutions.get(value, value)
 
 
 @register.filter

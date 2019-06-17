@@ -36,7 +36,7 @@
       <p class="lede">
         {% trans 'Debit card payments with these details' %}
         &nbsp;
-        <a href="#grouping-info-dialogue" class="mtp-grouping-info js-dialogue-open">{% trans 'How are these grouped?' %}</a>
+        <a href="#grouping-info-dialogue" class="js-dialogue-open">{% trans 'How are these grouped?' %}</a>
       </p>
 
       <div class="grid-row mtp-sender-summary__details">
@@ -90,7 +90,9 @@
         <h2 class="heading-large">{% trans 'Credits sent' %}</h2>
 
         <div class="panel panel-border-narrow">
-          {% include 'security/forms/search-description.html' with form=form only %}
+          <p class="mtp-search-description--aside">
+            {{ form.search_description.description }}
+          </p>
 
           <div class="print-hidden mtp-links">
             <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -121,11 +123,22 @@
           </tbody>
         </table>
       </div>
-      {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+      <div class="mtp-page-list-container">
+        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+        <p class="mtp-object-count">
+          {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+            {{ number }} credit
+          {% plural %}
+            {{ number }} credits
+          {% endblocktrans %}
+        </p>
+      </div>
     {% endif %}
   </form>
 
-  {% dialoguebox html_id='grouping-info-dialogue' title=_('How these credits are grouped') html_classes="mtp-grouping-info-dialogue" %}
+  {% dialoguebox html_id='grouping-info-dialogue' title=_('How these credits are grouped') %}
     <p>
       {% trans 'We group the payment sources by the debit card’s last 4 digits, expiry date and postcode.' %}
       {% trans 'We do this because card industry compliance doesn’t allow using the full card number as a unique ID.' %}
@@ -134,9 +147,7 @@
       {% trans 'In almost all cases, this results in one specific card and cardholder.' %}
       {% trans 'But, for the avoidance of doubt, we’ve listed details for each transaction below.' %}
     </p>
-    <div class="mtp-grouping-info-dialogue__button">
-      <button type="button" class="button {{ dialogue_close_class }}">{% trans 'OK' %}</button>
-    </div>
+    <button type="button" class="button {{ dialogue_close_class }}">{% trans 'OK' %}</button>
   {% enddialoguebox %}
 
 {% endblock %}

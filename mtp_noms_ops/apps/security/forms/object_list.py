@@ -1,7 +1,6 @@
 import re
 
 from django import forms
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
 from django.utils.translation import gettext_lazy as _
@@ -10,8 +9,7 @@ from security.forms.object_base import (
     SecurityForm,
     AmountPattern, parse_amount,
     validate_amount, validate_prisoner_number, validate_range_field,
-    insert_blank_option, get_credit_source_choices,
-    get_disbursement_method_choices, TIME_PERIOD_CHOICES
+    insert_blank_option, get_credit_source_choices, get_disbursement_method_choices,
 )
 from security.templatetags.security import currency as format_currency
 from security.utils import parse_date_fields
@@ -33,13 +31,6 @@ class SendersForm(SecurityForm):
                                      ('credit_total', _('Total sent (low to high)')),
                                      ('-credit_total', _('Total sent (high to low)')),
                                  ])
-
-    time_period = forms.ChoiceField(
-        label=_('Time period'),
-        choices=TIME_PERIOD_CHOICES,
-        initial=TIME_PERIOD_CHOICES[0][0],
-        required=False
-    )
 
     prisoner_count__gte = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
     prisoner_count__lte = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
@@ -108,6 +99,7 @@ class SendersForm(SecurityForm):
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
     }
+    unlisted_description = 'You can’t see credits sent by post.'
 
     def clean_sender_sort_code(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
@@ -170,13 +162,6 @@ class PrisonersForm(SecurityForm):
                                      ('-prisoner_number', _('Prisoner number (Z to A)')),
                                  ])
 
-    time_period = forms.ChoiceField(
-        label=_('Time period'),
-        choices=TIME_PERIOD_CHOICES,
-        initial=TIME_PERIOD_CHOICES[0][0],
-        required=False
-    )
-
     sender_count__gte = forms.IntegerField(label=_('Number of senders (minimum)'), required=False, min_value=1)
     sender_count__lte = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)
     credit_count__gte = forms.IntegerField(label=_('Minimum credits received'), required=False, min_value=1)
@@ -225,6 +210,7 @@ class PrisonersForm(SecurityForm):
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
     }
+    unlisted_description = 'You can only see prisoners who received or sent money.'
 
     def get_object_list_endpoint_path(self):
         return '/prisoners/'
@@ -331,6 +317,7 @@ class CreditsForm(SecurityForm):
         'prison_region': 'preserve',
         'prison_category': 'lowerfirst',
     }
+    unlisted_description = 'You can’t see credits received by post.'
 
     def clean_amount_exact(self):
         if self.cleaned_data.get('amount_pattern') != 'exact':
@@ -455,6 +442,7 @@ class DisbursementsForm(SecurityForm):
     # search = forms.CharField(label=_('Prisoner name, prisoner number or recipient name'), required=False)
 
     exclusive_date_params = ['created__lt']
+    exclude_private_estate = True
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are disbursements {filter_description}, ' \
@@ -495,10 +483,7 @@ class DisbursementsForm(SecurityForm):
         'prison_category': 'lowerfirst',
     }
     default_prison_preposition = 'from'
-
-    def __init__(self, *args, **kwargs):
-        self.included_nomis_ids = set(settings.DISBURSEMENT_PRISONS)
-        super().__init__(*args, **kwargs)
+    unlisted_description = 'You can’t see cash or postal orders here.'
 
     def clean_amount_exact(self):
         if self.cleaned_data.get('amount_pattern') != 'exact':
