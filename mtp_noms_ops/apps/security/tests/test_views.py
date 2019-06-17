@@ -83,7 +83,6 @@ def no_saved_searches():
 
 @override_settings(
     CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}},
-    DISBURSEMENT_PRISONS=['AAI', 'BBI']
 )
 class SecurityBaseTestCase(SimpleTestCase):
 

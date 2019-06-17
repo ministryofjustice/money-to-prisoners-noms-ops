@@ -18,7 +18,7 @@ disbursement_methods = {
 class PrisonList:
     excluded_nomis_ids = {'ZCH'}
 
-    def __init__(self, session, included_nomis_ids=None):
+    def __init__(self, session):
         self.prisons = self.get_prisons(session)
 
         prison_choices = []
@@ -26,10 +26,7 @@ class PrisonList:
         category_choices = {}
         population_choices = {}
         for prison in self.prisons:
-            if (
-                (prison['nomis_id'] in self.excluded_nomis_ids) or
-                (included_nomis_ids and prison['nomis_id'] not in included_nomis_ids)
-            ):
+            if prison['nomis_id'] in self.excluded_nomis_ids:
                 continue
             prison_choices.append((prison['nomis_id'], prison['name']))
             if prison['region']:

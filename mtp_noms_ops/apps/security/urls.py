@@ -28,10 +28,6 @@ def dashboard_view(request):
     return render(request, 'dashboard.html', {
         'start_page_url': settings.START_PAGE_URL,
         'saved_searches': populate_new_result_counts(session, get_saved_searches(session)),
-        'in_disbursement_pilot': any(
-            prison['nomis_id'] in settings.DISBURSEMENT_PRISONS
-            for prison in request.user_prisons
-        ),
     })
 
 

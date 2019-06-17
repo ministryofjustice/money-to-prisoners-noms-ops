@@ -1,7 +1,6 @@
 import re
 
 from django import forms
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
 from django.utils.translation import gettext_lazy as _
@@ -495,10 +494,6 @@ class DisbursementsForm(SecurityForm):
         'prison_category': 'lowerfirst',
     }
     default_prison_preposition = 'from'
-
-    def __init__(self, *args, **kwargs):
-        self.included_nomis_ids = set(settings.DISBURSEMENT_PRISONS)
-        super().__init__(*args, **kwargs)
 
     def clean_amount_exact(self):
         if self.cleaned_data.get('amount_pattern') != 'exact':

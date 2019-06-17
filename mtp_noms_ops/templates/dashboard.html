@@ -5,31 +5,6 @@
 {% block inner_content %}
   {% notifications_box request 'noms_ops_security_dashboard' %}
 
-  <div class="mtp-notification mtp-notification--info">
-    <h1>
-      <a href="#mtp-notification-disbursements" class="mtp-notification__headline">
-        {% trans 'You now have access to more data' %}
-        <i></i>
-      </a>
-    </h1>
-    <div id="mtp-notification-disbursements" class="mtp-notification__message">
-      <p>
-        {% trans 'We’re piloting a new digital disbursement tool which will track money sent out of prisons.' %}
-      </p>
-      <p>
-        {% if in_disbursement_pilot %}
-          {% trans 'Your prison is part of the pilot so you now have access to the data from your prison and the other 21 pilot prisons.' %}
-        {% else %}
-          {% trans 'You now have access to the data from 22 pilot prisons.' %}
-          {% trans 'You’re not part of the pilot, so this data is not from your prison.' %}
-        {% endif %}
-      </p>
-      <p>
-        {% trans 'All public UK prisons will have access soon.' %}
-      </p>
-    </div>
-  </div>
-
   <header>
     <h1 class="heading-xlarge mtp-unpadded-heading">
       {% blocktrans trimmed with full_name=request.user.get_full_name|default:request.user.username %}
@@ -74,7 +49,7 @@
 
     <div class="grid-row">
       <div class="column-one-third mtp-box">
-        <a href="{% url 'security:disbursement_list' %}?{{ initial_disbursement_params }}">
+        <a href="{% url 'security:disbursement_list' %}?{{ initial_params }}">
           {% trans 'Disbursements' %}
         </a>
       </div>

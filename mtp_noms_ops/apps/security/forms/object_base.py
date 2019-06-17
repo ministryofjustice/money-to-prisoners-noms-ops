@@ -183,10 +183,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         self.existing_search = None
 
         if 'prison' in self.fields:
-            prison_list = PrisonList(
-                self.session,
-                included_nomis_ids=getattr(self, 'included_nomis_ids', None)
-            )
+            prison_list = PrisonList(self.session)
             self['prison'].field.choices = prison_list.prison_choices
             self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
                                                                       title=_('All regions'))

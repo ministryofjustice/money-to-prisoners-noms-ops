@@ -4,7 +4,7 @@ import unittest
 from unittest import mock
 
 from django.http import QueryDict
-from django.test import SimpleTestCase, override_settings
+from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
 import responses
 
@@ -57,7 +57,6 @@ def mock_empty_response(rsps, path):
     )
 
 
-@override_settings(DISBURSEMENT_PRISONS=['IXB', 'INP'])
 class SecurityFormTestCase(SimpleTestCase):
     form_class = None
 
