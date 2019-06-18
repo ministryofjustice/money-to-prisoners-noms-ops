@@ -109,7 +109,8 @@ def sender_profile_search_url(credit, redirect_on_single=True):
 
 @register.filter
 def credit_sender_identifiable(credit):
-    return any([credit[key] for key in get_sender_keys(credit)])
+    keys = get_sender_keys(credit)
+    return any([credit[key] for key in keys - {'postcode'}])
 
 
 @register.filter
