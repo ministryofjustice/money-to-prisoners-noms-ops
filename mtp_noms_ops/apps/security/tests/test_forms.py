@@ -108,18 +108,8 @@ class SecurityFormTestCase(SimpleTestCase):
             form = self.form_class(self.request, data=QueryDict('prison=INP', mutable=True))
         initial_ordering = form['ordering'].initial
         self.assertTrue(form.is_valid())
-        if self.form_class in (SendersForm, PrisonersForm):
-            self.assertDictEqual(
-                form.get_query_data(),
-                {'ordering': initial_ordering, 'prison': ['INP'], 'time_period': 'all_time'}
-            )
-            self.assertEqual(
-                form.query_string,
-                'ordering=%s&time_period=all_time&prison=INP' % initial_ordering
-            )
-        else:
-            self.assertDictEqual(form.get_query_data(), {'ordering': initial_ordering, 'prison': ['INP']})
-            self.assertEqual(form.query_string, 'ordering=%s&prison=INP' % initial_ordering)
+        self.assertDictEqual(form.get_query_data(), {'ordering': initial_ordering, 'prison': ['INP']})
+        self.assertEqual(form.query_string, 'ordering=%s&prison=INP' % initial_ordering)
 
     def test_filtering_by_many_prisons(self):
         if not self.form_class:
@@ -129,18 +119,8 @@ class SecurityFormTestCase(SimpleTestCase):
             form = self.form_class(self.request, data=QueryDict('prison=IXB&prison=INP', mutable=True))
         initial_ordering = form['ordering'].initial
         self.assertTrue(form.is_valid())
-        if self.form_class in (SendersForm, PrisonersForm):
-            self.assertDictEqual(
-                form.get_query_data(),
-                {'ordering': initial_ordering, 'prison': ['INP', 'IXB'], 'time_period': 'all_time'}
-            )
-            self.assertEqual(
-                form.query_string,
-                'ordering=%s&time_period=all_time&prison=INP&prison=IXB' % initial_ordering
-            )
-        else:
-            self.assertDictEqual(form.get_query_data(), {'ordering': initial_ordering, 'prison': ['INP', 'IXB']})
-            self.assertEqual(form.query_string, 'ordering=%s&prison=INP&prison=IXB' % initial_ordering)
+        self.assertDictEqual(form.get_query_data(), {'ordering': initial_ordering, 'prison': ['INP', 'IXB']})
+        self.assertEqual(form.query_string, 'ordering=%s&prison=INP&prison=IXB' % initial_ordering)
 
     def test_filtering_by_many_prisons_alternate(self):
         if not self.form_class:
@@ -150,18 +130,8 @@ class SecurityFormTestCase(SimpleTestCase):
             form = self.form_class(self.request, data=QueryDict('prison=IXB,INP,', mutable=True))
         initial_ordering = form['ordering'].initial
         self.assertTrue(form.is_valid())
-        if self.form_class in (SendersForm, PrisonersForm):
-            self.assertDictEqual(
-                form.get_query_data(),
-                {'ordering': initial_ordering, 'prison': ['INP', 'IXB'], 'time_period': 'all_time'}
-            )
-            self.assertEqual(
-                form.query_string,
-                'ordering=%s&time_period=all_time&prison=INP&prison=IXB' % initial_ordering
-            )
-        else:
-            self.assertDictEqual(form.get_query_data(), {'ordering': initial_ordering, 'prison': ['INP', 'IXB']})
-            self.assertEqual(form.query_string, 'ordering=%s&prison=INP&prison=IXB' % initial_ordering)
+        self.assertDictEqual(form.get_query_data(), {'ordering': initial_ordering, 'prison': ['INP', 'IXB']})
+        self.assertEqual(form.query_string, 'ordering=%s&prison=INP&prison=IXB' % initial_ordering)
 
 
 class SenderFormTestCase(SecurityFormTestCase):
@@ -178,7 +148,6 @@ class SenderFormTestCase(SecurityFormTestCase):
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'prison_count__gte': None, 'prison_count__lte': None,
             'card_number_last_digits': '', 'source': '', 'sender_email': '', 'sender_postcode': '',
-            'time_period': 'all_time'
         }
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
@@ -187,8 +156,8 @@ class SenderFormTestCase(SecurityFormTestCase):
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
-        self.assertDictEqual(form.get_query_data(), {'ordering': '-prisoner_count', 'time_period': 'all_time'})
-        self.assertEqual(form.query_string, 'ordering=-prisoner_count&time_period=all_time')
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-prisoner_count'})
+        self.assertEqual(form.query_string, 'ordering=-prisoner_count')
 
     def test_sender_list_valid_form(self):
         expected_data = {
@@ -200,7 +169,6 @@ class SenderFormTestCase(SecurityFormTestCase):
             'prisoner_count__lte': None, 'credit_count__lte': None, 'credit_total__lte': None,
             'prison_count__gte': None, 'prison_count__lte': None,
             'card_number_last_digits': '', 'source': '', 'sender_email': '', 'sender_postcode': '',
-            'time_period': 'all_time'
         }
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
@@ -209,11 +177,8 @@ class SenderFormTestCase(SecurityFormTestCase):
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
-        self.assertDictEqual(
-            form.get_query_data(),
-            {'ordering': '-credit_total', 'sender_name': 'Joh', 'time_period': 'all_time'}
-        )
-        self.assertEqual(form.query_string, 'ordering=-credit_total&time_period=all_time&sender_name=Joh')
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-credit_total', 'sender_name': 'Joh'})
+        self.assertEqual(form.query_string, 'ordering=-credit_total&sender_name=Joh')
 
     def test_sender_list_invalid_forms(self):
         with responses.RequestsMock() as rsps:
@@ -248,7 +213,6 @@ class PrisonerFormTestCase(SecurityFormTestCase):
             'disbursement_count__gte': None, 'disbursement_count__lte': None,
             'disbursement_total__gte': None, 'disbursement_total__lte': None,
             'recipient_count__gte': None, 'recipient_count__lte': None,
-            'time_period': 'all_time',
         }
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
@@ -257,11 +221,8 @@ class PrisonerFormTestCase(SecurityFormTestCase):
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
-        self.assertDictEqual(
-            form.get_query_data(),
-            {'ordering': '-sender_count', 'time_period': 'all_time'}
-        )
-        self.assertEqual(form.query_string, 'ordering=-sender_count&time_period=all_time')
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-sender_count'})
+        self.assertEqual(form.query_string, 'ordering=-sender_count')
 
     def test_prisoner_list_valid_form(self):
         expected_data = {
@@ -275,7 +236,6 @@ class PrisonerFormTestCase(SecurityFormTestCase):
             'disbursement_count__gte': None, 'disbursement_count__lte': None,
             'disbursement_total__gte': None, 'disbursement_total__lte': None,
             'recipient_count__gte': None, 'recipient_count__lte': None,
-            'time_period': 'all_time',
         }
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
@@ -287,14 +247,8 @@ class PrisonerFormTestCase(SecurityFormTestCase):
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
-        self.assertDictEqual(
-            form.get_query_data(),
-            {'ordering': '-credit_total', 'prisoner_name': 'John', 'time_period': 'all_time'}
-        )
-        self.assertEqual(
-            form.query_string,
-            'ordering=-credit_total&time_period=all_time&prisoner_name=John'
-        )
+        self.assertDictEqual(form.get_query_data(), {'ordering': '-credit_total', 'prisoner_name': 'John'})
+        self.assertEqual(form.query_string, 'ordering=-credit_total&prisoner_name=John')
 
     def test_prisoner_list_invalid_forms(self):
         with responses.RequestsMock() as rsps:

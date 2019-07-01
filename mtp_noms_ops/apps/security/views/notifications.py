@@ -11,9 +11,7 @@ from django.views.generic import TemplateView
 from mtp_common.auth.api_client import get_api_session
 from requests.exceptions import RequestException
 
-from security.utils import (
-    populate_totals, parse_date_fields, can_see_notifications
-)
+from security.utils import parse_date_fields, can_see_notifications
 
 
 class NotificationListView(TemplateView):
@@ -21,13 +19,17 @@ class NotificationListView(TemplateView):
     template_name = 'security/notifications.html'
     page_size = 20
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.notification_total = 0
+
     def dispatch(self, request, *args, **kwargs):
         if not can_see_notifications(request.user):
             return redirect(reverse_lazy(settings.LOGIN_REDIRECT_URL))
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         week_start = parse_date(self.kwargs.get('week_start', ''))
         if week_start is None:
             week_start = now().date()
@@ -41,7 +43,6 @@ class NotificationListView(TemplateView):
         return context
 
     def populate_notifications(self, session, context):
-        self.notification_total = 0
         start_date = context['current_week'],
         end_date = context['current_week'] + timedelta(days=7)
         prison_filter = ','.join(p['nomis_id'] for p in self.request.user_prisons)
@@ -156,13 +157,9 @@ class NotificationListView(TemplateView):
         return context
 
     def get_event_list(self, session, page_param, **filters):
-        event_list = self.get_object_list(
-            '/events', session, page_param, ordering='-triggered_at', **filters
+        return self.get_object_list(
+            '/events/', session, page_param, ordering='-triggered_at', **filters
         )
-        for event in event_list['results']:
-            if 'group_by' in filters:
-                populate_totals(event[filters['group_by']], 'last_4_weeks')
-        return event_list
 
     def get_object_list(self, path, session, page_param, **filters):
         page = int(self.request.GET.get(page_param, 1))
@@ -178,7 +175,7 @@ class NotificationListView(TemplateView):
                 'results': [],
                 'total_count': 0,
                 'page_count': 0,
-                'page': page
+                'page': page,
             }
         total_count = data.get('count', 0)
         page_count = int(ceil(total_count / self.page_size))
@@ -188,5 +185,5 @@ class NotificationListView(TemplateView):
             'total_count': total_count,
             'page_count': page_count,
             'page': page,
-            'page_param': page_param
+            'page_param': page_param,
         }

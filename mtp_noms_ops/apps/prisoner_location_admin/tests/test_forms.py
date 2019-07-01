@@ -8,12 +8,12 @@ from mtp_common.test_utils import silence_logger
 import responses
 
 from prisoner_location_admin.forms import LocationFileUploadForm
+from prisoner_location_admin.tests import (
+    PrisonerLocationUploadTestCase, generate_testable_location_data,
+    get_csv_data_as_file,
+)
 from security.tests import api_url
 from security.tests.test_forms import mock_prison_response
-from . import (
-    PrisonerLocationUploadTestCase, generate_testable_location_data,
-    get_csv_data_as_file
-)
 
 
 class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):

@@ -5,7 +5,6 @@ import re
 from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
-from django.utils.translation import gettext_lazy as _
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
@@ -13,19 +12,6 @@ from . import (
     hmpps_employee_flag, confirmed_prisons_flag,
     notifications_pilot_flag
 )
-
-TIME_PERIOD_CHOICES = [
-    ('all_time', _('all time')),
-    ('last_7_days', _('last 7 days')),
-    ('last_4_weeks', _('last 4 weeks')),
-    ('last_6_months', _('last 6 months')),
-]
-
-TOTALS_FIELDS = [
-    'prisoner_count', 'sender_count', 'prison_count', 'credit_count',
-    'credit_total', 'recipient_count', 'disbursement_count',
-    'disbursement_total', 'time_period'
-]
 
 
 def parse_date_fields(object_list):
@@ -188,12 +174,3 @@ def is_nomis_api_configured():
         settings.NOMIS_API_CLIENT_TOKEN and
         settings.NOMIS_API_PRIVATE_KEY
     )
-
-
-def populate_totals(record, time_period):
-    if 'totals' in record:
-        for total in record['totals']:
-            if total['time_period'] == (time_period or TIME_PERIOD_CHOICES[0][0]):
-                for field in total:
-                    if field in TOTALS_FIELDS:
-                        record[field] = total[field]

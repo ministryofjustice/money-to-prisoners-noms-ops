@@ -4,10 +4,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 from mtp_common.auth.api_client import get_api_session
 
-from . import required_permissions, views
-from .searches import get_saved_searches, populate_new_result_counts
-from .utils import can_skip_confirming_prisons, is_hmpps_employee
 from mtp_noms_ops.utils import user_test
+from security import required_permissions, views
+from security.searches import get_saved_searches, populate_new_result_counts
+from security.utils import can_skip_confirming_prisons, is_hmpps_employee
 
 
 def security_test(view):

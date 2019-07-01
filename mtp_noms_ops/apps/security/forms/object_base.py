@@ -23,7 +23,7 @@ from security.models import PrisonList, credit_sources, disbursement_methods
 from security.searches import (
     save_search, update_result_count, delete_search, get_existing_search
 )
-from security.utils import parse_date_fields, populate_totals, TOTALS_FIELDS
+from security.utils import parse_date_fields
 
 
 def get_credit_source_choices(blank_option=_('Any method')):
@@ -205,19 +205,10 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_api_request_params(self):
         filters = self.get_query_data()
-        api_filters = {}
         for param in filters:
             if param in self.exclusive_date_params:
-                api_filters[param] = filters[param] + datetime.timedelta(days=1)
-            elif param in TOTALS_FIELDS:
-                api_filters['totals__' + param] = filters[param]
-            elif param == 'ordering' and filters[param] in TOTALS_FIELDS:
-                api_filters[param] = 'totals__' + filters[param]
-            elif param == 'ordering' and filters[param][1:] in TOTALS_FIELDS:
-                api_filters[param] = '-totals__' + filters[param][1:]
-            else:
-                api_filters[param] = filters[param]
-        return api_filters
+                filters[param] += datetime.timedelta(days=1)
+        return filters
 
     def get_object_list(self):
         """
@@ -240,9 +231,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         count = data.get('count', 0)
         self.total_count = count
         self.page_count = int(ceil(count / self.page_size))
-        for record in data.get('results', []):
-            time_period = self.cleaned_data.get('time_period')
-            populate_totals(record, time_period)
         return data.get('results', [])
 
     def get_complete_object_list(self):
@@ -373,10 +361,7 @@ class SecurityDetailForm(SecurityForm):
         :return: dict or None if not found
         """
         try:
-            record = self.session.get(self.get_object_endpoint_path()).json()
-            time_period = self.cleaned_data.get('time_period')
-            populate_totals(record, time_period)
-            return record
+            return self.session.get(self.get_object_endpoint_path()).json()
         except HttpNotFoundError:
             self.add_error(None, _('Not found'))
             return None
