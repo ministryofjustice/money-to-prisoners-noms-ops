@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block inner_content %}
+  <header>
+    <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <div class="mtp-notifications-current-week">
+    {% blocktrans trimmed with date=current_week|date:'d/m/Y' %}
+      Week commencing <strong>{{ date }}</strong>
+    {% endblocktrans %}
+  </div>
+
+  <div class="mtp-notifications-navigation">
+    <div class="mtp-notifications-previous-week">
+      {% with date=previous_week|date:'Y-m-d' %}
+        <a href="{% url 'security:notification_list' date %}">&#8592; {% trans 'Previous week' %}</a>
+      {% endwith %}
+    </div>
+    {% if next_week %}
+      <div class="mtp-notifications-next-week">
+        {% with date=next_week|date:'Y-m-d' %}
+          <a href="{% url 'security:notification_list' date %}">{% trans 'Next week' %} &#8594;</a>
+        {% endwith %}
+      </div>
+    {% endif %}
+  </div>
+
+  <p>
+    <strong>
+    {% blocktrans trimmed with total=view.notification_total %}
+      You have {{ total }} notifications.
+    {% endblocktrans %}
+    </strong>
+  </p>
+
+  <br/>
+
+  <div class="mtp-notifications-group{% if not monitored_credits.total_count and not monitored_disbursements.total_count %} mtp-fade-out{% endif %}">
+    <h2 class="heading-large">{% trans 'Monitored transactions' %}</h2>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Credits for prisoners, debit cards, bank accounts you’re monitoring' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=monitored_credits notification_class='monitored_credits' datatype='credit' %}
+    </div>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Disbursements for prisoners, bank accounts you’re monitoring' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=monitored_disbursements notification_class='monitored_disbursements' datatype='disbursement' %}
+    </div>
+  </div>
+
+  <div class="mtp-notifications-group{% if not not_whole_credits.total_count and not not_whole_disbursements.total_count and not high_amount_credits.total_count and not high_amount_disbursements.total_count %} mtp-fade-out{% endif %}">
+    <h2 class="heading-large">{% trans 'Credits or disbursements' %}</h2>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Credits not a whole number, for example £25.19' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=not_whole_credits notification_class='not_whole_credits' datatype='credit' %}
+    </div>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Disbursements not a whole number, for example £25.19' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=not_whole_disbursements notification_class='not_whole_disbursements' datatype='disbursement' %}
+    </div>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Credits over £120' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=high_amount_credits notification_class='high_amount_credits' datatype='credit' %}
+    </div>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Disbursements over £120' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=high_amount_disbursements notification_class='high_amount_disbursements' datatype='disbursement' %}
+    </div>
+  </div>
+
+  <div class="mtp-notifications-group{% if not frequent_senders.total_count and not frequent_recipients.total_count %} mtp-fade-out{% endif %}">
+    <h2 class="heading-large">{% trans 'Debit cards or bank accounts with frequent transactions' %}</h2>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Debit cards or bank accounts sending 4 or more credits in last 4 weeks' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=frequent_senders notification_class='frequent_senders' datatype='sender_profile' %}
+    </div>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Bank accounts receiving 4 or more disbursements in last 4 weeks' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=frequent_recipients notification_class='frequent_recipients' datatype='recipient_profile' %}
+    </div>
+  </div>
+
+  <div class="mtp-notifications-group{% if not from_many_senders.total_count and not to_many_recipients.total_count %} mtp-fade-out{% endif %}">
+    <h2 class="heading-large">{% trans 'Prisoners sending money to or receiving money from several debit cards or bank accounts' %}</h2>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Prisoners receiving credits from 4 or more debit cards or bank accounts in last 4 weeks' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=from_many_senders notification_class='from_many_senders' datatype='prisoner_profile' %}
+    </div>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Prisoners sending money to 4 or more bank accounts in last 4 weeks' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=to_many_recipients notification_class='to_many_recipients' datatype='prisoner_profile' %}
+    </div>
+  </div>
+
+  <div class="mtp-notifications-group{% if not to_many_prisoners.total_count and not from_many_prisoners.total_count %} mtp-fade-out{% endif %}">
+    <h2 class="heading-large">{% trans 'Debit cards or bank accounts sending money to or receiving money from several prisoners' %}</h2>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Debit cards or bank accounts sending money to more than 4 prisoners in last 4 weeks' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=to_many_prisoners notification_class='to_many_prisoners' datatype='sender_profile' %}
+    </div>
+    <div class="mtp-notifications">
+      <h3 class="heading-medium">{% trans 'Bank accounts receiving money from more than 4 prisoners in last 4 weeks' %}</h3>
+      {% include 'security/includes/notification-table.html' with notifications=from_many_prisoners notification_class='from_many_prisoners' datatype='recipient_profile' %}
+    </div>
+  </div>
+
+{% endblock %}

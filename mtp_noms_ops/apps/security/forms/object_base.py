@@ -23,7 +23,7 @@ from security.models import PrisonList, credit_sources, disbursement_methods
 from security.searches import (
     save_search, update_result_count, delete_search, get_existing_search
 )
-from security.utils import parse_date_fields
+from security.utils import parse_date_fields, populate_totals, TOTALS_FIELDS
 
 
 def get_credit_source_choices(blank_option=_('Any method')):
@@ -205,10 +205,19 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_api_request_params(self):
         filters = self.get_query_data()
+        api_filters = {}
         for param in filters:
             if param in self.exclusive_date_params:
-                filters[param] += datetime.timedelta(days=1)
-        return filters
+                api_filters[param] = filters[param] + datetime.timedelta(days=1)
+            elif param in TOTALS_FIELDS:
+                api_filters['totals__' + param] = filters[param]
+            elif param == 'ordering' and filters[param] in TOTALS_FIELDS:
+                api_filters[param] = 'totals__' + filters[param]
+            elif param == 'ordering' and filters[param][1:] in TOTALS_FIELDS:
+                api_filters[param] = '-totals__' + filters[param][1:]
+            else:
+                api_filters[param] = filters[param]
+        return api_filters
 
     def get_object_list(self):
         """
@@ -231,6 +240,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         count = data.get('count', 0)
         self.total_count = count
         self.page_count = int(ceil(count / self.page_size))
+        for record in data.get('results', []):
+            time_period = self.cleaned_data.get('time_period')
+            populate_totals(record, time_period)
         return data.get('results', [])
 
     def get_complete_object_list(self):
@@ -340,23 +352,6 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         choices = dict(self.prison_list.prison_choices)
         return ', '.join(sorted(filter(None, map(lambda prison: choices.get(prison), prisons))))
 
-    def check_and_update_saved_searches(self, page_title):
-        site_url = '?'.join([urlparse(self.request.path).path, self.query_string])
-        self.existing_search = get_existing_search(self.session, site_url)
-        if self.existing_search:
-            update_result_count(
-                self.session, self.existing_search['id'], self.total_count
-            )
-        if self.request.GET.get('pin') and not self.existing_search:
-            endpoint_path = self.get_object_list_endpoint_path()
-            self.existing_search = save_search(
-                self.session, page_title, endpoint_path, site_url,
-                filters=self.get_api_request_params(), last_result_count=self.total_count
-            )
-        elif self.request.GET.get('unpin') and self.existing_search:
-            delete_search(self.session, self.existing_search['id'])
-            self.existing_search = None
-
 
 class SecurityDetailForm(SecurityForm):
     def __init__(self, object_id, **kwargs):
@@ -378,10 +373,36 @@ class SecurityDetailForm(SecurityForm):
         :return: dict or None if not found
         """
         try:
-            return self.session.get(self.get_object_endpoint_path()).json()
+            record = self.session.get(self.get_object_endpoint_path()).json()
+            time_period = self.cleaned_data.get('time_period')
+            populate_totals(record, time_period)
+            return record
         except HttpNotFoundError:
             self.add_error(None, _('Not found'))
             return None
         except RequestException:
             self.add_error(None, _('This service is currently unavailable'))
             return {}
+
+    def check_and_update_saved_searches(self, page_title):
+        site_url = urlparse(self.request.path).path
+        self.existing_search = get_existing_search(self.session, site_url)
+        if self.existing_search:
+            update_result_count(
+                self.session, self.existing_search['id'], self.total_count
+            )
+        if self.request.GET.get('pin') and not self.existing_search:
+            endpoint_path = self.get_object_list_endpoint_path()
+            self.existing_search = save_search(
+                self.session, page_title, endpoint_path, site_url,
+                filters=self.get_api_request_params(), last_result_count=self.total_count
+            )
+            self.session.post(
+                '{}monitor/'.format(self.get_object_endpoint_path())
+            )
+        elif self.request.GET.get('unpin') and self.existing_search:
+            delete_search(self.session, self.existing_search['id'])
+            self.session.post(
+                '{}unmonitor/'.format(self.get_object_endpoint_path())
+            )
+            self.existing_search = None

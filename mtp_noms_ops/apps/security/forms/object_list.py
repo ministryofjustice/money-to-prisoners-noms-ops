@@ -13,7 +13,7 @@ from security.forms.object_base import (
     get_credit_source_choices, get_disbursement_method_choices,
 )
 from security.templatetags.security import currency as format_currency
-from security.utils import parse_date_fields
+from security.utils import parse_date_fields, TIME_PERIOD_CHOICES
 
 
 @validate_range_fields(
@@ -34,6 +34,13 @@ class SendersForm(SecurityForm):
                                      ('credit_total', _('Total sent (low to high)')),
                                      ('-credit_total', _('Total sent (high to low)')),
                                  ])
+
+    time_period = forms.ChoiceField(
+        label=_('Time period'),
+        choices=TIME_PERIOD_CHOICES,
+        initial=TIME_PERIOD_CHOICES[0][0],
+        required=False
+    )
 
     prisoner_count__gte = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
     prisoner_count__lte = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
@@ -175,6 +182,13 @@ class PrisonersForm(SecurityForm):
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
                                      ('-prisoner_number', _('Prisoner number (Z to A)')),
                                  ])
+
+    time_period = forms.ChoiceField(
+        label=_('Time period'),
+        choices=TIME_PERIOD_CHOICES,
+        initial=TIME_PERIOD_CHOICES[0][0],
+        required=False
+    )
 
     sender_count__gte = forms.IntegerField(label=_('Number of senders (minimum)'), required=False, min_value=1)
     sender_count__lte = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)

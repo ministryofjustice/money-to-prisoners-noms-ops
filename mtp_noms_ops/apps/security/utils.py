@@ -5,6 +5,7 @@ import re
 from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
+from django.utils.translation import gettext_lazy as _
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
@@ -13,17 +14,35 @@ from . import (
     notifications_pilot_flag
 )
 
+TIME_PERIOD_CHOICES = [
+    ('all_time', _('all time')),
+    ('last_7_days', _('last 7 days')),
+    ('last_4_weeks', _('last 4 weeks')),
+    ('last_6_months', _('last 6 months')),
+]
+
+TOTALS_FIELDS = [
+    'prisoner_count', 'sender_count', 'prison_count', 'credit_count',
+    'credit_total', 'recipient_count', 'disbursement_count',
+    'disbursement_total', 'time_period'
+]
+
 
 def parse_date_fields(object_list):
     """
     MTP API responds with string date/time fields, this filter converts them to python objects
     """
-    fields = ('received_at', 'credited_at', 'refunded_at', 'created')
+    fields = ('received_at', 'credited_at', 'refunded_at', 'created',)
+    nested_objects = ('credit', 'disbursement',)
     parsers = (parse_datetime, parse_date)
 
-    def convert(credit):
+    def convert(obj):
+        for nested_obj in nested_objects:
+            nested = obj.get(nested_obj)
+            if nested and isinstance(nested, dict):
+                convert(nested)
         for field in fields:
-            value = credit.get(field)
+            value = obj.get(field)
             if not value or not isinstance(value, str):
                 continue
             for parser in parsers:
@@ -31,11 +50,11 @@ def parse_date_fields(object_list):
                     value = parser(value)
                     if isinstance(value, datetime.datetime):
                         value = timezone.localtime(value)
-                    credit[field] = value
+                    obj[field] = value
                     break
                 except (ValueError, TypeError):
                     pass
-        return credit
+        return obj
 
     return list(map(convert, object_list)) if object_list else object_list
 
@@ -169,3 +188,12 @@ def is_nomis_api_configured():
         settings.NOMIS_API_CLIENT_TOKEN and
         settings.NOMIS_API_PRIVATE_KEY
     )
+
+
+def populate_totals(record, time_period):
+    if 'totals' in record:
+        for total in record['totals']:
+            if total['time_period'] == (time_period or TIME_PERIOD_CHOICES[0][0]):
+                for field in total:
+                    if field in TOTALS_FIELDS:
+                        record[field] = total[field]
