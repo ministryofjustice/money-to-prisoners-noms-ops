@@ -1,6 +1,7 @@
 (function () {
   'use strict';
   require('polyfills').Polyfills.init();
+  require('gds-modules').GDSModules.init();
 
   require('dialogue-box').DialogueBox.init();
   require('upload').Upload.init();
