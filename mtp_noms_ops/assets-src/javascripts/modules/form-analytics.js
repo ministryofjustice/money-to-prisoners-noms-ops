@@ -26,7 +26,7 @@ exports.FormAnalytics = {
         for (var i = 0; i < initialInputs.length; i++) {
           if (initialInputs[i].name === this.name &&
               initialInputs[i].value === this.value) {
-              changed = false;
+            changed = false;
           }
         }
         if (this.value) {

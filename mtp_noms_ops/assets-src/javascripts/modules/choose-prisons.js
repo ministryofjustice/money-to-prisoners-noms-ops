@@ -35,8 +35,8 @@ exports.ChoosePrisons = {
     var $form = $('form.mtp-choose-prison');
     var $hiddenInputs = $form.find('input.mtp-autocomplete-hidden');
 
-    $form.find('input[type=text]').keydown(function(e) {
-      if (e.keyCode === 13) {
+    $form.find('input[type=text]').keydown(function (e) {
+      if (e.which === 13) {
         e.preventDefault();
         return false;
       }
@@ -66,7 +66,9 @@ exports.ChoosePrisons = {
 
             $('div.mtp-prison-selection').before(
               '<div class="error-summary" aria-labeledby="error-summary-heading" tabindex="-1" role="alert">' +
-              '  <h2 class="heading-medium error-summary-heading" id="error-summary-heading">' + errorSummaryTitle + '</h2>' +
+              '<h2 class="heading-medium error-summary-heading" id="error-summary-heading">' +
+              errorSummaryTitle +
+              '</h2>' +
               '  <ul class="error-summary-list">' +
               '      <li class="field-specific-error">' +
               '        <a href="#id_' + $hiddenInput.attr('name') + '-label">' + emptyErrorMsg + '</a>' +
@@ -104,7 +106,7 @@ exports.ChoosePrisons = {
     });
   },
 
-  addedPrisons: function(inputs) {
+  addedPrisons: function (inputs) {
     var newPrisons = [];
     inputs.each(function () {
       var $input = $(this);
@@ -125,14 +127,14 @@ exports.ChoosePrisons = {
       var $chosenPrisons = $form.find('input[name=prisons]:checked');
       var newPrisonsStr = self.addedPrisons($chosenPrisons);
 
-      var event_label = $confirmButton.data('current-prisons') + ' > ' + newPrisonsStr;
+      var eventLabel = $confirmButton.data('current-prisons') + ' > ' + newPrisonsStr;
       analytics.Analytics.send(
-        'event', 'PrisonConfirmation', 'Confirm', event_label
+        'event', 'PrisonConfirmation', 'Confirm', eventLabel
       );
     });
   },
 
-  initAddPrison: function() {
+  initAddPrison: function () {
     var $form = $('form.mtp-choose-prison');
     if ($form.length !== 1) {
       return;
@@ -141,17 +143,17 @@ exports.ChoosePrisons = {
 
     var $addPrisonLink = $form.find('input[name=submit_add]');
     $addPrisonLink.click(function (e) {
-      var next_prison_id = 0;
+      var nextPrisonId = 0;
       $('.mtp-prison-selection-row').each(function () {
-        var thisId = parseInt($(this).attr('id').substring(11));
-        if (thisId >= next_prison_id) {
-          next_prison_id = thisId + 1;
+        var thisId = parseInt($(this).attr('id').substring(11), 10);
+        if (thisId >= nextPrisonId) {
+          nextPrisonId = thisId + 1;
         }
       });
 
       var template = $('#prison-field-template').html().replace(
         /template_prison_selection/g,
-        'prison_' + next_prison_id
+        'prison_' + nextPrisonId
       );
       var $newRow = $(template);
       $newRow.addClass('hidden');
@@ -166,7 +168,7 @@ exports.ChoosePrisons = {
     });
   },
 
-  initRemovePrison: function() {
+  initRemovePrison: function () {
     var $form = $('form.mtp-choose-prison');
     if ($form.length !== 1) {
       return;
@@ -175,21 +177,21 @@ exports.ChoosePrisons = {
     var $removalLinks = $form.find('.mtp-prison-selection-row__remove > input');
     $removalLinks.each(function () {
       var $removalLink = $(this);
-      var related_field_name = $removalLink.attr('name').substring(14);
+      var relatedFieldName = $removalLink.attr('name').substring(14);
       $removalLink.click(function (e) {
-        $form.find('#row_' + related_field_name).remove();
+        $form.find('#row_' + relatedFieldName).remove();
 
         var $errorSummary = $form.find('div.error-summary');
         if ($errorSummary.length > 0) {
           var $fieldErrors = $errorSummary.find('li.field-specific-error');
           $fieldErrors.each(function () {
             var $link = $(this).find('a');
-            if ($link.attr('href') == ('#id_' + related_field_name + '-label')) {
+            if ($link.attr('href') === '#id_' + relatedFieldName + '-label') {
               $(this).remove();
             }
 
-            if ($errorSummary.find('li.field-specific-error').length == 0 &&
-                $errorSummary.find('li.non-field-error').length == 0) {
+            if ($errorSummary.find('li.field-specific-error').length === 0 &&
+                $errorSummary.find('li.non-field-error').length === 0) {
               $form.find('div.error-summary').remove();
             }
           });

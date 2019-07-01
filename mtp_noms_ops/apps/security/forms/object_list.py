@@ -8,16 +8,19 @@ from django.utils.translation import gettext_lazy as _
 from security.forms.object_base import (
     SecurityForm,
     AmountPattern, parse_amount,
-    validate_amount, validate_prisoner_number, validate_range_field,
-    insert_blank_option, get_credit_source_choices, get_disbursement_method_choices,
+    validate_amount, validate_prisoner_number, validate_range_fields,
+    insert_blank_option,
+    get_credit_source_choices, get_disbursement_method_choices,
 )
 from security.templatetags.security import currency as format_currency
 from security.utils import parse_date_fields
 
 
-@validate_range_field('prisoner_count', _('Must be larger than the minimum prisoners'))
-@validate_range_field('credit_count', _('Must be larger than the minimum credits'))
-@validate_range_field('credit_total', _('Must be larger than the minimum total'))
+@validate_range_fields(
+    ('prisoner_count', _('Must be larger than the minimum prisoners')),
+    ('credit_count', _('Must be larger than the minimum credits')),
+    ('credit_total', _('Must be larger than the minimum total')),
+)
 class SendersForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-prisoner_count',
@@ -143,9 +146,14 @@ class SendersForm(SecurityForm):
         return query_data
 
 
-@validate_range_field('sender_count', _('Must be larger than the minimum senders'))
-@validate_range_field('credit_count', _('Must be larger than the minimum credits'))
-@validate_range_field('credit_total', _('Must be larger than the minimum total'))
+@validate_range_fields(
+    ('sender_count', _('Must be larger than the minimum senders')),
+    ('credit_count', _('Must be larger than the minimum credits')),
+    ('credit_total', _('Must be larger than the minimum total received')),
+    ('recipient_count', _('Must be larger than the minimum recipients')),
+    ('disbursement_count', _('Must be larger than the minimum disbursements')),
+    ('disbursement_total', _('Must be larger than the minimum total sent')),
+)
 class PrisonersForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-sender_count',
@@ -156,6 +164,12 @@ class PrisonersForm(SecurityForm):
                                      ('-credit_count', _('Number of credits (high to low)')),
                                      ('credit_total', _('Total received (low to high)')),
                                      ('-credit_total', _('Total received (high to low)')),
+                                     ('recipient_count', _('Number of recipients (low to high)')),
+                                     ('-recipient_count', _('Number of recipients (high to low)')),
+                                     ('disbursement_count', _('Number of disbursements (low to high)')),
+                                     ('-disbursement_count', _('Number of disbursements (high to low)')),
+                                     ('disbursement_total', _('Total sent (low to high)')),
+                                     ('-disbursement_total', _('Total sent (high to low)')),
                                      ('prisoner_name', _('Prisoner name (A to Z)')),
                                      ('-prisoner_name', _('Prisoner name (Z to A)')),
                                      ('prisoner_number', _('Prisoner number (A to Z)')),
@@ -168,6 +182,13 @@ class PrisonersForm(SecurityForm):
     credit_count__lte = forms.IntegerField(label=_('Maximum credits received'), required=False, min_value=1)
     credit_total__gte = forms.IntegerField(label=_('Minimum total received'), required=False)
     credit_total__lte = forms.IntegerField(label=_('Maximum total received'), required=False)
+
+    recipient_count__gte = forms.IntegerField(label=_('Number of recipients (minimum)'), required=False, min_value=1)
+    recipient_count__lte = forms.IntegerField(label=_('Maximum recipients sent to'), required=False, min_value=1)
+    disbursement_count__gte = forms.IntegerField(label=_('Minimum disbursements sent'), required=False, min_value=1)
+    disbursement_count__lte = forms.IntegerField(label=_('Maximum disbursements sent'), required=False, min_value=1)
+    disbursement_total__gte = forms.IntegerField(label=_('Minimum total sent'), required=False)
+    disbursement_total__lte = forms.IntegerField(label=_('Maximum total sent'), required=False)
 
     prisoner_number = forms.CharField(label=_('Prisoner number'),
                                       validators=[validate_prisoner_number], required=False)
@@ -203,6 +224,15 @@ class PrisonersForm(SecurityForm):
         ('received between £{credit_total__gte}-{credit_total__lte}',
          'received at least £{credit_total__gte}',
          'received at most £{credit_total__lte}',),
+        ('sent to {recipient_count__gte}-{recipient_count__lte} senders',
+         'sent to at least {recipient_count__gte} senders',
+         'sent to at most {recipient_count__lte} senders',),
+        ('sent between {disbursement_count__gte}-{disbursement_count__lte} credits',
+         'sent at least {disbursement_count__gte} credits',
+         'sent at most {disbursement_count__lte} credits',),
+        ('sent between £{disbursement_total__gte}-{disbursement_total__lte}',
+         'sent at least £{disbursement_total__gte}',
+         'sent at most £{disbursement_total__lte}',),
     )
     description_capitalisation = {
         'ordering': 'lowerfirst',
@@ -224,14 +254,20 @@ class PrisonersForm(SecurityForm):
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
-            for field in ('credit_total__gte', 'credit_total__lte'):
+            fields = (
+                'credit_total__gte', 'credit_total__lte',
+                'disbursement_total__gte', 'disbursement_total__lte',
+            )
+            for field in fields:
                 value = query_data.get(field)
                 if value is not None:
                     query_data[field] = value * 100
         return query_data
 
 
-@validate_range_field('received_at', _('Must be after the start date'), upper_limit='__lt')
+@validate_range_fields(
+    ('received_at', _('Must be after the start date'), '__lt'),
+)
 class CreditsForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-received_at',
@@ -397,7 +433,9 @@ class CreditsForm(SecurityForm):
         return str(description).lower() if description else None
 
 
-@validate_range_field('created', _('Must be after the start date'), upper_limit='__lt')
+@validate_range_fields(
+    ('created', _('Must be after the start date'), '__lt'),
+)
 class DisbursementsForm(SecurityForm):
     ordering = forms.ChoiceField(label=_('Order by'), required=False,
                                  initial='-created',
