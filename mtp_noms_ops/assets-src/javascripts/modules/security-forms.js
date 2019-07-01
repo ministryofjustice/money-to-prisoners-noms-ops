@@ -59,7 +59,7 @@ exports.SecurityForms = {
 
   bindPrisonSelection: function () {
     var $prisonSelect = $('#id_prison');
-    if ($prisonSelect.length == 0) {
+    if ($prisonSelect.length === 0) {
       return;
     }
     var $prisonOptions = $('option', $prisonSelect[0]);
