@@ -243,6 +243,16 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     def query_string(self):
         return urlencode(self.get_query_data(allow_parameter_manipulation=False), doseq=True)
 
+    @property
+    def query_string_with_page(self):
+        return f"page={self.cleaned_data['page']}&{self.query_string}"
+
+    @property
+    def query_string_without_ordering(self):
+        query_data = self.get_query_data(allow_parameter_manipulation=False)
+        query_data.pop('ordering', None)
+        return urlencode(query_data, doseq=True)
+
     def _get_value_text(self, bf, f, v):
         if isinstance(f, forms.ChoiceField):
             v = dict(f.choices).get(v)
