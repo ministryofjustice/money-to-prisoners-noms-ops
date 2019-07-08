@@ -19,6 +19,6 @@
   </div>
 
   <div class="mtp-prison-switcher__change-link">
-    <a href="{% url 'change_prisons' %}?{{REDIRECT_FIELD_NAME}}={{request.path|urlencode}}">{% trans 'Change' %}</a>
+    <a href="{% url 'change_prisons' %}?{{ REDIRECT_FIELD_NAME }}={{ request.path|urlencode }}?{{ request.GET.urlencode|urlencode }}">{% trans 'Change' %}</a>
   </div>
 </div>
