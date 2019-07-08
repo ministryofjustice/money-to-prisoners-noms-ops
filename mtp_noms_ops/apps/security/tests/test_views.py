@@ -184,6 +184,92 @@ class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
         self.assertContains(response, '<!-- security:dashboard -->')
 
 
+class PrisonSwitcherTestCase(SecurityBaseTestCase):
+    """
+    Tests related to the prison switcher area on the top of some pages.
+    The prison switcher area shows the prisons that the user selected in the settings
+    page with a link to change this.
+    """
+
+    def _mock_api_responses(self):
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url('/senders/'),
+            json={},
+        )
+
+    @responses.activate
+    def test_with_many_prisons(self):
+        """
+        Test that if the user has more than 4 prisons in settings, only the first ones are
+        shown in the prison switcher area to avoid long text.
+        """
+        self._mock_api_responses()
+        prisons = [
+            {
+                **sample_prisons[0],
+                'name': f'Prison {index}',
+            } for index in range(1, 11)
+        ]
+        self.login(
+            user_data=self.get_user_data(prisons=prisons),
+        )
+        response = self.client.get(reverse('security:sender_list'))
+        self.assertContains(
+            response,
+            'Prison 1, Prison 2, Prison 3, Prison 4',
+        )
+        self.assertContains(
+            response,
+            ' and 6 more',
+        )
+
+    @responses.activate
+    def test_with_fewer_prisons(self):
+        """
+        Test that if the user has less than 4 prisons in settings,
+        they are all shown in the prison switcher area.
+        """
+        self._mock_api_responses()
+        prisons = [
+            {
+                **sample_prisons[0],
+                'name': f'Prison {index}',
+            } for index in range(1, 3)
+        ]
+        self.login(
+            user_data=self.get_user_data(prisons=prisons),
+        )
+        response = self.client.get(reverse('security:sender_list'))
+        self.assertContains(
+            response,
+            'Prison 1, Prison 2',
+        )
+
+        self.assertNotContains(
+            response,
+            'Prison 3',
+        )
+
+    @responses.activate
+    def test_sees_all_prisons(self):
+        """
+        Test that if the user hasn't specified any prisons in settings, it means that he/she can
+        see all prisons so the text 'All prisons' is known in the prison switcher area.
+        """
+        self._mock_api_responses()
+        self.login(
+            user_data=self.get_user_data(prisons=[]),
+        )
+        response = self.client.get(reverse('security:sender_list'))
+        self.assertContains(
+            response,
+            'All prisons',
+        )
+
+
 class HMPPSEmployeeTestCase(SecurityBaseTestCase):
     protected_views = ['security:dashboard', 'security:credit_list', 'security:sender_list', 'security:prisoner_list']
 
