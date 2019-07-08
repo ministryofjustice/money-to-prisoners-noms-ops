@@ -84,7 +84,7 @@ def validate_range_fields(*fields):
                     self.add_error(upper, ValidationError(bound_ordering_msg, code='bound_ordering'))
             return self.cleaned_data
 
-        setattr(cls, 'clean', clean)
+        cls.clean = clean
         return cls
 
     return inner
