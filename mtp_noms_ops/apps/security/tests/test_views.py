@@ -128,7 +128,7 @@ class SecurityBaseTestCase(SimpleTestCase):
         email='sam@mtp.local', permissions=required_permissions,
         prisons=default_user_prisons,
         flags=(hmpps_employee_flag, confirmed_prisons_flag,),
-        roles=['security']
+        roles=('security',)
     ):
         return {
             'first_name': first_name,

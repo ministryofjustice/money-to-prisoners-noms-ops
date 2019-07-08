@@ -26,21 +26,21 @@ from security.searches import (
 from security.utils import parse_date_fields
 
 
-def get_credit_source_choices(blank_option=_('Any method')):
+def get_credit_source_choices():
     return insert_blank_option(
         list(credit_sources.items()),
-        title=blank_option
+        title=_('Any method')
     )
 
 
-def get_disbursement_method_choices(blank_option=_('Any method')):
+def get_disbursement_method_choices():
     return insert_blank_option(
         list(disbursement_methods.items()),
-        title=blank_option
+        title=_('Any method')
     )
 
 
-def insert_blank_option(choices, title=_('Select an option')):
+def insert_blank_option(choices, title):
     new_choices = [('', title)]
     new_choices.extend(choices)
     return new_choices
