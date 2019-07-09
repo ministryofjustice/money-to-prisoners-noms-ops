@@ -1,5 +1,3 @@
-import logging
-
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.shortcuts import redirect
@@ -11,8 +9,6 @@ from mtp_common.auth.api_client import get_api_session
 from security import hmpps_employee_flag, not_hmpps_employee_flag
 from security.forms.eligibility import HMPPSEmployeeForm
 from security.utils import save_user_flags
-
-logger = logging.getLogger('mtp')
 
 
 class HMPPSEmployeeView(FormView):
