@@ -5,6 +5,9 @@ The NOMS Ops UI for the Money to Prisoners Project
 
 ## Running locally
 
+It's recommended that you use a python virtual environment to isolate each application.
+Please call this `venv` and make sure it's in the root folder of this application so that
+`mtp_common.test_utils.code_style.CodeStyleTestCase` and the build tasks can find it.
 
 In order to run the application locally, it is necessary to have the API running.
 Please refer to the [money-to-prisoners-api](https://github.com/ministryofjustice/money-to-prisoners-api/) repository.
@@ -16,7 +19,7 @@ Once the API is running locally, run
 ```
 
 This will build everything (which will initially take a while) and run
-the local server at [http://localhost:8001](http://localhost:8001).
+the local server at [http://localhost:8003](http://localhost:8003).
 
 ### Alternative: Docker
 

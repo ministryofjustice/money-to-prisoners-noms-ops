@@ -5,7 +5,7 @@ import io
 import re
 
 from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
 

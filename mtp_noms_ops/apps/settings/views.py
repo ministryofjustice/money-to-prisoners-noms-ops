@@ -1,4 +1,3 @@
-import logging
 from urllib.parse import urlencode
 
 from django.core.urlresolvers import reverse_lazy
@@ -12,8 +11,6 @@ from security.utils import (
     save_user_flags, can_skip_confirming_prisons, can_see_notifications
 )
 from settings.forms import ConfirmPrisonForm, ChangePrisonForm, ALL_PRISONS_CODE
-
-logger = logging.getLogger('mtp')
 
 
 class NomsOpsSettingsView(TemplateView):

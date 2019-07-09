@@ -165,7 +165,7 @@ class ChangePrisonForm(ApiForm):
 
         if self.action == 'add' or not self.prison_fields:
             next_prison_id = 0
-            for prison_field in self.prison_fields:
+            for __ in self.prison_fields:
                 if next_prison_id < int(key[7:]):
                     next_prison_id = int(key[7:])
             field_name = 'prison_%s' % (next_prison_id + 1)
