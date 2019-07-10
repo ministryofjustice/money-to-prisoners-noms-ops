@@ -16,24 +16,42 @@ from security.templatetags.security import currency as format_currency
 from security.utils import parse_date_fields
 
 
+class BaseSendersForm(SecurityForm):
+    """
+    Senders Form Base Class.
+    """
+    ordering = forms.ChoiceField(
+        label=_('Order by'),
+        required=False,
+        initial='-prisoner_count',
+        choices=[
+            ('prisoner_count', _('Number of prisoners (low to high)')),
+            ('-prisoner_count', _('Number of prisoners (high to low)')),
+            ('prison_count', _('Number of prisons (low to high)')),
+            ('-prison_count', _('Number of prisons (high to low)')),
+            ('credit_count', _('Number of credits (low to high)')),
+            ('-credit_count', _('Number of credits (high to low)')),
+            ('credit_total', _('Total sent (low to high)')),
+            ('-credit_total', _('Total sent (high to low)')),
+        ]
+    )
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
+
+    def get_object_list_endpoint_path(self):
+        return '/senders/'
+
+
 @validate_range_fields(
     ('prisoner_count', _('Must be larger than the minimum prisoners')),
     ('credit_count', _('Must be larger than the minimum credits')),
     ('credit_total', _('Must be larger than the minimum total')),
 )
-class SendersForm(SecurityForm):
-    ordering = forms.ChoiceField(label=_('Order by'), required=False,
-                                 initial='-prisoner_count',
-                                 choices=[
-                                     ('prisoner_count', _('Number of prisoners (low to high)')),
-                                     ('-prisoner_count', _('Number of prisoners (high to low)')),
-                                     ('prison_count', _('Number of prisons (low to high)')),
-                                     ('-prison_count', _('Number of prisons (high to low)')),
-                                     ('credit_count', _('Number of credits (low to high)')),
-                                     ('-credit_count', _('Number of credits (high to low)')),
-                                     ('credit_total', _('Total sent (low to high)')),
-                                     ('-credit_total', _('Total sent (high to low)')),
-                                 ])
+class SendersForm(BaseSendersForm):
+    """
+    Legacy Search Form for Senders.
+
+    TODO: delete after search V2 goes live.
+    """
 
     prisoner_count__gte = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
     prisoner_count__lte = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
@@ -55,7 +73,6 @@ class SendersForm(SecurityForm):
     sender_email = forms.CharField(label=_('Sender email'), required=False)
     sender_postcode = forms.CharField(label=_('Sender postcode'), required=False)
 
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
@@ -133,9 +150,6 @@ class SendersForm(SecurityForm):
             sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
         return sender_postcode
 
-    def get_object_list_endpoint_path(self):
-        return '/senders/'
-
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
@@ -144,6 +158,17 @@ class SendersForm(SecurityForm):
                 if value is not None:
                     query_data[field] = value * 100
         return query_data
+
+
+class SendersFormV2(BaseSendersForm):
+    """
+    Search Form for Senders V2.
+    """
+    search = forms.CharField(label=_('Sender name or email address'), required=False)
+
+    @property
+    def search_description(self):
+        return ''
 
 
 @validate_range_fields(
