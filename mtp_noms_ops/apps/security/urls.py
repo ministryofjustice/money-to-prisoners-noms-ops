@@ -117,7 +117,7 @@ urlpatterns = [
                     export_view='download',
                     export_redirect_view='security:sender_list',
                 ),
-                views.SenderListView.as_view(
+                views.SenderListViewV2.as_view(
                     export_view='download',
                     export_redirect_view='security:sender_list',
                 ),
@@ -133,7 +133,7 @@ urlpatterns = [
                     export_view='email',
                     export_redirect_view='security:sender_list',
                 ),
-                views.SenderListView.as_view(
+                views.SenderListViewV2.as_view(
                     export_view='email',
                     export_redirect_view='security:sender_list',
                 ),

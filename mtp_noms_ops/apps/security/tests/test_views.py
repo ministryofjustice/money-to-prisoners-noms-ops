@@ -141,6 +141,12 @@ class SecurityBaseTestCase(SimpleTestCase):
             'roles': roles,
         }
 
+    def assertSpreadsheetEqual(self, spreadsheet_data, expected_values, msg=None):  # noqa: N802
+        with temp_spreadsheet(spreadsheet_data) as ws:
+            for i, row in enumerate(expected_values, start=1):
+                for j, cell in enumerate(row, start=1):
+                    self.assertEqual(cell, ws.cell(column=j, row=i).value, msg=msg)
+
 
 class LocaleTestCase(SecurityBaseTestCase):
     def test_locale_switches_based_on_browser_language(self):
@@ -524,7 +530,24 @@ class SenderViewsTestCaseV2(SecurityViewTestCase):
     """
     view_name = 'security:sender_list'
     detail_view_name = 'security:sender_detail'
+    export_view_name = 'security:senders_export'
     api_list_path = '/senders/'
+    expected_xls_headers = [
+        'Sender name',
+        'Payment source',
+        'Credits sent',
+        'Total amount sent',
+        'Prisoners sent to',
+        'Prisons sent to',
+        'Bank transfer sort code',
+        'Bank transfer account',
+        'Bank transfer roll number',
+        'Debit card number',
+        'Debit card expiry',
+        'Debit card postcode',
+        'Other cardholder names',
+        'Cardholder emails',
+    ]
 
     def get_user_data(
         self,
@@ -683,6 +706,91 @@ class SenderViewsTestCaseV2(SecurityViewTestCase):
         with silence_logger('django.request'):
             response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
         self.assertContains(response, 'non-field-error')
+
+    @responses.activate
+    def test_export_some_data(self):
+        """
+        Test that the export view generates a spreadsheet with only the content returned
+        by the API.
+        """
+        expected_spreadsheet_content = [
+            self.expected_xls_headers,
+            [
+                'MAISIE NOLAN',
+                'Bank transfer',
+                4,
+                '£410.00',
+                3,
+                2,
+                '10-10-10',
+                '12312345',
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            ],
+            [
+                'Maisie N',
+                'Debit card',
+                4,
+                '£420.00',
+                3,
+                2,
+                None,
+                None,
+                None,
+                '**** **** **** 1234',
+                '10/20',
+                'SW137NJ',
+                'Maisie Nolan',
+                'm@outside.local, mn@outside.local',
+            ],
+        ]
+
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 2,
+                'results': [self.bank_transfer_sender, self.debit_card_sender],
+            }
+        )
+        response = self.client.get(reverse(self.export_view_name))
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response['Content-Type'])
+        self.assertSpreadsheetEqual(response.content, expected_spreadsheet_content)
+
+    @responses.activate
+    def test_export_no_data(self):
+        """
+        Test that the export view generates a spreadsheet without rows if the API call doesn't return any record.
+        """
+        expected_spreadsheet_content = [
+            self.expected_xls_headers,
+        ]
+
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 0,
+                'results': [],
+            }
+        )
+        response = self.client.get(reverse(self.export_view_name))
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response['Content-Type'])
+        self.assertSpreadsheetEqual(response.content, expected_spreadsheet_content)
 
 
 class PrisonerListTestCase(SecurityViewTestCase):
@@ -1168,12 +1276,6 @@ class CreditsExportTestCase(SecurityBaseTestCase):
             reverse('security:credits_export') + '?received_at__gte=LL'
         )
         self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
-
-    def assertSpreadsheetEqual(self, spreadsheet_data, expected_values, msg=None):  # noqa: N802
-        with temp_spreadsheet(spreadsheet_data) as ws:
-            for i, row in enumerate(expected_values, start=1):
-                for j, cell in enumerate(row, start=1):
-                    self.assertEqual(cell, ws.cell(column=j, row=i).value, msg=msg)
 
 
 class PinnedProfileTestCase(SecurityViewTestCase):
