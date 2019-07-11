@@ -104,7 +104,7 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.SenderListView.as_view(),
-                views.SenderListView.as_view(),
+                views.SenderListViewV2.as_view(),
             ),
         ),
         name='sender_list',

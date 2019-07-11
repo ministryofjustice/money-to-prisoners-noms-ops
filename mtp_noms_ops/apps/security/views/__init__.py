@@ -5,7 +5,10 @@ from .object_detail import (  # noqa: F401
     CreditDetailView, DisbursementDetailView,
 )
 from .object_list import (  # noqa: F401
-    SenderListView, PrisonerListView,
-    CreditListView, DisbursementListView,
+    SenderListView,
+    SenderListViewV2,
+    PrisonerListView,
+    CreditListView,
+    DisbursementListView,
 )
 from .review import ReviewCreditsView  # noqa: F401
