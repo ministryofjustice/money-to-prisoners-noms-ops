@@ -19,6 +19,7 @@ from security import (
     confirmed_prisons_flag, SEARCH_V2_FLAG,
 )
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
+from security.views.object_base import SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME
 
 
 override_nomis_settings = override_settings(
@@ -529,6 +530,7 @@ class SenderViewsTestCaseV2(SecurityViewTestCase):
     Test case related to sender search V2 and detail views.
     """
     view_name = 'security:sender_list'
+    search_results_view_name = 'security:sender_search_results'
     detail_view_name = 'security:sender_detail'
     export_view_name = 'security:senders_export'
     api_list_path = '/senders/'
@@ -599,7 +601,7 @@ class SenderViewsTestCaseV2(SecurityViewTestCase):
             json={
                 'count': 2,
                 'results': [self.bank_transfer_sender, self.debit_card_sender],
-            }
+            },
         )
         response = self.client.get(reverse(self.view_name))
         self.assertContains(response, '2 payment sources')
@@ -607,6 +609,79 @@ class SenderViewsTestCaseV2(SecurityViewTestCase):
         response_content = response.content.decode(response.charset)
         self.assertIn('£410.00', response_content)
         self.assertIn('£420.00', response_content)
+
+    @responses.activate
+    def test_redirects_to_search_results_page(self):
+        """
+        Test that submitting the form redirects to the results page when the form is valid.
+        The action of submitting the form is represented by the query param
+        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
+        """
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 2,
+                'results': [self.bank_transfer_sender, self.debit_card_sender],
+            },
+        )
+        query_string = 'ordering=-prisoner_count&search=test'
+        request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+        expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
+        response = self.client.get(request_url)
+        self.assertRedirects(
+            response,
+            expected_redirect_url,
+        )
+
+    @responses.activate
+    def test_doesnt_redirect_to_search_results_page_if_form_is_invalid(self):
+        """
+        Test that submitting the form doesn't redirect to the results page when the form is invalid.
+        The action of submitting the form is represented by the query param
+        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        """
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 2,
+                'results': [self.bank_transfer_sender, self.debit_card_sender],
+            },
+        )
+        query_string = 'ordering=invalid&search=test'
+        request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+        response = self.client.get(request_url)
+        self.assertEqual(response.status_code, 200)
+
+    @responses.activate
+    def test_navigating_back_to_simple_search_form(self):
+        """
+        Test that going back to the simple search form doesn't redirect to the results page.
+        The action of NOT submitting the form explicitly is represented by the absence of query param
+        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        """
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 2,
+                'results': [self.bank_transfer_sender, self.debit_card_sender],
+            },
+        )
+        query_string = 'ordering=-prisoner_count&search=test'
+        request_url = f'{reverse(self.view_name)}?{query_string}'
+        response = self.client.get(request_url)
+        self.assertEqual(response.status_code, 200)
 
     @responses.activate
     def test_displays_bank_transfer_detail(self):

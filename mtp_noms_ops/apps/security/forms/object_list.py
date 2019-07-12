@@ -77,8 +77,6 @@ class SendersForm(BaseSendersForm):
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
 
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
-
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are senders who {filter_description}, ordered by {ordering_description}.'
     unfiltered_description_template = 'All senders are shown below ordered by {ordering_description}. ' \
@@ -164,11 +162,21 @@ class SendersFormV2(BaseSendersForm):
     """
     Search Form for Senders V2.
     """
-    search = forms.CharField(label=_('Sender name or email address'), required=False)
+    search = forms.CharField(
+        label=_('Search payment source name or email address'),
+        required=False,
+        help_text=_('Common or incomplete names may show many results'),
+    )
 
-    @property
-    def search_description(self):
-        return ''
+    # NB: ensure that these templates are HTML-safe
+    filtered_description_template = 'Results containing {filter_description}.'
+    unfiltered_description_template = ''
+
+    description_templates = (
+        ('prisoner number or name “{search}”',),
+    )
+    description_capitalisation = {}
+    unlisted_description = ''
 
 
 @validate_range_fields(

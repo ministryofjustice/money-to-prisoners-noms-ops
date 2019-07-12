@@ -110,6 +110,15 @@ urlpatterns = [
         name='sender_list',
     ),
     url(
+        r'^senders/search-results/$',
+        security_test(
+            views.SenderListViewV2.as_view(
+                view_type=views.ViewType.search_results,
+            ),
+        ),
+        name='sender_search_results',
+    ),
+    url(
         r'^senders/export/$',
         security_test(
             search_v2_view_dispatcher(

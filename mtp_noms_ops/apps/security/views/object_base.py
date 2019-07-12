@@ -17,6 +17,9 @@ from security.export import ObjectListXlsxResponse
 from security.tasks import email_export_xlsx
 
 
+SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME = 'form_submitted'
+
+
 class SimpleSecurityDetailView(TemplateView):
     """
     Base view for showing a single templated page without a form
@@ -72,7 +75,6 @@ class SecurityView(FormView):
     Allows form submission via GET, i.e. form is always bound
     """
     title = NotImplemented
-    template_name = NotImplemented
     form_template_name = NotImplemented
     object_list_context_key = NotImplemented
     export_view = False
@@ -123,7 +125,7 @@ class SecurityView(FormView):
         if self.redirect_on_single and len(object_list) == 1 and hasattr(self, 'url_for_single_result'):
             return redirect(self.url_for_single_result(object_list[0]))
         context[self.object_list_context_key] = object_list
-        return render(self.request, self.template_name, context)
+        return render(self.request, self.get_template_names(), context)
 
     def form_invalid(self, form):
         if self.export_view:
@@ -132,12 +134,17 @@ class SecurityView(FormView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        context_data['breadcrumbs'] = [
+        breadcrumbs = [
             {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.title}
         ]
-        context_data['google_analytics_pageview'] = genericised_pageview(self.request, self.get_generic_title())
-        return context_data
+        return {
+            **context_data,
+
+            'breadcrumbs': breadcrumbs,
+            'google_analytics_pageview': genericised_pageview(self.request, self.get_generic_title()),
+            'simple_search_form_submitted_input_name': SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME,
+        }
 
     def get_export_redirect(self, form):
         return redirect('%s?%s' % (reverse(self.export_redirect_view, kwargs=self.kwargs), form.query_string))
