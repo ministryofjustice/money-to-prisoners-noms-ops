@@ -1297,8 +1297,11 @@ class CreditsExportTestCase(SecurityBaseTestCase):
             api_url('/credits/'),
             json=response_data
         )
-        response = self.client.get(reverse('security:credits_email_export'), follow=False)
-        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
+        response = self.client.get(
+            f"{reverse('security:credits_email_export')}?ordering=-received_at",
+            follow=False,
+        )
+        self.assertRedirects(response, f"{reverse('security:credit_list')}?ordering=-received_at")
         self.assertSpreadsheetEqual(
             mail.outbox[0].attachments[0][1],
             expected_values,
@@ -1335,8 +1338,11 @@ class CreditsExportTestCase(SecurityBaseTestCase):
             api_url('/credits/'),
             json=response_data
         )
-        response = self.client.get(reverse('security:credits_email_export'), follow=False)
-        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
+        response = self.client.get(
+            f"{reverse('security:credits_email_export')}?ordering=-received_at",
+            follow=False,
+        )
+        self.assertRedirects(response, f"{reverse('security:credit_list')}?ordering=-received_at")
         self.assertSpreadsheetEqual(
             mail.outbox[0].attachments[0][1],
             expected_values,
@@ -1348,9 +1354,9 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         sample_prison_list()
         self.login()
         response = self.client.get(
-            reverse('security:credits_export') + '?received_at__gte=LL'
+            f"{reverse('security:credits_export')}?received_at__gte=LL"
         )
-        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
+        self.assertRedirects(response, f"{reverse('security:credit_list')}?received_at__gte=LL")
 
 
 class PinnedProfileTestCase(SecurityViewTestCase):

@@ -70,12 +70,12 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.CreditListView.as_view(
-                    export_view='download',
-                    export_redirect_view='security:credit_list',
+                    view_type=views.ViewType.export_download,
+                    referral_view='security:credit_list',
                 ),
                 views.CreditListView.as_view(
-                    export_view='download',
-                    export_redirect_view='security:credit_list',
+                    view_type=views.ViewType.export_download,
+                    referral_view='security:credit_list',
                 ),
             ),
         ),
@@ -86,12 +86,12 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.CreditListView.as_view(
-                    export_view='email',
-                    export_redirect_view='security:credit_list',
+                    view_type=views.ViewType.export_email,
+                    referral_view='security:credit_list',
                 ),
                 views.CreditListView.as_view(
-                    export_view='email',
-                    export_redirect_view='security:credit_list',
+                    view_type=views.ViewType.export_email,
+                    referral_view='security:credit_list',
                 ),
             ),
         ),
@@ -104,7 +104,9 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.SenderListView.as_view(),
-                views.SenderListViewV2.as_view(),
+                views.SenderListViewV2.as_view(
+                    view_type=views.ViewType.simple_search_form,
+                ),
             ),
         ),
         name='sender_list',
@@ -114,6 +116,7 @@ urlpatterns = [
         security_test(
             views.SenderListViewV2.as_view(
                 view_type=views.ViewType.search_results,
+                referral_view='security:sender_list',
             ),
         ),
         name='sender_search_results',
@@ -123,12 +126,12 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.SenderListView.as_view(
-                    export_view='download',
-                    export_redirect_view='security:sender_list',
+                    view_type=views.ViewType.export_download,
+                    referral_view='security:sender_list',
                 ),
                 views.SenderListViewV2.as_view(
-                    export_view='download',
-                    export_redirect_view='security:sender_list',
+                    view_type=views.ViewType.export_download,
+                    referral_view='security:sender_list',
                 ),
             ),
         ),
@@ -139,12 +142,12 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.SenderListView.as_view(
-                    export_view='email',
-                    export_redirect_view='security:sender_list',
+                    view_type=views.ViewType.export_email,
+                    referral_view='security:sender_list',
                 ),
                 views.SenderListViewV2.as_view(
-                    export_view='email',
-                    export_redirect_view='security:sender_list',
+                    view_type=views.ViewType.export_email,
+                    referral_view='security:sender_list',
                 ),
             ),
         ),
@@ -159,8 +162,8 @@ urlpatterns = [
         r'^senders/(?P<sender_id>\d+)/export/$',
         security_test(
             views.SenderDetailView.as_view(
-                export_view='download',
-                export_redirect_view='security:sender_detail',
+                view_type=views.ViewType.export_download,
+                referral_view='security:sender_detail',
             ),
         ),
         name='sender_detail_export',
@@ -169,8 +172,8 @@ urlpatterns = [
         r'^senders/(?P<sender_id>\d+)/email-export/$',
         security_test(
             views.SenderDetailView.as_view(
-                export_view='email',
-                export_redirect_view='security:sender_detail',
+                view_type=views.ViewType.export_email,
+                referral_view='security:sender_detail',
             ),
         ),
         name='sender_detail_email_export',
@@ -192,12 +195,12 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.PrisonerListView.as_view(
-                    export_view='download',
-                    export_redirect_view='security:prisoner_list',
+                    view_type=views.ViewType.export_download,
+                    referral_view='security:prisoner_list',
                 ),
                 views.PrisonerListView.as_view(
-                    export_view='download',
-                    export_redirect_view='security:prisoner_list',
+                    view_type=views.ViewType.export_download,
+                    referral_view='security:prisoner_list',
                 ),
             ),
         ),
@@ -208,12 +211,12 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.PrisonerListView.as_view(
-                    export_view='email',
-                    export_redirect_view='security:prisoner_list',
+                    view_type=views.ViewType.export_email,
+                    referral_view='security:prisoner_list',
                 ),
                 views.PrisonerListView.as_view(
-                    export_view='email',
-                    export_redirect_view='security:prisoner_list',
+                    view_type=views.ViewType.export_email,
+                    referral_view='security:prisoner_list',
                 ),
             ),
         ),
@@ -228,8 +231,8 @@ urlpatterns = [
         r'^prisoners/(?P<prisoner_id>\d+)/export/$',
         security_test(
             views.PrisonerDetailView.as_view(
-                export_view='download',
-                export_redirect_view='security:prisoner_detail',
+                view_type=views.ViewType.export_download,
+                referral_view='security:prisoner_detail',
             ),
         ),
         name='prisoner_detail_export',
@@ -238,8 +241,8 @@ urlpatterns = [
         r'^prisoners/(?P<prisoner_id>\d+)/email-export/$',
         security_test(
             views.PrisonerDetailView.as_view(
-                export_view='email',
-                export_redirect_view='security:prisoner_detail',
+                view_type=views.ViewType.export_email,
+                referral_view='security:prisoner_detail',
             )
         ),
         name='prisoner_detail_email_export',
@@ -253,8 +256,8 @@ urlpatterns = [
         r'^prisoners/(?P<prisoner_id>\d+)/disbursements/export/$',
         security_test(
             views.PrisonerDisbursementDetailView.as_view(
-                export_view='download',
-                export_redirect_view='security:prisoner_disbursement_detail',
+                view_type=views.ViewType.export_download,
+                referral_view='security:prisoner_disbursement_detail',
             ),
         ),
         name='prisoner_disbursement_detail_export',
@@ -263,8 +266,8 @@ urlpatterns = [
         r'^prisoners/(?P<prisoner_id>\d+)/disbursements/email-export/$',
         security_test(
             views.PrisonerDisbursementDetailView.as_view(
-                export_view='email',
-                export_redirect_view='security:prisoner_disbursement_detail',
+                view_type=views.ViewType.export_email,
+                referral_view='security:prisoner_disbursement_detail',
             ),
         ),
         name='prisoner_disbursement_detail_email_export',
@@ -303,12 +306,12 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.DisbursementListView.as_view(
-                    export_view='download',
-                    export_redirect_view='security:disbursement_list',
+                    view_type=views.ViewType.export_download,
+                    referral_view='security:disbursement_list',
                 ),
                 views.DisbursementListView.as_view(
-                    export_view='download',
-                    export_redirect_view='security:disbursement_list',
+                    view_type=views.ViewType.export_download,
+                    referral_view='security:disbursement_list',
                 ),
             ),
         ),
@@ -319,12 +322,12 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.DisbursementListView.as_view(
-                    export_view='email',
-                    export_redirect_view='security:disbursement_list',
+                    view_type=views.ViewType.export_email,
+                    referral_view='security:disbursement_list',
                 ),
                 views.DisbursementListView.as_view(
-                    export_view='email',
-                    export_redirect_view='security:disbursement_list',
+                    view_type=views.ViewType.export_email,
+                    referral_view='security:disbursement_list',
                 ),
             ),
         ),
