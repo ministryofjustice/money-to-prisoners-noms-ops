@@ -8,17 +8,14 @@ from django.utils.dateparse import parse_date, parse_datetime
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
-from . import (
-    hmpps_employee_flag, confirmed_prisons_flag,
-    notifications_pilot_flag
-)
+from security import hmpps_employee_flag, confirmed_prisons_flag
 
 
 def parse_date_fields(object_list):
     """
     MTP API responds with string date/time fields, this filter converts them to python objects
     """
-    fields = ('received_at', 'credited_at', 'refunded_at', 'created',)
+    fields = ('received_at', 'credited_at', 'refunded_at', 'created')
     nested_objects = ('credit', 'disbursement',)
     parsers = (parse_datetime, parse_date)
 
@@ -159,13 +156,6 @@ def can_skip_confirming_prisons(user):
     already_confirmed = confirmed_prisons_flag in user.user_data.get('flags', [])
     cannot_choose_prisons = not can_choose_prisons(user)
     return already_confirmed or cannot_choose_prisons
-
-
-def can_see_notifications(user):
-    return (
-        user.is_authenticated and
-        notifications_pilot_flag in user.user_data.get('flags', [])
-    )
 
 
 def is_nomis_api_configured():

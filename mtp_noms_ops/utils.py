@@ -6,7 +6,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 from mtp_common.context_processors import govuk_localisation as inherited_localisation
 
 from prisoner_location_admin import required_permissions as prisoner_location_permissions
-from security import required_permissions as security_permissions
+from security import required_permissions as security_permissions, notifications_pilot_flag
 
 
 class UserPermissionMiddleware:
@@ -16,6 +16,9 @@ class UserPermissionMiddleware:
         request.can_access_prisoner_location = request.user.has_perms(prisoner_location_permissions)
         request.can_access_security = request.user.has_perms(security_permissions)
         request.can_access_user_management = request.user.has_perm('auth.change_user')
+        request.can_access_notifications = (
+            request.user.is_authenticated and notifications_pilot_flag in request.user.user_data.get('flags', [])
+        )
         request.can_pre_approve = request.user.is_authenticated and any(
             prison['pre_approval_required']
             for prison in request.user_prisons

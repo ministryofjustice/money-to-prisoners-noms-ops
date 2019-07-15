@@ -8,9 +8,7 @@ from django.views.generic import FormView, TemplateView
 from mtp_common.auth.api_client import get_api_session
 
 from security import confirmed_prisons_flag
-from security.utils import (
-    save_user_flags, can_skip_confirming_prisons, can_see_notifications
-)
+from security.utils import save_user_flags, can_skip_confirming_prisons
 from settings.forms import ConfirmPrisonForm, ChangePrisonForm, ALL_PRISONS_CODE
 
 logger = logging.getLogger('mtp')
@@ -23,7 +21,7 @@ class NomsOpsSettingsView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         session = get_api_session(self.request)
-        if can_see_notifications(self.request.user):
+        if self.request.can_access_notifications:
             context['email_notifications'] = False
             email_preferences = session.get('/emailpreferences').json()
             context['email_notifications'] = email_preferences['frequency'] == 'weekly'

@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block extra_settings %}
-  {% if notifications_available %}
+  {% if request.can_access_notifications %}
     <div class="mtp-settings-item">
       <form method="post">
         {% csrf_token %}
