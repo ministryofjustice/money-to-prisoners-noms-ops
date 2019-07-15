@@ -7,22 +7,27 @@
       <form method="post">
         {% csrf_token %}
         {% if email_notifications %}
+
           <h2 class="heading-large">
-            {% trans 'Email notifications on' %}
+            {% trans 'Email notifications' %} – {% trans 'ON' %}
           </h2>
           <p>
-            {% trans 'You’re currently receiving email notifications every Monday.' %}
+            {% trans 'You’re currently receiving email notifications for payment sources and prisoners you are monitoring.' %}
           </p>
-          <input type="submit" class="button" name="submit_email_preferences" value="{% trans 'Turn off email notifications' %}"/>
+          <input type="hidden" name="email_notifications" value="False" />
+          <input type="submit" class="button" value="{% trans 'Turn off email notifications' %}"/>
+
         {% else %}
+
           <h2 class="heading-large">
-            {% trans 'Email notifications off' %}
+            {% trans 'Email notifications' %} – {% trans 'OFF' %}
           </h2>
           <p>
-            {% trans 'You’re not currently receiving email notifications.' %}
+            {% trans 'You’re not currently receiving email notifications for payment sources and prisoners you are monitoring.' %}
           </p>
-          <input type="hidden" name="toggle" value="True" />
-          <input type="submit" class="button" name="submit_email_preferences" value="{% trans 'Turn on email notifications' %}"/>
+          <input type="hidden" name="email_notifications" value="True" />
+          <input type="submit" class="button" value="{% trans 'Turn on email notifications' %}"/>
+
         {% endif %}
       </form>
     </div>
