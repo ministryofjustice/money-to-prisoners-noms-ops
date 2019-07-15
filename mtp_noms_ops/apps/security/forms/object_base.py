@@ -210,21 +210,25 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 filters[param] += datetime.timedelta(days=1)
         return filters
 
+    def get_api_request_page_params(self):
+        page = self.cleaned_data.get('page')
+        if not page:
+            return None
+        filters = self.get_api_request_params()
+        filters['offset'] = (page - 1) * self.page_size
+        filters['limit'] = self.page_size
+        return filters
+
     def get_object_list(self):
         """
         Gets the security object list: senders, prisoners or credits
         :return: list
         """
-        page = self.cleaned_data.get('page')
-        if not page:
+        filters = self.get_api_request_page_params()
+        if filters is None:
             return []
-        offset = (page - 1) * self.page_size
-        filters = self.get_api_request_params()
         try:
-            data = self.session.get(
-                self.get_object_list_endpoint_path(),
-                params=dict(offset=offset, limit=self.page_size, **filters)
-            ).json()
+            data = self.session.get(self.get_object_list_endpoint_path(), params=filters).json()
         except RequestException:
             self.add_error(None, _('This service is currently unavailable'))
             return []
