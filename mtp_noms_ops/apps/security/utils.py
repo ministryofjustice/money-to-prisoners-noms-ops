@@ -5,6 +5,7 @@ import re
 from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
+from django.utils.translation import gettext_lazy as _
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
@@ -40,6 +41,18 @@ def parse_date_fields(object_list):
         return obj
 
     return list(map(convert, object_list)) if object_list else object_list
+
+
+def sender_profile_name(sender):
+    try:
+        return sender['bank_transfer_details'][0]['sender_name']
+    except (KeyError, IndexError):
+        pass
+    try:
+        return sender['debit_card_details'][0]['cardholder_names'][0]
+    except (KeyError, IndexError):
+        pass
+    return _('Unknown sender')
 
 
 class OrderedSet(collections.MutableSet):

@@ -7,7 +7,7 @@ from security.forms.object_detail import (
     PrisonersDetailForm, PrisonersDisbursementDetailForm,
 )
 from security.templatetags.security import currency as format_currency
-from security.utils import NameSet, parse_date_fields
+from security.utils import NameSet, parse_date_fields, sender_profile_name
 from security.views.object_base import SimpleSecurityDetailView, SecurityDetailView
 from security.views.object_list import SenderListView, PrisonerListView
 
@@ -100,15 +100,7 @@ class SenderDetailView(SecurityDetailView):
     object_context_key = 'sender'
 
     def get_title_for_object(self, detail_object):
-        try:
-            return detail_object['bank_transfer_details'][0]['sender_name']
-        except (KeyError, IndexError):
-            pass
-        try:
-            return detail_object['debit_card_details'][0]['cardholder_names'][0]
-        except (KeyError, IndexError):
-            pass
-        return _('Unknown sender')
+        return sender_profile_name(detail_object)
 
 
 class PrisonerDetailView(SecurityDetailView):
