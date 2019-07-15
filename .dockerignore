@@ -28,3 +28,7 @@ static/
 media/
 venv/
 spooler/
+
+# Unit test / coverage reports
+.coverage
+reports/

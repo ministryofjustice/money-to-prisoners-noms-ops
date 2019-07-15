@@ -2,3 +2,5 @@
 -r dev.txt
 
 django-jenkins>=0.110,<1
+coverage>=4.5.3,<5
+coveralls>=1.8.1,<2

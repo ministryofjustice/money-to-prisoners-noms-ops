@@ -24,3 +24,7 @@ spooler/
 # selenium
 geckodriver.log
 ghostdriver.log
+
+# Unit test / coverage reports
+.coverage
+reports/

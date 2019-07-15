@@ -33,8 +33,9 @@ jobs:
             docker run \
               --name ${app} \
               -e DJANGO_SETTINGS_MODULE=mtp_noms_ops.settings.jenkins \
+              -e COVERALLS_REPO_TOKEN=${COVERALLS_REPO_TOKEN} \
               ${tag} \
-              /bin/bash -c 'mkdir /app/reports && /app/venv/bin/pip install -r requirements/jenkins.txt && /app/venv/bin/python manage.py test --verbosity=2'
+              /bin/bash -c 'mkdir /app/reports && /app/venv/bin/pip install -r requirements/jenkins.txt && /app/venv/bin/coverage run manage.py test --verbosity=2 && /app/venv/bin/coveralls'
             docker cp ${app}:/app/reports /tmp/reports
             docker rm ${app}
             mkdir /tmp/reports/${app} && mv /tmp/reports/junit.xml /tmp/reports/${app}
