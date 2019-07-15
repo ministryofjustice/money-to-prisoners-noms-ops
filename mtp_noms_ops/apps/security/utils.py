@@ -16,7 +16,7 @@ def parse_date_fields(object_list):
     """
     MTP API responds with string date/time fields, this filter converts them to python objects
     """
-    fields = ('received_at', 'credited_at', 'refunded_at', 'created')
+    fields = ('received_at', 'credited_at', 'refunded_at', 'created', 'triggered_at')
     nested_objects = ('credit', 'disbursement',)
     parsers = (parse_datetime, parse_date)
 

@@ -7,6 +7,6 @@ from .object_detail import (  # noqa: F401
 from .object_list import (  # noqa: F401
     SenderListView, PrisonerListView,
     CreditListView, DisbursementListView,
+    NotificationListView,
 )
 from .review import ReviewCreditsView  # noqa: F401
-from .notifications import NotificationListView  # noqa: F401
