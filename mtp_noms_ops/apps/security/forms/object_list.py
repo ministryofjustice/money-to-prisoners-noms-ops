@@ -15,7 +15,7 @@ from security.forms.object_base import (
     insert_blank_option, get_credit_source_choices, get_disbursement_method_choices,
 )
 from security.templatetags.security import currency as format_currency
-from security.utils import parse_date_fields, sender_profile_name
+from security.utils import convert_date_fields, sender_profile_name
 
 
 @validate_range_fields(
@@ -412,7 +412,7 @@ class CreditsForm(SecurityForm):
         return '/credits/'
 
     def get_object_list(self):
-        return parse_date_fields(super().get_object_list())
+        return convert_date_fields(super().get_object_list())
 
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
@@ -569,7 +569,7 @@ class DisbursementsForm(SecurityForm):
         return '/disbursements/'
 
     def get_object_list(self):
-        return parse_date_fields(super().get_object_list())
+        return convert_date_fields(super().get_object_list())
 
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
@@ -633,7 +633,7 @@ class NotificationsForm(SecurityForm):
         date_groups = []
 
         date_group = self.make_date_group(None)
-        for event in parse_date_fields(super().get_object_list()):
+        for event in convert_date_fields(super().get_object_list()):
             event_date = event['triggered_at'].date()
             if event_date != date_group['date']:
                 date_group = self.make_date_group(event_date)

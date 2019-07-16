@@ -12,19 +12,14 @@ from mtp_common.auth.api_client import get_api_session
 from security import hmpps_employee_flag, confirmed_prisons_flag
 
 
-def parse_date_fields(object_list):
+def convert_date_fields(object_list):
     """
     MTP API responds with string date/time fields, this filter converts them to python objects
     """
     fields = ('received_at', 'credited_at', 'refunded_at', 'created', 'triggered_at')
-    nested_objects = ('credit', 'disbursement',)
     parsers = (parse_datetime, parse_date)
 
     def convert(obj):
-        for nested_obj in nested_objects:
-            nested = obj.get(nested_obj)
-            if nested and isinstance(nested, dict):
-                convert(nested)
         for field in fields:
             value = obj.get(field)
             if not value or not isinstance(value, str):

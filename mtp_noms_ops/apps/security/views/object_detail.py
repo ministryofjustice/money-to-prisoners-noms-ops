@@ -7,7 +7,7 @@ from security.forms.object_detail import (
     PrisonersDetailForm, PrisonersDisbursementDetailForm,
 )
 from security.templatetags.security import currency as format_currency
-from security.utils import NameSet, parse_date_fields, sender_profile_name
+from security.utils import NameSet, convert_date_fields, sender_profile_name
 from security.views.object_base import SimpleSecurityDetailView, SecurityDetailView
 from security.views.object_list import SenderListView, PrisonerListView
 
@@ -34,7 +34,7 @@ class CreditDetailView(SimpleSecurityDetailView):
             return {}
         if response['count'] != 1:
             raise Http404('credit not found')
-        credit = parse_date_fields(response['results'])[0]
+        credit = convert_date_fields(response['results'])[0]
         return credit
 
     def get_context_data(self, **kwargs):
@@ -62,7 +62,7 @@ class DisbursementDetailView(SimpleSecurityDetailView):
     def get_object(self):
         disbursement = super().get_object()
         if disbursement:
-            disbursement = parse_date_fields([disbursement])[0]
+            disbursement = convert_date_fields([disbursement])[0]
             self.format_log_set(disbursement)
             disbursement['recipient_name'] = ('%s %s' % (disbursement['recipient_first_name'],
                                                          disbursement['recipient_last_name'])).strip()
@@ -82,7 +82,7 @@ class DisbursementDetailView(SimpleSecurityDetailView):
             return log_item
 
         disbursement['log_set'] = sorted(
-            map(format_staff_name, parse_date_fields(disbursement.get('log_set', []))),
+            map(format_staff_name, convert_date_fields(disbursement.get('log_set', []))),
             key=lambda log_item: log_item['created']
         )
 

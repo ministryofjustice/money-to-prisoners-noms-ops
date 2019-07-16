@@ -23,7 +23,7 @@ from security.models import PrisonList, credit_sources, disbursement_methods
 from security.searches import (
     save_search, update_result_count, delete_search, get_existing_search
 )
-from security.utils import parse_date_fields
+from security.utils import convert_date_fields
 
 
 def get_credit_source_choices(blank_option=_('Any method')):
@@ -239,7 +239,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
     def get_complete_object_list(self):
         filters = self.get_api_request_params()
-        return parse_date_fields(retrieve_all_pages_for_path(
+        return convert_date_fields(retrieve_all_pages_for_path(
             self.session, self.get_object_list_endpoint_path(), **filters)
         )
 
@@ -357,7 +357,7 @@ class SecurityDetailForm(SecurityForm):
         raise NotImplementedError
 
     def get_object_list(self):
-        return parse_date_fields(super().get_object_list())
+        return convert_date_fields(super().get_object_list())
 
     def get_object(self):
         """

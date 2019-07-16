@@ -11,7 +11,7 @@ from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 
 from security.export import write_objects
-from security.utils import parse_date_fields
+from security.utils import convert_date_fields
 
 
 @spoolable(body_params=('user', 'session', 'filters'))
@@ -38,7 +38,7 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
 
     api_session = get_api_session_with_session(user, session)
     generated_at = timezone.now()
-    object_list = parse_date_fields(
+    object_list = convert_date_fields(
         retrieve_all_pages_for_path(api_session, endpoint_path, **filters)
     )
 
