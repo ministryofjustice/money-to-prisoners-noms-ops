@@ -40,11 +40,11 @@
           {% if date_group.senders %}
             <h4 class="heading-small">{% trans 'Payment sources' %}</h4>
 
-            {% for profile in date_group.senders %}
-              <a href="{% url 'security:sender_detail' sender_id=profile.id %}">
-                {{ profile.description }}
+            {% for sender in date_group.senders %}
+              <a href="{% url 'security:sender_detail' sender_id=sender.id %}">
+                {{ sender.description }}
                 –
-                {% blocktrans trimmed count count=profile.transaction_count %}
+                {% blocktrans trimmed count count=sender.transaction_count %}
                   {{ count }} transaction
                 {% plural %}
                   {{ count }} transactions
@@ -57,16 +57,16 @@
           {% if date_group.prisoners %}
             <h4 class="heading-small">{% trans 'Prisoners' %}</h4>
 
-            {% for profile in date_group.prisoners %}
-              {% if profile.disbursements_only %}
-                {% url 'security:prisoner_disbursement_detail' prisoner_id=profile.id as prisoner_url %}
+            {% for prisoner in date_group.prisoners %}
+              {% if prisoner.disbursements_only %}
+                {% url 'security:prisoner_disbursement_detail' prisoner_id=prisoner.id as prisoner_url %}
               {% else %}
-                {% url 'security:prisoner_detail' prisoner_id=profile.id as prisoner_url %}
+                {% url 'security:prisoner_detail' prisoner_id=prisoner.id as prisoner_url %}
               {% endif %}
               <a href="{{ prisoner_url }}">
-                {{ profile.description }}
+                {{ prisoner.description }}
                 –
-                {% blocktrans trimmed count count=profile.transaction_count %}
+                {% blocktrans trimmed count count=prisoner.transaction_count %}
                   {{ count }} transaction
                 {% plural %}
                   {{ count }} transactions

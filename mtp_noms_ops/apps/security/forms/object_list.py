@@ -630,80 +630,108 @@ class NotificationsForm(SecurityForm):
         return filters
 
     def get_object_list(self):
-        date_groups = []
-
-        date_group = self.make_date_group(None)
-        for event in convert_date_fields(super().get_object_list()):
-            event_date = event['triggered_at'].date()
-            if event_date != date_group['date']:
-                date_group = self.make_date_group(event_date)
-                date_groups.append(date_group)
-
-            if event['sender_profile']:
-                profile = event['sender_profile']
-                if profile['id'] in date_group['senders']:
-                    details = date_group['senders'][profile['id']]
-                else:
-                    details = self.make_date_group_profile(
-                        profile['id'],
-                        sender_profile_name(profile)
-                    )
-                    date_group['senders'][profile['id']] = details
-                if event['credit_id']:
-                    details['credit_ids'].add(event['credit_id'])
-                if event['disbursement_id']:
-                    details['disbursement_ids'].add(event['disbursement_id'])
-
-            if event['prisoner_profile']:
-                profile = event['prisoner_profile']
-                if profile['id'] in date_group['prisoners']:
-                    details = date_group['prisoners'][profile['id']]
-                else:
-                    details = self.make_date_group_profile(
-                        profile['id'],
-                        profile['prisoner_name'] + ' (' + profile['prisoner_number'] + ')'
-                    )
-                    date_group['prisoners'][profile['id']] = details
-                if event['credit_id']:
-                    details['credit_ids'].add(event['credit_id'])
-                if event['disbursement_id']:
-                    details['disbursement_ids'].add(event['disbursement_id'])
-
-        for date_group in date_groups:
-            date_group['senders'] = sorted(
-                date_group['senders'].values(),
-                key=lambda sender: sender['description']
-            )
-            date_group['prisoners'] = sorted(
-                date_group['prisoners'].values(),
-                key=lambda prisoner: prisoner['description']
-            )
-            transaction_count = 0
-            for profile in date_group['senders']:
-                profile.pop('disbursement_ids')
-                profile['transaction_count'] = len(profile.pop('credit_ids'))
-                transaction_count += profile['transaction_count']
-            for profile in date_group['prisoners']:
-                profile['disbursements_only'] = bool(profile['disbursement_ids'] and not profile['credit_ids'])
-                profile['transaction_count'] = len(profile.pop('credit_ids')) + len(profile.pop('disbursement_ids'))
-                transaction_count += profile['transaction_count']
-            date_group['transaction_count'] = transaction_count
+        events = convert_date_fields(super().get_object_list())
+        date_groups = map(summarise_date_group, group_events_by_date(events))
 
         self.page_count = int(ceil(self.date_count / self.page_size))
         self.total_count = self.date_count
         return date_groups
 
-    def make_date_group(self, date):
-        return {
-            'date': date,
-            'senders': {},
-            'prisoners': {},
-        }
 
-    def make_date_group_profile(self, profile_id, description):
-        return {
-            'id': profile_id,
-            'description': description,
-            'credit_ids': set(),
-            'disbursement_ids': set(),
-        }
+def make_date_group(date):
+    return {
+        'date': date,
+        'senders': {},
+        'prisoners': {},
+    }
+
+
+def make_date_group_profile(profile_id, description):
+    return {
+        'id': profile_id,
+        'description': description,
+        'credit_ids': set(),
+        'disbursement_ids': set(),
+    }
+
+
+def group_events_by_date(events):
+    date_groups = []
+    date_group = make_date_group(None)
+    for event in events:
+        event_date = event['triggered_at'].date()
+        if event_date != date_group['date']:
+            date_group = make_date_group(event_date)
+            date_groups.append(date_group)
+
+        if event['sender_profile']:
+            profile = event['sender_profile']
+            if profile['id'] in date_group['senders']:
+                details = date_group['senders'][profile['id']]
+            else:
+                details = make_date_group_profile(
+                    profile['id'],
+                    sender_profile_name(profile)
+                )
+                date_group['senders'][profile['id']] = details
+            if event['credit_id']:
+                details['credit_ids'].add(event['credit_id'])
+            if event['disbursement_id']:
+                details['disbursement_ids'].add(event['disbursement_id'])
+
+        if event['prisoner_profile']:
+            profile = event['prisoner_profile']
+            if profile['id'] in date_group['prisoners']:
+                details = date_group['prisoners'][profile['id']]
+            else:
+                details = make_date_group_profile(
+                    profile['id'],
+                    f"{profile['prisoner_name']} ({profile['prisoner_number']})"
+                )
+                date_group['prisoners'][profile['id']] = details
+            if event['credit_id']:
+                details['credit_ids'].add(event['credit_id'])
+            if event['disbursement_id']:
+                details['disbursement_ids'].add(event['disbursement_id'])
+    return date_groups
+
+
+def summarise_date_group(date_group):
+    date_group_transaction_count = 0
+
+    sender_summaries = []
+    senders = sorted(
+        date_group['senders'].values(),
+        key=lambda s: s['description']
+    )
+    for sender in senders:
+        profile_transaction_count = len(sender['credit_ids'])
+        date_group_transaction_count += profile_transaction_count
+        sender_summaries.append({
+            'id': sender['id'],
+            'transaction_count': profile_transaction_count,
+            'description': sender['description'],
+        })
+
+    prisoner_summaries = []
+    prisoners = sorted(
+        date_group['prisoners'].values(),
+        key=lambda p: p['description']
+    )
+    for prisoner in prisoners:
+        disbursements_only = bool(prisoner['disbursement_ids'] and not prisoner['credit_ids'])
+        profile_transaction_count = len(prisoner['credit_ids']) + len(prisoner['disbursement_ids'])
+        date_group_transaction_count += profile_transaction_count
+        prisoner_summaries.append({
+            'id': prisoner['id'],
+            'transaction_count': profile_transaction_count,
+            'description': prisoner['description'],
+            'disbursements_only': disbursements_only,
+        })
+
+    return {
+        'date': date_group['date'],
+        'transaction_count': date_group_transaction_count,
+        'senders': sender_summaries,
+        'prisoners': prisoner_summaries,
+    }
