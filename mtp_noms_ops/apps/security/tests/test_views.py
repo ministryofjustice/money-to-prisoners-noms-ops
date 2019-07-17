@@ -16,9 +16,10 @@ import responses
 
 from security import (
     required_permissions, hmpps_employee_flag, not_hmpps_employee_flag,
-    confirmed_prisons_flag
+    confirmed_prisons_flag, SEARCH_V2_FLAG,
 )
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
+from security.views.object_base import SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME
 
 
 override_nomis_settings = override_settings(
@@ -140,6 +141,12 @@ class SecurityBaseTestCase(SimpleTestCase):
             'flags': flags,
             'roles': roles,
         }
+
+    def assertSpreadsheetEqual(self, spreadsheet_data, expected_values, msg=None):  # noqa: N802
+        with temp_spreadsheet(spreadsheet_data) as ws:
+            for i, row in enumerate(expected_values, start=1):
+                for j, cell in enumerate(row, start=1):
+                    self.assertEqual(cell, ws.cell(column=j, row=i).value, msg=msg)
 
 
 class LocaleTestCase(SecurityBaseTestCase):
@@ -266,6 +273,9 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
 
 
 class SecurityViewTestCase(SecurityBaseTestCase):
+    """
+    TODO: delete after search V2 goes live.
+    """
     view_name = None
     api_list_path = None
     bank_transfer_sender = {
@@ -356,8 +366,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         no_saved_searches()
         sample_prison_list()
         responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        response = self.client.get(reverse(self.view_name) + '?page=1&prison=BBI', follow=False)
-        self.assertContains(response, 'HMP Test 2')
+        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI', follow=False)
         calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
         self.assertEqual(len(calls), 1)
         self.assertIn('prison=BBI', calls[0].request.url)
@@ -370,9 +379,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         no_saved_searches()
         sample_prison_list()
         responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        response = self.client.get(reverse(self.view_name) + '?page=1&prison=BBI&prison=AAI', follow=False)
-        self.assertContains(response, 'HMP &amp; YOI Test 1')
-        self.assertContains(response, 'HMP Test 2')
+        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI&prison=AAI', follow=False)
         calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
         self.assertEqual(len(calls), 1)
         self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
@@ -385,15 +392,16 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         no_saved_searches()
         sample_prison_list()
         responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        response = self.client.get(reverse(self.view_name) + '?page=1&prison=BBI,AAI', follow=False)
-        self.assertContains(response, 'HMP &amp; YOI Test 1')
-        self.assertContains(response, 'HMP Test 2')
+        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI,AAI', follow=False)
         calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
         self.assertEqual(len(calls), 1)
         self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
 
 
-class SenderListTestCase(SecurityViewTestCase):
+class SenderViewsTestCase(SecurityViewTestCase):
+    """
+    TODO: delete after search V2 goes live.
+    """
     view_name = 'security:sender_list'
     detail_view_name = 'security:sender_detail'
     api_list_path = '/senders/'
@@ -515,6 +523,349 @@ class SenderListTestCase(SecurityViewTestCase):
         with silence_logger('django.request'):
             response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
         self.assertContains(response, 'non-field-error')
+
+
+class SenderViewsTestCaseV2(SecurityViewTestCase):
+    """
+    Test case related to sender search V2 and detail views.
+    """
+    view_name = 'security:sender_list'
+    search_results_view_name = 'security:sender_search_results'
+    detail_view_name = 'security:sender_detail'
+    export_view_name = 'security:senders_export'
+    api_list_path = '/senders/'
+    expected_xls_headers = [
+        'Sender name',
+        'Payment source',
+        'Credits sent',
+        'Total amount sent',
+        'Prisoners sent to',
+        'Prisons sent to',
+        'Bank transfer sort code',
+        'Bank transfer account',
+        'Bank transfer roll number',
+        'Debit card number',
+        'Debit card expiry',
+        'Debit card postcode',
+        'Other cardholder names',
+        'Cardholder emails',
+    ]
+
+    def get_user_data(
+        self,
+        *args,
+        flags=(
+            hmpps_employee_flag,
+            confirmed_prisons_flag,
+            SEARCH_V2_FLAG,
+        ),
+        **kwargs,
+    ):
+        """
+        Sets the SEARCH_V2_FLAG feature flag by default.
+        """
+
+        return super().get_user_data(*args, flags=flags, **kwargs)
+
+    @responses.activate
+    def test_default_prisons_used(self):
+        """
+        Test that the simple search template uses the prisons of the logged in user to
+        populate the `prison` hidden inputs.
+        The simple search filters by the user's prisons by default.
+        """
+        user_prisons = sample_prisons
+        user_data = self.get_user_data(prisons=user_prisons)
+
+        self.login(user_data=user_data)
+        no_saved_searches()
+        sample_prison_list()
+        response = self.client.get(reverse(self.view_name))
+        for prison in user_prisons:
+            self.assertContains(
+                response,
+                f'<input type="hidden" name="prison" value="{prison["nomis_id"]}" />',
+            )
+
+    @responses.activate
+    def test_displays_search_results(self):
+        """
+        Test that the search results page includes the objects returned by the API.
+        """
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 2,
+                'results': [self.bank_transfer_sender, self.debit_card_sender],
+            },
+        )
+        response = self.client.get(reverse(self.view_name))
+        self.assertContains(response, '2 payment sources')
+        self.assertContains(response, 'MAISIE NOLAN')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('£410.00', response_content)
+        self.assertIn('£420.00', response_content)
+
+    @responses.activate
+    def test_redirects_to_search_results_page(self):
+        """
+        Test that submitting the form redirects to the results page when the form is valid.
+        The action of submitting the form is represented by the query param
+        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
+        """
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 2,
+                'results': [self.bank_transfer_sender, self.debit_card_sender],
+            },
+        )
+        query_string = 'ordering=-prisoner_count&search=test'
+        request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+        expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
+        response = self.client.get(request_url)
+        self.assertRedirects(
+            response,
+            expected_redirect_url,
+        )
+
+    @responses.activate
+    def test_doesnt_redirect_to_search_results_page_if_form_is_invalid(self):
+        """
+        Test that submitting the form doesn't redirect to the results page when the form is invalid.
+        The action of submitting the form is represented by the query param
+        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        """
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 2,
+                'results': [self.bank_transfer_sender, self.debit_card_sender],
+            },
+        )
+        query_string = 'ordering=invalid&search=test'
+        request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+        response = self.client.get(request_url)
+        self.assertEqual(response.status_code, 200)
+
+    @responses.activate
+    def test_navigating_back_to_simple_search_form(self):
+        """
+        Test that going back to the simple search form doesn't redirect to the results page.
+        The action of NOT submitting the form explicitly is represented by the absence of query param
+        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        """
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 2,
+                'results': [self.bank_transfer_sender, self.debit_card_sender],
+            },
+        )
+        query_string = 'ordering=-prisoner_count&search=test'
+        request_url = f'{reverse(self.view_name)}?{query_string}'
+        response = self.client.get(request_url)
+        self.assertEqual(response.status_code, 200)
+
+    @responses.activate
+    def test_displays_bank_transfer_detail(self):
+        self.login()
+        no_saved_searches()
+        responses.add(
+            responses.GET,
+            api_url('/senders/{id}/'.format(id=9)),
+            json=self.bank_transfer_sender
+        )
+        responses.add(
+            responses.GET,
+            api_url('/senders/{id}/credits/'.format(id=9)),
+            json={
+                'count': 4,
+                'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
+            }
+        )
+
+        response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('MAISIE', response_content)
+        self.assertIn('12312345', response_content)
+        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('£102.50', response_content)
+
+    @responses.activate
+    def test_displays_debit_card_detail(self):
+        self.login()
+        no_saved_searches()
+        responses.add(
+            responses.GET,
+            api_url('/senders/{id}/'.format(id=9)),
+            json=self.debit_card_sender
+        )
+        responses.add(
+            responses.GET,
+            api_url('/senders/{id}/credits/'.format(id=9)),
+            json={
+                'count': 4,
+                'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
+            }
+        )
+        response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('**** **** **** 1234', response_content)
+        self.assertIn('10/20', response_content)
+        self.assertIn('SW137NJ', response_content)
+        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('£102.50', response_content)
+
+    @responses.activate
+    def test_detail_not_found(self):
+        self.login()
+        no_saved_searches()
+        responses.add(
+            responses.GET,
+            api_url('/senders/{id}/'.format(id=9)),
+            status=404
+        )
+        responses.add(
+            responses.GET,
+            api_url('/senders/{id}/credits/'.format(id=9)),
+            status=404
+        )
+        with silence_logger('django.request'):
+            response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
+        self.assertEqual(response.status_code, 404)
+
+    @responses.activate
+    def test_connection_errors(self):
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url('/senders/{id}/'.format(id=9)),
+            status=500
+        )
+        with silence_logger('django.request'):
+            response = self.client.get(reverse(self.view_name))
+        self.assertContains(response, 'non-field-error')
+
+        no_saved_searches()
+        responses.add(
+            responses.GET,
+            api_url('/senders/{id}/'.format(id=9)),
+            status=500
+        )
+        responses.add(
+            responses.GET,
+            api_url('/senders/{id}/credits/'.format(id=9)),
+            status=500
+        )
+        with silence_logger('django.request'):
+            response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
+        self.assertContains(response, 'non-field-error')
+
+    @responses.activate
+    def test_export_some_data(self):
+        """
+        Test that the export view generates a spreadsheet with only the content returned
+        by the API.
+        """
+        expected_spreadsheet_content = [
+            self.expected_xls_headers,
+            [
+                'MAISIE NOLAN',
+                'Bank transfer',
+                4,
+                '£410.00',
+                3,
+                2,
+                '10-10-10',
+                '12312345',
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            ],
+            [
+                'Maisie N',
+                'Debit card',
+                4,
+                '£420.00',
+                3,
+                2,
+                None,
+                None,
+                None,
+                '**** **** **** 1234',
+                '10/20',
+                'SW137NJ',
+                'Maisie Nolan',
+                'm@outside.local, mn@outside.local',
+            ],
+        ]
+
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 2,
+                'results': [self.bank_transfer_sender, self.debit_card_sender],
+            }
+        )
+        response = self.client.get(reverse(self.export_view_name))
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response['Content-Type'])
+        self.assertSpreadsheetEqual(response.content, expected_spreadsheet_content)
+
+    @responses.activate
+    def test_export_no_data(self):
+        """
+        Test that the export view generates a spreadsheet without rows if the API call doesn't return any record.
+        """
+        expected_spreadsheet_content = [
+            self.expected_xls_headers,
+        ]
+
+        self.login()
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url(self.api_list_path),
+            json={
+                'count': 0,
+                'results': [],
+            }
+        )
+        response = self.client.get(reverse(self.export_view_name))
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response['Content-Type'])
+        self.assertSpreadsheetEqual(response.content, expected_spreadsheet_content)
 
 
 class PrisonerListTestCase(SecurityViewTestCase):
@@ -946,8 +1297,11 @@ class CreditsExportTestCase(SecurityBaseTestCase):
             api_url('/credits/'),
             json=response_data
         )
-        response = self.client.get(reverse('security:credits_email_export'), follow=False)
-        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
+        response = self.client.get(
+            f"{reverse('security:credits_email_export')}?ordering=-received_at",
+            follow=False,
+        )
+        self.assertRedirects(response, f"{reverse('security:credit_list')}?ordering=-received_at")
         self.assertSpreadsheetEqual(
             mail.outbox[0].attachments[0][1],
             expected_values,
@@ -984,8 +1338,11 @@ class CreditsExportTestCase(SecurityBaseTestCase):
             api_url('/credits/'),
             json=response_data
         )
-        response = self.client.get(reverse('security:credits_email_export'), follow=False)
-        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
+        response = self.client.get(
+            f"{reverse('security:credits_email_export')}?ordering=-received_at",
+            follow=False,
+        )
+        self.assertRedirects(response, f"{reverse('security:credit_list')}?ordering=-received_at")
         self.assertSpreadsheetEqual(
             mail.outbox[0].attachments[0][1],
             expected_values,
@@ -997,15 +1354,9 @@ class CreditsExportTestCase(SecurityBaseTestCase):
         sample_prison_list()
         self.login()
         response = self.client.get(
-            reverse('security:credits_export') + '?received_at__gte=LL'
+            f"{reverse('security:credits_export')}?received_at__gte=LL"
         )
-        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
-
-    def assertSpreadsheetEqual(self, spreadsheet_data, expected_values, msg=None):  # noqa: N802
-        with temp_spreadsheet(spreadsheet_data) as ws:
-            for i, row in enumerate(expected_values, start=1):
-                for j, cell in enumerate(row, start=1):
-                    self.assertEqual(cell, ws.cell(column=j, row=i).value, msg=msg)
+        self.assertRedirects(response, f"{reverse('security:credit_list')}?received_at__gte=LL")
 
 
 class PinnedProfileTestCase(SecurityViewTestCase):

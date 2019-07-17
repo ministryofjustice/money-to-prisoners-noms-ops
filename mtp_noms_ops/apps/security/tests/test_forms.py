@@ -1,4 +1,5 @@
 import datetime
+from collections import namedtuple
 import json
 import unittest
 from unittest import mock
@@ -9,41 +10,50 @@ from mtp_common.auth.test_utils import generate_tokens
 import responses
 
 from security.forms.object_base import SecurityForm
-from security.forms.object_list import SendersForm, PrisonersForm, CreditsForm, DisbursementsForm
+from security.forms.object_list import (
+    SendersForm,
+    SendersFormV2,
+    PrisonersForm,
+    CreditsForm,
+    DisbursementsForm,
+)
 from security.forms.review import ReviewCreditsForm
 from security.tests import api_url
 
 
 def mock_prison_response(rsps):
+    prisons = [
+        {
+            'nomis_id': 'IXB', 'general_ledger_code': '10200042',
+            'name': 'HMP Prison 1', 'short_name': 'Prison 1',
+            'region': 'West Midlands',
+            'categories': [{'description': 'Category A', 'name': 'A'}],
+            'populations': [
+                {'description': 'Adult', 'name': 'adult'},
+                {'description': 'Male', 'name': 'male'}
+            ],
+        },
+        {
+            'nomis_id': 'INP', 'general_ledger_code': '10200015',
+            'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
+            'region': 'London',
+            'categories': [{'description': 'Category B', 'name': 'B'}],
+            'populations': [
+                {'description': 'Adult', 'name': 'adult'},
+                {'description': 'Female', 'name': 'female'}
+            ],
+        },
+    ]
     rsps.add(
         rsps.GET,
         api_url('/prisons/'),
         json={
             'count': 2,
-            'results': [
-                {
-                    'nomis_id': 'IXB', 'general_ledger_code': '10200042',
-                    'name': 'HMP Prison 1', 'short_name': 'Prison 1',
-                    'region': 'West Midlands',
-                    'categories': [{'description': 'Category A', 'name': 'A'}],
-                    'populations': [
-                        {'description': 'Adult', 'name': 'adult'},
-                        {'description': 'Male', 'name': 'male'}
-                    ],
-                },
-                {
-                    'nomis_id': 'INP', 'general_ledger_code': '10200015',
-                    'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
-                    'region': 'London',
-                    'categories': [{'description': 'Category B', 'name': 'B'}],
-                    'populations': [
-                        {'description': 'Adult', 'name': 'adult'},
-                        {'description': 'Female', 'name': 'female'}
-                    ],
-                },
-            ]
+            'results': prisons,
         }
     )
+
+    return prisons
 
 
 def mock_empty_response(rsps, path):
@@ -135,6 +145,9 @@ class SecurityFormTestCase(SimpleTestCase):
 
 
 class SenderFormTestCase(SecurityFormTestCase):
+    """
+    TODO: delete after search V2 goes live.
+    """
     form_class = SendersForm
     api_list_path = '/senders/'
 
@@ -195,6 +208,132 @@ class SenderFormTestCase(SecurityFormTestCase):
             mock_prison_response(rsps)
             form = SendersForm(self.request, data={'page': '1', 'prison': 'ABC'})
         self.assertFalse(form.is_valid())
+
+
+class SenderFormV2TestCase(SecurityFormTestCase):
+    """
+    Tests related to the SenderFormV2.
+    """
+
+    form_class = SendersFormV2
+    api_list_path = '/senders/'
+
+    @responses.activate
+    def test_blank_form(self):
+        """
+        Test that if no data is passed in, the default values are used instead.
+        """
+        mock_prison_response(responses)
+        mock_empty_response(responses, self.api_list_path)
+
+        form = SendersFormV2(self.request, data={})
+
+        self.assertTrue(form.is_valid())
+        self.assertListEqual(form.get_object_list(), [])
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'page': 1,
+                'ordering': '-prisoner_count',
+                'prison': [],
+                'search': '',
+            },
+        )
+        self.assertDictEqual(
+            form.get_query_data(),
+            {'ordering': '-prisoner_count'},
+        )
+        self.assertEqual(
+            form.query_string,
+            'ordering=-prisoner_count',
+        )
+        self.assertEqual(len(responses.calls), 2)
+        self.assertEqual(
+            responses.calls[-1].request.path_url,
+            f'{self.api_list_path}?offset=0&limit=20&ordering=-prisoner_count',
+        )
+
+    @responses.activate
+    def test_valid(self):
+        """
+        Test that if data is passed in, the API query string is constructed as expected.
+        """
+        prisons = mock_prison_response(responses)
+        mock_empty_response(responses, self.api_list_path)
+
+        form = SendersFormV2(
+            self.request,
+            data={
+                'page': 2,
+                'ordering': '-credit_total',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'search': 'Joh',
+            },
+        )
+
+        self.assertTrue(form.is_valid())
+        self.assertListEqual(form.get_object_list(), [])
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'page': 2,
+                'ordering': '-credit_total',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'search': 'Joh',
+            },
+        )
+
+        self.assertDictEqual(
+            form.get_query_data(),
+            {
+                'ordering': '-credit_total',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'search': 'Joh',
+            },
+        )
+        self.assertEqual(len(responses.calls), 2)
+        self.assertEqual(
+            form.query_string,
+            'ordering=-credit_total&prison=IXB&search=Joh',
+        )
+        self.assertEqual(
+            responses.calls[-1].request.path_url,
+            f'{self.api_list_path}?offset=20&limit=20&ordering=-credit_total&prison=IXB&search=Joh',
+        )
+
+    def test_invalid(self):
+        """
+        Test validation errors.
+        """
+        ValidationScenario = namedtuple('ValidationScenario', 'data errors')
+
+        scenarios = [
+            ValidationScenario(
+                {'page': '0'},
+                {'page': ['Ensure this value is greater than or equal to 1.']},
+            ),
+            ValidationScenario(
+                {'ordering': 'prison'},
+                {'ordering': ['Select a valid choice. prison is not one of the available choices.']},
+            ),
+            ValidationScenario(
+                {'prison': ['invalid']},
+                {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+        ]
+
+        for scenario in scenarios:
+            with responses.RequestsMock() as rsps:
+                mock_prison_response(rsps)
+                form = SendersFormV2(self.request, data=scenario.data)
+            self.assertFalse(form.is_valid())
+            self.assertDictEqual(form.errors, scenario.errors)
 
 
 class PrisonerFormTestCase(SecurityFormTestCase):

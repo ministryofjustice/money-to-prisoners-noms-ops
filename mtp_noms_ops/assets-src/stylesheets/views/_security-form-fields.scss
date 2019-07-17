@@ -93,3 +93,39 @@ select[disabled] {
     }
   }
 }
+
+#filter-senders {
+  .column-one-third {
+    .mtp-info-box {
+      padding: 1em;
+
+      @include media(mobile) {
+        margin-top: 1em;
+      }
+
+      .mtp-info-box__heading {
+        font-size: 19px;
+      }
+
+      p {
+        margin-top: em(20, 16);
+        margin-bottom: 0;
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+.mtp-security-form--simple {
+  #id_search-label {
+    font-size: 27px;
+  }
+
+  #id_search {
+    width: 100%;
+  }
+
+  #id_search-hint {
+    margin-bottom: 10px;
+  }
+}
