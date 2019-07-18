@@ -200,6 +200,53 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
             json={},
         )
 
+    def get_user_data(
+        self,
+        *args,
+        flags=(
+            hmpps_employee_flag,
+            confirmed_prisons_flag,
+            SEARCH_V2_FLAG,
+        ),
+        **kwargs,
+    ):
+        """
+        Sets the SEARCH_V2_FLAG feature flag by default.
+        """
+
+        return super().get_user_data(*args, flags=flags, **kwargs)
+
+    @responses.activate
+    def test_cannot_see_switcher_without_flag(self):
+        """
+        Test that the prison-switcher is not visible if the SEARCH_V2_FLAG flag for the user is not set.
+        """
+        self._mock_api_responses()
+        prisons = [
+            {
+                **sample_prisons[0],
+                'name': f'Prison {index}',
+            } for index in range(1, 11)
+        ]
+        self.login(
+            user_data=self.get_user_data(
+                prisons=prisons,
+                flags=(
+                    hmpps_employee_flag,
+                    confirmed_prisons_flag,
+                ),
+            ),
+        )
+        response = self.client.get(reverse('security:sender_list'))
+        self.assertNotContains(
+            response,
+            'Prison 1, Prison 2, Prison 3, Prison 4',
+        )
+        self.assertNotContains(
+            response,
+            ' and 6 more',
+        )
+
     @responses.activate
     def test_with_many_prisons(self):
         """

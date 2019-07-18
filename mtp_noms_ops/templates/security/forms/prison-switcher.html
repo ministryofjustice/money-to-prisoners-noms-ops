@@ -1,24 +1,26 @@
 {% load i18n security %}
 
-<div class="mtp-prison-switcher print-hidden">
-  <div class="mtp-prison-switcher__prison-names">
-    {% if not user.user_data.prisons %}
-      {% trans 'All prisons' %}
-    {% else %}
-      {% get_split_prison_names user.user_data.prisons 4 as split_prison_names %}
-
-      {{ split_prison_names.prison_names }}
-
-      {% if split_prison_names.total_remaining %}
-        {% blocktrans trimmed with total_remaining=split_prison_names.total_remaining %}
-          and {{ total_remaining }} more
-        {% endblocktrans %}
+{% if request.can_see_search_v2 %}
+  <div class="mtp-prison-switcher print-hidden">
+    <div class="mtp-prison-switcher__prison-names">
+      {% if not user.user_data.prisons %}
+        {% trans 'All prisons' %}
       {% else %}
-      {% endif %}
-    {% endif %}
-  </div>
+        {% get_split_prison_names user.user_data.prisons 4 as split_prison_names %}
 
-  <div class="mtp-prison-switcher__change-link">
-    <a href="{% url 'change_prisons' %}?{{ REDIRECT_FIELD_NAME }}={{ request.path|urlencode }}?{{ request.GET.urlencode|urlencode }}">{% trans 'Change' %}</a>
+        {{ split_prison_names.prison_names }}
+
+        {% if split_prison_names.total_remaining %}
+          {% blocktrans trimmed with total_remaining=split_prison_names.total_remaining %}
+            and {{ total_remaining }} more
+          {% endblocktrans %}
+        {% else %}
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <div class="mtp-prison-switcher__change-link">
+      <a href="{% url 'change_prisons' %}?{{ REDIRECT_FIELD_NAME }}={{ request.path|urlencode }}?{{ request.GET.urlencode|urlencode }}">{% trans 'Change' %}</a>
+    </div>
   </div>
-</div>
+{% endif %}
