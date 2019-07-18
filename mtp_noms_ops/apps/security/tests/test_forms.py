@@ -3,6 +3,7 @@ from collections import namedtuple
 import json
 import unittest
 from unittest import mock
+from urllib.parse import urlsplit
 
 from django.http import QueryDict
 from django.test import SimpleTestCase
@@ -218,18 +219,22 @@ class SenderFormV2TestCase(SecurityFormTestCase):
     form_class = SendersFormV2
     api_list_path = '/senders/'
 
-    @responses.activate
     def test_blank_form(self):
         """
         Test that if no data is passed in, the default values are used instead.
         """
-        mock_prison_response(responses)
-        mock_empty_response(responses, self.api_list_path)
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
 
-        form = SendersFormV2(self.request, data={})
+            form = SendersFormV2(self.request, data={})
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+            self.assertEqual(
+                urlsplit(rsps.calls[-1].request.url).query,
+                'offset=0&limit=20&ordering=-prisoner_count',
+            )
 
-        self.assertTrue(form.is_valid())
-        self.assertListEqual(form.get_object_list(), [])
         self.assertDictEqual(
             form.cleaned_data,
             {
@@ -247,34 +252,34 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             form.query_string,
             'ordering=-prisoner_count',
         )
-        self.assertEqual(len(responses.calls), 2)
-        self.assertEqual(
-            responses.calls[-1].request.path_url,
-            f'{self.api_list_path}?offset=0&limit=20&ordering=-prisoner_count',
-        )
 
-    @responses.activate
     def test_valid(self):
         """
         Test that if data is passed in, the API query string is constructed as expected.
         """
-        prisons = mock_prison_response(responses)
-        mock_empty_response(responses, self.api_list_path)
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
 
-        form = SendersFormV2(
-            self.request,
-            data={
-                'page': 2,
-                'ordering': '-credit_total',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
-                'search': 'Joh',
-            },
-        )
+            form = SendersFormV2(
+                self.request,
+                data={
+                    'page': 2,
+                    'ordering': '-credit_total',
+                    'prison': [
+                        prisons[0]['nomis_id'],
+                    ],
+                    'search': 'Joh',
+                },
+            )
 
-        self.assertTrue(form.is_valid())
-        self.assertListEqual(form.get_object_list(), [])
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+            self.assertEqual(
+                urlsplit(rsps.calls[-1].request.url).query,
+                'offset=20&limit=20&ordering=-credit_total&prison=IXB&search=Joh',
+            )
+
         self.assertDictEqual(
             form.cleaned_data,
             {
@@ -296,15 +301,6 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 ],
                 'search': 'Joh',
             },
-        )
-        self.assertEqual(len(responses.calls), 2)
-        self.assertEqual(
-            form.query_string,
-            'ordering=-credit_total&prison=IXB&search=Joh',
-        )
-        self.assertEqual(
-            responses.calls[-1].request.path_url,
-            f'{self.api_list_path}?offset=20&limit=20&ordering=-credit_total&prison=IXB&search=Joh',
         )
 
     def test_invalid(self):
