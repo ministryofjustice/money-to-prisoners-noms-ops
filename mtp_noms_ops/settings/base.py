@@ -41,6 +41,7 @@ PROJECT_APPS = (
     'mtp_common',
     'widget_tweaks',
     'prisoner_location_admin',
+    'core',
     'security',
     'zendesk_tickets',
     'settings',
