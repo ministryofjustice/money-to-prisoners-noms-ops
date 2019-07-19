@@ -119,6 +119,10 @@ select[disabled] {
 .mtp-security-form--simple {
   #id_search-label {
     font-size: 27px;
+
+    @include media(mobile) {
+      font-size: 18px;
+    }
   }
 
   #id_search {
@@ -127,5 +131,9 @@ select[disabled] {
 
   #id_search-hint {
     margin-bottom: 10px;
+
+    @include media(mobile) {
+      margin-top: 5px;
+    }
   }
 }
