@@ -319,6 +319,11 @@ class BaseCreditsForm(SecurityForm):
     )
     prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
+    def get_object_list(self):
+        object_list = super().get_object_list()
+        parse_date_fields(object_list)
+        return object_list
+
     def get_object_list_endpoint_path(self):
         return '/credits/'
 
@@ -455,9 +460,6 @@ class CreditsForm(BaseCreditsForm):
         if sender_postcode:
             sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
         return sender_postcode
-
-    def get_object_list(self):
-        return parse_date_fields(super().get_object_list())
 
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)

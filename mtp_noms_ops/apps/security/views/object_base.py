@@ -93,6 +93,7 @@ class SecurityView(FormView):
     view_type = None
     referral_view = None
     search_results_view = None
+    simple_search_view = None
     export_download_limit = settings.MAX_CREDITS_TO_DOWNLOAD
     export_email_limit = settings.MAX_CREDITS_TO_EMAIL
     object_name = None
@@ -175,7 +176,7 @@ class SecurityView(FormView):
         if self.view_type == ViewType.search_results:
             breadcrumbs = [
                 {'name': _('Home'), 'url': reverse('security:dashboard')},
-                {'name': self.title, 'url': f'{reverse("security:sender_list")}?{kwargs["form"].query_string}'},
+                {'name': self.title, 'url': f'{reverse(self.simple_search_view)}?{kwargs["form"].query_string}'},
                 {'name': _('Search results')}
             ]
         else:

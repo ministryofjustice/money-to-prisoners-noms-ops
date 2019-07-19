@@ -5,7 +5,9 @@ from security.forms.object_list import (
     SendersForm,
     SendersFormV2,
     PrisonersForm,
-    CreditsForm, DisbursementsForm,
+    CreditsForm,
+    CreditsFormV2,
+    DisbursementsForm,
 )
 from security.views.object_base import SecurityView
 
@@ -19,6 +21,20 @@ class CreditListView(SecurityView):
     template_name = 'security/credits.html'
     form_class = CreditsForm
     object_list_context_key = 'credits'
+
+
+class CreditListViewV2(SecurityView):
+    """
+    Credit list/search view V2
+    """
+    title = _('Credits')
+    form_class = CreditsFormV2
+    template_name = 'security/credits_list.html'
+    search_results_view = 'security:credit_search_results'
+    simple_search_view = 'security:credit_list'
+    object_list_context_key = 'credits'
+    object_name = _('credit')
+    object_name_plural = _('credits')
 
 
 class DisbursementListView(SecurityView):
@@ -56,6 +72,7 @@ class SenderListViewV2(SecurityView):
     form_class = SendersFormV2
     template_name = 'security/senders_list.html'
     search_results_view = 'security:sender_search_results'
+    simple_search_view = 'security:sender_list'
     object_list_context_key = 'senders'
     object_name = _('payment source')
     object_name_plural = _('payment sources')
