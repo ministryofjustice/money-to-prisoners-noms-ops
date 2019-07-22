@@ -512,7 +512,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-received_at',
                 'prison': [],
-                'search': '',
+                'simple_search': '',
             },
         )
         self.assertDictEqual(
@@ -540,7 +540,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'prison': [
                         prisons[0]['nomis_id'],
                     ],
-                    'search': 'Joh',
+                    'simple_search': 'Joh',
                 },
             )
 
@@ -548,7 +548,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             self.assertListEqual(form.get_object_list(), [])
             self.assertEqual(
                 urlsplit(rsps.calls[-1].request.url).query,
-                'offset=20&limit=20&ordering=-amount&prison=IXB&search=Joh',
+                'offset=20&limit=20&ordering=-amount&prison=IXB&simple_search=Joh',
             )
 
         self.assertDictEqual(
@@ -559,7 +559,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'prison': [
                     prisons[0]['nomis_id'],
                 ],
-                'search': 'Joh',
+                'simple_search': 'Joh',
             },
         )
 
@@ -570,7 +570,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'prison': [
                     prisons[0]['nomis_id'],
                 ],
-                'search': 'Joh',
+                'simple_search': 'Joh',
             },
         )
 
