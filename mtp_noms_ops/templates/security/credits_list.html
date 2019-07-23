@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block phase_banner %}
+  {{ block.super }}
+  {% include "security/forms/prison-switcher.html" %}
+{% endblock %}
+
+{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
+{% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
+
+{% block inner_content %}
+  <form id="filter-credits" class="mtp-security-search js-FormAnalytics" method="get">
+
+    <div class="grid-row">
+        <div class="column-two-thirds">
+          {% include 'security/forms/top-area-object-list.html' with field=form.simple_search %}
+        </div>
+    </div>
+
+    {% if form.is_valid %}
+      <div class="mtp-results-list">
+        <div class="print-hidden mtp-links--no-panel">
+          <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+          &nbsp;
+          {% url 'security:credits_export' as export_view %}
+          {% url 'security:credits_email_export' as email_export_view %}
+          {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
+        </div>
+
+        <table class="mtp-table">
+          <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+          <thead>
+            <tr>
+              {% include 'security/includes/credit-header-row.html' with link_prisoner=True %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for credit in credits %}
+              <tr>
+                {% include 'security/includes/credit-row.html' with link_prisoner=True link_sender=True %}
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7">{% trans 'No matching credits found' %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mtp-page-list-container">
+        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+        <p class="mtp-object-count">
+          {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+            {{ number }} credit
+          {% plural %}
+            {{ number }} credits
+          {% endblocktrans %}
+        </p>
+      </div>
+    {% endif %}
+
+  </form>
+
+{% endblock %}

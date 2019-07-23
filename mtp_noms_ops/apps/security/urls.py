@@ -55,15 +55,22 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.CreditListView.as_view(),
-                views.CreditListView.as_view(),
+                views.CreditListViewV2.as_view(
+                    view_type=views.ViewType.simple_search_form,
+                ),
             ),
         ),
         name='credit_list',
     ),
     url(
-        r'^credits/(?P<credit_id>\d+)/$',
-        security_test(views.CreditDetailView.as_view()),
-        name='credit_detail',
+        r'^credits/search-results/$',
+        security_test(
+            views.CreditListViewV2.as_view(
+                view_type=views.ViewType.search_results,
+                referral_view='security:credit_list',
+            ),
+        ),
+        name='credit_search_results',
     ),
     url(
         r'^credits/export/$',
@@ -73,7 +80,7 @@ urlpatterns = [
                     view_type=views.ViewType.export_download,
                     referral_view='security:credit_list',
                 ),
-                views.CreditListView.as_view(
+                views.CreditListViewV2.as_view(
                     view_type=views.ViewType.export_download,
                     referral_view='security:credit_list',
                 ),
@@ -89,13 +96,18 @@ urlpatterns = [
                     view_type=views.ViewType.export_email,
                     referral_view='security:credit_list',
                 ),
-                views.CreditListView.as_view(
+                views.CreditListViewV2.as_view(
                     view_type=views.ViewType.export_email,
                     referral_view='security:credit_list',
                 ),
             ),
         ),
         name='credits_email_export',
+    ),
+    url(
+        r'^credits/(?P<credit_id>\d+)/$',
+        security_test(views.CreditDetailView.as_view()),
+        name='credit_detail',
     ),
 
     # senders

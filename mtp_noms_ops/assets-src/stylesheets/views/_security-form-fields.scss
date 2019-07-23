@@ -117,15 +117,23 @@ select[disabled] {
 }
 
 .mtp-security-form--simple {
-  #id_search-label {
+  #id_simple_search-label, #id_search-label {
     font-size: 27px;
+
+    @include media(mobile) {
+      font-size: 18px;
+    }
   }
 
-  #id_search {
+  #id_simple_search, #id_search {
     width: 100%;
   }
 
-  #id_search-hint {
+  #id_simple_search-hint, #id_search-hint {
     margin-bottom: 10px;
+
+    @include media(mobile) {
+      margin-top: 5px;
+    }
   }
 }

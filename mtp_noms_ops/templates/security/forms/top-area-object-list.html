@@ -30,7 +30,7 @@
         <input type="hidden" name="prison" value="{{ prison.nomis_id }}" />
     {% endfor %}
 
-    {% with field=form.search %}
+    {% with field=field %}
       <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
         {% include 'mtp_common/forms/field-label.html' with field=field only %}
         {% include 'mtp_common/forms/field-errors.html' with field=field only %}

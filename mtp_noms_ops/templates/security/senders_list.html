@@ -10,12 +10,15 @@
   {% include "security/forms/prison-switcher.html" %}
 {% endblock %}
 
+{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
+{% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
+
 {% block inner_content %}
   <form id="filter-senders" class="mtp-security-search js-FormAnalytics" method="get">
 
     <div class="grid-row">
         <div class="column-two-thirds">
-          {% include 'security/forms/top-area-object-list.html' %}
+          {% include 'security/forms/top-area-object-list.html' with field=form.search %}
         </div>
 
         <div class="column-one-third print-hidden">
