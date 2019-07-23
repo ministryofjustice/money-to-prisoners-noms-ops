@@ -165,7 +165,7 @@ class SendersFormV2(BaseSendersForm):
     """
     Search Form for Senders V2.
     """
-    search = forms.CharField(
+    simple_search = forms.CharField(
         label=_('Search payment source name or email address'),
         required=False,
         help_text=_('Common or incomplete names may show many results'),
@@ -176,7 +176,7 @@ class SendersFormV2(BaseSendersForm):
     unfiltered_description_template = ''
 
     description_templates = (
-        ('payment source name or email address “{search}”',),
+        ('payment source name or email address “{simple_search}”',),
     )
     description_capitalisation = {}
     unlisted_description = ''

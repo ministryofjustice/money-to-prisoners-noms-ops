@@ -245,7 +245,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-prisoner_count',
                 'prison': [],
-                'search': '',
+                'simple_search': '',
             },
         )
         self.assertDictEqual(
@@ -273,7 +273,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                     'prison': [
                         prisons[0]['nomis_id'],
                     ],
-                    'search': 'Joh',
+                    'simple_search': 'Joh',
                 },
             )
 
@@ -281,7 +281,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             self.assertListEqual(form.get_object_list(), [])
             self.assertDictEqual(
                 parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
-                parse_qs('offset=20&limit=20&ordering=-credit_total&prison=IXB&search=Joh'),
+                parse_qs('offset=20&limit=20&ordering=-credit_total&prison=IXB&simple_search=Joh'),
             )
 
         self.assertDictEqual(
@@ -292,7 +292,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'prison': [
                     prisons[0]['nomis_id'],
                 ],
-                'search': 'Joh',
+                'simple_search': 'Joh',
             },
         )
 
@@ -303,7 +303,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'prison': [
                     prisons[0]['nomis_id'],
                 ],
-                'search': 'Joh',
+                'simple_search': 'Joh',
             },
         )
 
