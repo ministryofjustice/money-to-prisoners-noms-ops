@@ -6,7 +6,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 from mtp_common.context_processors import govuk_localisation as inherited_localisation
 
 from prisoner_location_admin import required_permissions as prisoner_location_permissions
-from security import required_permissions as security_permissions
+from security import required_permissions as security_permissions, SEARCH_V2_FLAG
 
 
 class UserPermissionMiddleware:
@@ -20,6 +20,7 @@ class UserPermissionMiddleware:
             prison['pre_approval_required']
             for prison in request.user_prisons
         )
+        request.can_see_search_v2 = SEARCH_V2_FLAG in request.user.user_data.get('flags', [])
 
 
 class SecurityMiddleware(MiddlewareMixin):
