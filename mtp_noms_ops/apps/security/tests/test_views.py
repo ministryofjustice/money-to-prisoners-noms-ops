@@ -545,9 +545,6 @@ class SecurityViewTestCase(SecurityBaseTestCase):
 class SimpleSearchV2SecurityTestCaseMixin:
     search_results_view_name = None
 
-    # TODO: delete when all forms start using `simple_search` instead of `search`
-    search_form_input_name = 'simple_search'
-
     def get_user_data(
         self,
         *args,
@@ -625,7 +622,7 @@ class SimpleSearchV2SecurityTestCaseMixin:
                     'results': [],
                 },
             )
-            query_string = f'ordering={self.search_ordering}&{self.search_form_input_name}=test'
+            query_string = f'ordering={self.search_ordering}&simple_search=test'
             request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
             response = self.client.get(request_url)
@@ -643,7 +640,7 @@ class SimpleSearchV2SecurityTestCaseMixin:
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             sample_prison_list(rsps=rsps)
-            query_string = 'ordering=invalid&{self.search_form_input_name}=test'
+            query_string = 'ordering=invalid&simple_search=test'
             request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             response = self.client.get(request_url)
             self.assertEqual(response.status_code, 200)
@@ -665,7 +662,7 @@ class SimpleSearchV2SecurityTestCaseMixin:
                     'results': [],
                 },
             )
-            query_string = f'ordering={self.search_ordering}&{self.search_form_input_name}=test'
+            query_string = f'ordering={self.search_ordering}&simple_search=test'
             request_url = f'{reverse(self.view_name)}?{query_string}'
             response = self.client.get(request_url)
             self.assertEqual(response.status_code, 200)
@@ -945,7 +942,6 @@ class SenderViewsV2TestCase(
     search_results_view_name = 'security:sender_search_results'
     detail_view_name = 'security:sender_detail'
     search_ordering = '-prisoner_count'
-    search_form_input_name = 'search'
     api_list_path = '/senders/'
 
     export_view_name = 'security:senders_export'
