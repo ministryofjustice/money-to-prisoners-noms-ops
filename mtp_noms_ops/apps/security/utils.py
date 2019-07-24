@@ -5,25 +5,23 @@ import re
 from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
+from django.utils.translation import gettext_lazy as _
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
-from . import (
-    hmpps_employee_flag, confirmed_prisons_flag,
-    notifications_pilot_flag
-)
+from security import hmpps_employee_flag, confirmed_prisons_flag
 
 
-def parse_date_fields(object_list):
+def convert_date_fields(object_list):
     """
     MTP API responds with string date/time fields, this filter converts them to python objects
     """
-    fields = ('received_at', 'credited_at', 'refunded_at', 'created')
+    fields = ('received_at', 'credited_at', 'refunded_at', 'created', 'triggered_at')
     parsers = (parse_datetime, parse_date)
 
-    def convert(credit):
+    def convert(obj):
         for field in fields:
-            value = credit.get(field)
+            value = obj.get(field)
             if not value or not isinstance(value, str):
                 continue
             for parser in parsers:
@@ -31,13 +29,25 @@ def parse_date_fields(object_list):
                     value = parser(value)
                     if isinstance(value, datetime.datetime):
                         value = timezone.localtime(value)
-                    credit[field] = value
+                    obj[field] = value
                     break
                 except (ValueError, TypeError):
                     pass
-        return credit
+        return obj
 
     return list(map(convert, object_list)) if object_list else object_list
+
+
+def sender_profile_name(sender):
+    try:
+        return sender['bank_transfer_details'][0]['sender_name']
+    except (KeyError, IndexError):
+        pass
+    try:
+        return sender['debit_card_details'][0]['cardholder_names'][0]
+    except (KeyError, IndexError):
+        pass
+    return _('Unknown sender')
 
 
 class OrderedSet(collections.MutableSet):
@@ -154,13 +164,6 @@ def can_skip_confirming_prisons(user):
     already_confirmed = confirmed_prisons_flag in user.user_data.get('flags', [])
     cannot_choose_prisons = not can_choose_prisons(user)
     return already_confirmed or cannot_choose_prisons
-
-
-def can_see_notifications(user):
-    return (
-        user.is_authenticated and
-        notifications_pilot_flag in user.user_data.get('flags', [])
-    )
 
 
 def is_nomis_api_configured():

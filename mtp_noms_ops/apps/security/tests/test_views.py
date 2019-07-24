@@ -1,5 +1,6 @@
 import base64
 from contextlib import contextmanager
+import datetime
 import json
 import logging
 import tempfile
@@ -7,7 +8,9 @@ from unittest import mock
 
 from django.core import mail
 from django.core.urlresolvers import reverse
+from django.http import QueryDict
 from django.test import SimpleTestCase, override_settings
+from django.utils.timezone import make_aware
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
@@ -16,8 +19,9 @@ import responses
 
 from security import (
     required_permissions, hmpps_employee_flag, not_hmpps_employee_flag,
-    confirmed_prisons_flag, SEARCH_V2_FLAG,
+    confirmed_prisons_flag, notifications_pilot_flag, SEARCH_V2_FLAG,
 )
+from security.models import EmailNotifications
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
 from security.views.object_base import SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME
 
@@ -1900,7 +1904,9 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
         )
         self.assertContains(response, 'Stop monitoring this prisoner')
-        self.assertEqual(responses.calls[-1].request.body, b'{"last_result_count": 4}')
+        for call in responses.calls:
+            if call.request.path_url == '/searches/1/':
+                self.assertEqual(call.request.body, b'{"last_result_count": 4}')
 
     @responses.activate
     @override_nomis_settings
@@ -1919,19 +1925,390 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             api_url('/searches/'),
             status=201,
         )
+        responses.add(
+            responses.POST,
+            api_url('/prisoners/1/monitor'),
+            status=204,
+        )
 
         self.login(follow=False)
         self.client.get(
             reverse('security:prisoner_detail', kwargs={'prisoner_id': 1}) +
             '?pin=1'
         )
-        self.assertEqual(
-            json.loads(responses.calls[-1].request.body.decode()),
-            {
-                'description': 'A1409AE JAMES HALLS',
-                'endpoint': '/prisoners/1/credits/',
-                'last_result_count': 4,
-                'site_url': '/en-gb/security/prisoners/1/?ordering=-received_at',
-                'filters': [{'field': 'ordering', 'value': '-received_at'}],
-            },
-        )
+
+        for call in responses.calls:
+            if call.request.path_url == '/searches/':
+                self.assertEqual(
+                    json.loads(call.request.body.decode()),
+                    {
+                        'description': 'A1409AE JAMES HALLS',
+                        'endpoint': '/prisoners/1/credits/',
+                        'last_result_count': 4,
+                        'site_url': '/en-gb/security/prisoners/1/',
+                        'filters': [{'field': 'ordering', 'value': '-received_at'}],
+                    },
+                )
+
+
+class NotificationsTestCase(SecurityBaseTestCase):
+    def test_cannot_access_without_pilot_flag(self):
+        with responses.RequestsMock() as rsps:
+            self.login(follow=False, rsps=rsps)
+            response = self.client.get(reverse('security:notification_list'), follow=True)
+        self.assertNotContains(response, '<!-- security:notification_list -->')
+
+    def login_with_pilot_user(self, rsps):
+        self.login(user_data=self.get_user_data(flags=[
+            notifications_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag,
+        ]), rsps=rsps)
+
+    def test_no_notifications_not_monitoring(self):
+        """
+        Expect to see a message if you're not monitoring anything and have no notifications
+        """
+        with responses.RequestsMock() as rsps:
+            self.login_with_pilot_user(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                json={'count': 0, 'newest': None, 'oldest': None},
+                match_querystring=True
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/monitored/'),
+                json={'count': 0},
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/events/'),
+                json={'count': 0, 'results': []},
+            )
+            response = self.client.get(reverse('security:notification_list'))
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('You’re not monitoring anything at the moment', response_content)
+        self.assertIn('0 results', response_content)
+
+    def test_no_notifications_but_monitoring(self):
+        """
+        Expect to see nothing interesting if monitoring some profile, but have no notifications
+        """
+        with responses.RequestsMock() as rsps:
+            self.login_with_pilot_user(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                json={'count': 0, 'newest': None, 'oldest': None},
+                match_querystring=True
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/monitored/'),
+                json={'count': 3},
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/events/'),
+                json={'count': 0, 'results': []},
+            )
+            response = self.client.get(reverse('security:notification_list'))
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertNotIn('You’re not monitoring anything at the moment', response_content)
+        self.assertIn('0 results', response_content)
+
+    def test_notifications_not_monitoring(self):
+        """
+        Expect to see a message if you're not monitoring anything even if you have notifications
+        """
+        with responses.RequestsMock() as rsps:
+            self.login_with_pilot_user(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
+                match_querystring=True
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/monitored/'),
+                json={'count': 0},
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/events/'),
+                json={'count': 1, 'results': [
+                    {
+                        'id': 1,
+                        'rule': 'MONP',
+                        'triggered_at': '2019-07-15T10:00:00Z',
+                        'credit_id': 1, 'disbursement_id': None,
+                        'sender_profile': None, 'recipient_profile': None,
+                        'prisoner_profile': {
+                            'id': 1, 'prisoner_name': 'JAMES HALLS', 'prisoner_number': 'A1409AE',
+                        },
+                    }
+                ]},
+            )
+            response = self.client.get(reverse('security:notification_list'))
+            request_url = rsps.calls[-2].request.url
+            request_query = request_url.split('?', 1)[1]
+            request_query = QueryDict(request_query)
+            self.assertEqual(request_query['triggered_at__gte'], '2019-07-15')
+            self.assertEqual(request_query['triggered_at__lt'], '2019-07-16')
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('You’re not monitoring anything at the moment', response_content)
+        self.assertIn('1 result', response_content)
+        self.assertIn('1 transaction', response_content)
+        self.assertIn('JAMES HALLS (A1409AE)', response_content)
+
+    def test_notifications_but_monitoring(self):
+        """
+        Expect to see a list of notifications when some exist
+        """
+        with responses.RequestsMock() as rsps:
+            self.login_with_pilot_user(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
+                match_querystring=True
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/monitored/'),
+                json={'count': 3},
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/events/'),
+                json={'count': 1, 'results': [
+                    {
+                        'id': 1,
+                        'rule': 'MONP',
+                        'triggered_at': '2019-07-15T10:00:00Z',
+                        'credit_id': 1, 'disbursement_id': None,
+                        'sender_profile': None, 'recipient_profile': None,
+                        'prisoner_profile': {
+                            'id': 1, 'prisoner_name': 'JAMES HALLS', 'prisoner_number': 'A1409AE',
+                        },
+                    }
+                ]},
+            )
+            response = self.client.get(reverse('security:notification_list'))
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertNotIn('You’re not monitoring anything at the moment', response_content)
+        self.assertIn('1 result', response_content)
+        self.assertIn('1 transaction', response_content)
+        self.assertIn('JAMES HALLS (A1409AE)', response_content)
+
+    def test_notification_pages(self):
+        """
+        Expect the correct number of pages if there are many notifications
+        """
+        with responses.RequestsMock() as rsps:
+            self.login_with_pilot_user(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                json={'count': 32, 'newest': '2019-07-15', 'oldest': '2019-06-21'},
+                match_querystring=True
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/monitored/'),
+                json={'count': 3},
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/events/'),
+                json={'count': 25, 'results': [
+                    {
+                        'id': 1 + days,
+                        'rule': 'MONP',
+                        'triggered_at': (
+                            make_aware(datetime.datetime(2019, 7, 15, 10) - datetime.timedelta(days)).isoformat()
+                        ),
+                        'credit_id': 1 + days, 'disbursement_id': None,
+                        'sender_profile': None, 'recipient_profile': None,
+                        'prisoner_profile': {
+                            'id': 1, 'prisoner_name': 'JAMES HALLS', 'prisoner_number': 'A1409AE',
+                        },
+                    }
+                    for days in range(0, 25)
+                ]},
+            )
+            response = self.client.get(reverse('security:notification_list'))
+            request_url = rsps.calls[-2].request.url
+            request_query = request_url.split('?', 1)[1]
+            request_query = QueryDict(request_query)
+            self.assertEqual(request_query['triggered_at__gte'], '2019-06-21')
+            self.assertEqual(request_query['triggered_at__lt'], '2019-07-16')
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('32 results', response_content)
+        self.assertIn('Page 1 of 2.', response_content)
+
+    def test_notification_grouping(self):
+        """
+        Expect notifications to be grouped by connected profile
+        """
+        with responses.RequestsMock() as rsps:
+            self.login_with_pilot_user(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
+                match_querystring=True
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/monitored/'),
+                json={'count': 4},
+            )
+            rsps.add(
+                rsps.GET,
+                api_url('/events/'),
+                json={'count': 6, 'results': [
+                    {
+                        'id': 1,
+                        'rule': 'MONP',
+                        'triggered_at': '2019-07-15T10:00:00Z',
+                        'credit_id': 1, 'disbursement_id': None,
+                        'sender_profile': None, 'recipient_profile': None,
+                        'prisoner_profile': {
+                            'id': 1, 'prisoner_name': 'JAMES HALLS', 'prisoner_number': 'A1409AE',
+                        },
+                    },
+                    {
+                        'id': 2,
+                        'rule': 'MONS',
+                        'triggered_at': '2019-07-15T09:00:00Z',
+                        'credit_id': 2, 'disbursement_id': None,
+                        'prisoner_profile': None, 'recipient_profile': None,
+                        'sender_profile': {
+                            'id': 1, 'bank_transfer_details': [{'sender_name': 'Mary Halls'}],
+                        },
+                    },
+                    {
+                        'id': 3,
+                        'rule': 'MONP',
+                        'triggered_at': '2019-07-15T08:00:00Z',
+                        'credit_id': 3, 'disbursement_id': None,
+                        'sender_profile': None, 'recipient_profile': None,
+                        'prisoner_profile': {
+                            'id': 2, 'prisoner_name': 'JILLY HALL', 'prisoner_number': 'A1401AE',
+                        },
+                    },
+                    {
+                        'id': 4,
+                        'rule': 'MONP',
+                        'triggered_at': '2019-07-15T07:00:00Z',
+                        'credit_id': None, 'disbursement_id': 1,
+                        'sender_profile': None, 'recipient_profile': None,
+                        'prisoner_profile': {
+                            'id': 1, 'prisoner_name': 'JAMES HALLS', 'prisoner_number': 'A1409AE',
+                        },
+                    },
+                    {
+                        'id': 5,
+                        'rule': 'MONS',
+                        'triggered_at': '2019-07-15T06:00:00Z',
+                        'credit_id': 5, 'disbursement_id': None,
+                        'prisoner_profile': None, 'recipient_profile': None,
+                        'sender_profile': {
+                            'id': 1, 'bank_transfer_details': [{'sender_name': 'Mary Halls'}],
+                        },
+                    },
+                    {
+                        'id': 6,
+                        'rule': 'MONS',
+                        'triggered_at': '2019-07-15T05:00:00Z',
+                        'credit_id': 6, 'disbursement_id': None,
+                        'prisoner_profile': None, 'recipient_profile': None,
+                        'sender_profile': {
+                            'id': 2, 'debit_card_details': [{'cardholder_names': ['Fred Smith']}],
+                        },
+                    },
+                ]},
+            )
+            response = self.client.get(reverse('security:notification_list'))
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('Page 1 of 1.', response_content)
+        self.assertEqual(response_content.count('Mary Halls'), 1)
+        self.assertEqual(response_content.count('Fred Smith'), 1)
+        self.assertEqual(response_content.count('JAMES HALLS'), 1)
+        self.assertEqual(response_content.count('JILLY HALL'), 1)
+        self.assertEqual(response_content.count('1 transaction'), 2)
+        self.assertEqual(response_content.count('2 transactions'), 2)
+
+
+class SettingsTestCase(SecurityBaseTestCase):
+    def test_cannot_see_email_notifications_switch_without_pilot_flag(self):
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            response = self.client.get(reverse('settings'), follow=True)
+        self.assertNotContains(response, 'Email notifications')
+
+    def test_can_turn_on_email_notifications_switch_with_pilot_flag(self):
+        with responses.RequestsMock() as rsps:
+            self.login(user_data=self.get_user_data(flags=[
+                notifications_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag,
+            ]), rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/emailpreferences/'),
+                json={'frequency': EmailNotifications.never},
+            )
+            response = self.client.get(reverse('settings'), follow=True)
+            self.assertContains(response, 'not currently receiving email notifications')
+
+            rsps.add(
+                rsps.POST,
+                api_url('/emailpreferences/'),
+            )
+            rsps.replace(
+                rsps.GET,
+                api_url('/emailpreferences/'),
+                json={'frequency': EmailNotifications.daily},
+            )
+            response = self.client.post(reverse('settings'), data={'email_notifications': 'True'}, follow=True)
+            self.assertNotContains(response, 'not currently receiving email notifications')
+
+            last_post_call = list(filter(lambda call: call.request.method == rsps.POST, rsps.calls))[-1]
+            last_request_body = json.loads(last_post_call.request.body)
+            self.assertDictEqual(last_request_body, {'frequency': 'daily'})
+
+    def test_can_turn_off_email_notifications_switch_with_pilot_flag(self):
+        with responses.RequestsMock() as rsps:
+            self.login(user_data=self.get_user_data(flags=[
+                notifications_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag,
+            ]), rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/emailpreferences/'),
+                json={'frequency': EmailNotifications.daily},
+            )
+            response = self.client.get(reverse('settings'), follow=True)
+            self.assertNotContains(response, 'not currently receiving email notifications')
+
+            rsps.add(
+                rsps.POST,
+                api_url('/emailpreferences/'),
+            )
+            rsps.replace(
+                rsps.GET,
+                api_url('/emailpreferences/'),
+                json={'frequency': EmailNotifications.never},
+            )
+            response = self.client.post(reverse('settings'), data={'email_notifications': 'False'}, follow=True)
+            self.assertContains(response, 'not currently receiving email notifications')
+
+            last_post_call = list(filter(lambda call: call.request.method == rsps.POST, rsps.calls))[-1]
+            last_request_body = json.loads(last_post_call.request.body)
+            self.assertDictEqual(last_request_body, {'frequency': 'never'})

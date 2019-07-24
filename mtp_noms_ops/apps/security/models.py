@@ -37,6 +37,11 @@ disbursement_resolutions = {
 }
 
 
+class EmailNotifications:
+    never = 'never'
+    daily = 'daily'
+
+
 class PrisonList:
     excluded_nomis_ids = {'ZCH'}
 

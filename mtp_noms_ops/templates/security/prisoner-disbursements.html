@@ -47,7 +47,7 @@
 {% endblock %}
 
 {% block list_object_count %}
-  <p class="mtp-object-count">
+  <p class="mtp-page-list__count">
     {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
       {{ number }} disbursement
     {% plural %}

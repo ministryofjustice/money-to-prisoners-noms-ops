@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
-from . import required_permissions, views
 from mtp_noms_ops.utils import user_test
+from prisoner_location_admin import required_permissions, views
 
 
 urlpatterns = [

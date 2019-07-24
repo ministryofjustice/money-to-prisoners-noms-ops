@@ -3,7 +3,7 @@ from collections import namedtuple
 import json
 import unittest
 from unittest import mock
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs
 
 from django.http import QueryDict
 from django.test import SimpleTestCase
@@ -234,9 +234,9 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             form = self.form_class(self.request, data={})
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
-            self.assertEqual(
-                urlsplit(rsps.calls[-1].request.url).query,
-                'offset=0&limit=20&ordering=-prisoner_count',
+            self.assertDictEqual(
+                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
+                parse_qs('offset=0&limit=20&ordering=-prisoner_count'),
             )
 
         self.assertDictEqual(
@@ -279,9 +279,9 @@ class SenderFormV2TestCase(SecurityFormTestCase):
 
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
-            self.assertEqual(
-                urlsplit(rsps.calls[-1].request.url).query,
-                'offset=20&limit=20&ordering=-credit_total&prison=IXB&search=Joh',
+            self.assertDictEqual(
+                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
+                parse_qs('offset=20&limit=20&ordering=-credit_total&prison=IXB&search=Joh'),
             )
 
         self.assertDictEqual(
@@ -501,9 +501,9 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             form = self.form_class(self.request, data={})
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
-            self.assertEqual(
-                urlsplit(rsps.calls[-1].request.url).query,
-                'offset=0&limit=20&ordering=-received_at',
+            self.assertDictEqual(
+                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
+                parse_qs('offset=0&limit=20&ordering=-received_at'),
             )
 
         self.assertDictEqual(
@@ -546,9 +546,9 @@ class CreditFormV2TestCase(SecurityFormTestCase):
 
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
-            self.assertEqual(
-                urlsplit(rsps.calls[-1].request.url).query,
-                'offset=20&limit=20&ordering=-amount&prison=IXB&simple_search=Joh',
+            self.assertDictEqual(
+                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
+                parse_qs('offset=20&limit=20&ordering=-amount&prison=IXB&simple_search=Joh'),
             )
 
         self.assertDictEqual(

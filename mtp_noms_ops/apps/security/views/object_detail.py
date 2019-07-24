@@ -1,14 +1,13 @@
 from django.core.urlresolvers import reverse_lazy
 from django.http import Http404
 from django.utils.translation import gettext, gettext_lazy as _
-from requests.exceptions import RequestException
 
 from security.forms.object_detail import (
     SendersDetailForm,
     PrisonersDetailForm, PrisonersDisbursementDetailForm,
 )
 from security.templatetags.security import currency as format_currency
-from security.utils import NameSet, parse_date_fields
+from security.utils import NameSet, convert_date_fields, sender_profile_name
 from security.views.object_base import SimpleSecurityDetailView, SecurityDetailView
 from security.views.object_list import SenderListView, PrisonerListView
 
@@ -35,7 +34,7 @@ class CreditDetailView(SimpleSecurityDetailView):
             return {}
         if response['count'] != 1:
             raise Http404('credit not found')
-        credit = parse_date_fields(response['results'])[0]
+        credit = convert_date_fields(response['results'])[0]
         return credit
 
     def get_context_data(self, **kwargs):
@@ -63,7 +62,7 @@ class DisbursementDetailView(SimpleSecurityDetailView):
     def get_object(self):
         disbursement = super().get_object()
         if disbursement:
-            disbursement = parse_date_fields([disbursement])[0]
+            disbursement = convert_date_fields([disbursement])[0]
             self.format_log_set(disbursement)
             disbursement['recipient_name'] = ('%s %s' % (disbursement['recipient_first_name'],
                                                          disbursement['recipient_last_name'])).strip()
@@ -83,7 +82,7 @@ class DisbursementDetailView(SimpleSecurityDetailView):
             return log_item
 
         disbursement['log_set'] = sorted(
-            map(format_staff_name, parse_date_fields(disbursement.get('log_set', []))),
+            map(format_staff_name, convert_date_fields(disbursement.get('log_set', []))),
             key=lambda log_item: log_item['created']
         )
 
@@ -101,15 +100,7 @@ class SenderDetailView(SecurityDetailView):
     object_context_key = 'sender'
 
     def get_title_for_object(self, detail_object):
-        try:
-            return detail_object['bank_transfer_details'][0]['sender_name']
-        except (KeyError, IndexError):
-            pass
-        try:
-            return detail_object['debit_card_details'][0]['cardholder_names'][0]
-        except (KeyError, IndexError):
-            pass
-        return _('Unknown sender')
+        return sender_profile_name(detail_object)
 
 
 class PrisonerDetailView(SecurityDetailView):
@@ -131,26 +122,11 @@ class PrisonerDetailView(SecurityDetailView):
             context_data['provided_names'] = NameSet(
                 prisoner.get('provided_names', ()), strip_titles=True
             )
-            context_data['disbursement_count'] = self.get_disbursement_count(
-                context_data['form'].session, prisoner['prisoner_number']
-            )
         return context_data
 
     def get_title_for_object(self, detail_object):
         title = ' '.join(detail_object.get(key, '') for key in ('prisoner_number', 'prisoner_name'))
         return title.strip() or _('Unknown prisoner')
-
-    def get_disbursement_count(self, session, prisoner_number):
-        try:
-            response = session.get('/disbursements/', params={
-                'prisoner_number': prisoner_number,
-                # exclude rejected/cancelled disbursements
-                'resolution': ['pending', 'preconfirmed', 'confirmed', 'sent'],
-                'limit': 1,
-            }).json()
-            return response['count']
-        except (RequestException, ValueError, KeyError):
-            return None
 
 
 class PrisonerDisbursementDetailView(PrisonerDetailView):

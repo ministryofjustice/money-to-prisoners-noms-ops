@@ -2,13 +2,7 @@ from urllib.parse import urlencode
 
 from django.contrib.auth import REDIRECT_FIELD_NAME
 
-from .utils import (
-    can_see_notifications, can_choose_prisons, is_nomis_api_configured
-)
-
-
-def notifications_available(request):
-    return {'notifications_available': can_see_notifications(request.user)}
+from security.utils import can_choose_prisons, is_nomis_api_configured
 
 
 def nomis_api_available(_):

@@ -10,10 +10,9 @@ from django.views.generic import FormView, TemplateView
 from mtp_common.auth.api_client import get_api_session
 
 from security import confirmed_prisons_flag
-from security.utils import (
-    save_user_flags, can_skip_confirming_prisons, can_see_notifications
-)
 from settings.forms import ConfirmPrisonForm, ChangePrisonForm, ALL_PRISONS_CODE
+from security.models import EmailNotifications
+from security.utils import save_user_flags, can_skip_confirming_prisons
 
 
 class NomsOpsSettingsView(TemplateView):
@@ -23,19 +22,18 @@ class NomsOpsSettingsView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         session = get_api_session(self.request)
-        if can_see_notifications(self.request.user):
-            context['email_notifications'] = False
-            email_preferences = session.get('/emailpreferences').json()
-            context['email_notifications'] = email_preferences['frequency'] == 'weekly'
+        if self.request.can_access_notifications:
+            email_preferences = session.get('/emailpreferences/').json()
+            context['email_notifications'] = email_preferences['frequency'] != EmailNotifications.never
         return context
 
     def post(self, *args, **kwargs):
-        if 'submit_email_preferences' in self.request.POST:
+        if 'email_notifications' in self.request.POST:
             session = get_api_session(self.request)
-            if 'toggle' in self.request.POST:
-                session.post('/emailpreferences', json={'frequency': 'weekly'})
+            if self.request.POST['email_notifications'] == 'True':
+                session.post('/emailpreferences/', json={'frequency': EmailNotifications.daily})
             else:
-                session.post('/emailpreferences', json={'frequency': 'never'})
+                session.post('/emailpreferences/', json={'frequency': EmailNotifications.never})
         return redirect(reverse_lazy('settings'))
 
 
@@ -45,8 +43,8 @@ class ConfirmPrisonsView(FormView):
     form_class = ConfirmPrisonForm
     success_url = reverse_lazy('confirm_prisons_confirmation')
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['current_prisons'] = ','.join([
             p['nomis_id'] for p in self.request.user.user_data['prisons']
         ] if self.request.user.user_data.get('prisons') else ['ALL'])
@@ -105,8 +103,8 @@ class ChangePrisonsView(SuccessURLAllowedHostsMixin, FormView):
                 return next_page
         return reverse('settings')
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['data_attrs'] = {
             'data-autocomplete-error-empty': _('Type a prison name'),
             'data-autocomplete-error-summary': _('There was a problem'),
@@ -135,8 +133,8 @@ class AddOrRemovePrisonsView(ChangePrisonsView):
     form_class = ChangePrisonForm
     success_url = reverse_lazy('confirm_prisons')
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['can_navigate_away'] = can_skip_confirming_prisons(self.request.user)
         return context
 
@@ -151,7 +149,7 @@ class ConfirmPrisonsConfirmationView(TemplateView):
     title = _('Your prisons have been saved')
     template_name = 'settings/confirm-prisons-confirmation.html'
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['prisons'] = self.request.user_prisons
         return context

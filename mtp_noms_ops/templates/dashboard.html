@@ -53,6 +53,14 @@
           {% trans 'Disbursements' %}
         </a>
       </div>
+
+      {% if request.can_access_notifications %}
+        <div class="column-one-third mtp-box">
+          <a href="{% url 'security:notification_list' %}">
+            {% trans 'Notifications' %}
+          </a>
+        </div>
+      {% endif %}
     </div>
 
   {% endif %}

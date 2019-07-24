@@ -6,7 +6,7 @@ from django.utils.translation import gettext, ngettext
 from django.views.generic.edit import FormView
 from mtp_common.spooling import spooler
 
-from .forms import LocationFileUploadForm
+from prisoner_location_admin.forms import LocationFileUploadForm
 
 
 class LocationFileUploadView(FormView):

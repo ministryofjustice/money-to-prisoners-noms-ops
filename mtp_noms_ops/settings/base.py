@@ -130,7 +130,6 @@ TEMPLATES = [
                 'mtp_noms_ops.apps.security.context_processors.initial_params',
                 'mtp_noms_ops.apps.security.context_processors.nomis_api_available',
                 'mtp_noms_ops.apps.security.context_processors.prison_choice_available',
-                'mtp_noms_ops.apps.security.context_processors.notifications_available',
                 'mtp_common.analytics.default_genericised_pageview',
             ],
         },

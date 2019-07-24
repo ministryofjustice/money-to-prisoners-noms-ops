@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block inner_content %}
+  <header>
+    <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <div class="grid-row">
+    <div class="column-two-thirds">
+
+      <h2 class="heading-large">
+        {% trans 'Your monitored payment sources and prisoners' %}
+      </h2>
+      {% if not monitored_count %}
+        <div class="panel panel-border-wide">
+          {% trans 'You’re not monitoring anything at the moment.' %}
+          {% trans 'When you start to monitor a payment source or prisoner, notifications of any activity will be here.' %}
+        </div>
+      {% endif %}
+
+      {% if form.is_valid %}
+        {% for date_group in date_groups %}
+
+          <h3 class="heading-medium" id="date-{{ date_group.date.isoformat }}">
+            {{ date_group.date|date:'SHORT_DATE_FORMAT' }}
+            –
+            {% blocktrans trimmed count count=date_group.transaction_count %}
+              {{ count }} notification
+            {% plural %}
+              {{ count }} notifications
+            {% endblocktrans %}
+          </h3>
+
+          {% if date_group.senders %}
+            <h4 class="heading-small">{% trans 'Payment sources' %}</h4>
+
+            {% for sender in date_group.senders %}
+              <a href="{% url 'security:sender_detail' sender_id=sender.id %}">
+                {{ sender.description }}
+                –
+                {% blocktrans trimmed count count=sender.transaction_count %}
+                  {{ count }} transaction
+                {% plural %}
+                  {{ count }} transactions
+                {% endblocktrans %}
+              </a>
+              <br />
+            {% endfor %}
+          {% endif %}
+
+          {% if date_group.prisoners %}
+            <h4 class="heading-small">{% trans 'Prisoners' %}</h4>
+
+            {% for prisoner in date_group.prisoners %}
+              {% if prisoner.disbursements_only %}
+                {% url 'security:prisoner_disbursement_detail' prisoner_id=prisoner.id as prisoner_url %}
+              {% else %}
+                {% url 'security:prisoner_detail' prisoner_id=prisoner.id as prisoner_url %}
+              {% endif %}
+              <a href="{{ prisoner_url }}">
+                {{ prisoner.description }}
+                –
+                {% blocktrans trimmed count count=prisoner.transaction_count %}
+                  {{ count }} transaction
+                {% plural %}
+                  {{ count }} transactions
+                {% endblocktrans %}
+              </a>
+              <br />
+            {% endfor %}
+          {% endif %}
+
+          <hr />
+        {% endfor %}
+
+        <div class="mtp-page-list__container">
+          {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+          <p class="mtp-page-list__count">
+            {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+              {{ number }} result
+            {% plural %}
+              {{ number }} results
+            {% endblocktrans %}
+          </p>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+{% endblock %}
