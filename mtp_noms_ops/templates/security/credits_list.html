@@ -10,23 +10,16 @@
   {% include "security/forms/prison-switcher.html" %}
 {% endblock %}
 
+{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
+{% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
+
 {% block inner_content %}
-
-  <header>
-    <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
-  </header>
-
-  {% include 'mtp_common/includes/message_box.html' %}
-
   <form id="filter-credits" class="mtp-security-search js-FormAnalytics" method="get">
-    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <p class="mtp-search-description">
-      {{ form.search_description.description }}
-    </p>
-
-    <div class="print-hidden">
-      {% include view.form_template_name with view=view form=form only %}
+    <div class="grid-row">
+        <div class="column-two-thirds">
+          {% include 'security/forms/top-area-object-list.html' with field=form.simple_search %}
+        </div>
     </div>
 
     {% if form.is_valid %}
@@ -60,10 +53,10 @@
         </table>
       </div>
 
-      <div class="mtp-page-list__container">
+      <div class="mtp-page-list-container">
         {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
 
-        <p class="mtp-page-list__count">
+        <p class="mtp-object-count">
           {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
             {{ number }} credit
           {% plural %}

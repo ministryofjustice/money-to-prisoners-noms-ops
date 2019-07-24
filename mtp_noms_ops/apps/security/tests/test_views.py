@@ -19,10 +19,11 @@ import responses
 
 from security import (
     required_permissions, hmpps_employee_flag, not_hmpps_employee_flag,
-    confirmed_prisons_flag, notifications_pilot_flag,
+    confirmed_prisons_flag, notifications_pilot_flag, SEARCH_V2_FLAG,
 )
 from security.models import EmailNotifications
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
+from security.views.object_base import SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME
 
 
 override_nomis_settings = override_settings(
@@ -64,7 +65,7 @@ default_user_prisons = (sample_prisons[1],)
 
 
 def sample_prison_list(rsps=None):
-    rsps = (rsps or responses)
+    rsps = rsps or responses
     rsps.add(
         rsps.GET,
         api_url('/prisons/'),
@@ -76,7 +77,7 @@ def sample_prison_list(rsps=None):
 
 
 def no_saved_searches(rsps=None):
-    rsps = (rsps or responses)
+    rsps = rsps or responses
     rsps.add(
         rsps.GET,
         api_url('/searches/'),
@@ -104,7 +105,7 @@ class SecurityBaseTestCase(SimpleTestCase):
 
     @mock.patch('mtp_common.auth.backends.api_client')
     def login(self, mock_api_client, follow=True, user_data=None, rsps=None):
-        no_saved_searches(rsps)
+        no_saved_searches(rsps=rsps)
         return self._login(mock_api_client, follow=follow, user_data=user_data)
 
     @mock.patch('mtp_common.auth.backends.api_client')
@@ -134,7 +135,7 @@ class SecurityBaseTestCase(SimpleTestCase):
         email='sam@mtp.local', permissions=required_permissions,
         prisons=default_user_prisons,
         flags=(hmpps_employee_flag, confirmed_prisons_flag,),
-        roles=['security']
+        roles=('security',)
     ):
         return {
             'first_name': first_name,
@@ -146,6 +147,12 @@ class SecurityBaseTestCase(SimpleTestCase):
             'flags': flags,
             'roles': roles,
         }
+
+    def assertSpreadsheetEqual(self, spreadsheet_data, expected_values, msg=None):  # noqa: N802
+        with temp_spreadsheet(spreadsheet_data) as ws:
+            for i, row in enumerate(expected_values, start=1):
+                for j, cell in enumerate(row, start=1):
+                    self.assertEqual(cell, ws.cell(column=j, row=i).value, msg=msg)
 
 
 class LocaleTestCase(SecurityBaseTestCase):
@@ -181,6 +188,139 @@ class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
         response = self.client.get(reverse('location_file_upload'), follow=True)
         self.assertNotContains(response, '<!-- location_file_upload -->')
         self.assertContains(response, '<!-- security:dashboard -->')
+
+
+class PrisonSwitcherTestCase(SecurityBaseTestCase):
+    """
+    Tests related to the prison switcher area on the top of some pages.
+    The prison switcher area shows the prisons that the user selected in the settings
+    page with a link to change this.
+    """
+
+    def _mock_api_responses(self):
+        no_saved_searches()
+        sample_prison_list()
+        responses.add(
+            responses.GET,
+            api_url('/senders/'),
+            json={},
+        )
+
+    def get_user_data(
+        self,
+        *args,
+        flags=(
+            hmpps_employee_flag,
+            confirmed_prisons_flag,
+            SEARCH_V2_FLAG,
+        ),
+        **kwargs,
+    ):
+        """
+        Sets the SEARCH_V2_FLAG feature flag by default.
+        """
+
+        return super().get_user_data(*args, flags=flags, **kwargs)
+
+    @responses.activate
+    def test_cannot_see_switcher_without_flag(self):
+        """
+        Test that the prison-switcher is not visible if the SEARCH_V2_FLAG flag for the user is not set.
+        """
+        self._mock_api_responses()
+        prisons = [
+            {
+                **sample_prisons[0],
+                'name': f'Prison {index}',
+            } for index in range(1, 11)
+        ]
+        self.login(
+            user_data=self.get_user_data(
+                prisons=prisons,
+                flags=(
+                    hmpps_employee_flag,
+                    confirmed_prisons_flag,
+                ),
+            ),
+        )
+        response = self.client.get(reverse('security:sender_list'))
+        self.assertNotContains(
+            response,
+            'Prison 1, Prison 2, Prison 3, Prison 4',
+        )
+        self.assertNotContains(
+            response,
+            ' and 6 more',
+        )
+
+    @responses.activate
+    def test_with_many_prisons(self):
+        """
+        Test that if the user has more than 4 prisons in settings, only the first ones are
+        shown in the prison switcher area to avoid long text.
+        """
+        self._mock_api_responses()
+        prisons = [
+            {
+                **sample_prisons[0],
+                'name': f'Prison {index}',
+            } for index in range(1, 11)
+        ]
+        self.login(
+            user_data=self.get_user_data(prisons=prisons),
+        )
+        response = self.client.get(reverse('security:sender_list'))
+        self.assertContains(
+            response,
+            'Prison 1, Prison 2, Prison 3, Prison 4',
+        )
+        self.assertContains(
+            response,
+            ' and 6 more',
+        )
+
+    @responses.activate
+    def test_with_fewer_prisons(self):
+        """
+        Test that if the user has less than 4 prisons in settings,
+        they are all shown in the prison switcher area.
+        """
+        self._mock_api_responses()
+        prisons = [
+            {
+                **sample_prisons[0],
+                'name': f'Prison {index}',
+            } for index in range(1, 3)
+        ]
+        self.login(
+            user_data=self.get_user_data(prisons=prisons),
+        )
+        response = self.client.get(reverse('security:sender_list'))
+        self.assertContains(
+            response,
+            'Prison 1, Prison 2',
+        )
+
+        self.assertNotContains(
+            response,
+            'Prison 3',
+        )
+
+    @responses.activate
+    def test_sees_all_prisons(self):
+        """
+        Test that if the user hasn't specified any prisons in settings, it means that he/she can
+        see all prisons so the text 'All prisons' is known in the prison switcher area.
+        """
+        self._mock_api_responses()
+        self.login(
+            user_data=self.get_user_data(prisons=[]),
+        )
+        response = self.client.get(reverse('security:sender_list'))
+        self.assertContains(
+            response,
+            'All prisons',
+        )
 
 
 class HMPPSEmployeeTestCase(SecurityBaseTestCase):
@@ -274,6 +414,8 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
 class SecurityViewTestCase(SecurityBaseTestCase):
     view_name = None
     api_list_path = None
+    search_ordering = None
+
     bank_transfer_sender = {
         'id': 9,
         'credit_count': 4,
@@ -343,6 +485,12 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'intended_recipient': None,
     }
 
+    def get_api_object_list_response_data(self):
+        """
+        Return the list of objects that the mocked api should return in the tests.
+        """
+        return []
+
     @responses.activate
     @mock.patch('security.forms.object_base.SecurityForm.get_object_list')
     def test_can_access_security_view(self, mocked_form_method):
@@ -362,8 +510,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         no_saved_searches()
         sample_prison_list()
         responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        response = self.client.get(reverse(self.view_name) + '?page=1&prison=BBI', follow=False)
-        self.assertContains(response, 'HMP Test 2')
+        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI', follow=False)
         calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
         self.assertEqual(len(calls), 1)
         self.assertIn('prison=BBI', calls[0].request.url)
@@ -376,9 +523,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         no_saved_searches()
         sample_prison_list()
         responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        response = self.client.get(reverse(self.view_name) + '?page=1&prison=BBI&prison=AAI', follow=False)
-        self.assertContains(response, 'HMP &amp; YOI Test 1')
-        self.assertContains(response, 'HMP Test 2')
+        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI&prison=AAI', follow=False)
         calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
         self.assertEqual(len(calls), 1)
         self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
@@ -391,15 +536,280 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         no_saved_searches()
         sample_prison_list()
         responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        response = self.client.get(reverse(self.view_name) + '?page=1&prison=BBI,AAI', follow=False)
-        self.assertContains(response, 'HMP &amp; YOI Test 1')
-        self.assertContains(response, 'HMP Test 2')
+        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI,AAI', follow=False)
         calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
         self.assertEqual(len(calls), 1)
         self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
 
 
-class SenderListTestCase(SecurityViewTestCase):
+class SimpleSearchV2SecurityTestCaseMixin:
+    search_results_view_name = None
+
+    # TODO: delete when all forms start using `simple_search` instead of `search`
+    search_form_input_name = 'simple_search'
+
+    def get_user_data(
+        self,
+        *args,
+        flags=(
+            hmpps_employee_flag,
+            confirmed_prisons_flag,
+            SEARCH_V2_FLAG,
+        ),
+        **kwargs,
+    ):
+        """
+        Sets the SEARCH_V2_FLAG feature flag by default.
+        """
+
+        return super().get_user_data(*args, flags=flags, **kwargs)
+
+    def test_simple_search_displays_search_results(self):
+        """
+        Test that the search results page includes the objects returned by the API.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 2,
+                    'results': self.get_api_object_list_response_data(),
+                },
+            )
+            response = self.client.get(reverse(self.view_name))
+        self._test_simple_search_search_results_content(response)
+
+    def _test_simple_search_search_results_content(self, response):
+        """
+        Subclass to test that the response content of the search results view is as expected.
+        """
+        raise NotImplementedError
+
+    def test_simple_search_uses_default_prisons(self):
+        """
+        Test that the simple search template uses the prisons of the logged in user to
+        populate the `prison` hidden inputs.
+        The simple search filters by the user's prisons by default.
+        """
+        with responses.RequestsMock() as rsps:
+            user_prisons = sample_prisons
+            user_data = self.get_user_data(prisons=user_prisons)
+
+            self.login(user_data=user_data, rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            response = self.client.get(reverse(self.view_name))
+
+        for prison in user_prisons:
+            self.assertContains(
+                response,
+                f'<input type="hidden" name="prison" value="{prison["nomis_id"]}" />',
+            )
+
+    def test_simple_search_redirects_to_search_results_page(self):
+        """
+        Test that submitting the form redirects to the results page when the form is valid.
+        The action of submitting the form is represented by the query param
+        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
+            query_string = f'ordering={self.search_ordering}&{self.search_form_input_name}=test'
+            request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+            expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
+            response = self.client.get(request_url)
+            self.assertRedirects(
+                response,
+                expected_redirect_url,
+            )
+
+    def test_doesnt_redirect_to_search_results_page_if_form_is_invalid(self):
+        """
+        Test that submitting the form doesn't redirect to the results page when the form is invalid.
+        The action of submitting the form is represented by the query param
+        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            query_string = 'ordering=invalid&{self.search_form_input_name}=test'
+            request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+            response = self.client.get(request_url)
+            self.assertEqual(response.status_code, 200)
+
+    def test_navigating_back_to_simple_search_form(self):
+        """
+        Test that going back to the simple search form doesn't redirect to the results page.
+        The action of NOT submitting the form explicitly is represented by the absence of query param
+        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
+            query_string = f'ordering={self.search_ordering}&{self.search_form_input_name}=test'
+            request_url = f'{reverse(self.view_name)}?{query_string}'
+            response = self.client.get(request_url)
+            self.assertEqual(response.status_code, 200)
+
+
+class ExportSecurityViewTestCaseMixin:
+    export_view_name = None
+    export_email_view_name = None
+    export_expected_xls_headers = None
+    export_expected_xls_rows = None
+
+    def test_export_some_data(self):
+        """
+        Test that the export view generates a spreadsheet with only the content returned
+        by the API.
+        """
+        expected_spreadsheet_content = [
+            self.export_expected_xls_headers,
+            *self.export_expected_xls_rows,
+        ]
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 2,
+                    'results': self.get_api_object_list_response_data(),
+                }
+            )
+            response = self.client.get(reverse(self.export_view_name))
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            response['Content-Type'],
+        )
+        self.assertSpreadsheetEqual(response.content, expected_spreadsheet_content)
+
+    def test_email_export_some_data(self):
+        """
+        Test that the view sends the expected spreadsheet via email.
+        """
+        expected_spreadsheet_content = [
+            self.export_expected_xls_headers,
+            *self.export_expected_xls_rows,
+        ]
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 2,
+                    'results': self.get_api_object_list_response_data(),
+                }
+            )
+            response = self.client.get(f'{reverse(self.export_email_view_name)}?ordering={self.search_ordering}')
+            self.assertRedirects(response, f'{reverse(self.view_name)}?ordering={self.search_ordering}')
+            self.assertSpreadsheetEqual(
+                mail.outbox[0].attachments[0][1],
+                expected_spreadsheet_content,
+                msg='Emailed contents do not match expected',
+            )
+
+    def test_export_no_data(self):
+        """
+        Test that the export view generates a spreadsheet without rows if the API call doesn't return any record.
+        """
+        expected_spreadsheet_content = [
+            self.export_expected_xls_headers,
+        ]
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
+
+            response = self.client.get(reverse(self.export_view_name))
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            response['Content-Type'],
+        )
+        self.assertSpreadsheetEqual(response.content, expected_spreadsheet_content)
+
+    def test_email_export_no_data(self):
+        """
+        Test that the view sends the an empty spreadsheet via email.
+        """
+        expected_spreadsheet_content = [
+            self.export_expected_xls_headers,
+        ]
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
+
+            response = self.client.get(f'{reverse(self.export_email_view_name)}?ordering={self.search_ordering}')
+            self.assertRedirects(response, f'{reverse(self.view_name)}?ordering={self.search_ordering}')
+            self.assertSpreadsheetEqual(
+                mail.outbox[0].attachments[0][1],
+                expected_spreadsheet_content,
+                msg='Emailed contents do not match expected',
+            )
+
+    def test_invalid_params_redirect_to_form(self):
+        """
+        Test that in case of invalid form, the export view redirects to the list page without
+        taking any action.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            response = self.client.get(f'{reverse(self.export_email_view_name)}?ordering=invalid')
+            self.assertRedirects(response, f'{reverse(self.view_name)}?ordering=invalid')
+
+
+class SenderViewsTestCase(SecurityViewTestCase):
+    """
+    TODO: delete after search V2 goes live.
+    """
     view_name = 'security:sender_list'
     detail_view_name = 'security:sender_detail'
     api_list_path = '/senders/'
@@ -523,6 +933,203 @@ class SenderListTestCase(SecurityViewTestCase):
         self.assertContains(response, 'non-field-error')
 
 
+class SenderViewsV2TestCase(
+    SimpleSearchV2SecurityTestCaseMixin,
+    ExportSecurityViewTestCaseMixin,
+    SecurityViewTestCase,
+):
+    """
+    Test case related to sender search V2 and detail views.
+    """
+    view_name = 'security:sender_list'
+    search_results_view_name = 'security:sender_search_results'
+    detail_view_name = 'security:sender_detail'
+    search_ordering = '-prisoner_count'
+    search_form_input_name = 'search'
+    api_list_path = '/senders/'
+
+    export_view_name = 'security:senders_export'
+    export_email_view_name = 'security:senders_email_export'
+    export_expected_xls_headers = [
+        'Sender name',
+        'Payment source',
+        'Credits sent',
+        'Total amount sent',
+        'Prisoners sent to',
+        'Prisons sent to',
+        'Bank transfer sort code',
+        'Bank transfer account',
+        'Bank transfer roll number',
+        'Debit card number',
+        'Debit card expiry',
+        'Debit card postcode',
+        'Other cardholder names',
+        'Cardholder emails',
+    ]
+    export_expected_xls_rows = [
+        [
+            'MAISIE NOLAN',
+            'Bank transfer',
+            4,
+            '£410.00',
+            3,
+            2,
+            '10-10-10',
+            '12312345',
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ],
+        [
+            'Maisie N',
+            'Debit card',
+            4,
+            '£420.00',
+            3,
+            2,
+            None,
+            None,
+            None,
+            '**** **** **** 1234',
+            '10/20',
+            'SW137NJ',
+            'Maisie Nolan',
+            'm@outside.local, mn@outside.local',
+        ]
+    ]
+
+    def get_api_object_list_response_data(self):
+        return [
+            self.bank_transfer_sender,
+            self.debit_card_sender,
+        ]
+
+    def _test_simple_search_search_results_content(self, response):
+        self.assertContains(response, '2 payment sources')
+        self.assertContains(response, 'MAISIE NOLAN')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('£410.00', response_content)
+        self.assertIn('£420.00', response_content)
+
+    def test_detail_view_displays_bank_transfer_detail(self):
+        sender_id = 9
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/'),
+                json=self.bank_transfer_sender,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.credit_object] * 4,
+                },
+            )
+
+            response = self.client.get(
+                reverse(
+                    self.detail_view_name,
+                    kwargs={'sender_id': sender_id},
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('MAISIE', response_content)
+        self.assertIn('12312345', response_content)
+        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('£102.50', response_content)
+
+    def test_detail_view_displays_debit_card_detail(self):
+        sender_id = 9
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/'),
+                json=self.debit_card_sender,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.credit_object] * 4,
+                }
+            )
+            response = self.client.get(
+                reverse(
+                    self.detail_view_name,
+                    kwargs={'sender_id': sender_id},
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('**** **** **** 1234', response_content)
+        self.assertIn('10/20', response_content)
+        self.assertIn('SW137NJ', response_content)
+        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('£102.50', response_content)
+
+    def test_detail_not_found(self):
+        sender_id = 9
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/'),
+                status=404,
+            )
+            with silence_logger('django.request'):
+                response = self.client.get(
+                    reverse(
+                        self.detail_view_name,
+                        kwargs={'sender_id': sender_id},
+                    ),
+                )
+        self.assertEqual(response.status_code, 404)
+
+    def test_connection_errors(self):
+        sender_id = 9
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                status=500,
+            )
+            with silence_logger('django.request'):
+                response = self.client.get(reverse(self.view_name))
+        self.assertContains(response, 'non-field-error')
+
+        with responses.RequestsMock() as rsps:
+            no_saved_searches(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/'),
+                status=500,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/credits/'),
+                status=500,
+            )
+            with silence_logger('django.request'):
+                response = self.client.get(
+                    reverse(
+                        self.detail_view_name,
+                        kwargs={'sender_id': sender_id},
+                    ),
+                )
+        self.assertContains(response, 'non-field-error')
+
+
 class PrisonerListTestCase(SecurityViewTestCase):
     view_name = 'security:prisoner_list'
     detail_view_name = 'security:prisoner_detail'
@@ -623,7 +1230,10 @@ class PrisonerListTestCase(SecurityViewTestCase):
         self.assertContains(response, 'non-field-error')
 
 
-class CreditsListTestCase(SecurityViewTestCase):
+class CreditViewsTestCase(SecurityViewTestCase):
+    """
+    TODO: delete after search V2 goes live.
+    """
     view_name = 'security:credit_list'
     detail_view_name = 'security:credit_detail'
     api_list_path = '/credits/'
@@ -732,6 +1342,235 @@ class CreditsListTestCase(SecurityViewTestCase):
         self.assertIn('21-96-57', response_content)
         self.assertIn('88447894', response_content)
         self.assertIn('Credited by Maria', response_content)
+
+
+class CreditViewsV2TestCase(SimpleSearchV2SecurityTestCaseMixin, ExportSecurityViewTestCaseMixin, SecurityViewTestCase):
+    """
+    Test case related to credit search V2 and detail views.
+    """
+    view_name = 'security:credit_list'
+    search_results_view_name = 'security:credit_search_results'
+    detail_view_name = 'security:credit_detail'
+    search_ordering = '-received_at'
+    api_list_path = '/credits/'
+
+    debit_card_credit = {
+        'id': 1,
+        'source': 'online',
+        'amount': 23000,
+        'intended_recipient': 'Mr G Melley',
+        'prisoner_number': 'A1411AE',
+        'prisoner_name': 'GEORGE MELLEY',
+        'prison': 'LEI',
+        'prison_name': 'HMP LEEDS',
+        'sender_name': None,
+        'sender_sort_code': None,
+        'sender_account_number': None,
+        'sender_email': 'ian@mail.local',
+        'billing_address': {'line1': '102PF', 'city': 'London'},
+        'sender_roll_number': None,
+        'card_number_last_digits': '4444',
+        'card_expiry_date': '07/18',
+        'resolution': 'credited',
+        'owner': None,
+        'owner_name': 'Maria',
+        'received_at': '2016-05-25T20:24:00Z',
+        'credited_at': '2016-05-25T20:27:00Z',
+        'refunded_at': None,
+        'comments': [{'user_full_name': 'Eve', 'comment': 'OK'}],
+        'nomis_transaction_id': None,
+        'ip_address': '127.0.0.1',
+    }
+    bank_transfer_credit = {
+        'id': 2,
+        'source': 'bank_transfer',
+        'amount': 27500,
+        'intended_recipient': None,
+        'prisoner_number': 'A1413AE',
+        'prisoner_name': 'NORMAN STANLEY FLETCHER',
+        'prison': 'LEI',
+        'prison_name': 'HMP LEEDS',
+        'sender_name': 'HEIDENREICH X',
+        'sender_email': None,
+        'billing_address': None,
+        'sender_sort_code': '219657',
+        'sender_account_number': '88447894',
+        'card_number_last_digits': None,
+        'card_expiry_date': None,
+        'sender_roll_number': '',
+        'resolution': 'credited',
+        'owner': None,
+        'owner_name': 'Maria',
+        'received_at': '2016-05-22T23:00:00Z',
+        'credited_at': '2016-05-23T01:10:00Z',
+        'refunded_at': None,
+        'comments': [],
+        'nomis_transaction_id': '123456-7',
+        'ip_address': '127.0.0.1',
+    }
+
+    export_view_name = 'security:credits_export'
+    export_email_view_name = 'security:credits_email_export'
+    export_expected_xls_headers = [
+        'Prisoner name',
+        'Prisoner number',
+        'Prison',
+        'Sender name',
+        'Payment method',
+        'Bank transfer sort code',
+        'Bank transfer account',
+        'Bank transfer roll number',
+        'Debit card number',
+        'Debit card expiry',
+        'Address',
+        'Amount',
+        'Date received',
+        'Credited status',
+        'Date credited',
+        'NOMIS ID',
+        'IP',
+    ]
+    export_expected_xls_rows = [
+        [
+            'GEORGE MELLEY',
+            'A1411AE',
+            'HMP LEEDS',
+            None,
+            'Debit card',
+            None,
+            None,
+            None,
+            '**** **** **** 4444',
+            '07/18',
+            '102PF, London',
+            '£230.00',
+            '2016-05-25 21:24:00',
+            'Credited',
+            '2016-05-25 21:27:00',
+            None,
+            '127.0.0.1',
+            'ian@mail.local'
+        ],
+        [
+            'NORMAN STANLEY FLETCHER',
+            'A1413AE',
+            'HMP LEEDS',
+            'HEIDENREICH X',
+            'Bank transfer',
+            '21-96-57',
+            '88447894',
+            None,
+            None,
+            None,
+            None,
+            '£275.00',
+            '2016-05-23 00:00:00',
+            'Credited',
+            '2016-05-23 02:10:00',
+            '123456-7',
+            '127.0.0.1',
+            None
+        ],
+    ]
+
+    def _test_simple_search_search_results_content(self, response):
+        self.assertContains(response, '2 credits')
+        self.assertContains(response, 'GEORGE MELLEY')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('A1413AE', response_content)
+        self.assertIn('275.00', response_content)
+        self.assertIn('Bank transfer', response_content)
+        self.assertIn('Debit card', response_content)
+
+    def test_detail_view_displays_debit_card_detail(self):
+        credit_id = 2
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                f'{api_url(self.api_list_path)}?pk={credit_id}',
+                json={
+                    'count': 1,
+                    'previous': None,
+                    'next': None,
+                    'results': [self.debit_card_credit],
+                }
+            )
+
+            self.login(rsps=rsps)
+            response = self.client.get(
+                reverse(
+                    self.detail_view_name,
+                    kwargs={'credit_id': credit_id},
+                ),
+            )
+        self.assertContains(response, 'Debit card')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('£230.00', response_content)
+        self.assertIn('GEORGE MELLEY', response_content)
+        self.assertIn('Mr G Melley', response_content)
+        self.assertIn('A1411AE', response_content)
+        self.assertIn('Credited by Maria', response_content)
+        self.assertIn('Eve', response_content)
+        self.assertIn('OK', response_content)
+
+    def test_detail_view_displays_bank_transfer_detail(self):
+        credit_id = 2
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                f'{api_url(self.api_list_path)}?pk={credit_id}',
+                json={
+                    'count': 1,
+                    'previous': None,
+                    'next': None,
+                    'results': [self.bank_transfer_credit],
+                }
+            )
+
+            self.login(rsps=rsps)
+            response = self.client.get(
+                reverse(
+                    self.detail_view_name,
+                    kwargs={'credit_id': credit_id},
+                ),
+            )
+        self.assertContains(response, 'Bank transfer')
+        response_content = response.content.decode(response.charset)
+        self.assertIn('£275.00', response_content)
+        self.assertIn('NORMAN STANLEY FLETCHER', response_content)
+        self.assertIn('21-96-57', response_content)
+        self.assertIn('88447894', response_content)
+        self.assertIn('Credited by Maria', response_content)
+
+    def test_detail_not_found(self):
+        credit_id = 999
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                f'{api_url(self.api_list_path)}?pk={credit_id}',
+                json={
+                    'count': 0,
+                    'previous': None,
+                    'next': None,
+                    'results': [],
+                }
+            )
+
+            self.login(rsps=rsps)
+            with silence_logger('django.request'):
+                response = self.client.get(
+                    reverse(
+                        self.detail_view_name,
+                        kwargs={'credit_id': credit_id},
+                    ),
+                )
+        self.assertEqual(response.status_code, 404)
+
+    def get_api_object_list_response_data(self):
+        return [
+            self.debit_card_credit,
+            self.bank_transfer_credit,
+        ]
 
 
 class DisbursementsListTestCase(SecurityViewTestCase):
@@ -868,150 +1707,6 @@ def temp_spreadsheet(data):
         wb = load_workbook(f)
         ws = wb.active
         yield ws
-
-
-class CreditsExportTestCase(SecurityBaseTestCase):
-    expected_headers = [
-        'Prisoner name', 'Prisoner number', 'Prison', 'Sender name', 'Payment method',
-        'Bank transfer sort code', 'Bank transfer account', 'Bank transfer roll number',
-        'Debit card number', 'Debit card expiry', 'Address', 'Amount', 'Date received',
-        'Credited status', 'Date credited', 'NOMIS ID', 'IP'
-    ]
-
-    @responses.activate
-    def test_creates_xslx(self):
-        response_data = {
-            'count': 2,
-            'previous': None,
-            'next': None,
-            'results': [
-                {
-                    'id': 1,
-                    'source': 'online',
-                    'amount': 23000,
-                    'intended_recipient': 'GEORGE MELLEY',
-                    'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
-                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-                    'sender_name': None,
-                    'sender_sort_code': None, 'sender_account_number': None, 'sender_roll_number': None,
-                    'card_number_last_digits': None, 'card_expiry_date': None,
-                    'billing_address': {'line1': '102PF', 'city': 'London'},
-                    'ip_address': '127.0.0.1', 'sender_email': 'ian@mail.local',
-                    'resolution': 'credited', 'nomis_transaction_id': None,
-                    'owner': None, 'owner_name': None,
-                    'received_at': '2016-05-25T20:24:00Z',
-                    'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,
-                },
-                {
-                    'id': 2,
-                    'source': 'bank_transfer',
-                    'amount': 27500,
-                    'intended_recipient': None,
-                    'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
-                    'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-                    'sender_name': 'HEIDENREICH X',
-                    'sender_sort_code': '219657', 'sender_account_number': '88447894',
-                    'sender_roll_number': '', 'sender_email': None,
-                    'card_number_last_digits': None, 'card_expiry_date': None,
-                    'billing_address': None, 'ip_address': '127.0.0.1',
-                    'resolution': 'credited', 'nomis_transaction_id': '123456-7',
-                    'owner': None, 'owner_name': None,
-                    'received_at': '2016-05-22T23:00:00Z',
-                    'credited_at': '2016-05-23T01:10:00Z', 'refunded_at': None,
-                },
-            ]
-        }
-        sample_prison_list()
-        responses.add(
-            responses.GET,
-            api_url('/credits/'),
-            json=response_data
-        )
-
-        expected_values = [
-            self.expected_headers,
-            ['GEORGE MELLEY', 'A1411AE', 'HMP LEEDS', None, 'Debit card', None, None, None,
-             None, None, '102PF, London', '£230.00', '2016-05-25 21:24:00',
-             'Credited', '2016-05-25 21:27:00', None, '127.0.0.1', 'ian@mail.local'],
-            ['NORMAN STANLEY FLETCHER', 'A1413AE', 'HMP LEEDS', 'HEIDENREICH X',
-             'Bank transfer', '21-96-57', '88447894', None, None, None, None,
-             '£275.00', '2016-05-23 00:00:00',
-             'Credited', '2016-05-23 02:10:00', '123456-7', '127.0.0.1', None]
-        ]
-
-        self.login()
-        response = self.client.get(reverse('security:credits_export'))
-        self.assertEqual(200, response.status_code)
-        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response['Content-Type'])
-
-        self.assertSpreadsheetEqual(response.content, expected_values)
-
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/credits/'),
-            json=response_data
-        )
-        response = self.client.get(reverse('security:credits_email_export'), follow=False)
-        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
-        self.assertSpreadsheetEqual(
-            mail.outbox[0].attachments[0][1],
-            expected_values,
-            msg='Emailed contents do not match expected'
-        )
-
-    @responses.activate
-    def test_no_data(self):
-        sample_prison_list()
-        response_data = {
-            'count': 0,
-            'previous': None,
-            'next': None,
-            'results': []
-        }
-        responses.add(
-            responses.GET,
-            api_url('/credits/'),
-            json=response_data
-        )
-
-        expected_values = [self.expected_headers]
-
-        self.login()
-        response = self.client.get(reverse('security:credits_export'))
-        self.assertEqual(200, response.status_code)
-        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response['Content-Type'])
-
-        self.assertSpreadsheetEqual(response.content, expected_values)
-
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/credits/'),
-            json=response_data
-        )
-        response = self.client.get(reverse('security:credits_email_export'), follow=False)
-        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
-        self.assertSpreadsheetEqual(
-            mail.outbox[0].attachments[0][1],
-            expected_values,
-            msg='Emailed contents do not match expected'
-        )
-
-    @responses.activate
-    def test_invalid_params_redirects_to_form(self):
-        sample_prison_list()
-        self.login()
-        response = self.client.get(
-            reverse('security:credits_export') + '?received_at__gte=LL'
-        )
-        self.assertRedirects(response, reverse('security:credit_list') + '?ordering=-received_at')
-
-    def assertSpreadsheetEqual(self, spreadsheet_data, expected_values, msg=None):  # noqa: N802
-        with temp_spreadsheet(spreadsheet_data) as ws:
-            for i, row in enumerate(expected_values, start=1):
-                for j, cell in enumerate(row, start=1):
-                    self.assertEqual(cell, ws.cell(column=j, row=i).value, msg=msg)
 
 
 class PinnedProfileTestCase(SecurityViewTestCase):

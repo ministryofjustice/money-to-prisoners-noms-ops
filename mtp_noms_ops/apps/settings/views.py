@@ -1,8 +1,10 @@
-import logging
 from urllib.parse import urlencode
 
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse, reverse_lazy
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth.views import SuccessURLAllowedHostsMixin
 from django.shortcuts import redirect
+from django.utils.http import is_safe_url
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from mtp_common.auth.api_client import get_api_session
@@ -11,8 +13,6 @@ from security import confirmed_prisons_flag
 from settings.forms import ConfirmPrisonForm, ChangePrisonForm, ALL_PRISONS_CODE
 from security.models import EmailNotifications
 from security.utils import save_user_flags, can_skip_confirming_prisons
-
-logger = logging.getLogger('mtp')
 
 
 class NomsOpsSettingsView(TemplateView):
@@ -81,11 +81,27 @@ class ConfirmPrisonsView(FormView):
         return self.success_url
 
 
-class ChangePrisonsView(FormView):
+class ChangePrisonsView(SuccessURLAllowedHostsMixin, FormView):
     title = _('Change prisons')
     template_name = 'settings/confirm-prisons-change.html'
     form_class = ChangePrisonForm
-    success_url = reverse_lazy('settings')
+
+    def get_success_url(self):
+        """
+        Returns the REDIRECT_FIELD_NAME value in GET if it exists and it's valid
+        or the url to the settings page otherwise.
+        """
+        if REDIRECT_FIELD_NAME in self.request.GET:
+            next_page = self.request.GET[REDIRECT_FIELD_NAME]
+            url_is_safe = is_safe_url(
+                url=next_page,
+                allowed_hosts=self.get_success_url_allowed_hosts(),
+                require_https=self.request.is_secure(),
+            )
+
+            if url_is_safe:
+                return next_page
+        return reverse('settings')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -12,10 +12,36 @@ from security.forms.object_base import (
     SecurityForm,
     AmountPattern, parse_amount,
     validate_amount, validate_prisoner_number, validate_range_fields,
-    insert_blank_option, get_credit_source_choices, get_disbursement_method_choices,
+    insert_blank_option,
+    get_credit_source_choices, get_disbursement_method_choices,
 )
 from security.templatetags.security import currency as format_currency
 from security.utils import convert_date_fields, sender_profile_name
+
+
+class BaseSendersForm(SecurityForm):
+    """
+    Senders Form Base Class.
+    """
+    ordering = forms.ChoiceField(
+        label=_('Order by'),
+        required=False,
+        initial='-prisoner_count',
+        choices=[
+            ('prisoner_count', _('Number of prisoners (low to high)')),
+            ('-prisoner_count', _('Number of prisoners (high to low)')),
+            ('prison_count', _('Number of prisons (low to high)')),
+            ('-prison_count', _('Number of prisons (high to low)')),
+            ('credit_count', _('Number of credits (low to high)')),
+            ('-credit_count', _('Number of credits (high to low)')),
+            ('credit_total', _('Total sent (low to high)')),
+            ('-credit_total', _('Total sent (high to low)')),
+        ]
+    )
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
+
+    def get_object_list_endpoint_path(self):
+        return '/senders/'
 
 
 @validate_range_fields(
@@ -23,19 +49,12 @@ from security.utils import convert_date_fields, sender_profile_name
     ('credit_count', _('Must be larger than the minimum credits')),
     ('credit_total', _('Must be larger than the minimum total')),
 )
-class SendersForm(SecurityForm):
-    ordering = forms.ChoiceField(label=_('Order by'), required=False,
-                                 initial='-prisoner_count',
-                                 choices=[
-                                     ('prisoner_count', _('Number of prisoners (low to high)')),
-                                     ('-prisoner_count', _('Number of prisoners (high to low)')),
-                                     ('prison_count', _('Number of prisons (low to high)')),
-                                     ('-prison_count', _('Number of prisons (high to low)')),
-                                     ('credit_count', _('Number of credits (low to high)')),
-                                     ('-credit_count', _('Number of credits (high to low)')),
-                                     ('credit_total', _('Total sent (low to high)')),
-                                     ('-credit_total', _('Total sent (high to low)')),
-                                 ])
+class SendersForm(BaseSendersForm):
+    """
+    Legacy Search Form for Senders.
+
+    TODO: delete after search V2 goes live.
+    """
 
     prisoner_count__gte = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
     prisoner_count__lte = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
@@ -57,12 +76,9 @@ class SendersForm(SecurityForm):
     sender_email = forms.CharField(label=_('Sender email'), required=False)
     sender_postcode = forms.CharField(label=_('Sender postcode'), required=False)
 
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
-
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are senders who {filter_description}, ordered by {ordering_description}.'
@@ -135,9 +151,6 @@ class SendersForm(SecurityForm):
             sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
         return sender_postcode
 
-    def get_object_list_endpoint_path(self):
-        return '/senders/'
-
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
@@ -146,6 +159,27 @@ class SendersForm(SecurityForm):
                 if value is not None:
                     query_data[field] = value * 100
         return query_data
+
+
+class SendersFormV2(BaseSendersForm):
+    """
+    Search Form for Senders V2.
+    """
+    search = forms.CharField(
+        label=_('Search payment source name or email address'),
+        required=False,
+        help_text=_('Common or incomplete names may show many results'),
+    )
+
+    # NB: ensure that these templates are HTML-safe
+    filtered_description_template = 'Results containing {filter_description}.'
+    unfiltered_description_template = ''
+
+    description_templates = (
+        ('payment source name or email address “{search}”',),
+    )
+    description_capitalisation = {}
+    unlisted_description = ''
 
 
 @validate_range_fields(
@@ -267,22 +301,45 @@ class PrisonersForm(SecurityForm):
         return query_data
 
 
+class BaseCreditsForm(SecurityForm):
+    """
+    Credits Form Base Class.
+    """
+    ordering = forms.ChoiceField(
+        label=_('Order by'),
+        required=False,
+        initial='-received_at',
+        choices=[
+            ('received_at', _('Received date (oldest to newest)')),
+            ('-received_at', _('Received date (newest to oldest)')),
+            ('amount', _('Amount sent (low to high)')),
+            ('-amount', _('Amount sent (high to low)')),
+            ('prisoner_name', _('Prisoner name (A to Z)')),
+            ('-prisoner_name', _('Prisoner name (Z to A)')),
+            ('prisoner_number', _('Prisoner number (A to Z)')),
+            ('-prisoner_number', _('Prisoner number (Z to A)')),
+        ],
+    )
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
+
+    def get_object_list(self):
+        object_list = super().get_object_list()
+        convert_date_fields(object_list)
+        return object_list
+
+    def get_object_list_endpoint_path(self):
+        return '/credits/'
+
+
 @validate_range_fields(
     ('received_at', _('Must be after the start date'), '__lt'),
 )
-class CreditsForm(SecurityForm):
-    ordering = forms.ChoiceField(label=_('Order by'), required=False,
-                                 initial='-received_at',
-                                 choices=[
-                                     ('received_at', _('Received date (oldest to newest)')),
-                                     ('-received_at', _('Received date (newest to oldest)')),
-                                     ('amount', _('Amount sent (low to high)')),
-                                     ('-amount', _('Amount sent (high to low)')),
-                                     ('prisoner_name', _('Prisoner name (A to Z)')),
-                                     ('-prisoner_name', _('Prisoner name (Z to A)')),
-                                     ('prisoner_number', _('Prisoner number (A to Z)')),
-                                     ('-prisoner_number', _('Prisoner number (Z to A)')),
-                                 ])
+class CreditsForm(BaseCreditsForm):
+    """
+    Legacy Search Form for Credits.
+
+    TODO: delete after search V2 goes live.
+    """
 
     received_at__gte = forms.DateField(label=_('Received since'), required=False,
                                        help_text=_('For example, 13/02/2018'))
@@ -296,7 +353,6 @@ class CreditsForm(SecurityForm):
 
     prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
@@ -408,12 +464,6 @@ class CreditsForm(SecurityForm):
             sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
         return sender_postcode
 
-    def get_object_list_endpoint_path(self):
-        return '/credits/'
-
-    def get_object_list(self):
-        return convert_date_fields(super().get_object_list())
-
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
@@ -433,6 +483,27 @@ class CreditsForm(SecurityForm):
             return _('ending in %02d pence') % amount_value
         description = dict(self['amount_pattern'].field.choices).get(value)
         return str(description).lower() if description else None
+
+
+class CreditsFormV2(BaseCreditsForm):
+    """
+    Search Form for Credits V2.
+    """
+    simple_search = forms.CharField(
+        label=_('Search payment source name, email address or prisoner number'),
+        required=False,
+        help_text=_('Common or incomplete names may show many results'),
+    )
+
+    # NB: ensure that these templates are HTML-safe
+    filtered_description_template = 'Results containing {filter_description}.'
+    unfiltered_description_template = ''
+
+    description_templates = (
+        ('payment source name, email address or prisoner number “{simple_search}”',),
+    )
+    description_capitalisation = {}
+    unlisted_description = ''
 
 
 @validate_range_fields(

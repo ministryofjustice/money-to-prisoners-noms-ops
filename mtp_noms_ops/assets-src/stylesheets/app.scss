@@ -15,6 +15,7 @@
 @import 'views/review';
 @import 'views/save-search';
 @import 'views/choose-prisons';
+@import 'views/prison_switcher';
 
 // govuk elements overrides
 
@@ -57,5 +58,27 @@ form .form-group .form-hint {
 @include media($max-width: $mtp-proposition-tab-breakpoint, $ignore-for-ie: true) {
   #mtp-proposition-tabs li.mtp-proposition-tab__show-on-desktop {
     display: none;
+  }
+}
+
+
+.mtp-with-spaced-header {
+  #content {
+    margin-top: 55px;
+
+    @include media(mobile) {
+      margin-top: 35px;
+    }
+  }
+
+  header {
+    .heading-xlarge {
+      margin-top: 0;
+      margin-bottom: 50px;
+
+      @include media(mobile) {
+        margin-bottom: 30px;
+      }
+    }
   }
 }

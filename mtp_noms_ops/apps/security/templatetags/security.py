@@ -66,7 +66,28 @@ def format_resolution(resolution):
 
 @register.filter
 def list_prison_names(prisons):
+    """
+    Returns prison names in `prisons` as a comma separated string.
+    """
     return ', '.join((prison['name'] for prison in prisons))
+
+
+@register.simple_tag
+def get_split_prison_names(prisons, split_at=3):
+    """
+    Same as `list_prison_names` but only including the first `split_at` prisons.
+
+    Returns a dict with
+        prison_names: first `split_at` prison names in `prisons` as a comma separated string
+        total_remaining: number of remaining prisons that were not included in `prison_names`
+
+    :param prisons: list of dicts with prison data
+    :split_at: number of prisons to be included in the prison_names join.
+    """
+    return {
+        'prison_names': list_prison_names(prisons[:split_at]),
+        'total_remaining': len(prisons[split_at:]),
+    }
 
 
 @register.filter

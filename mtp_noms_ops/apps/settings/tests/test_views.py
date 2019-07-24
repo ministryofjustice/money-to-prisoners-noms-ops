@@ -1,6 +1,7 @@
 import json
 
 from django.core.urlresolvers import reverse
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.utils.html import escape
 from mtp_common.auth import USER_DATA_SESSION_KEY
 import responses
@@ -163,9 +164,38 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
 
 
 class ChangePrisonTestCase(SecurityBaseTestCase):
+    """
+    Tests related to the change prison views.
+    """
+
+    def _mock_save_prisons_responses(self, new_prisons):
+        """
+        Mocks all responses related to saving the form successfully.
+        """
+        responses.add(
+            responses.PATCH,
+            api_url('/users/shall/'),
+            json={},
+        )
+        responses.add(
+            responses.GET,
+            api_url('/users/shall/'),
+            json=self.get_user_data(
+                prisons=new_prisons,
+            ),
+        )
+        responses.add(
+            responses.PUT,
+            api_url(f'/users/shall/flags/{confirmed_prisons_flag}/'),
+            json={},
+        )
 
     @responses.activate
     def test_change_prisons(self):
+        """
+        Test changing my prisons' data by replacing an existing previously selected
+        prison with a new one.
+        """
         current_prison = sample_prisons[0]
         new_prison = sample_prisons[1]
         sample_prison_list()
@@ -179,27 +209,7 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         response = self.client.get(reverse('settings'), follow=True)
         self.assertContains(response, escape(current_prison['name']))
 
-        responses.add(
-            responses.PATCH,
-            api_url('/users/shall/'),
-            json={}
-        )
-        responses.add(
-            responses.GET,
-            api_url('/users/shall/'),
-            json=self.get_user_data(
-                prisons=[new_prison],
-                flags=[
-                    hmpps_employee_flag,
-                    confirmed_prisons_flag
-                ]
-            )
-        )
-        responses.add(
-            responses.PUT,
-            api_url('/users/shall/flags/%s/' % confirmed_prisons_flag),
-            json={}
-        )
+        self._mock_save_prisons_responses([new_prison])
 
         response = self.client.post(reverse('change_prisons'), data={
             'prison_0': new_prison['nomis_id'],
@@ -209,6 +219,11 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_add_prison(self):
+        """
+        Test that clicking on 'Add another prison' redirects to the same page
+        with a new textfield for the new prison added.
+        Note: the test does not save the form but it only tests its initialisation.
+        """
         current_prison = sample_prisons[0]
         new_prison = sample_prisons[1]
         sample_prison_list()
@@ -228,6 +243,10 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_remove_prison(self):
+        """
+        Test that clicking on 'Remove' redirects to the same page with that textfield removed.
+        Note: the test does not save the form but it only tests its initialisation.
+        """
         current_prison = sample_prisons[0]
         new_prison = sample_prisons[1]
         sample_prison_list()
@@ -248,6 +267,10 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_add_all_prisons(self):
+        """
+        Test that clicking on 'Add all prisons' redirects to the 'All Prisons' version of the page.
+        Note: the test does not save the form but it only tests its initialisation.
+        """
         current_prison = sample_prisons[0]
         new_prison = sample_prisons[1]
         sample_prison_list()
@@ -267,6 +290,11 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_not_all_prisons(self):
+        """
+        Test that clicking on 'Remove all prisons' redirects to the default version of the page
+        (not the 'All Prison' one).
+        Note: the test does not save the form but it only tests its initialisation.
+        """
         current_prison = sample_prisons[0]
         sample_prison_list()
         self.login(user_data=self.get_user_data(
@@ -282,3 +310,57 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         }, follow=True)
         self.assertContains(response, 'name="prison_1"')
         self.assertNotContains(response, 'All prisons')
+
+    @responses.activate
+    def test_next_url(self):
+        """
+        Test that if the next param is passed in, the view redirects to it after saving the changes.
+        """
+        current_prison = sample_prisons[0]
+        new_prison = sample_prisons[1]
+
+        sample_prison_list()
+        self.login(
+            user_data=self.get_user_data(
+                prisons=[current_prison],
+            ),
+        )
+
+        self._mock_save_prisons_responses([new_prison])
+
+        next_page = reverse('root')
+        response = self.client.post(
+            f"{reverse('change_prisons')}?{REDIRECT_FIELD_NAME}={next_page}",
+            data={
+                'prison_0': new_prison['nomis_id'],
+                'submit_save': True,
+            },
+        )
+        self.assertRedirects(response, next_page, target_status_code=302)
+
+    @responses.activate
+    def test_invalid_next_url(self):
+        """
+        Test that if the passed in next param is not in the allowed hosts list,
+        the view redirects to the default view after saving the changes instead.
+        """
+        current_prison = sample_prisons[0]
+        new_prison = sample_prisons[1]
+
+        sample_prison_list()
+        self.login(
+            user_data=self.get_user_data(
+                prisons=[current_prison],
+            ),
+        )
+
+        self._mock_save_prisons_responses([new_prison])
+
+        response = self.client.post(
+            f"{reverse('change_prisons')}?{REDIRECT_FIELD_NAME}=http://google.co.uk",
+            data={
+                'prison_0': new_prison['nomis_id'],
+                'submit_save': True,
+            },
+        )
+        self.assertRedirects(response, reverse('settings'))

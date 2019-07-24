@@ -1,5 +1,7 @@
 from urllib.parse import urlencode
 
+from django.contrib.auth import REDIRECT_FIELD_NAME
+
 from security.utils import can_choose_prisons, is_nomis_api_configured
 
 
@@ -22,3 +24,12 @@ def initial_params(request):
         ('prison', prison['nomis_id'])
         for prison in request.user_prisons
     ], doseq=True)}
+
+
+def common(_):
+    """
+    Context Processor for common / core logic, e.g. making some variable available in the templates.
+    """
+    return {
+        'REDIRECT_FIELD_NAME': REDIRECT_FIELD_NAME,
+    }

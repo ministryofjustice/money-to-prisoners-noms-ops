@@ -5,8 +5,11 @@ from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_list import (
     SendersForm,
+    SendersFormV2,
     PrisonersForm,
-    CreditsForm, DisbursementsForm,
+    CreditsForm,
+    CreditsFormV2,
+    DisbursementsForm,
     NotificationsForm,
 )
 from security.views.object_base import SecurityView
@@ -23,6 +26,20 @@ class CreditListView(SecurityView):
     object_list_context_key = 'credits'
 
 
+class CreditListViewV2(SecurityView):
+    """
+    Credit list/search view V2
+    """
+    title = _('Credits')
+    form_class = CreditsFormV2
+    template_name = 'security/credits_list.html'
+    search_results_view = 'security:credit_search_results'
+    simple_search_view = 'security:credit_list'
+    object_list_context_key = 'credits'
+    object_name = _('credit')
+    object_name_plural = _('credits')
+
+
 class DisbursementListView(SecurityView):
     """
     Disbursement search view
@@ -36,13 +53,32 @@ class DisbursementListView(SecurityView):
 
 class SenderListView(SecurityView):
     """
-    Sender search view
+    Legacy Sender search view
+
+    TODO: delete after search V2 goes live.
     """
     title = _('Payment sources')
     form_template_name = 'security/forms/senders.html'
     template_name = 'security/senders.html'
     form_class = SendersForm
     object_list_context_key = 'senders'
+
+    def url_for_single_result(self, sender):
+        return reverse('security:sender_detail', kwargs={'sender_id': sender['id']})
+
+
+class SenderListViewV2(SecurityView):
+    """
+    Sender list/search view V2.
+    """
+    title = _('Payment sources')
+    form_class = SendersFormV2
+    template_name = 'security/senders_list.html'
+    search_results_view = 'security:sender_search_results'
+    simple_search_view = 'security:sender_list'
+    object_list_context_key = 'senders'
+    object_name = _('payment source')
+    object_name_plural = _('payment sources')
 
     def url_for_single_result(self, sender):
         return reverse('security:sender_detail', kwargs={'sender_id': sender['id']})

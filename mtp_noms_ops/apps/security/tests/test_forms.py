@@ -1,7 +1,9 @@
 import datetime
+from collections import namedtuple
 import json
 import unittest
 from unittest import mock
+from urllib.parse import urlsplit
 
 from django.http import QueryDict
 from django.test import SimpleTestCase
@@ -9,41 +11,54 @@ from mtp_common.auth.test_utils import generate_tokens
 import responses
 
 from security.forms.object_base import SecurityForm
-from security.forms.object_list import SendersForm, PrisonersForm, CreditsForm, DisbursementsForm
+from security.forms.object_list import (
+    SendersForm,
+    SendersFormV2,
+    PrisonersForm,
+    CreditsForm,
+    CreditsFormV2,
+    DisbursementsForm,
+)
 from security.forms.review import ReviewCreditsForm
 from security.tests import api_url
 
 
+ValidationScenario = namedtuple('ValidationScenario', 'data errors')
+
+
 def mock_prison_response(rsps):
+    prisons = [
+        {
+            'nomis_id': 'IXB', 'general_ledger_code': '10200042',
+            'name': 'HMP Prison 1', 'short_name': 'Prison 1',
+            'region': 'West Midlands',
+            'categories': [{'description': 'Category A', 'name': 'A'}],
+            'populations': [
+                {'description': 'Adult', 'name': 'adult'},
+                {'description': 'Male', 'name': 'male'}
+            ],
+        },
+        {
+            'nomis_id': 'INP', 'general_ledger_code': '10200015',
+            'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
+            'region': 'London',
+            'categories': [{'description': 'Category B', 'name': 'B'}],
+            'populations': [
+                {'description': 'Adult', 'name': 'adult'},
+                {'description': 'Female', 'name': 'female'}
+            ],
+        },
+    ]
     rsps.add(
         rsps.GET,
         api_url('/prisons/'),
         json={
             'count': 2,
-            'results': [
-                {
-                    'nomis_id': 'IXB', 'general_ledger_code': '10200042',
-                    'name': 'HMP Prison 1', 'short_name': 'Prison 1',
-                    'region': 'West Midlands',
-                    'categories': [{'description': 'Category A', 'name': 'A'}],
-                    'populations': [
-                        {'description': 'Adult', 'name': 'adult'},
-                        {'description': 'Male', 'name': 'male'}
-                    ],
-                },
-                {
-                    'nomis_id': 'INP', 'general_ledger_code': '10200015',
-                    'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
-                    'region': 'London',
-                    'categories': [{'description': 'Category B', 'name': 'B'}],
-                    'populations': [
-                        {'description': 'Adult', 'name': 'adult'},
-                        {'description': 'Female', 'name': 'female'}
-                    ],
-                },
-            ]
+            'results': prisons,
         }
     )
+
+    return prisons
 
 
 def mock_empty_response(rsps, path):
@@ -135,6 +150,9 @@ class SecurityFormTestCase(SimpleTestCase):
 
 
 class SenderFormTestCase(SecurityFormTestCase):
+    """
+    TODO: delete after search V2 goes live.
+    """
     form_class = SendersForm
     api_list_path = '/senders/'
 
@@ -152,7 +170,7 @@ class SenderFormTestCase(SecurityFormTestCase):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
-            form = SendersForm(self.request, data={'page': '1'})
+            form = self.form_class(self.request, data={'page': '1'})
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
@@ -173,7 +191,7 @@ class SenderFormTestCase(SecurityFormTestCase):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
-            form = SendersForm(self.request, data={'page': '1', 'ordering': '-credit_total', 'sender_name': 'Joh '})
+            form = self.form_class(self.request, data={'page': '1', 'ordering': '-credit_total', 'sender_name': 'Joh '})
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
@@ -183,18 +201,137 @@ class SenderFormTestCase(SecurityFormTestCase):
     def test_sender_list_invalid_forms(self):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = SendersForm(self.request, data={'page': '0'})
+            form = self.form_class(self.request, data={'page': '0'})
         self.assertFalse(form.is_valid())
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = SendersForm(self.request, data={'page': '1', 'ordering': 'prison'})
+            form = self.form_class(self.request, data={'page': '1', 'ordering': 'prison'})
         self.assertFalse(form.is_valid())
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = SendersForm(self.request, data={'page': '1', 'prison': 'ABC'})
+            form = self.form_class(self.request, data={'page': '1', 'prison': 'ABC'})
         self.assertFalse(form.is_valid())
+
+
+class SenderFormV2TestCase(SecurityFormTestCase):
+    """
+    Tests related to the SenderFormV2.
+    """
+
+    form_class = SendersFormV2
+    api_list_path = '/senders/'
+
+    def test_blank_form(self):
+        """
+        Test that if no data is passed in, the default values are used instead.
+        """
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
+
+            form = self.form_class(self.request, data={})
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+            self.assertEqual(
+                urlsplit(rsps.calls[-1].request.url).query,
+                'offset=0&limit=20&ordering=-prisoner_count',
+            )
+
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'page': 1,
+                'ordering': '-prisoner_count',
+                'prison': [],
+                'search': '',
+            },
+        )
+        self.assertDictEqual(
+            form.get_query_data(),
+            {'ordering': '-prisoner_count'},
+        )
+        self.assertEqual(
+            form.query_string,
+            'ordering=-prisoner_count',
+        )
+
+    def test_valid(self):
+        """
+        Test that if data is passed in, the API query string is constructed as expected.
+        """
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
+
+            form = self.form_class(
+                self.request,
+                data={
+                    'page': 2,
+                    'ordering': '-credit_total',
+                    'prison': [
+                        prisons[0]['nomis_id'],
+                    ],
+                    'search': 'Joh',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+            self.assertEqual(
+                urlsplit(rsps.calls[-1].request.url).query,
+                'offset=20&limit=20&ordering=-credit_total&prison=IXB&search=Joh',
+            )
+
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'page': 2,
+                'ordering': '-credit_total',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'search': 'Joh',
+            },
+        )
+
+        self.assertDictEqual(
+            form.get_query_data(),
+            {
+                'ordering': '-credit_total',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'search': 'Joh',
+            },
+        )
+
+    def test_invalid(self):
+        """
+        Test validation errors.
+        """
+        scenarios = [
+            ValidationScenario(
+                {'page': '0'},
+                {'page': ['Ensure this value is greater than or equal to 1.']},
+            ),
+            ValidationScenario(
+                {'ordering': 'prison'},
+                {'ordering': ['Select a valid choice. prison is not one of the available choices.']},
+            ),
+            ValidationScenario(
+                {'prison': ['invalid']},
+                {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+        ]
+
+        for scenario in scenarios:
+            with responses.RequestsMock() as rsps:
+                mock_prison_response(rsps)
+                form = self.form_class(self.request, data=scenario.data)
+            self.assertFalse(form.is_valid())
+            self.assertDictEqual(form.errors, scenario.errors)
 
 
 class PrisonerFormTestCase(SecurityFormTestCase):
@@ -217,7 +354,7 @@ class PrisonerFormTestCase(SecurityFormTestCase):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
-            form = PrisonersForm(self.request, data={'page': '1'})
+            form = self.form_class(self.request, data={'page': '1'})
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
@@ -240,7 +377,7 @@ class PrisonerFormTestCase(SecurityFormTestCase):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
-            form = PrisonersForm(
+            form = self.form_class(
                 self.request,
                 data={'page': '1', 'ordering': '-credit_total', 'prisoner_name': ' John'},
             )
@@ -253,21 +390,24 @@ class PrisonerFormTestCase(SecurityFormTestCase):
     def test_prisoner_list_invalid_forms(self):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = PrisonersForm(self.request, data={'page': '0'})
+            form = self.form_class(self.request, data={'page': '0'})
         self.assertFalse(form.is_valid())
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = PrisonersForm(self.request, data={'page': '1', 'ordering': 'prison'})
+            form = self.form_class(self.request, data={'page': '1', 'ordering': 'prison'})
         self.assertFalse(form.is_valid())
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = PrisonersForm(self.request, data={'page': '1', 'prison': 'ABC'})
+            form = self.form_class(self.request, data={'page': '1', 'prison': 'ABC'})
         self.assertFalse(form.is_valid())
 
 
 class CreditFormTestCase(SecurityFormTestCase):
+    """
+    TODO: delete after search V2 goes live.
+    """
     form_class = CreditsForm
     api_list_path = '/credits/'
 
@@ -285,7 +425,7 @@ class CreditFormTestCase(SecurityFormTestCase):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
-            form = CreditsForm(self.request, data={'page': '1'})
+            form = self.form_class(self.request, data={'page': '1'})
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
@@ -307,7 +447,10 @@ class CreditFormTestCase(SecurityFormTestCase):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
-            form = CreditsForm(self.request, data={'page': '1', 'ordering': '-amount', 'received_at__gte': '26/5/2016'})
+            form = self.form_class(
+                self.request,
+                data={'page': '1', 'ordering': '-amount', 'received_at__gte': '26/5/2016'},
+            )
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
@@ -316,7 +459,7 @@ class CreditFormTestCase(SecurityFormTestCase):
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = CreditsForm(self.request, data={'page': '1', 'amount_pattern': 'not_integral'})
+            form = self.form_class(self.request, data={'page': '1', 'amount_pattern': 'not_integral'})
         self.assertTrue(form.is_valid(), msg=form.errors.as_text())
         self.assertDictEqual(form.get_query_data(), {'ordering': '-received_at', 'exclude_amount__endswith': '00'})
         self.assertDictEqual(form.get_query_data(allow_parameter_manipulation=False),
@@ -326,18 +469,136 @@ class CreditFormTestCase(SecurityFormTestCase):
     def test_credits_list_invalid_forms(self):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = CreditsForm(self.request, data={'page': '0'})
+            form = self.form_class(self.request, data={'page': '0'})
         self.assertFalse(form.is_valid())
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = CreditsForm(self.request, data={'page': '1', 'ordering': 'prison'})
+            form = self.form_class(self.request, data={'page': '1', 'ordering': 'prison'})
         self.assertFalse(form.is_valid())
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = CreditsForm(self.request, data={'page': '1', 'prison': 'ABC'})
+            form = self.form_class(self.request, data={'page': '1', 'prison': 'ABC'})
         self.assertFalse(form.is_valid())
+
+
+class CreditFormV2TestCase(SecurityFormTestCase):
+    """
+    Tests related to the CreditFormV2.
+    """
+    form_class = CreditsFormV2
+    api_list_path = '/credits/'
+
+    def test_blank_form(self):
+        """
+        Test that if no data is passed in, the default values are used instead.
+        """
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
+
+            form = self.form_class(self.request, data={})
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+            self.assertEqual(
+                urlsplit(rsps.calls[-1].request.url).query,
+                'offset=0&limit=20&ordering=-received_at',
+            )
+
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'page': 1,
+                'ordering': '-received_at',
+                'prison': [],
+                'simple_search': '',
+            },
+        )
+        self.assertDictEqual(
+            form.get_query_data(),
+            {'ordering': '-received_at'},
+        )
+        self.assertEqual(
+            form.query_string,
+            'ordering=-received_at',
+        )
+
+    def test_valid(self):
+        """
+        Test that if data is passed in, the API query string is constructed as expected.
+        """
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
+
+            form = self.form_class(
+                self.request,
+                data={
+                    'page': 2,
+                    'ordering': '-amount',
+                    'prison': [
+                        prisons[0]['nomis_id'],
+                    ],
+                    'simple_search': 'Joh',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+            self.assertEqual(
+                urlsplit(rsps.calls[-1].request.url).query,
+                'offset=20&limit=20&ordering=-amount&prison=IXB&simple_search=Joh',
+            )
+
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'page': 2,
+                'ordering': '-amount',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'simple_search': 'Joh',
+            },
+        )
+
+        self.assertDictEqual(
+            form.get_query_data(),
+            {
+                'ordering': '-amount',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'simple_search': 'Joh',
+            },
+        )
+
+    def test_invalid(self):
+        """
+        Test validation errors.
+        """
+        scenarios = [
+            ValidationScenario(
+                {'page': '0'},
+                {'page': ['Ensure this value is greater than or equal to 1.']},
+            ),
+            ValidationScenario(
+                {'ordering': 'prison'},
+                {'ordering': ['Select a valid choice. prison is not one of the available choices.']},
+            ),
+            ValidationScenario(
+                {'prison': ['invalid']},
+                {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+        ]
+
+        for scenario in scenarios:
+            with responses.RequestsMock() as rsps:
+                mock_prison_response(rsps)
+                form = self.form_class(self.request, data=scenario.data)
+            self.assertFalse(form.is_valid())
+            self.assertDictEqual(form.errors, scenario.errors)
 
 
 class DisbursementFormTestCase(SecurityFormTestCase):
@@ -359,7 +620,7 @@ class DisbursementFormTestCase(SecurityFormTestCase):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
-            form = DisbursementsForm(self.request, data={'page': '1'})
+            form = self.form_class(self.request, data={'page': '1'})
             self.assertTrue(form.is_valid())
             self.assertDictEqual(form.cleaned_data, expected_data)
             self.assertListEqual(form.get_object_list(), [])
@@ -382,7 +643,7 @@ class DisbursementFormTestCase(SecurityFormTestCase):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
-            form = DisbursementsForm(
+            form = self.form_class(
                 self.request,
                 data={'page': '1', 'ordering': '-amount', 'created__gte': '26/5/2016'},
             )
@@ -394,7 +655,7 @@ class DisbursementFormTestCase(SecurityFormTestCase):
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = DisbursementsForm(self.request, data={'page': '1', 'amount_pattern': 'not_integral'})
+            form = self.form_class(self.request, data={'page': '1', 'amount_pattern': 'not_integral'})
         self.assertTrue(form.is_valid(), msg=form.errors.as_text())
         self.assertDictEqual(form.get_query_data(), {'ordering': '-created', 'exclude_amount__endswith': '00'})
         self.assertDictEqual(form.get_query_data(allow_parameter_manipulation=False),
@@ -404,17 +665,17 @@ class DisbursementFormTestCase(SecurityFormTestCase):
     def test_disbursements_list_invalid_forms(self):
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = DisbursementsForm(self.request, data={'page': '0'})
+            form = self.form_class(self.request, data={'page': '0'})
         self.assertFalse(form.is_valid())
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = DisbursementsForm(self.request, data={'page': '1', 'ordering': 'prison'})
+            form = self.form_class(self.request, data={'page': '1', 'ordering': 'prison'})
         self.assertFalse(form.is_valid())
 
         with responses.RequestsMock() as rsps:
             mock_prison_response(rsps)
-            form = DisbursementsForm(self.request, data={'page': '1', 'prison': 'ABC'})
+            form = self.form_class(self.request, data={'page': '1', 'prison': 'ABC'})
         self.assertFalse(form.is_valid())
 
 

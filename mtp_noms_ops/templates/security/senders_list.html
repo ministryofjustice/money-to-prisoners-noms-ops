@@ -1,30 +1,39 @@
 {% extends 'base.html' %}
-{% comment %}TODO: delete after search V2 goes live.{% endcomment %}
-
 {% load i18n %}
 {% load mtp_common %}
 {% load security %}
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
+{% block phase_banner %}
+  {{ block.super }}
+  {% include "security/forms/prison-switcher.html" %}
+{% endblock %}
+
+{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
+{% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
 
 {% block inner_content %}
-
-  <header>
-    <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
-  </header>
-
-  {% include 'mtp_common/includes/message_box.html' %}
-
   <form id="filter-senders" class="mtp-security-search js-FormAnalytics" method="get">
-    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <p class="mtp-search-description">
-      {{ form.search_description.description }}
-    </p>
+    <div class="grid-row">
+        <div class="column-two-thirds">
+          {% include 'security/forms/top-area-object-list.html' with field=form.search %}
+        </div>
 
-    <div class="print-hidden">
-      {% include view.form_template_name with view=view form=form request=request object_name=_('payment sources') only %}
+        <div class="column-one-third print-hidden">
+          <div class="mtp-info-box">
+            <div class="mtp-info-box__heading">
+              {% trans 'About payment source data' %}
+            </div>
+            <p>
+              {% trans 'One person using many cards displays as many payment sources.' %}
+            </p>
+            <p>
+              {% trans "We can’t check names match their cards, we can’t match people by name to different cards and we can’t check if email addresses are real." %}
+            </p>
+          </div>
+        </div>
     </div>
 
     {% if form.is_valid %}
@@ -108,10 +117,10 @@
         </table>
       </div>
 
-      <div class="mtp-page-list__container">
+      <div class="mtp-page-list-container">
         {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
 
-        <p class="mtp-page-list__count">
+        <p class="mtp-object-count">
           {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
             {{ number }} payment source
           {% plural %}

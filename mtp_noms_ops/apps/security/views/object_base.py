@@ -1,3 +1,5 @@
+from enum import Enum
+
 from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -15,6 +17,20 @@ from requests.exceptions import RequestException
 
 from security.export import ObjectListXlsxResponse
 from security.tasks import email_export_xlsx
+
+
+SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME = 'form_submitted'
+
+
+class ViewType(Enum):
+    """
+    Enum for the different variants of views for a specific class of objects.
+    """
+    simple_search_form = 'simple_search_form'
+    search_results = 'search_results'
+    export_download = 'export_download'
+    export_email = 'export_email'
+    detail = 'detail'
 
 
 class SimpleSecurityDetailView(TemplateView):
@@ -72,13 +88,16 @@ class SecurityView(FormView):
     Allows form submission via GET, i.e. form is always bound
     """
     title = NotImplemented
-    template_name = NotImplemented
-    form_template_name = NotImplemented
+    form_template_name = NotImplemented  # TODO: delete after search V2 goes live.
     object_list_context_key = NotImplemented
-    export_view = False
-    export_redirect_view = None
+    view_type = None
+    referral_view = None
+    search_results_view = None
+    simple_search_view = None
     export_download_limit = settings.MAX_CREDITS_TO_DOWNLOAD
     export_email_limit = settings.MAX_CREDITS_TO_EMAIL
+    object_name = None
+    object_name_plural = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -93,12 +112,21 @@ class SecurityView(FormView):
         form_kwargs['data'] = request_data
         return form_kwargs
 
+    def is_export_view_type(self):
+        return self.view_type in (ViewType.export_download, ViewType.export_email)
+
     def form_valid(self, form):
-        if self.export_view:
+        """
+        If it's an export view, export and redirect to the referral view.
+        If it's a simple form view, the form is valid and was submitted,
+            redirect to the search results page.
+        Else, render the template.
+        """
+        if self.is_export_view_type():
             attachment_name = 'exported-%s-%s.xlsx' % (
                 self.object_list_context_key, date_format(timezone.now(), 'Y-m-d')
             )
-            if self.export_view == 'email':
+            if self.view_type == ViewType.export_email:
                 email_export_xlsx(
                     object_type=self.object_list_context_key,
                     user=self.request.user,
@@ -112,34 +140,65 @@ class SecurityView(FormView):
                     self.request,
                     _('The spreadsheet will be emailed to you at %(email)s') % {'email': self.request.user.email}
                 )
-                return self.get_export_redirect(form)
+                return self.redirect_to_referral_view(form)
             return ObjectListXlsxResponse(form.get_complete_object_list(),
                                           object_type=self.object_list_context_key,
                                           attachment_name=attachment_name)
+
+        if (
+            self.view_type == ViewType.simple_search_form
+            and SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME in self.request.GET
+            and self.search_results_view
+        ):
+            search_results_url = f'{reverse(self.search_results_view)}?{form.query_string}'
+            return redirect(search_results_url)
 
         object_list = form.get_object_list()
         context = self.get_context_data(form=form)
         if self.redirect_on_single and len(object_list) == 1 and hasattr(self, 'url_for_single_result'):
             return redirect(self.url_for_single_result(object_list[0]))
         context[self.object_list_context_key] = object_list
-        return render(self.request, self.template_name, context)
+        return render(self.request, self.get_template_names(), context)
 
     def form_invalid(self, form):
-        if self.export_view:
-            return self.get_export_redirect(form)
+        """
+        If the form is invalid and the view type is export or search results,
+        it redirects back to the referral view so that the user can see and correct the errors.
+        """
+        if self.is_export_view_type() or self.view_type == ViewType.search_results:
+            return self.redirect_to_referral_view(form)
         return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        context_data['breadcrumbs'] = [
-            {'name': _('Home'), 'url': reverse('security:dashboard')},
-            {'name': self.title}
-        ]
-        context_data['google_analytics_pageview'] = genericised_pageview(self.request, self.get_generic_title())
-        return context_data
 
-    def get_export_redirect(self, form):
-        return redirect('%s?%s' % (reverse(self.export_redirect_view, kwargs=self.kwargs), form.query_string))
+        if self.view_type == ViewType.search_results:
+            breadcrumbs = [
+                {'name': _('Home'), 'url': reverse('security:dashboard')},
+                {'name': self.title, 'url': f'{reverse(self.simple_search_view)}?{kwargs["form"].query_string}'},
+                {'name': _('Search results')}
+            ]
+        else:
+            breadcrumbs = [
+                {'name': _('Home'), 'url': reverse('security:dashboard')},
+                {'name': self.title}
+            ]
+
+        return {
+            **context_data,
+
+            'breadcrumbs': breadcrumbs,
+            'google_analytics_pageview': genericised_pageview(self.request, self.get_generic_title()),
+            'simple_search_form_submitted_input_name': SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME,
+            'is_search_results': self.view_type == ViewType.search_results,
+        }
+
+    def redirect_to_referral_view(self, form):
+        """
+        Returns an HttpResponseRedirect to the referral_view preserving the same kwargs and query string.
+        """
+        view = reverse(self.referral_view, kwargs=self.kwargs)
+        return redirect(f'{view}?{self.request.GET.urlencode()}')
 
     def get_export_description(self, form):
         return str(form.search_description['description'])
@@ -171,6 +230,7 @@ class SecurityDetailView(SecurityView):
     id_kwarg_name = NotImplemented
     object_list_context_key = 'credits'
     object_context_key = NotImplemented
+    view_type = ViewType.detail
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
@@ -195,6 +255,7 @@ class SecurityDetailView(SecurityView):
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
+
         context_data['form'].check_and_update_saved_searches(str(self.title))
         return context_data
 

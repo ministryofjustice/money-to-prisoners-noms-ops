@@ -26,21 +26,21 @@ from security.searches import (
 from security.utils import convert_date_fields
 
 
-def get_credit_source_choices(blank_option=_('Any method')):
+def get_credit_source_choices():
     return insert_blank_option(
         list(credit_sources.items()),
-        title=blank_option
+        title=_('Any method')
     )
 
 
-def get_disbursement_method_choices(blank_option=_('Any method')):
+def get_disbursement_method_choices():
     return insert_blank_option(
         list(disbursement_methods.items()),
-        title=blank_option
+        title=_('Any method')
     )
 
 
-def insert_blank_option(choices, title=_('Select an option')):
+def insert_blank_option(choices, title):
     new_choices = [('', title)]
     new_choices.extend(choices)
     return new_choices
@@ -84,7 +84,7 @@ def validate_range_fields(*fields):
                     self.add_error(upper, ValidationError(bound_ordering_msg, code='bound_ordering'))
             return self.cleaned_data
 
-        setattr(cls, 'clean', clean)
+        cls.clean = clean
         return cls
 
     return inner
@@ -162,15 +162,9 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         self.existing_search = None
 
         if 'prison' in self.fields:
-            prison_list = PrisonList(self.session, exclude_private_estate=self.exclude_private_estate)
-            self['prison'].field.choices = prison_list.prison_choices
-            self['prison_region'].field.choices = insert_blank_option(prison_list.region_choices,
-                                                                      title=_('All regions'))
-            self['prison_population'].field.choices = insert_blank_option(prison_list.population_choices,
-                                                                          title=_('All types'))
-            self['prison_category'].field.choices = insert_blank_option(prison_list.category_choices,
-                                                                        title=_('All categories'))
-            self.prison_list = prison_list
+            self.prison_list = PrisonList(self.session, exclude_private_estate=self.exclude_private_estate)
+            self['prison'].field.choices = self.prison_list.prison_choices
+
             if 'prison' in self.data and hasattr(self.data, 'getlist'):
                 selected_prisons = itertools.chain.from_iterable(
                     selection.split(',')
@@ -178,6 +172,23 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 )
                 selected_prisons = sorted(set(filter(None, selected_prisons)))
                 self.data.setlist('prison', selected_prisons)
+
+            if 'prison_region' in self.fields:
+                self['prison_region'].field.choices = insert_blank_option(
+                    self.prison_list.region_choices,
+                    title=_('All regions'),
+                )
+            if 'prison_population' in self.fields:
+                self['prison_population'].field.choices = insert_blank_option(
+                    self.prison_list.population_choices,
+                    title=_('All types'),
+                )
+
+            if 'prison_category' in self.fields:
+                self['prison_category'].field.choices = insert_blank_option(
+                    self.prison_list.category_choices,
+                    title=_('All categories'),
+                )
 
     @cached_property
     def session(self):
