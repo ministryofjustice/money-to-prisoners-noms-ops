@@ -506,23 +506,48 @@ class CreditsFormV2(BaseCreditsForm):
     unlisted_description = ''
 
 
+class BaseDisbursementsForm(SecurityForm):
+    """
+    Disbursements Form Base Class.
+    """
+    ordering = forms.ChoiceField(
+        label=_('Order by'),
+        required=False,
+        initial='-created',
+        choices=[
+            ('created', _('Date entered (oldest to newest)')),
+            ('-created', _('Date entered (newest to oldest)')),
+            ('amount', _('Amount sent (low to high)')),
+            ('-amount', _('Amount sent (high to low)')),
+            ('prisoner_name', _('Prisoner name (A to Z)')),
+            ('-prisoner_name', _('Prisoner name (Z to A)')),
+            ('prisoner_number', _('Prisoner number (A to Z)')),
+            ('-prisoner_number', _('Prisoner number (Z to A)')),
+        ],
+    )
+
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
+
+    exclude_private_estate = True
+
+    def get_object_list(self):
+        object_list = super().get_object_list()
+        convert_date_fields(object_list)
+        return object_list
+
+    def get_object_list_endpoint_path(self):
+        return '/disbursements/'
+
+
 @validate_range_fields(
     ('created', _('Must be after the start date'), '__lt'),
 )
-class DisbursementsForm(SecurityForm):
-    ordering = forms.ChoiceField(label=_('Order by'), required=False,
-                                 initial='-created',
-                                 choices=[
-                                     ('created', _('Date entered (oldest to newest)')),
-                                     ('-created', _('Date entered (newest to oldest)')),
-                                     ('amount', _('Amount sent (low to high)')),
-                                     ('-amount', _('Amount sent (high to low)')),
-                                     ('prisoner_name', _('Prisoner name (A to Z)')),
-                                     ('-prisoner_name', _('Prisoner name (Z to A)')),
-                                     ('prisoner_number', _('Prisoner number (A to Z)')),
-                                     ('-prisoner_number', _('Prisoner number (Z to A)')),
-                                 ])
+class DisbursementsForm(BaseDisbursementsForm):
+    """
+    Legacy Search Form for Disbursements.
 
+    TODO: delete after search V2 goes live.
+    """
     created__gte = forms.DateField(label=_('Entered since'), help_text=_('For example, 13/02/2018'), required=False)
     created__lt = forms.DateField(label=_('Entered before'), help_text=_('For example, 13/02/2018'), required=False)
 
@@ -533,7 +558,6 @@ class DisbursementsForm(SecurityForm):
 
     prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
@@ -550,10 +574,7 @@ class DisbursementsForm(SecurityForm):
     roll_number = forms.CharField(label=_('Roll number'), required=False)
     invoice_number = forms.CharField(label=_('Invoice number'), required=False)
 
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or recipient name'), required=False)
-
     exclusive_date_params = ['created__lt']
-    exclude_private_estate = True
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are disbursements {filter_description}, ' \
@@ -636,12 +657,6 @@ class DisbursementsForm(SecurityForm):
             return ''
         return self.cleaned_data.get('roll_number')
 
-    def get_object_list_endpoint_path(self):
-        return '/disbursements/'
-
-    def get_object_list(self):
-        return convert_date_fields(super().get_object_list())
-
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
         if allow_parameter_manipulation:
@@ -661,6 +676,27 @@ class DisbursementsForm(SecurityForm):
             return _('ending in %02d pence') % amount_value
         description = dict(self['amount_pattern'].field.choices).get(value)
         return str(description).lower() if description else None
+
+
+class DisbursementsFormV2(BaseDisbursementsForm):
+    """
+    Search Form for Disbursements V2.
+    """
+    simple_search = forms.CharField(
+        label=_('Search recipient name or prisoner number'),
+        required=False,
+        help_text=_('Common or incomplete names may show many results'),
+    )
+
+    # NB: ensure that these templates are HTML-safe
+    filtered_description_template = 'Results containing {filter_description}.'
+    unfiltered_description_template = ''
+
+    description_templates = (
+        ('recipient name or prisoner number “{simple_search}”',),
+    )
+    description_capitalisation = {}
+    unlisted_description = ''
 
 
 @validate_range_fields(
