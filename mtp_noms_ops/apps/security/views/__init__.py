@@ -12,6 +12,7 @@ from .object_list import (  # noqa: F401
     CreditListView,
     CreditListViewV2,
     DisbursementListView,
+    DisbursementListViewV2,
     NotificationListView,
 )
 from .review import ReviewCreditsView  # noqa: F401
