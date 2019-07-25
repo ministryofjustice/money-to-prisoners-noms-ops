@@ -303,15 +303,22 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.DisbursementListView.as_view(),
-                views.DisbursementListView.as_view(),
+                views.DisbursementListViewV2.as_view(
+                    view_type=views.ViewType.simple_search_form,
+                ),
             ),
         ),
         name='disbursement_list',
     ),
     url(
-        r'^disbursements/(?P<disbursement_id>\d+)/$',
-        security_test(views.DisbursementDetailView.as_view()),
-        name='disbursement_detail',
+        r'^disbursements/search-results/$',
+        security_test(
+            views.DisbursementListViewV2.as_view(
+                view_type=views.ViewType.search_results,
+                referral_view='security:disbursement_list',
+            ),
+        ),
+        name='disbursement_search_results',
     ),
     url(
         r'^disbursements/export/$',
@@ -321,7 +328,7 @@ urlpatterns = [
                     view_type=views.ViewType.export_download,
                     referral_view='security:disbursement_list',
                 ),
-                views.DisbursementListView.as_view(
+                views.DisbursementListViewV2.as_view(
                     view_type=views.ViewType.export_download,
                     referral_view='security:disbursement_list',
                 ),
@@ -337,13 +344,18 @@ urlpatterns = [
                     view_type=views.ViewType.export_email,
                     referral_view='security:disbursement_list',
                 ),
-                views.DisbursementListView.as_view(
+                views.DisbursementListViewV2.as_view(
                     view_type=views.ViewType.export_email,
                     referral_view='security:disbursement_list',
                 ),
             ),
         ),
         name='disbursements_email_export',
+    ),
+    url(
+        r'^disbursements/(?P<disbursement_id>\d+)/$',
+        security_test(views.DisbursementDetailView.as_view()),
+        name='disbursement_detail',
     ),
 
     # review credits

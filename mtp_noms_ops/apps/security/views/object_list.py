@@ -10,6 +10,7 @@ from security.forms.object_list import (
     CreditsForm,
     CreditsFormV2,
     DisbursementsForm,
+    DisbursementsFormV2,
     NotificationsForm,
 )
 from security.views.object_base import SecurityView
@@ -17,7 +18,9 @@ from security.views.object_base import SecurityView
 
 class CreditListView(SecurityView):
     """
-    Credit search view
+    Legacy Credit search view
+
+    TODO: delete after search V2 goes live.
     """
     title = _('Credits')
     form_template_name = 'security/forms/credits.html'
@@ -42,13 +45,29 @@ class CreditListViewV2(SecurityView):
 
 class DisbursementListView(SecurityView):
     """
-    Disbursement search view
+    Legacy Disbursement search view
+
+    TODO: delete after search V2 goes live.
     """
     title = _('Disbursements')
     form_template_name = 'security/forms/disbursements.html'
     template_name = 'security/disbursements.html'
     form_class = DisbursementsForm
     object_list_context_key = 'disbursements'
+
+
+class DisbursementListViewV2(SecurityView):
+    """
+    Disbursement list/search view V2
+    """
+    title = _('Disbursements')
+    form_class = DisbursementsFormV2
+    template_name = 'security/disbursements_list.html'
+    search_results_view = 'security:disbursement_search_results'
+    simple_search_view = 'security:disbursement_list'
+    object_list_context_key = 'disbursements'
+    object_name = _('disbursement')
+    object_name_plural = _('disbursements')
 
 
 class SenderListView(SecurityView):
