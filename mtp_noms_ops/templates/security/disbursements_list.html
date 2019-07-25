@@ -23,7 +23,7 @@
     </div>
 
     {% if form.is_valid %}
-      <div class="mtp-results-list">
+      <div class="mtp-results-list-v2">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
           &nbsp;
@@ -32,21 +32,53 @@
           {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many disbursements to download.') %}
         </div>
 
-        <table class="mtp-table">
+        <table class="mtp-table table-font-xsmall">
           <caption class="visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
-              {% include 'security/includes/disbursement-header-row.html' with link_prisoner=True %}
+              {% sortable_cell _('Date entered') form.cleaned_data 'created' %}
+              <th>{% trans 'Prisoner (from)' %}</th>
+              <th>{% trans 'Recipient (to)' %}</th>
+              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
+              <th class="numeric print-hidden">{% trans 'Action' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for disbursement in disbursements %}
               <tr>
-                {% include 'security/includes/disbursement-row.html' with link_prisoner=True %}
+                <td class="mtp-numeric-left">
+                  {{ disbursement.created|date:'j F Y' }}
+                </td>
+
+                <td>
+                  {{ disbursement.prisoner_name|default:_('Unknown prisoner') }}
+                  <br/>
+                  {{ disbursement.prisoner_number }}
+                </td>
+
+                <td>
+                  {{ disbursement.recipient_first_name }} {{ disbursement.recipient_last_name }}
+                  {% if disbursement.recipient_email %}
+                    <br/>
+                    {{ disbursement.recipient_email }}
+                  {% endif %}
+                </td>
+
+                <td class="numeric">
+                  <span class="mtp-sortable-cell--pad">
+                    {{ disbursement.amount|currency }}
+                  </span>
+                </td>
+
+                <td class="numeric print-hidden">
+                  <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}">
+                    {% trans 'View details' %}
+                  </a>
+                </td>
               </tr>
             {% empty %}
               <tr>
-                <td colspan="7">{% trans 'No matching disbursements found' %}</td>
+                <td colspan="5">{% trans 'No matching disbursements found' %}</td>
               </tr>
             {% endfor %}
           </tbody>

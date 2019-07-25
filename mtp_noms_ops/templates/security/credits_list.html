@@ -38,7 +38,7 @@
             <tr>
               {% sortable_cell _('Date received') form.cleaned_data 'received_at' %}
               <th>{% trans 'Payment source (from)' %}</th>
-              {% sortable_cell _('Prisoner (to)') form.cleaned_data 'prisoner_number' %}
+              <th>{% trans 'Prisoner (to)' %}</th>
               {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
               <th class="numeric print-hidden">{% trans 'Action' %}</th>
             </tr>
