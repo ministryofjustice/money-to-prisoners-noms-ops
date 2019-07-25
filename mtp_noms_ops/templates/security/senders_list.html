@@ -37,7 +37,7 @@
     </div>
 
     {% if form.is_valid %}
-      <div class="mtp-results-list">
+      <div class="mtp-results-list-v2">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
           &nbsp;
@@ -46,15 +46,17 @@
           {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many payment sources to download.') %}
         </div>
 
-        <table class="mtp-table">
+        <table class="mtp-table table-font-xsmall">
           <caption class="visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
               <th>{% trans 'Payment source' %}</th>
-              {% sortable_cell _('Sent') form.cleaned_data 'credit_count' %}
-              {% sortable_cell _('Prisoners') form.cleaned_data 'prisoner_count' %}
-              {% sortable_cell _('Prisons') form.cleaned_data 'prison_count' %}
-              {% sortable_cell _('Amount') form.cleaned_data 'credit_total' cell_classes='numeric' %}
+              <th>{% trans 'Payment method' %}</th>
+              {% sortable_cell _('Number of credits sent') form.cleaned_data 'credit_count' cell_classes='numeric' %}
+              {% sortable_cell _('Prisoners sent to') form.cleaned_data 'prisoner_count' cell_classes='numeric' %}
+              {% sortable_cell _('Number of prisons sent to') form.cleaned_data 'prison_count' cell_classes='numeric' %}
+              {% sortable_cell _('Total amount sent') form.cleaned_data 'credit_total' cell_classes='numeric' %}
+              <th class="numeric print-hidden">{% trans 'Action' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -64,63 +66,71 @@
                   <tr>
                     <td>
                       {% if sender.bank_transfer_details %}
-                        <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}" class="mtp-print-url-hidden">
-                          {{ sender.bank_transfer_details.0.sender_name|default:'—' }}
-                        </a>
-                        <br />
-                        {% trans 'by bank transfer' %}
+                        {{ sender.bank_transfer_details.0.sender_name|default:'—' }}
                       {% elif sender.debit_card_details %}
-                        <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}" class="mtp-print-url-hidden">
-                          {{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}
-                        </a>
-                        <br />
-                        {% trans 'by debit card' %}
+                        {{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}
+                        {% comment %}TODO show when there are multiple cardholder names{% endcomment %}
+
+                        {% if sender.debit_card_details.0.sender_emails %}
+                          <br/>
+                          {{ sender.debit_card_details.0.sender_emails.0 }}
+                          {% comment %}TODO show when there are multiple emails{% endcomment %}
+                        {% endif %}
+
                       {% else %}
                         —
                       {% endif %}
                     </td>
                     <td>
-                      {% blocktrans trimmed count count=sender.credit_count %}
-                        {{ count }} credit sent
-                      {% plural %}
-                        {{ count }} credits sent
-                      {% endblocktrans %}
+                    {% if sender.bank_transfer_details %}
+                      {% trans 'Bank transfer' %}
+                    {% elif sender.debit_card_details %}
+                      {% trans 'Debit card' %}
+                    {% else %}
+                      -
+                    {% endif %}
                     </td>
-                    <td>
-                      {% blocktrans trimmed count count=sender.prisoner_count %}
-                        {{ count }} prisoner
-                      {% plural %}
-                        {{ count }} prisoners
-                      {% endblocktrans %}
+                    <td class="numeric">
+                      <span class="mtp-sortable-cell--pad">
+                        {{ sender.credit_count }}
+                      </span>
                     </td>
-                    <td>
-                      {% blocktrans trimmed count count=sender.prison_count %}
-                        {{ count }} prison
-                      {% plural %}
-                        {{ count }} prisons
-                      {% endblocktrans %}
+                    <td class="numeric">
+                      <span class="mtp-sortable-cell--pad">
+                        {{ sender.prisoner_count }}
+                      </span>
+                    </td>
+                    <td class="numeric">
+                      <span class="mtp-sortable-cell--pad">
+                        {{ sender.prison_count }}
+                      </span>
                     </td>
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.credit_total|currency }}
                       </span>
                     </td>
+                    <td class="numeric print-hidden">
+                      <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}">
+                        {% trans 'View details' %}
+                      </a>
+                    </td>
                   </tr>
                 {% endif %}
               {% endwith %}
             {% empty %}
               <tr>
-                <td colspan="5">{% trans 'No matching payment sources found' %}</td>
+                <td colspan="7">{% trans 'No matching payment sources found' %}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
 
-      <div class="mtp-page-list-container">
+      <div class="mtp-page-list__container">
         {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
 
-        <p class="mtp-object-count">
+        <p class="mtp-page-list__count">
           {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
             {{ number }} payment source
           {% plural %}
