@@ -23,7 +23,7 @@
     </div>
 
     {% if form.is_valid %}
-      <div class="mtp-results-list">
+      <div class="mtp-results-list-v2">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
           &nbsp;
@@ -32,31 +32,63 @@
           {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
         </div>
 
-        <table class="mtp-table">
+        <table class="mtp-table table-font-xsmall">
           <caption class="visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
-              {% include 'security/includes/credit-header-row.html' with link_prisoner=True %}
+              {% sortable_cell _('Date received') form.cleaned_data 'received_at' %}
+              <th>{% trans 'Payment source (from)' %}</th>
+              {% sortable_cell _('Prisoner (to)') form.cleaned_data 'prisoner_number' %}
+              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
+              <th class="numeric print-hidden">{% trans 'Action' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for credit in credits %}
               <tr>
-                {% include 'security/includes/credit-row.html' with link_prisoner=True link_sender=True %}
+                <td class="mtp-numeric-left">
+                  {{ credit.received_at|date:'j F Y' }}
+                </td>
+
+                <td>
+                  {{ credit.sender_name|default:_('Sender details not recorded') }}
+                  {% if credit.sender_email %}
+                    <br/>
+                    {{ credit.sender_email }}
+                  {% endif %}
+                </td>
+
+                <td>
+                  {{ credit.prisoner_name|default:_('Unknown prisoner') }}
+                  <br/>
+                  {{ credit.prisoner_number }}
+                </td>
+
+                <td class="numeric">
+                  <span class="mtp-sortable-cell--pad">
+                    {{ credit.amount|currency }}
+                  </span>
+                </td>
+
+                <td class="numeric print-hidden">
+                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}">
+                    {% trans 'View details' %}
+                  </a>
+                </td>
               </tr>
             {% empty %}
               <tr>
-                <td colspan="7">{% trans 'No matching credits found' %}</td>
+                <td colspan="5">{% trans 'No matching credits found' %}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
 
-      <div class="mtp-page-list-container">
+      <div class="mtp-page-list__container">
         {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
 
-        <p class="mtp-object-count">
+        <p class="mtp-page-list__count">
           {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
             {{ number }} credit
           {% plural %}

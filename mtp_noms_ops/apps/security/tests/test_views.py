@@ -1471,12 +1471,14 @@ class CreditViewsV2TestCase(SimpleSearchV2SecurityTestCaseMixin, ExportSecurityV
 
     def _test_simple_search_search_results_content(self, response):
         self.assertContains(response, '2 credits')
+
         self.assertContains(response, 'GEORGE MELLEY')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('A1413AE', response_content)
-        self.assertIn('275.00', response_content)
-        self.assertIn('Bank transfer', response_content)
-        self.assertIn('Debit card', response_content)
+        self.assertContains(response, 'A1411AE')
+        self.assertContains(response, '230.00')
+
+        self.assertContains(response, 'NORMAN STANLEY FLETCHER')
+        self.assertContains(response, 'A1413AE')
+        self.assertContains(response, '275.00')
 
     def test_detail_view_displays_debit_card_detail(self):
         credit_id = 2
