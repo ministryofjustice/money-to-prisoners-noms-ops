@@ -457,6 +457,9 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'credit_count': 3,
         'credit_total': 31000,
         'sender_count': 2,
+        'disbursement_count': 2,
+        'disbursement_total': 29000,
+        'recipient_count': 1,
         'prisoner_name': 'JAMES HALLS',
         'prisoner_number': 'A1409AE',
         'prisoner_dob': '1986-12-09',
@@ -1126,7 +1129,10 @@ class SenderViewsV2TestCase(
         self.assertContains(response, 'non-field-error')
 
 
-class PrisonerListTestCase(SecurityViewTestCase):
+class PrisonerViewsTestCase(SecurityViewTestCase):
+    """
+    TODO: delete after search V2 goes live.
+    """
     view_name = 'security:prisoner_list'
     detail_view_name = 'security:prisoner_detail'
     api_list_path = '/prisoners/'
@@ -1223,6 +1229,153 @@ class PrisonerListTestCase(SecurityViewTestCase):
         )
         with silence_logger('django.request'):
             response = self.client.get(reverse(self.detail_view_name, kwargs={'prisoner_id': 9}))
+        self.assertContains(response, 'non-field-error')
+
+
+class PrisonerViewsV2TestCase(
+    SimpleSearchV2SecurityTestCaseMixin,
+    ExportSecurityViewTestCaseMixin,
+    SecurityViewTestCase,
+):
+    """
+    Test case related to prisoner search V2 and detail views.
+    """
+    view_name = 'security:prisoner_list'
+    search_results_view_name = 'security:prisoner_search_results'
+    detail_view_name = 'security:prisoner_detail'
+    search_ordering = '-sender_count'
+    api_list_path = '/prisoners/'
+
+    export_view_name = 'security:prisoners_export'
+    export_email_view_name = 'security:prisoners_email_export'
+    export_expected_xls_headers = [
+        'Prisoner number',
+        'Prisoner name',
+        'Date of birth',
+        'Credits received',
+        'Total amount received',
+        'Payment sources',
+        'Current prison',
+        'Prisons where received credits',
+        'Names given by senders',
+        'Disbursements sent',
+        'Total amount sent',
+        'Recipients',
+    ]
+    export_expected_xls_rows = [
+        [
+            'A1409AE',
+            'JAMES HALLS',
+            '1986-12-09',
+            3,
+            '£310.00',
+            2,
+            'Prison',
+            'Prison',
+            'Jim Halls, JAMES HALLS',
+            2,
+            '£290.00',
+            1,
+        ],
+    ]
+
+    def get_api_object_list_response_data(self):
+        return [self.prisoner_profile]
+
+    def _test_simple_search_search_results_content(self, response):
+        response_content = response.content.decode(response.charset)
+        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('A1409AE', response_content)
+        self.assertIn('310.00', response_content)
+
+    @override_nomis_settings
+    def test_detail_view(self):
+        prisoner_id = 9
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{prisoner_id}/'),
+                json=self.prisoner_profile,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{prisoner_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.credit_object] * 4,
+                },
+            )
+
+            response = self.client.get(
+                reverse(
+                    self.detail_view_name,
+                    kwargs={'prisoner_id': prisoner_id},
+                ),
+            )
+        response_content = response.content.decode(response.charset)
+        self.assertIn('JAMES HALLS', response_content)
+        self.assertIn('Jim Halls', response_content)
+        self.assertNotIn('James Halls', response_content)
+        self.assertIn('MAISIE', response_content)
+        self.assertIn('£102.50', response_content)
+
+    def test_detail_not_found(self):
+        prisoner_id = 999
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{prisoner_id}/'),
+                status=404,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{prisoner_id}/credits/'),
+                status=404,
+            )
+            with silence_logger('django.request'):
+                response = self.client.get(
+                    reverse(
+                        self.detail_view_name,
+                        kwargs={'prisoner_id': prisoner_id},
+                    ),
+                )
+        self.assertEqual(response.status_code, 404)
+
+    def test_connection_errors(self):
+        prisoner_id = 9
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                status=500,
+            )
+            with silence_logger('django.request'):
+                response = self.client.get(reverse(self.view_name))
+        self.assertContains(response, 'non-field-error')
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{prisoner_id}/'),
+                status=500,
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{prisoner_id}/credits/'),
+                status=500,
+            )
+            with silence_logger('django.request'):
+                response = self.client.get(
+                    reverse(
+                        self.detail_view_name,
+                        kwargs={'prisoner_id': prisoner_id},
+                    ),
+                )
         self.assertContains(response, 'non-field-error')
 
 

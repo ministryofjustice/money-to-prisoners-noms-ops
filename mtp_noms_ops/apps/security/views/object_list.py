@@ -7,6 +7,7 @@ from security.forms.object_list import (
     SendersForm,
     SendersFormV2,
     PrisonersForm,
+    PrisonersFormV2,
     CreditsForm,
     CreditsFormV2,
     DisbursementsForm,
@@ -105,13 +106,32 @@ class SenderListViewV2(SecurityView):
 
 class PrisonerListView(SecurityView):
     """
-    Prisoner search view
+    Legacy Prisoner search view
+
+    TODO: delete after search V2 goes live.
     """
     title = _('Prisoners')
     form_template_name = 'security/forms/prisoners.html'
     template_name = 'security/prisoners.html'
     form_class = PrisonersForm
     object_list_context_key = 'prisoners'
+
+    def url_for_single_result(self, prisoner):
+        return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner['id']})
+
+
+class PrisonerListViewV2(SecurityView):
+    """
+    Prisoner list/search view V2.
+    """
+    title = _('Prisoners')
+    form_class = PrisonersFormV2
+    template_name = 'security/prisoners_list.html'
+    search_results_view = 'security:prisoner_search_results'
+    simple_search_view = 'security:prisoner_list'
+    object_list_context_key = 'prisoners'
+    object_name = _('prisoner')
+    object_name_plural = _('prisoners')
 
     def url_for_single_result(self, prisoner):
         return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner['id']})

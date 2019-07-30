@@ -197,10 +197,22 @@ urlpatterns = [
         security_test(
             search_v2_view_dispatcher(
                 views.PrisonerListView.as_view(),
-                views.PrisonerListView.as_view(),
+                views.PrisonerListViewV2.as_view(
+                    view_type=views.ViewType.simple_search_form,
+                ),
             ),
         ),
         name='prisoner_list',
+    ),
+    url(
+        r'^prisoners/search-results/$',
+        security_test(
+            views.PrisonerListViewV2.as_view(
+                view_type=views.ViewType.search_results,
+                referral_view='security:prisoner_list',
+            ),
+        ),
+        name='prisoner_search_results',
     ),
     url(
         r'^prisoners/export/$',
@@ -210,7 +222,7 @@ urlpatterns = [
                     view_type=views.ViewType.export_download,
                     referral_view='security:prisoner_list',
                 ),
-                views.PrisonerListView.as_view(
+                views.PrisonerListViewV2.as_view(
                     view_type=views.ViewType.export_download,
                     referral_view='security:prisoner_list',
                 ),
@@ -226,7 +238,7 @@ urlpatterns = [
                     view_type=views.ViewType.export_email,
                     referral_view='security:prisoner_list',
                 ),
-                views.PrisonerListView.as_view(
+                views.PrisonerListViewV2.as_view(
                     view_type=views.ViewType.export_email,
                     referral_view='security:prisoner_list',
                 ),

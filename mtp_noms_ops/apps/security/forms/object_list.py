@@ -182,6 +182,39 @@ class SendersFormV2(BaseSendersForm):
     unlisted_description = ''
 
 
+class BasePrisonersForm(SecurityForm):
+    """
+    Prisoners Form Base Class.
+    """
+    ordering = forms.ChoiceField(
+        label=_('Order by'),
+        required=False,
+        initial='-sender_count',
+        choices=[
+            ('sender_count', _('Number of senders (low to high)')),
+            ('-sender_count', _('Number of senders (high to low)')),
+            ('credit_count', _('Number of credits (low to high)')),
+            ('-credit_count', _('Number of credits (high to low)')),
+            ('credit_total', _('Total received (low to high)')),
+            ('-credit_total', _('Total received (high to low)')),
+            ('recipient_count', _('Number of recipients (low to high)')),
+            ('-recipient_count', _('Number of recipients (high to low)')),
+            ('disbursement_count', _('Number of disbursements (low to high)')),
+            ('-disbursement_count', _('Number of disbursements (high to low)')),
+            ('disbursement_total', _('Total sent (low to high)')),
+            ('-disbursement_total', _('Total sent (high to low)')),
+            ('prisoner_name', _('Prisoner name (A to Z)')),
+            ('-prisoner_name', _('Prisoner name (Z to A)')),
+            ('prisoner_number', _('Prisoner number (A to Z)')),
+            ('-prisoner_number', _('Prisoner number (Z to A)')),
+        ],
+    )
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
+
+    def get_object_list_endpoint_path(self):
+        return '/prisoners/'
+
+
 @validate_range_fields(
     ('sender_count', _('Must be larger than the minimum senders')),
     ('credit_count', _('Must be larger than the minimum credits')),
@@ -190,27 +223,12 @@ class SendersFormV2(BaseSendersForm):
     ('disbursement_count', _('Must be larger than the minimum disbursements')),
     ('disbursement_total', _('Must be larger than the minimum total sent')),
 )
-class PrisonersForm(SecurityForm):
-    ordering = forms.ChoiceField(label=_('Order by'), required=False,
-                                 initial='-sender_count',
-                                 choices=[
-                                     ('sender_count', _('Number of senders (low to high)')),
-                                     ('-sender_count', _('Number of senders (high to low)')),
-                                     ('credit_count', _('Number of credits (low to high)')),
-                                     ('-credit_count', _('Number of credits (high to low)')),
-                                     ('credit_total', _('Total received (low to high)')),
-                                     ('-credit_total', _('Total received (high to low)')),
-                                     ('recipient_count', _('Number of recipients (low to high)')),
-                                     ('-recipient_count', _('Number of recipients (high to low)')),
-                                     ('disbursement_count', _('Number of disbursements (low to high)')),
-                                     ('-disbursement_count', _('Number of disbursements (high to low)')),
-                                     ('disbursement_total', _('Total sent (low to high)')),
-                                     ('-disbursement_total', _('Total sent (high to low)')),
-                                     ('prisoner_name', _('Prisoner name (A to Z)')),
-                                     ('-prisoner_name', _('Prisoner name (Z to A)')),
-                                     ('prisoner_number', _('Prisoner number (A to Z)')),
-                                     ('-prisoner_number', _('Prisoner number (Z to A)')),
-                                 ])
+class PrisonersForm(BasePrisonersForm):
+    """
+    Legacy Search Form for Prisoners.
+
+    TODO: delete after search V2 goes live.
+    """
 
     sender_count__gte = forms.IntegerField(label=_('Number of senders (minimum)'), required=False, min_value=1)
     sender_count__lte = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)
@@ -229,12 +247,9 @@ class PrisonersForm(SecurityForm):
     prisoner_number = forms.CharField(label=_('Prisoner number'),
                                       validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
     prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
     prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
     prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
-
-    # search = forms.CharField(label=_('Prisoner name, prisoner number or sender name'), required=False)
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Below are prisoners who {filter_description}, ordered by {ordering_description}.'
@@ -278,9 +293,6 @@ class PrisonersForm(SecurityForm):
     }
     unlisted_description = 'You can only see prisoners who received or sent money.'
 
-    def get_object_list_endpoint_path(self):
-        return '/prisoners/'
-
     def clean_prisoner_number(self):
         prisoner_number = self.cleaned_data.get('prisoner_number')
         if prisoner_number:
@@ -299,6 +311,27 @@ class PrisonersForm(SecurityForm):
                 if value is not None:
                     query_data[field] = value * 100
         return query_data
+
+
+class PrisonersFormV2(BasePrisonersForm):
+    """
+    Search Form for Prisoners V2.
+    """
+    simple_search = forms.CharField(
+        label=_('Search prisoner number or name'),
+        required=False,
+        help_text=_('For example, name or “A1234BC”'),
+    )
+
+    # NB: ensure that these templates are HTML-safe
+    filtered_description_template = 'Results containing {filter_description}.'
+    unfiltered_description_template = ''
+
+    description_templates = (
+        ('prisoner number or name “{simple_search}”',),
+    )
+    description_capitalisation = {}
+    unlisted_description = ''
 
 
 class BaseCreditsForm(SecurityForm):
