@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block phase_banner %}
+  {{ block.super }}
+  {% include "security/forms/prison-switcher.html" %}
+{% endblock %}
+
+{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
+{% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
+
+{% block inner_content %}
+  <form id="filter-prisoners" class="mtp-security-search js-FormAnalytics" method="get">
+    <div class="grid-row">
+        <div class="column-two-thirds">
+          {% include 'security/forms/top-area-object-list.html' %}
+        </div>
+    </div>
+
+    {% if form.is_valid %}
+    <div class="mtp-results-list-wrapper">
+      {% tabbedpanel cookie_name='mtp-tab-prisoners-results' collapsable=False tab_label=_('View credits or disbursements') css_class='govuk-grey' %}
+
+        {% paneltab name='credits' title=_('Credits') %}
+          <div class="mtp-results-list-v2">
+            <div class="print-hidden mtp-links--no-panel">
+              <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+              &nbsp;
+              {% url 'security:prisoners_export' as export_view %}
+              {% url 'security:prisoners_email_export' as email_export_view %}
+              {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many prisoners to download.') %}
+            </div>
+
+            <table class="mtp-table table-font-xsmall">
+              <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+              <thead>
+                <tr>
+                  <th>{% trans 'Prisoner' %}</th>
+                  {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' cell_classes='numeric' %}
+                  {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' cell_classes='numeric' %}
+                  {% sortable_cell _('Amount of credits') form.cleaned_data 'credit_total' cell_classes='numeric' %}
+                  <th class="numeric print-hidden">{% trans 'Action' %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for prisoner in prisoners %}
+                  <tr>
+                    <td>
+                      {{ prisoner.prisoner_name|default:_('Unknown prisoner') }}
+                      <br/>
+                      {{ prisoner.prisoner_number }}
+                    </td>
+                    <td class="numeric">
+                      <span class="mtp-sortable-cell--pad">
+                      {{ prisoner.credit_count }}
+                      </span>
+                    </td>
+                    <td class="numeric">
+                      <span class="mtp-sortable-cell--pad">
+                      {{ prisoner.sender_count }}
+                      </span>
+                    </td>
+                    <td class="numeric">
+                      <span class="mtp-sortable-cell--pad">
+                        {{ prisoner.credit_total|currency }}
+                      </span>
+                    </td>
+                    <td class="numeric print-hidden">
+                      <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}">
+                        {% trans 'View details' %}
+                      </a>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="5">{% trans 'No matching prisoners found' %}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mtp-page-list__container">
+            {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+            <p class="mtp-page-list__count">
+              {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+                {{ number }} prisoner
+              {% plural %}
+                {{ number }} prisoners
+              {% endblocktrans %}
+            </p>
+          </div>
+        {% endpaneltab %}
+
+        {% paneltab name='disbursements' title=_('Disbursements') %}
+          <div class="mtp-results-list-v2">
+            <div class="print-hidden mtp-links--no-panel">
+              <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+              &nbsp;
+              {% url 'security:prisoners_export' as export_view %}
+              {% url 'security:prisoners_email_export' as email_export_view %}
+              {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many prisoners to download.') %}
+            </div>
+
+            <table class="mtp-table table-font-xsmall">
+              <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+              <thead>
+                <tr>
+                  <th>{% trans 'Prisoner' %}</th>
+                  {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='numeric' %}
+                  {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' cell_classes='numeric' %}
+                  {% sortable_cell _('Amount of disbursements	') form.cleaned_data 'disbursement_total' cell_classes='numeric' %}
+                  <th class="numeric print-hidden">{% trans 'Action' %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for prisoner in prisoners %}
+                  <tr>
+                    <td>
+                      {{ prisoner.prisoner_name|default:_('Unknown prisoner') }}
+                      <br/>
+                      {{ prisoner.prisoner_number }}
+                    </td>
+                    <td class="numeric">
+                      <span class="mtp-sortable-cell--pad">
+                      {{ prisoner.recipient_count }}
+                      </span>
+                    </td>
+                    <td class="numeric">
+                      <span class="mtp-sortable-cell--pad">
+                      {{ prisoner.disbursement_count }}
+                      </span>
+                    </td>
+                    <td class="numeric">
+                      <span class="mtp-sortable-cell--pad">
+                        {{ prisoner.disbursement_total|currency }}
+                      </span>
+                    </td>
+                    <td class="numeric print-hidden">
+                      <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}">
+                        {% trans 'View details' %}
+                      </a>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="5">{% trans 'No matching prisoners found' %}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mtp-page-list__container">
+            {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+            <p class="mtp-page-list__count">
+              {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+                {{ number }} prisoner
+              {% plural %}
+                {{ number }} prisoners
+              {% endblocktrans %}
+            </p>
+          </div>
+        {% endpaneltab %}
+      {% endtabbedpanel %}
+    </div>
+    {% endif %}
+
+  </form>
+
+{% endblock %}

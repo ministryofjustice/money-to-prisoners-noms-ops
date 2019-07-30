@@ -119,9 +119,18 @@ def sender_row_generator(object_list):
 
 def prisoner_row_generator(object_list):
     yield [
-        gettext('Prisoner number'), gettext('Prisoner name'), gettext('Date of birth'),
-        gettext('Credits received'), gettext('Total amount received'), gettext('Payment sources'),
-        gettext('Current prison'), gettext('Prisons where received credits'), gettext('Names given by senders'),
+        gettext('Prisoner number'),
+        gettext('Prisoner name'),
+        gettext('Date of birth'),
+        gettext('Credits received'),
+        gettext('Total amount received'),
+        gettext('Payment sources'),
+        gettext('Current prison'),
+        gettext('Prisons where received credits'),
+        gettext('Names given by senders'),
+        gettext('Disbursements sent'),
+        gettext('Total amount sent'),
+        gettext('Recipients'),
     ]
     for prisoner in object_list:
         if prisoner['current_prison']:
@@ -130,9 +139,18 @@ def prisoner_row_generator(object_list):
             current_prison = gettext('Not in a public prison')
         provided_names = NameSet(prisoner['provided_names'])
         yield [
-            prisoner['prisoner_number'], prisoner['prisoner_name'], prisoner['prisoner_dob'],
-            prisoner['credit_count'], currency(prisoner['credit_total']), prisoner['sender_count'],
-            current_prison, list_prison_names(prisoner['prisons']), ', '.join(provided_names),
+            prisoner['prisoner_number'],
+            prisoner['prisoner_name'],
+            prisoner['prisoner_dob'],
+            prisoner['credit_count'],
+            currency(prisoner['credit_total']),
+            prisoner['sender_count'],
+            current_prison,
+            list_prison_names(prisoner['prisons']),
+            ', '.join(provided_names),
+            prisoner['disbursement_count'],
+            currency(prisoner['disbursement_total']),
+            prisoner['recipient_count'],
         ]
 
 
