@@ -158,6 +158,8 @@ class SecurityView(FormView):
         if self.redirect_on_single and len(object_list) == 1 and hasattr(self, 'url_for_single_result'):
             return redirect(self.url_for_single_result(object_list[0]))
         context[self.object_list_context_key] = object_list
+        # add objects as an alias for generic logic
+        context['objects'] = object_list
         return render(self.request, self.get_template_names(), context)
 
     def form_invalid(self, form):

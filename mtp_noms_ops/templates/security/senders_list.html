@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    {% if form.is_valid %}
+    {% if form.is_valid and senders %}
       <div class="mtp-results-list-v2">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -122,10 +122,6 @@
                   </tr>
                 {% endif %}
               {% endwith %}
-            {% empty %}
-              <tr>
-                <td colspan="7">{% trans 'No matching payment sources found' %}</td>
-              </tr>
             {% endfor %}
           </tbody>
         </table>
