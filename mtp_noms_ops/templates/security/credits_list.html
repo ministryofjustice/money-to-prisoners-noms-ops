@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    {% if form.is_valid %}
+    {% if form.is_valid and credits %}
       <div class="mtp-results-list-v2">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -73,10 +73,6 @@
                     {% trans 'View details' %}
                   </a>
                 </td>
-              </tr>
-            {% empty %}
-              <tr>
-                <td colspan="5">{% trans 'No matching credits found' %}</td>
               </tr>
             {% endfor %}
           </tbody>

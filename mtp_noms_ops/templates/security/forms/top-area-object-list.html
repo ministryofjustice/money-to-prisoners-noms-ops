@@ -10,7 +10,11 @@
   {% include 'mtp_common/includes/message_box.html' %}
 
   <p class="mtp-search-description">
-  {{ form.search_description.description }}
+    {% if objects %}
+      {{ form.search_description.description }}
+    {% else %}
+      {% blocktrans with search_term=form.simple_search.value %}Your search for “<strong>{{ search_term }}</strong>” returned no results.{% endblocktrans %}
+    {% endif %}
   </p>
 {% else %}
   <header>

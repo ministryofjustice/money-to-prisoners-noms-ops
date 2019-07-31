@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    {% if form.is_valid %}
+    {% if form.is_valid and prisoners %}
     <div class="mtp-results-list-wrapper">
       {% tabbedpanel cookie_name='mtp-tab-prisoners-results' collapsable=False tab_label=_('View credits or disbursements') css_class='govuk-grey' %}
 
@@ -74,10 +74,6 @@
                         {% trans 'View details' %}
                       </a>
                     </td>
-                  </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="5">{% trans 'No matching prisoners found' %}</td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -146,10 +142,6 @@
                         {% trans 'View details' %}
                       </a>
                     </td>
-                  </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="5">{% trans 'No matching prisoners found' %}</td>
                   </tr>
                 {% endfor %}
               </tbody>
