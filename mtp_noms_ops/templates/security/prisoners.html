@@ -5,11 +5,6 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
-{% block phase_banner %}
-  {{ block.super }}
-  {% include "security/forms/prison-switcher.html" %}
-{% endblock %}
-
 {% block inner_content %}
 
   <header>

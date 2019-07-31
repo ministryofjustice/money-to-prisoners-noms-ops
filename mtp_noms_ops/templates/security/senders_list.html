@@ -67,14 +67,18 @@
                     <td>
                       {% if sender.bank_transfer_details %}
                         {{ sender.bank_transfer_details.0.sender_name|default:'—' }}
+                        <br/>
+                        {% trans 'Email not provided' %}
                       {% elif sender.debit_card_details %}
                         {{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}
                         {% comment %}TODO show when there are multiple cardholder names{% endcomment %}
+                        <br/>
 
                         {% if sender.debit_card_details.0.sender_emails %}
-                          <br/>
                           {{ sender.debit_card_details.0.sender_emails.0 }}
                           {% comment %}TODO show when there are multiple emails{% endcomment %}
+                        {% else %}
+                          {% trans 'Email not provided' %}
                         {% endif %}
 
                       {% else %}

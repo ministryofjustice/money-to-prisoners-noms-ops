@@ -58,10 +58,8 @@
 
                 <td>
                   {{ disbursement.recipient_first_name }} {{ disbursement.recipient_last_name }}
-                  {% if disbursement.recipient_email %}
-                    <br/>
-                    {{ disbursement.recipient_email }}
-                  {% endif %}
+                  <br/>
+                  {{ disbursement.recipient_email|default:_('Email not provided') }}
                 </td>
 
                 <td class="numeric">

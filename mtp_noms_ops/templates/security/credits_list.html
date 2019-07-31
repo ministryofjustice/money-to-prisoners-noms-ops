@@ -52,10 +52,8 @@
 
                 <td>
                   {{ credit.sender_name|default:_('Sender details not recorded') }}
-                  {% if credit.sender_email %}
-                    <br/>
-                    {{ credit.sender_email }}
-                  {% endif %}
+                  <br/>
+                  {{ credit.sender_email|default:_('Email not provided') }}
                 </td>
 
                 <td>
