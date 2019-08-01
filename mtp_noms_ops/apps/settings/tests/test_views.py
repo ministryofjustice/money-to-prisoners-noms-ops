@@ -9,7 +9,7 @@ import responses
 from security import (
     hmpps_employee_flag, confirmed_prisons_flag, required_permissions
 )
-from security.tests import api_url
+from security.tests.utils import api_url
 from security.tests.test_views import (
     SecurityBaseTestCase, sample_prison_list, sample_prisons
 )

@@ -3,17 +3,11 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
-from security.forms.object_list import (
-    SendersForm,
-    SendersFormV2,
-    PrisonersForm,
-    PrisonersFormV2,
-    CreditsForm,
-    CreditsFormV2,
-    DisbursementsForm,
-    DisbursementsFormV2,
-    NotificationsForm,
-)
+from security.forms.credits import CreditsForm, CreditsFormV2
+from security.forms.disbursements import DisbursementsForm, DisbursementsFormV2
+from security.forms.notifications import NotificationsForm
+from security.forms.prisoners import PrisonersForm, PrisonersFormV2
+from security.forms.senders import SendersForm, SendersFormV2
 from security.views.object_base import SecurityView
 
 

@@ -22,7 +22,7 @@ from security import (
     confirmed_prisons_flag, notifications_pilot_flag, SEARCH_V2_FLAG,
 )
 from security.models import EmailNotifications
-from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
+from security.tests.utils import api_url, nomis_url, TEST_IMAGE_DATA
 from security.views.object_base import SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME
 
 
@@ -495,7 +495,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         return []
 
     @responses.activate
-    @mock.patch('security.forms.object_base.SecurityForm.get_object_list')
+    @mock.patch('security.forms.base.SecurityForm.get_object_list')
     def test_can_access_security_view(self, mocked_form_method):
         mocked_form_method.return_value = []
         if not self.view_name:
