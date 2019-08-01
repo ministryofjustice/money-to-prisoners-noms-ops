@@ -7,11 +7,15 @@ from mtp_common.auth import USER_DATA_SESSION_KEY
 import responses
 
 from security import (
-    hmpps_employee_flag, confirmed_prisons_flag, required_permissions
+    confirmed_prisons_flag,
+    hmpps_employee_flag,
+    required_permissions,
 )
 from security.tests.utils import api_url
-from security.tests.test_views import (
-    SecurityBaseTestCase, sample_prison_list, sample_prisons
+from security.tests.views.test_base import (
+    sample_prison_list,
+    sample_prisons,
+    SecurityBaseTestCase,
 )
 
 
