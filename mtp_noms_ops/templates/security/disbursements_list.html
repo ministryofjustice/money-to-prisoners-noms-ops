@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    {% if form.is_valid and disbursements %}
+    {% if form.is_valid and disbursements %}{% setup_highlight %}
       <div class="mtp-results-list-v2">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -53,11 +53,11 @@
                 <td>
                   {{ disbursement.prisoner_name|default:_('Unknown prisoner') }}
                   <br/>
-                  {{ disbursement.prisoner_number }}
+                  {% search_highlight disbursement.prisoner_number %}
                 </td>
 
                 <td>
-                  {{ disbursement.recipient_first_name }} {{ disbursement.recipient_last_name }}
+                  {% search_highlight disbursement.recipient_first_name %} {% search_highlight  disbursement.recipient_last_name %}
                   <br/>
                   {{ disbursement.recipient_email|default:_('Email not provided') }}
                 </td>

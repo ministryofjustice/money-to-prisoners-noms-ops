@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    {% if form.is_valid and senders %}
+    {% if form.is_valid and senders %}{% setup_highlight %}
       <div class="mtp-results-list-v2">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -66,16 +66,16 @@
                   <tr>
                     <td>
                       {% if sender.bank_transfer_details %}
-                        {{ sender.bank_transfer_details.0.sender_name|default:'—' }}
+                        {% search_highlight sender.bank_transfer_details.0.sender_name default='—' %}
                         <br/>
                         {% trans 'Email not provided' %}
                       {% elif sender.debit_card_details %}
-                        {{ sender.debit_card_details.0.cardholder_names.0|default:'—' }}
+                        {% search_highlight sender.debit_card_details.0.cardholder_names.0 default='—' %}
                         {% comment %}TODO show when there are multiple cardholder names{% endcomment %}
                         <br/>
 
                         {% if sender.debit_card_details.0.sender_emails %}
-                          {{ sender.debit_card_details.0.sender_emails.0 }}
+                          {% search_highlight sender.debit_card_details.0.sender_emails.0 %}
                           {% comment %}TODO show when there are multiple emails{% endcomment %}
                         {% else %}
                           {% trans 'Email not provided' %}

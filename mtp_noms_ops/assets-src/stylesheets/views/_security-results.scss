@@ -140,3 +140,18 @@
 .mtp-results-list-wrapper {
   margin-top: 50px;
 }
+
+.mtp-search-highlight {
+  border-bottom: 3px solid #ffbf47;
+  margin-right: 1px;
+  background-color: #fff2d3;
+  padding: 2px 0px 0px;
+
+  // reset with print as IE8 doesn't support @media not print for the rule above
+  @media print {
+    border-bottom: 0;
+    margin-right: 0;
+    background-color: transparent;
+    padding: 0;
+  }
+}
