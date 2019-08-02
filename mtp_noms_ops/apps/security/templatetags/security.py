@@ -1,3 +1,4 @@
+import re
 import logging
 
 from django import template
@@ -192,3 +193,65 @@ def find_rejection_reason(comment_set):
     for comment in filter(lambda comment: comment['category'] == 'reject', comment_set):
         return comment['comment']
     return ''
+
+
+def _build_search_terms_re(context):
+    """
+    Constructs the compiled regex pattern from the search term in the context.
+    It returns None if not on the search results page, if the form is not in the context or the
+    search term can't be found.
+    The search term is automatically obtained from the simple_form field of the form in the context.
+    """
+    in_search_results = context.get('is_search_results', False)
+    if not in_search_results:
+        return None
+
+    form = context.get('form')
+    if not form:
+        return None
+
+    search_term = form.cleaned_data.get('simple_search')
+
+    if not search_term:
+        return None
+
+    search_terms = search_term.split()
+    return re.compile(f'({"|".join(search_terms)})', re.I)
+
+
+def _get_cached_search_terms_re(context):
+    """
+    Returns the cached seach_terms_re to be used.
+    """
+    if '_search_terms_re' not in context:
+        context['_search_terms_re'] = _build_search_terms_re(context)
+    return context['_search_terms_re']
+
+
+@register.simple_tag(takes_context=True)
+def setup_highlight(context):
+    """
+    Template tag that can be used to optimise the highlight logic by caching the compiled reex pattern.
+    """
+    # warm up cache
+    _ = _get_cached_search_terms_re(context)
+    return ''
+
+
+@register.simple_tag(takes_context=True)
+def search_highlight(context, value, default=''):
+    """
+    Wraps all search term words contained in 'value' with a span with class 'mtp-search-highlight'.
+    The search term is automatically obtained from the simple_form field of the form in the context.
+    It only works on the search results page.
+    It returns 'default' if 'value' is emnpty.
+    """
+    if not value:
+        return default
+
+    search_terms_re = _get_cached_search_terms_re(context)
+    if search_terms_re:
+        return mark_safe(
+            search_terms_re.sub(r'<span class="mtp-search-highlight">\1</span>', value),
+        )
+    return value

@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    {% if form.is_valid and credits %}
+    {% if form.is_valid and credits %}{% setup_highlight %}
       <div class="mtp-results-list-v2">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -51,15 +51,15 @@
                 </td>
 
                 <td>
-                  {{ credit.sender_name|default:_('Sender details not recorded') }}
+                  {% search_highlight credit.sender_name default=_('Sender details not recorded') %}
                   <br/>
-                  {{ credit.sender_email|default:_('Email not provided') }}
+                  {% search_highlight credit.sender_email default=_('Email not provided') %}
                 </td>
 
                 <td>
                   {{ credit.prisoner_name|default:_('Unknown prisoner') }}
                   <br/>
-                  {{ credit.prisoner_number }}
+                  {% search_highlight credit.prisoner_number %}
                 </td>
 
                 <td class="numeric">

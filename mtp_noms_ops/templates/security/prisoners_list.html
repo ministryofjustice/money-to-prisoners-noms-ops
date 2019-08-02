@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    {% if form.is_valid and prisoners %}
+    {% if form.is_valid and prisoners %}{% setup_highlight %}
     <div class="mtp-results-list-wrapper">
       {% tabbedpanel cookie_name='mtp-tab-prisoners-results' collapsable=False tab_label=_('View credits or disbursements') css_class='govuk-grey' %}
 
@@ -50,9 +50,9 @@
                 {% for prisoner in prisoners %}
                   <tr>
                     <td>
-                      {{ prisoner.prisoner_name|default:_('Unknown prisoner') }}
+                      {% search_highlight prisoner.prisoner_name default=_('Unknown prisoner') %}
                       <br/>
-                      {{ prisoner.prisoner_number }}
+                      {% search_highlight prisoner.prisoner_number %}
                     </td>
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">
@@ -118,9 +118,9 @@
                 {% for prisoner in prisoners %}
                   <tr>
                     <td>
-                      {{ prisoner.prisoner_name|default:_('Unknown prisoner') }}
+                      {% search_highlight prisoner.prisoner_name default=_('Unknown prisoner') %}
                       <br/>
-                      {{ prisoner.prisoner_number }}
+                      {% search_highlight prisoner.prisoner_number %}
                     </td>
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">

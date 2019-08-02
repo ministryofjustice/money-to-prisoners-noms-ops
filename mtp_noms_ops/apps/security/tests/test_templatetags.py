@@ -1,6 +1,12 @@
+from unittest import mock
+
 from django.test import SimpleTestCase
 
-from security.templatetags.security import get_split_prison_names
+from security.templatetags.security import (
+    get_split_prison_names,
+    search_highlight,
+    setup_highlight,
+)
 
 
 class TestGetSplitPrisonNames(SimpleTestCase):
@@ -51,3 +57,155 @@ class TestGetSplitPrisonNames(SimpleTestCase):
             'total_remaining': 1,
         }
         self.assertEqual(actual_data, expected_data)
+
+
+class TestSearchHighlight(SimpleTestCase):
+    """
+    Tests for the search_highlight template tag.
+    """
+
+    def test_returns_default_with_empty_value(self):
+        """
+        Test that the default value is returned if value is empty.
+        """
+        # default 'default'
+        for value in (None, ''):
+            self.assertEqual(
+                search_highlight({}, value),
+                '',
+            )
+
+        # given default
+        for value in (None, ''):
+            self.assertEqual(
+                search_highlight({}, value, default='replacement'),
+                'replacement',
+            )
+
+    def test_replace(self):
+        """
+        Test that the matching portion of value is replaced by a span.
+        """
+        context = {
+            'is_search_results': True,
+            'form': mock.Mock(
+                cleaned_data={
+                    'simple_search': 'term1 term2',
+                },
+            ),
+        }
+
+        scenarios = (
+            # simple case
+            (
+                'prefixterm1suffix',
+                'prefix<span class="mtp-search-highlight">term1</span>suffix',
+            ),
+            # uppercase
+            (
+                'prefixTERM2suffix',
+                'prefix<span class="mtp-search-highlight">TERM2</span>suffix',
+            ),
+            # multiple terms multiple times
+            (
+                'aterm2 bterm1 cterm2',
+                (
+                    'a<span class="mtp-search-highlight">term2</span> '
+                    'b<span class="mtp-search-highlight">term1</span> '
+                    'c<span class="mtp-search-highlight">term2</span>'
+                )
+            ),
+            # non-match
+            (
+                'prefixtern1suffix',
+                'prefixtern1suffix',
+            ),
+        )
+
+        for value, expected_result in scenarios:
+            self.assertEqual(
+                search_highlight(context, value),
+                expected_result,
+            )
+
+    def test_does_not_replace_if_not_on_search_results_page(self):
+        """
+        Test that if `is_search_results` can't be found in context, the template tag doesn't do anything.
+        """
+        context = {
+            'form': mock.Mock(
+                cleaned_data={
+                    'simple_search': 'term',
+                },
+            ),
+        }
+        self.assertEqual(
+            search_highlight(context, 'term'),
+            'term',
+        )
+
+    def test_does_not_replace_if_form_not_in_context(self):
+        """
+        Test that if `form` can't be found in context, the template tag doesn't do anything.
+        """
+        context = {
+            'is_search_results': True,
+        }
+        self.assertEqual(
+            search_highlight(context, 'term'),
+            'term',
+        )
+
+    def test_does_not_replace_if_search_term_is_empty(self):
+        """
+        Test that if the search term is empty, the template tag doesn't do anything.
+        """
+        context = {
+            'is_search_results': True,
+            'form': mock.Mock(
+                cleaned_data={
+                    'simple_search': '',
+                },
+            ),
+        }
+        self.assertEqual(
+            search_highlight(context, 'term'),
+            'term',
+        )
+
+    def test_does_not_replace_if_search_term_not_in_context(self):
+        """
+        Test that if the search term doesn't exist in context, the template tag doesn't do anything.
+        """
+        context = {
+            'is_search_results': True,
+            'form': mock.Mock(
+                cleaned_data={},
+            ),
+        }
+        self.assertEqual(
+            search_highlight(context, 'term'),
+            'term',
+        )
+
+
+class TestSetupHighlight(SimpleTestCase):
+    """
+    Tests for the setup_highlight template tag.
+    """
+
+    def test_caches_regex(self):
+        """
+        Test that the compiled re is cached so that can be used in subsequent highlight calls.
+        """
+        context = {
+            'is_search_results': True,
+            'form': mock.Mock(
+                cleaned_data={
+                    'simple_search': 'term',
+                },
+            ),
+        }
+        setup_highlight(context)
+
+        assert '_search_terms_re' in context
