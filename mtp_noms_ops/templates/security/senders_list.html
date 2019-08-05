@@ -70,15 +70,31 @@
                         <br/>
                         {% trans 'Email not provided' %}
                       {% elif sender.debit_card_details %}
-                        {% search_highlight sender.debit_card_details.0.cardholder_names.0 default='—' %}
-                        {% comment %}TODO show when there are multiple cardholder names{% endcomment %}
+
+                        {% extract_best_match sender.debit_card_details.0.cardholder_names as match %}
+                        {% search_highlight match.item default='-' %}
+
+                        {% if match.total_remaining %}
+                          <br/>
+                          {% blocktrans trimmed count total_remaining=match.total_remaining %}
+                            and {{ total_remaining }} more name
+                          {% plural %}
+                            and {{ total_remaining }} more names
+                          {% endblocktrans %}
+                        {% endif %}
+
                         <br/>
 
-                        {% if sender.debit_card_details.0.sender_emails %}
-                          {% search_highlight sender.debit_card_details.0.sender_emails.0 %}
-                          {% comment %}TODO show when there are multiple emails{% endcomment %}
-                        {% else %}
-                          {% trans 'Email not provided' %}
+                        {% extract_best_match sender.debit_card_details.0.sender_emails as match %}
+                        {% search_highlight match.item default=_('Email not provided') %}
+
+                        {% if match.total_remaining %}
+                          <br/>
+                          {% blocktrans trimmed count total_remaining=match.total_remaining %}
+                            and {{ total_remaining }} more email address
+                          {% plural %}
+                            and {{ total_remaining }} more email addresses
+                          {% endblocktrans %}
                         {% endif %}
 
                       {% else %}

@@ -3,6 +3,7 @@ from unittest import mock
 from django.test import SimpleTestCase
 
 from security.templatetags.security import (
+    extract_best_match,
     get_split_prison_names,
     search_highlight,
     setup_highlight,
@@ -209,3 +210,96 @@ class TestSetupHighlight(SimpleTestCase):
         setup_highlight(context)
 
         assert '_search_terms_re' in context
+
+
+class TestExtractBestMatch(SimpleTestCase):
+    """
+    Tests for the extract_best_match template tag.
+    """
+    def test_match(self):
+        """
+        Test that the template tag returns the first item in the list that matches one of the words
+        in the search term.
+        """
+        context = {
+            'is_search_results': True,
+            'form': mock.Mock(
+                cleaned_data={
+                    'simple_search': 'tem1 term2',
+                },
+            ),
+        }
+        self.assertDictEqual(
+            extract_best_match(context, ['first', 'second with term2', 'term1']),
+            {
+                'item': 'second with term2',
+                'total_remaining': 2,
+            },
+        )
+
+    def test_no_match(self):
+        """
+        Test that the template tag returns the first item in the list if none of them matches
+        the search term.
+        """
+        context = {
+            'is_search_results': True,
+            'form': mock.Mock(
+                cleaned_data={
+                    'simple_search': 'tem1 term2',
+                },
+            ),
+        }
+        self.assertDictEqual(
+            extract_best_match(context, ['first']),
+            {
+                'item': 'first',
+                'total_remaining': 0,
+            },
+        )
+
+    def test_with_falsy_value(self):
+        """
+        Test that if the input value is falsy the template tag returns (None, 0).
+        """
+        for value in (None, []):
+            self.assertDictEqual(
+                extract_best_match({}, value),
+                {
+                    'item': None,
+                    'total_remaining': 0,
+                },
+            )
+
+    def test_when_not_on_search_results_page(self):
+        """
+        Test that if `is_search_results` can't be found in context, the template tag returns
+        the first item as best match.
+        """
+        self.assertDictEqual(
+            extract_best_match({}, ['first', 'second']),
+            {
+                'item': 'first',
+                'total_remaining': 1,
+            },
+        )
+
+    def test_when_search_term_is_empty(self):
+        """
+        Test that if the search term is empty, the template tag returns the first item as best match.
+        """
+        context = {
+            'is_search_results': True,
+            'form': mock.Mock(
+                cleaned_data={
+                    'simple_search': '',
+                },
+            ),
+        }
+        self.assertDictEqual(
+            extract_best_match(context, ['first', 'second']),
+            {
+                'item': 'first',
+                'total_remaining': 1,
+            },
+        )

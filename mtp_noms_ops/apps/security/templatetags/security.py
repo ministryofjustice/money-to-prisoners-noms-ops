@@ -255,3 +255,37 @@ def search_highlight(context, value, default=''):
             search_terms_re.sub(r'<span class="mtp-search-highlight">\1</span>', value),
         )
     return value
+
+
+@register.simple_tag(takes_context=True)
+def extract_best_match(context, items):
+    """
+    Takes a list and returns a dict with:
+    - 'item': best item in the list that matches the search term
+    - 'total_remaining': total number of other items in the list
+
+    The best match equals a random item in the list if the user is not not on the
+    search results page or if there's no match in the list.
+    """
+    item_list = items or []
+    best_match = None
+
+    search_terms_re = _get_cached_search_terms_re(context)
+
+    if search_terms_re:
+        best_match = next(
+            (
+                item
+                for item in item_list
+                if search_terms_re.search(item)
+            ),
+            None,
+        )
+
+    if not best_match and item_list:
+        best_match = item_list[0]
+
+    return {
+        'item': best_match,
+        'total_remaining': max(len(item_list)-1, 0),
+    }
