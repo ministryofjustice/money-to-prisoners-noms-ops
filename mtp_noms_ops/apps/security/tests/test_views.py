@@ -716,6 +716,13 @@ class ExportSecurityViewTestCaseMixin:
             *self.export_expected_xls_rows,
         ]
 
+        # get realistic referer
+        qs = f'ordering={self.search_ordering}'
+        response = self.client.get('/')
+        referer_url = response.wsgi_request.build_absolute_uri(
+            f'{reverse(self.view_name)}?{qs}',
+        )
+
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             sample_prison_list(rsps=rsps)
@@ -727,8 +734,11 @@ class ExportSecurityViewTestCaseMixin:
                     'results': self.get_api_object_list_response_data(),
                 }
             )
-            response = self.client.get(f'{reverse(self.export_email_view_name)}?ordering={self.search_ordering}')
-            self.assertRedirects(response, f'{reverse(self.view_name)}?ordering={self.search_ordering}')
+            response = self.client.get(
+                f'{reverse(self.export_email_view_name)}?{qs}',
+                HTTP_REFERER=referer_url,
+            )
+            self.assertRedirects(response, referer_url)
             self.assertSpreadsheetEqual(
                 mail.outbox[0].attachments[0][1],
                 expected_spreadsheet_content,
@@ -786,8 +796,18 @@ class ExportSecurityViewTestCaseMixin:
                 },
             )
 
-            response = self.client.get(f'{reverse(self.export_email_view_name)}?ordering={self.search_ordering}')
-            self.assertRedirects(response, f'{reverse(self.view_name)}?ordering={self.search_ordering}')
+            # get realistic referer
+            qs = f'ordering={self.search_ordering}'
+            response = self.client.get('/')
+            referer_url = response.wsgi_request.build_absolute_uri(
+                f'{reverse(self.view_name)}?{qs}',
+            )
+
+            response = self.client.get(
+                f'{reverse(self.export_email_view_name)}?{qs}',
+                HTTP_REFERER=referer_url,
+            )
+            self.assertRedirects(response, referer_url)
             self.assertSpreadsheetEqual(
                 mail.outbox[0].attachments[0][1],
                 expected_spreadsheet_content,
@@ -799,11 +819,21 @@ class ExportSecurityViewTestCaseMixin:
         Test that in case of invalid form, the export view redirects to the list page without
         taking any action.
         """
+        # get realistic referer
+        qs = f'ordering=invalid'
+        response = self.client.get('/')
+        referer_url = response.wsgi_request.build_absolute_uri(
+            f'{reverse(self.view_name)}?{qs}',
+        )
+
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             sample_prison_list(rsps=rsps)
-            response = self.client.get(f'{reverse(self.export_email_view_name)}?ordering=invalid')
-            self.assertRedirects(response, f'{reverse(self.view_name)}?ordering=invalid')
+            response = self.client.get(
+                f'{reverse(self.export_email_view_name)}?{qs}',
+                HTTP_REFERER=referer_url,
+            )
+            self.assertRedirects(response, referer_url)
 
 
 class SenderViewsTestCase(SecurityViewTestCase):

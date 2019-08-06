@@ -1,4 +1,5 @@
 from enum import Enum
+from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import messages
@@ -8,6 +9,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.dateformat import format as date_format
 from django.utils.functional import cached_property
+from django.utils.http import is_safe_url
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from mtp_common.analytics import genericised_pageview
@@ -91,7 +93,6 @@ class SecurityView(FormView):
     form_template_name = NotImplemented  # TODO: delete after search V2 goes live.
     object_list_context_key = NotImplemented
     view_type = None
-    referral_view = None
     search_results_view = None
     simple_search_view = None
     export_download_limit = settings.MAX_CREDITS_TO_DOWNLOAD
@@ -140,7 +141,7 @@ class SecurityView(FormView):
                     self.request,
                     _('The spreadsheet will be emailed to you at %(email)s') % {'email': self.request.user.email}
                 )
-                return self.redirect_to_referral_view(form)
+                return self.redirect_to_referral_url()
             return ObjectListXlsxResponse(form.get_complete_object_list(),
                                           object_type=self.object_list_context_key,
                                           attachment_name=attachment_name)
@@ -168,7 +169,8 @@ class SecurityView(FormView):
         it redirects back to the referral view so that the user can see and correct the errors.
         """
         if self.is_export_view_type() or self.view_type == ViewType.search_results:
-            return self.redirect_to_referral_view(form)
+            return self.redirect_to_referral_url()
+
         return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
@@ -195,12 +197,21 @@ class SecurityView(FormView):
             'is_search_results': self.view_type == ViewType.search_results,
         }
 
-    def redirect_to_referral_view(self, form):
+    def redirect_to_referral_url(self):
         """
-        Returns an HttpResponseRedirect to the referral_view preserving the same kwargs and query string.
+        Returns an HttpResponseRedirect to the referer preserving the same kwargs and query string.
         """
-        view = reverse(self.referral_view, kwargs=self.kwargs)
-        return redirect(f'{view}?{self.request.GET.urlencode()}')
+        referer = self.request.META.get('HTTP_REFERER')
+        if referer:
+            referer = unquote(referer)  # HTTP_REFERER may be encoded.
+
+        if not is_safe_url(
+            url=referer,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            referer = '/'
+        return redirect(referer)
 
     def get_export_description(self, form):
         return str(form.search_description['description'])
