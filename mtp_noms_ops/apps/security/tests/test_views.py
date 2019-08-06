@@ -625,7 +625,7 @@ class SimpleSearchV2SecurityTestCaseMixin:
                     'results': [],
                 },
             )
-            query_string = f'ordering={self.search_ordering}&simple_search=test'
+            query_string = f'ordering={self.search_ordering}&advanced=False&simple_search=test'
             request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
             response = self.client.get(request_url)

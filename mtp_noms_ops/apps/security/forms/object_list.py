@@ -22,6 +22,22 @@ from security.utils import (
 )
 
 
+class SearchFormV2Mixin(forms.Form):
+    """
+    Mixin for SearchForm V2.
+    """
+    # indicates whether the form was used in advanced search
+    advanced = forms.BooleanField(initial=False, required=False)
+
+    def get_api_request_params(self):
+        """
+        Removes `advanced` from the API call as it's not a valid filter.
+        """
+        api_params = super().get_api_request_params()
+        api_params.pop('advanced', None)
+        return api_params
+
+
 class BaseSendersForm(SecurityForm):
     """
     Senders Form Base Class.
@@ -158,7 +174,7 @@ class SendersForm(BaseSendersForm):
         return query_data
 
 
-class SendersFormV2(BaseSendersForm):
+class SendersFormV2(SearchFormV2Mixin, BaseSendersForm):
     """
     Search Form for Senders V2.
     """
@@ -310,7 +326,7 @@ class PrisonersForm(BasePrisonersForm):
         return query_data
 
 
-class PrisonersFormV2(BasePrisonersForm):
+class PrisonersFormV2(SearchFormV2Mixin, BasePrisonersForm):
     """
     Search Form for Prisoners V2.
     """
@@ -509,7 +525,7 @@ class CreditsForm(BaseCreditsForm):
         return str(description).lower() if description else None
 
 
-class CreditsFormV2(BaseCreditsForm):
+class CreditsFormV2(SearchFormV2Mixin, BaseCreditsForm):
     """
     Search Form for Credits V2.
     """
@@ -699,7 +715,7 @@ class DisbursementsForm(BaseDisbursementsForm):
         return str(description).lower() if description else None
 
 
-class DisbursementsFormV2(BaseDisbursementsForm):
+class DisbursementsFormV2(SearchFormV2Mixin, BaseDisbursementsForm):
     """
     Search Form for Disbursements V2.
     """
