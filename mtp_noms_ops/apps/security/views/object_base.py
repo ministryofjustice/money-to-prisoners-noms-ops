@@ -19,7 +19,7 @@ from security.export import ObjectListXlsxResponse
 from security.tasks import email_export_xlsx
 
 
-SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME = 'form_submitted'
+SEARCH_FORM_SUBMITTED_INPUT_NAME = 'form_submitted'
 
 
 class ViewType(Enum):
@@ -147,7 +147,7 @@ class SecurityView(FormView):
 
         if (
             self.view_type == ViewType.simple_search_form
-            and SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME in self.request.GET
+            and SEARCH_FORM_SUBMITTED_INPUT_NAME in self.request.GET
             and self.search_results_view
         ):
             search_results_url = f'{reverse(self.search_results_view)}?{form.query_string}'
@@ -191,7 +191,7 @@ class SecurityView(FormView):
 
             'breadcrumbs': breadcrumbs,
             'google_analytics_pageview': genericised_pageview(self.request, self.get_generic_title()),
-            'simple_search_form_submitted_input_name': SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME,
+            'search_form_submitted_input_name': SEARCH_FORM_SUBMITTED_INPUT_NAME,
             'is_search_results': self.view_type == ViewType.search_results,
         }
 

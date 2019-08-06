@@ -27,7 +27,7 @@
 
   <div class="print-hidden">
     <div class="mtp-security-form--simple">
-    <input type="hidden" name="{{ simple_search_form_submitted_input_name }}" value="1" />
+    <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
     {{ form.ordering.as_hidden }}
 
     {% for prison in request.user_prisons %}

@@ -23,7 +23,7 @@ from security import (
 )
 from security.models import EmailNotifications
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
-from security.views.object_base import SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME
+from security.views.object_base import SEARCH_FORM_SUBMITTED_INPUT_NAME
 
 
 override_nomis_settings = override_settings(
@@ -612,7 +612,7 @@ class SimpleSearchV2SecurityTestCaseMixin:
         """
         Test that submitting the form redirects to the results page when the form is valid.
         The action of submitting the form is represented by the query param
-        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
+        SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
@@ -626,7 +626,7 @@ class SimpleSearchV2SecurityTestCaseMixin:
                 },
             )
             query_string = f'ordering={self.search_ordering}&simple_search=test'
-            request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+            request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
             response = self.client.get(request_url)
             self.assertRedirects(
@@ -638,13 +638,13 @@ class SimpleSearchV2SecurityTestCaseMixin:
         """
         Test that submitting the form doesn't redirect to the results page when the form is invalid.
         The action of submitting the form is represented by the query param
-        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        SEARCH_FORM_SUBMITTED_INPUT_NAME.
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             sample_prison_list(rsps=rsps)
             query_string = 'ordering=invalid&simple_search=test'
-            request_url = f'{reverse(self.view_name)}?{query_string}&{SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+            request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             response = self.client.get(request_url)
             self.assertEqual(response.status_code, 200)
 
@@ -652,7 +652,7 @@ class SimpleSearchV2SecurityTestCaseMixin:
         """
         Test that going back to the simple search form doesn't redirect to the results page.
         The action of NOT submitting the form explicitly is represented by the absence of query param
-        SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        SEARCH_FORM_SUBMITTED_INPUT_NAME.
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
