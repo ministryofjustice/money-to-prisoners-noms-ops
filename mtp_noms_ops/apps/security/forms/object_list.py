@@ -1,6 +1,5 @@
 import datetime
 from math import ceil
-import re
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -16,7 +15,11 @@ from security.forms.object_base import (
     get_credit_source_choices, get_disbursement_method_choices,
 )
 from security.templatetags.security import currency as format_currency
-from security.utils import convert_date_fields, sender_profile_name
+from security.utils import (
+    convert_date_fields,
+    remove_whitespaces_and_hyphens,
+    sender_profile_name,
+)
 
 
 class BaseSendersForm(SecurityForm):
@@ -125,10 +128,7 @@ class SendersForm(BaseSendersForm):
     def clean_sender_sort_code(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
             return ''
-        sender_sort_code = self.cleaned_data.get('sender_sort_code')
-        if sender_sort_code:
-            sender_sort_code = sender_sort_code.replace('-', '')
-        return sender_sort_code
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_sort_code'))
 
     def clean_sender_account_number(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
@@ -146,10 +146,7 @@ class SendersForm(BaseSendersForm):
         return self.cleaned_data.get('card_number_last_digits')
 
     def clean_sender_postcode(self):
-        sender_postcode = self.cleaned_data.get('sender_postcode')
-        if sender_postcode:
-            sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
-        return sender_postcode
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_postcode'))
 
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
@@ -471,10 +468,7 @@ class CreditsForm(BaseCreditsForm):
     def clean_sender_sort_code(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
             return ''
-        sender_sort_code = self.cleaned_data.get('sender_sort_code')
-        if sender_sort_code:
-            sender_sort_code = sender_sort_code.replace('-', '')
-        return sender_sort_code
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_sort_code'))
 
     def clean_sender_account_number(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
@@ -492,10 +486,7 @@ class CreditsForm(BaseCreditsForm):
         return self.cleaned_data.get('card_number_last_digits')
 
     def clean_sender_postcode(self):
-        sender_postcode = self.cleaned_data.get('sender_postcode')
-        if sender_postcode:
-            sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
-        return sender_postcode
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_postcode'))
 
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
@@ -675,10 +666,7 @@ class DisbursementsForm(BaseDisbursementsForm):
     def clean_sort_code(self):
         if self.cleaned_data.get('method') != 'bank_transfer':
             return ''
-        sort_code = self.cleaned_data.get('sort_code')
-        if sort_code:
-            sort_code = sort_code.replace('-', '')
-        return sort_code
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sort_code'))
 
     def clean_account_number(self):
         if self.cleaned_data.get('method') != 'bank_transfer':

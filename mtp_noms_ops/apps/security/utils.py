@@ -172,3 +172,12 @@ def is_nomis_api_configured():
         settings.NOMIS_API_CLIENT_TOKEN and
         settings.NOMIS_API_PRIVATE_KEY
     )
+
+
+def remove_whitespaces_and_hyphens(value):
+    """
+    Returns value without whitespaces or -
+    """
+    if not value:
+        return value
+    return re.sub(r'[\s-]+', '', value)
