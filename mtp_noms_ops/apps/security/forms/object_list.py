@@ -29,6 +29,9 @@ class SearchFormV2Mixin(forms.Form):
     # indicates whether the form was used in advanced search
     advanced = forms.BooleanField(initial=False, required=False)
 
+    def was_advanced_search_used(self):
+        return self.cleaned_data.get('advanced', False)
+
     def get_api_request_params(self):
         """
         Removes `advanced` from the API call as it's not a valid filter.
@@ -183,6 +186,12 @@ class SendersFormV2(SearchFormV2Mixin, BaseSendersForm):
         required=False,
         help_text=_('Common or incomplete names may show many results'),
     )
+    sender_name = forms.CharField(label=_('Name'), required=False)
+    sender_email = forms.CharField(label=_('Email'), required=False)
+    sender_postcode = forms.CharField(label=_('Postcode'), required=False)
+    card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
+    sender_account_number = forms.CharField(label=_('Account number'), required=False)
+    sender_sort_code = forms.CharField(label=_('Sort code'), required=False)
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Results containing {filter_description}.'
@@ -193,6 +202,12 @@ class SendersFormV2(SearchFormV2Mixin, BaseSendersForm):
     )
     description_capitalisation = {}
     unlisted_description = ''
+
+    def clean_sender_postcode(self):
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_postcode'))
+
+    def clean_sender_sort_code(self):
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_sort_code'))
 
 
 class BasePrisonersForm(SecurityForm):

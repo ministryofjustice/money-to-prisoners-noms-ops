@@ -297,6 +297,12 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'prison': [],
                 'advanced': False,
                 'simple_search': '',
+                'sender_name': '',
+                'sender_email': '',
+                'sender_postcode': '',
+                'card_number_last_digits': '',
+                'sender_account_number': '',
+                'sender_sort_code': '',
             },
         )
         self.assertDictEqual(
@@ -311,7 +317,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             'ordering=-prisoner_count&advanced=False',
         )
 
-    def test_valid(self):
+    def test_valid_simple_search(self):
         """
         Test that if data is passed in, the API query string is constructed as expected.
         """
@@ -342,11 +348,17 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             form.cleaned_data,
             {
                 'advanced': False,
+                'card_number_last_digits': '',
                 'page': 2,
                 'ordering': '-credit_total',
                 'prison': [
                     prisons[0]['nomis_id'],
                 ],
+                'sender_account_number': '',
+                'sender_email': '',
+                'sender_name': '',
+                'sender_postcode': '',
+                'sender_sort_code': '',
                 'simple_search': 'Joh',
             },
         )
@@ -360,6 +372,85 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                     prisons[0]['nomis_id'],
                 ],
                 'simple_search': 'Joh',
+            },
+        )
+
+    def test_valid_advanced_search(self):
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
+
+            form = self.form_class(
+                self.request,
+                data={
+                    'page': 2,
+                    'ordering': '-credit_total',
+                    'prison': [
+                        prisons[0]['nomis_id'],
+                    ],
+                    'advanced': True,
+                    'sender_name': 'John Doe',
+                    'sender_email': 'johndoe',
+                    'sender_postcode': 'SW1A 1a-a',
+                    'card_number_last_digits': '1234',
+                    'sender_account_number': '123456789',
+                    'sender_sort_code': '11-22 - 33',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+
+            api_call_made = rsps.calls[-1].request.url
+            self.assertDictEqual(
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['20'],
+                    'limit': ['20'],
+                    'ordering': ['-credit_total'],
+                    'prison': ['IXB'],
+                    'sender_name': ['John Doe'],
+                    'sender_email': ['johndoe'],
+                    'sender_postcode': ['SW1A1aa'],
+                    'card_number_last_digits': ['1234'],
+                    'sender_account_number': ['123456789'],
+                    'sender_sort_code': ['112233'],
+                },
+            )
+
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'simple_search': '',
+                'advanced': True,
+                'page': 2,
+                'ordering': '-credit_total',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'sender_name': 'John Doe',
+                'sender_email': 'johndoe',
+                'sender_postcode': 'SW1A1aa',
+                'card_number_last_digits': '1234',
+                'sender_account_number': '123456789',
+                'sender_sort_code': '112233',
+            },
+        )
+
+        self.assertDictEqual(
+            form.get_query_data(),
+            {
+                'advanced': True,
+                'ordering': '-credit_total',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'sender_name': 'John Doe',
+                'sender_email': 'johndoe',
+                'sender_postcode': 'SW1A1aa',
+                'card_number_last_digits': '1234',
+                'sender_account_number': '123456789',
+                'sender_sort_code': '112233',
             },
         )
 
@@ -379,6 +470,10 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             ValidationScenario(
                 {'prison': ['invalid']},
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+            ValidationScenario(
+                {'card_number_last_digits': ['12345']},
+                {'card_number_last_digits': ['You’ve entered too many characters']},
             ),
         ]
 
