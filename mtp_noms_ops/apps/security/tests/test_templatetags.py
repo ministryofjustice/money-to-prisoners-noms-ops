@@ -129,6 +129,24 @@ class TestSearchHighlight(SimpleTestCase):
                 expected_result,
             )
 
+    def test_escapes_terms(self):
+        """
+        Test that value is escaped so that it's considered raw.
+        """
+        context = {
+            'is_search_results': True,
+            'form': mock.Mock(
+                cleaned_data={
+                    'simple_search': 'a|b',
+                },
+            ),
+        }
+
+        self.assertEqual(
+            search_highlight(context, 'a b a|b'),
+            'a b <span class="mtp-search-highlight">a|b</span>',
+        )
+
     def test_does_not_replace_if_not_on_search_results_page(self):
         """
         Test that if `is_search_results` can't be found in context, the template tag doesn't do anything.

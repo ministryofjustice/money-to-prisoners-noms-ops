@@ -215,7 +215,7 @@ def _build_search_terms_re(context):
     if not search_term:
         return None
 
-    search_terms = search_term.split()
+    search_terms = [re.escape(term) for term in search_term.split()]
     return re.compile(f'({"|".join(search_terms)})', re.I)
 
 
