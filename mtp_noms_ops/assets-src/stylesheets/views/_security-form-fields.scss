@@ -117,6 +117,12 @@ select[disabled] {
 }
 
 .mtp-security-form--simple {
+  margin-bottom: 32px;
+
+  @include media(mobile) {
+    margin-bottom: 22px;
+  }
+
   #id_simple_search-label {
     font-size: 27px;
 
@@ -135,5 +141,22 @@ select[disabled] {
     @include media(mobile) {
       margin-top: 5px;
     }
+  }
+}
+
+
+.mtp-security-advanced-search {
+  #id_sender_name, #id_sender_email, #id_sender_postcode, #id_prison {
+    max-width: 402px;
+    width: 100%;
+  }
+
+  #id_card_number_last_digits, #id_sender_account_number, #id_sender_sort_code {
+    max-width: 226px;
+    width: 100%;
+  }
+
+  #id_card_number_last_digits-wrapper {
+    width: 100%;
   }
 }

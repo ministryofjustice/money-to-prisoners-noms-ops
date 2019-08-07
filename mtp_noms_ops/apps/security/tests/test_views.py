@@ -545,8 +545,9 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
 
 
-class SimpleSearchV2SecurityTestCaseMixin:
+class SearchV2SecurityTestCaseMixin:
     search_results_view_name = None
+    advanced_search_view_name = None
 
     def get_user_data(
         self,
@@ -564,7 +565,7 @@ class SimpleSearchV2SecurityTestCaseMixin:
 
         return super().get_user_data(*args, flags=flags, **kwargs)
 
-    def test_simple_search_displays_search_results(self):
+    def test_displays_search_results(self):
         """
         Test that the search results page includes the objects returned by the API.
         """
@@ -580,9 +581,9 @@ class SimpleSearchV2SecurityTestCaseMixin:
                 },
             )
             response = self.client.get(reverse(self.view_name))
-        self._test_simple_search_search_results_content(response)
+        self._test_search_results_content(response)
 
-    def _test_simple_search_search_results_content(self, response):
+    def _test_search_results_content(self, response):
         """
         Subclass to test that the response content of the search results view is as expected.
         """
@@ -610,7 +611,7 @@ class SimpleSearchV2SecurityTestCaseMixin:
 
     def test_simple_search_redirects_to_search_results_page(self):
         """
-        Test that submitting the form redirects to the results page when the form is valid.
+        Test that submitting the simple search form redirects to the results page when the form is valid.
         The action of submitting the form is represented by the query param
         SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
         """
@@ -634,11 +635,41 @@ class SimpleSearchV2SecurityTestCaseMixin:
                 expected_redirect_url,
             )
 
-    def test_doesnt_redirect_to_search_results_page_if_form_is_invalid(self):
+    def test_advanced_search_redirects_to_search_results_page(self):
         """
-        Test that submitting the form doesn't redirect to the results page when the form is invalid.
+        Test that submitting the advanced search form redirects to the results page when the form is valid.
         The action of submitting the form is represented by the query param
-        SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
+        """
+        if not self.advanced_search_view_name:
+            self.skipTest(f'Advanced search not yet implemented for {self.__class__.__name__}')
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
+            query_string = f'ordering={self.search_ordering}&advanced=True'
+            request_url = (
+                f'{reverse(self.advanced_search_view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+            )
+            expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
+            response = self.client.get(request_url)
+            self.assertRedirects(
+                response,
+                expected_redirect_url,
+            )
+
+    def test_simple_search_doesnt_redirect_to_search_results_page_if_form_is_invalid(self):
+        """
+        Test that submitting the simple search form doesn't redirect to the results page when the form is invalid.
+        The action of submitting the form is represented by the query param SEARCH_FORM_SUBMITTED_INPUT_NAME.
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
@@ -646,6 +677,26 @@ class SimpleSearchV2SecurityTestCaseMixin:
             query_string = 'ordering=invalid&simple_search=test'
             request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             response = self.client.get(request_url)
+            self.assertFalse(response.context['form'].is_valid())
+            self.assertEqual(response.status_code, 200)
+
+    def test_advanced_search_doesnt_redirect_to_search_results_page_if_form_is_invalid(self):
+        """
+        Test that submitting the advanced search form doesn't redirect to the results page when the form is invalid.
+        The action of submitting the form is represented by the query param SEARCH_FORM_SUBMITTED_INPUT_NAME.
+        """
+        if not self.advanced_search_view_name:
+            self.skipTest(f'Advanced search not yet implemented for {self.__class__.__name__}')
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            sample_prison_list(rsps=rsps)
+            query_string = 'ordering=invalid&advanced=True'
+            request_url = (
+                f'{reverse(self.advanced_search_view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
+            )
+            response = self.client.get(request_url)
+            self.assertFalse(response.context['form'].is_valid())
             self.assertEqual(response.status_code, 200)
 
     def test_navigating_back_to_simple_search_form(self):
@@ -964,7 +1015,7 @@ class SenderViewsTestCase(SecurityViewTestCase):
 
 
 class SenderViewsV2TestCase(
-    SimpleSearchV2SecurityTestCaseMixin,
+    SearchV2SecurityTestCaseMixin,
     ExportSecurityViewTestCaseMixin,
     SecurityViewTestCase,
 ):
@@ -972,6 +1023,7 @@ class SenderViewsV2TestCase(
     Test case related to sender search V2 and detail views.
     """
     view_name = 'security:sender_list'
+    advanced_search_view_name = 'security:senders_advanced_search'
     search_results_view_name = 'security:sender_search_results'
     detail_view_name = 'security:sender_detail'
     search_ordering = '-prisoner_count'
@@ -1036,7 +1088,7 @@ class SenderViewsV2TestCase(
             self.debit_card_sender,
         ]
 
-    def _test_simple_search_search_results_content(self, response):
+    def _test_search_results_content(self, response):
         self.assertContains(response, '2 payment sources')
         self.assertContains(response, 'MAISIE NOLAN')
         response_content = response.content.decode(response.charset)
@@ -1263,7 +1315,7 @@ class PrisonerViewsTestCase(SecurityViewTestCase):
 
 
 class PrisonerViewsV2TestCase(
-    SimpleSearchV2SecurityTestCaseMixin,
+    SearchV2SecurityTestCaseMixin,
     ExportSecurityViewTestCaseMixin,
     SecurityViewTestCase,
 ):
@@ -1312,7 +1364,7 @@ class PrisonerViewsV2TestCase(
     def get_api_object_list_response_data(self):
         return [self.prisoner_profile]
 
-    def _test_simple_search_search_results_content(self, response):
+    def _test_search_results_content(self, response):
         response_content = response.content.decode(response.charset)
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('A1409AE', response_content)
@@ -1523,7 +1575,7 @@ class CreditViewsTestCase(SecurityViewTestCase):
         self.assertIn('Credited by Maria', response_content)
 
 
-class CreditViewsV2TestCase(SimpleSearchV2SecurityTestCaseMixin, ExportSecurityViewTestCaseMixin, SecurityViewTestCase):
+class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTestCaseMixin, SecurityViewTestCase):
     """
     Test case related to credit search V2 and detail views.
     """
@@ -1652,7 +1704,7 @@ class CreditViewsV2TestCase(SimpleSearchV2SecurityTestCaseMixin, ExportSecurityV
         ],
     ]
 
-    def _test_simple_search_search_results_content(self, response):
+    def _test_search_results_content(self, response):
         self.assertContains(response, '2 credits')
 
         self.assertContains(response, 'GEORGE MELLEY')
@@ -1885,7 +1937,7 @@ class DisbursementViewsTestCase(SecurityViewTestCase):
 
 
 class DisbursementViewsV2TestCase(
-    SimpleSearchV2SecurityTestCaseMixin,
+    SearchV2SecurityTestCaseMixin,
     ExportSecurityViewTestCaseMixin,
     SecurityViewTestCase,
 ):
@@ -2044,7 +2096,7 @@ class DisbursementViewsV2TestCase(
         ],
     ]
 
-    def _test_simple_search_search_results_content(self, response):
+    def _test_search_results_content(self, response):
         self.assertContains(response, '2 disbursements')
 
         self.assertContains(response, 'Jack Halls')

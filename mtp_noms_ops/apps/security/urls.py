@@ -119,6 +119,15 @@ urlpatterns = [
         name='sender_list',
     ),
     url(
+        r'^senders/advanced-search/$',
+        security_test(
+            views.SenderListViewV2.as_view(
+                view_type=views.ViewType.advanced_search_form,
+            ),
+        ),
+        name='senders_advanced_search',
+    ),
+    url(
         r'^senders/search-results/$',
         security_test(
             views.SenderListViewV2.as_view(
