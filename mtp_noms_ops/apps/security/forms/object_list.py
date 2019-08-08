@@ -350,6 +350,12 @@ class PrisonersFormV2(SearchFormV2Mixin, BasePrisonersForm):
         required=False,
         help_text=_('For example, name or “A1234BC”'),
     )
+    prisoner_number = forms.CharField(
+        label=_('Prisoner number'),
+        validators=[validate_prisoner_number],
+        required=False,
+    )
+    prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Results containing {filter_description}.'
@@ -360,6 +366,16 @@ class PrisonersFormV2(SearchFormV2Mixin, BasePrisonersForm):
     )
     description_capitalisation = {}
     unlisted_description = ''
+
+    def clean_prisoner_number(self):
+        """
+        Make sure prisoner number is always uppercase.
+        """
+        prisoner_number = self.cleaned_data.get('prisoner_number')
+        if not prisoner_number:
+            return prisoner_number
+
+        return prisoner_number.upper()
 
 
 class BaseCreditsForm(SecurityForm):
