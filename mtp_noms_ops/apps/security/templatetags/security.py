@@ -201,6 +201,9 @@ def _build_search_terms_re(context):
     It returns None if not on the search results page, if the form is not in the context or the
     search term can't be found.
     The search term is automatically obtained from the simple_form field of the form in the context.
+
+    The value used in the regex pattern is html and regex escaped which means that you need to escape
+    the test string as well when using it.
     """
     in_search_results = context.get('is_search_results', False)
     if not in_search_results:
@@ -215,7 +218,12 @@ def _build_search_terms_re(context):
     if not search_term:
         return None
 
-    search_terms = [re.escape(term) for term in search_term.split()]
+    search_terms = [
+        re.escape(
+            escape(term),
+        )
+        for term in search_term.split()
+    ]
     return re.compile(f'({"|".join(search_terms)})', re.I)
 
 
@@ -249,10 +257,11 @@ def search_highlight(context, value, default=''):
     if not value:
         return default
 
+    escaped_value = escape(value)
     search_terms_re = _get_cached_search_terms_re(context)
     if search_terms_re:
         return mark_safe(
-            search_terms_re.sub(r'<span class="mtp-search-highlight">\1</span>', value),
+            search_terms_re.sub(r'<span class="mtp-search-highlight">\1</span>', escaped_value),
         )
     return value
 
@@ -277,7 +286,7 @@ def extract_best_match(context, items):
             (
                 item
                 for item in item_list
-                if search_terms_re.search(item)
+                if search_terms_re.search(escape(item))
             ),
             None,
         )

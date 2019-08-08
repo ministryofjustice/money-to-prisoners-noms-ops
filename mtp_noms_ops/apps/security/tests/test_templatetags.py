@@ -129,9 +129,9 @@ class TestSearchHighlight(SimpleTestCase):
                 expected_result,
             )
 
-    def test_escapes_terms(self):
+    def test_regex_escapes_terms(self):
         """
-        Test that value is escaped so that it's considered raw.
+        Test that the regex value is escaped so that it's considered raw.
         """
         context = {
             'is_search_results': True,
@@ -145,6 +145,24 @@ class TestSearchHighlight(SimpleTestCase):
         self.assertEqual(
             search_highlight(context, 'a b a|b'),
             'a b <span class="mtp-search-highlight">a|b</span>',
+        )
+
+    def test_html_escapes_value(self):
+        """
+        Test that the test value is escaped before being wrapped in the highlight span.
+        """
+        context = {
+            'is_search_results': True,
+            'form': mock.Mock(
+                cleaned_data={
+                    'simple_search': '<a>test</a>',
+                },
+            ),
+        }
+
+        self.assertEqual(
+            search_highlight(context, 'some <a>test</a> string'),
+            'some <span class="mtp-search-highlight">&lt;a&gt;test&lt;/a&gt;</span> string',
         )
 
     def test_does_not_replace_if_not_on_search_results_page(self):
