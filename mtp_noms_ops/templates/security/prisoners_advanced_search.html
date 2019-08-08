@@ -1,0 +1,6 @@
+{% extends 'security/base_advanced_search.html' %}
+
+{% block advanced_search_fields %}
+  {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
+  {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
+{% endblock advanced_search_fields %}

@@ -1,54 +1,20 @@
-{% extends 'base.html' %}
+{% extends 'security/base_advanced_search.html' %}
 {% load i18n %}
-{% load mtp_common %}
-{% load security %}
 
-{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+{% block advanced_search_fields %}
+  <div class="heading-large">{% trans 'Payment source details' %}</div>
+  <p>{% trans 'Name, email and postcode are supplied by the payment source when they make a debit card payment. They are not validated.' %}
+  <p>{% trans 'When the payment source makes a bank transfer, the bank supplies the name on the bank account.' %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_email %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
 
-{% block phase_banner %}
-  {{ block.super }}
-  {% include "security/forms/prison-switcher.html" %}
-{% endblock %}
+  <div class="heading-large">{% trans 'Payment methods' %}</div>
 
-{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
-{% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
+  <div class="heading-medium">{% trans 'Debit card' %}</div>
+  {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
 
-{% block inner_content %}
-  <form class="mtp-security-advanced-search js-FormAnalytics" method="get">
-    <input type="hidden" name="{{ form.advanced.html_name }}" value="True" />
-    <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
-  {% for prison in request.user_prisons %}
-    <input type="hidden" name="prison" value="{{ prison.nomis_id }}" />
-  {% endfor %}
-
-    <div class="grid-row">
-      <div class="column-two-thirds">
-        <header>
-          <h1 class="heading-xlarge">
-            <span class="heading-secondary">{{ view.title }}</span>
-            {% trans 'Advanced search' %}
-          </h1>
-        </header>
-
-        <div class="heading-large">{% trans 'Payment source details' %}</div>
-        <p>{% trans 'Name, email and postcode are supplied by the payment source when they make a debit card payment. They are not validated.' %}
-        <p>{% trans 'When the payment source makes a bank transfer, the bank supplies the name on the bank account.' %}
-        {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
-        {% include 'mtp_common/forms/field.html' with field=form.sender_email %}
-        {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
-
-        <div class="heading-large">{% trans 'Payment methods' %}</div>
-
-        <div class="heading-medium">{% trans 'Debit card' %}</div>
-        {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
-
-        <div class="heading-medium">{% trans 'Bank transfer' %}</div>
-        {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
-        {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
-
-        <button type="submit" class="button" value="submit">{% blocktrans with object_name=view.object_name_plural %}Search {{ object_name }}{% endblocktrans %}</button>
-      </div>
-    </div>
-
-  </form>
-{% endblock %}
+  <div class="heading-medium">{% trans 'Bank transfer' %}</div>
+  {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
+{% endblock advanced_search_fields %}

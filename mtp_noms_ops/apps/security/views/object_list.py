@@ -129,8 +129,10 @@ class PrisonerListViewV2(SecurityView):
     title = _('Prisoners')
     form_class = PrisonersFormV2
     template_name = 'security/prisoners_list.html'
+    advanced_search_template_name = 'security/prisoners_advanced_search.html'
     search_results_view = 'security:prisoner_search_results'
     simple_search_view = 'security:prisoner_list'
+    advanced_search_view = 'security:prisoners_advanced_search'
     object_list_context_key = 'prisoners'
     object_name = _('prisoner')
     object_name_plural = _('prisoners')
