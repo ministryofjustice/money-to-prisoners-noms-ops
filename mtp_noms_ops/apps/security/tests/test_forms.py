@@ -319,7 +319,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
 
     def test_valid_simple_search(self):
         """
-        Test that if data is passed in, the API query string is constructed as expected.
+        Test that if data for a simple search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
             prisons = mock_prison_response(rsps)
@@ -376,6 +376,9 @@ class SenderFormV2TestCase(SecurityFormTestCase):
         )
 
     def test_valid_advanced_search(self):
+        """
+        Test that if data for an advanced search is passed in, the API query string is constructed as expected.
+        """
         with responses.RequestsMock() as rsps:
             prisons = mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
@@ -589,6 +592,8 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 'prison': [],
                 'simple_search': '',
                 'advanced': False,
+                'prisoner_name': '',
+                'prisoner_number': '',
             },
         )
         self.assertDictEqual(
@@ -603,9 +608,9 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
             'ordering=-sender_count&advanced=False',
         )
 
-    def test_valid(self):
+    def test_valid_simple_search(self):
         """
-        Test that if data is passed in, the API query string is constructed as expected.
+        Test that if data for a simple search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
             prisons = mock_prison_response(rsps)
@@ -640,6 +645,8 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                     prisons[0]['nomis_id'],
                 ],
                 'simple_search': 'Joh',
+                'prisoner_name': '',
+                'prisoner_number': '',
             },
         )
 
@@ -652,6 +659,70 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                     prisons[0]['nomis_id'],
                 ],
                 'simple_search': 'Joh',
+            },
+        )
+
+    def test_valid_advanced_search(self):
+        """
+        Test that if data for an advanced search is passed in, the API query string is constructed as expected.
+        """
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
+
+            form = self.form_class(
+                self.request,
+                data={
+                    'page': 2,
+                    'ordering': '-credit_total',
+                    'prison': [
+                        prisons[0]['nomis_id'],
+                    ],
+                    'advanced': True,
+                    'prisoner_name': 'John Doe',
+                    'prisoner_number': 'a2624ae',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+            self.assertDictEqual(
+                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
+                {
+                    'offset': ['20'],
+                    'limit': ['20'],
+                    'ordering': ['-credit_total'],
+                    'prison': ['IXB'],
+                    'prisoner_name': ['John Doe'],
+                    'prisoner_number': ['A2624AE'],
+                }
+            )
+
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'advanced': True,
+                'page': 2,
+                'ordering': '-credit_total',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'simple_search': '',
+                'prisoner_name': 'John Doe',
+                'prisoner_number': 'A2624AE',
+            },
+        )
+
+        self.assertDictEqual(
+            form.get_query_data(),
+            {
+                'advanced': True,
+                'ordering': '-credit_total',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'prisoner_name': 'John Doe',
+                'prisoner_number': 'A2624AE',
             },
         )
 
@@ -671,6 +742,10 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
             ValidationScenario(
                 {'prison': ['invalid']},
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+            ValidationScenario(
+                {'prisoner_number': ['invalid']},
+                {'prisoner_number': ['Invalid prisoner number.']},
             ),
         ]
 

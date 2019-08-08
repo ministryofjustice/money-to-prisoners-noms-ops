@@ -60,12 +60,12 @@ def parse_amount(value, as_int=True):
 
 def validate_amount(amount):
     if not re.match(r'^£?\d+(\.\d\d)?$', amount):
-        raise ValidationError(_('Invalid amount'), code='invalid')
+        raise ValidationError(_('Invalid amount.'), code='invalid')
 
 
 def validate_prisoner_number(prisoner_number):
     if not re.match(r'^[a-z]\d\d\d\d[a-z]{2}$', prisoner_number, flags=re.I):
-        raise ValidationError(_('Invalid prisoner number'), code='invalid')
+        raise ValidationError(_('Invalid prisoner number.'), code='invalid')
 
 
 def validate_range_fields(*fields):

@@ -202,6 +202,15 @@ urlpatterns = [
         name='prisoner_list',
     ),
     url(
+        r'^prisoners/advanced-search/$',
+        security_test(
+            views.PrisonerListViewV2.as_view(
+                view_type=views.ViewType.advanced_search_form,
+            ),
+        ),
+        name='prisoners_advanced_search',
+    ),
+    url(
         r'^prisoners/search-results/$',
         security_test(
             views.PrisonerListViewV2.as_view(

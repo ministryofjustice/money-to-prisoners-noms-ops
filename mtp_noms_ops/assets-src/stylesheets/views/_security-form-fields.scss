@@ -146,7 +146,7 @@ select[disabled] {
 
 
 .mtp-security-advanced-search {
-  #id_sender_name, #id_sender_email, #id_sender_postcode, #id_prison {
+  #id_sender_name, #id_sender_email, #id_sender_postcode, #id_prison, #id_prisoner_name, #id_prisoner_number {
     max-width: 402px;
     width: 100%;
   }
@@ -156,7 +156,11 @@ select[disabled] {
     width: 100%;
   }
 
-  #id_card_number_last_digits-wrapper {
+  #id_card_number_last_digits-wrapper, #id_prisoner_name-wrapper, #id_prisoner_number-wrapper {
     width: 100%;
+  }
+
+  #id_prisoner_name-wrapper, #id_prisoner_number-wrapper {
+    display: block;
   }
 }
