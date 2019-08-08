@@ -1,7 +1,7 @@
 import unittest
 
 from security.templatetags.security import currency, pence, format_sort_code
-from security.utils import NameSet, EmailSet
+from security.utils import NameSet, EmailSet, remove_whitespaces_and_hyphens
 
 
 class UtilTestCase(unittest.TestCase):
@@ -46,3 +46,28 @@ class UtilTestCase(unittest.TestCase):
         emails = EmailSet(['abc@example.com', 'ABC@EXAMPLE.COM', 'abc@example.co.uk',
                            'abc@example.com ', 'Abc@example.com', ''])
         self.assertSequenceEqual(emails, ('abc@example.com', 'abc@example.co.uk', ''))
+
+
+class RemoveWhitespacesAndHyphensTestCase(unittest.TestCase):
+    """
+    Tests related to remove_whitespaces_and_hyphens.
+    """
+
+    def test_falsy_value_returns_value(self):
+        """
+        Test that if `value` is falsy, the function returns `value` untouched.
+        """
+        for value in (None, ''):
+            self.assertEqual(
+                remove_whitespaces_and_hyphens(value),
+                value,
+            )
+
+    def test_replaces_whitespaces_and_hyphens(self):
+        """
+        Test that the function gets rid of whitespaces and hyphens.
+        """
+        self.assertEqual(
+            remove_whitespaces_and_hyphens(' SW 1A-1a A '),
+            'SW1A1aA',
+        )

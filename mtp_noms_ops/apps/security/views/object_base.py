@@ -1,4 +1,5 @@
 from enum import Enum
+from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import messages
@@ -8,6 +9,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.dateformat import format as date_format
 from django.utils.functional import cached_property
+from django.utils.http import is_safe_url
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from mtp_common.analytics import genericised_pageview
@@ -15,11 +17,12 @@ from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
+from security.context_processors import initial_params
 from security.export import ObjectListXlsxResponse
 from security.tasks import email_export_xlsx
 
 
-SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME = 'form_submitted'
+SEARCH_FORM_SUBMITTED_INPUT_NAME = 'form_submitted'
 
 
 class ViewType(Enum):
@@ -27,6 +30,7 @@ class ViewType(Enum):
     Enum for the different variants of views for a specific class of objects.
     """
     simple_search_form = 'simple_search_form'
+    advanced_search_form = 'advanced_search_form'
     search_results = 'search_results'
     export_download = 'export_download'
     export_email = 'export_email'
@@ -89,11 +93,12 @@ class SecurityView(FormView):
     """
     title = NotImplemented
     form_template_name = NotImplemented  # TODO: delete after search V2 goes live.
+    advanced_search_template_name = NotImplemented
     object_list_context_key = NotImplemented
     view_type = None
-    referral_view = None
     search_results_view = None
     simple_search_view = None
+    advanced_search_view = None
     export_download_limit = settings.MAX_CREDITS_TO_DOWNLOAD
     export_email_limit = settings.MAX_CREDITS_TO_EMAIL
     object_name = None
@@ -102,6 +107,15 @@ class SecurityView(FormView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.redirect_on_single = False
+
+    def get_template_names(self):
+        """
+        Return the advanced search template if the view type is 'adanced search' or the default
+        template otherwise.
+        """
+        if self.view_type == ViewType.advanced_search_form:
+            return self.advanced_search_template_name
+        return self.template_name
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
@@ -140,14 +154,13 @@ class SecurityView(FormView):
                     self.request,
                     _('The spreadsheet will be emailed to you at %(email)s') % {'email': self.request.user.email}
                 )
-                return self.redirect_to_referral_view(form)
+                return self.redirect_to_referral_url()
             return ObjectListXlsxResponse(form.get_complete_object_list(),
                                           object_type=self.object_list_context_key,
                                           attachment_name=attachment_name)
 
         if (
-            self.view_type == ViewType.simple_search_form
-            and SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME in self.request.GET
+            SEARCH_FORM_SUBMITTED_INPUT_NAME in self.request.GET
             and self.search_results_view
         ):
             search_results_url = f'{reverse(self.search_results_view)}?{form.query_string}'
@@ -168,39 +181,69 @@ class SecurityView(FormView):
         it redirects back to the referral view so that the user can see and correct the errors.
         """
         if self.is_export_view_type() or self.view_type == ViewType.search_results:
-            return self.redirect_to_referral_view(form)
+            return self.redirect_to_referral_url()
+
         return super().form_invalid(form)
+
+    def _get_breadcrumbs(self, **kwargs):
+        prisons_param = initial_params(self.request).get('initial_params', '')
+        if self.view_type == ViewType.advanced_search_form:
+            return [
+                {'name': _('Home'), 'url': reverse('security:dashboard')},
+                {'name': self.title, 'url': f'{reverse(self.simple_search_view)}?{prisons_param}'},
+                {'name': _('Advanced search')},
+            ]
+
+        if self.view_type == ViewType.search_results:
+            if kwargs['form'].was_advanced_search_used():
+                return [
+                    {'name': _('Home'), 'url': reverse('security:dashboard')},
+                    {'name': self.title, 'url': f'{reverse(self.simple_search_view)}?{prisons_param}'},
+                    {
+                        'name': _('Advanced search'),
+                        'url': f'{reverse(self.advanced_search_view)}?{kwargs["form"].query_string}',
+                    },
+                    {'name': _('Search results')},
+                ]
+
+            return [
+                {'name': _('Home'), 'url': reverse('security:dashboard')},
+                {'name': self.title, 'url': f'{reverse(self.simple_search_view)}?{kwargs["form"].query_string}'},
+                {'name': _('Search results')},
+            ]
+
+        return [
+            {'name': _('Home'), 'url': reverse('security:dashboard')},
+            {'name': self.title},
+        ]
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        if self.view_type == ViewType.search_results:
-            breadcrumbs = [
-                {'name': _('Home'), 'url': reverse('security:dashboard')},
-                {'name': self.title, 'url': f'{reverse(self.simple_search_view)}?{kwargs["form"].query_string}'},
-                {'name': _('Search results')}
-            ]
-        else:
-            breadcrumbs = [
-                {'name': _('Home'), 'url': reverse('security:dashboard')},
-                {'name': self.title}
-            ]
-
         return {
             **context_data,
 
-            'breadcrumbs': breadcrumbs,
+            'breadcrumbs': self._get_breadcrumbs(**kwargs),
             'google_analytics_pageview': genericised_pageview(self.request, self.get_generic_title()),
-            'simple_search_form_submitted_input_name': SIMPLE_SEARCH_FORM_SUBMITTED_INPUT_NAME,
+            'search_form_submitted_input_name': SEARCH_FORM_SUBMITTED_INPUT_NAME,
             'is_search_results': self.view_type == ViewType.search_results,
         }
 
-    def redirect_to_referral_view(self, form):
+    def redirect_to_referral_url(self):
         """
-        Returns an HttpResponseRedirect to the referral_view preserving the same kwargs and query string.
+        Returns an HttpResponseRedirect to the referer preserving the same kwargs and query string.
         """
-        view = reverse(self.referral_view, kwargs=self.kwargs)
-        return redirect(f'{view}?{self.request.GET.urlencode()}')
+        referer = self.request.META.get('HTTP_REFERER')
+        if referer:
+            referer = unquote(referer)  # HTTP_REFERER may be encoded.
+
+        if not is_safe_url(
+            url=referer,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            referer = '/'
+        return redirect(referer)
 
     def get_export_description(self, form):
         return str(form.search_description['description'])

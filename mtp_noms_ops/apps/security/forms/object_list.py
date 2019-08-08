@@ -1,6 +1,5 @@
 import datetime
 from math import ceil
-import re
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -16,7 +15,30 @@ from security.forms.object_base import (
     get_credit_source_choices, get_disbursement_method_choices,
 )
 from security.templatetags.security import currency as format_currency
-from security.utils import convert_date_fields, sender_profile_name
+from security.utils import (
+    convert_date_fields,
+    remove_whitespaces_and_hyphens,
+    sender_profile_name,
+)
+
+
+class SearchFormV2Mixin(forms.Form):
+    """
+    Mixin for SearchForm V2.
+    """
+    # indicates whether the form was used in advanced search
+    advanced = forms.BooleanField(initial=False, required=False)
+
+    def was_advanced_search_used(self):
+        return self.cleaned_data.get('advanced', False)
+
+    def get_api_request_params(self):
+        """
+        Removes `advanced` from the API call as it's not a valid filter.
+        """
+        api_params = super().get_api_request_params()
+        api_params.pop('advanced', None)
+        return api_params
 
 
 class BaseSendersForm(SecurityForm):
@@ -125,10 +147,7 @@ class SendersForm(BaseSendersForm):
     def clean_sender_sort_code(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
             return ''
-        sender_sort_code = self.cleaned_data.get('sender_sort_code')
-        if sender_sort_code:
-            sender_sort_code = sender_sort_code.replace('-', '')
-        return sender_sort_code
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_sort_code'))
 
     def clean_sender_account_number(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
@@ -146,10 +165,7 @@ class SendersForm(BaseSendersForm):
         return self.cleaned_data.get('card_number_last_digits')
 
     def clean_sender_postcode(self):
-        sender_postcode = self.cleaned_data.get('sender_postcode')
-        if sender_postcode:
-            sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
-        return sender_postcode
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_postcode'))
 
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
@@ -161,7 +177,7 @@ class SendersForm(BaseSendersForm):
         return query_data
 
 
-class SendersFormV2(BaseSendersForm):
+class SendersFormV2(SearchFormV2Mixin, BaseSendersForm):
     """
     Search Form for Senders V2.
     """
@@ -170,6 +186,12 @@ class SendersFormV2(BaseSendersForm):
         required=False,
         help_text=_('Common or incomplete names may show many results'),
     )
+    sender_name = forms.CharField(label=_('Name'), required=False)
+    sender_email = forms.CharField(label=_('Email'), required=False)
+    sender_postcode = forms.CharField(label=_('Postcode'), required=False)
+    card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
+    sender_account_number = forms.CharField(label=_('Account number'), required=False)
+    sender_sort_code = forms.CharField(label=_('Sort code'), required=False)
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Results containing {filter_description}.'
@@ -180,6 +202,12 @@ class SendersFormV2(BaseSendersForm):
     )
     description_capitalisation = {}
     unlisted_description = ''
+
+    def clean_sender_postcode(self):
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_postcode'))
+
+    def clean_sender_sort_code(self):
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_sort_code'))
 
 
 class BasePrisonersForm(SecurityForm):
@@ -313,7 +341,7 @@ class PrisonersForm(BasePrisonersForm):
         return query_data
 
 
-class PrisonersFormV2(BasePrisonersForm):
+class PrisonersFormV2(SearchFormV2Mixin, BasePrisonersForm):
     """
     Search Form for Prisoners V2.
     """
@@ -471,10 +499,7 @@ class CreditsForm(BaseCreditsForm):
     def clean_sender_sort_code(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
             return ''
-        sender_sort_code = self.cleaned_data.get('sender_sort_code')
-        if sender_sort_code:
-            sender_sort_code = sender_sort_code.replace('-', '')
-        return sender_sort_code
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_sort_code'))
 
     def clean_sender_account_number(self):
         if self.cleaned_data.get('source') != 'bank_transfer':
@@ -492,10 +517,7 @@ class CreditsForm(BaseCreditsForm):
         return self.cleaned_data.get('card_number_last_digits')
 
     def clean_sender_postcode(self):
-        sender_postcode = self.cleaned_data.get('sender_postcode')
-        if sender_postcode:
-            sender_postcode = re.sub(r'[\s-]+', '', sender_postcode).upper()
-        return sender_postcode
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_postcode'))
 
     def get_query_data(self, allow_parameter_manipulation=True):
         query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
@@ -518,7 +540,7 @@ class CreditsForm(BaseCreditsForm):
         return str(description).lower() if description else None
 
 
-class CreditsFormV2(BaseCreditsForm):
+class CreditsFormV2(SearchFormV2Mixin, BaseCreditsForm):
     """
     Search Form for Credits V2.
     """
@@ -675,10 +697,7 @@ class DisbursementsForm(BaseDisbursementsForm):
     def clean_sort_code(self):
         if self.cleaned_data.get('method') != 'bank_transfer':
             return ''
-        sort_code = self.cleaned_data.get('sort_code')
-        if sort_code:
-            sort_code = sort_code.replace('-', '')
-        return sort_code
+        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sort_code'))
 
     def clean_account_number(self):
         if self.cleaned_data.get('method') != 'bank_transfer':
@@ -711,7 +730,7 @@ class DisbursementsForm(BaseDisbursementsForm):
         return str(description).lower() if description else None
 
 
-class DisbursementsFormV2(BaseDisbursementsForm):
+class DisbursementsFormV2(SearchFormV2Mixin, BaseDisbursementsForm):
     """
     Search Form for Disbursements V2.
     """

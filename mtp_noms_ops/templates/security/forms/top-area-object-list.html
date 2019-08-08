@@ -13,7 +13,11 @@
     {% if objects %}
       {{ form.search_description.description }}
     {% else %}
-      {% blocktrans with search_term=form.simple_search.value %}Your search for “<strong>{{ search_term }}</strong>” returned no results.{% endblocktrans %}
+      {% if form.simple_search.value %}
+        {% blocktrans with search_term=form.simple_search.value %}Your search for “<strong>{{ search_term }}</strong>” returned no results.{% endblocktrans %}
+      {% else %}
+        {% trans 'Your search returned no results.' %}
+      {% endif %}
     {% endif %}
   </p>
 {% else %}
@@ -27,7 +31,7 @@
 
   <div class="print-hidden">
     <div class="mtp-security-form--simple">
-    <input type="hidden" name="{{ simple_search_form_submitted_input_name }}" value="1" />
+    <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
     {{ form.ordering.as_hidden }}
 
     {% for prison in request.user_prisons %}
