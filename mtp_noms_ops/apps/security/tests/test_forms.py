@@ -1118,6 +1118,8 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'card_number_last_digits': '',
                 'sender_sort_code': '',
                 'sender_account_number': '',
+                'received_at__gte': None,
+                'received_at__lt': None,
             },
         )
         self.assertDictEqual(
@@ -1181,6 +1183,8 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'card_number_last_digits': '',
                 'sender_sort_code': '',
                 'sender_account_number': '',
+                'received_at__gte': None,
+                'received_at__lt': None,
             },
         )
 
@@ -1225,6 +1229,12 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'card_number_last_digits': '1234',
                     'sender_account_number': '123456789',
                     'sender_sort_code': '11-22 - 33',
+                    'received_at__gte_0': '1',
+                    'received_at__gte_1': '2',
+                    'received_at__gte_2': '2000',
+                    'received_at__lt_0': '10',
+                    'received_at__lt_1': '3',
+                    'received_at__lt_2': '2000',
                 },
             )
 
@@ -1249,6 +1259,8 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'card_number_last_digits': ['1234'],
                     'sender_account_number': ['123456789'],
                     'sender_sort_code': ['112233'],
+                    'received_at__gte': ['2000-02-01'],
+                    'received_at__lt': ['2000-03-11'],
                 },
             )
 
@@ -1274,6 +1286,8 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'card_number_last_digits': '1234',
                 'sender_account_number': '123456789',
                 'sender_sort_code': '112233',
+                'received_at__gte': datetime.date(2000, 2, 1),
+                'received_at__lt': datetime.date(2000, 3, 10),
             },
         )
 
@@ -1295,7 +1309,36 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'card_number_last_digits': '1234',
                 'sender_account_number': '123456789',
                 'sender_sort_code': '112233',
+                'received_at__gte': datetime.date(2000, 2, 1),
+                'received_at__lt': datetime.date(2000, 3, 10),
             },
+        )
+
+        # make sure the values for dates are split
+        self.assertDictEqual(
+            parse_qs(form.query_string),
+            {
+                'ordering': ['-amount'],
+                'prison': ['IXB'],
+                'amount_pattern': ['exact'],
+                'amount_exact': ['100.00'],
+                'advanced': ['True'],
+                'sender_name': ['John Doe'],
+                'sender_email': ['johndoe'],
+                'sender_postcode': ['SW1A1aa'],
+                'sender_ip_address': ['127.0.0.1'],
+                'card_number_last_digits': ['1234'],
+                'sender_account_number': ['123456789'],
+                'sender_sort_code': ['112233'],
+                'prisoner_name': ['Jane Doe'],
+                'prisoner_number': ['A2624AE'],
+                'received_at__gte_0': ['1'],
+                'received_at__gte_1': ['2'],
+                'received_at__gte_2': ['2000'],
+                'received_at__lt_0': ['10'],
+                'received_at__lt_1': ['3'],
+                'received_at__lt_2': ['2000']
+            }
         )
 
     def test_invalid(self):
@@ -1326,6 +1369,31 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             ValidationScenario(
                 {'sender_ip_address': '256.0.0.1'},
                 {'sender_ip_address': ['Enter a valid IPv4 address.']},
+            ),
+            ValidationScenario(
+                {
+                    'received_at__gte_0': '2',
+                    'received_at__gte_1': '2',
+                    'received_at__gte_2': '2000',
+                    'received_at__lt_0': '1',
+                    'received_at__lt_1': '2',
+                    'received_at__lt_2': '2000',
+                },
+                {'received_at__lt': ['Must be after the start date.']},
+            ),
+            ValidationScenario(
+                {
+                    'received_at__gte_0': '32',
+                    'received_at__gte_1': '13',
+                    'received_at__gte_2': '1111',
+                },
+                {
+                    'received_at__gte': [
+                        '‘Day’ should be between 1 and 31',
+                        '‘Month’ should be between 1 and 12',
+                        '‘Year’ should be between 1900 and 2019',
+                    ],
+                },
             ),
         ]
 

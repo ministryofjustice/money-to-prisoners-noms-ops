@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
+from mtp_common.forms.fields import SplitDateField
 
 from security.forms.object_base import (
     AmountPattern,
@@ -23,6 +24,8 @@ from security.utils import (
     remove_whitespaces_and_hyphens,
     sender_profile_name,
 )
+
+END_DATE_BEFORE_START_DATE_ERROR_MSG = _('Must be after the start date.')
 
 
 class SearchFormV2Mixin(forms.Form):
@@ -667,6 +670,16 @@ class CreditsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseCreditsForm):
         required=False,
         help_text=_('Common or incomplete names may show many results'),
     )
+    received_at__gte = SplitDateField(
+        label=_('From'),
+        required=False,
+        help_text=_('For example, 01 08 2007'),
+    )
+    received_at__lt = SplitDateField(
+        label=_('To'),
+        required=False,
+        help_text=_('For example, 01 08 2007'),
+    )
 
     sender_name = forms.CharField(label=_('Name'), required=False)
     sender_email = forms.CharField(label=_('Email'), required=False)
@@ -686,6 +699,8 @@ class CreditsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseCreditsForm):
         validators=[validate_prisoner_number],
         required=False,
     )
+
+    exclusive_date_params = ['received_at__lt']
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Results containing {filter_description}.'
@@ -714,6 +729,51 @@ class CreditsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseCreditsForm):
             return prisoner_number
 
         return prisoner_number.upper()
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        """
+        Split Date Fields are compressed into a datetime.date values.
+        This is okay for API calls but when we need to preserve the query string
+        (e.g. redirect to search results page or export), we need to keep the split
+        values instead.
+        """
+        query_data = super().get_query_data(
+            allow_parameter_manipulation=allow_parameter_manipulation,
+        )
+
+        if not allow_parameter_manipulation:
+            for date_field_name in ('received_at__gte', 'received_at__lt'):
+                value = query_data.pop(date_field_name, None)
+                if not value:
+                    continue
+
+                query_data.update(
+                    {
+                        f'{date_field_name}_{index}': value_part
+                        for index, value_part in enumerate(
+                            SplitDateField().widget.decompress(value),
+                        )
+                    },
+                )
+        return query_data
+
+    def _clean_dates(self, cleaned_data):
+        received_at__gte = cleaned_data.get('received_at__gte')
+        received_at__lt = cleaned_data.get('received_at__lt')
+
+        if received_at__gte and received_at__lt and received_at__gte > received_at__lt:
+            self.add_error(
+                'received_at__lt',
+                ValidationError(END_DATE_BEFORE_START_DATE_ERROR_MSG, code='bound_ordering'),
+            )
+        return cleaned_data
+
+    def clean(self):
+        """
+        Validates dates.
+        """
+        cleaned_data = super().clean()
+        return self._clean_dates(cleaned_data)
 
 
 class BaseDisbursementsForm(SecurityForm):
