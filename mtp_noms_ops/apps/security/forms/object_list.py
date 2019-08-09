@@ -668,6 +668,25 @@ class CreditsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseCreditsForm):
         help_text=_('Common or incomplete names may show many results'),
     )
 
+    sender_name = forms.CharField(label=_('Name'), required=False)
+    sender_email = forms.CharField(label=_('Email'), required=False)
+    sender_postcode = forms.CharField(label=_('Postcode'), required=False)
+    sender_ip_address = forms.CharField(
+        label=_('IP Address'),
+        validators=[validate_ipv4_address],
+        required=False,
+    )
+    card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
+    sender_account_number = forms.CharField(label=_('Account number'), required=False)
+    sender_sort_code = forms.CharField(label=_('Sort code'), required=False)
+
+    prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
+    prisoner_number = forms.CharField(
+        label=_('Prisoner number'),
+        validators=[validate_prisoner_number],
+        required=False,
+    )
+
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Results containing {filter_description}.'
     unfiltered_description_template = ''
@@ -677,6 +696,24 @@ class CreditsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseCreditsForm):
     )
     description_capitalisation = {}
     unlisted_description = ''
+
+    def clean_sender_postcode(self):
+        sender_postcode = self.cleaned_data.get('sender_postcode')
+        return remove_whitespaces_and_hyphens(sender_postcode)
+
+    def clean_sender_sort_code(self):
+        sender_sort_code = self.cleaned_data.get('sender_sort_code')
+        return remove_whitespaces_and_hyphens(sender_sort_code)
+
+    def clean_prisoner_number(self):
+        """
+        Make sure prisoner number is always uppercase.
+        """
+        prisoner_number = self.cleaned_data.get('prisoner_number')
+        if not prisoner_number:
+            return prisoner_number
+
+        return prisoner_number.upper()
 
 
 class BaseDisbursementsForm(SecurityForm):

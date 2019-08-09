@@ -264,11 +264,17 @@ class AmountSearchFormMixinTestCase(SimpleTestCase):
                 {'amount_pence': ['This field is required for the selected amount pattern.']},
             ),
             ValidationScenario(
-                {'amount_pattern': AmountPattern.pence.name, 'amount_pence': -1},
+                {
+                    'amount_pattern': AmountPattern.pence.name,
+                    'amount_pence': -1,
+                },
                 {'amount_pence': ['Ensure this value is greater than or equal to 0.']},
             ),
             ValidationScenario(
-                {'amount_pattern': AmountPattern.pence.name, 'amount_pence': 100},
+                {
+                    'amount_pattern': AmountPattern.pence.name,
+                    'amount_pence': 100,
+                },
                 {'amount_pence': ['Ensure this value is less than or equal to 99.']},
             ),
             ValidationScenario(
@@ -276,15 +282,24 @@ class AmountSearchFormMixinTestCase(SimpleTestCase):
                 {'amount_pattern': ['Select a valid choice. invalid is not one of the available choices.']},
             ),
             ValidationScenario(
-                {'amount_pattern': AmountPattern.exact.name, 'amount_exact': '$100'},
+                {
+                    'amount_pattern': AmountPattern.exact.name,
+                    'amount_exact': '$100',
+                },
                 {'amount_exact': ['Invalid amount.']},
             ),
             ValidationScenario(
-                {'amount_pattern': AmountPattern.exact.name, 'amount_exact': '£100.0.0'},
+                {
+                    'amount_pattern': AmountPattern.exact.name,
+                    'amount_exact': '£100.0.0',
+                },
                 {'amount_exact': ['Invalid amount.']},
             ),
             ValidationScenario(
-                {'amount_pattern': AmountPattern.exact.name, 'amount_exact': 'one'},
+                {
+                    'amount_pattern': AmountPattern.exact.name,
+                    'amount_exact': 'one',
+                },
                 {'amount_exact': ['Invalid amount.']},
             ),
         ]
@@ -699,7 +714,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
             ),
             ValidationScenario(
-                {'card_number_last_digits': ['12345']},
+                {'card_number_last_digits': '12345'},
                 {'card_number_last_digits': ['You’ve entered too many characters']},
             ),
         ]
@@ -968,7 +983,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
             ),
             ValidationScenario(
-                {'prisoner_number': ['invalid']},
+                {'prisoner_number': 'invalid'},
                 {'prisoner_number': ['Invalid prisoner number.']},
             ),
         ]
@@ -1094,6 +1109,15 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'amount_pattern': '',
                 'amount_exact': '',
                 'amount_pence': '',
+                'prisoner_name': '',
+                'prisoner_number': '',
+                'sender_name': '',
+                'sender_email': '',
+                'sender_postcode': '',
+                'sender_ip_address': '',
+                'card_number_last_digits': '',
+                'sender_sort_code': '',
+                'sender_account_number': '',
             },
         )
         self.assertDictEqual(
@@ -1148,6 +1172,15 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'amount_pattern': '',
                 'amount_exact': '',
                 'amount_pence': '',
+                'prisoner_name': '',
+                'prisoner_number': '',
+                'sender_name': '',
+                'sender_email': '',
+                'sender_postcode': '',
+                'sender_ip_address': '',
+                'card_number_last_digits': '',
+                'sender_sort_code': '',
+                'sender_account_number': '',
             },
         )
 
@@ -1183,6 +1216,15 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'amount_pattern': AmountPattern.exact.name,
                     'amount_exact': '100.00',
                     'amount_pence': '',
+                    'prisoner_name': 'Jane Doe',
+                    'prisoner_number': 'a2624ae',
+                    'sender_name': 'John Doe',
+                    'sender_email': 'johndoe',
+                    'sender_postcode': 'SW1A 1a-a',
+                    'sender_ip_address': '127.0.0.1',
+                    'card_number_last_digits': '1234',
+                    'sender_account_number': '123456789',
+                    'sender_sort_code': '11-22 - 33',
                 },
             )
 
@@ -1198,6 +1240,15 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'ordering': ['-amount'],
                     'prison': ['IXB'],
                     'amount': ['10000'],
+                    'prisoner_name': ['Jane Doe'],
+                    'prisoner_number': ['A2624AE'],
+                    'sender_name': ['John Doe'],
+                    'sender_email': ['johndoe'],
+                    'sender_postcode': ['SW1A1aa'],
+                    'sender_ip_address': ['127.0.0.1'],
+                    'card_number_last_digits': ['1234'],
+                    'sender_account_number': ['123456789'],
+                    'sender_sort_code': ['112233'],
                 },
             )
 
@@ -1214,6 +1265,15 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'amount_pattern': AmountPattern.exact.name,
                 'amount_exact': '100.00',
                 'amount_pence': '',
+                'prisoner_name': 'Jane Doe',
+                'prisoner_number': 'A2624AE',
+                'sender_name': 'John Doe',
+                'sender_email': 'johndoe',
+                'sender_postcode': 'SW1A1aa',
+                'sender_ip_address': '127.0.0.1',
+                'card_number_last_digits': '1234',
+                'sender_account_number': '123456789',
+                'sender_sort_code': '112233',
             },
         )
 
@@ -1226,6 +1286,15 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     prisons[0]['nomis_id'],
                 ],
                 'amount': '10000',
+                'prisoner_name': 'Jane Doe',
+                'prisoner_number': 'A2624AE',
+                'sender_name': 'John Doe',
+                'sender_email': 'johndoe',
+                'sender_postcode': 'SW1A1aa',
+                'sender_ip_address': '127.0.0.1',
+                'card_number_last_digits': '1234',
+                'sender_account_number': '123456789',
+                'sender_sort_code': '112233',
             },
         )
 
@@ -1245,6 +1314,18 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             ValidationScenario(
                 {'prison': ['invalid']},
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+            ValidationScenario(
+                {'prisoner_number': 'invalid'},
+                {'prisoner_number': ['Invalid prisoner number.']},
+            ),
+            ValidationScenario(
+                {'card_number_last_digits': '12345'},
+                {'card_number_last_digits': ['You’ve entered too many characters']},
+            ),
+            ValidationScenario(
+                {'sender_ip_address': '256.0.0.1'},
+                {'sender_ip_address': ['Enter a valid IPv4 address.']},
             ),
         ]
 
