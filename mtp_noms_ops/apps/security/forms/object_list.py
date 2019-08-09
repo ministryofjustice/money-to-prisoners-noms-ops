@@ -8,11 +8,14 @@ from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_base import (
+    AmountPattern,
+    get_credit_source_choices,
+    get_disbursement_method_choices,
+    parse_amount,
     SecurityForm,
-    AmountPattern, parse_amount,
-    validate_amount, validate_prisoner_number, validate_range_fields,
-    insert_blank_option,
-    get_credit_source_choices, get_disbursement_method_choices,
+    validate_amount,
+    validate_prisoner_number,
+    validate_range_fields,
 )
 from security.templatetags.security import currency as format_currency
 from security.utils import (
@@ -39,6 +42,100 @@ class SearchFormV2Mixin(forms.Form):
         api_params = super().get_api_request_params()
         api_params.pop('advanced', None)
         return api_params
+
+
+class AmountSearchFormMixin(forms.Form):
+    """
+    Mixin for the amount fields and related logic.
+    """
+    amount_pattern = forms.ChoiceField(
+        label=_('Amount'),
+        required=False,
+        choices=AmountPattern.get_choices(),
+    )
+    amount_exact = forms.CharField(
+        label=AmountPattern.exact.value,
+        validators=[validate_amount],
+        required=False,
+    )
+    amount_pence = forms.IntegerField(
+        label=AmountPattern.pence.value,
+        min_value=0,
+        max_value=99,
+        required=False,
+    )
+
+    def _update_amounts_in_query_data(self, query_data):
+        amount_pattern = query_data.pop('amount_pattern', None)
+        try:
+            amount_pattern = AmountPattern[amount_pattern]
+        except KeyError:
+            return
+
+        amount_exact = query_data.pop('amount_exact', None)
+        amount_pence = query_data.pop('amount_pence', None)
+
+        if amount_pattern == AmountPattern.not_integral:
+            query_data['exclude_amount__endswith'] = '00'
+        elif amount_pattern == AmountPattern.not_multiple_5:
+            query_data['exclude_amount__regex'] = '(500|000)$'
+        elif amount_pattern == AmountPattern.not_multiple_10:
+            query_data['exclude_amount__endswith'] = '000'
+        elif amount_pattern == AmountPattern.gte_100:
+            query_data['amount__gte'] = '10000'
+        elif amount_pattern == AmountPattern.exact:
+            query_data['amount'] = parse_amount(amount_exact or '', as_int=False)
+        elif amount_pattern == AmountPattern.pence:
+            query_data['amount__endswith'] = '' if amount_pence is None else '%02d' % amount_pence
+        else:
+            raise NotImplementedError
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        """
+        Updates `query_data` by translating amount_pattern, amount_exact and amount_pence
+        into appropriate filters for the API.
+        """
+        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
+        if allow_parameter_manipulation:
+            self._update_amounts_in_query_data(query_data)
+        return query_data
+
+    def _clean_amount_fields(self, cleaned_data):
+        # if amount fields are already in error dont' check any further
+        if set(self.errors) & {'amount_pattern', 'amount_exact', 'amount_pence'}:
+            return cleaned_data
+
+        try:
+            amount_pattern = AmountPattern[cleaned_data.get('amount_pattern')]
+        except KeyError:
+            amount_pattern = None
+
+        if amount_pattern == AmountPattern.exact:
+            if not cleaned_data.get('amount_exact'):
+                self.add_error(
+                    'amount_exact',
+                    ValidationError(_('This field is required for the selected amount pattern.'), code='required'),
+                )
+        else:
+            cleaned_data['amount_exact'] = ''
+
+        if amount_pattern == AmountPattern.pence:
+            if cleaned_data.get('amount_pence') is None:
+                self.add_error(
+                    'amount_pence',
+                    ValidationError(_('This field is required for the selected amount pattern.'), code='required'),
+                )
+        else:
+            cleaned_data['amount_pence'] = ''
+        return cleaned_data
+
+    def clean(self):
+        """
+        Validates the amount fields and resets amount_exact, amount_pence if incompatible with
+        the choosen amount_pattern.
+        """
+        cleaned_data = super().clean()
+        return self._clean_amount_fields(cleaned_data)
 
 
 class BaseSendersForm(SecurityForm):
@@ -204,10 +301,12 @@ class SendersFormV2(SearchFormV2Mixin, BaseSendersForm):
     unlisted_description = ''
 
     def clean_sender_postcode(self):
-        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_postcode'))
+        sender_postcode = self.cleaned_data.get('sender_postcode')
+        return remove_whitespaces_and_hyphens(sender_postcode)
 
     def clean_sender_sort_code(self):
-        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_sort_code'))
+        sender_sort_code = self.cleaned_data.get('sender_sort_code')
+        return remove_whitespaces_and_hyphens(sender_sort_code)
 
 
 class BasePrisonersForm(SecurityForm):
@@ -423,8 +522,11 @@ class CreditsForm(BaseCreditsForm):
     received_at__lt = forms.DateField(label=_('Received before'), required=False,
                                       help_text=_('For example, 13/02/2018'))
 
-    amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
-                                       choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
+    amount_pattern = forms.ChoiceField(
+        label=_('Amount (£)'),
+        required=False,
+        choices=AmountPattern.get_choices(),
+    )
     amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
     amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 
@@ -622,8 +724,11 @@ class DisbursementsForm(BaseDisbursementsForm):
     created__gte = forms.DateField(label=_('Entered since'), help_text=_('For example, 13/02/2018'), required=False)
     created__lt = forms.DateField(label=_('Entered before'), help_text=_('For example, 13/02/2018'), required=False)
 
-    amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
-                                       choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
+    amount_pattern = forms.ChoiceField(
+        label=_('Amount (£)'),
+        required=False,
+        choices=AmountPattern.get_choices(),
+    )
     amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
     amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 

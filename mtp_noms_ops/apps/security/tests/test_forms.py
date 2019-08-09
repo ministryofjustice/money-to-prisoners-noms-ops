@@ -10,8 +10,9 @@ from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
 import responses
 
-from security.forms.object_base import SecurityForm
+from security.forms.object_base import AmountPattern, SecurityForm
 from security.forms.object_list import (
+    AmountSearchFormMixin,
     SendersForm,
     SendersFormV2,
     PrisonersForm,
@@ -26,6 +27,12 @@ from security.tests import api_url
 
 
 ValidationScenario = namedtuple('ValidationScenario', 'data errors')
+
+
+class MyAmountSearchForm(AmountSearchFormMixin, SecurityForm):
+    """
+    SecurityForm used to test AmountSearchFormMixin.
+    """
 
 
 def mock_prison_response(rsps):
@@ -72,6 +79,223 @@ def mock_empty_response(rsps, path):
             'results': [],
         }
     )
+
+
+class AmountSearchFormMixinTestCase(SimpleTestCase):
+    """
+    Tests for the AmountSearchFormMixin.
+    """
+
+    def test_valid(self):
+        """
+        Test valid scenarios.
+
+        Note: amount_exact is reset when amount_pattern is not `exact` and
+        amount_pence is reset when amount_pattern is not `pence`.
+        """
+        scenarios = [
+            # amount_pattern == 'exact' and amount_exact value
+            (
+                {
+                    'amount_pattern': AmountPattern.exact.name,
+                    'amount_exact': '£100',
+                },
+                {
+                    'page': 1,
+                    'amount_pattern': AmountPattern.exact.name,
+                    'amount_exact': '£100',
+                    'amount_pence': '',
+                },
+                {
+                    'amount': '10000',
+                },
+            ),
+
+            # amount_pattern == 'pence' and amount_pence value
+            (
+                {
+                    'amount_pattern': AmountPattern.pence.name,
+                    'amount_pence': 99,
+                },
+                {
+                    'page': 1,
+                    'amount_pattern': AmountPattern.pence.name,
+                    'amount_pence': 99,
+                    'amount_exact': '',
+                },
+                {
+                    'amount__endswith': '99',
+                },
+            ),
+
+            # amount_pattern == 'pence' and amount_pence == 0
+            (
+                {
+                    'amount_pattern': AmountPattern.pence.name,
+                    'amount_pence': 0,
+                },
+                {
+                    'page': 1,
+                    'amount_pattern': AmountPattern.pence.name,
+                    'amount_pence': 0,
+                    'amount_exact': '',
+                },
+                {
+                    'amount__endswith': '00',
+                },
+            ),
+
+            # amount_pattern == 'not_integral'
+            (
+                {
+                    'amount_pattern': AmountPattern.not_integral.name,
+                    'amount_exact': '£100',
+                    'amount_pence': '99',
+                },
+                {
+                    'page': 1,
+                    'amount_pattern': AmountPattern.not_integral.name,
+                    'amount_pence': '',
+                    'amount_exact': '',
+                },
+                {
+                    'exclude_amount__endswith': '00',
+                },
+            ),
+
+            # amount_pattern == 'not_multiple_5'
+            (
+                {
+                    'amount_pattern': AmountPattern.not_multiple_5.name,
+                    'amount_exact': '£100',
+                    'amount_pence': '99',
+                },
+                {
+                    'page': 1,
+                    'amount_pattern': AmountPattern.not_multiple_5.name,
+                    'amount_pence': '',
+                    'amount_exact': '',
+                },
+                {
+                    'exclude_amount__regex': '(500|000)$',
+                },
+            ),
+
+            # amount_pattern == 'not_multiple_10'
+            (
+                {
+                    'amount_pattern': AmountPattern.not_multiple_10.name,
+                    'amount_exact': '£100',
+                    'amount_pence': '99',
+                },
+                {
+                    'page': 1,
+                    'amount_pattern': AmountPattern.not_multiple_10.name,
+                    'amount_pence': '',
+                    'amount_exact': '',
+                },
+                {
+                    'exclude_amount__endswith': '000',
+                },
+            ),
+
+            # amount_pattern == £100 or more
+            (
+                {
+                    'amount_pattern': AmountPattern.gte_100.name,
+                    'amount_exact': '£100',
+                    'amount_pence': '99',
+                },
+                {
+                    'page': 1,
+                    'amount_pattern': AmountPattern.gte_100.name,
+                    'amount_pence': '',
+                    'amount_exact': '',
+                },
+                {
+                    'amount__gte': '10000',
+                },
+            ),
+
+            # no amount_pattern
+            (
+                {
+                    'amount_pattern': '',
+                    'amount_exact': '£100',
+                    'amount_pence': '99',
+                },
+                {
+                    'page': 1,
+                    'amount_pattern': '',
+                    'amount_pence': '',
+                    'amount_exact': '',
+                },
+                {},
+            ),
+        ]
+
+        for data, expected_cleaned_data, expected_api_request_params in scenarios:
+            form = MyAmountSearchForm(
+                mock.MagicMock(),
+                data=data,
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertDictEqual(
+                form.cleaned_data,
+                expected_cleaned_data,
+            )
+            self.assertDictEqual(
+                form.get_api_request_params(),
+                expected_api_request_params,
+            )
+
+    def test_invalid(self):
+        """
+        Test validation errors.
+        """
+        scenarios = [
+            ValidationScenario(
+                {'amount_pattern': AmountPattern.exact.name},
+                {'amount_exact': ['This field is required for the selected amount pattern.']},
+            ),
+            ValidationScenario(
+                {'amount_pattern': AmountPattern.pence.name},
+                {'amount_pence': ['This field is required for the selected amount pattern.']},
+            ),
+            ValidationScenario(
+                {'amount_pattern': AmountPattern.pence.name, 'amount_pence': -1},
+                {'amount_pence': ['Ensure this value is greater than or equal to 0.']},
+            ),
+            ValidationScenario(
+                {'amount_pattern': AmountPattern.pence.name, 'amount_pence': 100},
+                {'amount_pence': ['Ensure this value is less than or equal to 99.']},
+            ),
+            ValidationScenario(
+                {'amount_pattern': 'invalid'},
+                {'amount_pattern': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+            ValidationScenario(
+                {'amount_pattern': AmountPattern.exact.name, 'amount_exact': '$100'},
+                {'amount_exact': ['Invalid amount.']},
+            ),
+            ValidationScenario(
+                {'amount_pattern': AmountPattern.exact.name, 'amount_exact': '£100.0.0'},
+                {'amount_exact': ['Invalid amount.']},
+            ),
+            ValidationScenario(
+                {'amount_pattern': AmountPattern.exact.name, 'amount_exact': 'one'},
+                {'amount_exact': ['Invalid amount.']},
+            ),
+        ]
+
+        for scenario in scenarios:
+            form = MyAmountSearchForm(
+                mock.MagicMock(),
+                data=scenario.data,
+            )
+            self.assertFalse(form.is_valid())
+            self.assertDictEqual(form.errors, scenario.errors)
 
 
 class SecurityFormTestCase(SimpleTestCase):
