@@ -658,7 +658,7 @@ class CreditsForm(BaseCreditsForm):
         return str(description).lower() if description else None
 
 
-class CreditsFormV2(SearchFormV2Mixin, BaseCreditsForm):
+class CreditsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseCreditsForm):
     """
     Search Form for Credits V2.
     """

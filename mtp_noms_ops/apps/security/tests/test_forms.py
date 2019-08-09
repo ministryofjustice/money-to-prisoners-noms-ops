@@ -1091,6 +1091,9 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'prison': [],
                 'simple_search': '',
                 'advanced': False,
+                'amount_pattern': '',
+                'amount_exact': '',
+                'amount_pence': '',
             },
         )
         self.assertDictEqual(
@@ -1105,9 +1108,9 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             'ordering=-received_at&advanced=False',
         )
 
-    def test_valid(self):
+    def test_valid_simple_search(self):
         """
-        Test that if data is passed in, the API query string is constructed as expected.
+        Test that if data for a simple search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
             prisons = mock_prison_response(rsps)
@@ -1142,6 +1145,9 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     prisons[0]['nomis_id'],
                 ],
                 'simple_search': 'Joh',
+                'amount_pattern': '',
+                'amount_exact': '',
+                'amount_pence': '',
             },
         )
 
@@ -1154,6 +1160,72 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     prisons[0]['nomis_id'],
                 ],
                 'simple_search': 'Joh',
+            },
+        )
+
+    def test_valid_advanced_search(self):
+        """
+        Test that if data for an advanced search is passed in, the API query string is constructed as expected.
+        """
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
+
+            form = self.form_class(
+                self.request,
+                data={
+                    'page': 2,
+                    'ordering': '-amount',
+                    'prison': [
+                        prisons[0]['nomis_id'],
+                    ],
+                    'advanced': True,
+                    'amount_pattern': AmountPattern.exact.name,
+                    'amount_exact': '100.00',
+                    'amount_pence': '',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+
+            api_call_made = rsps.calls[-1].request.url
+            self.assertDictEqual(
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['20'],
+                    'limit': ['20'],
+                    'ordering': ['-amount'],
+                    'prison': ['IXB'],
+                    'amount': ['10000'],
+                },
+            )
+
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'advanced': True,
+                'page': 2,
+                'ordering': '-amount',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'simple_search': '',
+                'amount_pattern': AmountPattern.exact.name,
+                'amount_exact': '100.00',
+                'amount_pence': '',
+            },
+        )
+
+        self.assertDictEqual(
+            form.get_query_data(),
+            {
+                'advanced': True,
+                'ordering': '-amount',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'amount': '10000',
             },
         )
 
