@@ -27,6 +27,9 @@ from security.utils import convert_date_fields
 
 
 def get_credit_source_choices():
+    """
+    TODO: delete after search V2 goes live.
+    """
     return [
         ('', _('Any method')),  # blank option
         *credit_sources.items(),
@@ -34,6 +37,9 @@ def get_credit_source_choices():
 
 
 def get_disbursement_method_choices():
+    """
+    TODO: delete after search V2 goes live.
+    """
     return [
         ('', _('Any method')),  # blank option
         *disbursement_methods.items(),
@@ -63,6 +69,9 @@ def validate_prisoner_number(prisoner_number):
 
 
 def validate_range_fields(*fields):
+    """
+    TODO: delete after search V2 goes live.
+    """
     def inner(cls):
         base_clean = cls.clean
 
