@@ -37,8 +37,10 @@ class CreditListViewV2(SecurityView):
     title = _('Credits')
     form_class = CreditsFormV2
     template_name = 'security/credits_list.html'
+    advanced_search_template_name = 'security/credits_advanced_search.html'
     search_results_view = 'security:credit_search_results'
     simple_search_view = 'security:credit_list'
+    advanced_search_view = 'security:credits_advanced_search'
     object_list_context_key = 'credits'
     object_name = _('credit')
     object_name_plural = _('credits')

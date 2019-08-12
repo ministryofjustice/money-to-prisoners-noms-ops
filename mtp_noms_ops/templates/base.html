@@ -21,9 +21,9 @@
           {% if request.can_pre_approve %}
             {% include 'proposition-tab.html' with view_name='security:review_credits' subview_names='security:review_credits' link_text=_('New credits check') %}
           {% endif %}
-          {% include 'proposition-tab.html' with view_name='security:credit_list' subview_names='security:credit_list security:credit_detail security:credit_search_results' link_text=_('Credits') params=initial_params %}
-          {% include 'proposition-tab.html' with view_name='security:sender_list' subview_names='security:sender_list security:sender_detail security:sender_search_results' link_text=_('Payment sources') params=initial_params hide_on_mobile=True %}
-          {% include 'proposition-tab.html' with view_name='security:prisoner_list' subview_names='security:prisoner_list security:prisoner_detail security:prisoner_disbursement_detail security:prisoner_search_results' link_text=_('Prisoners') params=initial_params hide_on_mobile=True %}
+          {% include 'proposition-tab.html' with view_name='security:credit_list' subview_names='security:credit_list security:credit_detail security:credit_search_results security:credits_advanced_search' link_text=_('Credits') params=initial_params %}
+          {% include 'proposition-tab.html' with view_name='security:sender_list' subview_names='security:sender_list security:sender_detail security:sender_search_results security:senders_advanced_search' link_text=_('Payment sources') params=initial_params hide_on_mobile=True %}
+          {% include 'proposition-tab.html' with view_name='security:prisoner_list' subview_names='security:prisoner_list security:prisoner_detail security:prisoner_disbursement_detail security:prisoner_search_results  security:prisoners_advanced_search' link_text=_('Prisoners') params=initial_params hide_on_mobile=True %}
           {% include 'proposition-tab.html' with view_name='security:disbursement_list' subview_names='security:disbursement_list security:disbursement_detail security:disbursement_search_results' link_text=_('Disbursements') params=initial_params %}
           {% if request.can_access_notifications %}
             {% include 'proposition-tab.html' with view_name='security:notification_list' subview_names='security:notification_list' link_text=_('Notifications') %}

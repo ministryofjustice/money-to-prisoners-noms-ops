@@ -63,6 +63,15 @@ urlpatterns = [
         name='credit_list',
     ),
     url(
+        r'^credits/advanced-search/$',
+        security_test(
+            views.CreditListViewV2.as_view(
+                view_type=views.ViewType.advanced_search_form,
+            ),
+        ),
+        name='credits_advanced_search',
+    ),
+    url(
         r'^credits/search-results/$',
         security_test(
             views.CreditListViewV2.as_view(
