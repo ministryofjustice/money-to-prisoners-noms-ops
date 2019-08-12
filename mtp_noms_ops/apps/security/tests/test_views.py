@@ -1323,6 +1323,7 @@ class PrisonerViewsV2TestCase(
     Test case related to prisoner search V2 and detail views.
     """
     view_name = 'security:prisoner_list'
+    advanced_search_view_name = 'security:prisoners_advanced_search'
     search_results_view_name = 'security:prisoner_search_results'
     detail_view_name = 'security:prisoner_detail'
     search_ordering = '-sender_count'
