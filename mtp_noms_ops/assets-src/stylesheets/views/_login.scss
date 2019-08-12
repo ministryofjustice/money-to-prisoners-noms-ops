@@ -11,6 +11,12 @@
     display: none;
   }
 
+  @include media($min-width: $desktop-breakpoint) {
+    #global-header .header-proposition {
+      min-height: 46px;
+    }
+  }
+
   .mtp-language-switch {
     padding-left: 0;
     padding-right: 0;
