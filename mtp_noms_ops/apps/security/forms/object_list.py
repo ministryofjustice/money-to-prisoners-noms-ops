@@ -948,7 +948,7 @@ class DisbursementsForm(BaseDisbursementsForm):
         return str(description).lower() if description else None
 
 
-class DisbursementsFormV2(SearchFormV2Mixin, BaseDisbursementsForm):
+class DisbursementsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseDisbursementsForm):
     """
     Search Form for Disbursements V2.
     """
@@ -957,6 +957,33 @@ class DisbursementsFormV2(SearchFormV2Mixin, BaseDisbursementsForm):
         required=False,
         help_text=_('Common or incomplete names may show many results'),
     )
+    created__gte = SplitDateField(
+        label=_('From'),
+        required=False,
+        help_text=_('For example, 01 08 2007'),
+    )
+    created__lt = SplitDateField(
+        label=_('To'),
+        required=False,
+        help_text=_('For example, 01 08 2007'),
+    )
+
+    recipient_name = forms.CharField(label=_('Name'), required=False)
+    recipient_email = forms.CharField(label=_('Email'), required=False)
+    postcode = forms.CharField(label=_('Postcode'), required=False)
+    account_number = forms.CharField(label=_('Account number'), required=False)
+    sort_code = forms.CharField(label=_('Sort code'), required=False)
+
+    prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
+    prisoner_number = forms.CharField(
+        label=_('Prisoner number'),
+        validators=[validate_prisoner_number],
+        required=False,
+    )
+
+    invoice_number = forms.CharField(label=_('Invoice number'), required=False)
+
+    exclusive_date_params = ['created__lt']
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Results containing {filter_description}.'
@@ -967,6 +994,69 @@ class DisbursementsFormV2(SearchFormV2Mixin, BaseDisbursementsForm):
     )
     description_capitalisation = {}
     unlisted_description = ''
+
+    def clean_postcode(self):
+        postcode = self.cleaned_data.get('postcode')
+        return remove_whitespaces_and_hyphens(postcode)
+
+    def clean_sort_code(self):
+        sort_code = self.cleaned_data.get('sort_code')
+        return remove_whitespaces_and_hyphens(sort_code)
+
+    def clean_prisoner_number(self):
+        """
+        Make sure prisoner number is always uppercase.
+        """
+        prisoner_number = self.cleaned_data.get('prisoner_number')
+        if not prisoner_number:
+            return prisoner_number
+
+        return prisoner_number.upper()
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        """
+        Split Date Fields are compressed into a datetime.date values.
+        This is okay for API calls but when we need to preserve the query string
+        (e.g. redirect to search results page or export), we need to keep the split
+        values instead.
+        """
+        query_data = super().get_query_data(
+            allow_parameter_manipulation=allow_parameter_manipulation,
+        )
+
+        if not allow_parameter_manipulation:
+            for date_field_name in ('created__gte', 'created__lt'):
+                value = query_data.pop(date_field_name, None)
+                if not value:
+                    continue
+
+                query_data.update(
+                    {
+                        f'{date_field_name}_{index}': value_part
+                        for index, value_part in enumerate(
+                            SplitDateField().widget.decompress(value),
+                        )
+                    },
+                )
+        return query_data
+
+    def _clean_dates(self, cleaned_data):
+        created__gte = cleaned_data.get('created__gte')
+        created__lt = cleaned_data.get('created__lt')
+
+        if created__gte and created__lt and created__gte > created__lt:
+            self.add_error(
+                'created__lt',
+                ValidationError(END_DATE_BEFORE_START_DATE_ERROR_MSG, code='bound_ordering'),
+            )
+        return cleaned_data
+
+    def clean(self):
+        """
+        Validates dates.
+        """
+        cleaned_data = super().clean()
+        return self._clean_dates(cleaned_data)
 
 
 @validate_range_fields(
