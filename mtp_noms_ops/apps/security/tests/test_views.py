@@ -1323,6 +1323,7 @@ class PrisonerViewsV2TestCase(
     Test case related to prisoner search V2 and detail views.
     """
     view_name = 'security:prisoner_list'
+    advanced_search_view_name = 'security:prisoners_advanced_search'
     search_results_view_name = 'security:prisoner_search_results'
     detail_view_name = 'security:prisoner_detail'
     search_ordering = '-sender_count'
@@ -1580,6 +1581,7 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
     Test case related to credit search V2 and detail views.
     """
     view_name = 'security:credit_list'
+    advanced_search_view_name = 'security:credits_advanced_search'
     search_results_view_name = 'security:credit_search_results'
     detail_view_name = 'security:credit_detail'
     search_ordering = '-received_at'
@@ -1704,6 +1706,12 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
         ],
     ]
 
+    def get_api_object_list_response_data(self):
+        return [
+            self.debit_card_credit,
+            self.bank_transfer_credit,
+        ]
+
     def _test_search_results_content(self, response):
         self.assertContains(response, '2 credits')
 
@@ -1798,12 +1806,6 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
                     ),
                 )
         self.assertEqual(response.status_code, 404)
-
-    def get_api_object_list_response_data(self):
-        return [
-            self.debit_card_credit,
-            self.bank_transfer_credit,
-        ]
 
 
 class DisbursementViewsTestCase(SecurityViewTestCase):

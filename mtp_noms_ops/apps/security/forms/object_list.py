@@ -6,13 +6,17 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
+from mtp_common.forms.fields import SplitDateField
 
 from security.forms.object_base import (
+    AmountPattern,
+    get_credit_source_choices,
+    get_disbursement_method_choices,
+    parse_amount,
     SecurityForm,
-    AmountPattern, parse_amount,
-    validate_amount, validate_prisoner_number, validate_range_fields,
-    insert_blank_option,
-    get_credit_source_choices, get_disbursement_method_choices,
+    validate_amount,
+    validate_prisoner_number,
+    validate_range_fields,
 )
 from security.templatetags.security import currency as format_currency
 from security.utils import (
@@ -20,6 +24,8 @@ from security.utils import (
     remove_whitespaces_and_hyphens,
     sender_profile_name,
 )
+
+END_DATE_BEFORE_START_DATE_ERROR_MSG = _('Must be after the start date.')
 
 
 class SearchFormV2Mixin(forms.Form):
@@ -39,6 +45,100 @@ class SearchFormV2Mixin(forms.Form):
         api_params = super().get_api_request_params()
         api_params.pop('advanced', None)
         return api_params
+
+
+class AmountSearchFormMixin(forms.Form):
+    """
+    Mixin for the amount fields and related logic.
+    """
+    amount_pattern = forms.ChoiceField(
+        label=_('Amount'),
+        required=False,
+        choices=AmountPattern.get_choices(),
+    )
+    amount_exact = forms.CharField(
+        label=AmountPattern.exact.value,
+        validators=[validate_amount],
+        required=False,
+    )
+    amount_pence = forms.IntegerField(
+        label=AmountPattern.pence.value,
+        min_value=0,
+        max_value=99,
+        required=False,
+    )
+
+    def _update_amounts_in_query_data(self, query_data):
+        amount_pattern = query_data.pop('amount_pattern', None)
+        try:
+            amount_pattern = AmountPattern[amount_pattern]
+        except KeyError:
+            return
+
+        amount_exact = query_data.pop('amount_exact', None)
+        amount_pence = query_data.pop('amount_pence', None)
+
+        if amount_pattern == AmountPattern.not_integral:
+            query_data['exclude_amount__endswith'] = '00'
+        elif amount_pattern == AmountPattern.not_multiple_5:
+            query_data['exclude_amount__regex'] = '(500|000)$'
+        elif amount_pattern == AmountPattern.not_multiple_10:
+            query_data['exclude_amount__endswith'] = '000'
+        elif amount_pattern == AmountPattern.gte_100:
+            query_data['amount__gte'] = '10000'
+        elif amount_pattern == AmountPattern.exact:
+            query_data['amount'] = parse_amount(amount_exact or '', as_int=False)
+        elif amount_pattern == AmountPattern.pence:
+            query_data['amount__endswith'] = '' if amount_pence is None else '%02d' % amount_pence
+        else:
+            raise NotImplementedError
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        """
+        Updates `query_data` by translating amount_pattern, amount_exact and amount_pence
+        into appropriate filters for the API.
+        """
+        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
+        if allow_parameter_manipulation:
+            self._update_amounts_in_query_data(query_data)
+        return query_data
+
+    def _clean_amount_fields(self, cleaned_data):
+        # if amount fields are already in error dont' check any further
+        if set(self.errors) & {'amount_pattern', 'amount_exact', 'amount_pence'}:
+            return cleaned_data
+
+        try:
+            amount_pattern = AmountPattern[cleaned_data.get('amount_pattern')]
+        except KeyError:
+            amount_pattern = None
+
+        if amount_pattern == AmountPattern.exact:
+            if not cleaned_data.get('amount_exact'):
+                self.add_error(
+                    'amount_exact',
+                    ValidationError(_('This field is required for the selected amount pattern.'), code='required'),
+                )
+        else:
+            cleaned_data['amount_exact'] = ''
+
+        if amount_pattern == AmountPattern.pence:
+            if cleaned_data.get('amount_pence') is None:
+                self.add_error(
+                    'amount_pence',
+                    ValidationError(_('This field is required for the selected amount pattern.'), code='required'),
+                )
+        else:
+            cleaned_data['amount_pence'] = ''
+        return cleaned_data
+
+    def clean(self):
+        """
+        Validates the amount fields and resets amount_exact, amount_pence if incompatible with
+        the choosen amount_pattern.
+        """
+        cleaned_data = super().clean()
+        return self._clean_amount_fields(cleaned_data)
 
 
 class BaseSendersForm(SecurityForm):
@@ -204,10 +304,12 @@ class SendersFormV2(SearchFormV2Mixin, BaseSendersForm):
     unlisted_description = ''
 
     def clean_sender_postcode(self):
-        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_postcode'))
+        sender_postcode = self.cleaned_data.get('sender_postcode')
+        return remove_whitespaces_and_hyphens(sender_postcode)
 
     def clean_sender_sort_code(self):
-        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sender_sort_code'))
+        sender_sort_code = self.cleaned_data.get('sender_sort_code')
+        return remove_whitespaces_and_hyphens(sender_sort_code)
 
 
 class BasePrisonersForm(SecurityForm):
@@ -423,8 +525,11 @@ class CreditsForm(BaseCreditsForm):
     received_at__lt = forms.DateField(label=_('Received before'), required=False,
                                       help_text=_('For example, 13/02/2018'))
 
-    amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
-                                       choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
+    amount_pattern = forms.ChoiceField(
+        label=_('Amount (£)'),
+        required=False,
+        choices=AmountPattern.get_choices(),
+    )
     amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
     amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 
@@ -556,7 +661,7 @@ class CreditsForm(BaseCreditsForm):
         return str(description).lower() if description else None
 
 
-class CreditsFormV2(SearchFormV2Mixin, BaseCreditsForm):
+class CreditsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseCreditsForm):
     """
     Search Form for Credits V2.
     """
@@ -565,6 +670,37 @@ class CreditsFormV2(SearchFormV2Mixin, BaseCreditsForm):
         required=False,
         help_text=_('Common or incomplete names may show many results'),
     )
+    received_at__gte = SplitDateField(
+        label=_('From'),
+        required=False,
+        help_text=_('For example, 01 08 2007'),
+    )
+    received_at__lt = SplitDateField(
+        label=_('To'),
+        required=False,
+        help_text=_('For example, 01 08 2007'),
+    )
+
+    sender_name = forms.CharField(label=_('Name'), required=False)
+    sender_email = forms.CharField(label=_('Email'), required=False)
+    sender_postcode = forms.CharField(label=_('Postcode'), required=False)
+    sender_ip_address = forms.CharField(
+        label=_('IP Address'),
+        validators=[validate_ipv4_address],
+        required=False,
+    )
+    card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
+    sender_account_number = forms.CharField(label=_('Account number'), required=False)
+    sender_sort_code = forms.CharField(label=_('Sort code'), required=False)
+
+    prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
+    prisoner_number = forms.CharField(
+        label=_('Prisoner number'),
+        validators=[validate_prisoner_number],
+        required=False,
+    )
+
+    exclusive_date_params = ['received_at__lt']
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Results containing {filter_description}.'
@@ -575,6 +711,69 @@ class CreditsFormV2(SearchFormV2Mixin, BaseCreditsForm):
     )
     description_capitalisation = {}
     unlisted_description = ''
+
+    def clean_sender_postcode(self):
+        sender_postcode = self.cleaned_data.get('sender_postcode')
+        return remove_whitespaces_and_hyphens(sender_postcode)
+
+    def clean_sender_sort_code(self):
+        sender_sort_code = self.cleaned_data.get('sender_sort_code')
+        return remove_whitespaces_and_hyphens(sender_sort_code)
+
+    def clean_prisoner_number(self):
+        """
+        Make sure prisoner number is always uppercase.
+        """
+        prisoner_number = self.cleaned_data.get('prisoner_number')
+        if not prisoner_number:
+            return prisoner_number
+
+        return prisoner_number.upper()
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        """
+        Split Date Fields are compressed into a datetime.date values.
+        This is okay for API calls but when we need to preserve the query string
+        (e.g. redirect to search results page or export), we need to keep the split
+        values instead.
+        """
+        query_data = super().get_query_data(
+            allow_parameter_manipulation=allow_parameter_manipulation,
+        )
+
+        if not allow_parameter_manipulation:
+            for date_field_name in ('received_at__gte', 'received_at__lt'):
+                value = query_data.pop(date_field_name, None)
+                if not value:
+                    continue
+
+                query_data.update(
+                    {
+                        f'{date_field_name}_{index}': value_part
+                        for index, value_part in enumerate(
+                            SplitDateField().widget.decompress(value),
+                        )
+                    },
+                )
+        return query_data
+
+    def _clean_dates(self, cleaned_data):
+        received_at__gte = cleaned_data.get('received_at__gte')
+        received_at__lt = cleaned_data.get('received_at__lt')
+
+        if received_at__gte and received_at__lt and received_at__gte > received_at__lt:
+            self.add_error(
+                'received_at__lt',
+                ValidationError(END_DATE_BEFORE_START_DATE_ERROR_MSG, code='bound_ordering'),
+            )
+        return cleaned_data
+
+    def clean(self):
+        """
+        Validates dates.
+        """
+        cleaned_data = super().clean()
+        return self._clean_dates(cleaned_data)
 
 
 class BaseDisbursementsForm(SecurityForm):
@@ -622,8 +821,11 @@ class DisbursementsForm(BaseDisbursementsForm):
     created__gte = forms.DateField(label=_('Entered since'), help_text=_('For example, 13/02/2018'), required=False)
     created__lt = forms.DateField(label=_('Entered before'), help_text=_('For example, 13/02/2018'), required=False)
 
-    amount_pattern = forms.ChoiceField(label=_('Amount (£)'), required=False,
-                                       choices=insert_blank_option(AmountPattern.get_choices(), _('Any amount')))
+    amount_pattern = forms.ChoiceField(
+        label=_('Amount (£)'),
+        required=False,
+        choices=AmountPattern.get_choices(),
+    )
     amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
     amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
 

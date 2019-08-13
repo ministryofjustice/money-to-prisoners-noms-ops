@@ -151,16 +151,39 @@ select[disabled] {
     width: 100%;
   }
 
-  #id_card_number_last_digits, #id_sender_account_number, #id_sender_sort_code {
+  #id_card_number_last_digits, #id_sender_account_number, #id_sender_sort_code, #id_sender_ip_address {
     max-width: 226px;
     width: 100%;
   }
 
-  #id_card_number_last_digits-wrapper, #id_prisoner_name-wrapper, #id_prisoner_number-wrapper {
+  #id_card_number_last_digits-wrapper, #id_prisoner_name-wrapper, #id_prisoner_number-wrapper, #id_sender_ip_address-wrapper {
     width: 100%;
   }
 
   #id_prisoner_name-wrapper, #id_prisoner_number-wrapper {
     display: block;
+  }
+
+  .mtp-form-group-year {
+    max-width: 88px;
+    width: 100%;
+  }
+
+  .mtp-split-date-legend {
+    font-weight: bold;
+  }
+
+  .mtp-split-date-to-wrapper {
+    @include media(mobile) {
+      margin-top: 20px;
+    }
+  }
+
+  #id_amount_exact-wrapper,
+  #id_amount_pence-wrapper {
+    @extend .panel;
+    border-left-width: 5px;
+    margin-left: 18px;
+    padding-left: 26px;
   }
 }

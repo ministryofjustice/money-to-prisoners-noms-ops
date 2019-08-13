@@ -27,23 +27,23 @@ from security.utils import convert_date_fields
 
 
 def get_credit_source_choices():
-    return insert_blank_option(
-        list(credit_sources.items()),
-        title=_('Any method')
-    )
+    """
+    TODO: delete after search V2 goes live.
+    """
+    return [
+        ('', _('Any method')),  # blank option
+        *credit_sources.items(),
+    ]
 
 
 def get_disbursement_method_choices():
-    return insert_blank_option(
-        list(disbursement_methods.items()),
-        title=_('Any method')
-    )
-
-
-def insert_blank_option(choices, title):
-    new_choices = [('', title)]
-    new_choices.extend(choices)
-    return new_choices
+    """
+    TODO: delete after search V2 goes live.
+    """
+    return [
+        ('', _('Any method')),  # blank option
+        *disbursement_methods.items(),
+    ]
 
 
 def parse_amount(value, as_int=True):
@@ -69,6 +69,9 @@ def validate_prisoner_number(prisoner_number):
 
 
 def validate_range_fields(*fields):
+    """
+    TODO: delete after search V2 goes live.
+    """
     def inner(cls):
         base_clean = cls.clean
 
@@ -100,10 +103,22 @@ class AmountPattern(enum.Enum):
 
     @classmethod
     def get_choices(cls):
-        return [(choice.name, choice.value) for choice in cls]
+        """
+        Returns list of choices to be used in forms. It also includes a blank option.
+        """
+        return [
+            ('', _('Any amount')),
+            *[
+                (choice.name, choice.value)
+                for choice in cls
+            ],
+        ]
 
     @classmethod
     def update_query_data(cls, query_data):
+        """
+        TODO: delete after search V2 goes live.
+        """
         amount_pattern = query_data.pop('amount_pattern', None)
         try:
             amount_pattern = cls[amount_pattern]
@@ -174,21 +189,21 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 self.data.setlist('prison', selected_prisons)
 
             if 'prison_region' in self.fields:
-                self['prison_region'].field.choices = insert_blank_option(
-                    self.prison_list.region_choices,
-                    title=_('All regions'),
-                )
+                self['prison_region'].field.choices = [
+                    ('', _('All regions')),
+                    *self.prison_list.region_choices,
+                ]
             if 'prison_population' in self.fields:
-                self['prison_population'].field.choices = insert_blank_option(
-                    self.prison_list.population_choices,
-                    title=_('All types'),
-                )
+                self['prison_population'].field.choices = [
+                    ('', _('All types')),  # blank option
+                    *self.prison_list.population_choices,
+                ]
 
             if 'prison_category' in self.fields:
-                self['prison_category'].field.choices = insert_blank_option(
-                    self.prison_list.category_choices,
-                    title=_('All categories'),
-                )
+                self['prison_category'].field.choices = [
+                    ('', _('All categories')),  # blank option
+                    *self.prison_list.category_choices,
+                ]
 
     @cached_property
     def session(self):

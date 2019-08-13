@@ -11,22 +11,36 @@ exports.SecurityForms = {
 
   bindAmountPatternSelection: function () {
     var $patternSelect = $('#id_amount_pattern');
+    var valueGetter = function() { return $patternSelect.val() };
+
+    // if $patternSelect doesn't exist, check if the radio varient exists instead
+    if (!$patternSelect.length && $('[name=amount_pattern]')) {
+      $patternSelect = $('[name=amount_pattern]');
+      valueGetter = function() { return $patternSelect.filter(':checked').val(); };
+    }
+
     var $exactWrapper = $('#id_amount_exact-wrapper');
     var $penceWrapper = $('#id_amount_pence-wrapper');
 
+    var hideWrapper = function(wrapper) {
+      wrapper.removeClass('form-group-error').hide();
+      wrapper.find('input').val('').removeClass('form-control-error');
+      wrapper.find('.error-message').remove();
+    };
+
     function update () {
-      switch ($patternSelect.val()) {
+      switch (valueGetter()) {
         case 'exact':
           $exactWrapper.show();
-          $penceWrapper.hide();
+          hideWrapper($penceWrapper);
           break;
         case 'pence':
-          $exactWrapper.hide();
+          hideWrapper($exactWrapper);
           $penceWrapper.show();
           break;
         default:
-          $exactWrapper.hide();
-          $penceWrapper.hide();
+          hideWrapper($exactWrapper);
+          hideWrapper($penceWrapper);
       }
     }
 
