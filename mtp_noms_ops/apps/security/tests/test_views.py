@@ -642,9 +642,6 @@ class SearchV2SecurityTestCaseMixin:
         The action of submitting the form is represented by the query param
         SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
         """
-        if not self.advanced_search_view_name:
-            self.skipTest(f'Advanced search not yet implemented for {self.__class__.__name__}')
-
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             sample_prison_list(rsps=rsps)
@@ -1948,6 +1945,7 @@ class DisbursementViewsV2TestCase(
     Test case related to disbursement search V2 and detail views.
     """
     view_name = 'security:disbursement_list'
+    advanced_search_view_name = 'security:disbursements_advanced_search'
     search_results_view_name = 'security:disbursement_search_results'
     detail_view_name = 'security:disbursement_detail'
     search_ordering = '-created'

@@ -19,6 +19,10 @@
     <div class="grid-row">
         <div class="column-two-thirds">
           {% include 'security/forms/top-area-object-list.html' %}
+
+          {% if not is_search_results %}
+          <a href="{% url 'security:disbursements_advanced_search' %}">{% trans 'Advanced search' %}</a>
+          {% endif %}
         </div>
     </div>
 

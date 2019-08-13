@@ -329,6 +329,15 @@ urlpatterns = [
         name='disbursement_list',
     ),
     url(
+        r'^disbursements/advanced-search/$',
+        security_test(
+            views.DisbursementListViewV2.as_view(
+                view_type=views.ViewType.advanced_search_form,
+            ),
+        ),
+        name='disbursements_advanced_search',
+    ),
+    url(
         r'^disbursements/search-results/$',
         security_test(
             views.DisbursementListViewV2.as_view(
