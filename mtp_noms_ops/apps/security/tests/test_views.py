@@ -23,6 +23,7 @@ from security import (
 )
 from security.models import EmailNotifications
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
+from security.forms.object_base import YOUR_PRISONS_QUERY_STRING_VALUE
 from security.views.object_base import SEARCH_FORM_SUBMITTED_INPUT_NAME
 
 
@@ -603,11 +604,10 @@ class SearchV2SecurityTestCaseMixin:
             sample_prison_list(rsps=rsps)
             response = self.client.get(reverse(self.view_name))
 
-        for prison in user_prisons:
-            self.assertContains(
-                response,
-                f'<input type="hidden" name="prison" value="{prison["nomis_id"]}" />',
-            )
+        self.assertContains(
+            response,
+            f'<input type="hidden" name="prison" value="{YOUR_PRISONS_QUERY_STRING_VALUE}" />',
+        )
 
     def test_simple_search_redirects_to_search_results_page(self):
         """

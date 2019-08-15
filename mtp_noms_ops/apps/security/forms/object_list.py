@@ -13,6 +13,7 @@ from security.forms.object_base import (
     get_credit_source_choices,
     get_disbursement_method_choices,
     parse_amount,
+    PrisonChoiceField,
     SecurityForm,
     validate_amount,
     validate_prisoner_number,
@@ -160,7 +161,6 @@ class BaseSendersForm(SecurityForm):
             ('-credit_total', _('Total sent (high to low)')),
         ]
     )
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     def get_object_list_endpoint_path(self):
         return '/senders/'
@@ -177,6 +177,7 @@ class SendersForm(BaseSendersForm):
 
     TODO: delete after search V2 goes live.
     """
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     prisoner_count__gte = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
     prisoner_count__lte = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
@@ -281,6 +282,8 @@ class SendersFormV2(SearchFormV2Mixin, BaseSendersForm):
     """
     Search Form for Senders V2.
     """
+    prison = PrisonChoiceField(label=_('Prison'), required=False, choices=[])
+
     simple_search = forms.CharField(
         label=_('Search payment source name or email address'),
         required=False,
@@ -339,7 +342,6 @@ class BasePrisonersForm(SecurityForm):
             ('-prisoner_number', _('Prisoner number (Z to A)')),
         ],
     )
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     def get_object_list_endpoint_path(self):
         return '/prisoners/'
@@ -359,6 +361,7 @@ class PrisonersForm(BasePrisonersForm):
 
     TODO: delete after search V2 goes live.
     """
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     sender_count__gte = forms.IntegerField(label=_('Number of senders (minimum)'), required=False, min_value=1)
     sender_count__lte = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)
@@ -447,6 +450,8 @@ class PrisonersFormV2(SearchFormV2Mixin, BasePrisonersForm):
     """
     Search Form for Prisoners V2.
     """
+    prison = PrisonChoiceField(label=_('Prison'), required=False)
+
     simple_search = forms.CharField(
         label=_('Search prisoner number or name'),
         required=False,
@@ -499,7 +504,6 @@ class BaseCreditsForm(SecurityForm):
             ('-prisoner_number', _('Prisoner number (Z to A)')),
         ],
     )
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     def get_object_list(self):
         object_list = super().get_object_list()
@@ -519,6 +523,7 @@ class CreditsForm(BaseCreditsForm):
 
     TODO: delete after search V2 goes live.
     """
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     received_at__gte = forms.DateField(label=_('Received since'), required=False,
                                        help_text=_('For example, 13/02/2018'))
@@ -665,6 +670,8 @@ class CreditsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseCreditsForm):
     """
     Search Form for Credits V2.
     """
+    prison = PrisonChoiceField(label=_('Prison'), required=False, choices=[])
+
     simple_search = forms.CharField(
         label=_('Search payment source name, email address or prisoner number'),
         required=False,
@@ -796,8 +803,6 @@ class BaseDisbursementsForm(SecurityForm):
         ],
     )
 
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
-
     exclude_private_estate = True
 
     def get_object_list(self):
@@ -818,6 +823,8 @@ class DisbursementsForm(BaseDisbursementsForm):
 
     TODO: delete after search V2 goes live.
     """
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
+
     created__gte = forms.DateField(label=_('Entered since'), help_text=_('For example, 13/02/2018'), required=False)
     created__lt = forms.DateField(label=_('Entered before'), help_text=_('For example, 13/02/2018'), required=False)
 
@@ -952,6 +959,8 @@ class DisbursementsFormV2(SearchFormV2Mixin, BaseDisbursementsForm):
     """
     Search Form for Disbursements V2.
     """
+    prison = PrisonChoiceField(label=_('Prison'), required=False, choices=[])
+
     simple_search = forms.CharField(
         label=_('Search recipient name or prisoner number'),
         required=False,

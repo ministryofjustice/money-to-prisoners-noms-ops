@@ -26,6 +26,55 @@ from security.searches import (
 from security.utils import convert_date_fields
 
 
+YOUR_PRISONS_QUERY_STRING_VALUE = 'mine'
+
+
+class PrisonChoiceField(forms.MultipleChoiceField):
+    """
+    MultipleChoiceField for prison field.
+
+    To be used along with SecurityForm which makes sure the methods configure and to_api_value
+    are called at the right time.
+
+    It supports a magic choice option `YOUR_PRISONS_QUERY_STRING_VALUE` which is automatically
+    expanded into the current user's prisons when making API calls.
+    """
+    def configure(self, request, prison_list):
+        """
+        To be called explicitly to configure this field.
+        """
+        self.choices = [
+            *prison_list.prison_choices,
+
+            (YOUR_PRISONS_QUERY_STRING_VALUE, _('Your prisons')),
+        ]
+        self.request = request
+
+    def to_api_value(self, value):
+        """
+        Resolves `value` into something that can be used to query the API.
+        The option `YOUR_PRISONS_QUERY_STRING_VALUE` is automatically expanded
+        into the current user's prisons.
+        """
+        if YOUR_PRISONS_QUERY_STRING_VALUE not in (value or []):
+            return value
+
+        return list({
+            # current user's prisons
+            *[
+                prison['nomis_id']
+                for prison in (self.request.user_prisons or [])
+            ],
+
+            # any other selected prison
+            *[
+                prison
+                for prison in value
+                if prison != YOUR_PRISONS_QUERY_STRING_VALUE
+            ],
+        })
+
+
 def get_credit_source_choices():
     """
     TODO: delete after search V2 goes live.
@@ -178,7 +227,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
 
         if 'prison' in self.fields:
             self.prison_list = PrisonList(self.session, exclude_private_estate=self.exclude_private_estate)
-            self['prison'].field.choices = self.prison_list.prison_choices
+
+            if hasattr(self.fields['prison'], 'configure'):
+                self.fields['prison'].configure(self.request, self.prison_list)
+            else:
+                self['prison'].field.choices = self.prison_list.prison_choices
 
             if 'prison' in self.data and hasattr(self.data, 'getlist'):
                 selected_prisons = itertools.chain.from_iterable(
@@ -220,13 +273,18 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         :return: collections.OrderedDict
         """
         data = collections.OrderedDict()
-        for field in self:
-            if field.name == 'page':
+        for field_name, field in self.fields.items():
+            if field_name == 'page':
                 continue
-            value = self.cleaned_data.get(field.name)
+            value = self.cleaned_data.get(field_name)
+
+            # if the field defines a method called `to_api_value`, call it to resolve `value`
+            if allow_parameter_manipulation and hasattr(field, 'to_api_value'):
+                value = field.to_api_value(value)
+
             if value in [None, '', []]:
                 continue
-            data[field.name] = value
+            data[field_name] = value
         return data
 
     def get_api_request_params(self):

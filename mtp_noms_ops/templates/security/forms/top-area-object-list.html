@@ -34,9 +34,7 @@
     <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
     {{ form.ordering.as_hidden }}
 
-    {% for prison in request.user_prisons %}
-        <input type="hidden" name="prison" value="{{ prison.nomis_id }}" />
-    {% endfor %}
+    <input type="hidden" name="prison" value="{{ YOUR_PRISONS_QUERY_STRING_VALUE }}" />
 
     {% with field=form.simple_search %}
       <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">

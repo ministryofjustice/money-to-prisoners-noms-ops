@@ -6,11 +6,12 @@ from unittest import mock
 from urllib.parse import parse_qs
 
 from django.http import QueryDict
+from django.utils.translation import gettext_lazy as _
 from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
 import responses
 
-from security.forms.object_base import AmountPattern, SecurityForm
+from security.forms.object_base import AmountPattern, PrisonChoiceField, YOUR_PRISONS_QUERY_STRING_VALUE, SecurityForm
 from security.forms.object_list import (
     AmountSearchFormMixin,
     SendersForm,
@@ -33,6 +34,13 @@ class MyAmountSearchForm(AmountSearchFormMixin, SecurityForm):
     """
     SecurityForm used to test AmountSearchFormMixin.
     """
+
+
+class MyPrisonChoiceForm(SecurityForm):
+    """
+    SecurityForm used to test PrisonChoiceField.
+    """
+    prison = PrisonChoiceField()
 
 
 def mock_prison_response(rsps):
@@ -313,6 +321,174 @@ class AmountSearchFormMixinTestCase(SimpleTestCase):
             self.assertDictEqual(form.errors, scenario.errors)
 
 
+class PrisonChoiceFieldTestCase(SimpleTestCase):
+    """
+    Tests for the PrisonChoiceField.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.request = mock.MagicMock(
+            user=mock.MagicMock(
+                token=generate_tokens(),
+            ),
+        )
+
+    def test_configure(self):
+        """
+        Test that field.choices is configured correctly.
+        """
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+            form = MyPrisonChoiceForm(self.request)
+
+            expected_choices = [
+                (prison['nomis_id'], prison['name'])
+                for prison in prisons
+            ]
+            expected_choices.append(
+                (YOUR_PRISONS_QUERY_STRING_VALUE, _('Your prisons')),
+            )
+            self.assertCountEqual(
+                form.fields['prison'].choices,
+                expected_choices,
+            )
+
+    def test_query_string(self):
+        """
+        Test that the query_string method preserves the same params.
+        """
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+
+            scenarios = (
+                # current user's prisons selected
+                [YOUR_PRISONS_QUERY_STRING_VALUE],
+
+                # arbitrary selection of prisons
+                [
+                    prison['nomis_id']
+                    for prison in prisons[:-1]
+                ],
+
+                # current user's prisons and all other prisons selected
+                [
+                    YOUR_PRISONS_QUERY_STRING_VALUE,
+
+                    *[
+                        prison['nomis_id']
+                        for prison in prisons
+                    ],
+                ],
+            )
+
+            for scenario in scenarios:
+                form = MyPrisonChoiceForm(
+                    self.request,
+                    data={
+                        'prison': scenario,
+                    },
+                )
+
+                self.assertTrue(form.is_valid())
+
+                actual_qs = parse_qs(form.query_string)
+                self.assertCountEqual(
+                    actual_qs['prison'],
+                    scenario,
+                )
+
+    def test_get_api_request_params(self):
+        """
+        Test that the get_api_request_params method expands YOUR_PRISONS_QUERY_STRING_VALUE.
+        """
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+
+            scenarios = (
+                # current user's prisons selected == one prison
+                {
+                    'user_prisons': [prisons[0]],
+                    'data': {'prison': [YOUR_PRISONS_QUERY_STRING_VALUE]},
+                    'expected_api_params': {
+                        'prison': [prisons[0]['nomis_id']],
+                    }
+                },
+
+                # current user's prisons selected == all prisons
+                {
+                    'user_prisons': [],
+                    'data': {'prison': [YOUR_PRISONS_QUERY_STRING_VALUE]},
+                    'expected_api_params': {}
+                },
+
+
+                # arbitrary selection of prisons
+                {
+                    'user_prisons': [],
+                    'data': {
+                        'prison': [
+                            prison['nomis_id']
+                            for prison in prisons[:-1]
+                        ],
+                    },
+                    'expected_api_params': {
+                        'prison': [
+                            prison['nomis_id']
+                            for prison in prisons[:-1]
+                        ],
+                    }
+                },
+
+                # current user's prisons and all other prisons selected
+                {
+                    'user_prisons': [prisons[0]],
+                    'data': {
+                        'prison': [
+                            YOUR_PRISONS_QUERY_STRING_VALUE,
+
+                            *[
+                                prison['nomis_id']
+                                for prison in prisons
+                            ],
+                        ]
+                    },
+                    'expected_api_params': {
+                        'prison': [
+                            prison['nomis_id']
+                            for prison in prisons
+                        ],
+                    }
+                },
+            )
+
+            for scenario in scenarios:
+                request = mock.MagicMock(
+                    user=mock.MagicMock(
+                        token=generate_tokens(),
+                    ),
+                    user_prisons=scenario['user_prisons'],
+                )
+
+                form = MyPrisonChoiceForm(
+                    request,
+                    data=scenario['data'],
+                )
+
+                self.assertTrue(form.is_valid())
+
+                actual_api_params = form.get_api_request_params()
+                expected_api_params = scenario['expected_api_params']
+
+                actual_api_params.get('prison', []).sort()
+                expected_api_params.get('prison', []).sort()
+
+                self.assertDictEqual(
+                    actual_api_params,
+                    expected_api_params,
+                )
+
+
 class SecurityFormTestCase(SimpleTestCase):
     form_class = None
 
@@ -381,7 +557,10 @@ class SecurityFormTestCase(SimpleTestCase):
             expected_query_string = f'{expected_query_string}&advanced=False'
 
         self.assertDictEqual(form.get_query_data(), expected_query_data)
-        self.assertEqual(form.query_string, expected_query_string)
+        self.assertDictEqual(
+            parse_qs(form.query_string),
+            parse_qs(expected_query_string),
+        )
 
     def test_filtering_by_many_prisons(self):
         if not self.form_class:
@@ -408,7 +587,10 @@ class SecurityFormTestCase(SimpleTestCase):
             expected_query_string = f'{expected_query_string}&advanced=False'
 
         self.assertDictEqual(form.get_query_data(), expected_query_data)
-        self.assertEqual(form.query_string, expected_query_string)
+        self.assertDictEqual(
+            parse_qs(form.query_string),
+            parse_qs(expected_query_string),
+        )
 
     def test_filtering_by_many_prisons_alternate(self):
         if not self.form_class:
@@ -435,7 +617,10 @@ class SecurityFormTestCase(SimpleTestCase):
             expected_query_string = f'{expected_query_string}&advanced=False'
 
         self.assertDictEqual(form.get_query_data(), expected_query_data)
-        self.assertEqual(form.query_string, expected_query_string)
+        self.assertDictEqual(
+            parse_qs(form.query_string),
+            parse_qs(expected_query_string),
+        )
 
 
 class SenderFormTestCase(SecurityFormTestCase):
