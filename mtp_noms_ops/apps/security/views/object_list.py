@@ -66,8 +66,10 @@ class DisbursementListViewV2(SecurityView):
     title = _('Disbursements')
     form_class = DisbursementsFormV2
     template_name = 'security/disbursements_list.html'
+    advanced_search_template_name = 'security/disbursements_advanced_search.html'
     search_results_view = 'security:disbursement_search_results'
     simple_search_view = 'security:disbursement_list'
+    advanced_search_view = 'security:disbursements_advanced_search'
     object_list_context_key = 'disbursements'
     object_name = _('disbursement')
     object_name_plural = _('disbursements')

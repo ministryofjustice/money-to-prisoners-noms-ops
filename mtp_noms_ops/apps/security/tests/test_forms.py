@@ -1517,6 +1517,19 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'prison': [],
                 'simple_search': '',
                 'advanced': False,
+                'amount_exact': '',
+                'amount_pattern': '',
+                'amount_pence': '',
+                'recipient_name': '',
+                'recipient_email': '',
+                'postcode': '',
+                'created__gte': None,
+                'created__lt': None,
+                'account_number': '',
+                'sort_code': '',
+                'prisoner_name': '',
+                'prisoner_number': '',
+                'invoice_number': '',
             },
         )
         self.assertDictEqual(
@@ -1531,9 +1544,9 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
             'ordering=-created&advanced=False',
         )
 
-    def test_valid(self):
+    def test_valid_simple_search(self):
         """
-        Test that if data is passed in, the API query string is constructed as expected.
+        Test that if data for a simple search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
             prisons = mock_prison_response(rsps)
@@ -1568,6 +1581,19 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                     prisons[0]['nomis_id'],
                 ],
                 'simple_search': 'Joh',
+                'amount_exact': '',
+                'amount_pattern': '',
+                'amount_pence': '',
+                'recipient_name': '',
+                'recipient_email': '',
+                'postcode': '',
+                'created__gte': None,
+                'created__lt': None,
+                'account_number': '',
+                'sort_code': '',
+                'prisoner_name': '',
+                'prisoner_number': '',
+                'invoice_number': '',
             },
         )
 
@@ -1581,6 +1607,142 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 ],
                 'simple_search': 'Joh',
             },
+        )
+
+    def test_valid_advanced_search(self):
+        """
+        Test that if data for an advanced search is passed in, the API query string is constructed as expected.
+        """
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+            mock_empty_response(rsps, self.api_list_path)
+
+            form = self.form_class(
+                self.request,
+                data={
+                    'page': 2,
+                    'ordering': '-amount',
+                    'prison': [
+                        prisons[0]['nomis_id'],
+                    ],
+                    'advanced': True,
+                    'amount_pattern': AmountPattern.exact.name,
+                    'amount_exact': '100.00',
+                    'amount_pence': '',
+                    'recipient_name': 'John Doe',
+                    'recipient_email': 'johndoe',
+                    'postcode': 'SW1A 1a-a',
+                    'created__gte_0': '1',
+                    'created__gte_1': '2',
+                    'created__gte_2': '2000',
+                    'created__lt_0': '10',
+                    'created__lt_1': '3',
+                    'created__lt_2': '2000',
+                    'account_number': '123456789',
+                    'sort_code': '11-22 - 33',
+                    'prisoner_name': 'Jane Doe',
+                    'prisoner_number': 'a2624ae',
+                    'invoice_number': 'PMD1000052',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+
+            api_call_made = rsps.calls[-1].request.url
+            self.assertDictEqual(
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['20'],
+                    'limit': ['20'],
+                    'ordering': ['-amount'],
+                    'prison': ['IXB'],
+                    'amount': ['10000'],
+                    'recipient_name': ['John Doe'],
+                    'recipient_email': ['johndoe'],
+                    'postcode': ['SW1A1aa'],
+                    'created__gte': ['2000-02-01'],
+                    'created__lt': ['2000-03-11'],
+                    'account_number': ['123456789'],
+                    'sort_code': ['112233'],
+                    'prisoner_name': ['Jane Doe'],
+                    'prisoner_number': ['A2624AE'],
+                    'invoice_number': ['PMD1000052'],
+                },
+            )
+
+        self.assertDictEqual(
+            form.cleaned_data,
+            {
+                'advanced': True,
+                'page': 2,
+                'ordering': '-amount',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'simple_search': '',
+                'amount_pattern': AmountPattern.exact.name,
+                'amount_exact': '100.00',
+                'amount_pence': '',
+                'recipient_name': 'John Doe',
+                'recipient_email': 'johndoe',
+                'postcode': 'SW1A1aa',
+                'created__gte': datetime.date(2000, 2, 1),
+                'created__lt': datetime.date(2000, 3, 10),
+                'account_number': '123456789',
+                'sort_code': '112233',
+                'prisoner_name': 'Jane Doe',
+                'prisoner_number': 'A2624AE',
+                'invoice_number': 'PMD1000052',
+            },
+        )
+
+        self.assertDictEqual(
+            form.get_query_data(),
+            {
+                'advanced': True,
+                'ordering': '-amount',
+                'prison': [
+                    prisons[0]['nomis_id'],
+                ],
+                'amount': '10000',
+                'recipient_name': 'John Doe',
+                'recipient_email': 'johndoe',
+                'postcode': 'SW1A1aa',
+                'created__gte': datetime.date(2000, 2, 1),
+                'created__lt': datetime.date(2000, 3, 10),
+                'account_number': '123456789',
+                'sort_code': '112233',
+                'prisoner_name': 'Jane Doe',
+                'prisoner_number': 'A2624AE',
+                'invoice_number': 'PMD1000052',
+            },
+        )
+
+        # make sure the values for dates are split
+        self.assertDictEqual(
+            parse_qs(form.query_string),
+            {
+                'ordering': ['-amount'],
+                'prison': ['IXB'],
+                'amount_pattern': ['exact'],
+                'amount_exact': ['100.00'],
+                'advanced': ['True'],
+                'recipient_name': ['John Doe'],
+                'recipient_email': ['johndoe'],
+                'postcode': ['SW1A1aa'],
+                'created__gte_0': ['1'],
+                'created__gte_1': ['2'],
+                'created__gte_2': ['2000'],
+                'created__lt_0': ['10'],
+                'created__lt_1': ['3'],
+                'created__lt_2': ['2000'],
+                'account_number': ['123456789'],
+                'sort_code': ['112233'],
+                'prisoner_name': ['Jane Doe'],
+                'prisoner_number': ['A2624AE'],
+                'invoice_number': ['PMD1000052'],
+            }
         )
 
     def test_invalid(self):
@@ -1599,6 +1761,35 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
             ValidationScenario(
                 {'prison': ['invalid']},
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+            ValidationScenario(
+                {'prisoner_number': 'invalid'},
+                {'prisoner_number': ['Invalid prisoner number.']},
+            ),
+            ValidationScenario(
+                {
+                    'created__gte_0': '2',
+                    'created__gte_1': '2',
+                    'created__gte_2': '2000',
+                    'created__lt_0': '1',
+                    'created__lt_1': '2',
+                    'created__lt_2': '2000',
+                },
+                {'created__lt': ['Must be after the start date.']},
+            ),
+            ValidationScenario(
+                {
+                    'created__gte_0': '32',
+                    'created__gte_1': '13',
+                    'created__gte_2': '1111',
+                },
+                {
+                    'created__gte': [
+                        '‘Day’ should be between 1 and 31',
+                        '‘Month’ should be between 1 and 12',
+                        '‘Year’ should be between 1900 and 2019',
+                    ],
+                },
             ),
         ]
 
