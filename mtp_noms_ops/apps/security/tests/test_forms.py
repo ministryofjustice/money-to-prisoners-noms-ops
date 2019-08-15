@@ -333,6 +333,11 @@ class PrisonChoiceFieldTestCase(SimpleTestCase):
                 token=generate_tokens(),
             ),
         )
+        self.disable_cache = mock.patch('security.models.cache')
+        self.disable_cache.start().get.return_value = None
+
+    def tearDown(self):
+        self.disable_cache.stop()
 
     def test_configure(self):
         """
