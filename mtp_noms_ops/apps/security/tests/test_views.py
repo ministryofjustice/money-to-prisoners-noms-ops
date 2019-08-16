@@ -21,6 +21,7 @@ from security import (
     required_permissions, hmpps_employee_flag, not_hmpps_employee_flag,
     confirmed_prisons_flag, notifications_pilot_flag, SEARCH_V2_FLAG,
 )
+from security.forms.object_list import YOUR_PRISONS_QUERY_STRING_VALUE
 from security.models import EmailNotifications
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
 from security.views.object_base import SEARCH_FORM_SUBMITTED_INPUT_NAME
@@ -506,6 +507,14 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         response = self.client.get(reverse(self.view_name), follow=True)
         self.assertContains(response, '<!-- %s -->' % self.view_name)
 
+
+class LegacySecurityViewTestCase(SecurityViewTestCase):
+    """
+    Base TestCase class for security search views V1
+
+    TODO: delete after search V2 goes live.
+    """
+
     @responses.activate
     def test_filtering_by_one_prison(self):
         if not self.api_list_path:
@@ -604,11 +613,10 @@ class SearchV2SecurityTestCaseMixin:
             sample_prison_list(rsps=rsps)
             response = self.client.get(reverse(self.view_name))
 
-        for prison in user_prisons:
-            self.assertContains(
-                response,
-                f'<input type="hidden" name="prison" value="{prison["nomis_id"]}" />',
-            )
+        self.assertContains(
+            response,
+            f'<input type="hidden" name="prison_selector" value="{YOUR_PRISONS_QUERY_STRING_VALUE}"',
+        )
 
     def test_simple_search_redirects_to_search_results_page(self):
         """
@@ -627,7 +635,10 @@ class SearchV2SecurityTestCaseMixin:
                     'results': [],
                 },
             )
-            query_string = f'ordering={self.search_ordering}&advanced=False&simple_search=test'
+            query_string = (
+                f'ordering={self.search_ordering}&prison_selector={YOUR_PRISONS_QUERY_STRING_VALUE}'
+                f'&advanced=False&simple_search=test'
+            )
             request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
             response = self.client.get(request_url)
@@ -653,7 +664,10 @@ class SearchV2SecurityTestCaseMixin:
                     'results': [],
                 },
             )
-            query_string = f'ordering={self.search_ordering}&advanced=True'
+            query_string = (
+                f'ordering={self.search_ordering}&prison_selector={YOUR_PRISONS_QUERY_STRING_VALUE}'
+                '&advanced=True'
+            )
             request_url = (
                 f'{reverse(self.advanced_search_view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             )
@@ -885,7 +899,7 @@ class ExportSecurityViewTestCaseMixin:
             self.assertRedirects(response, referer_url)
 
 
-class SenderViewsTestCase(SecurityViewTestCase):
+class SenderViewsTestCase(LegacySecurityViewTestCase):
     """
     TODO: delete after search V2 goes live.
     """
@@ -1209,7 +1223,7 @@ class SenderViewsV2TestCase(
         self.assertContains(response, 'non-field-error')
 
 
-class PrisonerViewsTestCase(SecurityViewTestCase):
+class PrisonerViewsTestCase(LegacySecurityViewTestCase):
     """
     TODO: delete after search V2 goes live.
     """
@@ -1460,7 +1474,7 @@ class PrisonerViewsV2TestCase(
         self.assertContains(response, 'non-field-error')
 
 
-class CreditViewsTestCase(SecurityViewTestCase):
+class CreditViewsTestCase(LegacySecurityViewTestCase):
     """
     TODO: delete after search V2 goes live.
     """
@@ -1806,7 +1820,7 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
         self.assertEqual(response.status_code, 404)
 
 
-class DisbursementViewsTestCase(SecurityViewTestCase):
+class DisbursementViewsTestCase(LegacySecurityViewTestCase):
     """
     TODO: delete after search V2 goes live.
     """

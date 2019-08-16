@@ -241,7 +241,6 @@ class BaseSendersForm(SecurityForm):
             ('-credit_total', _('Total sent (high to low)')),
         ]
     )
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     def get_object_list_endpoint_path(self):
         return '/senders/'
@@ -258,6 +257,7 @@ class SendersForm(BaseSendersForm):
 
     TODO: delete after search V2 goes live.
     """
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     prisoner_count__gte = forms.IntegerField(label=_('Number of prisoners (minimum)'), required=False, min_value=1)
     prisoner_count__lte = forms.IntegerField(label=_('Maximum prisoners sent to'), required=False, min_value=1)
@@ -358,7 +358,7 @@ class SendersForm(BaseSendersForm):
         return query_data
 
 
-class SendersFormV2(SearchFormV2Mixin, BaseSendersForm):
+class SendersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, BaseSendersForm):
     """
     Search Form for Senders V2.
     """
@@ -420,7 +420,6 @@ class BasePrisonersForm(SecurityForm):
             ('-prisoner_number', _('Prisoner number (Z to A)')),
         ],
     )
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     def get_object_list_endpoint_path(self):
         return '/prisoners/'
@@ -440,6 +439,7 @@ class PrisonersForm(BasePrisonersForm):
 
     TODO: delete after search V2 goes live.
     """
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     sender_count__gte = forms.IntegerField(label=_('Number of senders (minimum)'), required=False, min_value=1)
     sender_count__lte = forms.IntegerField(label=_('Maximum senders received from'), required=False, min_value=1)
@@ -524,7 +524,7 @@ class PrisonersForm(BasePrisonersForm):
         return query_data
 
 
-class PrisonersFormV2(SearchFormV2Mixin, BasePrisonersForm):
+class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, BasePrisonersForm):
     """
     Search Form for Prisoners V2.
     """
@@ -580,7 +580,6 @@ class BaseCreditsForm(SecurityForm):
             ('-prisoner_number', _('Prisoner number (Z to A)')),
         ],
     )
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     def get_object_list(self):
         object_list = super().get_object_list()
@@ -600,6 +599,7 @@ class CreditsForm(BaseCreditsForm):
 
     TODO: delete after search V2 goes live.
     """
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
 
     received_at__gte = forms.DateField(label=_('Received since'), required=False,
                                        help_text=_('For example, 13/02/2018'))
@@ -742,7 +742,12 @@ class CreditsForm(BaseCreditsForm):
         return str(description).lower() if description else None
 
 
-class CreditsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseCreditsForm):
+class CreditsFormV2(
+    SearchFormV2Mixin,
+    AmountSearchFormMixin,
+    PrisonSelectorSearchFormMixin,
+    BaseCreditsForm,
+):
     """
     Search Form for Credits V2.
     """
@@ -877,8 +882,6 @@ class BaseDisbursementsForm(SecurityForm):
         ],
     )
 
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
-
     exclude_private_estate = True
 
     def get_object_list(self):
@@ -899,6 +902,8 @@ class DisbursementsForm(BaseDisbursementsForm):
 
     TODO: delete after search V2 goes live.
     """
+    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
+
     created__gte = forms.DateField(label=_('Entered since'), help_text=_('For example, 13/02/2018'), required=False)
     created__lt = forms.DateField(label=_('Entered before'), help_text=_('For example, 13/02/2018'), required=False)
 
@@ -1029,7 +1034,12 @@ class DisbursementsForm(BaseDisbursementsForm):
         return str(description).lower() if description else None
 
 
-class DisbursementsFormV2(SearchFormV2Mixin, AmountSearchFormMixin, BaseDisbursementsForm):
+class DisbursementsFormV2(
+    SearchFormV2Mixin,
+    AmountSearchFormMixin,
+    PrisonSelectorSearchFormMixin,
+    BaseDisbursementsForm,
+):
     """
     Search Form for Disbursements V2.
     """

@@ -30,6 +30,29 @@ from security.tests import api_url
 
 ValidationScenario = namedtuple('ValidationScenario', 'data expected_errors')
 
+PRISONS = [
+    {
+        'nomis_id': 'IXB', 'general_ledger_code': '10200042',
+        'name': 'HMP Prison 1', 'short_name': 'Prison 1',
+        'region': 'West Midlands',
+        'categories': [{'description': 'Category A', 'name': 'A'}],
+        'populations': [
+            {'description': 'Adult', 'name': 'adult'},
+            {'description': 'Male', 'name': 'male'}
+        ],
+    },
+    {
+        'nomis_id': 'INP', 'general_ledger_code': '10200015',
+        'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
+        'region': 'London',
+        'categories': [{'description': 'Category B', 'name': 'B'}],
+        'populations': [
+            {'description': 'Adult', 'name': 'adult'},
+            {'description': 'Female', 'name': 'female'}
+        ],
+    },
+]
+
 
 class MyAmountSearchForm(AmountSearchFormMixin, SecurityForm):
     """
@@ -44,38 +67,14 @@ class MyPrisonSelectorSearchForm(PrisonSelectorSearchFormMixin, SecurityForm):
 
 
 def mock_prison_response(rsps):
-    prisons = [
-        {
-            'nomis_id': 'IXB', 'general_ledger_code': '10200042',
-            'name': 'HMP Prison 1', 'short_name': 'Prison 1',
-            'region': 'West Midlands',
-            'categories': [{'description': 'Category A', 'name': 'A'}],
-            'populations': [
-                {'description': 'Adult', 'name': 'adult'},
-                {'description': 'Male', 'name': 'male'}
-            ],
-        },
-        {
-            'nomis_id': 'INP', 'general_ledger_code': '10200015',
-            'name': 'HMP & YOI Prison 2', 'short_name': 'Prison 2',
-            'region': 'London',
-            'categories': [{'description': 'Category B', 'name': 'B'}],
-            'populations': [
-                {'description': 'Adult', 'name': 'adult'},
-                {'description': 'Female', 'name': 'female'}
-            ],
-        },
-    ]
     rsps.add(
         rsps.GET,
         api_url('/prisons/'),
         json={
             'count': 2,
-            'results': prisons,
+            'results': PRISONS,
         }
     )
-
-    return prisons
 
 
 def mock_empty_response(rsps, path):
@@ -351,14 +350,14 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
         )
 
         with responses.RequestsMock() as rsps:
-            prisons = mock_prison_response(rsps)
+            mock_prison_response(rsps)
             scenarios = [
                 # selection == user's prisons AND current user's prisons == one prison
                 Scenario(
-                    [prisons[0]],
+                    [PRISONS[0]],
                     {
                         'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
-                        'prison': [prisons[1]['nomis_id']],
+                        'prison': [PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
@@ -366,7 +365,7 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                         'prison': [],  # reset
                     },
                     {
-                        'prison': [prisons[0]['nomis_id']],
+                        'prison': [PRISONS[0]['nomis_id']],
                     },
                     {
                         'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
@@ -378,7 +377,7 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                     [],
                     {
                         'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
-                        'prison': [prisons[1]['nomis_id']],
+                        'prison': [PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
@@ -393,10 +392,10 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
 
                 # selection == all
                 Scenario(
-                    [prisons[0]],
+                    [PRISONS[0]],
                     {
                         'prison_selector': 'all',
-                        'prison': [prisons[1]['nomis_id']],
+                        'prison': [PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
@@ -411,22 +410,22 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
 
                 # selection == exact
                 Scenario(
-                    [prisons[0]],
+                    [PRISONS[0]],
                     {
                         'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
-                        'prison': [prisons[1]['nomis_id']],
+                        'prison': [PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
                         'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
-                        'prison': [prisons[1]['nomis_id']],
+                        'prison': [PRISONS[1]['nomis_id']],
                     },
                     {
-                        'prison': [prisons[1]['nomis_id']],
+                        'prison': [PRISONS[1]['nomis_id']],
                     },
                     {
                         'prison_selector': [PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE],
-                        'prison': [prisons[1]['nomis_id']],
+                        'prison': [PRISONS[1]['nomis_id']],
                     },
                 ),
 
@@ -494,10 +493,12 @@ class SecurityFormTestCase(SimpleTestCase):
 
     def setUp(self):
         super().setUp()
+        self.user_prisons = PRISONS[:1]
         self.request = mock.MagicMock(
             user=mock.MagicMock(
-                token=generate_tokens()
-            )
+                token=generate_tokens(),
+            ),
+            user_prisons=self.user_prisons,
         )
         self.disable_cache = mock.patch('security.models.cache')
         self.disable_cache.start().get.return_value = None
@@ -532,6 +533,13 @@ class SecurityFormTestCase(SimpleTestCase):
             self.assertDictEqual(form.get_query_data(), {})
             self.assertEqual(form.query_string, '')
 
+
+class LegacySecurityFormTestCase(SecurityFormTestCase):
+    """
+    Base TestCase class for security search form V1
+
+    TODO: delete after search V2 goes live.
+    """
     def test_filtering_by_one_prison(self):
         if not self.form_class:
             return
@@ -547,14 +555,6 @@ class SecurityFormTestCase(SimpleTestCase):
             'prison': ['INP'],
         }
         expected_query_string = f'ordering={initial_ordering}&prison=INP'
-
-        # search forms v2 have an extra `advanced` field
-        if 'advanced' in form.fields:
-            expected_query_data = {
-                **expected_query_data,
-                'advanced': False,
-            }
-            expected_query_string = f'{expected_query_string}&advanced=False'
 
         self.assertDictEqual(form.get_query_data(), expected_query_data)
         self.assertEqual(form.query_string, expected_query_string)
@@ -575,14 +575,6 @@ class SecurityFormTestCase(SimpleTestCase):
         }
         expected_query_string = f'ordering={initial_ordering}&prison=INP&prison=IXB'
 
-        # search forms v2 have an extra `advanced` field
-        if 'advanced' in form.fields:
-            expected_query_data = {
-                **expected_query_data,
-                'advanced': False,
-            }
-            expected_query_string = f'{expected_query_string}&advanced=False'
-
         self.assertDictEqual(form.get_query_data(), expected_query_data)
         self.assertEqual(form.query_string, expected_query_string)
 
@@ -602,19 +594,11 @@ class SecurityFormTestCase(SimpleTestCase):
         }
         expected_query_string = f'ordering={initial_ordering}&prison=INP&prison=IXB'
 
-        # search forms v2 have an extra `advanced` field
-        if 'advanced' in form.fields:
-            expected_query_data = {
-                **expected_query_data,
-                'advanced': False,
-            }
-            expected_query_string = f'{expected_query_string}&advanced=False'
-
         self.assertDictEqual(form.get_query_data(), expected_query_data)
         self.assertEqual(form.query_string, expected_query_string)
 
 
-class SenderFormTestCase(SecurityFormTestCase):
+class SenderFormTestCase(LegacySecurityFormTestCase):
     """
     TODO: delete after search V2 goes live.
     """
@@ -699,9 +683,19 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             form = self.form_class(self.request, data={})
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
+
+            api_call_made = rsps.calls[-1].request.url
             self.assertDictEqual(
-                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
-                parse_qs('offset=0&limit=20&ordering=-prisoner_count'),
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['0'],
+                    'limit': ['20'],
+                    'ordering': ['-prisoner_count'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
+                },
             )
 
         self.assertDictEqual(
@@ -710,6 +704,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-prisoner_count',
                 'prison': [],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
                 'advanced': False,
                 'simple_search': '',
                 'sender_name': '',
@@ -720,16 +715,13 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'sender_sort_code': '',
             },
         )
-        self.assertDictEqual(
-            form.get_query_data(),
-            {
-                'ordering': '-prisoner_count',
-                'advanced': False,
-            },
-        )
         self.assertEqual(
-            form.query_string,
-            'ordering=-prisoner_count&advanced=False',
+            parse_qs(form.query_string),
+            {
+                'advanced': ['False'],
+                'ordering': ['-prisoner_count'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+            },
         )
 
     def test_valid_simple_search(self):
@@ -737,7 +729,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
         Test that if data for a simple search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
-            prisons = mock_prison_response(rsps)
+            mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
 
             form = self.form_class(
@@ -745,18 +737,26 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-credit_total',
-                    'prison': [
-                        prisons[0]['nomis_id'],
-                    ],
+                    'prison_selection': YOUR_PRISONS_QUERY_STRING_VALUE,
                     'simple_search': 'Joh',
                 },
             )
 
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
+            api_call_made = rsps.calls[-1].request.url
             self.assertDictEqual(
-                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
-                parse_qs('offset=20&limit=20&ordering=-credit_total&prison=IXB&simple_search=Joh'),
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['20'],
+                    'limit': ['20'],
+                    'ordering': ['-credit_total'],
+                    'simple_search': ['Joh'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
+                },
             )
 
         self.assertDictEqual(
@@ -766,9 +766,8 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'card_number_last_digits': '',
                 'page': 2,
                 'ordering': '-credit_total',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison': [],
                 'sender_account_number': '',
                 'sender_email': '',
                 'sender_name': '',
@@ -779,14 +778,12 @@ class SenderFormV2TestCase(SecurityFormTestCase):
         )
 
         self.assertDictEqual(
-            form.get_query_data(),
+            parse_qs(form.query_string),
             {
-                'advanced': False,
-                'ordering': '-credit_total',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
-                'simple_search': 'Joh',
+                'advanced': ['False'],
+                'ordering': ['-credit_total'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'simple_search': ['Joh'],
             },
         )
 
@@ -795,7 +792,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
         Test that if data for an advanced search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
-            prisons = mock_prison_response(rsps)
+            mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
 
             form = self.form_class(
@@ -803,9 +800,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-credit_total',
-                    'prison': [
-                        prisons[0]['nomis_id'],
-                    ],
+                    'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
                     'advanced': True,
                     'sender_name': 'John Doe',
                     'sender_email': 'johndoe',
@@ -826,7 +821,10 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                     'offset': ['20'],
                     'limit': ['20'],
                     'ordering': ['-credit_total'],
-                    'prison': ['IXB'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
                     'sender_name': ['John Doe'],
                     'sender_email': ['johndoe'],
                     'sender_postcode': ['SW1A1aa'],
@@ -843,9 +841,8 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'advanced': True,
                 'page': 2,
                 'ordering': '-credit_total',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison': [],
                 'sender_name': 'John Doe',
                 'sender_email': 'johndoe',
                 'sender_postcode': 'SW1A1aa',
@@ -856,19 +853,17 @@ class SenderFormV2TestCase(SecurityFormTestCase):
         )
 
         self.assertDictEqual(
-            form.get_query_data(),
+            parse_qs(form.query_string),
             {
-                'advanced': True,
-                'ordering': '-credit_total',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
-                'sender_name': 'John Doe',
-                'sender_email': 'johndoe',
-                'sender_postcode': 'SW1A1aa',
-                'card_number_last_digits': '1234',
-                'sender_account_number': '123456789',
-                'sender_sort_code': '112233',
+                'ordering': ['-credit_total'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'advanced': ['True'],
+                'sender_name': ['John Doe'],
+                'sender_email': ['johndoe'],
+                'sender_postcode': ['SW1A1aa'],
+                'card_number_last_digits': ['1234'],
+                'sender_account_number': ['123456789'],
+                'sender_sort_code': ['112233'],
             },
         )
 
@@ -903,7 +898,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
-class PrisonerFormTestCase(SecurityFormTestCase):
+class PrisonerFormTestCase(LegacySecurityFormTestCase):
     """
     TODO: delete after search V2 goes live.
     """
@@ -994,9 +989,19 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
             form = self.form_class(self.request, data={})
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
+
+            api_call_made = rsps.calls[-1].request.url
             self.assertDictEqual(
-                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
-                parse_qs('offset=0&limit=20&ordering=-sender_count'),
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['0'],
+                    'limit': ['20'],
+                    'ordering': ['-sender_count'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
+                },
             )
 
         self.assertDictEqual(
@@ -1005,22 +1010,20 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-sender_count',
                 'prison': [],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
                 'simple_search': '',
                 'advanced': False,
                 'prisoner_name': '',
                 'prisoner_number': '',
             },
         )
-        self.assertDictEqual(
-            form.get_query_data(),
-            {
-                'ordering': '-sender_count',
-                'advanced': False,
-            },
-        )
         self.assertEqual(
-            form.query_string,
-            'ordering=-sender_count&advanced=False',
+            parse_qs(form.query_string),
+            {
+                'advanced': ['False'],
+                'ordering': ['-sender_count'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+            },
         )
 
     def test_valid_simple_search(self):
@@ -1028,7 +1031,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
         Test that if data for a simple search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
-            prisons = mock_prison_response(rsps)
+            mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
 
             form = self.form_class(
@@ -1036,18 +1039,26 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-credit_total',
-                    'prison': [
-                        prisons[0]['nomis_id'],
-                    ],
+                    'prison_selection': YOUR_PRISONS_QUERY_STRING_VALUE,
                     'simple_search': 'Joh',
                 },
             )
 
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
+            api_call_made = rsps.calls[-1].request.url
             self.assertDictEqual(
-                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
-                parse_qs('offset=20&limit=20&ordering=-credit_total&prison=IXB&simple_search=Joh'),
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['20'],
+                    'limit': ['20'],
+                    'ordering': ['-credit_total'],
+                    'simple_search': ['Joh'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
+                },
             )
 
         self.assertDictEqual(
@@ -1056,9 +1067,8 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 'advanced': False,
                 'page': 2,
                 'ordering': '-credit_total',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison': [],
                 'simple_search': 'Joh',
                 'prisoner_name': '',
                 'prisoner_number': '',
@@ -1066,14 +1076,12 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
         )
 
         self.assertDictEqual(
-            form.get_query_data(),
+            parse_qs(form.query_string),
             {
-                'advanced': False,
-                'ordering': '-credit_total',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
-                'simple_search': 'Joh',
+                'advanced': ['False'],
+                'ordering': ['-credit_total'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'simple_search': ['Joh'],
             },
         )
 
@@ -1082,7 +1090,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
         Test that if data for an advanced search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
-            prisons = mock_prison_response(rsps)
+            mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
 
             form = self.form_class(
@@ -1090,9 +1098,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-credit_total',
-                    'prison': [
-                        prisons[0]['nomis_id'],
-                    ],
+                    'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
                     'advanced': True,
                     'prisoner_name': 'John Doe',
                     'prisoner_number': 'a2624ae',
@@ -1101,13 +1107,17 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
 
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
+            api_call_made = rsps.calls[-1].request.url
             self.assertDictEqual(
-                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
+                parse_qs(api_call_made.split('?', 1)[1]),
                 {
                     'offset': ['20'],
                     'limit': ['20'],
                     'ordering': ['-credit_total'],
-                    'prison': ['IXB'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
                     'prisoner_name': ['John Doe'],
                     'prisoner_number': ['A2624AE'],
                 }
@@ -1119,9 +1129,8 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 'advanced': True,
                 'page': 2,
                 'ordering': '-credit_total',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison': [],
                 'simple_search': '',
                 'prisoner_name': 'John Doe',
                 'prisoner_number': 'A2624AE',
@@ -1129,16 +1138,14 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
         )
 
         self.assertDictEqual(
-            form.get_query_data(),
+            parse_qs(form.query_string),
             {
-                'advanced': True,
-                'ordering': '-credit_total',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
-                'prisoner_name': 'John Doe',
-                'prisoner_number': 'A2624AE',
-            },
+                'ordering': ['-credit_total'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'advanced': ['True'],
+                'prisoner_name': ['John Doe'],
+                'prisoner_number': ['A2624AE'],
+            }
         )
 
     def test_invalid(self):
@@ -1172,7 +1179,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
             self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
-class CreditFormTestCase(SecurityFormTestCase):
+class CreditFormTestCase(LegacySecurityFormTestCase):
     """
     TODO: delete after search V2 goes live.
     """
@@ -1269,9 +1276,19 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             form = self.form_class(self.request, data={})
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
+
+            api_call_made = rsps.calls[-1].request.url
             self.assertDictEqual(
-                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
-                parse_qs('offset=0&limit=20&ordering=-received_at'),
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['0'],
+                    'limit': ['20'],
+                    'ordering': ['-received_at'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
+                },
             )
 
         self.assertDictEqual(
@@ -1280,6 +1297,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-received_at',
                 'prison': [],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
                 'simple_search': '',
                 'advanced': False,
                 'amount_pattern': '',
@@ -1298,16 +1316,13 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'received_at__lt': None,
             },
         )
-        self.assertDictEqual(
-            form.get_query_data(),
-            {
-                'ordering': '-received_at',
-                'advanced': False,
-            },
-        )
         self.assertEqual(
-            form.query_string,
-            'ordering=-received_at&advanced=False',
+            parse_qs(form.query_string),
+            {
+                'advanced': ['False'],
+                'ordering': ['-received_at'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+            },
         )
 
     def test_valid_simple_search(self):
@@ -1315,7 +1330,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
         Test that if data for a simple search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
-            prisons = mock_prison_response(rsps)
+            mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
 
             form = self.form_class(
@@ -1323,18 +1338,26 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-amount',
-                    'prison': [
-                        prisons[0]['nomis_id'],
-                    ],
+                    'prison_selection': YOUR_PRISONS_QUERY_STRING_VALUE,
                     'simple_search': 'Joh',
                 },
             )
 
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
+            api_call_made = rsps.calls[-1].request.url
             self.assertDictEqual(
-                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
-                parse_qs('offset=20&limit=20&ordering=-amount&prison=IXB&simple_search=Joh'),
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['20'],
+                    'limit': ['20'],
+                    'ordering': ['-amount'],
+                    'simple_search': ['Joh'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
+                },
             )
 
         self.assertDictEqual(
@@ -1343,9 +1366,8 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'advanced': False,
                 'page': 2,
                 'ordering': '-amount',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison': [],
                 'simple_search': 'Joh',
                 'amount_pattern': '',
                 'amount_exact': '',
@@ -1365,14 +1387,12 @@ class CreditFormV2TestCase(SecurityFormTestCase):
         )
 
         self.assertDictEqual(
-            form.get_query_data(),
+            parse_qs(form.query_string),
             {
-                'advanced': False,
-                'ordering': '-amount',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
-                'simple_search': 'Joh',
+                'advanced': ['False'],
+                'ordering': ['-amount'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'simple_search': ['Joh'],
             },
         )
 
@@ -1381,7 +1401,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
         Test that if data for an advanced search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
-            prisons = mock_prison_response(rsps)
+            mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
 
             form = self.form_class(
@@ -1389,9 +1409,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-amount',
-                    'prison': [
-                        prisons[0]['nomis_id'],
-                    ],
+                    'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
                     'advanced': True,
                     'amount_pattern': AmountPattern.exact.name,
                     'amount_exact': '100.00',
@@ -1424,7 +1442,10 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'offset': ['20'],
                     'limit': ['20'],
                     'ordering': ['-amount'],
-                    'prison': ['IXB'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
                     'amount': ['10000'],
                     'prisoner_name': ['Jane Doe'],
                     'prisoner_number': ['A2624AE'],
@@ -1446,36 +1467,12 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'advanced': True,
                 'page': 2,
                 'ordering': '-amount',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison': [],
                 'simple_search': '',
                 'amount_pattern': AmountPattern.exact.name,
                 'amount_exact': '100.00',
                 'amount_pence': '',
-                'prisoner_name': 'Jane Doe',
-                'prisoner_number': 'A2624AE',
-                'sender_name': 'John Doe',
-                'sender_email': 'johndoe',
-                'sender_postcode': 'SW1A1aa',
-                'sender_ip_address': '127.0.0.1',
-                'card_number_last_digits': '1234',
-                'sender_account_number': '123456789',
-                'sender_sort_code': '112233',
-                'received_at__gte': datetime.date(2000, 2, 1),
-                'received_at__lt': datetime.date(2000, 3, 10),
-            },
-        )
-
-        self.assertDictEqual(
-            form.get_query_data(),
-            {
-                'advanced': True,
-                'ordering': '-amount',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
-                'amount': '10000',
                 'prisoner_name': 'Jane Doe',
                 'prisoner_number': 'A2624AE',
                 'sender_name': 'John Doe',
@@ -1495,7 +1492,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             parse_qs(form.query_string),
             {
                 'ordering': ['-amount'],
-                'prison': ['IXB'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
                 'amount_pattern': ['exact'],
                 'amount_exact': ['100.00'],
                 'advanced': ['True'],
@@ -1581,7 +1578,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
-class DisbursementFormTestCase(SecurityFormTestCase):
+class DisbursementFormTestCase(LegacySecurityFormTestCase):
     """
     TODO: delete after search V2 goes live.
     """
@@ -1680,9 +1677,19 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
             form = self.form_class(self.request, data={})
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
-            self.assertEqual(
-                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
-                parse_qs('offset=0&limit=20&ordering=-created'),
+
+            api_call_made = rsps.calls[-1].request.url
+            self.assertDictEqual(
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['0'],
+                    'limit': ['20'],
+                    'ordering': ['-created'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
+                },
             )
 
         self.assertDictEqual(
@@ -1691,6 +1698,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-created',
                 'prison': [],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
                 'simple_search': '',
                 'advanced': False,
                 'amount_exact': '',
@@ -1708,16 +1716,13 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'invoice_number': '',
             },
         )
-        self.assertDictEqual(
-            form.get_query_data(),
-            {
-                'ordering': '-created',
-                'advanced': False,
-            },
-        )
         self.assertEqual(
-            form.query_string,
-            'ordering=-created&advanced=False',
+            parse_qs(form.query_string),
+            {
+                'advanced': ['False'],
+                'ordering': ['-created'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+            },
         )
 
     def test_valid_simple_search(self):
@@ -1725,7 +1730,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
         Test that if data for a simple search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
-            prisons = mock_prison_response(rsps)
+            mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
 
             form = self.form_class(
@@ -1733,18 +1738,26 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-amount',
-                    'prison': [
-                        prisons[0]['nomis_id'],
-                    ],
+                    'prison_selection': YOUR_PRISONS_QUERY_STRING_VALUE,
                     'simple_search': 'Joh',
                 },
             )
 
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
+            api_call_made = rsps.calls[-1].request.url
             self.assertDictEqual(
-                parse_qs(rsps.calls[-1].request.url.split('?', 1)[1]),
-                parse_qs('offset=20&limit=20&ordering=-amount&prison=IXB&simple_search=Joh'),
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['20'],
+                    'limit': ['20'],
+                    'ordering': ['-amount'],
+                    'simple_search': ['Joh'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
+                },
             )
 
         self.assertDictEqual(
@@ -1753,9 +1766,8 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'advanced': False,
                 'page': 2,
                 'ordering': '-amount',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison': [],
                 'simple_search': 'Joh',
                 'amount_exact': '',
                 'amount_pattern': '',
@@ -1774,14 +1786,12 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
         )
 
         self.assertDictEqual(
-            form.get_query_data(),
+            parse_qs(form.query_string),
             {
-                'advanced': False,
-                'ordering': '-amount',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
-                'simple_search': 'Joh',
+                'advanced': ['False'],
+                'ordering': ['-amount'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'simple_search': ['Joh'],
             },
         )
 
@@ -1790,7 +1800,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
         Test that if data for an advanced search is passed in, the API query string is constructed as expected.
         """
         with responses.RequestsMock() as rsps:
-            prisons = mock_prison_response(rsps)
+            mock_prison_response(rsps)
             mock_empty_response(rsps, self.api_list_path)
 
             form = self.form_class(
@@ -1798,9 +1808,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-amount',
-                    'prison': [
-                        prisons[0]['nomis_id'],
-                    ],
+                    'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
                     'advanced': True,
                     'amount_pattern': AmountPattern.exact.name,
                     'amount_exact': '100.00',
@@ -1832,7 +1840,10 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                     'offset': ['20'],
                     'limit': ['20'],
                     'ordering': ['-amount'],
-                    'prison': ['IXB'],
+                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                        prison['nomis_id']
+                        for prison in self.user_prisons
+                    ],
                     'amount': ['10000'],
                     'recipient_name': ['John Doe'],
                     'recipient_email': ['johndoe'],
@@ -1853,35 +1864,12 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'advanced': True,
                 'page': 2,
                 'ordering': '-amount',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
+                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison': [],
                 'simple_search': '',
                 'amount_pattern': AmountPattern.exact.name,
                 'amount_exact': '100.00',
                 'amount_pence': '',
-                'recipient_name': 'John Doe',
-                'recipient_email': 'johndoe',
-                'postcode': 'SW1A1aa',
-                'created__gte': datetime.date(2000, 2, 1),
-                'created__lt': datetime.date(2000, 3, 10),
-                'account_number': '123456789',
-                'sort_code': '112233',
-                'prisoner_name': 'Jane Doe',
-                'prisoner_number': 'A2624AE',
-                'invoice_number': 'PMD1000052',
-            },
-        )
-
-        self.assertDictEqual(
-            form.get_query_data(),
-            {
-                'advanced': True,
-                'ordering': '-amount',
-                'prison': [
-                    prisons[0]['nomis_id'],
-                ],
-                'amount': '10000',
                 'recipient_name': 'John Doe',
                 'recipient_email': 'johndoe',
                 'postcode': 'SW1A1aa',
@@ -1900,7 +1888,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
             parse_qs(form.query_string),
             {
                 'ordering': ['-amount'],
-                'prison': ['IXB'],
+                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
                 'amount_pattern': ['exact'],
                 'amount_exact': ['100.00'],
                 'advanced': ['True'],
