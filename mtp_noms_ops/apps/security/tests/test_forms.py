@@ -13,25 +13,33 @@ import responses
 from security.forms.object_base import AmountPattern, SecurityForm
 from security.forms.object_list import (
     AmountSearchFormMixin,
-    SendersForm,
-    SendersFormV2,
-    PrisonersForm,
-    PrisonersFormV2,
     CreditsForm,
     CreditsFormV2,
     DisbursementsForm,
     DisbursementsFormV2,
+    PrisonersForm,
+    PrisonersFormV2,
+    PrisonSelectorSearchFormMixin,
+    SendersForm,
+    SendersFormV2,
+    YOUR_PRISONS_QUERY_STRING_VALUE,
 )
 from security.forms.review import ReviewCreditsForm
 from security.tests import api_url
 
 
-ValidationScenario = namedtuple('ValidationScenario', 'data errors')
+ValidationScenario = namedtuple('ValidationScenario', 'data expected_errors')
 
 
 class MyAmountSearchForm(AmountSearchFormMixin, SecurityForm):
     """
     SecurityForm used to test AmountSearchFormMixin.
+    """
+
+
+class MyPrisonSelectorSearchForm(PrisonSelectorSearchFormMixin, SecurityForm):
+    """
+    SecurityForm used to test PrisonSelectorSearchFormMixin.
     """
 
 
@@ -310,7 +318,175 @@ class AmountSearchFormMixinTestCase(SimpleTestCase):
                 data=scenario.data,
             )
             self.assertFalse(form.is_valid())
-            self.assertDictEqual(form.errors, scenario.errors)
+            self.assertDictEqual(form.errors, scenario.expected_errors)
+
+
+class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
+    """
+    Tests for the PrisonSelectorSearchFormMixin.
+    """
+    def setUp(self):
+        super().setUp()
+        self.disable_cache = mock.patch('security.models.cache')
+        self.disable_cache.start().get.return_value = None
+
+    def tearDown(self):
+        self.disable_cache.stop()
+
+    def test_valid(self):
+        """
+        Test valid scenarios.
+
+        Note: prison is reset when prison_selector is not `exact`.
+        """
+        Scenario = namedtuple(
+            'Scenario',
+            [
+                'user_prisons',
+                'data',
+                'expected_cleaned_data',
+                'expected_api_request_params',
+                'expected_query_string'
+            ],
+        )
+
+        with responses.RequestsMock() as rsps:
+            prisons = mock_prison_response(rsps)
+            scenarios = [
+                # selection == user's prisons AND current user's prisons == one prison
+                Scenario(
+                    [prisons[0]],
+                    {
+                        'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                        'prison': [prisons[1]['nomis_id']],
+                    },
+                    {
+                        'page': 1,
+                        'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                        'prison': [],  # reset
+                    },
+                    {
+                        'prison': [prisons[0]['nomis_id']],
+                    },
+                    {
+                        'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                    },
+                ),
+
+                # selection == user's prisons AND current user's prisons == all prisons
+                Scenario(
+                    [],
+                    {
+                        'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                        'prison': [prisons[1]['nomis_id']],
+                    },
+                    {
+                        'page': 1,
+                        'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                        'prison': [],  # reset
+                    },
+                    {},  # expected api query params empty because we don't want to filter by any prison
+                    {
+                        'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                    },
+                ),
+
+                # selection == all
+                Scenario(
+                    [prisons[0]],
+                    {
+                        'prison_selector': 'all',
+                        'prison': [prisons[1]['nomis_id']],
+                    },
+                    {
+                        'page': 1,
+                        'prison_selector': 'all',
+                        'prison': [],  # reset
+                    },
+                    {},  # expected api query params empty because we don't want to filter by any prison
+                    {
+                        'prison_selector': ['all'],
+                    },
+                ),
+
+                # selection == exact
+                Scenario(
+                    [prisons[0]],
+                    {
+                        'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
+                        'prison': [prisons[1]['nomis_id']],
+                    },
+                    {
+                        'page': 1,
+                        'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
+                        'prison': [prisons[1]['nomis_id']],
+                    },
+                    {
+                        'prison': [prisons[1]['nomis_id']],
+                    },
+                    {
+                        'prison_selector': [PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE],
+                        'prison': [prisons[1]['nomis_id']],
+                    },
+                ),
+
+            ]
+            for scenario in scenarios:
+                request = mock.MagicMock(
+                    user=mock.MagicMock(
+                        token=generate_tokens(),
+                    ),
+                    user_prisons=scenario.user_prisons,
+                )
+
+                form = MyPrisonSelectorSearchForm(request, data=scenario.data)
+
+                self.assertTrue(form.is_valid())
+                self.assertDictEqual(
+                    form.cleaned_data,
+                    scenario.expected_cleaned_data,
+                )
+                self.assertDictEqual(
+                    form.get_api_request_params(),
+                    scenario.expected_api_request_params,
+                )
+                self.assertDictEqual(
+                    parse_qs(form.query_string),
+                    scenario.expected_query_string,
+                )
+
+    def test_invalid(self):
+        """
+        Test validation errors.
+        """
+        scenarios = [
+            ValidationScenario(
+                {'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE},
+                {'prison': ['This field is required']},
+            ),
+            ValidationScenario(
+                {
+                    'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
+                    'prison': ['invalid'],
+                },
+                {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+            ValidationScenario(
+                {'prison_selector': 'invalid'},
+                {'prison_selector': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+        ]
+
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+
+            for scenario in scenarios:
+                form = MyPrisonSelectorSearchForm(
+                    mock.MagicMock(),
+                    data=scenario.data,
+                )
+                self.assertFalse(form.is_valid())
+                self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
 class SecurityFormTestCase(SimpleTestCase):
@@ -724,7 +900,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 mock_prison_response(rsps)
                 form = self.form_class(self.request, data=scenario.data)
             self.assertFalse(form.is_valid())
-            self.assertDictEqual(form.errors, scenario.errors)
+            self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
 class PrisonerFormTestCase(SecurityFormTestCase):
@@ -993,7 +1169,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 mock_prison_response(rsps)
                 form = self.form_class(self.request, data=scenario.data)
             self.assertFalse(form.is_valid())
-            self.assertDictEqual(form.errors, scenario.errors)
+            self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
 class CreditFormTestCase(SecurityFormTestCase):
@@ -1402,7 +1578,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 mock_prison_response(rsps)
                 form = self.form_class(self.request, data=scenario.data)
             self.assertFalse(form.is_valid())
-            self.assertDictEqual(form.errors, scenario.errors)
+            self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
 class DisbursementFormTestCase(SecurityFormTestCase):
@@ -1798,7 +1974,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 mock_prison_response(rsps)
                 form = self.form_class(self.request, data=scenario.data)
             self.assertFalse(form.is_valid())
-            self.assertDictEqual(form.errors, scenario.errors)
+            self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
 class ReviewCreditsFormTestCase(unittest.TestCase):

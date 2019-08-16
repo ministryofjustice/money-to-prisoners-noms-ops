@@ -25,6 +25,8 @@ from security.utils import (
     sender_profile_name,
 )
 
+YOUR_PRISONS_QUERY_STRING_VALUE = 'mine'
+
 END_DATE_BEFORE_START_DATE_ERROR_MSG = _('Must be after the start date.')
 
 
@@ -45,6 +47,85 @@ class SearchFormV2Mixin(forms.Form):
         api_params = super().get_api_request_params()
         api_params.pop('advanced', None)
         return api_params
+
+
+class PrisonSelectorSearchFormMixin(forms.Form):
+    """
+    Mixin with prison fields for search V2.
+
+    prison_selector can be one of:
+    - all: all prisons
+    - mine: current user's prisons
+    - exact: for a specific prison
+
+    when prison_selector == exact a `prison` value must be specified
+    otherwise the form isn't valid.
+    when prison_selector != exact, any `prison` value is reset as not applicable
+    """
+    PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE = 'exact'
+
+    prison_selector = forms.ChoiceField(
+        label=_('Choose a prison'),
+        required=False,
+        choices=(
+            (YOUR_PRISONS_QUERY_STRING_VALUE, _('Your prisons')),
+            ('all', _('All prisons')),
+            (PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE, _('A specific prison')),
+        ),
+        initial=YOUR_PRISONS_QUERY_STRING_VALUE,
+    )
+    prison = forms.MultipleChoiceField(label=_('Prison name'), required=False, choices=[])
+
+    def _update_prison_in_query_data(self, query_data):
+        prison_selector = query_data.pop('prison_selector', None)
+        prisons = query_data.pop('prison', [])
+
+        if prison_selector == YOUR_PRISONS_QUERY_STRING_VALUE:
+            if self.request.user_prisons:
+                query_data['prison'] = [
+                    prison['nomis_id']
+                    for prison in self.request.user_prisons
+                ]
+        elif prison_selector == self.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE or not prison_selector:
+            query_data['prison'] = prisons
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        """
+        Updates `query_data` by translating prison_selector into the appropriate prison value for the API.
+        """
+        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
+        if allow_parameter_manipulation:
+            self._update_prison_in_query_data(query_data)
+        return query_data
+
+    def _clean_prison_fields(self, cleaned_data):
+        # if prison related fields are already in error don't check any further
+        if set(self.errors) & {'prison_selector', 'prison'}:
+            return cleaned_data
+
+        prison_selector = cleaned_data.get('prison_selector', None)
+
+        if prison_selector == self.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE:
+            if not cleaned_data.get('prison'):
+                self.add_error(
+                    'prison',
+                    ValidationError(
+                        self.fields['prison'].error_messages['required'],
+                        code='required',
+                    ),
+                )
+        else:
+            cleaned_data['prison'] = []
+
+        return cleaned_data
+
+    def clean(self):
+        """
+        Validates the prison related fields and resets the prison field
+        if incompatible with the choosen prison_selector.
+        """
+        cleaned_data = super().clean()
+        return self._clean_prison_fields(cleaned_data)
 
 
 class AmountSearchFormMixin(forms.Form):
