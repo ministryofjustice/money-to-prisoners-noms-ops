@@ -63,13 +63,14 @@ class PrisonSelectorSearchFormMixin(forms.Form):
     when prison_selector != exact, any `prison` value is reset as not applicable
     """
     PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE = 'exact'
+    PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE = 'all'
 
     prison_selector = forms.ChoiceField(
         label=_('Choose a prison'),
         required=False,
         choices=(
             (YOUR_PRISONS_QUERY_STRING_VALUE, _('Your prisons')),
-            ('all', _('All prisons')),
+            (PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE, _('All prisons')),
             (PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE, _('A specific prison')),
         ),
         initial=YOUR_PRISONS_QUERY_STRING_VALUE,

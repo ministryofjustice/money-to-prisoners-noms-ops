@@ -394,17 +394,17 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                 Scenario(
                     [PRISONS[0]],
                     {
-                        'prison_selector': 'all',
+                        'prison_selector': MyPrisonSelectorSearchForm.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
                         'prison': [PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
-                        'prison_selector': 'all',
+                        'prison_selector': MyPrisonSelectorSearchForm.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
                         'prison': [],  # reset
                     },
                     {},  # expected api query params empty because we don't want to filter by any prison
                     {
-                        'prison_selector': ['all'],
+                        'prison_selector': [MyPrisonSelectorSearchForm.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE],
                     },
                 ),
 
