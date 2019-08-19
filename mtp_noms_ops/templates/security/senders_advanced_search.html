@@ -17,4 +17,6 @@
   <div class="heading-medium">{% trans 'Bank transfer' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
+
+  {% include 'security/forms/prison-selector-fieldset.html' %}
 {% endblock advanced_search_fields %}

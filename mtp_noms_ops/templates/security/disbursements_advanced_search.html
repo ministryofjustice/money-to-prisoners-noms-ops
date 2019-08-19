@@ -55,7 +55,9 @@
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
 
-  <div class="heading-large">{% trans 'Invoice number' %}</div>
+  {% include 'security/forms/prison-selector-fieldset.html' %}
+
+  <div class="heading-large mtp-invoice-nr-header">{% trans 'Invoice number' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.invoice_number %}
 
 {% endblock advanced_search_fields %}

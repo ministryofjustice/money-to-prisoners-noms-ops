@@ -14,10 +14,11 @@
 {% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
 
 {% block inner_content %}
-  <form class="mtp-security-advanced-search js-FormAnalytics" method="get">
+  <form class="mtp-security-advanced-search mtp-autocomplete js-FormAnalytics" method="get">
     <input type="hidden" name="{{ form.advanced.html_name }}" value="True" />
     <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
-    {{ form.prison_selector.as_hidden }}
+
+    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
     <div class="grid-row">
       <div class="column-two-thirds">

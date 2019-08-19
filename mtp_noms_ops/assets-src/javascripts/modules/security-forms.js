@@ -2,8 +2,12 @@
 /* globals prisonData */
 'use strict';
 
-exports.SecurityForms = {
+var LegacySecurityForms = {
   init: function () {
+    if (!$('.mtp-security-form').length) {
+      return;
+    }
+
     this.bindAmountPatternSelection();
     this.bindPaymentSourceSelection();
     this.bindPrisonSelection();
@@ -133,6 +137,79 @@ exports.SecurityForms = {
     $regionSelect.change(update);
     $categorySelect.change(update);
     $populationSelect.change(update);
+    update();
+  }
+};
+
+exports.SecurityForms = {
+  init: function () {
+    LegacySecurityForms.init();
+
+    if (!$('.mtp-security-advanced-search').length) {
+      return;
+    }
+    this.bindAmountPatternSelection();
+    this.bindPrisonSelection();
+  },
+
+  hideFieldWrapper: function (wrapper) {
+    wrapper.removeClass('form-group-error').hide();
+    wrapper.find('input').val('').removeClass('form-control-error');
+    wrapper.find('.error-message').remove();
+  },
+
+  bindAmountPatternSelection: function () {
+    var $patternSelect = $('[name=amount_pattern]');
+    var self = this;
+
+    if (!$patternSelect.length) {
+      return;
+    }
+
+    var $exactWrapper = $('#id_amount_exact-wrapper');
+    var $penceWrapper = $('#id_amount_pence-wrapper');
+
+    function update () {
+      switch ($patternSelect.filter(':checked').val()) {
+        case 'exact':
+          $exactWrapper.show();
+          self.hideFieldWrapper($penceWrapper);
+          break;
+        case 'pence':
+          self.hideFieldWrapper($exactWrapper);
+          $penceWrapper.show();
+          break;
+        default:
+          self.hideFieldWrapper($exactWrapper);
+          self.hideFieldWrapper($penceWrapper);
+      }
+    }
+
+    $patternSelect.change(update);
+    update();
+  },
+
+  bindPrisonSelection: function () {
+    var $prisonSelector = $('[name=prison_selector]');
+    var self = this;
+
+    if (!$prisonSelector.length) {
+      return;
+    }
+
+    var $prisonWrapper = $('#id_prison-wrapper');
+
+    function update () {
+      switch ($prisonSelector.filter(':checked').val()) {
+        case 'exact':
+          $prisonWrapper.show();
+          break;
+        default:
+          self.hideFieldWrapper($prisonWrapper);
+      }
+    }
+
+    $prisonSelector.change(update);
     update();
   }
 };

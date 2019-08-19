@@ -5,6 +5,7 @@ import json
 import logging
 import tempfile
 from unittest import mock
+from urllib.parse import parse_qs
 
 from django.core import mail
 from django.core.urlresolvers import reverse
@@ -21,7 +22,7 @@ from security import (
     required_permissions, hmpps_employee_flag, not_hmpps_employee_flag,
     confirmed_prisons_flag, notifications_pilot_flag, SEARCH_V2_FLAG,
 )
-from security.forms.object_list import YOUR_PRISONS_QUERY_STRING_VALUE
+from security.forms.object_list import PrisonSelectorSearchFormMixin, YOUR_PRISONS_QUERY_STRING_VALUE
 from security.models import EmailNotifications
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
 from security.views.object_base import SEARCH_FORM_SUBMITTED_INPUT_NAME
@@ -609,8 +610,7 @@ class SearchV2SecurityTestCaseMixin:
         The simple search filters by the user's prisons by default.
         """
         with responses.RequestsMock() as rsps:
-            user_prisons = SAMPLE_PRISONS
-            user_data = self.get_user_data(prisons=user_prisons)
+            user_data = self.get_user_data(prisons=SAMPLE_PRISONS)
 
             self.login(user_data=user_data, rsps=rsps)
             mock_prison_response(rsps=rsps)
@@ -620,6 +620,73 @@ class SearchV2SecurityTestCaseMixin:
             response,
             f'<input type="hidden" name="prison_selector" value="{YOUR_PRISONS_QUERY_STRING_VALUE}"',
         )
+
+    def test_advanced_search_with_my_prisons_selection(self):
+        """
+        Test that if prison_selector == mine, the API call includes the prison filter with
+        the expanted current user's prisons value.
+        """
+        with responses.RequestsMock() as rsps:
+            user_prisons = SAMPLE_PRISONS[:1]
+            user_data = self.get_user_data(prisons=user_prisons)
+
+            self.login(user_data=user_data, rsps=rsps)
+            mock_prison_response(rsps=rsps)
+
+            response = self.client.get(
+                f'{reverse(self.advanced_search_view_name)}?prison_selector={YOUR_PRISONS_QUERY_STRING_VALUE}',
+            )
+            self.assertEqual(response.status_code, 200)
+
+            api_call_made = rsps.calls[-1].request.url
+            parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
+            self.assertCountEqual(
+                parsed_qs['prison'],
+                [prison['nomis_id'] for prison in user_prisons],
+            )
+
+    def test_advanced_search_with_all_prisons_selection(self):
+        """
+        Test that if prison_selector == all, the API call doesn't include any prison filter.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            mock_prison_response(rsps=rsps)
+
+            response = self.client.get(
+                f'{reverse(self.advanced_search_view_name)}'
+                f'?prison_selector={PrisonSelectorSearchFormMixin.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE}',
+            )
+            self.assertEqual(response.status_code, 200)
+
+            api_call_made = rsps.calls[-1].request.url
+            parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
+            self.assertTrue('prison' not in parsed_qs)
+
+    def test_advanced_search_with_exact_prison_selected(self):
+        """
+        Test that if prison_selector == exact and a prison is specified, the API call
+        includes exactly that prison filter.
+        """
+        with responses.RequestsMock() as rsps:
+            expected_prison_id = SAMPLE_PRISONS[1]['nomis_id']
+
+            self.login(rsps=rsps)
+            mock_prison_response(rsps=rsps)
+
+            response = self.client.get(
+                f'{reverse(self.advanced_search_view_name)}'
+                f'?prison_selector={PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE}'
+                f'&prison={expected_prison_id}',
+            )
+            self.assertEqual(response.status_code, 200)
+
+            api_call_made = rsps.calls[-1].request.url
+            parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
+            self.assertCountEqual(
+                parsed_qs['prison'],
+                [expected_prison_id],
+            )
 
     def test_simple_search_redirects_to_search_results_page(self):
         """
