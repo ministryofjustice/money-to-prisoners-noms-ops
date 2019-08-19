@@ -30,7 +30,7 @@ from security.tests import api_url
 
 ValidationScenario = namedtuple('ValidationScenario', 'data expected_errors')
 
-PRISONS = [
+SAMPLE_PRISONS = [
     {
         'nomis_id': 'IXB', 'general_ledger_code': '10200042',
         'name': 'HMP Prison 1', 'short_name': 'Prison 1',
@@ -54,25 +54,13 @@ PRISONS = [
 ]
 
 
-class MyAmountSearchForm(AmountSearchFormMixin, SecurityForm):
-    """
-    SecurityForm used to test AmountSearchFormMixin.
-    """
-
-
-class MyPrisonSelectorSearchForm(PrisonSelectorSearchFormMixin, SecurityForm):
-    """
-    SecurityForm used to test PrisonSelectorSearchFormMixin.
-    """
-
-
 def mock_prison_response(rsps):
     rsps.add(
         rsps.GET,
         api_url('/prisons/'),
         json={
-            'count': 2,
-            'results': PRISONS,
+            'count': len(SAMPLE_PRISONS),
+            'results': SAMPLE_PRISONS,
         }
     )
 
@@ -86,6 +74,18 @@ def mock_empty_response(rsps, path):
             'results': [],
         }
     )
+
+
+class MyAmountSearchForm(AmountSearchFormMixin, SecurityForm):
+    """
+    SecurityForm used to test AmountSearchFormMixin.
+    """
+
+
+class MyPrisonSelectorSearchForm(PrisonSelectorSearchFormMixin, SecurityForm):
+    """
+    SecurityForm used to test PrisonSelectorSearchFormMixin.
+    """
 
 
 class AmountSearchFormMixinTestCase(SimpleTestCase):
@@ -354,10 +354,10 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
             scenarios = [
                 # selection == user's prisons AND current user's prisons == one prison
                 Scenario(
-                    [PRISONS[0]],
+                    [SAMPLE_PRISONS[0]],
                     {
                         'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
-                        'prison': [PRISONS[1]['nomis_id']],
+                        'prison': [SAMPLE_PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
@@ -365,7 +365,7 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                         'prison': [],  # reset
                     },
                     {
-                        'prison': [PRISONS[0]['nomis_id']],
+                        'prison': [SAMPLE_PRISONS[0]['nomis_id']],
                     },
                     {
                         'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
@@ -377,7 +377,7 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                     [],
                     {
                         'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
-                        'prison': [PRISONS[1]['nomis_id']],
+                        'prison': [SAMPLE_PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
@@ -392,10 +392,10 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
 
                 # selection == all
                 Scenario(
-                    [PRISONS[0]],
+                    [SAMPLE_PRISONS[0]],
                     {
                         'prison_selector': MyPrisonSelectorSearchForm.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
-                        'prison': [PRISONS[1]['nomis_id']],
+                        'prison': [SAMPLE_PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
@@ -410,22 +410,22 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
 
                 # selection == exact
                 Scenario(
-                    [PRISONS[0]],
+                    [SAMPLE_PRISONS[0]],
                     {
                         'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
-                        'prison': [PRISONS[1]['nomis_id']],
+                        'prison': [SAMPLE_PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
                         'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
-                        'prison': [PRISONS[1]['nomis_id']],
+                        'prison': [SAMPLE_PRISONS[1]['nomis_id']],
                     },
                     {
-                        'prison': [PRISONS[1]['nomis_id']],
+                        'prison': [SAMPLE_PRISONS[1]['nomis_id']],
                     },
                     {
                         'prison_selector': [PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE],
-                        'prison': [PRISONS[1]['nomis_id']],
+                        'prison': [SAMPLE_PRISONS[1]['nomis_id']],
                     },
                 ),
 
@@ -493,7 +493,7 @@ class SecurityFormTestCase(SimpleTestCase):
 
     def setUp(self):
         super().setUp()
-        self.user_prisons = PRISONS[:1]
+        self.user_prisons = SAMPLE_PRISONS[:1]
         self.request = mock.MagicMock(
             user=mock.MagicMock(
                 token=generate_tokens(),

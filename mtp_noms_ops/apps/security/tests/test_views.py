@@ -39,7 +39,7 @@ override_nomis_settings = override_settings(
     ),  # this key is just for tests, doesn't do anything
 )
 
-sample_prisons = [
+SAMPLE_PRISONS = [
     {
         'nomis_id': 'AAI',
         'general_ledger_code': '001',
@@ -62,17 +62,16 @@ sample_prisons = [
         'pre_approval_required': False,
     },
 ]
-default_user_prisons = (sample_prisons[1],)
 
 
-def sample_prison_list(rsps=None):
+def mock_prison_response(rsps=None):
     rsps = rsps or responses
     rsps.add(
         rsps.GET,
         api_url('/prisons/'),
         json={
-            'count': len(sample_prisons),
-            'results': sample_prisons,
+            'count': len(SAMPLE_PRISONS),
+            'results': SAMPLE_PRISONS,
         }
     )
 
@@ -132,11 +131,15 @@ class SecurityBaseTestCase(SimpleTestCase):
         return response
 
     def get_user_data(
-        self, first_name='Sam', last_name='Hall', username='shall',
-        email='sam@mtp.local', permissions=required_permissions,
-        prisons=default_user_prisons,
+        self,
+        first_name='Sam',
+        last_name='Hall',
+        username='shall',
+        email='sam@mtp.local',
+        permissions=required_permissions,
+        prisons=(SAMPLE_PRISONS[1],),
         flags=(hmpps_employee_flag, confirmed_prisons_flag,),
-        roles=('security',)
+        roles=('security',),
     ):
         return {
             'first_name': first_name,
@@ -201,7 +204,7 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
 
     def _mock_api_responses(self):
         no_saved_searches()
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url('/senders/'),
@@ -232,7 +235,7 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
         self._mock_api_responses()
         prisons = [
             {
-                **sample_prisons[0],
+                **SAMPLE_PRISONS[0],
                 'name': f'Prison {index}',
             } for index in range(1, 11)
         ]
@@ -264,7 +267,7 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
         self._mock_api_responses()
         prisons = [
             {
-                **sample_prisons[0],
+                **SAMPLE_PRISONS[0],
                 'name': f'Prison {index}',
             } for index in range(1, 11)
         ]
@@ -290,7 +293,7 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
         self._mock_api_responses()
         prisons = [
             {
-                **sample_prisons[0],
+                **SAMPLE_PRISONS[0],
                 'name': f'Prison {index}',
             } for index in range(1, 3)
         ]
@@ -356,7 +359,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
             self.assertContains(response, '<!-- %s -->' % view)
 
         assertViewAccessible('security:dashboard')
-        sample_prison_list()
+        mock_prison_response()
         assertViewAccessible('security:credit_list')
 
     @responses.activate
@@ -384,7 +387,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
             api_url('/users/shall/flags/%s/' % hmpps_employee_flag),
             json={}
         )
-        sample_prison_list()
+        mock_prison_response()
         response = self.client.post(reverse('security:hmpps_employee'), data={
             'confirmation': 'yes',
             'next': reverse('security:prisoner_list'),
@@ -502,7 +505,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         mocked_form_method.return_value = []
         if not self.view_name:
             return
-        sample_prison_list()
+        mock_prison_response()
         self.login()
         response = self.client.get(reverse(self.view_name), follow=True)
         self.assertContains(response, '<!-- %s -->' % self.view_name)
@@ -521,7 +524,7 @@ class LegacySecurityViewTestCase(SecurityViewTestCase):
             return
         self.login()
         no_saved_searches()
-        sample_prison_list()
+        mock_prison_response()
         responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
         self.client.get(reverse(self.view_name) + '?page=1&prison=BBI', follow=False)
         calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
@@ -534,7 +537,7 @@ class LegacySecurityViewTestCase(SecurityViewTestCase):
             return
         self.login()
         no_saved_searches()
-        sample_prison_list()
+        mock_prison_response()
         responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
         self.client.get(reverse(self.view_name) + '?page=1&prison=BBI&prison=AAI', follow=False)
         calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
@@ -547,7 +550,7 @@ class LegacySecurityViewTestCase(SecurityViewTestCase):
             return
         self.login()
         no_saved_searches()
-        sample_prison_list()
+        mock_prison_response()
         responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
         self.client.get(reverse(self.view_name) + '?page=1&prison=BBI,AAI', follow=False)
         calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
@@ -581,7 +584,7 @@ class SearchV2SecurityTestCaseMixin:
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -606,11 +609,11 @@ class SearchV2SecurityTestCaseMixin:
         The simple search filters by the user's prisons by default.
         """
         with responses.RequestsMock() as rsps:
-            user_prisons = sample_prisons
+            user_prisons = SAMPLE_PRISONS
             user_data = self.get_user_data(prisons=user_prisons)
 
             self.login(user_data=user_data, rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             response = self.client.get(reverse(self.view_name))
 
         self.assertContains(
@@ -626,7 +629,7 @@ class SearchV2SecurityTestCaseMixin:
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -655,7 +658,7 @@ class SearchV2SecurityTestCaseMixin:
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -685,7 +688,7 @@ class SearchV2SecurityTestCaseMixin:
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             query_string = 'ordering=invalid&simple_search=test'
             request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             response = self.client.get(request_url)
@@ -702,7 +705,7 @@ class SearchV2SecurityTestCaseMixin:
 
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             query_string = 'ordering=invalid&advanced=True'
             request_url = (
                 f'{reverse(self.advanced_search_view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
@@ -719,7 +722,7 @@ class SearchV2SecurityTestCaseMixin:
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -752,7 +755,7 @@ class ExportSecurityViewTestCaseMixin:
 
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -788,7 +791,7 @@ class ExportSecurityViewTestCaseMixin:
 
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -818,7 +821,7 @@ class ExportSecurityViewTestCaseMixin:
 
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
 
             rsps.add(
                 rsps.GET,
@@ -848,7 +851,7 @@ class ExportSecurityViewTestCaseMixin:
 
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
 
             rsps.add(
                 rsps.GET,
@@ -891,7 +894,7 @@ class ExportSecurityViewTestCaseMixin:
 
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             response = self.client.get(
                 f'{reverse(self.export_email_view_name)}?{qs}',
                 HTTP_REFERER=referer_url,
@@ -911,7 +914,7 @@ class SenderViewsTestCase(LegacySecurityViewTestCase):
     def test_displays_results(self):
         self.login()
         no_saved_searches()
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url(self.api_list_path),
@@ -1000,7 +1003,7 @@ class SenderViewsTestCase(LegacySecurityViewTestCase):
     def test_connection_errors(self):
         self.login()
         no_saved_searches()
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url('/senders/{id}/'.format(id=9)),
@@ -1191,7 +1194,7 @@ class SenderViewsV2TestCase(
         sender_id = 9
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -1235,7 +1238,7 @@ class PrisonerViewsTestCase(LegacySecurityViewTestCase):
     def test_displays_results(self):
         self.login()
         no_saved_searches()
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url(self.api_list_path),
@@ -1300,7 +1303,7 @@ class PrisonerViewsTestCase(LegacySecurityViewTestCase):
     def test_connection_errors(self):
         self.login()
         no_saved_searches()
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url('/prisoners/{id}/'.format(id=9)),
@@ -1442,7 +1445,7 @@ class PrisonerViewsV2TestCase(
         prisoner_id = 9
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
-            sample_prison_list(rsps=rsps)
+            mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -1517,7 +1520,7 @@ class CreditViewsTestCase(LegacySecurityViewTestCase):
 
     @responses.activate
     def test_displays_results(self):
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url(self.api_list_path),
@@ -1543,7 +1546,7 @@ class CreditViewsTestCase(LegacySecurityViewTestCase):
 
     @responses.activate
     def test_debit_card_detail(self):
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url('/credits/'),
@@ -1567,7 +1570,7 @@ class CreditViewsTestCase(LegacySecurityViewTestCase):
 
     @responses.activate
     def test_bank_transfer_detail(self):
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url('/credits/'),
@@ -1878,7 +1881,7 @@ class DisbursementViewsTestCase(LegacySecurityViewTestCase):
 
     @responses.activate
     def test_displays_results(self):
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url(self.api_list_path),
@@ -1908,7 +1911,7 @@ class DisbursementViewsTestCase(LegacySecurityViewTestCase):
 
     @responses.activate
     def test_bank_transfer_detail(self):
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url('/disbursements/99/'),
@@ -1929,7 +1932,7 @@ class DisbursementViewsTestCase(LegacySecurityViewTestCase):
 
     @responses.activate
     def test_cheque_detail(self):
-        sample_prison_list()
+        mock_prison_response()
         responses.add(
             responses.GET,
             api_url('/disbursements/100/'),
