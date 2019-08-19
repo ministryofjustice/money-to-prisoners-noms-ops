@@ -25,7 +25,7 @@ from security.utils import (
     sender_profile_name,
 )
 
-YOUR_PRISONS_QUERY_STRING_VALUE = 'mine'
+PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE = 'mine'
 
 END_DATE_BEFORE_START_DATE_ERROR_MSG = _('Must be after the start date.')
 
@@ -69,11 +69,11 @@ class PrisonSelectorSearchFormMixin(forms.Form):
         label=_('Choose a prison'),
         required=False,
         choices=(
-            (YOUR_PRISONS_QUERY_STRING_VALUE, _('Your prisons')),
+            (PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE, _('Your prisons')),
             (PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE, _('All prisons')),
             (PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE, _('A specific prison')),
         ),
-        initial=YOUR_PRISONS_QUERY_STRING_VALUE,
+        initial=PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
     )
     prison = forms.MultipleChoiceField(label=_('Prison name'), required=False, choices=[])
 
@@ -81,7 +81,7 @@ class PrisonSelectorSearchFormMixin(forms.Form):
         prison_selector = query_data.pop('prison_selector', None)
         prisons = query_data.pop('prison', [])
 
-        if prison_selector == YOUR_PRISONS_QUERY_STRING_VALUE:
+        if prison_selector == PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE:
             if self.request.user_prisons:
                 query_data['prison'] = [
                     prison['nomis_id']

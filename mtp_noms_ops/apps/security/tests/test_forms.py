@@ -17,12 +17,12 @@ from security.forms.object_list import (
     CreditsFormV2,
     DisbursementsForm,
     DisbursementsFormV2,
+    PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
     PrisonersForm,
     PrisonersFormV2,
     PrisonSelectorSearchFormMixin,
     SendersForm,
     SendersFormV2,
-    YOUR_PRISONS_QUERY_STRING_VALUE,
 )
 from security.forms.review import ReviewCreditsForm
 from security.tests import api_url
@@ -356,19 +356,19 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                 Scenario(
                     [SAMPLE_PRISONS[0]],
                     {
-                        'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                         'prison': [SAMPLE_PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
-                        'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                         'prison': [],  # reset
                     },
                     {
                         'prison': [SAMPLE_PRISONS[0]['nomis_id']],
                     },
                     {
-                        'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                        'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                     },
                 ),
 
@@ -376,17 +376,17 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                 Scenario(
                     [],
                     {
-                        'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                         'prison': [SAMPLE_PRISONS[1]['nomis_id']],
                     },
                     {
                         'page': 1,
-                        'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                         'prison': [],  # reset
                     },
                     {},  # expected api query params empty because we don't want to filter by any prison
                     {
-                        'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                        'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                     },
                 ),
 
@@ -691,7 +691,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                     'offset': ['0'],
                     'limit': ['20'],
                     'ordering': ['-prisoner_count'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -704,7 +704,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-prisoner_count',
                 'prison': [],
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'advanced': False,
                 'simple_search': '',
                 'sender_name': '',
@@ -720,7 +720,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             {
                 'advanced': ['False'],
                 'ordering': ['-prisoner_count'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
             },
         )
 
@@ -737,7 +737,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-credit_total',
-                    'prison_selection': YOUR_PRISONS_QUERY_STRING_VALUE,
+                    'prison_selection': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                     'simple_search': 'Joh',
                 },
             )
@@ -752,7 +752,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                     'limit': ['20'],
                     'ordering': ['-credit_total'],
                     'simple_search': ['Joh'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -766,7 +766,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'card_number_last_digits': '',
                 'page': 2,
                 'ordering': '-credit_total',
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'prison': [],
                 'sender_account_number': '',
                 'sender_email': '',
@@ -782,7 +782,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             {
                 'advanced': ['False'],
                 'ordering': ['-credit_total'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                 'simple_search': ['Joh'],
             },
         )
@@ -800,7 +800,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-credit_total',
-                    'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                    'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                     'advanced': True,
                     'sender_name': 'John Doe',
                     'sender_email': 'johndoe',
@@ -821,7 +821,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                     'offset': ['20'],
                     'limit': ['20'],
                     'ordering': ['-credit_total'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -841,7 +841,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'advanced': True,
                 'page': 2,
                 'ordering': '-credit_total',
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'prison': [],
                 'sender_name': 'John Doe',
                 'sender_email': 'johndoe',
@@ -856,7 +856,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             parse_qs(form.query_string),
             {
                 'ordering': ['-credit_total'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                 'advanced': ['True'],
                 'sender_name': ['John Doe'],
                 'sender_email': ['johndoe'],
@@ -997,7 +997,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                     'offset': ['0'],
                     'limit': ['20'],
                     'ordering': ['-sender_count'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1010,7 +1010,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-sender_count',
                 'prison': [],
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'simple_search': '',
                 'advanced': False,
                 'prisoner_name': '',
@@ -1022,7 +1022,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
             {
                 'advanced': ['False'],
                 'ordering': ['-sender_count'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
             },
         )
 
@@ -1039,7 +1039,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-credit_total',
-                    'prison_selection': YOUR_PRISONS_QUERY_STRING_VALUE,
+                    'prison_selection': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                     'simple_search': 'Joh',
                 },
             )
@@ -1054,7 +1054,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                     'limit': ['20'],
                     'ordering': ['-credit_total'],
                     'simple_search': ['Joh'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1067,7 +1067,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 'advanced': False,
                 'page': 2,
                 'ordering': '-credit_total',
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'prison': [],
                 'simple_search': 'Joh',
                 'prisoner_name': '',
@@ -1080,7 +1080,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
             {
                 'advanced': ['False'],
                 'ordering': ['-credit_total'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                 'simple_search': ['Joh'],
             },
         )
@@ -1098,7 +1098,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-credit_total',
-                    'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                    'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                     'advanced': True,
                     'prisoner_name': 'John Doe',
                     'prisoner_number': 'a2624ae',
@@ -1114,7 +1114,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                     'offset': ['20'],
                     'limit': ['20'],
                     'ordering': ['-credit_total'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1129,7 +1129,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 'advanced': True,
                 'page': 2,
                 'ordering': '-credit_total',
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'prison': [],
                 'simple_search': '',
                 'prisoner_name': 'John Doe',
@@ -1141,7 +1141,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
             parse_qs(form.query_string),
             {
                 'ordering': ['-credit_total'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                 'advanced': ['True'],
                 'prisoner_name': ['John Doe'],
                 'prisoner_number': ['A2624AE'],
@@ -1284,7 +1284,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'offset': ['0'],
                     'limit': ['20'],
                     'ordering': ['-received_at'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1297,7 +1297,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-received_at',
                 'prison': [],
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'simple_search': '',
                 'advanced': False,
                 'amount_pattern': '',
@@ -1321,7 +1321,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             {
                 'advanced': ['False'],
                 'ordering': ['-received_at'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
             },
         )
 
@@ -1338,7 +1338,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-amount',
-                    'prison_selection': YOUR_PRISONS_QUERY_STRING_VALUE,
+                    'prison_selection': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                     'simple_search': 'Joh',
                 },
             )
@@ -1353,7 +1353,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'limit': ['20'],
                     'ordering': ['-amount'],
                     'simple_search': ['Joh'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1366,7 +1366,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'advanced': False,
                 'page': 2,
                 'ordering': '-amount',
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'prison': [],
                 'simple_search': 'Joh',
                 'amount_pattern': '',
@@ -1391,7 +1391,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             {
                 'advanced': ['False'],
                 'ordering': ['-amount'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                 'simple_search': ['Joh'],
             },
         )
@@ -1409,7 +1409,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-amount',
-                    'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                    'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                     'advanced': True,
                     'amount_pattern': AmountPattern.exact.name,
                     'amount_exact': '100.00',
@@ -1442,7 +1442,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'offset': ['20'],
                     'limit': ['20'],
                     'ordering': ['-amount'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1467,7 +1467,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'advanced': True,
                 'page': 2,
                 'ordering': '-amount',
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'prison': [],
                 'simple_search': '',
                 'amount_pattern': AmountPattern.exact.name,
@@ -1492,7 +1492,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             parse_qs(form.query_string),
             {
                 'ordering': ['-amount'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                 'amount_pattern': ['exact'],
                 'amount_exact': ['100.00'],
                 'advanced': ['True'],
@@ -1685,7 +1685,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                     'offset': ['0'],
                     'limit': ['20'],
                     'ordering': ['-created'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1698,7 +1698,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'page': 1,
                 'ordering': '-created',
                 'prison': [],
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'simple_search': '',
                 'advanced': False,
                 'amount_exact': '',
@@ -1721,7 +1721,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
             {
                 'advanced': ['False'],
                 'ordering': ['-created'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
             },
         )
 
@@ -1738,7 +1738,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-amount',
-                    'prison_selection': YOUR_PRISONS_QUERY_STRING_VALUE,
+                    'prison_selection': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                     'simple_search': 'Joh',
                 },
             )
@@ -1753,7 +1753,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                     'limit': ['20'],
                     'ordering': ['-amount'],
                     'simple_search': ['Joh'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1766,7 +1766,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'advanced': False,
                 'page': 2,
                 'ordering': '-amount',
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'prison': [],
                 'simple_search': 'Joh',
                 'amount_exact': '',
@@ -1790,7 +1790,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
             {
                 'advanced': ['False'],
                 'ordering': ['-amount'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                 'simple_search': ['Joh'],
             },
         )
@@ -1808,7 +1808,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 data={
                     'page': 2,
                     'ordering': '-amount',
-                    'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                    'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                     'advanced': True,
                     'amount_pattern': AmountPattern.exact.name,
                     'amount_exact': '100.00',
@@ -1840,7 +1840,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                     'offset': ['20'],
                     'limit': ['20'],
                     'ordering': ['-amount'],
-                    'prison': [  # YOUR_PRISONS_QUERY_STRING_VALUE expands into user prisons
+                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1864,7 +1864,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'advanced': True,
                 'page': 2,
                 'ordering': '-amount',
-                'prison_selector': YOUR_PRISONS_QUERY_STRING_VALUE,
+                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'prison': [],
                 'simple_search': '',
                 'amount_pattern': AmountPattern.exact.name,
@@ -1888,7 +1888,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
             parse_qs(form.query_string),
             {
                 'ordering': ['-amount'],
-                'prison_selector': [YOUR_PRISONS_QUERY_STRING_VALUE],
+                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
                 'amount_pattern': ['exact'],
                 'amount_exact': ['100.00'],
                 'advanced': ['True'],

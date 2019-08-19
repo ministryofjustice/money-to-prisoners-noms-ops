@@ -22,7 +22,7 @@ from security import (
     required_permissions, hmpps_employee_flag, not_hmpps_employee_flag,
     confirmed_prisons_flag, notifications_pilot_flag, SEARCH_V2_FLAG,
 )
-from security.forms.object_list import PrisonSelectorSearchFormMixin, YOUR_PRISONS_QUERY_STRING_VALUE
+from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
 from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
 from security.views.object_base import SEARCH_FORM_SUBMITTED_INPUT_NAME
@@ -618,7 +618,7 @@ class SearchV2SecurityTestCaseMixin:
 
         self.assertContains(
             response,
-            f'<input type="hidden" name="prison_selector" value="{YOUR_PRISONS_QUERY_STRING_VALUE}"',
+            f'<input type="hidden" name="prison_selector" value="{PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}"',
         )
 
     def test_advanced_search_with_my_prisons_selection(self):
@@ -634,7 +634,8 @@ class SearchV2SecurityTestCaseMixin:
             mock_prison_response(rsps=rsps)
 
             response = self.client.get(
-                f'{reverse(self.advanced_search_view_name)}?prison_selector={YOUR_PRISONS_QUERY_STRING_VALUE}',
+                f'{reverse(self.advanced_search_view_name)}'
+                f'?prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}',
             )
             self.assertEqual(response.status_code, 200)
 
@@ -706,7 +707,7 @@ class SearchV2SecurityTestCaseMixin:
                 },
             )
             query_string = (
-                f'ordering={self.search_ordering}&prison_selector={YOUR_PRISONS_QUERY_STRING_VALUE}'
+                f'ordering={self.search_ordering}&prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
                 f'&advanced=False&simple_search=test'
             )
             request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
@@ -735,7 +736,7 @@ class SearchV2SecurityTestCaseMixin:
                 },
             )
             query_string = (
-                f'ordering={self.search_ordering}&prison_selector={YOUR_PRISONS_QUERY_STRING_VALUE}'
+                f'ordering={self.search_ordering}&prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
                 '&advanced=True'
             )
             request_url = (

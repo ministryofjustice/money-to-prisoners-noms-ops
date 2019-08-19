@@ -16,7 +16,7 @@
           <input id="{{ field.html_name }}-{{ value }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == field.value %}checked{% endif %}>
 
           <label for="{{ field.html_name }}-{{ value }}">
-            {% if value == YOUR_PRISONS_QUERY_STRING_VALUE %}
+            {% if value == PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE %}
               {% include 'security/forms/user-prison-names-ellipsis.html' %}
             {% else %}
               {{ label }}
