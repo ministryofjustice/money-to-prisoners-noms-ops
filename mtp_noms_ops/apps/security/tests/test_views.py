@@ -585,6 +585,9 @@ class SearchV2SecurityTestCaseMixin:
     search_results_view_name = None
     advanced_search_view_name = None
 
+    # the filter name used for API calls, it's usually prison but can sometimes be current_prison
+    prison_api_filter_name = 'prison'
+
     def get_user_data(
         self,
         *args,
@@ -688,7 +691,7 @@ class SearchV2SecurityTestCaseMixin:
             api_call_made = rsps.calls[-1].request.url
             parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
             self.assertCountEqual(
-                parsed_qs['prison'],
+                parsed_qs[self.prison_api_filter_name],
                 [prison['nomis_id'] for prison in user_prisons],
             )
 
@@ -708,7 +711,7 @@ class SearchV2SecurityTestCaseMixin:
 
             api_call_made = rsps.calls[-1].request.url
             parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
-            self.assertTrue('prison' not in parsed_qs)
+            self.assertTrue(self.prison_api_filter_name not in parsed_qs)
 
     def test_advanced_search_with_exact_prison_selected(self):
         """
@@ -731,7 +734,7 @@ class SearchV2SecurityTestCaseMixin:
             api_call_made = rsps.calls[-1].request.url
             parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
             self.assertCountEqual(
-                parsed_qs['prison'],
+                parsed_qs[self.prison_api_filter_name],
                 [expected_prison_id],
             )
 
@@ -1465,6 +1468,7 @@ class PrisonerViewsV2TestCase(
     detail_view_name = 'security:prisoner_detail'
     search_ordering = '-sender_count'
     api_list_path = '/prisoners/'
+    prison_api_filter_name = 'current_prison'
 
     export_view_name = 'security:prisoners_export'
     export_email_view_name = 'security:prisoners_email_export'

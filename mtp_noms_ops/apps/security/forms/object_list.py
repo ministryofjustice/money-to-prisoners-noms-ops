@@ -561,6 +561,18 @@ class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, BasePris
 
         return prisoner_number.upper()
 
+    def get_query_data(self, allow_parameter_manipulation=True):
+        """
+        Make sure the API call filters by `current_prison` instead of the `prison` field which queries
+        all historic prisons.
+        """
+        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
+        if allow_parameter_manipulation:
+            prisons = query_data.pop('prison', None)
+            if prisons:
+                query_data['current_prison'] = prisons
+        return query_data
+
 
 class BaseCreditsForm(SecurityForm):
     """

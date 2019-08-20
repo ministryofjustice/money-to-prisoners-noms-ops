@@ -997,7 +997,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                     'offset': ['0'],
                     'limit': ['20'],
                     'ordering': ['-sender_count'],
-                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
+                    'current_prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1054,7 +1054,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                     'limit': ['20'],
                     'ordering': ['-credit_total'],
                     'simple_search': ['Joh'],
-                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
+                    'current_prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
@@ -1114,7 +1114,7 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                     'offset': ['20'],
                     'limit': ['20'],
                     'ordering': ['-credit_total'],
-                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
+                    'current_prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
                         prison['nomis_id']
                         for prison in self.user_prisons
                     ],
