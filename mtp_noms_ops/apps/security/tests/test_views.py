@@ -491,8 +491,8 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'prisoner_name': 'JAMES HALLS',
         'prisoner_number': 'A1409AE',
         'prisoner_dob': '1986-12-09',
-        'current_prison': {'nomis_id': 'PRN', 'name': 'Prison'},
-        'prisons': [{'nomis_id': 'PRN', 'name': 'Prison'}],
+        'current_prison': {'nomis_id': 'PRN', 'name': 'Prison PRN'},
+        'prisons': [{'nomis_id': 'PRN', 'name': 'Prison PRN'}],
         'provided_names': ['Jim Halls', 'JAMES HALLS', 'James Halls '],
         'created': '2016-05-25T20:24:00Z',
         'modified': '2016-05-25T20:24:00Z',
@@ -1494,8 +1494,8 @@ class PrisonerViewsV2TestCase(
             3,
             '£310.00',
             2,
-            'Prison',
-            'Prison',
+            'Prison PRN',
+            'Prison PRN',
             'Jim Halls, JAMES HALLS',
             2,
             '£290.00',
@@ -1511,6 +1511,11 @@ class PrisonerViewsV2TestCase(
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('A1409AE', response_content)
         self.assertIn('310.00', response_content)
+
+        if advanced:
+            self.assertIn('Prison PRN', response_content)
+        else:
+            self.assertNotIn('Prison PRN', response_content)
 
     @override_nomis_settings
     def test_detail_view(self):

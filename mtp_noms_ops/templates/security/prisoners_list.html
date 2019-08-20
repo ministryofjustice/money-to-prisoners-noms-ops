@@ -34,6 +34,9 @@
               <thead>
                 <tr>
                   <th>{% trans 'Prisoner' %}</th>
+                  {% if form.advanced.value %}
+                  <th>{% trans 'Prison' %}</th>
+                  {% endif %}
                   {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' cell_classes='numeric' %}
                   {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' cell_classes='numeric' %}
                   {% sortable_cell _('Amount of credits') form.cleaned_data 'credit_total' cell_classes='numeric' %}
@@ -48,6 +51,9 @@
                       <br/>
                       {% search_highlight prisoner.prisoner_number %}
                     </td>
+                    {% if form.advanced.value %}
+                    <td>{{ prisoner.current_prison.name|default:"-" }}</td>
+                    {% endif %}
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">
                       {{ prisoner.credit_count }}
@@ -102,6 +108,9 @@
               <thead>
                 <tr>
                   <th>{% trans 'Prisoner' %}</th>
+                  {% if form.advanced.value %}
+                  <th>{% trans 'Prison' %}</th>
+                  {% endif %}
                   {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='numeric' %}
                   {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' cell_classes='numeric' %}
                   {% sortable_cell _('Amount of disbursements	') form.cleaned_data 'disbursement_total' cell_classes='numeric' %}
@@ -116,6 +125,9 @@
                       <br/>
                       {% search_highlight prisoner.prisoner_number %}
                     </td>
+                    {% if form.advanced.value %}
+                    <td>{{ prisoner.current_prison.name|default:"-" }}</td>
+                    {% endif %}
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">
                       {{ prisoner.recipient_count }}
