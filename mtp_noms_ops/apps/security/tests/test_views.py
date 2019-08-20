@@ -44,7 +44,8 @@ SAMPLE_PRISONS = [
     {
         'nomis_id': 'AAI',
         'general_ledger_code': '001',
-        'name': 'HMP & YOI Test 1', 'short_name': 'Test 1',
+        'name': 'HMP & YOI Test 1',
+        'short_name': 'Test 1',
         'region': 'London',
         'categories': [{'description': 'Category D', 'name': 'D'},
                        {'description': 'Young Offender Institution', 'name': 'YOI'}],
@@ -56,7 +57,8 @@ SAMPLE_PRISONS = [
     {
         'nomis_id': 'BBI',
         'general_ledger_code': '002',
-        'name': 'HMP Test 2', 'short_name': 'Test 2',
+        'name': 'HMP Test 2',
+        'short_name': 'Test 2',
         'region': 'London',
         'categories': [{'description': 'Category D', 'name': 'D'}],
         'populations': [{'description': 'Male', 'name': 'male'}],
@@ -428,6 +430,16 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'credit_total': 41000,
         'prisoner_count': 3,
         'prison_count': 2,
+        'prisons': [
+            {
+                'nomis_id': 'PRN',
+                'name': 'Prison PRN',
+            },
+            {
+                'nomis_id': 'ABC',
+                'name': 'Prison ABC',
+            },
+        ],
         'bank_transfer_details': [
             {
                 'sender_name': 'MAISIE NOLAN',
@@ -445,6 +457,16 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'credit_total': 42000,
         'prisoner_count': 3,
         'prison_count': 2,
+        'prisons': [
+            {
+                'nomis_id': 'PRN',
+                'name': 'Prison PRN',
+            },
+            {
+                'nomis_id': 'ABC',
+                'name': 'Prison ABC',
+            },
+        ],
         'bank_transfer_details': [],
         'debit_card_details': [
             {
@@ -1196,11 +1218,19 @@ class SenderViewsV2TestCase(
         ]
 
     def _test_search_results_content(self, response, advanced=False):
-        self.assertContains(response, '2 payment sources')
-        self.assertContains(response, 'MAISIE NOLAN')
         response_content = response.content.decode(response.charset)
+
+        self.assertIn('2 payment sources', response_content)
+        self.assertIn('MAISIE NOLAN', response_content)
         self.assertIn('£410.00', response_content)
         self.assertIn('£420.00', response_content)
+
+        if advanced:
+            self.assertIn('Prison PRN', response_content)
+            self.assertIn('Prison ABC', response_content)
+        else:
+            self.assertNotIn('Prison PRN', response_content)
+            self.assertNotIn('Prison ABC', response_content)
 
     def test_detail_view_displays_bank_transfer_detail(self):
         sender_id = 9

@@ -48,7 +48,11 @@
               <th>{% trans 'Payment method' %}</th>
               {% sortable_cell _('Number of credits sent') form.cleaned_data 'credit_count' cell_classes='numeric' %}
               {% sortable_cell _('Prisoners sent to') form.cleaned_data 'prisoner_count' cell_classes='numeric' %}
+              {% if form.advanced.value %}
+              <th>{% trans 'Prisons sent to' %}</th>
+              {% else %}
               {% sortable_cell _('Number of prisons sent to') form.cleaned_data 'prison_count' cell_classes='numeric' %}
+              {% endif %}
               {% sortable_cell _('Total amount sent') form.cleaned_data 'credit_total' cell_classes='numeric' %}
               <th class="numeric print-hidden">{% trans 'Action' %}</th>
             </tr>
@@ -114,11 +118,15 @@
                         {{ sender.prisoner_count }}
                       </span>
                     </td>
+                    {% if form.advanced.value %}
+                    <td>{{ sender.prisons|list_prison_names }}</td>
+                    {% else %}
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.prison_count }}
                       </span>
                     </td>
+                    {% endif %}
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.credit_total|currency }}
