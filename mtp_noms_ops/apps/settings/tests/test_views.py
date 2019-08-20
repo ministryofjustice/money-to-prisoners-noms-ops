@@ -11,7 +11,9 @@ from security import (
 )
 from security.tests import api_url
 from security.tests.test_views import (
-    SecurityBaseTestCase, sample_prison_list, sample_prisons
+    mock_prison_response,
+    SAMPLE_PRISONS,
+    SecurityBaseTestCase,
 )
 
 
@@ -23,7 +25,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_redirects_when_no_flag(self):
-        sample_prison_list()
+        mock_prison_response()
         self.login(user_data=self.get_user_data(
             flags=[hmpps_employee_flag])
         )
@@ -59,9 +61,9 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_prison_confirmation(self):
-        current_prison = sample_prisons[0]
-        new_prison = sample_prisons[1]
-        sample_prison_list()
+        current_prison = SAMPLE_PRISONS[0]
+        new_prison = SAMPLE_PRISONS[1]
+        mock_prison_response()
         self.login(user_data=self.get_user_data(
             prisons=[current_prison], flags=[hmpps_employee_flag])
         )
@@ -112,8 +114,8 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_prison_confirmation_all_prisons(self):
-        current_prison = sample_prisons[0]
-        sample_prison_list()
+        current_prison = SAMPLE_PRISONS[0]
+        mock_prison_response()
         self.login(user_data=self.get_user_data(
             prisons=[current_prison], flags=[hmpps_employee_flag])
         )
@@ -196,9 +198,9 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         Test changing my prisons' data by replacing an existing previously selected
         prison with a new one.
         """
-        current_prison = sample_prisons[0]
-        new_prison = sample_prisons[1]
-        sample_prison_list()
+        current_prison = SAMPLE_PRISONS[0]
+        new_prison = SAMPLE_PRISONS[1]
+        mock_prison_response()
         self.login(user_data=self.get_user_data(
             prisons=[current_prison], flags=[
                 hmpps_employee_flag,
@@ -224,9 +226,9 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         with a new textfield for the new prison added.
         Note: the test does not save the form but it only tests its initialisation.
         """
-        current_prison = sample_prisons[0]
-        new_prison = sample_prisons[1]
-        sample_prison_list()
+        current_prison = SAMPLE_PRISONS[0]
+        new_prison = SAMPLE_PRISONS[1]
+        mock_prison_response()
         self.login(user_data=self.get_user_data(
             prisons=[current_prison], flags=[
                 hmpps_employee_flag,
@@ -247,9 +249,9 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         Test that clicking on 'Remove' redirects to the same page with that textfield removed.
         Note: the test does not save the form but it only tests its initialisation.
         """
-        current_prison = sample_prisons[0]
-        new_prison = sample_prisons[1]
-        sample_prison_list()
+        current_prison = SAMPLE_PRISONS[0]
+        new_prison = SAMPLE_PRISONS[1]
+        mock_prison_response()
         self.login(user_data=self.get_user_data(
             prisons=[current_prison], flags=[
                 hmpps_employee_flag,
@@ -271,9 +273,9 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         Test that clicking on 'Add all prisons' redirects to the 'All Prisons' version of the page.
         Note: the test does not save the form but it only tests its initialisation.
         """
-        current_prison = sample_prisons[0]
-        new_prison = sample_prisons[1]
-        sample_prison_list()
+        current_prison = SAMPLE_PRISONS[0]
+        new_prison = SAMPLE_PRISONS[1]
+        mock_prison_response()
         self.login(user_data=self.get_user_data(
             prisons=[current_prison], flags=[
                 hmpps_employee_flag,
@@ -295,8 +297,8 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         (not the 'All Prison' one).
         Note: the test does not save the form but it only tests its initialisation.
         """
-        current_prison = sample_prisons[0]
-        sample_prison_list()
+        current_prison = SAMPLE_PRISONS[0]
+        mock_prison_response()
         self.login(user_data=self.get_user_data(
             prisons=[current_prison], flags=[
                 hmpps_employee_flag,
@@ -316,10 +318,10 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         """
         Test that if the next param is passed in, the view redirects to it after saving the changes.
         """
-        current_prison = sample_prisons[0]
-        new_prison = sample_prisons[1]
+        current_prison = SAMPLE_PRISONS[0]
+        new_prison = SAMPLE_PRISONS[1]
 
-        sample_prison_list()
+        mock_prison_response()
         self.login(
             user_data=self.get_user_data(
                 prisons=[current_prison],
@@ -344,10 +346,10 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         Test that if the passed in next param is not in the allowed hosts list,
         the view redirects to the default view after saving the changes instead.
         """
-        current_prison = sample_prisons[0]
-        new_prison = sample_prisons[1]
+        current_prison = SAMPLE_PRISONS[0]
+        new_prison = SAMPLE_PRISONS[1]
 
-        sample_prison_list()
+        mock_prison_response()
         self.login(
             user_data=self.get_user_data(
                 prisons=[current_prison],

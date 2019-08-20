@@ -1,0 +1,15 @@
+{% load i18n security %}
+
+{% if not user.user_data.prisons %}
+  {% trans 'All prisons' %}
+{% else %}
+  {% get_split_prison_names user.user_data.prisons 4 as split_prison_names %}
+
+  {{ split_prison_names.prison_names }}
+
+  {% if split_prison_names.total_remaining %}
+    {% blocktrans trimmed with total_remaining=split_prison_names.total_remaining %}
+      and {{ total_remaining }} more
+    {% endblocktrans %}
+  {% endif %}
+{% endif %}
