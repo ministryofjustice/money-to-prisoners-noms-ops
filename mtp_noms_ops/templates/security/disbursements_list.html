@@ -33,6 +33,9 @@
               {% sortable_cell _('Date entered') form.cleaned_data 'created' %}
               <th>{% trans 'Prisoner (from)' %}</th>
               <th>{% trans 'Recipient (to)' %}</th>
+              {% if form.advanced.value %}
+              <th>{% trans 'Prison' %}</th>
+              {% endif %}
               {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
               <th class="numeric print-hidden">{% trans 'Action' %}</th>
             </tr>
@@ -55,6 +58,10 @@
                   <br/>
                   {{ disbursement.recipient_email|default:_('Email not provided') }}
                 </td>
+
+                {% if form.advanced.value %}
+                <td>{{ disbursement.prison_name }}</td>
+                {% endif %}
 
                 <td class="numeric">
                   <span class="mtp-sortable-cell--pad">

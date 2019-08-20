@@ -579,25 +579,49 @@ class SearchV2SecurityTestCaseMixin:
 
         return super().get_user_data(*args, flags=flags, **kwargs)
 
-    def test_displays_search_results(self):
+    def test_displays_simple_search_results(self):
         """
-        Test that the search results page includes the objects returned by the API.
+        Test that the search results page includes the objects returned by the API
+        in case of a simple search.
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             mock_prison_response(rsps=rsps)
+            api_results = self.get_api_object_list_response_data()
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
                 json={
-                    'count': 2,
-                    'results': self.get_api_object_list_response_data(),
+                    'count': len(api_results),
+                    'results': api_results,
                 },
             )
             response = self.client.get(reverse(self.view_name))
-        self._test_search_results_content(response)
+        self._test_search_results_content(response, advanced=False)
 
-    def _test_search_results_content(self, response):
+    def test_displays_advanced_search_results(self):
+        """
+        Test that the search results page includes the objects returned by the API
+        in case of an advanced search.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            mock_prison_response(rsps=rsps)
+            api_results = self.get_api_object_list_response_data()
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': len(api_results),
+                    'results': api_results,
+                },
+            )
+            response = self.client.get(
+                f'{reverse(self.view_name)}?advanced=True'
+            )
+        self._test_search_results_content(response, advanced=True)
+
+    def _test_search_results_content(self, response, advanced=False):
         """
         Subclass to test that the response content of the search results view is as expected.
         """
@@ -1171,7 +1195,7 @@ class SenderViewsV2TestCase(
             self.debit_card_sender,
         ]
 
-    def _test_search_results_content(self, response):
+    def _test_search_results_content(self, response, advanced=False):
         self.assertContains(response, '2 payment sources')
         self.assertContains(response, 'MAISIE NOLAN')
         response_content = response.content.decode(response.charset)
@@ -1448,7 +1472,7 @@ class PrisonerViewsV2TestCase(
     def get_api_object_list_response_data(self):
         return [self.prisoner_profile]
 
-    def _test_search_results_content(self, response):
+    def _test_search_results_content(self, response, advanced=False):
         response_content = response.content.decode(response.charset)
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('A1409AE', response_content)
@@ -1795,16 +1819,23 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
             self.bank_transfer_credit,
         ]
 
-    def _test_search_results_content(self, response):
-        self.assertContains(response, '2 credits')
+    def _test_search_results_content(self, response, advanced=False):
+        response_content = response.content.decode(response.charset)
+        self.assertIn('2 credits', response_content)
 
-        self.assertContains(response, 'GEORGE MELLEY')
-        self.assertContains(response, 'A1411AE')
-        self.assertContains(response, '230.00')
+        self.assertIn('GEORGE MELLEY', response_content)
+        self.assertIn('A1411AE', response_content)
+        self.assertIn('230.00', response_content)
 
-        self.assertContains(response, 'NORMAN STANLEY FLETCHER')
-        self.assertContains(response, 'A1413AE')
-        self.assertContains(response, '275.00')
+        self.assertIn('NORMAN STANLEY FLETCHER', response_content)
+        self.assertIn('A1413AE', response_content)
+        self.assertIn('275.00', response_content)
+
+        # results page via advanced search includes an extra `prison` column
+        if advanced:
+            self.assertIn('HMP LEEDS', response_content)
+        else:
+            self.assertNotIn('HMP LEEDS', response_content)
 
     def test_detail_view_displays_debit_card_detail(self):
         credit_id = 2
@@ -2182,16 +2213,25 @@ class DisbursementViewsV2TestCase(
         ],
     ]
 
-    def _test_search_results_content(self, response):
-        self.assertContains(response, '2 disbursements')
+    def _test_search_results_content(self, response, advanced=False):
+        response_content = response.content.decode(response.charset)
+        self.assertIn('2 disbursements', response_content)
 
-        self.assertContains(response, 'Jack Halls')
-        self.assertContains(response, '20.00')
-        self.assertContains(response, 'A1409AE')
+        self.assertIn('Jack Halls', response_content)
+        self.assertIn('20.00', response_content)
+        self.assertIn('A1409AE', response_content)
 
-        self.assertContains(response, 'Jilly Halls')
-        self.assertContains(response, '10.00')
-        self.assertContains(response, 'A1401AE')
+        self.assertIn('Jilly Halls', response_content)
+        self.assertIn('10.00', response_content)
+        self.assertIn('A1401AE', response_content)
+
+        # results page via advanced search includes an extra `prison` column
+        if advanced:
+            self.assertIn('HMP Test1', response_content)
+            self.assertIn('HMP Test2', response_content)
+        else:
+            self.assertNotIn('HMP Test1', response_content)
+            self.assertNotIn('HMP Test2', response_content)
 
     def test_detail_view_displays_bank_transfer_detail(self):
         disbursement_id = 99
