@@ -5,11 +5,6 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
-{% block phase_banner %}
-  {{ block.super }}
-  {% include "security/forms/prison-switcher.html" %}
-{% endblock %}
-
 {% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
 {% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
 

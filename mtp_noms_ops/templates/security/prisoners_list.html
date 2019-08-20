@@ -1,17 +1,7 @@
-{% extends 'base.html' %}
+{% extends 'security/base_search_results.html' %}
 {% load i18n %}
 {% load mtp_common %}
 {% load security %}
-
-{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
-
-{% block phase_banner %}
-  {{ block.super }}
-  {% include "security/forms/prison-switcher.html" %}
-{% endblock %}
-
-{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
-{% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
 
 {% block inner_content %}
   <form id="filter-prisoners" class="mtp-security-search js-FormAnalytics" method="get">
