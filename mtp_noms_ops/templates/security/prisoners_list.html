@@ -1,17 +1,7 @@
-{% extends 'base.html' %}
+{% extends 'security/base_search_results.html' %}
 {% load i18n %}
 {% load mtp_common %}
 {% load security %}
-
-{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
-
-{% block phase_banner %}
-  {{ block.super }}
-  {% include "security/forms/prison-switcher.html" %}
-{% endblock %}
-
-{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
-{% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
 
 {% block inner_content %}
   <form id="filter-prisoners" class="mtp-security-search js-FormAnalytics" method="get">
@@ -44,6 +34,9 @@
               <thead>
                 <tr>
                   <th>{% trans 'Prisoner' %}</th>
+                  {% if form.advanced.value %}
+                  <th>{% trans 'Prison' %}</th>
+                  {% endif %}
                   {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' cell_classes='numeric' %}
                   {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' cell_classes='numeric' %}
                   {% sortable_cell _('Amount of credits') form.cleaned_data 'credit_total' cell_classes='numeric' %}
@@ -58,6 +51,9 @@
                       <br/>
                       {% search_highlight prisoner.prisoner_number %}
                     </td>
+                    {% if form.advanced.value %}
+                    <td>{{ prisoner.current_prison.name|default:"-" }}</td>
+                    {% endif %}
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">
                       {{ prisoner.credit_count }}
@@ -112,6 +108,9 @@
               <thead>
                 <tr>
                   <th>{% trans 'Prisoner' %}</th>
+                  {% if form.advanced.value %}
+                  <th>{% trans 'Prison' %}</th>
+                  {% endif %}
                   {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='numeric' %}
                   {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' cell_classes='numeric' %}
                   {% sortable_cell _('Amount of disbursements	') form.cleaned_data 'disbursement_total' cell_classes='numeric' %}
@@ -126,6 +125,9 @@
                       <br/>
                       {% search_highlight prisoner.prisoner_number %}
                     </td>
+                    {% if form.advanced.value %}
+                    <td>{{ prisoner.current_prison.name|default:"-" }}</td>
+                    {% endif %}
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">
                       {{ prisoner.recipient_count }}

@@ -44,7 +44,8 @@ SAMPLE_PRISONS = [
     {
         'nomis_id': 'AAI',
         'general_ledger_code': '001',
-        'name': 'HMP & YOI Test 1', 'short_name': 'Test 1',
+        'name': 'HMP & YOI Test 1',
+        'short_name': 'Test 1',
         'region': 'London',
         'categories': [{'description': 'Category D', 'name': 'D'},
                        {'description': 'Young Offender Institution', 'name': 'YOI'}],
@@ -56,7 +57,8 @@ SAMPLE_PRISONS = [
     {
         'nomis_id': 'BBI',
         'general_ledger_code': '002',
-        'name': 'HMP Test 2', 'short_name': 'Test 2',
+        'name': 'HMP Test 2',
+        'short_name': 'Test 2',
         'region': 'London',
         'categories': [{'description': 'Category D', 'name': 'D'}],
         'populations': [{'description': 'Male', 'name': 'male'}],
@@ -428,6 +430,16 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'credit_total': 41000,
         'prisoner_count': 3,
         'prison_count': 2,
+        'prisons': [
+            {
+                'nomis_id': 'PRN',
+                'name': 'Prison PRN',
+            },
+            {
+                'nomis_id': 'ABC',
+                'name': 'Prison ABC',
+            },
+        ],
         'bank_transfer_details': [
             {
                 'sender_name': 'MAISIE NOLAN',
@@ -445,6 +457,16 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'credit_total': 42000,
         'prisoner_count': 3,
         'prison_count': 2,
+        'prisons': [
+            {
+                'nomis_id': 'PRN',
+                'name': 'Prison PRN',
+            },
+            {
+                'nomis_id': 'ABC',
+                'name': 'Prison ABC',
+            },
+        ],
         'bank_transfer_details': [],
         'debit_card_details': [
             {
@@ -469,8 +491,8 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         'prisoner_name': 'JAMES HALLS',
         'prisoner_number': 'A1409AE',
         'prisoner_dob': '1986-12-09',
-        'current_prison': {'nomis_id': 'PRN', 'name': 'Prison'},
-        'prisons': [{'nomis_id': 'PRN', 'name': 'Prison'}],
+        'current_prison': {'nomis_id': 'PRN', 'name': 'Prison PRN'},
+        'prisons': [{'nomis_id': 'PRN', 'name': 'Prison PRN'}],
         'provided_names': ['Jim Halls', 'JAMES HALLS', 'James Halls '],
         'created': '2016-05-25T20:24:00Z',
         'modified': '2016-05-25T20:24:00Z',
@@ -563,6 +585,9 @@ class SearchV2SecurityTestCaseMixin:
     search_results_view_name = None
     advanced_search_view_name = None
 
+    # the filter name used for API calls, it's usually prison but can sometimes be current_prison
+    prison_api_filter_name = 'prison'
+
     def get_user_data(
         self,
         *args,
@@ -579,25 +604,49 @@ class SearchV2SecurityTestCaseMixin:
 
         return super().get_user_data(*args, flags=flags, **kwargs)
 
-    def test_displays_search_results(self):
+    def test_displays_simple_search_results(self):
         """
-        Test that the search results page includes the objects returned by the API.
+        Test that the search results page includes the objects returned by the API
+        in case of a simple search.
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             mock_prison_response(rsps=rsps)
+            api_results = self.get_api_object_list_response_data()
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
                 json={
-                    'count': 2,
-                    'results': self.get_api_object_list_response_data(),
+                    'count': len(api_results),
+                    'results': api_results,
                 },
             )
             response = self.client.get(reverse(self.view_name))
-        self._test_search_results_content(response)
+        self._test_search_results_content(response, advanced=False)
 
-    def _test_search_results_content(self, response):
+    def test_displays_advanced_search_results(self):
+        """
+        Test that the search results page includes the objects returned by the API
+        in case of an advanced search.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            mock_prison_response(rsps=rsps)
+            api_results = self.get_api_object_list_response_data()
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': len(api_results),
+                    'results': api_results,
+                },
+            )
+            response = self.client.get(
+                f'{reverse(self.view_name)}?advanced=True'
+            )
+        self._test_search_results_content(response, advanced=True)
+
+    def _test_search_results_content(self, response, advanced=False):
         """
         Subclass to test that the response content of the search results view is as expected.
         """
@@ -642,7 +691,7 @@ class SearchV2SecurityTestCaseMixin:
             api_call_made = rsps.calls[-1].request.url
             parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
             self.assertCountEqual(
-                parsed_qs['prison'],
+                parsed_qs[self.prison_api_filter_name],
                 [prison['nomis_id'] for prison in user_prisons],
             )
 
@@ -662,7 +711,7 @@ class SearchV2SecurityTestCaseMixin:
 
             api_call_made = rsps.calls[-1].request.url
             parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
-            self.assertTrue('prison' not in parsed_qs)
+            self.assertTrue(self.prison_api_filter_name not in parsed_qs)
 
     def test_advanced_search_with_exact_prison_selected(self):
         """
@@ -685,7 +734,7 @@ class SearchV2SecurityTestCaseMixin:
             api_call_made = rsps.calls[-1].request.url
             parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
             self.assertCountEqual(
-                parsed_qs['prison'],
+                parsed_qs[self.prison_api_filter_name],
                 [expected_prison_id],
             )
 
@@ -1171,12 +1220,20 @@ class SenderViewsV2TestCase(
             self.debit_card_sender,
         ]
 
-    def _test_search_results_content(self, response):
-        self.assertContains(response, '2 payment sources')
-        self.assertContains(response, 'MAISIE NOLAN')
+    def _test_search_results_content(self, response, advanced=False):
         response_content = response.content.decode(response.charset)
+
+        self.assertIn('2 payment sources', response_content)
+        self.assertIn('MAISIE NOLAN', response_content)
         self.assertIn('£410.00', response_content)
         self.assertIn('£420.00', response_content)
+
+        if advanced:
+            self.assertIn('Prison PRN', response_content)
+            self.assertIn('Prison ABC', response_content)
+        else:
+            self.assertNotIn('Prison PRN', response_content)
+            self.assertNotIn('Prison ABC', response_content)
 
     def test_detail_view_displays_bank_transfer_detail(self):
         sender_id = 9
@@ -1411,6 +1468,7 @@ class PrisonerViewsV2TestCase(
     detail_view_name = 'security:prisoner_detail'
     search_ordering = '-sender_count'
     api_list_path = '/prisoners/'
+    prison_api_filter_name = 'current_prison'
 
     export_view_name = 'security:prisoners_export'
     export_email_view_name = 'security:prisoners_email_export'
@@ -1436,8 +1494,8 @@ class PrisonerViewsV2TestCase(
             3,
             '£310.00',
             2,
-            'Prison',
-            'Prison',
+            'Prison PRN',
+            'Prison PRN',
             'Jim Halls, JAMES HALLS',
             2,
             '£290.00',
@@ -1448,11 +1506,16 @@ class PrisonerViewsV2TestCase(
     def get_api_object_list_response_data(self):
         return [self.prisoner_profile]
 
-    def _test_search_results_content(self, response):
+    def _test_search_results_content(self, response, advanced=False):
         response_content = response.content.decode(response.charset)
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('A1409AE', response_content)
         self.assertIn('310.00', response_content)
+
+        if advanced:
+            self.assertIn('Prison PRN', response_content)
+        else:
+            self.assertNotIn('Prison PRN', response_content)
 
     @override_nomis_settings
     def test_detail_view(self):
@@ -1795,16 +1858,23 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
             self.bank_transfer_credit,
         ]
 
-    def _test_search_results_content(self, response):
-        self.assertContains(response, '2 credits')
+    def _test_search_results_content(self, response, advanced=False):
+        response_content = response.content.decode(response.charset)
+        self.assertIn('2 credits', response_content)
 
-        self.assertContains(response, 'GEORGE MELLEY')
-        self.assertContains(response, 'A1411AE')
-        self.assertContains(response, '230.00')
+        self.assertIn('GEORGE MELLEY', response_content)
+        self.assertIn('A1411AE', response_content)
+        self.assertIn('230.00', response_content)
 
-        self.assertContains(response, 'NORMAN STANLEY FLETCHER')
-        self.assertContains(response, 'A1413AE')
-        self.assertContains(response, '275.00')
+        self.assertIn('NORMAN STANLEY FLETCHER', response_content)
+        self.assertIn('A1413AE', response_content)
+        self.assertIn('275.00', response_content)
+
+        # results page via advanced search includes an extra `prison` column
+        if advanced:
+            self.assertIn('HMP LEEDS', response_content)
+        else:
+            self.assertNotIn('HMP LEEDS', response_content)
 
     def test_detail_view_displays_debit_card_detail(self):
         credit_id = 2
@@ -2182,16 +2252,25 @@ class DisbursementViewsV2TestCase(
         ],
     ]
 
-    def _test_search_results_content(self, response):
-        self.assertContains(response, '2 disbursements')
+    def _test_search_results_content(self, response, advanced=False):
+        response_content = response.content.decode(response.charset)
+        self.assertIn('2 disbursements', response_content)
 
-        self.assertContains(response, 'Jack Halls')
-        self.assertContains(response, '20.00')
-        self.assertContains(response, 'A1409AE')
+        self.assertIn('Jack Halls', response_content)
+        self.assertIn('20.00', response_content)
+        self.assertIn('A1409AE', response_content)
 
-        self.assertContains(response, 'Jilly Halls')
-        self.assertContains(response, '10.00')
-        self.assertContains(response, 'A1401AE')
+        self.assertIn('Jilly Halls', response_content)
+        self.assertIn('10.00', response_content)
+        self.assertIn('A1401AE', response_content)
+
+        # results page via advanced search includes an extra `prison` column
+        if advanced:
+            self.assertIn('HMP Test1', response_content)
+            self.assertIn('HMP Test2', response_content)
+        else:
+            self.assertNotIn('HMP Test1', response_content)
+            self.assertNotIn('HMP Test2', response_content)
 
     def test_detail_view_displays_bank_transfer_detail(self):
         disbursement_id = 99
