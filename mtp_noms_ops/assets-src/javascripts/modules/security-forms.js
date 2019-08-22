@@ -148,68 +148,34 @@ exports.SecurityForms = {
     if (!$('.mtp-security-advanced-search').length) {
       return;
     }
-    this.bindAmountPatternSelection();
-    this.bindPrisonSelection();
+    this.bindConditionalShowHideSelection('amount_pattern');
+    this.bindConditionalShowHideSelection('prison_selector');
   },
 
-  hideFieldWrapper: function (wrapper) {
-    wrapper.removeClass('form-group-error').hide();
-    wrapper.find('input').val('').removeClass('form-control-error');
-    wrapper.find('.error-message').remove();
-  },
+  bindConditionalShowHideSelection: function (inputName) {
+    var $conditionalSelector = $('[name='+inputName+']');
 
-  bindAmountPatternSelection: function () {
-    var $patternSelect = $('[name=amount_pattern]');
-    var self = this;
-
-    if (!$patternSelect.length) {
+    if (!$conditionalSelector.length) {
       return;
     }
 
-    var $exactWrapper = $('#id_amount_exact-wrapper');
-    var $penceWrapper = $('#id_amount_pence-wrapper');
+    var $conditionalContainer = $conditionalSelector.parents('.mtp-conditional-container');
+
 
     function update () {
-      switch ($patternSelect.filter(':checked').val()) {
-        case 'exact':
-          $exactWrapper.show();
-          self.hideFieldWrapper($penceWrapper);
-          break;
-        case 'pence':
-          self.hideFieldWrapper($exactWrapper);
-          $penceWrapper.show();
-          break;
-        default:
-          self.hideFieldWrapper($exactWrapper);
-          self.hideFieldWrapper($penceWrapper);
-      }
+      var selectedValue = $conditionalSelector.filter(':checked').val();
+      var wrapperToReveal = $('#mtp-conditional-'+inputName+'-'+selectedValue);
+      var wrappersToHide = $conditionalContainer.find('.mtp-conditional-wrapper').not(wrapperToReveal);
+
+      wrapperToReveal.show();
+
+      wrappersToHide.find('input').val('').removeClass('form-control-error');
+      wrappersToHide.find('.form-group-error').removeClass('form-group-error');
+      wrappersToHide.find('.error-message').remove();
+      wrappersToHide.hide();
     }
 
-    $patternSelect.change(update);
-    update();
-  },
-
-  bindPrisonSelection: function () {
-    var $prisonSelector = $('[name=prison_selector]');
-    var self = this;
-
-    if (!$prisonSelector.length) {
-      return;
-    }
-
-    var $prisonWrapper = $('#id_prison-wrapper');
-
-    function update () {
-      switch ($prisonSelector.filter(':checked').val()) {
-        case 'exact':
-          $prisonWrapper.show();
-          break;
-        default:
-          self.hideFieldWrapper($prisonWrapper);
-      }
-    }
-
-    $prisonSelector.change(update);
+    $conditionalSelector.change(update);
     update();
   }
 };

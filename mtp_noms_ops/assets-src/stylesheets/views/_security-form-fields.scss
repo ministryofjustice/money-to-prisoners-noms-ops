@@ -182,16 +182,23 @@ select[disabled] {
     }
   }
 
-  #id_amount_exact-wrapper,
-  #id_amount_pence-wrapper,
-  #id_prison-wrapper {
+  .mtp-conditional-wrapper {
     @extend .panel;
     border-left-width: 5px;
     margin-left: 18px;
     padding: 0 0 0 26px;
+    display: none;
   }
 
   .mtp-invoice-nr-header {
     margin-top: 15px;
+  }
+
+  #id_amount_exact-wrapper,
+  #id_amount_pence-wrapper,
+  #id_prison-wrapper {
+    border: 0;
+    display: block;
+    padding: 0;
   }
 }
