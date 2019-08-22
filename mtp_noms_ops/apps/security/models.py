@@ -1,3 +1,4 @@
+import enum
 import json
 
 from django.core.cache import cache
@@ -5,9 +6,16 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from mtp_common.api import retrieve_all_pages_for_path
 
+
+class PaymentMethod(enum.Enum):
+    bank_transfer = _('Bank transfer')
+    online = _('Debit card')
+    cheque = _('Cheque')
+
+
 credit_sources = {
-    'bank_transfer': _('Bank transfer'),
-    'online': _('Debit card'),
+    PaymentMethod.bank_transfer.name: PaymentMethod.bank_transfer.value,
+    PaymentMethod.online.name: PaymentMethod.online.value,
 }
 credit_resolutions = {
     'initial': _('Initial'),
@@ -18,8 +26,8 @@ credit_resolutions = {
 }
 
 disbursement_methods = {
-    'bank_transfer': _('Bank transfer'),
-    'cheque': _('Cheque'),
+    PaymentMethod.bank_transfer.name: PaymentMethod.bank_transfer.value,
+    PaymentMethod.cheque.name: PaymentMethod.cheque.value,
 }
 disbursement_actions = {
     'created': _('Entered'),

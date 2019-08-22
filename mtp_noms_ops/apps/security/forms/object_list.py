@@ -18,6 +18,7 @@ from security.forms.object_base import (
     validate_prisoner_number,
     validate_range_fields,
 )
+from security.models import PaymentMethod
 from security.templatetags.security import currency as format_currency
 from security.utils import (
     convert_date_fields,
@@ -186,7 +187,7 @@ class AmountSearchFormMixin(forms.Form):
         return query_data
 
     def _clean_amount_fields(self, cleaned_data):
-        # if amount fields are already in error dont' check any further
+        # if amount fields are already in error don't check any further
         if set(self.errors) & {'amount_pattern', 'amount_exact', 'amount_pence'}:
             return cleaned_data
 
@@ -221,6 +222,125 @@ class AmountSearchFormMixin(forms.Form):
         """
         cleaned_data = super().clean()
         return self._clean_amount_fields(cleaned_data)
+
+
+class PaymentMethodSearchFormMixin(forms.Form):
+    """
+    Mixin for the payment method fields and related logic.
+    """
+    payment_method = forms.ChoiceField(
+        label=_('Payment method'),
+        required=False,
+        choices=[],
+    )
+    account_number = forms.CharField(label=_('Account number'), required=False)
+    sort_code = forms.CharField(label=_('Sort code'), required=False)
+    card_number_last_digits = forms.CharField(
+        label=_('Last 4 digits of card number'),
+        max_length=4,
+        required=False,
+    )
+
+    # mapping from this form fields to related API filters to be translated into
+    # they can be overridden when subclassing if API endpoints expect different filter names
+    PAYMENT_METHOD_API_FIELDS_MAPPING = {
+        'payment_method': 'method',
+        'account_number': 'account_number',
+        'sort_code': 'sort_code',
+        'card_number_last_digits': 'card_number_last_digits',
+    }
+
+    # scope for each field (e.g. account_number only applies if payment method == bank transfer)
+    PAYMENT_METHOD_FIELDS_SCOPE = {
+        'payment_method': [
+            PaymentMethod.bank_transfer,
+            PaymentMethod.online,
+            PaymentMethod.cheque,
+        ],
+        'account_number': [PaymentMethod.bank_transfer],
+        'sort_code': [PaymentMethod.bank_transfer],
+        'card_number_last_digits': [PaymentMethod.online],
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # set up choices for payment method based on actual subclass
+        self.fields['payment_method'].choices = [
+            ('', _('Any method')),  # blank option
+
+            *self.get_payment_method_choices(),
+        ]
+
+        # store scope on fields so that it's easier to get them later on
+        for field_name, supported_payment_methods in self.PAYMENT_METHOD_FIELDS_SCOPE.items():
+            self.fields[field_name].supported_payment_methods = supported_payment_methods
+
+    def get_payment_method_choices(self):
+        """
+        To be implemented when subclassing.
+
+        Returns a list of tuples (id, name) to be used as payment method choices.
+        """
+        raise NotImplementedError()
+
+    def _update_payment_method_in_query_data(self, query_data):
+        try:
+            payment_method = PaymentMethod[
+                query_data.get('payment_method', None)
+            ]
+        except KeyError:
+            payment_method = None
+
+        for field_name in self.PAYMENT_METHOD_API_FIELDS_MAPPING:
+            field = self.fields[field_name]
+            cleaned_field_value = query_data.pop(field_name, None)
+
+            if not cleaned_field_value:
+                continue
+
+            if payment_method in field.supported_payment_methods:
+                api_filter_name = self.PAYMENT_METHOD_API_FIELDS_MAPPING[field_name]
+                query_data[api_filter_name] = cleaned_field_value
+
+    def get_query_data(self, allow_parameter_manipulation=True):
+        """
+        Updates `query_data` by translating payment method fields into appropriate filters for the API.
+        """
+        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
+        if allow_parameter_manipulation:
+            self._update_payment_method_in_query_data(query_data)
+        return query_data
+
+    def clean_sort_code(self):
+        sort_code = self.cleaned_data.get('sort_code')
+        return remove_whitespaces_and_hyphens(sort_code)
+
+    def _clean_payment_method_fields(self, cleaned_data):
+        # if payment method fields are already in error don't check any further
+        if set(self.errors) & set(self.PAYMENT_METHOD_FIELDS_SCOPE):
+            return cleaned_data
+
+        try:
+            payment_method = PaymentMethod[
+                cleaned_data.get('payment_method', None)
+            ]
+        except KeyError:
+            payment_method = None
+
+        for field_name in self.PAYMENT_METHOD_FIELDS_SCOPE:
+            field = self.fields[field_name]
+            if payment_method not in field.supported_payment_methods:
+                cleaned_data[field_name] = ''
+        return cleaned_data
+
+    def clean(self):
+        """
+        Validates the payment method fields and resets the ones that are not compatible with
+        the choosen method.
+        """
+        cleaned_data = super().clean()
+        return self._clean_payment_method_fields(cleaned_data)
 
 
 class BaseSendersForm(SecurityForm):
@@ -359,7 +479,11 @@ class SendersForm(BaseSendersForm):
         return query_data
 
 
-class SendersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, BaseSendersForm):
+class SendersFormV2(
+    SearchFormV2Mixin,
+    PrisonSelectorSearchFormMixin,
+    BaseSendersForm,
+):
     """
     Search Form for Senders V2.
     """

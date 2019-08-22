@@ -17,6 +17,7 @@ from security.forms.object_list import (
     CreditsFormV2,
     DisbursementsForm,
     DisbursementsFormV2,
+    PaymentMethodSearchFormMixin,
     PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
     PrisonersForm,
     PrisonersFormV2,
@@ -25,6 +26,7 @@ from security.forms.object_list import (
     SendersFormV2,
 )
 from security.forms.review import ReviewCreditsForm
+from security.models import PaymentMethod
 from security.tests import api_url
 
 
@@ -86,6 +88,19 @@ class MyPrisonSelectorSearchForm(PrisonSelectorSearchFormMixin, SecurityForm):
     """
     SecurityForm used to test PrisonSelectorSearchFormMixin.
     """
+
+
+class MyPaymentMethodSearchForm(PaymentMethodSearchFormMixin, SecurityForm):
+    """
+    SecurityForm used to test PaymentMethodSearchFormMixin.
+    """
+
+    def get_payment_method_choices(self):
+        return (
+            (PaymentMethod.bank_transfer.name, PaymentMethod.bank_transfer.value),
+            (PaymentMethod.online.name, PaymentMethod.online.value),
+            (PaymentMethod.cheque.name, PaymentMethod.cheque.value),
+        )
 
 
 class AmountSearchFormMixinTestCase(SimpleTestCase):
@@ -486,6 +501,305 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                 )
                 self.assertFalse(form.is_valid())
                 self.assertDictEqual(form.errors, scenario.expected_errors)
+
+
+class PaymentMethodSearchFormMixinTestCase(SimpleTestCase):
+    """
+    Tests for the PaymentMethodSearchFormMixin.
+    """
+    def setUp(self):
+        super().setUp()
+        self.disable_cache = mock.patch('security.models.cache')
+        self.disable_cache.start().get.return_value = None
+
+    def tearDown(self):
+        self.disable_cache.stop()
+
+    def test_valid(self):
+        """
+        Test valid scenarios.
+
+        Note:
+        account_number and sort_code are reset if payment method != bank_transfer
+        card_number_last_digits is reset if payment method != online
+        """
+        Scenario = namedtuple(
+            'Scenario',
+            [
+                'data',
+                'expected_cleaned_data',
+                'expected_api_request_params',
+                'expected_query_string'
+            ],
+        )
+
+        scenarios = [
+            # payment method == 'Any'
+            Scenario(
+                {
+                    'payment_method': '',
+                    'account_number': '112233',
+                    'sort_code': '44-55-66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': '',
+                    'account_number': '',
+                    'sort_code': '',
+                    'card_number_last_digits': '',
+                },
+                {},
+                {},
+            ),
+            # no payment method
+            Scenario(
+                {
+                    'account_number': '112233',
+                    'sort_code': '44-55-66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': '',
+                    'account_number': '',
+                    'sort_code': '',
+                    'card_number_last_digits': '',
+                },
+                {},
+                {},
+            ),
+            # bank tranfer + account number
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '',
+                    'card_number_last_digits': '',  # reset
+                },
+                {
+                    'method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                },
+                {
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'account_number': ['112233'],
+                },
+            ),
+            # bank tranfer + sort code
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'sort_code': '44-55 66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '',
+                    'sort_code': '445566',
+                    'card_number_last_digits': '',  # reset
+                },
+                {
+                    'method': PaymentMethod.bank_transfer.name,
+                    'sort_code': '445566',
+                },
+                {
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'sort_code': ['445566'],
+                },
+            ),
+            # bank tranfer + account number + sort code
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '44-55 66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '445566',
+                    'card_number_last_digits': '',  # reset
+                },
+                {
+                    'method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '445566',
+                },
+                {
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'account_number': ['112233'],
+                    'sort_code': ['445566'],
+                },
+            ),
+            # online + card_number_last_digits
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.online.name,
+                    'account_number': '112233',
+                    'sort_code': '44-55-66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.online.name,
+                    'account_number': '',  # reset
+                    'sort_code': '',  # reset
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'method': PaymentMethod.online.name,
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'payment_method': [PaymentMethod.online.name],
+                    'card_number_last_digits': ['9876'],
+                },
+            ),
+            # cheque
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.cheque.name,
+                    'account_number': '112233',
+                    'sort_code': '44-55-66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.cheque.name,
+                    'account_number': '',  # reset
+                    'sort_code': '',  # reset
+                    'card_number_last_digits': '',  # reset
+                },
+                {
+                    'method': PaymentMethod.cheque.name,
+                },
+                {
+                    'payment_method': [PaymentMethod.cheque.name],
+                },
+            ),
+        ]
+
+        for scenario in scenarios:
+            form = MyPaymentMethodSearchForm(
+                mock.MagicMock(),
+                data=scenario.data,
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertDictEqual(
+                form.cleaned_data,
+                scenario.expected_cleaned_data,
+            )
+            self.assertDictEqual(
+                form.get_api_request_params(),
+                scenario.expected_api_request_params,
+            )
+            self.assertDictEqual(
+                parse_qs(form.query_string),
+                scenario.expected_query_string,
+            )
+
+    def test_invalid(self):
+        """
+        Test validation errors.
+        """
+        scenarios = [
+            ValidationScenario(
+                {'payment_method': 'invalid'},
+                {'payment_method': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+        ]
+
+        for scenario in scenarios:
+            form = MyPaymentMethodSearchForm(
+                mock.MagicMock(),
+                data=scenario.data,
+            )
+            self.assertFalse(form.is_valid())
+            self.assertDictEqual(form.errors, scenario.expected_errors)
+
+    def test_overridden_api_mapping(self):
+        """
+        Test that if PAYMENT_METHOD_API_FIELDS_MAPPING if overridden, the api call uses
+        the translated filter name whilst the query string keeps the original field name.
+        """
+        class _MyPaymentMethodSearchForm(MyPaymentMethodSearchForm):
+            PAYMENT_METHOD_API_FIELDS_MAPPING = {
+                'payment_method': 'api_payment_method',
+                'account_number': 'api_account_number',
+                'sort_code': 'api_sort_code',
+                'card_number_last_digits': 'api_card_number_last_digits',
+            }
+
+        Scenario = namedtuple(
+            'Scenario',
+            [
+                'data',
+                'expected_api_request_params',
+                'expected_query_string'
+            ],
+        )
+
+        scenarios = [
+            # bank transfer + account number + sort code
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '44-55 66',
+                },
+                {
+                    'api_payment_method': PaymentMethod.bank_transfer.name,
+                    'api_account_number': '112233',
+                    'api_sort_code': '445566',
+                },
+                {
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'account_number': ['112233'],
+                    'sort_code': ['445566'],
+                },
+            ),
+            # online + card_number_last_digits
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.online.name,
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'api_payment_method': PaymentMethod.online.name,
+                    'api_card_number_last_digits': '9876',
+                },
+                {
+                    'payment_method': [PaymentMethod.online.name],
+                    'card_number_last_digits': ['9876'],
+                },
+            ),
+        ]
+
+        for scenario in scenarios:
+            form = _MyPaymentMethodSearchForm(
+                mock.MagicMock(),
+                data=scenario.data,
+            )
+            self.assertTrue(form.is_valid())
+            self.assertDictEqual(
+                form.get_api_request_params(),
+                scenario.expected_api_request_params,
+            )
+            self.assertDictEqual(
+                parse_qs(form.query_string),
+                scenario.expected_query_string,
+            )
 
 
 class SecurityFormTestCase(SimpleTestCase):
