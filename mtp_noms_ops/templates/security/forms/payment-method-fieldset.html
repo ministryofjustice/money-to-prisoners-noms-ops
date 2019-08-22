@@ -1,0 +1,31 @@
+{% load i18n %}
+
+{% with field=form.payment_method choices=form.payment_method.field.choices %}
+  <fieldset class="mtp-conditional-container">
+    <legend id="{{ field.id_for_label }}-label" class="visually-hidden">
+      <strong>{{ field.label }}</strong>
+    </legend>
+
+    <div class="{% if field.errors %}form-group-error{% endif %}">
+      {% for value, label in choices %}
+        <div class="multiple-choice">
+          <input id="{{ field.html_name }}-{{ value }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == field.value %}checked{% endif %}>
+          <label for="{{ field.html_name }}-{{ value }}">{{ label }}</label>
+        </div>
+
+        {% if value == 'bank_transfer' %}
+        <div class="mtp-conditional-wrapper" id="mtp-conditional-payment_method-bank_transfer">
+          {% include 'mtp_common/forms/field.html' with field=form.account_number only %}
+          {% include 'mtp_common/forms/field.html' with field=form.sort_code only %}
+        </div>
+        {% endif %}
+
+        {% if value == 'online' %}
+        <div class="mtp-conditional-wrapper" id="mtp-conditional-payment_method-online">
+          {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits only %}
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </fieldset>
+{% endwith %}

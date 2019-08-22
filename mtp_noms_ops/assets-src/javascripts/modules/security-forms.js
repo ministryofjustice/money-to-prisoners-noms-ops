@@ -150,6 +150,7 @@ exports.SecurityForms = {
     }
     this.bindConditionalShowHideSelection('amount_pattern');
     this.bindConditionalShowHideSelection('prison_selector');
+    this.bindConditionalShowHideSelection('payment_method');
   },
 
   bindConditionalShowHideSelection: function (inputName) {

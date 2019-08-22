@@ -26,12 +26,8 @@
   {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_ip_address %}
 
-  <div class="heading-medium">{% trans 'Debit card' %}</div>
-  {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
-
-  <div class="heading-medium">{% trans 'Bank transfer' %}</div>
-  {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
-  {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
+  <div class="heading-medium">{% trans 'Payment method' %}</div>
+  {% include 'security/forms/payment-method-fieldset.html' %}
 
   <div class="heading-large">{% trans 'Prisoner' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}

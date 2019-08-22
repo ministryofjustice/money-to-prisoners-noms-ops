@@ -23,9 +23,7 @@
   {% include 'mtp_common/forms/field.html' with field=form.postcode %}
 
   <div class="heading-large">{% trans 'Payment method' %}</div>
-  <div class="heading-medium">{% trans 'Bank transfer' %}</div>
-  {% include 'mtp_common/forms/field.html' with field=form.account_number %}
-  {% include 'mtp_common/forms/field.html' with field=form.sort_code %}
+  {% include 'security/forms/payment-method-fieldset.html' %}
 
   <div class="heading-large">{% trans 'Prisoner' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}

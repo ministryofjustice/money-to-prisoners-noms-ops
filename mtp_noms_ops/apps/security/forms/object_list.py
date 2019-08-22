@@ -18,7 +18,7 @@ from security.forms.object_base import (
     validate_prisoner_number,
     validate_range_fields,
 )
-from security.models import PaymentMethod
+from security.models import credit_sources, disbursement_methods, PaymentMethod
 from security.templatetags.security import currency as format_currency
 from security.utils import (
     convert_date_fields,
@@ -482,6 +482,7 @@ class SendersForm(BaseSendersForm):
 class SendersFormV2(
     SearchFormV2Mixin,
     PrisonSelectorSearchFormMixin,
+    PaymentMethodSearchFormMixin,
     BaseSendersForm,
 ):
     """
@@ -495,9 +496,6 @@ class SendersFormV2(
     sender_name = forms.CharField(label=_('Name'), required=False)
     sender_email = forms.CharField(label=_('Email'), required=False)
     sender_postcode = forms.CharField(label=_('Postcode'), required=False)
-    card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
-    sender_account_number = forms.CharField(label=_('Account number'), required=False)
-    sender_sort_code = forms.CharField(label=_('Sort code'), required=False)
 
     # NB: ensure that these templates are HTML-safe
     filtered_description_template = 'Results containing {filter_description}.'
@@ -509,13 +507,19 @@ class SendersFormV2(
     description_capitalisation = {}
     unlisted_description = ''
 
+    PAYMENT_METHOD_API_FIELDS_MAPPING = {
+        'payment_method': 'source',
+        'account_number': 'sender_account_number',
+        'sort_code': 'sender_sort_code',
+        'card_number_last_digits': 'card_number_last_digits',
+    }
+
+    def get_payment_method_choices(self):
+        return credit_sources.items()
+
     def clean_sender_postcode(self):
         sender_postcode = self.cleaned_data.get('sender_postcode')
         return remove_whitespaces_and_hyphens(sender_postcode)
-
-    def clean_sender_sort_code(self):
-        sender_sort_code = self.cleaned_data.get('sender_sort_code')
-        return remove_whitespaces_and_hyphens(sender_sort_code)
 
 
 class BasePrisonersForm(SecurityForm):
@@ -883,6 +887,7 @@ class CreditsFormV2(
     SearchFormV2Mixin,
     AmountSearchFormMixin,
     PrisonSelectorSearchFormMixin,
+    PaymentMethodSearchFormMixin,
     BaseCreditsForm,
 ):
     """
@@ -912,9 +917,6 @@ class CreditsFormV2(
         validators=[validate_ipv4_address],
         required=False,
     )
-    card_number_last_digits = forms.CharField(label=_('Last 4 digits of card number'), max_length=4, required=False)
-    sender_account_number = forms.CharField(label=_('Account number'), required=False)
-    sender_sort_code = forms.CharField(label=_('Sort code'), required=False)
 
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
     prisoner_number = forms.CharField(
@@ -935,13 +937,19 @@ class CreditsFormV2(
     description_capitalisation = {}
     unlisted_description = ''
 
+    PAYMENT_METHOD_API_FIELDS_MAPPING = {
+        'payment_method': 'source',
+        'account_number': 'sender_account_number',
+        'sort_code': 'sender_sort_code',
+        'card_number_last_digits': 'card_number_last_digits',
+    }
+
+    def get_payment_method_choices(self):
+        return credit_sources.items()
+
     def clean_sender_postcode(self):
         sender_postcode = self.cleaned_data.get('sender_postcode')
         return remove_whitespaces_and_hyphens(sender_postcode)
-
-    def clean_sender_sort_code(self):
-        sender_sort_code = self.cleaned_data.get('sender_sort_code')
-        return remove_whitespaces_and_hyphens(sender_sort_code)
 
     def clean_prisoner_number(self):
         """
@@ -1175,6 +1183,7 @@ class DisbursementsFormV2(
     SearchFormV2Mixin,
     AmountSearchFormMixin,
     PrisonSelectorSearchFormMixin,
+    PaymentMethodSearchFormMixin,
     BaseDisbursementsForm,
 ):
     """
@@ -1199,8 +1208,6 @@ class DisbursementsFormV2(
     recipient_name = forms.CharField(label=_('Name'), required=False)
     recipient_email = forms.CharField(label=_('Email'), required=False)
     postcode = forms.CharField(label=_('Postcode'), required=False)
-    account_number = forms.CharField(label=_('Account number'), required=False)
-    sort_code = forms.CharField(label=_('Sort code'), required=False)
 
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
     prisoner_number = forms.CharField(
@@ -1223,13 +1230,12 @@ class DisbursementsFormV2(
     description_capitalisation = {}
     unlisted_description = ''
 
+    def get_payment_method_choices(self):
+        return disbursement_methods.items()
+
     def clean_postcode(self):
         postcode = self.cleaned_data.get('postcode')
         return remove_whitespaces_and_hyphens(postcode)
-
-    def clean_sort_code(self):
-        sort_code = self.cleaned_data.get('sort_code')
-        return remove_whitespaces_and_hyphens(sort_code)
 
     def clean_prisoner_number(self):
         """
