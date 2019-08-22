@@ -15,31 +15,7 @@
     </div>
   </div>
 
-  <div class="heading-large">{% trans 'Amounts' %}</div>
-  {% with field=form.amount_pattern choices=form.amount_pattern.field.choices %}
-    <fieldset>
-      <legend id="{{ field.id_for_label }}-label" class="visually-hidden">
-        <strong>{{ field.label }}</strong>
-      </legend>
-
-      <div class="{% if field.errors %}form-group-error{% endif %}">
-        {% for value, label in choices %}
-          <div class="multiple-choice">
-            <input id="{{ field.html_name }}-{{ value }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == field.value %}checked{% endif %}>
-            <label for="{{ field.html_name }}-{{ value }}">{{ label }}</label>
-          </div>
-
-          {% if value == 'exact' %}
-            {% include 'mtp_common/forms/field.html' with field=form.amount_exact only %}
-          {% endif %}
-
-          {% if value == 'pence' %}
-            {% include 'mtp_common/forms/field.html' with field=form.amount_pence only %}
-          {% endif %}
-        {% endfor %}
-      </div>
-    </fieldset>
-  {% endwith %}
+  {% include 'security/forms/amount-pattern-fieldset.html' %}
 
   <div class="heading-large">{% trans 'Payment methods' %}</div>
   <div class="heading-medium">{% trans 'Payment source details' %}</div>
@@ -50,12 +26,8 @@
   {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_ip_address %}
 
-  <div class="heading-medium">{% trans 'Debit card' %}</div>
-  {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits %}
-
-  <div class="heading-medium">{% trans 'Bank transfer' %}</div>
-  {% include 'mtp_common/forms/field.html' with field=form.sender_account_number %}
-  {% include 'mtp_common/forms/field.html' with field=form.sender_sort_code %}
+  <div class="heading-medium">{% trans 'Payment method' %}</div>
+  {% include 'security/forms/payment-method-fieldset.html' %}
 
   <div class="heading-large">{% trans 'Prisoner' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}

@@ -1,0 +1,31 @@
+{% load i18n %}
+
+<div class="heading-large">{% trans 'Amounts' %}</div>
+{% with field=form.amount_pattern choices=form.amount_pattern.field.choices %}
+  <fieldset class="mtp-conditional-container">
+    <legend id="{{ field.id_for_label }}-label" class="visually-hidden">
+      <strong>{{ field.label }}</strong>
+    </legend>
+
+    <div class="{% if field.errors %}form-group-error{% endif %}">
+      {% for value, label in choices %}
+        <div class="multiple-choice">
+          <input id="{{ field.html_name }}-{{ value }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == field.value|default:"" %}checked{% endif %}>
+          <label for="{{ field.html_name }}-{{ value }}">{{ label }}</label>
+        </div>
+
+        {% if value == 'exact' %}
+        <div class="mtp-conditional-wrapper" id="mtp-conditional-amount_pattern-exact">
+          {% include 'mtp_common/forms/field.html' with field=form.amount_exact only %}
+        </div>
+        {% endif %}
+
+        {% if value == 'pence' %}
+        <div class="mtp-conditional-wrapper" id="mtp-conditional-amount_pattern-pence">
+          {% include 'mtp_common/forms/field.html' with field=form.amount_pence only %}
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </fieldset>
+{% endwith %}

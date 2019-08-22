@@ -17,6 +17,7 @@ from security.forms.object_list import (
     CreditsFormV2,
     DisbursementsForm,
     DisbursementsFormV2,
+    PaymentMethodSearchFormMixin,
     PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
     PrisonersForm,
     PrisonersFormV2,
@@ -25,6 +26,7 @@ from security.forms.object_list import (
     SendersFormV2,
 )
 from security.forms.review import ReviewCreditsForm
+from security.models import PaymentMethod
 from security.tests import api_url
 
 
@@ -86,6 +88,19 @@ class MyPrisonSelectorSearchForm(PrisonSelectorSearchFormMixin, SecurityForm):
     """
     SecurityForm used to test PrisonSelectorSearchFormMixin.
     """
+
+
+class MyPaymentMethodSearchForm(PaymentMethodSearchFormMixin, SecurityForm):
+    """
+    SecurityForm used to test PaymentMethodSearchFormMixin.
+    """
+
+    def get_payment_method_choices(self):
+        return (
+            (PaymentMethod.bank_transfer.name, PaymentMethod.bank_transfer.value),
+            (PaymentMethod.online.name, PaymentMethod.online.value),
+            (PaymentMethod.cheque.name, PaymentMethod.cheque.value),
+        )
 
 
 class AmountSearchFormMixinTestCase(SimpleTestCase):
@@ -488,6 +503,305 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                 self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
+class PaymentMethodSearchFormMixinTestCase(SimpleTestCase):
+    """
+    Tests for the PaymentMethodSearchFormMixin.
+    """
+    def setUp(self):
+        super().setUp()
+        self.disable_cache = mock.patch('security.models.cache')
+        self.disable_cache.start().get.return_value = None
+
+    def tearDown(self):
+        self.disable_cache.stop()
+
+    def test_valid(self):
+        """
+        Test valid scenarios.
+
+        Note:
+        account_number and sort_code are reset if payment method != bank_transfer
+        card_number_last_digits is reset if payment method != online
+        """
+        Scenario = namedtuple(
+            'Scenario',
+            [
+                'data',
+                'expected_cleaned_data',
+                'expected_api_request_params',
+                'expected_query_string'
+            ],
+        )
+
+        scenarios = [
+            # payment method == 'Any'
+            Scenario(
+                {
+                    'payment_method': '',
+                    'account_number': '112233',
+                    'sort_code': '44-55-66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': '',
+                    'account_number': '',
+                    'sort_code': '',
+                    'card_number_last_digits': '',
+                },
+                {},
+                {},
+            ),
+            # no payment method
+            Scenario(
+                {
+                    'account_number': '112233',
+                    'sort_code': '44-55-66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': '',
+                    'account_number': '',
+                    'sort_code': '',
+                    'card_number_last_digits': '',
+                },
+                {},
+                {},
+            ),
+            # bank tranfer + account number
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '',
+                    'card_number_last_digits': '',  # reset
+                },
+                {
+                    'method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                },
+                {
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'account_number': ['112233'],
+                },
+            ),
+            # bank tranfer + sort code
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'sort_code': '44-55 66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '',
+                    'sort_code': '445566',
+                    'card_number_last_digits': '',  # reset
+                },
+                {
+                    'method': PaymentMethod.bank_transfer.name,
+                    'sort_code': '445566',
+                },
+                {
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'sort_code': ['445566'],
+                },
+            ),
+            # bank tranfer + account number + sort code
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '44-55 66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '445566',
+                    'card_number_last_digits': '',  # reset
+                },
+                {
+                    'method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '445566',
+                },
+                {
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'account_number': ['112233'],
+                    'sort_code': ['445566'],
+                },
+            ),
+            # online + card_number_last_digits
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.online.name,
+                    'account_number': '112233',
+                    'sort_code': '44-55-66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.online.name,
+                    'account_number': '',  # reset
+                    'sort_code': '',  # reset
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'method': PaymentMethod.online.name,
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'payment_method': [PaymentMethod.online.name],
+                    'card_number_last_digits': ['9876'],
+                },
+            ),
+            # cheque
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.cheque.name,
+                    'account_number': '112233',
+                    'sort_code': '44-55-66',
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'page': 1,
+                    'payment_method': PaymentMethod.cheque.name,
+                    'account_number': '',  # reset
+                    'sort_code': '',  # reset
+                    'card_number_last_digits': '',  # reset
+                },
+                {
+                    'method': PaymentMethod.cheque.name,
+                },
+                {
+                    'payment_method': [PaymentMethod.cheque.name],
+                },
+            ),
+        ]
+
+        for scenario in scenarios:
+            form = MyPaymentMethodSearchForm(
+                mock.MagicMock(),
+                data=scenario.data,
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertDictEqual(
+                form.cleaned_data,
+                scenario.expected_cleaned_data,
+            )
+            self.assertDictEqual(
+                form.get_api_request_params(),
+                scenario.expected_api_request_params,
+            )
+            self.assertDictEqual(
+                parse_qs(form.query_string),
+                scenario.expected_query_string,
+            )
+
+    def test_invalid(self):
+        """
+        Test validation errors.
+        """
+        scenarios = [
+            ValidationScenario(
+                {'payment_method': 'invalid'},
+                {'payment_method': ['Select a valid choice. invalid is not one of the available choices.']},
+            ),
+        ]
+
+        for scenario in scenarios:
+            form = MyPaymentMethodSearchForm(
+                mock.MagicMock(),
+                data=scenario.data,
+            )
+            self.assertFalse(form.is_valid())
+            self.assertDictEqual(form.errors, scenario.expected_errors)
+
+    def test_overridden_api_mapping(self):
+        """
+        Test that if PAYMENT_METHOD_API_FIELDS_MAPPING if overridden, the api call uses
+        the translated filter name whilst the query string keeps the original field name.
+        """
+        class _MyPaymentMethodSearchForm(MyPaymentMethodSearchForm):
+            PAYMENT_METHOD_API_FIELDS_MAPPING = {
+                'payment_method': 'api_payment_method',
+                'account_number': 'api_account_number',
+                'sort_code': 'api_sort_code',
+                'card_number_last_digits': 'api_card_number_last_digits',
+            }
+
+        Scenario = namedtuple(
+            'Scenario',
+            [
+                'data',
+                'expected_api_request_params',
+                'expected_query_string'
+            ],
+        )
+
+        scenarios = [
+            # bank transfer + account number + sort code
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '112233',
+                    'sort_code': '44-55 66',
+                },
+                {
+                    'api_payment_method': PaymentMethod.bank_transfer.name,
+                    'api_account_number': '112233',
+                    'api_sort_code': '445566',
+                },
+                {
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'account_number': ['112233'],
+                    'sort_code': ['445566'],
+                },
+            ),
+            # online + card_number_last_digits
+            Scenario(
+                {
+                    'payment_method': PaymentMethod.online.name,
+                    'card_number_last_digits': '9876',
+                },
+                {
+                    'api_payment_method': PaymentMethod.online.name,
+                    'api_card_number_last_digits': '9876',
+                },
+                {
+                    'payment_method': [PaymentMethod.online.name],
+                    'card_number_last_digits': ['9876'],
+                },
+            ),
+        ]
+
+        for scenario in scenarios:
+            form = _MyPaymentMethodSearchForm(
+                mock.MagicMock(),
+                data=scenario.data,
+            )
+            self.assertTrue(form.is_valid())
+            self.assertDictEqual(
+                form.get_api_request_params(),
+                scenario.expected_api_request_params,
+            )
+            self.assertDictEqual(
+                parse_qs(form.query_string),
+                scenario.expected_query_string,
+            )
+
+
 class SecurityFormTestCase(SimpleTestCase):
     form_class = None
 
@@ -711,8 +1025,9 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'sender_email': '',
                 'sender_postcode': '',
                 'card_number_last_digits': '',
-                'sender_account_number': '',
-                'sender_sort_code': '',
+                'payment_method': '',
+                'account_number': '',
+                'sort_code': '',
             },
         )
         self.assertEqual(
@@ -768,11 +1083,12 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'ordering': '-credit_total',
                 'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                 'prison': [],
-                'sender_account_number': '',
+                'payment_method': '',
+                'account_number': '',
+                'sort_code': '',
                 'sender_email': '',
                 'sender_name': '',
                 'sender_postcode': '',
-                'sender_sort_code': '',
                 'simple_search': 'Joh',
             },
         )
@@ -805,9 +1121,9 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                     'sender_name': 'John Doe',
                     'sender_email': 'johndoe',
                     'sender_postcode': 'SW1A 1a-a',
-                    'card_number_last_digits': '1234',
-                    'sender_account_number': '123456789',
-                    'sender_sort_code': '11-22 - 33',
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '123456789',
+                    'sort_code': '11-22 - 33',
                 },
             )
 
@@ -828,7 +1144,7 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                     'sender_name': ['John Doe'],
                     'sender_email': ['johndoe'],
                     'sender_postcode': ['SW1A1aa'],
-                    'card_number_last_digits': ['1234'],
+                    'source': [PaymentMethod.bank_transfer.name],
                     'sender_account_number': ['123456789'],
                     'sender_sort_code': ['112233'],
                 },
@@ -846,9 +1162,10 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'sender_name': 'John Doe',
                 'sender_email': 'johndoe',
                 'sender_postcode': 'SW1A1aa',
-                'card_number_last_digits': '1234',
-                'sender_account_number': '123456789',
-                'sender_sort_code': '112233',
+                'payment_method': PaymentMethod.bank_transfer.name,
+                'account_number': '123456789',
+                'sort_code': '112233',
+                'card_number_last_digits': '',
             },
         )
 
@@ -861,9 +1178,9 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 'sender_name': ['John Doe'],
                 'sender_email': ['johndoe'],
                 'sender_postcode': ['SW1A1aa'],
-                'card_number_last_digits': ['1234'],
-                'sender_account_number': ['123456789'],
-                'sender_sort_code': ['112233'],
+                'payment_method': [PaymentMethod.bank_transfer.name],
+                'account_number': ['123456789'],
+                'sort_code': ['112233'],
             },
         )
 
@@ -881,11 +1198,17 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                 {'ordering': ['Select a valid choice. prison is not one of the available choices.']},
             ),
             ValidationScenario(
-                {'prison': ['invalid']},
+                {
+                    'prison_selector': self.form_class.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
+                    'prison': ['invalid'],
+                },
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
             ),
             ValidationScenario(
-                {'card_number_last_digits': '12345'},
+                {
+                    'payment_method': PaymentMethod.online.name,
+                    'card_number_last_digits': '12345',
+                },
                 {'card_number_last_digits': ['You’ve entered too many characters']},
             ),
         ]
@@ -1162,7 +1485,10 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
                 {'ordering': ['Select a valid choice. prison is not one of the available choices.']},
             ),
             ValidationScenario(
-                {'prison': ['invalid']},
+                {
+                    'prison_selector': self.form_class.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
+                    'prison': ['invalid'],
+                },
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
             ),
             ValidationScenario(
@@ -1310,8 +1636,9 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'sender_postcode': '',
                 'sender_ip_address': '',
                 'card_number_last_digits': '',
-                'sender_sort_code': '',
-                'sender_account_number': '',
+                'payment_method': '',
+                'account_number': '',
+                'sort_code': '',
                 'received_at__gte': None,
                 'received_at__lt': None,
             },
@@ -1379,8 +1706,9 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'sender_postcode': '',
                 'sender_ip_address': '',
                 'card_number_last_digits': '',
-                'sender_sort_code': '',
-                'sender_account_number': '',
+                'payment_method': '',
+                'account_number': '',
+                'sort_code': '',
                 'received_at__gte': None,
                 'received_at__lt': None,
             },
@@ -1420,9 +1748,9 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'sender_email': 'johndoe',
                     'sender_postcode': 'SW1A 1a-a',
                     'sender_ip_address': '127.0.0.1',
-                    'card_number_last_digits': '1234',
-                    'sender_account_number': '123456789',
-                    'sender_sort_code': '11-22 - 33',
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '123456789',
+                    'sort_code': '11-22 - 33',
                     'received_at__gte_0': '1',
                     'received_at__gte_1': '2',
                     'received_at__gte_2': '2000',
@@ -1453,7 +1781,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'sender_email': ['johndoe'],
                     'sender_postcode': ['SW1A1aa'],
                     'sender_ip_address': ['127.0.0.1'],
-                    'card_number_last_digits': ['1234'],
+                    'source': [PaymentMethod.bank_transfer.name],
                     'sender_account_number': ['123456789'],
                     'sender_sort_code': ['112233'],
                     'received_at__gte': ['2000-02-01'],
@@ -1479,9 +1807,10 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'sender_email': 'johndoe',
                 'sender_postcode': 'SW1A1aa',
                 'sender_ip_address': '127.0.0.1',
-                'card_number_last_digits': '1234',
-                'sender_account_number': '123456789',
-                'sender_sort_code': '112233',
+                'payment_method': PaymentMethod.bank_transfer.name,
+                'account_number': '123456789',
+                'sort_code': '112233',
+                'card_number_last_digits': '',
                 'received_at__gte': datetime.date(2000, 2, 1),
                 'received_at__lt': datetime.date(2000, 3, 10),
             },
@@ -1500,9 +1829,9 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 'sender_email': ['johndoe'],
                 'sender_postcode': ['SW1A1aa'],
                 'sender_ip_address': ['127.0.0.1'],
-                'card_number_last_digits': ['1234'],
-                'sender_account_number': ['123456789'],
-                'sender_sort_code': ['112233'],
+                'payment_method': [PaymentMethod.bank_transfer.name],
+                'account_number': ['123456789'],
+                'sort_code': ['112233'],
                 'prisoner_name': ['Jane Doe'],
                 'prisoner_number': ['A2624AE'],
                 'received_at__gte_0': ['1'],
@@ -1528,7 +1857,10 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 {'ordering': ['Select a valid choice. prison is not one of the available choices.']},
             ),
             ValidationScenario(
-                {'prison': ['invalid']},
+                {
+                    'prison_selector': self.form_class.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
+                    'prison': ['invalid'],
+                },
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
             ),
             ValidationScenario(
@@ -1536,7 +1868,10 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 {'prisoner_number': ['Invalid prisoner number.']},
             ),
             ValidationScenario(
-                {'card_number_last_digits': '12345'},
+                {
+                    'payment_method': PaymentMethod.online.name,
+                    'card_number_last_digits': '12345',
+                },
                 {'card_number_last_digits': ['You’ve entered too many characters']},
             ),
             ValidationScenario(
@@ -1709,7 +2044,9 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'postcode': '',
                 'created__gte': None,
                 'created__lt': None,
+                'payment_method': '',
                 'account_number': '',
+                'card_number_last_digits': '',
                 'sort_code': '',
                 'prisoner_name': '',
                 'prisoner_number': '',
@@ -1777,8 +2114,10 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'postcode': '',
                 'created__gte': None,
                 'created__lt': None,
+                'payment_method': '',
                 'account_number': '',
                 'sort_code': '',
+                'card_number_last_digits': '',
                 'prisoner_name': '',
                 'prisoner_number': '',
                 'invoice_number': '',
@@ -1822,6 +2161,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                     'created__lt_0': '10',
                     'created__lt_1': '3',
                     'created__lt_2': '2000',
+                    'payment_method': PaymentMethod.bank_transfer.name,
                     'account_number': '123456789',
                     'sort_code': '11-22 - 33',
                     'prisoner_name': 'Jane Doe',
@@ -1850,6 +2190,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                     'postcode': ['SW1A1aa'],
                     'created__gte': ['2000-02-01'],
                     'created__lt': ['2000-03-11'],
+                    'method': [PaymentMethod.bank_transfer.name],
                     'account_number': ['123456789'],
                     'sort_code': ['112233'],
                     'prisoner_name': ['Jane Doe'],
@@ -1875,8 +2216,10 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'postcode': 'SW1A1aa',
                 'created__gte': datetime.date(2000, 2, 1),
                 'created__lt': datetime.date(2000, 3, 10),
+                'payment_method': PaymentMethod.bank_transfer.name,
                 'account_number': '123456789',
                 'sort_code': '112233',
+                'card_number_last_digits': '',
                 'prisoner_name': 'Jane Doe',
                 'prisoner_number': 'A2624AE',
                 'invoice_number': 'PMD1000052',
@@ -1901,6 +2244,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 'created__lt_0': ['10'],
                 'created__lt_1': ['3'],
                 'created__lt_2': ['2000'],
+                'payment_method': [PaymentMethod.bank_transfer.name],
                 'account_number': ['123456789'],
                 'sort_code': ['112233'],
                 'prisoner_name': ['Jane Doe'],
@@ -1923,7 +2267,10 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                 {'ordering': ['Select a valid choice. prison is not one of the available choices.']},
             ),
             ValidationScenario(
-                {'prison': ['invalid']},
+                {
+                    'prison_selector': self.form_class.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
+                    'prison': ['invalid'],
+                },
                 {'prison': ['Select a valid choice. invalid is not one of the available choices.']},
             ),
             ValidationScenario(

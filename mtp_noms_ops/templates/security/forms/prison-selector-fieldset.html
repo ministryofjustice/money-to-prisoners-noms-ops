@@ -2,7 +2,7 @@
 
 <div class="heading-large">{% trans 'Prison' %}</div>
 {% with field=form.prison_selector choices=form.prison_selector.field.choices %}
-  <fieldset class="form-group">
+  <fieldset class="form-group mtp-conditional-container">
     <legend id="{{ field.id_for_label }}-label" class="visually-hidden">
       <strong>{{ field.label }}</strong>
     </legend>
@@ -28,20 +28,22 @@
       {% endfor %}
 
       {% with sub_field=form.prison %}
-      <div id="{{ sub_field.id_for_label }}-wrapper" class="form-group {% if sub_field.errors %}form-group-error{% endif %}">
+      <div class="mtp-conditional-wrapper" id="mtp-conditional-prison_selector-exact">
+        <div id="{{ sub_field.id_for_label }}-wrapper" class="form-group {% if sub_field.errors %}form-group-error{% endif %}">
 
-        {% include 'mtp_common/forms/field-label.html' with field=sub_field only %}
-        {% include 'mtp_common/forms/field-errors.html' with field=sub_field only %}
+          {% include 'mtp_common/forms/field-label.html' with field=sub_field only %}
+          {% include 'mtp_common/forms/field-errors.html' with field=sub_field only %}
 
-        <select id="{{ sub_field.id_for_label }}" class="form-control {% if sub_field.errors %}form-control-error{% endif %} mtp-autocomplete" name="{{ sub_field.html_name }}">
-            <option value=""></option>
-          {% for key, title in sub_field.field.choices %}
-            <option value="{{ key }}" {% if key in sub_field.value %}selected{% endif %}>{{ title }}</option>
-          {% endfor %}
-        </select>
+          <select id="{{ sub_field.id_for_label }}" class="form-control {% if sub_field.errors %}form-control-error{% endif %} mtp-autocomplete" name="{{ sub_field.html_name }}">
+              <option value=""></option>
+            {% for key, title in sub_field.field.choices %}
+              <option value="{{ key }}" {% if key in sub_field.value %}selected{% endif %}>{{ title }}</option>
+            {% endfor %}
+          </select>
 
+        </div>
+        {% endwith %}
       </div>
-      {% endwith %}
     </div>
   </fieldset>
 {% endwith %}
