@@ -73,67 +73,106 @@ urlpatterns = [
 
     # credits
     url(
-        r'^security/credits/$',
+        r'^credits/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.CreditListView.as_view(),
+            search_v2_view_redirect(
                 views.CreditListViewV2.as_view(
                     view_type=views.ViewType.simple_search_form,
                 ),
+                legacy_search_redirect_view_name='security:credit_list_legacy',
             ),
         ),
         name='credit_list',
     ),
     url(
-        r'^security/credits/advanced-search/$',
+        r'^credits/advanced-search/$',
         security_test(
-            views.CreditListViewV2.as_view(
-                view_type=views.ViewType.advanced_search_form,
+            search_v2_view_redirect(
+                views.CreditListViewV2.as_view(
+                    view_type=views.ViewType.advanced_search_form,
+                ),
+                legacy_search_redirect_view_name='security:credit_list_legacy',
             ),
         ),
-        name='credits_advanced_search',
+        name='credit_advanced_search',
     ),
     url(
-        r'^security/credits/search-results/$',
+        r'^credits/search-results/$',
         security_test(
-            views.CreditListViewV2.as_view(
-                view_type=views.ViewType.search_results,
+            search_v2_view_redirect(
+                views.CreditListViewV2.as_view(
+                    view_type=views.ViewType.search_results,
+                ),
+                legacy_search_redirect_view_name='security:credit_list_legacy',
             ),
         ),
         name='credit_search_results',
     ),
     url(
-        r'^security/credits/export/$',
+        r'^credits/export/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.CreditListView.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
+            search_v2_view_redirect(
                 views.CreditListViewV2.as_view(
                     view_type=views.ViewType.export_download,
                 ),
+                legacy_search_redirect_view_name='security:credit_list_legacy',
             ),
         ),
-        name='credits_export',
+        name='credit_export',
     ),
     url(
-        r'^security/credits/email-export/$',
+        r'^credits/email-export/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.CreditListView.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
+            search_v2_view_redirect(
                 views.CreditListViewV2.as_view(
                     view_type=views.ViewType.export_email,
                 ),
+                legacy_search_redirect_view_name='security:credit_list_legacy',
             ),
         ),
-        name='credits_email_export',
+        name='credit_email_export',
     ),
     url(
         r'^security/credits/(?P<credit_id>\d+)/$',
         security_test(views.CreditDetailView.as_view()),
         name='credit_detail',
+    ),
+
+
+    # TODO: delete _legacy views after search V2 goes live.
+    url(
+        r'^security/credits/$',
+        security_test(
+            search_v2_view_redirect(
+                views.CreditListView.as_view(),
+                search_v2_redirect_view_name='security:credit_list',
+            )
+        ),
+        name='credit_list_legacy',
+    ),
+    url(
+        r'^security/credits/export/$',
+        security_test(
+            search_v2_view_redirect(
+                views.CreditListView.as_view(
+                    view_type=views.ViewType.export_download,
+                ),
+                search_v2_redirect_view_name='security:credit_list',
+            ),
+        ),
+        name='credit_export_legacy',
+    ),
+    url(
+        r'^security/credits/email-export/$',
+        security_test(
+            search_v2_view_redirect(
+                views.CreditListView.as_view(
+                    view_type=views.ViewType.export_email,
+                ),
+                search_v2_redirect_view_name='security:credit_list',
+            ),
+        ),
+        name='credit_email_export_legacy',
     ),
 
     # senders

@@ -19,8 +19,12 @@ from openpyxl import load_workbook
 import responses
 
 from security import (
-    required_permissions, hmpps_employee_flag, not_hmpps_employee_flag,
-    confirmed_prisons_flag, notifications_pilot_flag, SEARCH_V2_FLAG,
+    confirmed_prisons_flag,
+    hmpps_employee_flag,
+    not_hmpps_employee_flag,
+    notifications_pilot_flag,
+    required_permissions,
+    SEARCH_V2_FLAG,
 )
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
@@ -332,19 +336,37 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
 
 
 class HMPPSEmployeeTestCase(SecurityBaseTestCase):
-    protected_views = ['security:dashboard', 'security:credit_list', 'security:sender_list', 'security:prisoner_list']
+    protected_views = [
+        'security:credit_list',
+        'security:dashboard',
+        'security:prisoner_list',
+        'security:sender_list',
+    ]
 
     @responses.activate
     def test_redirects_when_no_flag(self):
-        self.login(user_data=self.get_user_data(flags=[confirmed_prisons_flag]))
+        self.login(
+            user_data=self.get_user_data(
+                flags=[
+                    confirmed_prisons_flag,
+                    SEARCH_V2_FLAG,
+                ],
+            ),
+        )
         for view in self.protected_views:
             response = self.client.get(reverse(view), follow=True)
             self.assertContains(response, '<!-- security:hmpps_employee -->')
 
     @responses.activate
     def test_non_employee_flag_disallows_entry(self):
-        self.login(user_data=self.get_user_data(
-            flags=[not_hmpps_employee_flag, confirmed_prisons_flag])
+        self.login(
+            user_data=self.get_user_data(
+                flags=[
+                    confirmed_prisons_flag,
+                    not_hmpps_employee_flag,
+                    SEARCH_V2_FLAG,
+                ],
+            ),
         )
         for view in self.protected_views:
             response = self.client.get(reverse(view), follow=True)
@@ -353,8 +375,14 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_employee_can_access(self):
-        self.login(user_data=self.get_user_data(
-            flags=[hmpps_employee_flag, confirmed_prisons_flag])
+        self.login(
+            user_data=self.get_user_data(
+                flags=[
+                    confirmed_prisons_flag,
+                    hmpps_employee_flag,
+                    SEARCH_V2_FLAG,
+                ]
+            )
         )
 
         def assertViewAccessible(view):  # noqa: N802
@@ -1612,7 +1640,7 @@ class CreditViewsTestCase(LegacySecurityViewTestCase):
     """
     TODO: delete after search V2 goes live.
     """
-    view_name = 'security:credit_list'
+    view_name = 'security:credit_list_legacy'
     detail_view_name = 'security:credit_detail'
     api_list_path = '/credits/'
 
@@ -1727,7 +1755,7 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
     Test case related to credit search V2 and detail views.
     """
     view_name = 'security:credit_list'
-    advanced_search_view_name = 'security:credits_advanced_search'
+    advanced_search_view_name = 'security:credit_advanced_search'
     search_results_view_name = 'security:credit_search_results'
     detail_view_name = 'security:credit_detail'
     search_ordering = '-received_at'
@@ -1788,8 +1816,8 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
         'ip_address': '127.0.0.1',
     }
 
-    export_view_name = 'security:credits_export'
-    export_email_view_name = 'security:credits_email_export'
+    export_view_name = 'security:credit_export'
+    export_email_view_name = 'security:credit_email_export'
     export_expected_xls_headers = [
         'Prisoner name',
         'Prisoner number',

@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import Http404
 from django.utils.translation import gettext, gettext_lazy as _
 
@@ -6,7 +6,7 @@ from security.forms.object_detail import (
     SendersDetailForm,
     PrisonersDetailForm, PrisonersDisbursementDetailForm,
 )
-from security.templatetags.security import currency as format_currency
+from security.templatetags.security import currency as format_currency, conditional_fallback_search_view
 from security.utils import NameSet, convert_date_fields, sender_profile_name
 from security.views.object_base import SimpleSecurityDetailView, SecurityDetailView
 from security.views.object_list import SenderListView, PrisonerListView
@@ -20,7 +20,12 @@ class CreditDetailView(SimpleSecurityDetailView):
     template_name = 'security/credit.html'
     object_context_key = 'credit'
     list_title = _('Credits')
-    list_url = reverse_lazy('security:credit_list')
+
+    @property
+    def list_url(self):
+        # TODO: delete after search V2 goes live.
+        view_name = conditional_fallback_search_view('security:credit_list', self.request)
+        return reverse(view_name)
 
     def get_object_request_params(self):
         return {

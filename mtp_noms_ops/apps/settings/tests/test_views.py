@@ -7,7 +7,10 @@ from mtp_common.auth import USER_DATA_SESSION_KEY
 import responses
 
 from security import (
-    hmpps_employee_flag, confirmed_prisons_flag, required_permissions
+    confirmed_prisons_flag,
+    hmpps_employee_flag,
+    required_permissions,
+    SEARCH_V2_FLAG,
 )
 from security.tests import api_url
 from security.tests.test_views import (
@@ -19,15 +22,22 @@ from security.tests.test_views import (
 
 class ConfirmPrisonTestCase(SecurityBaseTestCase):
     protected_views = [
-        'security:dashboard', 'security:credit_list', 'security:sender_list',
-        'security:prisoner_list'
+        'security:credit_list',
+        'security:dashboard',
+        'security:prisoner_list',
+        'security:sender_list',
     ]
 
     @responses.activate
     def test_redirects_when_no_flag(self):
         mock_prison_response()
-        self.login(user_data=self.get_user_data(
-            flags=[hmpps_employee_flag])
+        self.login(
+            user_data=self.get_user_data(
+                flags=[
+                    hmpps_employee_flag,
+                    SEARCH_V2_FLAG,
+                ],
+            ),
         )
         for view in self.protected_views:
             response = self.client.get(reverse(view), follow=True)
