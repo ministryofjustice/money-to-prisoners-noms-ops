@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from mtp_common.auth.api_client import get_api_session
 
 from mtp_noms_ops.utils import user_test
@@ -40,6 +40,24 @@ def search_v2_view_dispatcher(legacy_search_view, search_view_v2):
         if SEARCH_V2_FLAG in request.user.user_data['flags']:
             return search_view_v2(request, *args, **kwargs)
         return legacy_search_view(request, *args, **kwargs)
+    return inner
+
+
+def search_v2_view_redirect(view, search_v2_redirect_view_name=None, legacy_search_redirect_view_name=None):
+    """
+    Redirects to `search_v2_redirect_view_name` if not None and the user has the SEARCH_V2_FLAG on
+        (meaning `view` is legacy search and shouldn't be served).
+    Redirects to `legacy_search_redirect_view_name` if not None and the user doesn't have the SEARCH_V2_FLAG on
+        (meaning `view` is search v2 but user can't access it).
+    """
+    def inner(request, *args, **kwargs):
+        if SEARCH_V2_FLAG in request.user.user_data['flags']:
+            if search_v2_redirect_view_name:
+                return redirect(search_v2_redirect_view_name)
+        else:
+            if legacy_search_redirect_view_name:
+                return redirect(legacy_search_redirect_view_name)
+        return view(request, *args, **kwargs)
     return inner
 
 
