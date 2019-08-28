@@ -1,11 +1,14 @@
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.shortcuts import render
 from mtp_common.auth.api_client import get_api_session
 
 from mtp_noms_ops.utils import user_test
 from security import required_permissions, views, SEARCH_V2_FLAG
+from security.context_processors import initial_params
 from security.searches import get_saved_searches, populate_new_result_counts
 from security.utils import can_skip_confirming_prisons, is_hmpps_employee
 
@@ -39,12 +42,19 @@ def search_v2_view_redirect(view, search_v2_redirect_view_name=None, legacy_sear
         (meaning `view` is search v2 but user can't access it).
     """
     def inner(request, *args, **kwargs):
+        redirect_view_name = None
         if SEARCH_V2_FLAG in request.user.user_data['flags']:
             if search_v2_redirect_view_name:
-                return redirect(search_v2_redirect_view_name)
+                redirect_view_name = search_v2_redirect_view_name
         else:
             if legacy_search_redirect_view_name:
-                return redirect(legacy_search_redirect_view_name)
+                redirect_view_name = legacy_search_redirect_view_name
+
+        if redirect_view_name:
+            prisons_param = initial_params(request).get('initial_params', '')
+            return HttpResponseRedirect(
+                f'{reverse(redirect_view_name)}?{prisons_param}',
+            )
         return view(request, *args, **kwargs)
     return inner
 
