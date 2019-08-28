@@ -299,62 +299,64 @@ urlpatterns = [
 
     # prisoners
     url(
-        r'^security/prisoners/$',
+        r'^prisoners/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.PrisonerListView.as_view(),
+            search_v2_view_redirect(
                 views.PrisonerListViewV2.as_view(
                     view_type=views.ViewType.simple_search_form,
                 ),
+                legacy_search_redirect_view_name='security:prisoner_list_legacy',
             ),
         ),
         name='prisoner_list',
     ),
     url(
-        r'^security/prisoners/advanced-search/$',
+        r'^prisoners/advanced-search/$',
         security_test(
-            views.PrisonerListViewV2.as_view(
-                view_type=views.ViewType.advanced_search_form,
+            search_v2_view_redirect(
+                views.PrisonerListViewV2.as_view(
+                    view_type=views.ViewType.advanced_search_form,
+                ),
+                legacy_search_redirect_view_name='security:prisoner_list_legacy',
             ),
         ),
-        name='prisoners_advanced_search',
+        name='prisoner_advanced_search',
     ),
     url(
-        r'^security/prisoners/search-results/$',
+        r'^prisoners/search-results/$',
         security_test(
-            views.PrisonerListViewV2.as_view(
-                view_type=views.ViewType.search_results,
+            search_v2_view_redirect(
+                views.PrisonerListViewV2.as_view(
+                    view_type=views.ViewType.search_results,
+                ),
+                legacy_search_redirect_view_name='security:prisoner_list_legacy',
             ),
         ),
         name='prisoner_search_results',
     ),
     url(
-        r'^security/prisoners/export/$',
+        r'^prisoners/export/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.PrisonerListView.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
+            search_v2_view_redirect(
                 views.PrisonerListViewV2.as_view(
                     view_type=views.ViewType.export_download,
                 ),
+                legacy_search_redirect_view_name='security:prisoner_list_legacy',
             ),
         ),
-        name='prisoners_export'
+        name='prisoner_export'
     ),
     url(
-        r'^security/prisoners/email-export/$',
+        r'^prisoners/email-export/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.PrisonerListView.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
+            search_v2_view_redirect(
                 views.PrisonerListViewV2.as_view(
                     view_type=views.ViewType.export_email,
                 ),
+                legacy_search_redirect_view_name='security:prisoner_list_legacy',
             ),
         ),
-        name='prisoners_email_export',
+        name='prisoner_email_export',
     ),
     url(
         r'^security/prisoners/(?P<prisoner_id>\d+)/$',
@@ -401,6 +403,43 @@ urlpatterns = [
             ),
         ),
         name='prisoner_disbursement_detail_email_export',
+    ),
+
+
+    # TODO: delete _legacy views after search V2 goes live.
+    url(
+        r'^security/prisoners/$',
+        security_test(
+            search_v2_view_redirect(
+                views.PrisonerListView.as_view(),
+                search_v2_redirect_view_name='security:prisoner_list',
+            ),
+        ),
+        name='prisoner_list_legacy',
+    ),
+    url(
+        r'^security/prisoners/export/$',
+        security_test(
+            search_v2_view_redirect(
+                views.PrisonerListView.as_view(
+                    view_type=views.ViewType.export_download,
+                ),
+                search_v2_redirect_view_name='security:prisoner_list',
+            ),
+        ),
+        name='prisoner_export_legacy'
+    ),
+    url(
+        r'^security/prisoners/email-export/$',
+        security_test(
+            search_v2_view_redirect(
+                views.PrisonerListView.as_view(
+                    view_type=views.ViewType.export_email,
+                ),
+                search_v2_redirect_view_name='security:prisoner_list',
+            ),
+        ),
+        name='prisoner_email_export_legacy',
     ),
 
     # async-loaded nomis info

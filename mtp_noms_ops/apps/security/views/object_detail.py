@@ -119,11 +119,16 @@ class PrisonerDetailView(SecurityDetailView):
     """
     title = _('Prisoner')
     list_title = PrisonerListView.title
-    list_url = reverse_lazy('security:prisoner_list')
     template_name = 'security/prisoner.html'
     form_class = PrisonersDetailForm
     id_kwarg_name = 'prisoner_id'
     object_context_key = 'prisoner'
+
+    @property
+    def list_url(self):
+        # TODO: delete after search V2 goes live.
+        view_name = conditional_fallback_search_view('security:prisoner_list', self.request)
+        return reverse(view_name)
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)

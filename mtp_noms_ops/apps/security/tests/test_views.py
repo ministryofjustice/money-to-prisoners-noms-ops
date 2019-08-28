@@ -412,7 +412,14 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_redirects_to_referrer(self):
-        self.login(user_data=self.get_user_data(flags=[confirmed_prisons_flag]))
+        self.login(
+            user_data=self.get_user_data(
+                flags=[
+                    confirmed_prisons_flag,
+                    SEARCH_V2_FLAG,
+                ],
+            ),
+        )
         responses.add(
             responses.PUT,
             api_url('/users/shall/flags/%s/' % hmpps_employee_flag),
@@ -1383,7 +1390,7 @@ class PrisonerViewsTestCase(LegacySecurityViewTestCase):
     """
     TODO: delete after search V2 goes live.
     """
-    view_name = 'security:prisoner_list'
+    view_name = 'security:prisoner_list_legacy'
     detail_view_name = 'security:prisoner_detail'
     api_list_path = '/prisoners/'
 
@@ -1491,15 +1498,15 @@ class PrisonerViewsV2TestCase(
     Test case related to prisoner search V2 and detail views.
     """
     view_name = 'security:prisoner_list'
-    advanced_search_view_name = 'security:prisoners_advanced_search'
+    advanced_search_view_name = 'security:prisoner_advanced_search'
     search_results_view_name = 'security:prisoner_search_results'
     detail_view_name = 'security:prisoner_detail'
     search_ordering = '-sender_count'
     api_list_path = '/prisoners/'
     prison_api_filter_name = 'current_prison'
 
-    export_view_name = 'security:prisoners_export'
-    export_email_view_name = 'security:prisoners_email_export'
+    export_view_name = 'security:prisoner_export'
+    export_email_view_name = 'security:prisoner_email_export'
     export_expected_xls_headers = [
         'Prisoner number',
         'Prisoner name',
