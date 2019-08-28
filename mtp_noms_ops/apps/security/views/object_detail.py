@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils.translation import gettext, gettext_lazy as _
 
@@ -57,7 +57,12 @@ class DisbursementDetailView(SimpleSecurityDetailView):
     template_name = 'security/disbursement.html'
     object_context_key = 'disbursement'
     list_title = _('Disbursements')
-    list_url = reverse_lazy('security:disbursement_list')
+
+    @property
+    def list_url(self):
+        # TODO: delete after search V2 goes live.
+        view_name = conditional_fallback_search_view('security:disbursement_list', self.request)
+        return reverse(view_name)
 
     def get_object_request_params(self):
         return {

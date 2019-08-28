@@ -456,67 +456,106 @@ urlpatterns = [
 
     # disbursements
     url(
-        r'^security/disbursements/$',
+        r'^disbursements/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.DisbursementListView.as_view(),
+            search_v2_view_redirect(
                 views.DisbursementListViewV2.as_view(
                     view_type=views.ViewType.simple_search_form,
                 ),
+                legacy_search_redirect_view_name='security:disbursement_list_legacy',
             ),
         ),
         name='disbursement_list',
     ),
     url(
-        r'^security/disbursements/advanced-search/$',
+        r'^disbursements/advanced-search/$',
         security_test(
-            views.DisbursementListViewV2.as_view(
-                view_type=views.ViewType.advanced_search_form,
+            search_v2_view_redirect(
+                views.DisbursementListViewV2.as_view(
+                    view_type=views.ViewType.advanced_search_form,
+                ),
+                legacy_search_redirect_view_name='security:disbursement_list_legacy',
             ),
         ),
-        name='disbursements_advanced_search',
+        name='disbursement_advanced_search',
     ),
     url(
-        r'^security/disbursements/search-results/$',
+        r'^disbursements/search-results/$',
         security_test(
-            views.DisbursementListViewV2.as_view(
-                view_type=views.ViewType.search_results,
+            search_v2_view_redirect(
+                views.DisbursementListViewV2.as_view(
+                    view_type=views.ViewType.search_results,
+                ),
+                legacy_search_redirect_view_name='security:disbursement_list_legacy',
             ),
         ),
         name='disbursement_search_results',
     ),
     url(
-        r'^security/disbursements/export/$',
+        r'^disbursements/export/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.DisbursementListView.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
+            search_v2_view_redirect(
                 views.DisbursementListViewV2.as_view(
                     view_type=views.ViewType.export_download,
                 ),
+                legacy_search_redirect_view_name='security:disbursement_list_legacy',
             ),
         ),
-        name='disbursements_export',
+        name='disbursement_export',
     ),
     url(
-        r'^security/disbursements/email-export/$',
+        r'^disbursements/email-export/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.DisbursementListView.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
+            search_v2_view_redirect(
                 views.DisbursementListViewV2.as_view(
                     view_type=views.ViewType.export_email,
                 ),
+                legacy_search_redirect_view_name='security:disbursement_list_legacy',
             ),
         ),
-        name='disbursements_email_export',
+        name='disbursement_email_export',
     ),
     url(
         r'^security/disbursements/(?P<disbursement_id>\d+)/$',
         security_test(views.DisbursementDetailView.as_view()),
         name='disbursement_detail',
+    ),
+
+
+    # TODO: delete _legacy views after search V2 goes live.
+    url(
+        r'^security/disbursements/$',
+        security_test(
+            search_v2_view_redirect(
+                views.DisbursementListView.as_view(),
+                search_v2_redirect_view_name='security:disbursement_list',
+            ),
+        ),
+        name='disbursement_list_legacy',
+    ),
+    url(
+        r'^security/disbursements/export/$',
+        security_test(
+            search_v2_view_redirect(
+                views.DisbursementListView.as_view(
+                    view_type=views.ViewType.export_download,
+                ),
+                search_v2_redirect_view_name='security:disbursement_list',
+            ),
+        ),
+        name='disbursement_export_legacy',
+    ),
+    url(
+        r'^security/disbursements/email-export/$',
+        security_test(
+            search_v2_view_redirect(
+                views.DisbursementListView.as_view(
+                    view_type=views.ViewType.export_email,
+                ),
+                search_v2_redirect_view_name='security:disbursement_list',
+            ),
+        ),
+        name='disbursement_email_export_legacy',
     ),
 
     # review credits

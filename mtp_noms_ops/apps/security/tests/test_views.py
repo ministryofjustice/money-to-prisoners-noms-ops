@@ -339,6 +339,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
     protected_views = [
         'security:credit_list',
         'security:dashboard',
+        'security:disbursement_list',
         'security:prisoner_list',
         'security:sender_list',
     ]
@@ -2000,7 +2001,7 @@ class DisbursementViewsTestCase(LegacySecurityViewTestCase):
     """
     TODO: delete after search V2 goes live.
     """
-    view_name = 'security:disbursement_list'
+    view_name = 'security:disbursement_list_legacy'
     detail_view_name = 'security:disbursement_detail'
     api_list_path = '/disbursements/'
 
@@ -2135,7 +2136,7 @@ class DisbursementViewsV2TestCase(
     Test case related to disbursement search V2 and detail views.
     """
     view_name = 'security:disbursement_list'
-    advanced_search_view_name = 'security:disbursements_advanced_search'
+    advanced_search_view_name = 'security:disbursement_advanced_search'
     search_results_view_name = 'security:disbursement_search_results'
     detail_view_name = 'security:disbursement_detail'
     search_ordering = '-created'
@@ -2225,8 +2226,8 @@ class DisbursementViewsV2TestCase(
         ],
     }
 
-    export_view_name = 'security:disbursements_export'
-    export_email_view_name = 'security:disbursements_email_export'
+    export_view_name = 'security:disbursement_export'
+    export_email_view_name = 'security:disbursement_email_export'
     export_expected_xls_headers = [
         'Prisoner name',
         'Prisoner number',
