@@ -31,18 +31,6 @@ def dashboard_view(request):
     })
 
 
-def search_v2_view_dispatcher(legacy_search_view, search_view_v2):
-    """
-    Dispatches to a version of the search depending on if the feature flag for
-    that logged in user is set.
-    """
-    def inner(request, *args, **kwargs):
-        if SEARCH_V2_FLAG in request.user.user_data['flags']:
-            return search_view_v2(request, *args, **kwargs)
-        return legacy_search_view(request, *args, **kwargs)
-    return inner
-
-
 def search_v2_view_redirect(view, search_v2_redirect_view_name=None, legacy_search_redirect_view_name=None):
     """
     Redirects to `search_v2_redirect_view_name` if not None and the user has the SEARCH_V2_FLAG on
