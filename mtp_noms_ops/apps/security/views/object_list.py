@@ -101,7 +101,7 @@ class SenderListViewV2(SecurityView):
     advanced_search_template_name = 'security/senders_advanced_search.html'
     search_results_view = 'security:sender_search_results'
     simple_search_view = 'security:sender_list'
-    advanced_search_view = 'security:senders_advanced_search'
+    advanced_search_view = 'security:sender_advanced_search'
     object_list_context_key = 'senders'
     object_name = _('payment source')
     object_name_plural = _('payment sources')

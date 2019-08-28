@@ -177,62 +177,64 @@ urlpatterns = [
 
     # senders
     url(
-        r'^security/senders/$',
+        r'^senders/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.SenderListView.as_view(),
+            search_v2_view_redirect(
                 views.SenderListViewV2.as_view(
                     view_type=views.ViewType.simple_search_form,
                 ),
+                legacy_search_redirect_view_name='security:sender_list_legacy',
             ),
         ),
         name='sender_list',
     ),
     url(
-        r'^security/senders/advanced-search/$',
+        r'^senders/advanced-search/$',
         security_test(
-            views.SenderListViewV2.as_view(
-                view_type=views.ViewType.advanced_search_form,
+            search_v2_view_redirect(
+                views.SenderListViewV2.as_view(
+                    view_type=views.ViewType.advanced_search_form,
+                ),
+                legacy_search_redirect_view_name='security:sender_list_legacy',
             ),
         ),
-        name='senders_advanced_search',
+        name='sender_advanced_search',
     ),
     url(
-        r'^security/senders/search-results/$',
+        r'^senders/search-results/$',
         security_test(
-            views.SenderListViewV2.as_view(
-                view_type=views.ViewType.search_results,
+            search_v2_view_redirect(
+                views.SenderListViewV2.as_view(
+                    view_type=views.ViewType.search_results,
+                ),
+                legacy_search_redirect_view_name='security:sender_list_legacy',
             ),
         ),
         name='sender_search_results',
     ),
     url(
-        r'^security/senders/export/$',
+        r'^senders/export/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.SenderListView.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
+            search_v2_view_redirect(
                 views.SenderListViewV2.as_view(
                     view_type=views.ViewType.export_download,
                 ),
+                legacy_search_redirect_view_name='security:sender_list_legacy',
             ),
         ),
-        name='senders_export',
+        name='sender_export',
     ),
     url(
-        r'^security/senders/email-export/$',
+        r'^senders/email-export/$',
         security_test(
-            search_v2_view_dispatcher(
-                views.SenderListView.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
+            search_v2_view_redirect(
                 views.SenderListViewV2.as_view(
                     view_type=views.ViewType.export_email,
                 ),
+                legacy_search_redirect_view_name='security:sender_list_legacy',
             ),
         ),
-        name='senders_email_export',
+        name='sender_email_export',
     ),
     url(
         r'^security/senders/(?P<sender_id>\d+)/$',
@@ -256,6 +258,43 @@ urlpatterns = [
             ),
         ),
         name='sender_detail_email_export',
+    ),
+
+
+    # TODO: delete _legacy views after search V2 goes live.
+    url(
+        r'^security/senders/$',
+        security_test(
+            search_v2_view_redirect(
+                views.SenderListView.as_view(),
+                search_v2_redirect_view_name='security:sender_list',
+            ),
+        ),
+        name='sender_list_legacy',
+    ),
+    url(
+        r'^security/senders/export/$',
+        security_test(
+            search_v2_view_redirect(
+                views.SenderListView.as_view(
+                    view_type=views.ViewType.export_download,
+                ),
+                search_v2_redirect_view_name='security:sender_list',
+            ),
+        ),
+        name='sender_export_legacy',
+    ),
+    url(
+        r'^security/senders/email-export/$',
+        security_test(
+            search_v2_view_redirect(
+                views.SenderListView.as_view(
+                    view_type=views.ViewType.export_email,
+                ),
+                search_v2_redirect_view_name='security:sender_list',
+            ),
+        ),
+        name='sender_email_export_legacy',
     ),
 
     # prisoners

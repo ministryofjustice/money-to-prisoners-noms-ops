@@ -34,7 +34,7 @@
       </div>
 
       <div class="column-one-third mtp-box">
-        <a href="{% url 'security:sender_list' %}?{{ initial_params }}">
+        <a href="{% url 'security:sender_list'|conditional_fallback_search_view:request %}?{{ initial_params }}">
           {% trans 'Payment sources' %}
         </a>
       </div>

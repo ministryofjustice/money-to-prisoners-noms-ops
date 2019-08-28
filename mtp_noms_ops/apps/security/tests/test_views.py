@@ -255,7 +255,7 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
                 ),
             ),
         )
-        response = self.client.get(reverse('security:sender_list'))
+        response = self.client.get(reverse('security:sender_list'), follow=True)
         self.assertNotContains(
             response,
             'Prison 1, Prison 2, Prison 3, Prison 4',
@@ -1051,7 +1051,7 @@ class SenderViewsTestCase(LegacySecurityViewTestCase):
     """
     TODO: delete after search V2 goes live.
     """
-    view_name = 'security:sender_list'
+    view_name = 'security:sender_list_legacy'
     detail_view_name = 'security:sender_detail'
     api_list_path = '/senders/'
 
@@ -1183,14 +1183,14 @@ class SenderViewsV2TestCase(
     Test case related to sender search V2 and detail views.
     """
     view_name = 'security:sender_list'
-    advanced_search_view_name = 'security:senders_advanced_search'
+    advanced_search_view_name = 'security:sender_advanced_search'
     search_results_view_name = 'security:sender_search_results'
     detail_view_name = 'security:sender_detail'
     search_ordering = '-prisoner_count'
     api_list_path = '/senders/'
 
-    export_view_name = 'security:senders_export'
-    export_email_view_name = 'security:senders_email_export'
+    export_view_name = 'security:sender_export'
+    export_email_view_name = 'security:sender_email_export'
     export_expected_xls_headers = [
         'Sender name',
         'Payment source',

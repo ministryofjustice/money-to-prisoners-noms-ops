@@ -98,11 +98,16 @@ class SenderDetailView(SecurityDetailView):
     """
     title = _('Payment source')
     list_title = SenderListView.title
-    list_url = reverse_lazy('security:sender_list')
     template_name = 'security/sender.html'
     form_class = SendersDetailForm
     id_kwarg_name = 'sender_id'
     object_context_key = 'sender'
+
+    @property
+    def list_url(self):
+        # TODO: delete after search V2 goes live.
+        view_name = conditional_fallback_search_view('security:sender_list', self.request)
+        return reverse(view_name)
 
     def get_title_for_object(self, detail_object):
         return sender_profile_name(detail_object)
