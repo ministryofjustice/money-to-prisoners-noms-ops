@@ -29,8 +29,8 @@
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
           &nbsp;
-          {% url 'security:credits_export' as export_view %}
-          {% url 'security:credits_email_export' as email_export_view %}
+          {% url 'security:credit_export_legacy' as export_view %}
+          {% url 'security:credit_email_export_legacy' as email_export_view %}
           {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
         </div>
 

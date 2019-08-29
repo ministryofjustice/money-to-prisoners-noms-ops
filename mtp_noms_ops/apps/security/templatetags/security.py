@@ -7,6 +7,7 @@ from django.utils.html import escape
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 
+from security import SEARCH_V2_FLAG
 from security.models import (
     credit_sources, credit_resolutions,
     disbursement_methods, disbursement_actions, disbursement_resolutions,
@@ -298,3 +299,20 @@ def extract_best_match(context, items):
         'item': best_match,
         'total_remaining': max(len(item_list)-1, 0),
     }
+
+
+@register.filter
+def conditional_fallback_search_view(view_name, request):
+    """
+    Returns `view_name` if the logged in user has the SEARCH_V2_FLAG on or the equivalent
+    legacy view_name, that is view_name with the _legacy suffix, otherwise.
+
+    Note: this assumes that you keep the convention of having <view_name> for search v2 and
+    <view_name>_legacy for the related legacy variant.
+
+    :param view_name: view name of the search v2
+    :param request: request object
+    """
+    if SEARCH_V2_FLAG not in request.user.user_data.get('flags', {}):
+        view_name = f'{view_name}_legacy'
+    return view_name

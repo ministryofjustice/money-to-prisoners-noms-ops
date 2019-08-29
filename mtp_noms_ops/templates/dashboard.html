@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% load mtp_common %}
+{% load security %}
 
 {% block inner_content %}
   {% notifications_box request 'noms_ops_security_dashboard' %}
@@ -27,19 +28,19 @@
 
     <div class="grid-row">
       <div class="column-one-third mtp-box">
-        <a href="{% url 'security:credit_list' %}?{{ initial_params }}">
+        <a href="{% url 'security:credit_list'|conditional_fallback_search_view:request %}?{{ initial_params }}">
           {% trans 'Credits' %}
         </a>
       </div>
 
       <div class="column-one-third mtp-box">
-        <a href="{% url 'security:sender_list' %}?{{ initial_params }}">
+        <a href="{% url 'security:sender_list'|conditional_fallback_search_view:request %}?{{ initial_params }}">
           {% trans 'Payment sources' %}
         </a>
       </div>
 
       <div class="column-one-third mtp-box">
-        <a href="{% url 'security:prisoner_list' %}?{{ initial_params }}">
+        <a href="{% url 'security:prisoner_list'|conditional_fallback_search_view:request %}?{{ initial_params }}">
           {% trans 'Prisoners' %}
         </a>
       </div>
@@ -47,7 +48,7 @@
 
     <div class="grid-row">
       <div class="column-one-third mtp-box">
-        <a href="{% url 'security:disbursement_list' %}?{{ initial_params }}">
+        <a href="{% url 'security:disbursement_list'|conditional_fallback_search_view:request %}?{{ initial_params }}">
           {% trans 'Disbursements' %}
         </a>
       </div>

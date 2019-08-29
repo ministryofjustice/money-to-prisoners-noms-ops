@@ -40,7 +40,7 @@ class CreditListViewV2(SecurityView):
     advanced_search_template_name = 'security/credits_advanced_search.html'
     search_results_view = 'security:credit_search_results'
     simple_search_view = 'security:credit_list'
-    advanced_search_view = 'security:credits_advanced_search'
+    advanced_search_view = 'security:credit_advanced_search'
     object_list_context_key = 'credits'
     object_name = _('credit')
     object_name_plural = _('credits')
@@ -69,7 +69,7 @@ class DisbursementListViewV2(SecurityView):
     advanced_search_template_name = 'security/disbursements_advanced_search.html'
     search_results_view = 'security:disbursement_search_results'
     simple_search_view = 'security:disbursement_list'
-    advanced_search_view = 'security:disbursements_advanced_search'
+    advanced_search_view = 'security:disbursement_advanced_search'
     object_list_context_key = 'disbursements'
     object_name = _('disbursement')
     object_name_plural = _('disbursements')
@@ -101,7 +101,7 @@ class SenderListViewV2(SecurityView):
     advanced_search_template_name = 'security/senders_advanced_search.html'
     search_results_view = 'security:sender_search_results'
     simple_search_view = 'security:sender_list'
-    advanced_search_view = 'security:senders_advanced_search'
+    advanced_search_view = 'security:sender_advanced_search'
     object_list_context_key = 'senders'
     object_name = _('payment source')
     object_name_plural = _('payment sources')
@@ -136,7 +136,7 @@ class PrisonerListViewV2(SecurityView):
     advanced_search_template_name = 'security/prisoners_advanced_search.html'
     search_results_view = 'security:prisoner_search_results'
     simple_search_view = 'security:prisoner_list'
-    advanced_search_view = 'security:prisoners_advanced_search'
+    advanced_search_view = 'security:prisoner_advanced_search'
     object_list_context_key = 'prisoners'
     object_name = _('prisoner')
     object_name_plural = _('prisoners')

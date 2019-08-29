@@ -35,7 +35,6 @@ def root_view(request):
 urlpatterns = i18n_patterns(
     url(r'^$', root_view, name='root'),
     url(r'^prisoner-location/', include('prisoner_location_admin.urls')),
-    url(r'^security/', include('security.urls', namespace='security')),
     url(r'^settings/', include('settings.urls')),
     url(r'^feedback/', include('feedback.urls')),
 
@@ -82,6 +81,7 @@ urlpatterns = i18n_patterns(
             'cancel_url': reverse_lazy('settings'),
         }, name='email_change'
     ),
+    url(r'^', include('security.urls', namespace='security')),
 
     url(r'^', include('mtp_common.user_admin.urls')),
 

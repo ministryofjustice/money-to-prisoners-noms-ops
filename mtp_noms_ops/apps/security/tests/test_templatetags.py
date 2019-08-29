@@ -2,7 +2,9 @@ from unittest import mock
 
 from django.test import SimpleTestCase
 
+from security import SEARCH_V2_FLAG
 from security.templatetags.security import (
+    conditional_fallback_search_view,
     extract_best_match,
     get_split_prison_names,
     search_highlight,
@@ -339,3 +341,39 @@ class TestExtractBestMatch(SimpleTestCase):
                 'total_remaining': 1,
             },
         )
+
+
+class TestConditionalFallbackSearchView(SimpleTestCase):
+    """
+    Tests for the conditional_fallback_search_view filter.
+    """
+
+    def test_returns_view_name_with_flag_on(self):
+        """
+        Test that the filter returns the passed in view_name untouched if the
+        logged in user has the SEARCH_V2_FLAG on.
+        """
+        request = mock.Mock()
+        request.user.user_data = {
+            'flags': [SEARCH_V2_FLAG],
+        }
+
+        view_name = 'my-view'
+
+        actual_view_name = conditional_fallback_search_view(view_name, request)
+        self.assertEqual(actual_view_name, view_name)
+
+    def test_returns_legacy_view_name_with_flag_off(self):
+        """
+        Test that the filter returns the legacy version of the passed in view_name if the
+        logged in user doesn't have the SEARCH_V2_FLAG on.
+        """
+        request = mock.Mock()
+        request.user.user_data = {
+            'flags': [],
+        }
+
+        view_name = 'my-view'
+
+        actual_view_name = conditional_fallback_search_view(view_name, request)
+        self.assertEqual(actual_view_name, f'{view_name}_legacy')
