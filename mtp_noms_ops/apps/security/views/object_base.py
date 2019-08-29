@@ -203,7 +203,7 @@ class SecurityView(FormView):
                         'name': _('Advanced search'),
                         'url': f'{reverse(self.advanced_search_view)}?{kwargs["form"].query_string}',
                     },
-                    {'name': _('Search results')},
+                    {'name': _('Advanced search results')},
                 ]
 
             return [
