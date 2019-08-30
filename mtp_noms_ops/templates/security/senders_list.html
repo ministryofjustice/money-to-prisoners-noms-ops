@@ -158,6 +158,11 @@
       </div>
     {% endif %}
 
+  {% if is_search_results %}
+    {% with search_form_item=breadcrumbs|slice:":-1"|last %}
+      <a href="{{ search_form_item.url }}" class="button">{% trans 'Search again' %}</a>
+    {% endwith%}
+  {% endif %}
   </form>
 
 {% endblock %}
