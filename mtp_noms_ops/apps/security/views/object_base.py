@@ -208,7 +208,7 @@ class SecurityView(FormView):
 
             return [
                 {'name': _('Home'), 'url': reverse('security:dashboard')},
-                {'name': self.title, 'url': f'{reverse(self.simple_search_view)}?{kwargs["form"].query_string}'},
+                {'name': self.title, 'url': f'{reverse(self.simple_search_view)}?{prisons_param}'},
                 {'name': _('Search results')},
             ]
 
