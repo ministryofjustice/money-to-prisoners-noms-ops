@@ -498,7 +498,7 @@ class SendersFormV2(
     sender_postcode = forms.CharField(label=_('Postcode'), required=False)
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results containing {filter_description}.'
+    filtered_description_template = 'Results containing {filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
@@ -670,7 +670,7 @@ class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, BasePris
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results containing {filter_description}.'
+    filtered_description_template = 'Results containing {filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
@@ -928,7 +928,7 @@ class CreditsFormV2(
     exclusive_date_params = ['received_at__lt']
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results containing {filter_description}.'
+    filtered_description_template = 'Results containing {filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
@@ -1221,7 +1221,7 @@ class DisbursementsFormV2(
     exclusive_date_params = ['created__lt']
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results containing {filter_description}.'
+    filtered_description_template = 'Results containing {filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
