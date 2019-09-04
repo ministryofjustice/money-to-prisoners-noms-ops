@@ -3,6 +3,12 @@
 {% load mtp_common %}
 {% load security %}
 
+{% block phase_banner %}
+  {{ block.super }}
+
+  {% include "security/forms/prison-switcher.html" %}
+{% endblock %}
+
 {% block inner_content %}
   {% notifications_box request 'noms_ops_security_dashboard' %}
 
