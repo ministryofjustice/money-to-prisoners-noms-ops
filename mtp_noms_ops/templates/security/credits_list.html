@@ -4,7 +4,7 @@
 {% load security %}
 
 {% block inner_content %}
-  <form id="filter-credits" class="mtp-security-search js-FormAnalytics" method="get">
+  <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search js-FormAnalytics" method="get">
 
     <div class="grid-row">
         <div class="column-two-thirds">
