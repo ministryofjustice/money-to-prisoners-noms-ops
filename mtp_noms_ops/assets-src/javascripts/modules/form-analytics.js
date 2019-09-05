@@ -55,6 +55,9 @@ exports.FormAnalytics = {
       var $element = $(this);
       var eventDetails = $element.data('click-track').split(',');
       if (eventDetails.length === 2) {
+        sendEvent('form-link', eventDetails[0], eventDetails[1]);
+
+        // TODO: delete after search V2 goes live.
         sendEvent('SecurityFormsExport', eventDetails[0], eventDetails[1]);
 
         analytics.Analytics.rawSend(
