@@ -718,10 +718,12 @@ class SearchV2SecurityTestCaseMixin:
             self.login(user_data=user_data, rsps=rsps)
             mock_prison_response(rsps=rsps)
 
-            response = self.client.get(
+            url = (
                 f'{reverse(self.advanced_search_view_name)}'
-                f'?prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}',
+                f'?prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
+                f'&advanced=True&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             )
+            response = self.client.get(url, follow=True)
             self.assertEqual(response.status_code, 200)
 
             api_call_made = rsps.calls[-1].request.url
@@ -739,10 +741,12 @@ class SearchV2SecurityTestCaseMixin:
             self.login(rsps=rsps)
             mock_prison_response(rsps=rsps)
 
-            response = self.client.get(
+            url = (
                 f'{reverse(self.advanced_search_view_name)}'
-                f'?prison_selector={PrisonSelectorSearchFormMixin.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE}',
+                f'?prison_selector={PrisonSelectorSearchFormMixin.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE}'
+                f'&advanced=True&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             )
+            response = self.client.get(url, follow=True)
             self.assertEqual(response.status_code, 200)
 
             api_call_made = rsps.calls[-1].request.url
@@ -760,11 +764,13 @@ class SearchV2SecurityTestCaseMixin:
             self.login(rsps=rsps)
             mock_prison_response(rsps=rsps)
 
-            response = self.client.get(
+            url = (
                 f'{reverse(self.advanced_search_view_name)}'
                 f'?prison_selector={PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE}'
-                f'&prison={expected_prison_id}',
+                f'&prison={expected_prison_id}'
+                f'&advanced=True&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             )
+            response = self.client.get(url, follow=True)
             self.assertEqual(response.status_code, 200)
 
             api_call_made = rsps.calls[-1].request.url
