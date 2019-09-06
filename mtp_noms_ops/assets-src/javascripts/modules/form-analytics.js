@@ -44,6 +44,11 @@ exports.FormAnalytics = {
       var eventDetails = $element.data('click-track').split(',');
       if (eventDetails.length === 2) {
         sendEvent('SecurityFormsExport', eventDetails[0], eventDetails[1]);
+
+        analytics.Analytics.rawSend(
+          'pageview',
+          $element.attr('href').split('?')[0]
+        );
       }
     });
   }
