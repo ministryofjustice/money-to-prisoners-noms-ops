@@ -38,6 +38,10 @@ class SearchFormV2Mixin(forms.Form):
     # indicates whether the form was used in advanced search
     advanced = forms.BooleanField(initial=False, required=False)
 
+    def get_ga_event_category(self):
+        """GA event category."""
+        return f'form-errors-{self.__class__.__name__}'
+
     def was_advanced_search_used(self):
         return self.cleaned_data.get('advanced', False)
 
