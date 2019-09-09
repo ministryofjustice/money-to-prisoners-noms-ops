@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.utils.html import escape
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
+from mtp_common.utils import format_postcode
 
 from security import SEARCH_V2_FLAG
 from security.models import (
@@ -160,18 +161,19 @@ def prisoner_profile_search_url(credit, redirect_on_single=True):
 
 @register.filter
 def format_address(obj):
-    if obj:
-        if 'address_line1' in obj:
-            # disbursement object
-            keys = ('address_line1', 'address_line2', 'city', 'postcode', 'country')
-        else:
-            # credit's address sub-object
-            keys = ('line1', 'line2', 'city', 'postcode', 'country')
-        return mark_safe('<br/>'.join(
-            escape(obj[key])
-            for key in keys
-            if obj.get(key)
-        ))
+    if not obj:
+        return None
+    if 'address_line1' in obj:
+        # disbursement object
+        keys = ('address_line1', 'address_line2', 'city', 'postcode', 'country')
+    else:
+        # credit's address sub-object
+        keys = ('line1', 'line2', 'city', 'postcode', 'country')
+    return mark_safe('<br/>'.join(
+        escape(format_postcode(obj[key])) if key == 'postcode' else escape(obj[key])
+        for key in keys
+        if obj.get(key)
+    ))
 
 
 @register.filter
