@@ -1136,7 +1136,7 @@ class SenderViewsTestCase(LegacySecurityViewTestCase):
         response_content = response.content.decode(response.charset)
         self.assertIn('**** **** **** 1234', response_content)
         self.assertIn('10/20', response_content)
-        self.assertIn('SW137NJ', response_content)
+        self.assertIn('SW13 7NJ', response_content)
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('£102.50', response_content)
 
@@ -1335,7 +1335,7 @@ class SenderViewsV2TestCase(
         response_content = response.content.decode(response.charset)
         self.assertIn('**** **** **** 1234', response_content)
         self.assertIn('10/20', response_content)
-        self.assertIn('SW137NJ', response_content)
+        self.assertIn('SW13 7NJ', response_content)
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('£102.50', response_content)
 
