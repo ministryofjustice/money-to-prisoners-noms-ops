@@ -19,8 +19,8 @@
 
   <div class="heading-large">{% trans 'Payment methods' %}</div>
   <div class="heading-medium">{% trans 'Payment source details' %}</div>
-  <p>{% trans 'Name, email and postcode are supplied by the payment source when they make a debit card payment. They are not validated.' %}
-  <p>{% trans 'When the payment source makes a bank transfer, the bank supplies the name on the bank account.' %}
+  <p>{% trans 'Name, email and postcode are supplied by the sender when they make a debit card payment. They are not validated.' %}</p>
+  <p>{% trans 'When the sender makes a bank transfer, the bank supplies the name on the bank account.' %}</p>
   {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_email %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
