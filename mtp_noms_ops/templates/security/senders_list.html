@@ -119,7 +119,16 @@
                       </span>
                     </td>
                     {% if form.advanced.value %}
-                    <td>{{ sender.prisons|list_prison_names }}</td>
+                      {% get_split_prison_names sender.prisons 2 as split_prison_names %}
+                    <td>
+                      {{ split_prison_names.prison_names }}
+
+                      {% if split_prison_names.total_remaining %}
+                        {% blocktrans trimmed with total_remaining=split_prison_names.total_remaining %}
+                          and {{ total_remaining }} more
+                        {% endblocktrans %}
+                      {% endif %}
+                    </td>
                     {% else %}
                     <td class="numeric">
                       <span class="mtp-sortable-cell--pad">
