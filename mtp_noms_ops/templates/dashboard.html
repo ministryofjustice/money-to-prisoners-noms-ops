@@ -34,8 +34,8 @@
 
     <div class="grid-row">
       <div class="column-one-third mtp-box">
-        <a href="{% url 'security:credit_list'|conditional_fallback_search_view:request %}?{{ initial_params }}">
-          {% trans 'Credits' %}
+        <a href="{% url 'security:prisoner_list'|conditional_fallback_search_view:request %}?{{ initial_params }}">
+          {% trans 'Prisoners' %}
         </a>
       </div>
 
@@ -46,8 +46,8 @@
       </div>
 
       <div class="column-one-third mtp-box">
-        <a href="{% url 'security:prisoner_list'|conditional_fallback_search_view:request %}?{{ initial_params }}">
-          {% trans 'Prisoners' %}
+        <a href="{% url 'security:credit_list'|conditional_fallback_search_view:request %}?{{ initial_params }}">
+          {% trans 'Credits' %}
         </a>
       </div>
     </div>
