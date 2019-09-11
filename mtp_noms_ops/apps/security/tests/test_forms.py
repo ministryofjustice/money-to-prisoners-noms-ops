@@ -1107,82 +1107,133 @@ class SenderFormV2TestCase(SecurityFormTestCase):
         """
         Test that if data for an advanced search is passed in, the API query string is constructed as expected.
         """
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            mock_empty_response(rsps, self.api_list_path)
-
-            form = self.form_class(
-                self.request,
-                data={
-                    'page': 2,
-                    'ordering': '-credit_total',
-                    'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
-                    'advanced': True,
-                    'sender_name': 'John Doe',
-                    'sender_email': 'johndoe',
-                    'sender_postcode': 'SW1A 1a-a',
+        scenarios = [
+            # bank transfer
+            (
+                {  # request_data
                     'payment_method': PaymentMethod.bank_transfer.name,
                     'account_number': '123456789',
                     'sort_code': '11-22 - 33',
+                    'sender_email': '',
+                    'sender_postcode': '',
                 },
-            )
-
-            self.assertTrue(form.is_valid())
-            self.assertListEqual(form.get_object_list(), [])
-
-            api_call_made = rsps.calls[-1].request.url
-            self.assertDictEqual(
-                parse_qs(api_call_made.split('?', 1)[1]),
-                {
-                    'offset': ['20'],
-                    'limit': ['20'],
-                    'ordering': ['-credit_total'],
-                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
-                        prison['nomis_id']
-                        for prison in self.user_prisons
-                    ],
-                    'sender_name': ['John Doe'],
-                    'sender_email': ['johndoe'],
-                    'sender_postcode': ['SW1A1aa'],
+                {  # expected_api_call_params
                     'source': [PaymentMethod.bank_transfer.name],
                     'sender_account_number': ['123456789'],
                     'sender_sort_code': ['112233'],
                 },
+                {  # expected_cleaned_data
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '123456789',
+                    'sort_code': '112233',
+                    'sender_email': '',
+                    'sender_postcode': '',
+                    'card_number_last_digits': '',
+                },
+                {  # expected_qs
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'account_number': ['123456789'],
+                    'sort_code': ['112233'],
+                },
+            ),
+
+            # debit card
+            (
+                {  # request_data
+                    'payment_method': PaymentMethod.online.name,
+                    'sender_email': 'john@example.com',
+                    'sender_postcode': 'SW1A 1a-a',
+                    'card_number_last_digits': '1234',
+                    'account_number': '',
+                    'sort_code': '',
+                },
+                {  # expected_api_call_params
+                    'source': [PaymentMethod.online.name],
+                    'sender_email': ['john@example.com'],
+                    'sender_postcode': ['SW1A1aa'],
+                    'card_number_last_digits': ['1234'],
+                },
+                {  # expected_cleaned_data
+                    'payment_method': PaymentMethod.online.name,
+                    'sender_email': 'john@example.com',
+                    'sender_postcode': 'SW1A1aa',
+                    'card_number_last_digits': '1234',
+                    'account_number': '',
+                    'sort_code': '',
+                },
+                {  # expected_qs
+                    'payment_method': [PaymentMethod.online.name],
+                    'sender_email': ['john@example.com'],
+                    'sender_postcode': ['SW1A1aa'],
+                    'card_number_last_digits': ['1234'],
+                },
+            ),
+        ]
+
+        for request_data, expected_api_call_params, expected_cleaned_data, expected_qs in scenarios:
+            with responses.RequestsMock() as rsps:
+                mock_prison_response(rsps)
+                mock_empty_response(rsps, self.api_list_path)
+
+                form = self.form_class(
+                    self.request,
+                    data={
+                        'page': 2,
+                        'ordering': '-credit_total',
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
+                        'advanced': True,
+                        'sender_name': 'John Doe',
+
+                        **request_data,
+                    },
+                )
+
+                self.assertTrue(form.is_valid())
+                self.assertListEqual(form.get_object_list(), [])
+
+                api_call_made = rsps.calls[-1].request.url
+                self.assertDictEqual(
+                    parse_qs(api_call_made.split('?', 1)[1]),
+                    {
+                        'offset': ['20'],
+                        'limit': ['20'],
+                        'ordering': ['-credit_total'],
+                        'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
+                            prison['nomis_id']
+                            for prison in self.user_prisons
+                        ],
+                        'sender_name': ['John Doe'],
+
+                        **expected_api_call_params,
+                    },
+                )
+
+            self.assertDictEqual(
+                form.cleaned_data,
+                {
+                    'simple_search': '',
+                    'advanced': True,
+                    'page': 2,
+                    'ordering': '-credit_total',
+                    'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
+                    'prison': [],
+                    'sender_name': 'John Doe',
+
+                    **expected_cleaned_data,
+                },
             )
 
-        self.assertDictEqual(
-            form.cleaned_data,
-            {
-                'simple_search': '',
-                'advanced': True,
-                'page': 2,
-                'ordering': '-credit_total',
-                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
-                'prison': [],
-                'sender_name': 'John Doe',
-                'sender_email': 'johndoe',
-                'sender_postcode': 'SW1A1aa',
-                'payment_method': PaymentMethod.bank_transfer.name,
-                'account_number': '123456789',
-                'sort_code': '112233',
-                'card_number_last_digits': '',
-            },
-        )
+            self.assertDictEqual(
+                parse_qs(form.query_string),
+                {
+                    'ordering': ['-credit_total'],
+                    'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
+                    'advanced': ['True'],
+                    'sender_name': ['John Doe'],
 
-        self.assertDictEqual(
-            parse_qs(form.query_string),
-            {
-                'ordering': ['-credit_total'],
-                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
-                'advanced': ['True'],
-                'sender_name': ['John Doe'],
-                'sender_email': ['johndoe'],
-                'sender_postcode': ['SW1A1aa'],
-                'payment_method': [PaymentMethod.bank_transfer.name],
-                'account_number': ['123456789'],
-                'sort_code': ['112233'],
-            },
-        )
+                    **expected_qs,
+                },
+            )
 
     def test_invalid(self):
         """
@@ -1210,6 +1261,28 @@ class SenderFormV2TestCase(SecurityFormTestCase):
                     'card_number_last_digits': '12345',
                 },
                 {'card_number_last_digits': ['You’ve entered too many characters']},
+            ),
+            ValidationScenario(
+                {
+                    'payment_method': '',
+                    'sender_email': 'john@example.com',
+                    'sender_postcode': 'SW1A1AA',
+                },
+                {
+                    'sender_email': ['Only available for debit card payments.'],
+                    'sender_postcode': ['Only available for debit card payments.'],
+                },
+            ),
+            ValidationScenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'sender_email': 'john@example.com',
+                    'sender_postcode': 'SW1A1AA',
+                },
+                {
+                    'sender_email': ['Only available for debit card payments.'],
+                    'sender_postcode': ['Only available for debit card payments.'],
+                },
             ),
         ]
 
@@ -1728,120 +1801,170 @@ class CreditFormV2TestCase(SecurityFormTestCase):
         """
         Test that if data for an advanced search is passed in, the API query string is constructed as expected.
         """
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            mock_empty_response(rsps, self.api_list_path)
+        scenarios = [
+            (
+                {  # request_data
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '123456789',
+                    'sort_code': '11-22 - 33',
+                    'sender_email': '',
+                    'sender_postcode': '',
+                    'sender_ip_address': '',
+                },
+                {  # expected_api_call_params
+                    'source': [PaymentMethod.bank_transfer.name],
+                    'sender_account_number': ['123456789'],
+                    'sender_sort_code': ['112233'],
+                },
+                {  # expected_cleaned_data
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'account_number': '123456789',
+                    'sort_code': '112233',
+                    'sender_email': '',
+                    'sender_postcode': '',
+                    'sender_ip_address': '',
+                    'card_number_last_digits': '',
+                },
+                {  # expected_qs
+                    'payment_method': [PaymentMethod.bank_transfer.name],
+                    'account_number': ['123456789'],
+                    'sort_code': ['112233'],
+                },
+            ),
+            (
+                {  # request_data
+                    'payment_method': PaymentMethod.online.name,
+                    'sender_email': 'johndoe',
+                    'sender_postcode': 'SW1A 1a-a',
+                    'sender_ip_address': '127.0.0.1',
+                    'card_number_last_digits': '1234',
+                    'account_number': '',
+                    'sort_code': '',
+                },
+                {  # expected_api_call_params
+                    'source': [PaymentMethod.online.name],
+                    'sender_email': ['johndoe'],
+                    'sender_postcode': ['SW1A1aa'],
+                    'sender_ip_address': ['127.0.0.1'],
+                    'card_number_last_digits': ['1234'],
+                },
+                {  # expected_cleaned_data
+                    'payment_method': PaymentMethod.online.name,
+                    'sender_email': 'johndoe',
+                    'sender_postcode': 'SW1A1aa',
+                    'sender_ip_address': '127.0.0.1',
+                    'card_number_last_digits': '1234',
+                    'account_number': '',
+                    'sort_code': '',
+                },
+                {  # expected_qs
+                    'payment_method': [PaymentMethod.online.name],
+                    'sender_email': ['johndoe'],
+                    'sender_postcode': ['SW1A1aa'],
+                    'sender_ip_address': ['127.0.0.1'],
+                    'card_number_last_digits': ['1234'],
+                },
+            ),
+        ]
 
-            form = self.form_class(
-                self.request,
-                data={
+        for request_data, expected_api_call_params, expected_cleaned_data, expected_qs in scenarios:
+            with responses.RequestsMock() as rsps:
+                mock_prison_response(rsps)
+                mock_empty_response(rsps, self.api_list_path)
+
+                form = self.form_class(
+                    self.request,
+                    data={
+                        'page': 2,
+                        'ordering': '-amount',
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
+                        'advanced': True,
+                        'amount_pattern': AmountPattern.exact.name,
+                        'amount_exact': '100.00',
+                        'amount_pence': '',
+                        'prisoner_name': 'Jane Doe',
+                        'prisoner_number': 'a2624ae',
+                        'sender_name': 'John Doe',
+                        'received_at__gte_0': '1',
+                        'received_at__gte_1': '2',
+                        'received_at__gte_2': '2000',
+                        'received_at__lt_0': '10',
+                        'received_at__lt_1': '3',
+                        'received_at__lt_2': '2000',
+
+                        **request_data,
+                    },
+                )
+
+                self.assertTrue(form.is_valid())
+                self.assertListEqual(form.get_object_list(), [])
+
+                api_call_made = rsps.calls[-1].request.url
+                self.assertDictEqual(
+                    parse_qs(api_call_made.split('?', 1)[1]),
+                    {
+                        'offset': ['20'],
+                        'limit': ['20'],
+                        'ordering': ['-amount'],
+                        'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
+                            prison['nomis_id']
+                            for prison in self.user_prisons
+                        ],
+                        'amount': ['10000'],
+                        'prisoner_name': ['Jane Doe'],
+                        'prisoner_number': ['A2624AE'],
+                        'sender_name': ['John Doe'],
+                        'received_at__gte': ['2000-02-01'],
+                        'received_at__lt': ['2000-03-11'],
+
+                        **expected_api_call_params,
+                    },
+                )
+
+            self.assertDictEqual(
+                form.cleaned_data,
+                {
+                    'advanced': True,
                     'page': 2,
                     'ordering': '-amount',
                     'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
-                    'advanced': True,
+                    'prison': [],
+                    'simple_search': '',
                     'amount_pattern': AmountPattern.exact.name,
                     'amount_exact': '100.00',
                     'amount_pence': '',
                     'prisoner_name': 'Jane Doe',
-                    'prisoner_number': 'a2624ae',
+                    'prisoner_number': 'A2624AE',
                     'sender_name': 'John Doe',
-                    'sender_email': 'johndoe',
-                    'sender_postcode': 'SW1A 1a-a',
-                    'sender_ip_address': '127.0.0.1',
-                    'payment_method': PaymentMethod.bank_transfer.name,
-                    'account_number': '123456789',
-                    'sort_code': '11-22 - 33',
-                    'received_at__gte_0': '1',
-                    'received_at__gte_1': '2',
-                    'received_at__gte_2': '2000',
-                    'received_at__lt_0': '10',
-                    'received_at__lt_1': '3',
-                    'received_at__lt_2': '2000',
+                    'received_at__gte': datetime.date(2000, 2, 1),
+                    'received_at__lt': datetime.date(2000, 3, 10),
+
+                    **expected_cleaned_data,
                 },
             )
 
-            self.assertTrue(form.is_valid())
-            self.assertListEqual(form.get_object_list(), [])
-
-            api_call_made = rsps.calls[-1].request.url
+            # make sure the values for dates are split
             self.assertDictEqual(
-                parse_qs(api_call_made.split('?', 1)[1]),
+                parse_qs(form.query_string),
                 {
-                    'offset': ['20'],
-                    'limit': ['20'],
                     'ordering': ['-amount'],
-                    'prison': [  # PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE expands into user prisons
-                        prison['nomis_id']
-                        for prison in self.user_prisons
-                    ],
-                    'amount': ['10000'],
+                    'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
+                    'amount_pattern': ['exact'],
+                    'amount_exact': ['100.00'],
+                    'advanced': ['True'],
+                    'sender_name': ['John Doe'],
                     'prisoner_name': ['Jane Doe'],
                     'prisoner_number': ['A2624AE'],
-                    'sender_name': ['John Doe'],
-                    'sender_email': ['johndoe'],
-                    'sender_postcode': ['SW1A1aa'],
-                    'sender_ip_address': ['127.0.0.1'],
-                    'source': [PaymentMethod.bank_transfer.name],
-                    'sender_account_number': ['123456789'],
-                    'sender_sort_code': ['112233'],
-                    'received_at__gte': ['2000-02-01'],
-                    'received_at__lt': ['2000-03-11'],
-                },
+                    'received_at__gte_0': ['1'],
+                    'received_at__gte_1': ['2'],
+                    'received_at__gte_2': ['2000'],
+                    'received_at__lt_0': ['10'],
+                    'received_at__lt_1': ['3'],
+                    'received_at__lt_2': ['2000'],
+
+                    **expected_qs,
+                }
             )
-
-        self.assertDictEqual(
-            form.cleaned_data,
-            {
-                'advanced': True,
-                'page': 2,
-                'ordering': '-amount',
-                'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
-                'prison': [],
-                'simple_search': '',
-                'amount_pattern': AmountPattern.exact.name,
-                'amount_exact': '100.00',
-                'amount_pence': '',
-                'prisoner_name': 'Jane Doe',
-                'prisoner_number': 'A2624AE',
-                'sender_name': 'John Doe',
-                'sender_email': 'johndoe',
-                'sender_postcode': 'SW1A1aa',
-                'sender_ip_address': '127.0.0.1',
-                'payment_method': PaymentMethod.bank_transfer.name,
-                'account_number': '123456789',
-                'sort_code': '112233',
-                'card_number_last_digits': '',
-                'received_at__gte': datetime.date(2000, 2, 1),
-                'received_at__lt': datetime.date(2000, 3, 10),
-            },
-        )
-
-        # make sure the values for dates are split
-        self.assertDictEqual(
-            parse_qs(form.query_string),
-            {
-                'ordering': ['-amount'],
-                'prison_selector': [PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE],
-                'amount_pattern': ['exact'],
-                'amount_exact': ['100.00'],
-                'advanced': ['True'],
-                'sender_name': ['John Doe'],
-                'sender_email': ['johndoe'],
-                'sender_postcode': ['SW1A1aa'],
-                'sender_ip_address': ['127.0.0.1'],
-                'payment_method': [PaymentMethod.bank_transfer.name],
-                'account_number': ['123456789'],
-                'sort_code': ['112233'],
-                'prisoner_name': ['Jane Doe'],
-                'prisoner_number': ['A2624AE'],
-                'received_at__gte_0': ['1'],
-                'received_at__gte_1': ['2'],
-                'received_at__gte_2': ['2000'],
-                'received_at__lt_0': ['10'],
-                'received_at__lt_1': ['3'],
-                'received_at__lt_2': ['2000']
-            }
-        )
 
     def test_invalid(self):
         """
@@ -1901,6 +2024,32 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                         '‘Month’ should be between 1 and 12',
                         '‘Year’ should be between 1900 and 2019',
                     ],
+                },
+            ),
+            ValidationScenario(
+                {
+                    'payment_method': '',
+                    'sender_email': 'john@example.com',
+                    'sender_postcode': 'SW1A1AA',
+                    'sender_ip_address': '127.0.0.1',
+                },
+                {
+                    'sender_email': ['Only available for debit card payments.'],
+                    'sender_postcode': ['Only available for debit card payments.'],
+                    'sender_ip_address': ['Only available for debit card payments.'],
+                },
+            ),
+            ValidationScenario(
+                {
+                    'payment_method': PaymentMethod.bank_transfer.name,
+                    'sender_email': 'john@example.com',
+                    'sender_postcode': 'SW1A1AA',
+                    'sender_ip_address': '127.0.0.1',
+                },
+                {
+                    'sender_email': ['Only available for debit card payments.'],
+                    'sender_postcode': ['Only available for debit card payments.'],
+                    'sender_ip_address': ['Only available for debit card payments.'],
                 },
             ),
         ]

@@ -525,6 +525,39 @@ class SendersFormV2(
         sender_postcode = self.cleaned_data.get('sender_postcode')
         return remove_whitespaces_and_hyphens(sender_postcode)
 
+    def _clean_sender_fields(self, cleaned_data):
+        """
+        Validates that some sender fields are not used when payment method != `debit card`.
+        """
+        if 'payment_method' not in cleaned_data:
+            return cleaned_data
+
+        try:
+            payment_method = PaymentMethod[
+                cleaned_data['payment_method']
+            ]
+        except KeyError:
+            payment_method = None
+
+        if payment_method == PaymentMethod.online:
+            return cleaned_data
+
+        for field_name in ('sender_email', 'sender_postcode'):
+            if cleaned_data.get(field_name):
+                self.add_error(
+                    field_name,
+                    ValidationError(
+                        _('Only available for debit card payments.'),
+                        code='conflict',
+                    ),
+                )
+
+        return cleaned_data
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return self._clean_sender_fields(cleaned_data)
+
 
 class BasePrisonersForm(SecurityForm):
     """
@@ -917,7 +950,7 @@ class CreditsFormV2(
     sender_email = forms.CharField(label=_('Email'), required=False)
     sender_postcode = forms.CharField(label=_('Postcode'), required=False)
     sender_ip_address = forms.CharField(
-        label=_('IP Address'),
+        label=_('IP address'),
         validators=[validate_ipv4_address],
         required=False,
     )
@@ -993,6 +1026,9 @@ class CreditsFormV2(
         return query_data
 
     def _clean_dates(self, cleaned_data):
+        """
+        Validates dates.
+        """
         received_at__gte = cleaned_data.get('received_at__gte')
         received_at__lt = cleaned_data.get('received_at__lt')
 
@@ -1003,12 +1039,39 @@ class CreditsFormV2(
             )
         return cleaned_data
 
+    def _clean_sender_fields(self, cleaned_data):
+        """
+        Validates that some sender fields are not used when payment method != `debit card`.
+        """
+        if 'payment_method' not in cleaned_data:
+            return cleaned_data
+
+        try:
+            payment_method = PaymentMethod[
+                cleaned_data['payment_method']
+            ]
+        except KeyError:
+            payment_method = None
+
+        if payment_method == PaymentMethod.online:
+            return cleaned_data
+
+        for field_name in ('sender_email', 'sender_postcode', 'sender_ip_address'):
+            if cleaned_data.get(field_name):
+                self.add_error(
+                    field_name,
+                    ValidationError(
+                        _('Only available for debit card payments.'),
+                        code='conflict',
+                    ),
+                )
+
+        return cleaned_data
+
     def clean(self):
-        """
-        Validates dates.
-        """
         cleaned_data = super().clean()
-        return self._clean_dates(cleaned_data)
+        cleaned_data = self._clean_dates(cleaned_data)
+        return self._clean_sender_fields(cleaned_data)
 
 
 class BaseDisbursementsForm(SecurityForm):
