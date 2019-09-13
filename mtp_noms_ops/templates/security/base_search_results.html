@@ -5,6 +5,12 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
+{% block sub_nav %}
+  {{ block.super }}
+
+  {% include 'security/includes/feedback-banner.html' %}
+{% endblock %}
+
 {% block phase_banner %}
   {{ block.super }}
 

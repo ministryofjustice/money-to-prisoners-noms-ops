@@ -1,0 +1,22 @@
+.mtp-feedback-banner {
+  @extend %site-width-container;
+
+  background: $light-blue;
+
+  div {
+    margin: $gutter 0;
+    padding: $gutter;
+  }
+
+  p {
+    color: $white;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  a:link, a:visited, a:hover, a:active, a:focus {
+    color: $white;
+  }
+}
