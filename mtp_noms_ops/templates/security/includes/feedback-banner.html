@@ -1,0 +1,12 @@
+{% load i18n %}
+
+{% if not is_search_results %}
+<aside class="print-hidden mtp-feedback-banner">
+  <div>
+    <p class="font-medium">
+      {% trans "We’ve updated the tool." %}
+      <a href="{% url 'submit_ticket' %}">{% trans 'Tell us what you think?' %}</a>
+    </p>
+  </div>
+</aside>
+{% endif %}
