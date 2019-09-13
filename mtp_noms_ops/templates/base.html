@@ -34,7 +34,7 @@
         {% else %}
           {% include 'proposition-tab.html' with view_name='login' subview_names='login' link_text=_('Sign in') %}
         {% endif %}
-        {% include 'proposition-tab.html' with view_name='submit_ticket' subview_names='submit_ticket feedback_success' link_text=_('Get help') %}
+        {% include 'proposition-tab.html' with view_name='submit_ticket' subview_names='submit_ticket feedback_success' link_text=_('Help and feedback') %}
       </ul>
     {% endspaceless %}
   </nav>
@@ -48,7 +48,7 @@
 
 {% block footer_support_links %}
   <ul>
-    <li><a href="{% url 'submit_ticket' %}">{% trans 'Get help' %}</a></li>
+    <li><a href="{% url 'submit_ticket' %}">{% trans 'Help and feedback' %}</a></li>
     <li>
       {% trans 'Built by' %}
       <a href="https://mojdigital.blog.gov.uk/">
