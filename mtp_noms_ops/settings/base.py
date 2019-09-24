@@ -53,6 +53,7 @@ ROOT_URLCONF = 'mtp_noms_ops.urls'
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'mtp_common.cp_migration.middleware.CloudPlatformMigrationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'mtp_common.auth.csrf.CsrfViewMiddleware',
     'mtp_common.auth.middleware.AuthenticationMiddleware',
@@ -280,6 +281,9 @@ NOMIS_API_PRIVATE_KEY = os.environ.get('NOMIS_API_PRIVATE_KEY', '').encode('utf8
 
 TOKEN_RETRIEVAL_USER = os.environ.get('TOKEN_RETRIEVAL_USER', '_token_retrieval')
 TOKEN_RETRIEVAL_PASSWORD = os.environ.get('TOKEN_RETRIEVAL_PASSWORD', '_token_retrieval')
+
+CLOUD_PLATFORM_MIGRATION_MODE = os.environ.get('CLOUD_PLATFORM_MIGRATION_MODE', '')
+CLOUD_PLATFORM_MIGRATION_URL = os.environ.get('CLOUD_PLATFORM_MIGRATION_URL', '')
 
 try:
     from .local import *  # noqa

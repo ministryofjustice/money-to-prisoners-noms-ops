@@ -28,7 +28,7 @@ def initial_params(request):
             ),
         }
 
-    if not request.user_prisons:
+    if not getattr(request, 'user_prisons', None):
         return {}
 
     return {'initial_params': urlencode([

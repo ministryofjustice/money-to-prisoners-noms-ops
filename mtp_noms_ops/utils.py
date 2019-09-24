@@ -50,7 +50,10 @@ def external_breadcrumbs(request):
 
 def govuk_localisation(request):
     data = inherited_localisation(request)
-    if request.can_access_prisoner_location and not request.can_access_security:
+
+    can_access_prisoner_location = getattr(request, 'can_access_prisoner_location', False)
+    can_access_security = getattr(request, 'can_access_security', False)
+    if can_access_prisoner_location and not can_access_security:
         app_title = _('Prisoner location admin')
     else:
         app_title = _('Prisoner money intelligence')
