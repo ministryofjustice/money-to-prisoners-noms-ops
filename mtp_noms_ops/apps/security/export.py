@@ -87,7 +87,7 @@ def sender_row_generator(object_list):
         gettext('Other cardholder names'), gettext('Cardholder emails'),
     ]
     for sender in object_list:
-        if sender['bank_transfer_details']:
+        if sender.get('bank_transfer_details'):
             payment_source = gettext('Bank transfer')
             bank_transfer = sender['bank_transfer_details'][0]
             sender_name = bank_transfer['sender_name']
@@ -95,11 +95,14 @@ def sender_row_generator(object_list):
                              bank_transfer['sender_account_number'],
                              bank_transfer['sender_roll_number']]
             debit_card = ['', '', '', '', '']
-        elif sender['debit_card_details']:
+        elif sender.get('debit_card_details'):
             payment_source = gettext('Debit card')
             bank_transfer = ['', '', '']
             debit_card = sender['debit_card_details'][0]
-            sender_name = debit_card['cardholder_names'][0]
+            try:
+                sender_name = debit_card['cardholder_names'][0]
+            except IndexError:
+                sender_name = gettext('Unknown')
             other_sender_names = NameSet(debit_card['cardholder_names'])
             if sender_name in other_sender_names:
                 other_sender_names.remove(sender_name)
