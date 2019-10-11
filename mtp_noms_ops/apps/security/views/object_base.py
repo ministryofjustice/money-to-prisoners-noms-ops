@@ -229,7 +229,6 @@ class SecurityView(FormView):
             'breadcrumbs': self._get_breadcrumbs(**kwargs),
             'google_analytics_pageview': genericised_pageview(self.request, self.get_generic_title()),
             'search_form_submitted_input_name': SEARCH_FORM_SUBMITTED_INPUT_NAME,
-            'is_search_results': self.view_type == ViewType.search_results,
         }
 
     def redirect_to_referral_url(self):

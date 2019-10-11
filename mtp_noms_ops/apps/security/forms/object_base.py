@@ -269,9 +269,14 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
             self.session, self.get_object_list_endpoint_path(), **filters)
         )
 
+    def build_query_string(self, **extra_query_data):
+        query_data = self.get_query_data(allow_parameter_manipulation=False)
+        query_data.update(extra_query_data)
+        return urlencode(query_data, doseq=True)
+
     @cached_property
     def query_string(self):
-        return urlencode(self.get_query_data(allow_parameter_manipulation=False), doseq=True)
+        return self.build_query_string()
 
     @property
     def query_string_with_page(self):
@@ -359,9 +364,13 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
                 'description': format_html(
                     description_template + ' {unlisted}',
                     unlisted=self.unlisted_description,
-                    **description_kwargs
+                    **description_kwargs,
+                    **self.get_extra_search_description_template_kwargs(),
                 ),
             }
+
+    def get_extra_search_description_template_kwargs(self):
+        return {}
 
     def describe_field_prison(self):
         prisons = self.cleaned_data.get('prison')

@@ -5,6 +5,7 @@ import unittest
 from unittest import mock
 from urllib.parse import parse_qs
 
+from django import forms
 from django.http import QueryDict
 from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
@@ -88,6 +89,7 @@ class MyPrisonSelectorSearchForm(PrisonSelectorSearchFormMixin, SecurityForm):
     """
     SecurityForm used to test PrisonSelectorSearchFormMixin.
     """
+    simple_search = forms.CharField(required=False)
 
 
 class MyPaymentMethodSearchForm(PaymentMethodSearchFormMixin, SecurityForm):
@@ -378,6 +380,7 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                         'page': 1,
                         'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                         'prison': [],  # reset
+                        'simple_search': '',
                     },
                     {
                         'prison': [SAMPLE_PRISONS[0]['nomis_id']],
@@ -398,6 +401,7 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                         'page': 1,
                         'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
                         'prison': [],  # reset
+                        'simple_search': '',
                     },
                     {},  # expected api query params empty because we don't want to filter by any prison
                     {
@@ -416,6 +420,7 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                         'page': 1,
                         'prison_selector': MyPrisonSelectorSearchForm.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
                         'prison': [],  # reset
+                        'simple_search': '',
                     },
                     {},  # expected api query params empty because we don't want to filter by any prison
                     {
@@ -434,6 +439,7 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                         'page': 1,
                         'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE,
                         'prison': [SAMPLE_PRISONS[1]['nomis_id']],
+                        'simple_search': '',
                     },
                     {
                         'prison': [SAMPLE_PRISONS[1]['nomis_id']],
@@ -501,6 +507,219 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
                 )
                 self.assertFalse(form.is_valid())
                 self.assertDictEqual(form.errors, scenario.expected_errors)
+
+    def test_all_prisons_simple_search_shoud_not_be_allowed(self):
+        """
+        Test that the allow_all_prisons_simple_search method returns False if:
+
+        - the form was not submitted
+        - a simple search was not performed
+        - the search term is empty
+        - the current user's prisons value is 'all'
+        """
+        # case of form not submitted
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+
+            form = MyPrisonSelectorSearchForm(mock.MagicMock())
+            self.assertFalse(form.allow_all_prisons_simple_search())
+
+        # cases of form submitted
+        Scenario = namedtuple(
+            'Scenario',
+            [
+                'user_prisons',
+                'data',
+            ],
+        )
+
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+            scenarios = [
+                # selection == user's prisons AND current user's prisons == one prison AND no simple search term used
+                Scenario(
+                    [SAMPLE_PRISONS[0]],
+                    {
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
+                    },
+                ),
+
+                # selection == user's prisons AND current user's prisons == one prison AND
+                # empty simple search term used
+                Scenario(
+                    [SAMPLE_PRISONS[0]],
+                    {
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
+                        'simple_search': '',
+                    },
+                ),
+
+                # selection == user's prisons AND current user's prisons == all prison AND
+                # non-empty simple search term used
+                Scenario(
+                    [],
+                    {
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
+                        'simple_search': 'term',
+                    },
+                ),
+
+                # selection == all AND current user's prisons == one prison AND
+                # non-empty simple search term used
+                Scenario(
+                    [SAMPLE_PRISONS[0]],
+                    {
+                        'prison_selector': form.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
+                        'simple_search': 'term',
+                    },
+                ),
+            ]
+            for scenario in scenarios:
+                request = mock.MagicMock(
+                    user=mock.MagicMock(
+                        token=generate_tokens(),
+                    ),
+                    user_prisons=scenario.user_prisons,
+                )
+
+                form = MyPrisonSelectorSearchForm(request, data=scenario.data)
+
+                self.assertTrue(form.is_valid())
+                self.assertFalse(form.allow_all_prisons_simple_search())
+
+    def test_all_prisons_simple_search_allowed(self):
+        """
+        Test that the allow_all_prisons_simple_search method returns True if a simple search
+        was made with a non-empty search term and the current user's prisons value is not 'all'.
+        """
+        request = mock.MagicMock(
+            user=mock.MagicMock(
+                token=generate_tokens(),
+            ),
+            user_prisons=[SAMPLE_PRISONS[0]],
+        )
+
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+
+            form = MyPrisonSelectorSearchForm(
+                request,
+                data={
+                    'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
+                    'simple_search': 'term',
+                },
+            )
+
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.allow_all_prisons_simple_search())
+
+    def test_was_all_prisons_simple_search_used_false(self):
+        """
+        Test that the was_all_prisons_simple_search_used method returns False in any
+        of the following cases:
+
+        - the form was not submitted
+        - a simple search was not performed
+        - the search term is empty
+        - the prison selection query param is not 'all'
+        - the user's prisons value is 'all'
+        """
+        # case of form not submitted
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+
+            form = MyPrisonSelectorSearchForm(mock.MagicMock())
+            self.assertFalse(form.was_all_prisons_simple_search_used())
+
+        # cases of form submitted
+        Scenario = namedtuple(
+            'Scenario',
+            [
+                'user_prisons',
+                'data',
+            ],
+        )
+
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+            scenarios = [
+                # selection == all prisons AND current user's prisons == one prison AND no simple search term used
+                Scenario(
+                    [SAMPLE_PRISONS[0]],
+                    {
+                        'prison_selector': form.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
+                    },
+                ),
+
+                # selection == all prisons AND current user's prisons == one prison AND
+                # empty simple search term used
+                Scenario(
+                    [SAMPLE_PRISONS[0]],
+                    {
+                        'prison_selector': form.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
+                        'simple_search': '',
+                    },
+                ),
+
+                # selection == all prisons AND current user's prisons == all prison AND
+                # non-empty simple search term used
+                Scenario(
+                    [],
+                    {
+                        'prison_selector': form.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
+                        'simple_search': 'term',
+                    },
+                ),
+
+                # selection == user's prisons AND current user's prisons == one prison AND
+                # non-empty simple search term used
+                Scenario(
+                    [SAMPLE_PRISONS[0]],
+                    {
+                        'prison_selector': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
+                        'simple_search': 'term',
+                    },
+                ),
+            ]
+            for scenario in scenarios:
+                request = mock.MagicMock(
+                    user=mock.MagicMock(
+                        token=generate_tokens(),
+                    ),
+                    user_prisons=scenario.user_prisons,
+                )
+
+                form = MyPrisonSelectorSearchForm(request, data=scenario.data)
+
+                self.assertTrue(form.is_valid())
+                self.assertFalse(form.was_all_prisons_simple_search_used())
+
+    def test_was_all_prisons_simple_search_used_true(self):
+        """
+        Test that the was_all_prisons_simple_search_used method returns True if
+        a simple search with a non-empty search term was performed, the current user's prisons value
+        is not 'all' and the prison selector query param is 'all'.
+        """
+        request = mock.MagicMock(
+            user=mock.MagicMock(
+                token=generate_tokens(),
+            ),
+            user_prisons=[SAMPLE_PRISONS[0]],
+        )
+
+        with responses.RequestsMock() as rsps:
+            mock_prison_response(rsps)
+
+            form = MyPrisonSelectorSearchForm(
+                request,
+                data={
+                    'prison_selector': MyPrisonSelectorSearchForm.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
+                    'simple_search': 'term',
+                },
+            )
+
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.was_all_prisons_simple_search_used())
 
 
 class PaymentMethodSearchFormMixinTestCase(SimpleTestCase):

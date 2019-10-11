@@ -133,6 +133,44 @@ class PrisonSelectorSearchFormMixin(forms.Form):
         cleaned_data = super().clean()
         return self._clean_prison_fields(cleaned_data)
 
+    def allow_all_prisons_simple_search(self):
+        """
+        :return: True if the current simple search could benefit from extending the search
+            to all prisons.
+
+        This is the case when:
+        - a simple search was made using a non-empty search term
+        - the default prisons value of the user who made the search is not 'all'
+        """
+        if not hasattr(self, 'cleaned_data') or not self.cleaned_data.get('simple_search'):
+            return False
+
+        return (
+            self.cleaned_data['prison_selector'] == PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
+            and self.request.user_prisons
+        )
+
+    def was_all_prisons_simple_search_used(self):
+        """
+        :return: True if a simple search in all prisons was made, False otherwise.
+        """
+        if not hasattr(self, 'cleaned_data') or not self.cleaned_data.get('simple_search'):
+            return False
+
+        return (
+            self.cleaned_data['prison_selector'] == self.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE
+            and self.request.user_prisons
+        )
+
+    def get_extra_search_description_template_kwargs(self):
+        return {
+            'all_prisons_filter_description': (
+                'from all prisons'
+                if self.was_all_prisons_simple_search_used()
+                else ''
+            ),
+        }
+
 
 class AmountSearchFormMixin(forms.Form):
     """
@@ -502,11 +540,11 @@ class SendersFormV2(
     sender_postcode = forms.CharField(label=_('Postcode'), required=False)
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results containing {filter_description}'
+    filtered_description_template = 'Results {all_prisons_filter_description} that contain {filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
-        ('payment source name or email address “{simple_search}”',),
+        ('the payment source name or the email address “{simple_search}”',),
     )
     description_capitalisation = {}
     unlisted_description = ''
@@ -707,11 +745,11 @@ class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, BasePris
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results containing {filter_description}'
+    filtered_description_template = 'Results {all_prisons_filter_description} that contain {filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
-        ('prisoner number or name “{simple_search}”',),
+        ('the prisoner number or the name “{simple_search}”',),
     )
     description_capitalisation = {}
     unlisted_description = ''
@@ -965,11 +1003,11 @@ class CreditsFormV2(
     exclusive_date_params = ['received_at__lt']
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results containing {filter_description}'
+    filtered_description_template = 'Results {all_prisons_filter_description} that contain {filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
-        ('payment source name, email address or prisoner number “{simple_search}”',),
+        ('the payment source name, the email address or the prisoner number “{simple_search}”',),
     )
     description_capitalisation = {}
     unlisted_description = ''
@@ -1288,11 +1326,11 @@ class DisbursementsFormV2(
     exclusive_date_params = ['created__lt']
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results containing {filter_description}'
+    filtered_description_template = 'Results {all_prisons_filter_description} that contain {filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
-        ('recipient name or prisoner number “{simple_search}”',),
+        ('the recipient name or the prisoner number “{simple_search}”',),
     )
     description_capitalisation = {}
     unlisted_description = ''

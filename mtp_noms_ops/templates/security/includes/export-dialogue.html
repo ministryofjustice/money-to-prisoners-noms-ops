@@ -3,7 +3,7 @@
 
 {% if form.total_count <= view.export_download_limit %}
 
-  <a class="js-FormAnalytics-click" href="{{ export_view }}?{{ request.GET.urlencode }}" data-click-track="export-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Export' %}</a>
+  <a class="js-FormAnalytics-click" href="{{ export_view }}?{{ request.GET.urlencode }}" data-click-track="export-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}" data-click-as-pageview="true">{% trans 'Export' %}</a>
 
 {% elif form.total_count <= view.export_email_limit %}
 

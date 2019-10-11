@@ -14,7 +14,40 @@ from security.forms.object_list import (
     DisbursementsFormV2,
     NotificationsForm,
 )
-from security.views.object_base import SecurityView
+from security.views.object_base import SecurityView, ViewType
+
+
+class SecuritySearchViewV2(SecurityView):
+    """
+    Base class for all Search Views V2.
+    """
+
+    def get_context_data(self, **kwargs):
+        """
+        Adds extra vars related to the search performed.
+        """
+        context_data = super().get_context_data(**kwargs)
+        form = kwargs['form']
+
+        is_search_results = self.view_type == ViewType.search_results
+
+        if is_search_results and form.allow_all_prisons_simple_search():
+            query_data = form.build_query_string(
+                prison_selector=form.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE,
+            )
+
+            all_prisons_simple_search_link = f'{reverse(self.search_results_view)}?{query_data}'
+        else:
+            all_prisons_simple_search_link = None
+
+        return {
+            **context_data,
+
+            'is_search_results': is_search_results,
+            'is_advanced_search_results': is_search_results and form.was_advanced_search_used(),
+            'is_all_prisons_simple_search_results': is_search_results and form.was_all_prisons_simple_search_used(),
+            'all_prisons_simple_search_link': all_prisons_simple_search_link,
+        }
 
 
 class CreditListView(SecurityView):
@@ -30,7 +63,7 @@ class CreditListView(SecurityView):
     object_list_context_key = 'credits'
 
 
-class CreditListViewV2(SecurityView):
+class CreditListViewV2(SecuritySearchViewV2):
     """
     Credit list/search view V2
     """
@@ -59,7 +92,7 @@ class DisbursementListView(SecurityView):
     object_list_context_key = 'disbursements'
 
 
-class DisbursementListViewV2(SecurityView):
+class DisbursementListViewV2(SecuritySearchViewV2):
     """
     Disbursement list/search view V2
     """
@@ -91,7 +124,7 @@ class SenderListView(SecurityView):
         return reverse('security:sender_detail', kwargs={'sender_id': sender['id']})
 
 
-class SenderListViewV2(SecurityView):
+class SenderListViewV2(SecuritySearchViewV2):
     """
     Sender list/search view V2.
     """
@@ -126,7 +159,7 @@ class PrisonerListView(SecurityView):
         return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner['id']})
 
 
-class PrisonerListViewV2(SecurityView):
+class PrisonerListViewV2(SecuritySearchViewV2):
     """
     Prisoner list/search view V2.
     """
