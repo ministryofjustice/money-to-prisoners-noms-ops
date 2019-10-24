@@ -11,7 +11,6 @@ from mtp_common.forms.fields import SplitDateField
 from security.forms.object_base import (
     AmountPattern,
     get_credit_source_choices,
-    get_disbursement_method_choices,
     parse_amount,
     SecurityForm,
     validate_amount,
@@ -19,7 +18,6 @@ from security.forms.object_base import (
     validate_range_fields,
 )
 from security.models import credit_sources, disbursement_methods, PaymentMethod
-from security.templatetags.security import currency as format_currency
 from security.utils import (
     convert_date_fields,
     remove_whitespaces_and_hyphens,
@@ -989,147 +987,6 @@ class BaseDisbursementsForm(SecurityForm):
 
     def get_object_list_endpoint_path(self):
         return '/disbursements/'
-
-
-@validate_range_fields(
-    ('created', _('Must be after the start date'), '__lt'),
-)
-class DisbursementsForm(BaseDisbursementsForm):
-    """
-    Legacy Search Form for Disbursements.
-
-    TODO: delete after search V2 goes live.
-    """
-    prison = forms.MultipleChoiceField(label=_('Prison'), required=False, choices=[])
-
-    created__gte = forms.DateField(label=_('Entered since'), help_text=_('For example, 13/02/2018'), required=False)
-    created__lt = forms.DateField(label=_('Entered before'), help_text=_('For example, 13/02/2018'), required=False)
-
-    amount_pattern = forms.ChoiceField(
-        label=_('Amount (£)'),
-        required=False,
-        choices=AmountPattern.get_choices(),
-    )
-    amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
-    amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
-
-    prisoner_number = forms.CharField(label=_('Prisoner number'), validators=[validate_prisoner_number], required=False)
-    prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
-    prison_region = forms.ChoiceField(label=_('Prison region'), required=False, choices=[])
-    prison_population = forms.ChoiceField(label=_('Prison type'), required=False, choices=[])
-    prison_category = forms.ChoiceField(label=_('Prison category'), required=False, choices=[])
-
-    method = forms.ChoiceField(label=_('Payment method'), required=False, choices=get_disbursement_method_choices(),
-                               help_text=_('Select to see filters like account number'))
-    recipient_name = forms.CharField(label=_('Recipient name'), required=False)
-    recipient_email = forms.CharField(label=_('Recipient email'), required=False)
-    city = forms.CharField(label=_('City'), required=False)
-    postcode = forms.CharField(label=_('Postcode'), required=False)
-    sort_code = forms.CharField(label=_('Sort code'), help_text=_('For example, 01-23-45'),
-                                required=False)
-    account_number = forms.CharField(label=_('Account number'), required=False)
-    roll_number = forms.CharField(label=_('Roll number'), required=False)
-    invoice_number = forms.CharField(label=_('Invoice number'), required=False)
-
-    exclusive_date_params = ['created__lt']
-
-    # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Below are disbursements {filter_description}, ' \
-                                    'ordered by {ordering_description}.'
-    unfiltered_description_template = 'All disbursements are shown below ordered by {ordering_description}. ' \
-                                      'Add filters to narrow down your search.'
-    description_templates = (
-        ('entered between {created__gte} and {created__lt}',
-         'entered since {created__gte}',
-         'entered before {created__lt}',),
-        ('that are {amount_pattern}',),
-        ('from {prisoner_name} ({prisoner_number})',
-         'from prisoners named ‘{prisoner_name}’',
-         'from prisoner {prisoner_number}',),
-        ('{prison_preposition} {prison}',),
-        ('{prison_preposition} {prison_population} {prison_category} prisons in {prison_region}',
-         '{prison_preposition} {prison_category} prisons in {prison_region}',
-         '{prison_preposition} {prison_population} prisons in {prison_region}',
-         '{prison_preposition} {prison_population} {prison_category} prisons',
-         '{prison_preposition} {prison_category} prisons',
-         '{prison_preposition} {prison_population} prisons',
-         '{prison_preposition} prisons in {prison_region}',),
-        ('using {method} to account {account_number} {sort_code}',
-         'using {method} to account {account_number}',
-         'using {method} to sort code {sort_code}',
-         'using {method}',),
-        ('to recipients named ‘{recipient_name}’ with email {recipient_email}',
-         'to recipients named {recipient_email}',
-         'to recipients named ‘{recipient_name}’',),
-        ('to {postcode}, {city}',
-         'to {postcode} postcode',
-         'to {city}',),
-    )
-    description_capitalisation = {
-        'ordering': 'lowerfirst',
-        'prison': 'preserve',
-        'prison_region': 'preserve',
-        'prison_category': 'lowerfirst',
-    }
-    default_prison_preposition = 'from'
-    unlisted_description = 'You can’t see cash or postal orders here.'
-
-    def clean_amount_exact(self):
-        if self.cleaned_data.get('amount_pattern') != 'exact':
-            return ''
-        amount = self.cleaned_data.get('amount_exact')
-        if not amount:
-            raise ValidationError(_('This field is required for the selected amount pattern'), code='required')
-        return amount
-
-    def clean_amount_pence(self):
-        if self.cleaned_data.get('amount_pattern') != 'pence':
-            return None
-        amount = self.cleaned_data.get('amount_pence')
-        if amount is None:
-            raise ValidationError(_('This field is required for the selected amount pattern'), code='required')
-        return amount
-
-    def clean_prisoner_number(self):
-        prisoner_number = self.cleaned_data.get('prisoner_number')
-        if prisoner_number:
-            return prisoner_number.upper()
-        return prisoner_number
-
-    def clean_sort_code(self):
-        if self.cleaned_data.get('method') != 'bank_transfer':
-            return ''
-        return remove_whitespaces_and_hyphens(self.cleaned_data.get('sort_code'))
-
-    def clean_account_number(self):
-        if self.cleaned_data.get('method') != 'bank_transfer':
-            return ''
-        return self.cleaned_data.get('account_number')
-
-    def clean_roll_number(self):
-        if self.cleaned_data.get('method') != 'bank_transfer':
-            return ''
-        return self.cleaned_data.get('roll_number')
-
-    def get_query_data(self, allow_parameter_manipulation=True):
-        query_data = super().get_query_data(allow_parameter_manipulation=allow_parameter_manipulation)
-        if allow_parameter_manipulation:
-            AmountPattern.update_query_data(query_data)
-        return query_data
-
-    def describe_field_amount_pattern(self):
-        value = self.cleaned_data.get('amount_pattern')
-        if not value:
-            return None
-        if value in ('exact', 'pence'):
-            amount_value = self.cleaned_data.get('amount_%s' % value)
-            if amount_value is None:
-                return None
-            if value == 'exact':
-                return format_currency(parse_amount(amount_value))
-            return _('ending in %02d pence') % amount_value
-        description = dict(self['amount_pattern'].field.choices).get(value)
-        return str(description).lower() if description else None
 
 
 class DisbursementsFormV2(

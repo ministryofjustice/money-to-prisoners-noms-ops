@@ -377,34 +377,6 @@ urlpatterns = [
         name='disbursement_detail',
     ),
 
-
-    # TODO: delete _legacy views after search V2 goes live.
-    url(
-        r'^security/disbursements/$',
-        security_test(
-            views.DisbursementListView.as_view(),
-        ),
-        name='disbursement_list_legacy',
-    ),
-    url(
-        r'^security/disbursements/export/$',
-        security_test(
-            views.DisbursementListView.as_view(
-                view_type=views.ViewType.export_download,
-            ),
-        ),
-        name='disbursement_export_legacy',
-    ),
-    url(
-        r'^security/disbursements/email-export/$',
-        security_test(
-            views.DisbursementListView.as_view(
-                view_type=views.ViewType.export_email,
-            ),
-        ),
-        name='disbursement_email_export_legacy',
-    ),
-
     # review credits
     url(
         r'^security/review-credits/$',
@@ -426,5 +398,12 @@ urlpatterns = [
             RedirectView.as_view(pattern_name='security:credit_list'),
         ),
         name='credit_list_legacy',
+    ),
+    url(
+        r'^security/disbursements/$',
+        security_test(
+            RedirectView.as_view(pattern_name='security:disbursement_list'),
+        ),
+        name='disbursement_list_legacy',
     ),
 ]

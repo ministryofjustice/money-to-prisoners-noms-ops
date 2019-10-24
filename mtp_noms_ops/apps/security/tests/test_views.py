@@ -1957,136 +1957,6 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
         self.assertEqual(response.status_code, 404)
 
 
-class DisbursementViewsTestCase(LegacySecurityViewTestCase):
-    """
-    TODO: delete after search V2 goes live.
-    """
-    view_name = 'security:disbursement_list_legacy'
-    detail_view_name = 'security:disbursement_detail'
-    api_list_path = '/disbursements/'
-
-    bank_transfer_disbursement = {
-        'id': 99,
-        'created': '2018-02-12T12:00:00Z', 'modified': '2018-02-12T12:00:00Z',
-        'method': 'bank_transfer',
-        'amount': 2000,
-        'resolution': 'sent',
-        'nomis_transaction_id': '1234567-1', 'invoice_number': '1000099',
-        'prisoner_number': 'A1409AE', 'prisoner_name': 'JAMES HALLS',
-        'prison': 'ABC', 'prison_name': 'HMP Test1',
-        'recipient_first_name': 'Jack', 'recipient_last_name': 'Halls',
-        'recipient_email': '', 'remittance_description': '',
-        'address_line1': '102 Petty France', 'address_line2': '',
-        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
-        'account_number': '1234567', 'sort_code': '112233', 'roll_number': None,
-        'comments': [],
-        'log_set': [{'action': 'created',
-                     'created': '2018-02-12T12:00:00Z',
-                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
-                    {'action': 'confirmed',
-                     'created': '2018-02-12T12:00:00Z',
-                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}},
-                    {'action': 'sent',
-                     'created': '2018-02-12T12:00:00Z',
-                     'user': {'first_name': 'SSCL', 'last_name': '', 'username': 'sscl'}}],
-    }
-    cheque_disbursement = {
-        'id': 100,
-        'created': '2018-02-10T10:00:00Z', 'modified': '2018-02-10T12:00:00Z',
-        'method': 'cheque',
-        'amount': 1000,
-        'resolution': 'confirmed',
-        'nomis_transaction_id': '1234568-1', '': 'PMD1000100',
-        'prisoner_number': 'A1401AE', 'prisoner_name': 'JILLY HALL',
-        'prison': 'DEF', 'prison_name': 'HMP Test2',
-        'recipient_first_name': 'Jilly', 'recipient_last_name': 'Halls',
-        'recipient_email': 'jilly@mtp.local', 'remittance_description': 'PRESENT',
-        'address_line1': '102 Petty France', 'address_line2': '',
-        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
-        'account_number': '', 'sort_code': '', 'roll_number': None,
-        'comments': [],
-        'log_set': [{'action': 'created',
-                     'created': '2018-02-10T10:00:00Z',
-                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
-                    {'action': 'confirmed',
-                     'created': '2018-02-10T11:00:00Z',
-                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}}]
-    }
-
-    @responses.activate
-    def test_displays_results(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url(self.api_list_path),
-            json={
-                'count': 2,
-                'previous': None,
-                'next': 'http://localhost:8000/disbursements/?limit=20&offset=20&ordering=-amount',
-                'results': [
-                    self.bank_transfer_disbursement,
-                    self.cheque_disbursement,
-                ]
-            }
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.view_name), {'ordering': '-amount'})
-        self.assertContains(response, 'JAMES HALLS')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('A1409AE', response_content)
-        self.assertIn('£20.00', response_content)
-        self.assertIn('by bank transfer', response_content)
-        self.assertIn('Sent', response_content)
-        self.assertIn('A1401AE', response_content)
-        self.assertIn('£10.00', response_content)
-        self.assertIn('by cheque', response_content)
-        self.assertIn('Confirmed', response_content)
-
-    @responses.activate
-    def test_bank_transfer_detail(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/disbursements/99/'),
-            json=self.bank_transfer_disbursement
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'disbursement_id': '99'}))
-        self.assertContains(response, 'Bank transfer')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£20.00', response_content)
-        self.assertIn('JAMES HALLS', response_content)
-        self.assertIn('Jack Halls', response_content)
-        self.assertIn('1234567-1', response_content)
-        self.assertIn('1000099', response_content)
-        self.assertIn('Confirmed by John Smith', response_content)
-        self.assertIn('None given', response_content)
-
-    @responses.activate
-    def test_cheque_detail(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/disbursements/100/'),
-            json=self.cheque_disbursement
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'disbursement_id': '100'}))
-        self.assertContains(response, 'Cheque')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£10.00', response_content)
-        self.assertIn('JILLY HALL', response_content)
-        self.assertIn('Jilly Halls', response_content)
-        self.assertIn('1234568-1', response_content)
-        self.assertNotIn('PMD1000100', response_content)
-        self.assertIn('Confirmed by John Smith', response_content)
-        self.assertIn('jilly@mtp.local', response_content)
-        self.assertIn('PRESENT', response_content)
-
-
 class DisbursementViewsV2TestCase(
     SearchV2SecurityTestCaseMixin,
     ExportSecurityViewTestCaseMixin,
@@ -2951,6 +2821,7 @@ class LegacyViewsRedirectTestCase(SecurityBaseTestCase):
         """
         view_names = (
             'security:credit_list',
+            'security:disbursement_list',
         )
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)

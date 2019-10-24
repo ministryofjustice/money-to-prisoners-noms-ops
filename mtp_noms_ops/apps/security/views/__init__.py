@@ -11,7 +11,6 @@ from .object_list import (  # noqa: F401
     PrisonerListView,
     PrisonerListViewV2,
     CreditListViewV2,
-    DisbursementListView,
     DisbursementListViewV2,
     NotificationListView,
 )

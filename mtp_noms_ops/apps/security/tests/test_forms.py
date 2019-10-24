@@ -15,7 +15,6 @@ from security.forms.object_base import AmountPattern, SecurityForm
 from security.forms.object_list import (
     AmountSearchFormMixin,
     CreditsFormV2,
-    DisbursementsForm,
     DisbursementsFormV2,
     PaymentMethodSearchFormMixin,
     PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
@@ -2199,87 +2198,6 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                 form = self.form_class(self.request, data=scenario.data)
             self.assertFalse(form.is_valid())
             self.assertDictEqual(form.errors, scenario.expected_errors)
-
-
-class DisbursementFormTestCase(LegacySecurityFormTestCase):
-    """
-    TODO: delete after search V2 goes live.
-    """
-    form_class = DisbursementsForm
-    api_list_path = '/disbursements/'
-
-    def test_disbursements_list_blank_form(self):
-        expected_data = {
-            'page': 1,
-            'ordering': '-created',
-            'created__gte': None, 'created__lt': None,
-            'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
-            'prisoner_number': '', 'prisoner_name': '',
-            'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
-            'method': '', 'recipient_name': '', 'recipient_email': '', 'city': '', 'postcode': '',
-            'sort_code': '', 'account_number': '', 'roll_number': '',
-            'invoice_number': '',
-        }
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            mock_empty_response(rsps, self.api_list_path)
-            form = self.form_class(self.request, data={'page': '1'})
-            self.assertTrue(form.is_valid())
-            self.assertDictEqual(form.cleaned_data, expected_data)
-            self.assertListEqual(form.get_object_list(), [])
-        self.assertDictEqual(form.get_query_data(), {'ordering': '-created'})
-        self.assertEqual(form.query_string, 'ordering=-created')
-
-    def test_disbursements_list_valid_forms(self):
-        created__gte = datetime.date(2016, 5, 26)
-        expected_data = {
-            'page': 1,
-            'ordering': '-amount',
-            'created__gte': created__gte, 'created__lt': None,
-            'amount_pattern': '', 'amount_exact': '', 'amount_pence': None,
-            'prisoner_number': '', 'prisoner_name': '',
-            'prison': [], 'prison_region': '', 'prison_population': '', 'prison_category': '',
-            'method': '', 'recipient_name': '', 'recipient_email': '', 'city': '', 'postcode': '',
-            'sort_code': '', 'account_number': '', 'roll_number': '',
-            'invoice_number': '',
-        }
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            mock_empty_response(rsps, self.api_list_path)
-            form = self.form_class(
-                self.request,
-                data={'page': '1', 'ordering': '-amount', 'created__gte': '26/5/2016'},
-            )
-            self.assertTrue(form.is_valid())
-            self.assertDictEqual(form.cleaned_data, expected_data)
-            self.assertListEqual(form.get_object_list(), [])
-        self.assertDictEqual(form.get_query_data(), {'ordering': '-amount', 'created__gte': created__gte})
-        self.assertEqual(form.query_string, 'ordering=-amount&created__gte=2016-05-26')
-
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            form = self.form_class(self.request, data={'page': '1', 'amount_pattern': 'not_integral'})
-        self.assertTrue(form.is_valid(), msg=form.errors.as_text())
-        self.assertDictEqual(form.get_query_data(), {'ordering': '-created', 'exclude_amount__endswith': '00'})
-        self.assertDictEqual(form.get_query_data(allow_parameter_manipulation=False),
-                             {'ordering': '-created', 'amount_pattern': 'not_integral'})
-        self.assertEqual(form.query_string, 'ordering=-created&amount_pattern=not_integral')
-
-    def test_disbursements_list_invalid_forms(self):
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            form = self.form_class(self.request, data={'page': '0'})
-        self.assertFalse(form.is_valid())
-
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            form = self.form_class(self.request, data={'page': '1', 'ordering': 'prison'})
-        self.assertFalse(form.is_valid())
-
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            form = self.form_class(self.request, data={'page': '1', 'prison': 'ABC'})
-        self.assertFalse(form.is_valid())
 
 
 class DisbursementFormV2TestCase(SecurityFormTestCase):

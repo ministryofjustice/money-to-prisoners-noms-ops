@@ -9,7 +9,6 @@ from security.forms.object_list import (
     PrisonersForm,
     PrisonersFormV2,
     CreditsFormV2,
-    DisbursementsForm,
     DisbursementsFormV2,
     NotificationsForm,
 )
@@ -63,19 +62,6 @@ class CreditListViewV2(SecuritySearchViewV2):
     object_list_context_key = 'credits'
     object_name = _('credit')
     object_name_plural = _('credits')
-
-
-class DisbursementListView(SecurityView):
-    """
-    Legacy Disbursement search view
-
-    TODO: delete after search V2 goes live.
-    """
-    title = _('Disbursements')
-    form_template_name = 'security/forms/disbursements.html'
-    template_name = 'security/disbursements.html'
-    form_class = DisbursementsForm
-    object_list_context_key = 'disbursements'
 
 
 class DisbursementListViewV2(SecuritySearchViewV2):

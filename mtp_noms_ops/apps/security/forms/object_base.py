@@ -19,7 +19,7 @@ from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
-from security.models import PrisonList, credit_sources, disbursement_methods
+from security.models import PrisonList, credit_sources
 from security.searches import (
     save_search, update_result_count, delete_search, get_existing_search
 )
@@ -33,16 +33,6 @@ def get_credit_source_choices():
     return [
         ('', _('Any method')),  # blank option
         *credit_sources.items(),
-    ]
-
-
-def get_disbursement_method_choices():
-    """
-    TODO: delete after search V2 goes live.
-    """
-    return [
-        ('', _('Any method')),  # blank option
-        *disbursement_methods.items(),
     ]
 
 
