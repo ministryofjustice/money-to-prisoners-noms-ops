@@ -25,7 +25,6 @@ from security import (
     not_hmpps_employee_flag,
     notifications_pilot_flag,
     required_permissions,
-    SEARCH_V2_FLAG,
 )
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
@@ -219,22 +218,6 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
             json={},
         )
 
-    def get_user_data(
-        self,
-        *args,
-        flags=(
-            hmpps_employee_flag,
-            confirmed_prisons_flag,
-            SEARCH_V2_FLAG,
-        ),
-        **kwargs,
-    ):
-        """
-        Sets the SEARCH_V2_FLAG feature flag by default.
-        """
-
-        return super().get_user_data(*args, flags=flags, **kwargs)
-
     @responses.activate
     def test_with_many_prisons(self):
         """
@@ -320,7 +303,6 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
-                    SEARCH_V2_FLAG,
                 ],
             ),
         )
@@ -335,7 +317,6 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
                 flags=[
                     confirmed_prisons_flag,
                     not_hmpps_employee_flag,
-                    SEARCH_V2_FLAG,
                 ],
             ),
         )
@@ -351,7 +332,6 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
                 flags=[
                     confirmed_prisons_flag,
                     hmpps_employee_flag,
-                    SEARCH_V2_FLAG,
                 ]
             )
         )
@@ -387,7 +367,6 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
-                    SEARCH_V2_FLAG,
                 ],
             ),
         )
@@ -593,22 +572,6 @@ class SearchV2SecurityTestCaseMixin:
 
     # the filter name used for API calls, it's usually prison but can sometimes be current_prison
     prison_api_filter_name = 'prison'
-
-    def get_user_data(
-        self,
-        *args,
-        flags=(
-            hmpps_employee_flag,
-            confirmed_prisons_flag,
-            SEARCH_V2_FLAG,
-        ),
-        **kwargs,
-    ):
-        """
-        Sets the SEARCH_V2_FLAG feature flag by default.
-        """
-
-        return super().get_user_data(*args, flags=flags, **kwargs)
 
     def test_displays_simple_search_results(self):
         """
