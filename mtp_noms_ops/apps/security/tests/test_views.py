@@ -1129,133 +1129,6 @@ class ExportSecurityViewTestCaseMixin:
             self.assertRedirects(response, referer_url)
 
 
-class SenderViewsTestCase(LegacySecurityViewTestCase):
-    """
-    TODO: delete after search V2 goes live.
-    """
-    view_name = 'security:sender_list_legacy'
-    detail_view_name = 'security:sender_detail'
-    api_list_path = '/senders/'
-
-    @responses.activate
-    def test_displays_results(self):
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url(self.api_list_path),
-            json={
-                'count': 2,
-                'results': [self.bank_transfer_sender, self.debit_card_sender],
-            }
-        )
-        response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'MAISIE NOLAN')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£410.00', response_content)
-        self.assertIn('£420.00', response_content)
-
-    @responses.activate
-    def test_displays_bank_transfer_detail(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            json=self.bank_transfer_sender
-        )
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/credits/'.format(id=9)),
-            json={
-                'count': 4,
-                'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
-            }
-        )
-
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
-        self.assertEqual(response.status_code, 200)
-        response_content = response.content.decode(response.charset)
-        self.assertIn('MAISIE', response_content)
-        self.assertIn('12312345', response_content)
-        self.assertIn('JAMES HALLS', response_content)
-        self.assertIn('£102.50', response_content)
-
-    @responses.activate
-    def test_displays_debit_card_detail(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            json=self.debit_card_sender
-        )
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/credits/'.format(id=9)),
-            json={
-                'count': 4,
-                'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
-            }
-        )
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
-        self.assertEqual(response.status_code, 200)
-        response_content = response.content.decode(response.charset)
-        self.assertIn('**** **** **** 1234', response_content)
-        self.assertIn('10/20', response_content)
-        self.assertIn('SW13 7NJ', response_content)
-        self.assertIn('JAMES HALLS', response_content)
-        self.assertIn('£102.50', response_content)
-
-    @responses.activate
-    def test_detail_not_found(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            status=404
-        )
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/credits/'.format(id=9)),
-            status=404
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
-        self.assertEqual(response.status_code, 404)
-
-    @responses.activate
-    def test_connection_errors(self):
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            status=500
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'non-field-error')
-
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            status=500
-        )
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/credits/'.format(id=9)),
-            status=500
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
-        self.assertContains(response, 'non-field-error')
-
-
 class SenderViewsV2TestCase(
     SearchV2SecurityTestCaseMixin,
     ExportSecurityViewTestCaseMixin,
@@ -2822,6 +2695,7 @@ class LegacyViewsRedirectTestCase(SecurityBaseTestCase):
         view_names = (
             'security:credit_list',
             'security:disbursement_list',
+            'security:sender_list',
         )
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)

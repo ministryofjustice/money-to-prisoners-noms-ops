@@ -9,7 +9,7 @@ from security.forms.object_detail import (
 from security.templatetags.security import currency as format_currency
 from security.utils import NameSet, convert_date_fields, sender_profile_name
 from security.views.object_base import SimpleSecurityDetailView, SecurityDetailView
-from security.views.object_list import SenderListView, PrisonerListView
+from security.views.object_list import PrisonerListView
 
 
 class CreditDetailView(SimpleSecurityDetailView):
@@ -17,9 +17,9 @@ class CreditDetailView(SimpleSecurityDetailView):
     Credit detail view
     """
     title = _('Credit')
+    list_title = _('Credits')
     template_name = 'security/credit.html'
     object_context_key = 'credit'
-    list_title = _('Credits')
     list_url = reverse_lazy('security:credit_list')
 
     def get_object_request_params(self):
@@ -49,9 +49,9 @@ class DisbursementDetailView(SimpleSecurityDetailView):
     Disbursement detail view
     """
     title = _('Disbursement')
+    list_title = _('Disbursements')
     template_name = 'security/disbursement.html'
     object_context_key = 'disbursement'
-    list_title = _('Disbursements')
     list_url = reverse_lazy('security:disbursement_list')
 
     def get_object_request_params(self):
@@ -92,7 +92,7 @@ class SenderDetailView(SecurityDetailView):
     Sender profile view
     """
     title = _('Payment source')
-    list_title = SenderListView.title
+    list_title = _('Payment sources')
     template_name = 'security/sender.html'
     form_class = SendersDetailForm
     id_kwarg_name = 'sender_id'

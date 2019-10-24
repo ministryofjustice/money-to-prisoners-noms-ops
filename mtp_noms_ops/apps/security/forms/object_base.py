@@ -19,21 +19,11 @@ from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
-from security.models import PrisonList, credit_sources
+from security.models import PrisonList
 from security.searches import (
     save_search, update_result_count, delete_search, get_existing_search
 )
 from security.utils import convert_date_fields
-
-
-def get_credit_source_choices():
-    """
-    TODO: delete after search V2 goes live.
-    """
-    return [
-        ('', _('Any method')),  # blank option
-        *credit_sources.items(),
-    ]
 
 
 def parse_amount(value, as_int=True):

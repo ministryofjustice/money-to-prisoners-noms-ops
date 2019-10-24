@@ -4,7 +4,6 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_list import (
-    SendersForm,
     SendersFormV2,
     PrisonersForm,
     PrisonersFormV2,
@@ -78,22 +77,6 @@ class DisbursementListViewV2(SecuritySearchViewV2):
     object_list_context_key = 'disbursements'
     object_name = _('disbursement')
     object_name_plural = _('disbursements')
-
-
-class SenderListView(SecurityView):
-    """
-    Legacy Sender search view
-
-    TODO: delete after search V2 goes live.
-    """
-    title = _('Payment sources')
-    form_template_name = 'security/forms/senders.html'
-    template_name = 'security/senders.html'
-    form_class = SendersForm
-    object_list_context_key = 'senders'
-
-    def url_for_single_result(self, sender):
-        return reverse('security:sender_detail', kwargs={'sender_id': sender['id']})
 
 
 class SenderListViewV2(SecuritySearchViewV2):

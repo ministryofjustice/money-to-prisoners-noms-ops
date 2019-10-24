@@ -164,34 +164,6 @@ urlpatterns = [
         name='sender_detail_email_export',
     ),
 
-
-    # TODO: delete _legacy views after search V2 goes live.
-    url(
-        r'^security/senders/$',
-        security_test(
-            views.SenderListView.as_view(),
-        ),
-        name='sender_list_legacy',
-    ),
-    url(
-        r'^security/senders/export/$',
-        security_test(
-            views.SenderListView.as_view(
-                view_type=views.ViewType.export_download,
-            ),
-        ),
-        name='sender_export_legacy',
-    ),
-    url(
-        r'^security/senders/email-export/$',
-        security_test(
-            views.SenderListView.as_view(
-                view_type=views.ViewType.export_email,
-            ),
-        ),
-        name='sender_email_export_legacy',
-    ),
-
     # prisoners
     url(
         r'^prisoners/$',
@@ -405,5 +377,12 @@ urlpatterns = [
             RedirectView.as_view(pattern_name='security:disbursement_list'),
         ),
         name='disbursement_list_legacy',
+    ),
+    url(
+        r'^security/senders/$',
+        security_test(
+            RedirectView.as_view(pattern_name='security:sender_list'),
+        ),
+        name='sender_list_legacy',
     ),
 ]
