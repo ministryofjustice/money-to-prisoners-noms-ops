@@ -1,14 +1,11 @@
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 from django.shortcuts import render
 from mtp_common.auth.api_client import get_api_session
 
 from mtp_noms_ops.utils import user_test
-from security import required_permissions, views, SEARCH_V2_FLAG
-from security.context_processors import initial_params
+from security import required_permissions, views
 from security.searches import get_saved_searches, populate_new_result_counts
 from security.utils import can_skip_confirming_prisons, is_hmpps_employee
 
@@ -34,31 +31,6 @@ def dashboard_view(request):
     })
 
 
-def search_v2_view_redirect(view, search_v2_redirect_view_name=None, legacy_search_redirect_view_name=None):
-    """
-    Redirects to `search_v2_redirect_view_name` if not None and the user has the SEARCH_V2_FLAG on
-        (meaning `view` is legacy search and shouldn't be served).
-    Redirects to `legacy_search_redirect_view_name` if not None and the user doesn't have the SEARCH_V2_FLAG on
-        (meaning `view` is search v2 but user can't access it).
-    """
-    def inner(request, *args, **kwargs):
-        redirect_view_name = None
-        if SEARCH_V2_FLAG in request.user.user_data['flags']:
-            if search_v2_redirect_view_name:
-                redirect_view_name = search_v2_redirect_view_name
-        else:
-            if legacy_search_redirect_view_name:
-                redirect_view_name = legacy_search_redirect_view_name
-
-        if redirect_view_name:
-            prisons_param = initial_params(request).get('initial_params', '')
-            return HttpResponseRedirect(
-                f'{reverse(redirect_view_name)}?{prisons_param}',
-            )
-        return view(request, *args, **kwargs)
-    return inner
-
-
 app_name = 'security'
 urlpatterns = [
     url(r'^security/$', security_test(dashboard_view), name='dashboard'),
@@ -73,11 +45,8 @@ urlpatterns = [
     url(
         r'^credits/$',
         security_test(
-            search_v2_view_redirect(
-                views.CreditListViewV2.as_view(
-                    view_type=views.ViewType.simple_search_form,
-                ),
-                legacy_search_redirect_view_name='security:credit_list_legacy',
+            views.CreditListViewV2.as_view(
+                view_type=views.ViewType.simple_search_form,
             ),
         ),
         name='credit_list',
@@ -85,11 +54,8 @@ urlpatterns = [
     url(
         r'^credits/advanced-search/$',
         security_test(
-            search_v2_view_redirect(
-                views.CreditListViewV2.as_view(
-                    view_type=views.ViewType.advanced_search_form,
-                ),
-                legacy_search_redirect_view_name='security:credit_list_legacy',
+            views.CreditListViewV2.as_view(
+                view_type=views.ViewType.advanced_search_form,
             ),
         ),
         name='credit_advanced_search',
@@ -97,11 +63,8 @@ urlpatterns = [
     url(
         r'^credits/search-results/$',
         security_test(
-            search_v2_view_redirect(
-                views.CreditListViewV2.as_view(
-                    view_type=views.ViewType.search_results,
-                ),
-                legacy_search_redirect_view_name='security:credit_list_legacy',
+            views.CreditListViewV2.as_view(
+                view_type=views.ViewType.search_results,
             ),
         ),
         name='credit_search_results',
@@ -109,11 +72,8 @@ urlpatterns = [
     url(
         r'^credits/export/$',
         security_test(
-            search_v2_view_redirect(
-                views.CreditListViewV2.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
-                legacy_search_redirect_view_name='security:credit_list_legacy',
+            views.CreditListViewV2.as_view(
+                view_type=views.ViewType.export_download,
             ),
         ),
         name='credit_export',
@@ -121,11 +81,8 @@ urlpatterns = [
     url(
         r'^credits/email-export/$',
         security_test(
-            search_v2_view_redirect(
-                views.CreditListViewV2.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
-                legacy_search_redirect_view_name='security:credit_list_legacy',
+            views.CreditListViewV2.as_view(
+                view_type=views.ViewType.export_email,
             ),
         ),
         name='credit_email_export',
@@ -141,21 +98,15 @@ urlpatterns = [
     url(
         r'^security/credits/$',
         security_test(
-            search_v2_view_redirect(
                 views.CreditListView.as_view(),
-                search_v2_redirect_view_name='security:credit_list',
-            )
         ),
         name='credit_list_legacy',
     ),
     url(
         r'^security/credits/export/$',
         security_test(
-            search_v2_view_redirect(
-                views.CreditListView.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
-                search_v2_redirect_view_name='security:credit_list',
+            views.CreditListView.as_view(
+                view_type=views.ViewType.export_download,
             ),
         ),
         name='credit_export_legacy',
@@ -163,11 +114,8 @@ urlpatterns = [
     url(
         r'^security/credits/email-export/$',
         security_test(
-            search_v2_view_redirect(
-                views.CreditListView.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
-                search_v2_redirect_view_name='security:credit_list',
+            views.CreditListView.as_view(
+                view_type=views.ViewType.export_email,
             ),
         ),
         name='credit_email_export_legacy',
@@ -177,11 +125,8 @@ urlpatterns = [
     url(
         r'^senders/$',
         security_test(
-            search_v2_view_redirect(
-                views.SenderListViewV2.as_view(
-                    view_type=views.ViewType.simple_search_form,
-                ),
-                legacy_search_redirect_view_name='security:sender_list_legacy',
+            views.SenderListViewV2.as_view(
+                view_type=views.ViewType.simple_search_form,
             ),
         ),
         name='sender_list',
@@ -189,11 +134,8 @@ urlpatterns = [
     url(
         r'^senders/advanced-search/$',
         security_test(
-            search_v2_view_redirect(
-                views.SenderListViewV2.as_view(
-                    view_type=views.ViewType.advanced_search_form,
-                ),
-                legacy_search_redirect_view_name='security:sender_list_legacy',
+            views.SenderListViewV2.as_view(
+                view_type=views.ViewType.advanced_search_form,
             ),
         ),
         name='sender_advanced_search',
@@ -201,11 +143,8 @@ urlpatterns = [
     url(
         r'^senders/search-results/$',
         security_test(
-            search_v2_view_redirect(
-                views.SenderListViewV2.as_view(
-                    view_type=views.ViewType.search_results,
-                ),
-                legacy_search_redirect_view_name='security:sender_list_legacy',
+            views.SenderListViewV2.as_view(
+                view_type=views.ViewType.search_results,
             ),
         ),
         name='sender_search_results',
@@ -213,11 +152,8 @@ urlpatterns = [
     url(
         r'^senders/export/$',
         security_test(
-            search_v2_view_redirect(
-                views.SenderListViewV2.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
-                legacy_search_redirect_view_name='security:sender_list_legacy',
+            views.SenderListViewV2.as_view(
+                view_type=views.ViewType.export_download,
             ),
         ),
         name='sender_export',
@@ -225,11 +161,8 @@ urlpatterns = [
     url(
         r'^senders/email-export/$',
         security_test(
-            search_v2_view_redirect(
-                views.SenderListViewV2.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
-                legacy_search_redirect_view_name='security:sender_list_legacy',
+            views.SenderListViewV2.as_view(
+                view_type=views.ViewType.export_email,
             ),
         ),
         name='sender_email_export',
@@ -263,21 +196,15 @@ urlpatterns = [
     url(
         r'^security/senders/$',
         security_test(
-            search_v2_view_redirect(
-                views.SenderListView.as_view(),
-                search_v2_redirect_view_name='security:sender_list',
-            ),
+            views.SenderListView.as_view(),
         ),
         name='sender_list_legacy',
     ),
     url(
         r'^security/senders/export/$',
         security_test(
-            search_v2_view_redirect(
-                views.SenderListView.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
-                search_v2_redirect_view_name='security:sender_list',
+            views.SenderListView.as_view(
+                view_type=views.ViewType.export_download,
             ),
         ),
         name='sender_export_legacy',
@@ -285,11 +212,8 @@ urlpatterns = [
     url(
         r'^security/senders/email-export/$',
         security_test(
-            search_v2_view_redirect(
-                views.SenderListView.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
-                search_v2_redirect_view_name='security:sender_list',
+            views.SenderListView.as_view(
+                view_type=views.ViewType.export_email,
             ),
         ),
         name='sender_email_export_legacy',
@@ -299,11 +223,8 @@ urlpatterns = [
     url(
         r'^prisoners/$',
         security_test(
-            search_v2_view_redirect(
-                views.PrisonerListViewV2.as_view(
-                    view_type=views.ViewType.simple_search_form,
-                ),
-                legacy_search_redirect_view_name='security:prisoner_list_legacy',
+            views.PrisonerListViewV2.as_view(
+                view_type=views.ViewType.simple_search_form,
             ),
         ),
         name='prisoner_list',
@@ -311,11 +232,8 @@ urlpatterns = [
     url(
         r'^prisoners/advanced-search/$',
         security_test(
-            search_v2_view_redirect(
-                views.PrisonerListViewV2.as_view(
-                    view_type=views.ViewType.advanced_search_form,
-                ),
-                legacy_search_redirect_view_name='security:prisoner_list_legacy',
+            views.PrisonerListViewV2.as_view(
+                view_type=views.ViewType.advanced_search_form,
             ),
         ),
         name='prisoner_advanced_search',
@@ -323,11 +241,8 @@ urlpatterns = [
     url(
         r'^prisoners/search-results/$',
         security_test(
-            search_v2_view_redirect(
-                views.PrisonerListViewV2.as_view(
-                    view_type=views.ViewType.search_results,
-                ),
-                legacy_search_redirect_view_name='security:prisoner_list_legacy',
+            views.PrisonerListViewV2.as_view(
+                view_type=views.ViewType.search_results,
             ),
         ),
         name='prisoner_search_results',
@@ -335,11 +250,8 @@ urlpatterns = [
     url(
         r'^prisoners/export/$',
         security_test(
-            search_v2_view_redirect(
-                views.PrisonerListViewV2.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
-                legacy_search_redirect_view_name='security:prisoner_list_legacy',
+            views.PrisonerListViewV2.as_view(
+                view_type=views.ViewType.export_download,
             ),
         ),
         name='prisoner_export'
@@ -347,11 +259,8 @@ urlpatterns = [
     url(
         r'^prisoners/email-export/$',
         security_test(
-            search_v2_view_redirect(
-                views.PrisonerListViewV2.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
-                legacy_search_redirect_view_name='security:prisoner_list_legacy',
+            views.PrisonerListViewV2.as_view(
+                view_type=views.ViewType.export_email,
             ),
         ),
         name='prisoner_email_export',
@@ -408,21 +317,15 @@ urlpatterns = [
     url(
         r'^security/prisoners/$',
         security_test(
-            search_v2_view_redirect(
-                views.PrisonerListView.as_view(),
-                search_v2_redirect_view_name='security:prisoner_list',
-            ),
+            views.PrisonerListView.as_view(),
         ),
         name='prisoner_list_legacy',
     ),
     url(
         r'^security/prisoners/export/$',
         security_test(
-            search_v2_view_redirect(
-                views.PrisonerListView.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
-                search_v2_redirect_view_name='security:prisoner_list',
+            views.PrisonerListView.as_view(
+                view_type=views.ViewType.export_download,
             ),
         ),
         name='prisoner_export_legacy'
@@ -430,11 +333,8 @@ urlpatterns = [
     url(
         r'^security/prisoners/email-export/$',
         security_test(
-            search_v2_view_redirect(
-                views.PrisonerListView.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
-                search_v2_redirect_view_name='security:prisoner_list',
+            views.PrisonerListView.as_view(
+                view_type=views.ViewType.export_email,
             ),
         ),
         name='prisoner_email_export_legacy',
@@ -456,11 +356,8 @@ urlpatterns = [
     url(
         r'^disbursements/$',
         security_test(
-            search_v2_view_redirect(
-                views.DisbursementListViewV2.as_view(
-                    view_type=views.ViewType.simple_search_form,
-                ),
-                legacy_search_redirect_view_name='security:disbursement_list_legacy',
+            views.DisbursementListViewV2.as_view(
+                view_type=views.ViewType.simple_search_form,
             ),
         ),
         name='disbursement_list',
@@ -468,11 +365,8 @@ urlpatterns = [
     url(
         r'^disbursements/advanced-search/$',
         security_test(
-            search_v2_view_redirect(
-                views.DisbursementListViewV2.as_view(
-                    view_type=views.ViewType.advanced_search_form,
-                ),
-                legacy_search_redirect_view_name='security:disbursement_list_legacy',
+            views.DisbursementListViewV2.as_view(
+                view_type=views.ViewType.advanced_search_form,
             ),
         ),
         name='disbursement_advanced_search',
@@ -480,11 +374,8 @@ urlpatterns = [
     url(
         r'^disbursements/search-results/$',
         security_test(
-            search_v2_view_redirect(
-                views.DisbursementListViewV2.as_view(
-                    view_type=views.ViewType.search_results,
-                ),
-                legacy_search_redirect_view_name='security:disbursement_list_legacy',
+            views.DisbursementListViewV2.as_view(
+                view_type=views.ViewType.search_results,
             ),
         ),
         name='disbursement_search_results',
@@ -492,11 +383,8 @@ urlpatterns = [
     url(
         r'^disbursements/export/$',
         security_test(
-            search_v2_view_redirect(
-                views.DisbursementListViewV2.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
-                legacy_search_redirect_view_name='security:disbursement_list_legacy',
+            views.DisbursementListViewV2.as_view(
+                view_type=views.ViewType.export_download,
             ),
         ),
         name='disbursement_export',
@@ -504,11 +392,8 @@ urlpatterns = [
     url(
         r'^disbursements/email-export/$',
         security_test(
-            search_v2_view_redirect(
-                views.DisbursementListViewV2.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
-                legacy_search_redirect_view_name='security:disbursement_list_legacy',
+            views.DisbursementListViewV2.as_view(
+                view_type=views.ViewType.export_email,
             ),
         ),
         name='disbursement_email_export',
@@ -524,21 +409,15 @@ urlpatterns = [
     url(
         r'^security/disbursements/$',
         security_test(
-            search_v2_view_redirect(
-                views.DisbursementListView.as_view(),
-                search_v2_redirect_view_name='security:disbursement_list',
-            ),
+            views.DisbursementListView.as_view(),
         ),
         name='disbursement_list_legacy',
     ),
     url(
         r'^security/disbursements/export/$',
         security_test(
-            search_v2_view_redirect(
-                views.DisbursementListView.as_view(
-                    view_type=views.ViewType.export_download,
-                ),
-                search_v2_redirect_view_name='security:disbursement_list',
+            views.DisbursementListView.as_view(
+                view_type=views.ViewType.export_download,
             ),
         ),
         name='disbursement_export_legacy',
@@ -546,11 +425,8 @@ urlpatterns = [
     url(
         r'^security/disbursements/email-export/$',
         security_test(
-            search_v2_view_redirect(
-                views.DisbursementListView.as_view(
-                    view_type=views.ViewType.export_email,
-                ),
-                search_v2_redirect_view_name='security:disbursement_list',
+            views.DisbursementListView.as_view(
+                view_type=views.ViewType.export_email,
             ),
         ),
         name='disbursement_email_export_legacy',
