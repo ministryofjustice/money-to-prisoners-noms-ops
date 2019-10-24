@@ -8,7 +8,6 @@ from security.forms.object_list import (
     SendersFormV2,
     PrisonersForm,
     PrisonersFormV2,
-    CreditsForm,
     CreditsFormV2,
     DisbursementsForm,
     DisbursementsFormV2,
@@ -48,19 +47,6 @@ class SecuritySearchViewV2(SecurityView):
             'is_all_prisons_simple_search_results': is_search_results and form.was_all_prisons_simple_search_used(),
             'all_prisons_simple_search_link': all_prisons_simple_search_link,
         }
-
-
-class CreditListView(SecurityView):
-    """
-    Legacy Credit search view
-
-    TODO: delete after search V2 goes live.
-    """
-    title = _('Credits')
-    form_template_name = 'security/forms/credits.html'
-    template_name = 'security/credits.html'
-    form_class = CreditsForm
-    object_list_context_key = 'credits'
 
 
 class CreditListViewV2(SecuritySearchViewV2):

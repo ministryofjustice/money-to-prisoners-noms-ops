@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
+from django.views.generic.base import RedirectView
 from mtp_common.auth.api_client import get_api_session
 
 from mtp_noms_ops.utils import user_test
@@ -91,34 +92,6 @@ urlpatterns = [
         r'^security/credits/(?P<credit_id>\d+)/$',
         security_test(views.CreditDetailView.as_view()),
         name='credit_detail',
-    ),
-
-
-    # TODO: delete _legacy views after search V2 goes live.
-    url(
-        r'^security/credits/$',
-        security_test(
-                views.CreditListView.as_view(),
-        ),
-        name='credit_list_legacy',
-    ),
-    url(
-        r'^security/credits/export/$',
-        security_test(
-            views.CreditListView.as_view(
-                view_type=views.ViewType.export_download,
-            ),
-        ),
-        name='credit_export_legacy',
-    ),
-    url(
-        r'^security/credits/email-export/$',
-        security_test(
-            views.CreditListView.as_view(
-                view_type=views.ViewType.export_email,
-            ),
-        ),
-        name='credit_email_export_legacy',
     ),
 
     # senders
@@ -444,5 +417,14 @@ urlpatterns = [
         r'^security/notifications/$',
         security_test(views.NotificationListView.as_view()),
         name='notification_list',
+    ),
+
+    # legacy views, they redirect to their v2 and should be safe to be removed eventually
+    url(
+        r'^security/credits/$',
+        security_test(
+            RedirectView.as_view(pattern_name='security:credit_list'),
+        ),
+        name='credit_list_legacy',
     ),
 ]

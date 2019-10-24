@@ -1718,120 +1718,6 @@ class PrisonerViewsV2TestCase(
         self.assertContains(response, 'non-field-error')
 
 
-class CreditViewsTestCase(LegacySecurityViewTestCase):
-    """
-    TODO: delete after search V2 goes live.
-    """
-    view_name = 'security:credit_list_legacy'
-    detail_view_name = 'security:credit_detail'
-    api_list_path = '/credits/'
-
-    debit_card_credit = {
-        'id': 1,
-        'source': 'online',
-        'amount': 23000,
-        'intended_recipient': 'Mr G Melley',
-        'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
-        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-        'sender_name': None,
-        'sender_sort_code': None, 'sender_account_number': None,
-        'sender_roll_number': None,
-        'card_number_last_digits': '4444', 'card_expiry_date': '07/18',
-        'resolution': 'credited',
-        'owner': None, 'owner_name': 'Maria',
-        'received_at': '2016-05-25T20:24:00Z',
-        'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,
-        'comments': [{'user_full_name': 'Eve', 'comment': 'OK'}],
-    }
-    bank_transfer_credit = {
-        'id': 2,
-        'source': 'bank_transfer',
-        'amount': 27500,
-        'intended_recipient': None,
-        'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
-        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-        'sender_name': 'HEIDENREICH X',
-        'sender_sort_code': '219657', 'sender_account_number': '88447894',
-        'sender_roll_number': '', 'resolution': 'credited',
-        'owner': None, 'owner_name': 'Maria',
-        'received_at': '2016-05-22T23:00:00Z',
-        'credited_at': '2016-05-23T01:10:00Z', 'refunded_at': None,
-        'comments': [],
-    }
-
-    @responses.activate
-    def test_displays_results(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url(self.api_list_path),
-            json={
-                'count': 2,
-                'previous': None,
-                'next': 'http://localhost:8000/credits/?limit=20&offset=20&ordering=-amount',
-                'results': [
-                    self.debit_card_credit,
-                    self.bank_transfer_credit,
-                ]
-            }
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.view_name), {'ordering': '-amount'})
-        self.assertContains(response, 'GEORGE MELLEY')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('A1413AE', response_content)
-        self.assertIn('275.00', response_content)
-        self.assertIn('Bank transfer', response_content)
-        self.assertIn('Debit card', response_content)
-
-    @responses.activate
-    def test_debit_card_detail(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/credits/'),
-            json={
-                'count': 1, 'previous': None, 'next': None,
-                'results': [self.debit_card_credit]
-            }
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'credit_id': '1'}))
-        self.assertContains(response, 'Debit card')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£230.00', response_content)
-        self.assertIn('GEORGE MELLEY', response_content)
-        self.assertIn('Mr G Melley', response_content)
-        self.assertIn('A1411AE', response_content)
-        self.assertIn('Credited by Maria', response_content)
-        self.assertIn('Eve', response_content)
-        self.assertIn('OK', response_content)
-
-    @responses.activate
-    def test_bank_transfer_detail(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/credits/'),
-            json={
-                'count': 1, 'previous': None, 'next': None,
-                'results': [self.bank_transfer_credit]
-            }
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'credit_id': '2'}))
-        self.assertContains(response, 'Bank transfer')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£275.00', response_content)
-        self.assertIn('NORMAN STANLEY FLETCHER', response_content)
-        self.assertIn('21-96-57', response_content)
-        self.assertIn('88447894', response_content)
-        self.assertIn('Credited by Maria', response_content)
-
-
 class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTestCaseMixin, SecurityViewTestCase):
     """
     Test case related to credit search V2 and detail views.
@@ -3051,3 +2937,25 @@ class SettingsTestCase(SecurityBaseTestCase):
             last_post_call = list(filter(lambda call: call.request.method == rsps.POST, rsps.calls))[-1]
             last_request_body = json.loads(last_post_call.request.body)
             self.assertDictEqual(last_request_body, {'frequency': 'never'})
+
+
+class LegacyViewsRedirectTestCase(SecurityBaseTestCase):
+    """
+    Tests related to legacy views.
+    """
+
+    @responses.activate
+    def test_legacy_search_views_redirect_to_new_ones(self):
+        """
+        Test that legacy search views redirect to search views V2.
+        """
+        view_names = (
+            'security:credit_list',
+        )
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            mock_prison_response(rsps=rsps)
+
+            for view_name in view_names:
+                response = self.client.get(reverse(f'{view_name}_legacy'))
+                self.assertRedirects(response, reverse(view_name))
