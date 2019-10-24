@@ -3,10 +3,10 @@
   <header>
   <h1 class="heading-xlarge">
     <span class="heading-secondary">{{ view.title }}</span>
-    {% if form.advanced.value %}
+    {% if is_advanced_search_results %}
       {% trans 'Advanced search results' %}
     {% else %}
-      {% trans 'Search results' %}
+      {% trans 'Search results' %}{% if is_all_prisons_simple_search_results %} - {% trans 'all prisons' %}{% endif %}
     {% endif %}
   </h1>
   </header>

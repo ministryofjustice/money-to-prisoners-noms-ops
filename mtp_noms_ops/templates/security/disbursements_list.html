@@ -33,7 +33,7 @@
               {% sortable_cell _('Date entered') form.cleaned_data 'created' %}
               <th>{% trans 'Prisoner (from)' %}</th>
               <th>{% trans 'Recipient (to)' %}</th>
-              {% if form.advanced.value %}
+              {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
               <th>{% trans 'Prison' %}</th>
               {% endif %}
               {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
@@ -59,7 +59,7 @@
                   {{ disbursement.recipient_email|default:_('Email not provided') }}
                 </td>
 
-                {% if form.advanced.value %}
+                {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
                 <td>{{ disbursement.prison_name }}</td>
                 {% endif %}
 
@@ -94,9 +94,19 @@
     {% endif %}
 
   {% if is_search_results %}
+    <p>
     {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="button">{% trans 'Search again' %}</a>
+      <a href="{{ search_form_item.url }}" class="button print-hidden">{% trans 'Search again' %}</a>
     {% endwith%}
+    </p>
+
+    {% if all_prisons_simple_search_link %}
+    <p>
+      <a href="{{ all_prisons_simple_search_link }}" class="print-hidden js-FormAnalytics-click" data-click-track="all-prisons-simple-search,disbursements">
+        {% trans 'See results from all prisons' %}
+      </a>
+    </p>
+    {% endif %}
   {% endif %}
   </form>
 

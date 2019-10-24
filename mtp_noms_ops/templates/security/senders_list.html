@@ -48,7 +48,7 @@
               <th>{% trans 'Payment method' %}</th>
               {% sortable_cell _('Number of credits sent') form.cleaned_data 'credit_count' cell_classes='numeric' %}
               {% sortable_cell _('Prisoners sent to') form.cleaned_data 'prisoner_count' cell_classes='numeric' %}
-              {% if form.advanced.value %}
+              {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
               <th>{% trans 'Prisons sent to' %}</th>
               {% else %}
               {% sortable_cell _('Number of prisons sent to') form.cleaned_data 'prison_count' cell_classes='numeric' %}
@@ -118,7 +118,7 @@
                         {{ sender.prisoner_count }}
                       </span>
                     </td>
-                    {% if form.advanced.value %}
+                    {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
                       {% get_split_prison_names sender.prisons 2 as split_prison_names %}
                     <td>
                       {{ split_prison_names.prison_names }}
@@ -168,9 +168,19 @@
     {% endif %}
 
   {% if is_search_results %}
+    <p>
     {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="button">{% trans 'Search again' %}</a>
+      <a href="{{ search_form_item.url }}" class="button print-hidden">{% trans 'Search again' %}</a>
     {% endwith%}
+    </p>
+
+    {% if all_prisons_simple_search_link %}
+    <p>
+      <a href="{{ all_prisons_simple_search_link }}" class="print-hidden js-FormAnalytics-click" data-click-track="all-prisons-simple-search,senders">
+        {% trans 'See results from all prisons' %}
+      </a>
+    </p>
+    {% endif %}
   {% endif %}
   </form>
 

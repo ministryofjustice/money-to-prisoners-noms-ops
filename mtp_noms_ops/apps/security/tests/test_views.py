@@ -3,6 +3,7 @@ from contextlib import contextmanager
 import datetime
 import json
 import logging
+import re
 import tempfile
 from unittest import mock
 from urllib.parse import parse_qs
@@ -657,7 +658,7 @@ class SearchV2SecurityTestCaseMixin:
                     'results': api_results,
                 },
             )
-            response = self.client.get(reverse(self.view_name))
+            response = self.client.get(reverse(self.search_results_view_name))
         self._test_search_results_content(response, advanced=False)
 
     def test_displays_advanced_search_results(self):
@@ -678,7 +679,7 @@ class SearchV2SecurityTestCaseMixin:
                 },
             )
             response = self.client.get(
-                f'{reverse(self.view_name)}?advanced=True'
+                f'{reverse(self.search_results_view_name)}?advanced=True'
             )
         self._test_search_results_content(response, advanced=True)
 
@@ -894,6 +895,104 @@ class SearchV2SecurityTestCaseMixin:
             request_url = f'{reverse(self.view_name)}?{query_string}'
             response = self.client.get(request_url)
             self.assertEqual(response.status_code, 200)
+
+    def test_simple_search_results_with_link_to_all_prisons_search(self):
+        """
+        Test that if the current user's prisons value != 'all', after making a simple search,
+        a link to search for the same thing in all prisons is shown.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            mock_prison_response(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
+
+            response = self.client.get(f'{reverse(self.search_results_view_name)}?simple_search=test')
+
+        link_re = re.compile(
+            (
+                '<a href="(.*)'
+                f'prison_selector={PrisonSelectorSearchFormMixin.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE}'
+                '(.*)">'
+                '(.*)See results from all prisons(.*)'
+                '</a>'
+            ),
+            re.DOTALL,
+        )
+        self.assertTrue(
+            link_re.search(response.content.decode('utf8')),
+        )
+
+    def test_simple_search_results_without_link_to_all_prisons_search(self):
+        """
+        Test that if the current user's prisons value == 'all', after making a simple search
+        no link to search for the same thing in all prisons is shown as it would have the
+        same result.
+        """
+        with responses.RequestsMock() as rsps:
+            user_data = self.get_user_data(prisons=None)
+
+            self.login(user_data=user_data, rsps=rsps)
+            mock_prison_response(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
+            response = self.client.get(f'{reverse(self.search_results_view_name)}?simple_search=test')
+
+        link_re = re.compile(
+            (
+                '<a href="(.*)'
+                f'prison_selector={PrisonSelectorSearchFormMixin.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE}'
+                '(.*)">'
+                '(.*)See results from all prisons(.*)'
+                '</a>'
+            ),
+            re.DOTALL,
+        )
+        self.assertFalse(
+            link_re.search(response.content.decode('utf8')),
+        )
+
+    def test_displays_simple_search_results_with_all_prisons(self):
+        """
+        Test that when making a simple search with prison_selector == all,
+        the API call doesn't include any prison filter.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            mock_prison_response(rsps=rsps)
+            api_results = self.get_api_object_list_response_data()
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': len(api_results),
+                    'results': api_results,
+                },
+            )
+            url = (
+                f'{reverse(self.search_results_view_name)}'
+                '?simple_search=test'
+                f'&prison_selector={PrisonSelectorSearchFormMixin.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE}'
+            )
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+
+            api_call_made = rsps.calls[-1].request.url
+            parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
+            self.assertTrue(self.prison_api_filter_name not in parsed_qs)
+            self.assertTrue('simple_search' in parsed_qs)
 
 
 class ExportSecurityViewTestCaseMixin:

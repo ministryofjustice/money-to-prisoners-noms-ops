@@ -34,7 +34,7 @@
               <thead>
                 <tr>
                   <th>{% trans 'Prisoner' %}</th>
-                  {% if form.advanced.value %}
+                  {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
                   <th>{% trans 'Prison' %}</th>
                   {% endif %}
                   {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' cell_classes='numeric' %}
@@ -51,7 +51,7 @@
                       <br/>
                       {% search_highlight prisoner.prisoner_number %}
                     </td>
-                    {% if form.advanced.value %}
+                    {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
                     <td>{{ prisoner.current_prison.name|default:"-" }}</td>
                     {% endif %}
                     <td class="numeric">
@@ -108,7 +108,7 @@
               <thead>
                 <tr>
                   <th>{% trans 'Prisoner' %}</th>
-                  {% if form.advanced.value %}
+                  {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
                   <th>{% trans 'Prison' %}</th>
                   {% endif %}
                   {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='numeric' %}
@@ -125,7 +125,7 @@
                       <br/>
                       {% search_highlight prisoner.prisoner_number %}
                     </td>
-                    {% if form.advanced.value %}
+                    {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
                     <td>{{ prisoner.current_prison.name|default:"-" }}</td>
                     {% endif %}
                     <td class="numeric">
@@ -171,9 +171,19 @@
     {% endif %}
 
   {% if is_search_results %}
+    <p>
     {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="button">{% trans 'Search again' %}</a>
+      <a href="{{ search_form_item.url }}" class="button print-hidden">{% trans 'Search again' %}</a>
     {% endwith%}
+    </p>
+
+    {% if all_prisons_simple_search_link %}
+    <p>
+      <a href="{{ all_prisons_simple_search_link }}" class="print-hidden js-FormAnalytics-click" data-click-track="all-prisons-simple-search,prisoners">
+        {% trans 'See results from all prisons' %}
+      </a>
+    </p>
+    {% endif %}
   {% endif %}
   </form>
 
