@@ -6,7 +6,6 @@ from unittest import mock
 from urllib.parse import parse_qs
 
 from django import forms
-from django.http import QueryDict
 from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
 import responses
@@ -1061,70 +1060,6 @@ class SecurityFormTestCase(SimpleTestCase):
             self.assertListEqual(form.get_object_list(), [])
             self.assertDictEqual(form.get_query_data(), {})
             self.assertEqual(form.query_string, '')
-
-
-class LegacySecurityFormTestCase(SecurityFormTestCase):
-    """
-    Base TestCase class for security search form V1
-
-    TODO: delete after search V2 goes live.
-    """
-    def test_filtering_by_one_prison(self):
-        if not self.form_class:
-            return
-
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            form = self.form_class(self.request, data=QueryDict('prison=INP', mutable=True))
-        initial_ordering = form['ordering'].initial
-        self.assertTrue(form.is_valid())
-
-        expected_query_data = {
-            'ordering': initial_ordering,
-            'prison': ['INP'],
-        }
-        expected_query_string = f'ordering={initial_ordering}&prison=INP'
-
-        self.assertDictEqual(form.get_query_data(), expected_query_data)
-        self.assertEqual(form.query_string, expected_query_string)
-
-    def test_filtering_by_many_prisons(self):
-        if not self.form_class:
-            return
-
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            form = self.form_class(self.request, data=QueryDict('prison=IXB&prison=INP', mutable=True))
-        initial_ordering = form['ordering'].initial
-        self.assertTrue(form.is_valid())
-
-        expected_query_data = {
-            'ordering': initial_ordering,
-            'prison': ['INP', 'IXB'],
-        }
-        expected_query_string = f'ordering={initial_ordering}&prison=INP&prison=IXB'
-
-        self.assertDictEqual(form.get_query_data(), expected_query_data)
-        self.assertEqual(form.query_string, expected_query_string)
-
-    def test_filtering_by_many_prisons_alternate(self):
-        if not self.form_class:
-            return
-
-        with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
-            form = self.form_class(self.request, data=QueryDict('prison=IXB,INP,', mutable=True))
-        initial_ordering = form['ordering'].initial
-        self.assertTrue(form.is_valid())
-
-        expected_query_data = {
-            'ordering': initial_ordering,
-            'prison': ['INP', 'IXB'],
-        }
-        expected_query_string = f'ordering={initial_ordering}&prison=INP&prison=IXB'
-
-        self.assertDictEqual(form.get_query_data(), expected_query_data)
-        self.assertEqual(form.query_string, expected_query_string)
 
 
 class SenderFormV2TestCase(SecurityFormTestCase):

@@ -382,9 +382,14 @@ class PaymentMethodSearchFormMixin(forms.Form):
         return self._clean_payment_method_fields(cleaned_data)
 
 
-class BaseSendersForm(SecurityForm):
+class SendersFormV2(
+    SearchFormV2Mixin,
+    PrisonSelectorSearchFormMixin,
+    PaymentMethodSearchFormMixin,
+    SecurityForm,
+):
     """
-    Senders Form Base Class.
+    Search Form for Senders V2.
     """
     ordering = forms.ChoiceField(
         label=_('Order by'),
@@ -401,20 +406,6 @@ class BaseSendersForm(SecurityForm):
             ('-credit_total', _('Total sent (high to low)')),
         ]
     )
-
-    def get_object_list_endpoint_path(self):
-        return '/senders/'
-
-
-class SendersFormV2(
-    SearchFormV2Mixin,
-    PrisonSelectorSearchFormMixin,
-    PaymentMethodSearchFormMixin,
-    BaseSendersForm,
-):
-    """
-    Search Form for Senders V2.
-    """
     simple_search = forms.CharField(
         label=_('Search payment source name or email address'),
         required=False,
@@ -440,6 +431,9 @@ class SendersFormV2(
         'sort_code': 'sender_sort_code',
         'card_number_last_digits': 'card_number_last_digits',
     }
+
+    def get_object_list_endpoint_path(self):
+        return '/senders/'
 
     def get_payment_method_choices(self):
         return credit_sources.items()
@@ -482,9 +476,9 @@ class SendersFormV2(
         return self._clean_sender_fields(cleaned_data)
 
 
-class BasePrisonersForm(SecurityForm):
+class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, SecurityForm):
     """
-    Prisoners Form Base Class.
+    Search Form for Prisoners V2.
     """
     ordering = forms.ChoiceField(
         label=_('Order by'),
@@ -509,15 +503,6 @@ class BasePrisonersForm(SecurityForm):
             ('-prisoner_number', _('Prisoner number (Z to A)')),
         ],
     )
-
-    def get_object_list_endpoint_path(self):
-        return '/prisoners/'
-
-
-class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, BasePrisonersForm):
-    """
-    Search Form for Prisoners V2.
-    """
     simple_search = forms.CharField(
         label=_('Search prisoner number or name'),
         required=False,
@@ -539,6 +524,9 @@ class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, BasePris
     )
     description_capitalisation = {}
     unlisted_description = ''
+
+    def get_object_list_endpoint_path(self):
+        return '/prisoners/'
 
     def clean_prisoner_number(self):
         """
@@ -563,9 +551,15 @@ class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, BasePris
         return query_data
 
 
-class BaseCreditsForm(SecurityForm):
+class CreditsFormV2(
+    SearchFormV2Mixin,
+    AmountSearchFormMixin,
+    PrisonSelectorSearchFormMixin,
+    PaymentMethodSearchFormMixin,
+    SecurityForm,
+):
     """
-    Credits Form Base Class.
+    Search Form for Credits V2.
     """
     ordering = forms.ChoiceField(
         label=_('Order by'),
@@ -582,26 +576,6 @@ class BaseCreditsForm(SecurityForm):
             ('-prisoner_number', _('Prisoner number (Z to A)')),
         ],
     )
-
-    def get_object_list(self):
-        object_list = super().get_object_list()
-        convert_date_fields(object_list)
-        return object_list
-
-    def get_object_list_endpoint_path(self):
-        return '/credits/'
-
-
-class CreditsFormV2(
-    SearchFormV2Mixin,
-    AmountSearchFormMixin,
-    PrisonSelectorSearchFormMixin,
-    PaymentMethodSearchFormMixin,
-    BaseCreditsForm,
-):
-    """
-    Search Form for Credits V2.
-    """
     simple_search = forms.CharField(
         label=_('Search payment source name, email address or prisoner number'),
         required=False,
@@ -652,6 +626,14 @@ class CreditsFormV2(
         'sort_code': 'sender_sort_code',
         'card_number_last_digits': 'card_number_last_digits',
     }
+
+    def get_object_list(self):
+        object_list = super().get_object_list()
+        convert_date_fields(object_list)
+        return object_list
+
+    def get_object_list_endpoint_path(self):
+        return '/credits/'
 
     def get_payment_method_choices(self):
         return credit_sources.items()
@@ -746,9 +728,15 @@ class CreditsFormV2(
         return self._clean_sender_fields(cleaned_data)
 
 
-class BaseDisbursementsForm(SecurityForm):
+class DisbursementsFormV2(
+    SearchFormV2Mixin,
+    AmountSearchFormMixin,
+    PrisonSelectorSearchFormMixin,
+    PaymentMethodSearchFormMixin,
+    SecurityForm,
+):
     """
-    Disbursements Form Base Class.
+    Search Form for Disbursements V2.
     """
     ordering = forms.ChoiceField(
         label=_('Order by'),
@@ -765,28 +753,6 @@ class BaseDisbursementsForm(SecurityForm):
             ('-prisoner_number', _('Prisoner number (Z to A)')),
         ],
     )
-
-    exclude_private_estate = True
-
-    def get_object_list(self):
-        object_list = super().get_object_list()
-        convert_date_fields(object_list)
-        return object_list
-
-    def get_object_list_endpoint_path(self):
-        return '/disbursements/'
-
-
-class DisbursementsFormV2(
-    SearchFormV2Mixin,
-    AmountSearchFormMixin,
-    PrisonSelectorSearchFormMixin,
-    PaymentMethodSearchFormMixin,
-    BaseDisbursementsForm,
-):
-    """
-    Search Form for Disbursements V2.
-    """
     simple_search = forms.CharField(
         label=_('Search recipient name or prisoner number'),
         required=False,
@@ -827,6 +793,15 @@ class DisbursementsFormV2(
     )
     description_capitalisation = {}
     unlisted_description = ''
+    exclude_private_estate = True
+
+    def get_object_list(self):
+        object_list = super().get_object_list()
+        convert_date_fields(object_list)
+        return object_list
+
+    def get_object_list_endpoint_path(self):
+        return '/disbursements/'
 
     def get_payment_method_choices(self):
         return disbursement_methods.items()

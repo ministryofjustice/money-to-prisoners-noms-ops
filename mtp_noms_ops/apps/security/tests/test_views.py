@@ -519,53 +519,6 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         self.assertContains(response, '<!-- %s -->' % self.view_name)
 
 
-class LegacySecurityViewTestCase(SecurityViewTestCase):
-    """
-    Base TestCase class for security search views V1
-
-    TODO: delete after search V2 goes live.
-    """
-
-    @responses.activate
-    def test_filtering_by_one_prison(self):
-        if not self.api_list_path:
-            return
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI', follow=False)
-        calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
-        self.assertEqual(len(calls), 1)
-        self.assertIn('prison=BBI', calls[0].request.url)
-
-    @responses.activate
-    def test_filtering_by_many_prisons(self):
-        if not self.api_list_path:
-            return
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI&prison=AAI', follow=False)
-        calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
-        self.assertEqual(len(calls), 1)
-        self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
-
-    @responses.activate
-    def test_filtering_by_many_prisons_alternate(self):
-        if not self.api_list_path:
-            return
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI,AAI', follow=False)
-        calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
-        self.assertEqual(len(calls), 1)
-        self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
-
-
 class SearchV2SecurityTestCaseMixin:
     search_results_view_name = None
     advanced_search_view_name = None
@@ -731,8 +684,8 @@ class SearchV2SecurityTestCaseMixin:
                 },
             )
             query_string = (
-                f'ordering={self.search_ordering}&prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
-                f'&advanced=False&simple_search=test'
+                f'prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
+                f'&advanced=False&ordering={self.search_ordering}&simple_search=test'
             )
             request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
@@ -760,8 +713,8 @@ class SearchV2SecurityTestCaseMixin:
                 },
             )
             query_string = (
-                f'ordering={self.search_ordering}&prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
-                '&advanced=True'
+                f'prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
+                f'&advanced=True&ordering={self.search_ordering}'
             )
             request_url = (
                 f'{reverse(self.advanced_search_view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
