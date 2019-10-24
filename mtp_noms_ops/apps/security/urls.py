@@ -257,34 +257,6 @@ urlpatterns = [
         name='prisoner_disbursement_detail_email_export',
     ),
 
-
-    # TODO: delete _legacy views after search V2 goes live.
-    url(
-        r'^security/prisoners/$',
-        security_test(
-            views.PrisonerListView.as_view(),
-        ),
-        name='prisoner_list_legacy',
-    ),
-    url(
-        r'^security/prisoners/export/$',
-        security_test(
-            views.PrisonerListView.as_view(
-                view_type=views.ViewType.export_download,
-            ),
-        ),
-        name='prisoner_export_legacy'
-    ),
-    url(
-        r'^security/prisoners/email-export/$',
-        security_test(
-            views.PrisonerListView.as_view(
-                view_type=views.ViewType.export_email,
-            ),
-        ),
-        name='prisoner_email_export_legacy',
-    ),
-
     # async-loaded nomis info
     url(
         r'^security/prisoner_image/(?P<prisoner_number>[A-Za-z0-9]*)/$',
@@ -384,5 +356,12 @@ urlpatterns = [
             RedirectView.as_view(pattern_name='security:sender_list'),
         ),
         name='sender_list_legacy',
+    ),
+    url(
+        r'^security/prisoners/$',
+        security_test(
+            RedirectView.as_view(pattern_name='security:prisoner_list'),
+        ),
+        name='prisoner_list_legacy',
     ),
 ]

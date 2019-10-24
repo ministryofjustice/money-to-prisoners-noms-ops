@@ -9,7 +9,6 @@ from security.forms.object_detail import (
 from security.templatetags.security import currency as format_currency
 from security.utils import NameSet, convert_date_fields, sender_profile_name
 from security.views.object_base import SimpleSecurityDetailView, SecurityDetailView
-from security.views.object_list import PrisonerListView
 
 
 class CreditDetailView(SimpleSecurityDetailView):
@@ -108,7 +107,7 @@ class PrisonerDetailView(SecurityDetailView):
     Prisoner profile view showing credit list
     """
     title = _('Prisoner')
-    list_title = PrisonerListView.title
+    list_title = _('Prisoners')
     template_name = 'security/prisoner.html'
     form_class = PrisonersDetailForm
     id_kwarg_name = 'prisoner_id'

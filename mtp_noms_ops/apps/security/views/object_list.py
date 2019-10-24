@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_list import (
     SendersFormV2,
-    PrisonersForm,
     PrisonersFormV2,
     CreditsFormV2,
     DisbursementsFormV2,
@@ -96,22 +95,6 @@ class SenderListViewV2(SecuritySearchViewV2):
 
     def url_for_single_result(self, sender):
         return reverse('security:sender_detail', kwargs={'sender_id': sender['id']})
-
-
-class PrisonerListView(SecurityView):
-    """
-    Legacy Prisoner search view
-
-    TODO: delete after search V2 goes live.
-    """
-    title = _('Prisoners')
-    form_template_name = 'security/forms/prisoners.html'
-    template_name = 'security/prisoners.html'
-    form_class = PrisonersForm
-    object_list_context_key = 'prisoners'
-
-    def url_for_single_result(self, prisoner):
-        return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner['id']})
 
 
 class PrisonerListViewV2(SecuritySearchViewV2):

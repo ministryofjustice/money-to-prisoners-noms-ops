@@ -1334,109 +1334,6 @@ class SenderViewsV2TestCase(
         self.assertContains(response, 'non-field-error')
 
 
-class PrisonerViewsTestCase(LegacySecurityViewTestCase):
-    """
-    TODO: delete after search V2 goes live.
-    """
-    view_name = 'security:prisoner_list_legacy'
-    detail_view_name = 'security:prisoner_detail'
-    api_list_path = '/prisoners/'
-
-    @responses.activate
-    def test_displays_results(self):
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url(self.api_list_path),
-            json={
-                'count': 1,
-                'results': [self.prisoner_profile],
-            }
-        )
-        response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'JAMES HALLS')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('A1409AE', response_content)
-        self.assertIn('310.00', response_content)
-
-    @responses.activate
-    @override_nomis_settings
-    def test_displays_detail(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/'.format(id=9)),
-            json=self.prisoner_profile
-        )
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/credits/'.format(id=9)),
-            json={
-                'count': 4,
-                'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
-            }
-        )
-
-        response = self.client.get(reverse(
-            self.detail_view_name, kwargs={'prisoner_id': 9}))
-        self.assertContains(response, 'JAMES HALLS')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('Jim Halls', response_content)
-        self.assertNotIn('James Halls', response_content)
-        self.assertIn('MAISIE', response_content)
-        self.assertIn('£102.50', response_content)
-
-    @responses.activate
-    def test_detail_not_found(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/'.format(id=9)),
-            status=404
-        )
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/credits/'.format(id=9)),
-            status=404
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.detail_view_name, kwargs={'prisoner_id': 9}))
-        self.assertEqual(response.status_code, 404)
-
-    @responses.activate
-    def test_connection_errors(self):
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/'.format(id=9)),
-            status=500
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'non-field-error')
-
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/'.format(id=9)),
-            status=500
-        )
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/credits/'.format(id=9)),
-            status=500
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.detail_view_name, kwargs={'prisoner_id': 9}))
-        self.assertContains(response, 'non-field-error')
-
-
 class PrisonerViewsV2TestCase(
     SearchV2SecurityTestCaseMixin,
     ExportSecurityViewTestCaseMixin,
@@ -2696,6 +2593,7 @@ class LegacyViewsRedirectTestCase(SecurityBaseTestCase):
             'security:credit_list',
             'security:disbursement_list',
             'security:sender_list',
+            'security:prisoner_list',
         )
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
