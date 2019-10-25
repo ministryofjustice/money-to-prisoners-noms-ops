@@ -25,7 +25,6 @@ from security import (
     not_hmpps_employee_flag,
     notifications_pilot_flag,
     required_permissions,
-    SEARCH_V2_FLAG,
 )
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
@@ -219,53 +218,6 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
             json={},
         )
 
-    def get_user_data(
-        self,
-        *args,
-        flags=(
-            hmpps_employee_flag,
-            confirmed_prisons_flag,
-            SEARCH_V2_FLAG,
-        ),
-        **kwargs,
-    ):
-        """
-        Sets the SEARCH_V2_FLAG feature flag by default.
-        """
-
-        return super().get_user_data(*args, flags=flags, **kwargs)
-
-    @responses.activate
-    def test_cannot_see_switcher_without_flag(self):
-        """
-        Test that the prison-switcher is not visible if the SEARCH_V2_FLAG flag for the user is not set.
-        """
-        self._mock_api_responses()
-        prisons = [
-            {
-                **SAMPLE_PRISONS[0],
-                'name': f'Prison {index}',
-            } for index in range(1, 11)
-        ]
-        self.login(
-            user_data=self.get_user_data(
-                prisons=prisons,
-                flags=(
-                    hmpps_employee_flag,
-                    confirmed_prisons_flag,
-                ),
-            ),
-        )
-        response = self.client.get(reverse('security:sender_list'), follow=True)
-        self.assertNotContains(
-            response,
-            'Prison 1, Prison 2, Prison 3, Prison 4',
-        )
-        self.assertNotContains(
-            response,
-            ' and 6 more',
-        )
-
     @responses.activate
     def test_with_many_prisons(self):
         """
@@ -351,7 +303,6 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
-                    SEARCH_V2_FLAG,
                 ],
             ),
         )
@@ -366,7 +317,6 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
                 flags=[
                     confirmed_prisons_flag,
                     not_hmpps_employee_flag,
-                    SEARCH_V2_FLAG,
                 ],
             ),
         )
@@ -382,7 +332,6 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
                 flags=[
                     confirmed_prisons_flag,
                     hmpps_employee_flag,
-                    SEARCH_V2_FLAG,
                 ]
             )
         )
@@ -418,7 +367,6 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
-                    SEARCH_V2_FLAG,
                 ],
             ),
         )
@@ -571,75 +519,12 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         self.assertContains(response, '<!-- %s -->' % self.view_name)
 
 
-class LegacySecurityViewTestCase(SecurityViewTestCase):
-    """
-    Base TestCase class for security search views V1
-
-    TODO: delete after search V2 goes live.
-    """
-
-    @responses.activate
-    def test_filtering_by_one_prison(self):
-        if not self.api_list_path:
-            return
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI', follow=False)
-        calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
-        self.assertEqual(len(calls), 1)
-        self.assertIn('prison=BBI', calls[0].request.url)
-
-    @responses.activate
-    def test_filtering_by_many_prisons(self):
-        if not self.api_list_path:
-            return
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI&prison=AAI', follow=False)
-        calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
-        self.assertEqual(len(calls), 1)
-        self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
-
-    @responses.activate
-    def test_filtering_by_many_prisons_alternate(self):
-        if not self.api_list_path:
-            return
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(responses.GET, api_url(self.api_list_path), json={'count': 0, 'results': []})
-        self.client.get(reverse(self.view_name) + '?page=1&prison=BBI,AAI', follow=False)
-        calls = list(filter(lambda call: self.api_list_path in call.request.url, responses.calls))
-        self.assertEqual(len(calls), 1)
-        self.assertIn('prison=AAI&prison=BBI', calls[0].request.url)
-
-
 class SearchV2SecurityTestCaseMixin:
     search_results_view_name = None
     advanced_search_view_name = None
 
     # the filter name used for API calls, it's usually prison but can sometimes be current_prison
     prison_api_filter_name = 'prison'
-
-    def get_user_data(
-        self,
-        *args,
-        flags=(
-            hmpps_employee_flag,
-            confirmed_prisons_flag,
-            SEARCH_V2_FLAG,
-        ),
-        **kwargs,
-    ):
-        """
-        Sets the SEARCH_V2_FLAG feature flag by default.
-        """
-
-        return super().get_user_data(*args, flags=flags, **kwargs)
 
     def test_displays_simple_search_results(self):
         """
@@ -799,8 +684,8 @@ class SearchV2SecurityTestCaseMixin:
                 },
             )
             query_string = (
-                f'ordering={self.search_ordering}&prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
-                f'&advanced=False&simple_search=test'
+                f'prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
+                f'&advanced=False&ordering={self.search_ordering}&simple_search=test'
             )
             request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
             expected_redirect_url = f'{reverse(self.search_results_view_name)}?{query_string}'
@@ -828,8 +713,8 @@ class SearchV2SecurityTestCaseMixin:
                 },
             )
             query_string = (
-                f'ordering={self.search_ordering}&prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
-                '&advanced=True'
+                f'prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
+                f'&advanced=True&ordering={self.search_ordering}'
             )
             request_url = (
                 f'{reverse(self.advanced_search_view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
@@ -1160,133 +1045,6 @@ class ExportSecurityViewTestCaseMixin:
             self.assertRedirects(response, referer_url)
 
 
-class SenderViewsTestCase(LegacySecurityViewTestCase):
-    """
-    TODO: delete after search V2 goes live.
-    """
-    view_name = 'security:sender_list_legacy'
-    detail_view_name = 'security:sender_detail'
-    api_list_path = '/senders/'
-
-    @responses.activate
-    def test_displays_results(self):
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url(self.api_list_path),
-            json={
-                'count': 2,
-                'results': [self.bank_transfer_sender, self.debit_card_sender],
-            }
-        )
-        response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'MAISIE NOLAN')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£410.00', response_content)
-        self.assertIn('£420.00', response_content)
-
-    @responses.activate
-    def test_displays_bank_transfer_detail(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            json=self.bank_transfer_sender
-        )
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/credits/'.format(id=9)),
-            json={
-                'count': 4,
-                'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
-            }
-        )
-
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
-        self.assertEqual(response.status_code, 200)
-        response_content = response.content.decode(response.charset)
-        self.assertIn('MAISIE', response_content)
-        self.assertIn('12312345', response_content)
-        self.assertIn('JAMES HALLS', response_content)
-        self.assertIn('£102.50', response_content)
-
-    @responses.activate
-    def test_displays_debit_card_detail(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            json=self.debit_card_sender
-        )
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/credits/'.format(id=9)),
-            json={
-                'count': 4,
-                'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
-            }
-        )
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
-        self.assertEqual(response.status_code, 200)
-        response_content = response.content.decode(response.charset)
-        self.assertIn('**** **** **** 1234', response_content)
-        self.assertIn('10/20', response_content)
-        self.assertIn('SW13 7NJ', response_content)
-        self.assertIn('JAMES HALLS', response_content)
-        self.assertIn('£102.50', response_content)
-
-    @responses.activate
-    def test_detail_not_found(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            status=404
-        )
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/credits/'.format(id=9)),
-            status=404
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
-        self.assertEqual(response.status_code, 404)
-
-    @responses.activate
-    def test_connection_errors(self):
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            status=500
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'non-field-error')
-
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/'.format(id=9)),
-            status=500
-        )
-        responses.add(
-            responses.GET,
-            api_url('/senders/{id}/credits/'.format(id=9)),
-            status=500
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.detail_view_name, kwargs={'sender_id': 9}))
-        self.assertContains(response, 'non-field-error')
-
-
 class SenderViewsV2TestCase(
     SearchV2SecurityTestCaseMixin,
     ExportSecurityViewTestCaseMixin,
@@ -1492,109 +1250,6 @@ class SenderViewsV2TestCase(
         self.assertContains(response, 'non-field-error')
 
 
-class PrisonerViewsTestCase(LegacySecurityViewTestCase):
-    """
-    TODO: delete after search V2 goes live.
-    """
-    view_name = 'security:prisoner_list_legacy'
-    detail_view_name = 'security:prisoner_detail'
-    api_list_path = '/prisoners/'
-
-    @responses.activate
-    def test_displays_results(self):
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url(self.api_list_path),
-            json={
-                'count': 1,
-                'results': [self.prisoner_profile],
-            }
-        )
-        response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'JAMES HALLS')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('A1409AE', response_content)
-        self.assertIn('310.00', response_content)
-
-    @responses.activate
-    @override_nomis_settings
-    def test_displays_detail(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/'.format(id=9)),
-            json=self.prisoner_profile
-        )
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/credits/'.format(id=9)),
-            json={
-                'count': 4,
-                'results': [self.credit_object, self.credit_object, self.credit_object, self.credit_object],
-            }
-        )
-
-        response = self.client.get(reverse(
-            self.detail_view_name, kwargs={'prisoner_id': 9}))
-        self.assertContains(response, 'JAMES HALLS')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('Jim Halls', response_content)
-        self.assertNotIn('James Halls', response_content)
-        self.assertIn('MAISIE', response_content)
-        self.assertIn('£102.50', response_content)
-
-    @responses.activate
-    def test_detail_not_found(self):
-        self.login()
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/'.format(id=9)),
-            status=404
-        )
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/credits/'.format(id=9)),
-            status=404
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.detail_view_name, kwargs={'prisoner_id': 9}))
-        self.assertEqual(response.status_code, 404)
-
-    @responses.activate
-    def test_connection_errors(self):
-        self.login()
-        no_saved_searches()
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/'.format(id=9)),
-            status=500
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.view_name))
-        self.assertContains(response, 'non-field-error')
-
-        no_saved_searches()
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/'.format(id=9)),
-            status=500
-        )
-        responses.add(
-            responses.GET,
-            api_url('/prisoners/{id}/credits/'.format(id=9)),
-            status=500
-        )
-        with silence_logger('django.request'):
-            response = self.client.get(reverse(self.detail_view_name, kwargs={'prisoner_id': 9}))
-        self.assertContains(response, 'non-field-error')
-
-
 class PrisonerViewsV2TestCase(
     SearchV2SecurityTestCaseMixin,
     ExportSecurityViewTestCaseMixin,
@@ -1747,120 +1402,6 @@ class PrisonerViewsV2TestCase(
                     ),
                 )
         self.assertContains(response, 'non-field-error')
-
-
-class CreditViewsTestCase(LegacySecurityViewTestCase):
-    """
-    TODO: delete after search V2 goes live.
-    """
-    view_name = 'security:credit_list_legacy'
-    detail_view_name = 'security:credit_detail'
-    api_list_path = '/credits/'
-
-    debit_card_credit = {
-        'id': 1,
-        'source': 'online',
-        'amount': 23000,
-        'intended_recipient': 'Mr G Melley',
-        'prisoner_number': 'A1411AE', 'prisoner_name': 'GEORGE MELLEY',
-        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-        'sender_name': None,
-        'sender_sort_code': None, 'sender_account_number': None,
-        'sender_roll_number': None,
-        'card_number_last_digits': '4444', 'card_expiry_date': '07/18',
-        'resolution': 'credited',
-        'owner': None, 'owner_name': 'Maria',
-        'received_at': '2016-05-25T20:24:00Z',
-        'credited_at': '2016-05-25T20:27:00Z', 'refunded_at': None,
-        'comments': [{'user_full_name': 'Eve', 'comment': 'OK'}],
-    }
-    bank_transfer_credit = {
-        'id': 2,
-        'source': 'bank_transfer',
-        'amount': 27500,
-        'intended_recipient': None,
-        'prisoner_number': 'A1413AE', 'prisoner_name': 'NORMAN STANLEY FLETCHER',
-        'prison': 'LEI', 'prison_name': 'HMP LEEDS',
-        'sender_name': 'HEIDENREICH X',
-        'sender_sort_code': '219657', 'sender_account_number': '88447894',
-        'sender_roll_number': '', 'resolution': 'credited',
-        'owner': None, 'owner_name': 'Maria',
-        'received_at': '2016-05-22T23:00:00Z',
-        'credited_at': '2016-05-23T01:10:00Z', 'refunded_at': None,
-        'comments': [],
-    }
-
-    @responses.activate
-    def test_displays_results(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url(self.api_list_path),
-            json={
-                'count': 2,
-                'previous': None,
-                'next': 'http://localhost:8000/credits/?limit=20&offset=20&ordering=-amount',
-                'results': [
-                    self.debit_card_credit,
-                    self.bank_transfer_credit,
-                ]
-            }
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.view_name), {'ordering': '-amount'})
-        self.assertContains(response, 'GEORGE MELLEY')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('A1413AE', response_content)
-        self.assertIn('275.00', response_content)
-        self.assertIn('Bank transfer', response_content)
-        self.assertIn('Debit card', response_content)
-
-    @responses.activate
-    def test_debit_card_detail(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/credits/'),
-            json={
-                'count': 1, 'previous': None, 'next': None,
-                'results': [self.debit_card_credit]
-            }
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'credit_id': '1'}))
-        self.assertContains(response, 'Debit card')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£230.00', response_content)
-        self.assertIn('GEORGE MELLEY', response_content)
-        self.assertIn('Mr G Melley', response_content)
-        self.assertIn('A1411AE', response_content)
-        self.assertIn('Credited by Maria', response_content)
-        self.assertIn('Eve', response_content)
-        self.assertIn('OK', response_content)
-
-    @responses.activate
-    def test_bank_transfer_detail(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/credits/'),
-            json={
-                'count': 1, 'previous': None, 'next': None,
-                'results': [self.bank_transfer_credit]
-            }
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'credit_id': '2'}))
-        self.assertContains(response, 'Bank transfer')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£275.00', response_content)
-        self.assertIn('NORMAN STANLEY FLETCHER', response_content)
-        self.assertIn('21-96-57', response_content)
-        self.assertIn('88447894', response_content)
-        self.assertIn('Credited by Maria', response_content)
 
 
 class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTestCaseMixin, SecurityViewTestCase):
@@ -2100,136 +1641,6 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
                     ),
                 )
         self.assertEqual(response.status_code, 404)
-
-
-class DisbursementViewsTestCase(LegacySecurityViewTestCase):
-    """
-    TODO: delete after search V2 goes live.
-    """
-    view_name = 'security:disbursement_list_legacy'
-    detail_view_name = 'security:disbursement_detail'
-    api_list_path = '/disbursements/'
-
-    bank_transfer_disbursement = {
-        'id': 99,
-        'created': '2018-02-12T12:00:00Z', 'modified': '2018-02-12T12:00:00Z',
-        'method': 'bank_transfer',
-        'amount': 2000,
-        'resolution': 'sent',
-        'nomis_transaction_id': '1234567-1', 'invoice_number': '1000099',
-        'prisoner_number': 'A1409AE', 'prisoner_name': 'JAMES HALLS',
-        'prison': 'ABC', 'prison_name': 'HMP Test1',
-        'recipient_first_name': 'Jack', 'recipient_last_name': 'Halls',
-        'recipient_email': '', 'remittance_description': '',
-        'address_line1': '102 Petty France', 'address_line2': '',
-        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
-        'account_number': '1234567', 'sort_code': '112233', 'roll_number': None,
-        'comments': [],
-        'log_set': [{'action': 'created',
-                     'created': '2018-02-12T12:00:00Z',
-                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
-                    {'action': 'confirmed',
-                     'created': '2018-02-12T12:00:00Z',
-                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}},
-                    {'action': 'sent',
-                     'created': '2018-02-12T12:00:00Z',
-                     'user': {'first_name': 'SSCL', 'last_name': '', 'username': 'sscl'}}],
-    }
-    cheque_disbursement = {
-        'id': 100,
-        'created': '2018-02-10T10:00:00Z', 'modified': '2018-02-10T12:00:00Z',
-        'method': 'cheque',
-        'amount': 1000,
-        'resolution': 'confirmed',
-        'nomis_transaction_id': '1234568-1', '': 'PMD1000100',
-        'prisoner_number': 'A1401AE', 'prisoner_name': 'JILLY HALL',
-        'prison': 'DEF', 'prison_name': 'HMP Test2',
-        'recipient_first_name': 'Jilly', 'recipient_last_name': 'Halls',
-        'recipient_email': 'jilly@mtp.local', 'remittance_description': 'PRESENT',
-        'address_line1': '102 Petty France', 'address_line2': '',
-        'city': 'London', 'postcode': 'SW1H 9AJ', 'country': None,
-        'account_number': '', 'sort_code': '', 'roll_number': None,
-        'comments': [],
-        'log_set': [{'action': 'created',
-                     'created': '2018-02-10T10:00:00Z',
-                     'user': {'first_name': 'Mary', 'last_name': 'Smith', 'username': 'msmith'}},
-                    {'action': 'confirmed',
-                     'created': '2018-02-10T11:00:00Z',
-                     'user': {'first_name': 'John', 'last_name': 'Smith', 'username': 'jsmith'}}]
-    }
-
-    @responses.activate
-    def test_displays_results(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url(self.api_list_path),
-            json={
-                'count': 2,
-                'previous': None,
-                'next': 'http://localhost:8000/disbursements/?limit=20&offset=20&ordering=-amount',
-                'results': [
-                    self.bank_transfer_disbursement,
-                    self.cheque_disbursement,
-                ]
-            }
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.view_name), {'ordering': '-amount'})
-        self.assertContains(response, 'JAMES HALLS')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('A1409AE', response_content)
-        self.assertIn('£20.00', response_content)
-        self.assertIn('by bank transfer', response_content)
-        self.assertIn('Sent', response_content)
-        self.assertIn('A1401AE', response_content)
-        self.assertIn('£10.00', response_content)
-        self.assertIn('by cheque', response_content)
-        self.assertIn('Confirmed', response_content)
-
-    @responses.activate
-    def test_bank_transfer_detail(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/disbursements/99/'),
-            json=self.bank_transfer_disbursement
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'disbursement_id': '99'}))
-        self.assertContains(response, 'Bank transfer')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£20.00', response_content)
-        self.assertIn('JAMES HALLS', response_content)
-        self.assertIn('Jack Halls', response_content)
-        self.assertIn('1234567-1', response_content)
-        self.assertIn('1000099', response_content)
-        self.assertIn('Confirmed by John Smith', response_content)
-        self.assertIn('None given', response_content)
-
-    @responses.activate
-    def test_cheque_detail(self):
-        mock_prison_response()
-        responses.add(
-            responses.GET,
-            api_url('/disbursements/100/'),
-            json=self.cheque_disbursement
-        )
-
-        self.login()
-        response = self.client.get(reverse(self.detail_view_name, kwargs={'disbursement_id': '100'}))
-        self.assertContains(response, 'Cheque')
-        response_content = response.content.decode(response.charset)
-        self.assertIn('£10.00', response_content)
-        self.assertIn('JILLY HALL', response_content)
-        self.assertIn('Jilly Halls', response_content)
-        self.assertIn('1234568-1', response_content)
-        self.assertNotIn('PMD1000100', response_content)
-        self.assertIn('Confirmed by John Smith', response_content)
-        self.assertIn('jilly@mtp.local', response_content)
-        self.assertIn('PRESENT', response_content)
 
 
 class DisbursementViewsV2TestCase(
@@ -3082,3 +2493,28 @@ class SettingsTestCase(SecurityBaseTestCase):
             last_post_call = list(filter(lambda call: call.request.method == rsps.POST, rsps.calls))[-1]
             last_request_body = json.loads(last_post_call.request.body)
             self.assertDictEqual(last_request_body, {'frequency': 'never'})
+
+
+class LegacyViewsRedirectTestCase(SecurityBaseTestCase):
+    """
+    Tests related to legacy views.
+    """
+
+    @responses.activate
+    def test_legacy_search_views_redirect_to_new_ones(self):
+        """
+        Test that legacy search views redirect to search views V2.
+        """
+        view_names = (
+            'security:credit_list',
+            'security:disbursement_list',
+            'security:sender_list',
+            'security:prisoner_list',
+        )
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            mock_prison_response(rsps=rsps)
+
+            for view_name in view_names:
+                response = self.client.get(reverse(f'{view_name}_legacy'))
+                self.assertRedirects(response, reverse(view_name))

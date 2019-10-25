@@ -59,8 +59,8 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
 
     def test_cannot_access_security_views(self):
         self.login()
-        response = self.client.get(reverse('security:credit_list_legacy'), follow=True)
-        self.assertNotContains(response, '<!-- security:credit_list_legacy -->')
+        response = self.client.get(reverse('security:credit_list'), follow=True)
+        self.assertNotContains(response, '<!-- security:credit_list -->')
         self.assertContains(response, '<!-- location_file_upload -->')
 
     @mock.patch('prisoner_location_admin.tasks.api_client')

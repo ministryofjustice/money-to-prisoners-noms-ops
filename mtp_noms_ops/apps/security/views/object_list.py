@@ -4,13 +4,9 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_list import (
-    SendersForm,
     SendersFormV2,
-    PrisonersForm,
     PrisonersFormV2,
-    CreditsForm,
     CreditsFormV2,
-    DisbursementsForm,
     DisbursementsFormV2,
     NotificationsForm,
 )
@@ -50,19 +46,6 @@ class SecuritySearchViewV2(SecurityView):
         }
 
 
-class CreditListView(SecurityView):
-    """
-    Legacy Credit search view
-
-    TODO: delete after search V2 goes live.
-    """
-    title = _('Credits')
-    form_template_name = 'security/forms/credits.html'
-    template_name = 'security/credits.html'
-    form_class = CreditsForm
-    object_list_context_key = 'credits'
-
-
 class CreditListViewV2(SecuritySearchViewV2):
     """
     Credit list/search view V2
@@ -79,19 +62,6 @@ class CreditListViewV2(SecuritySearchViewV2):
     object_name_plural = _('credits')
 
 
-class DisbursementListView(SecurityView):
-    """
-    Legacy Disbursement search view
-
-    TODO: delete after search V2 goes live.
-    """
-    title = _('Disbursements')
-    form_template_name = 'security/forms/disbursements.html'
-    template_name = 'security/disbursements.html'
-    form_class = DisbursementsForm
-    object_list_context_key = 'disbursements'
-
-
 class DisbursementListViewV2(SecuritySearchViewV2):
     """
     Disbursement list/search view V2
@@ -106,22 +76,6 @@ class DisbursementListViewV2(SecuritySearchViewV2):
     object_list_context_key = 'disbursements'
     object_name = _('disbursement')
     object_name_plural = _('disbursements')
-
-
-class SenderListView(SecurityView):
-    """
-    Legacy Sender search view
-
-    TODO: delete after search V2 goes live.
-    """
-    title = _('Payment sources')
-    form_template_name = 'security/forms/senders.html'
-    template_name = 'security/senders.html'
-    form_class = SendersForm
-    object_list_context_key = 'senders'
-
-    def url_for_single_result(self, sender):
-        return reverse('security:sender_detail', kwargs={'sender_id': sender['id']})
 
 
 class SenderListViewV2(SecuritySearchViewV2):
@@ -141,22 +95,6 @@ class SenderListViewV2(SecuritySearchViewV2):
 
     def url_for_single_result(self, sender):
         return reverse('security:sender_detail', kwargs={'sender_id': sender['id']})
-
-
-class PrisonerListView(SecurityView):
-    """
-    Legacy Prisoner search view
-
-    TODO: delete after search V2 goes live.
-    """
-    title = _('Prisoners')
-    form_template_name = 'security/forms/prisoners.html'
-    template_name = 'security/prisoners.html'
-    form_class = PrisonersForm
-    object_list_context_key = 'prisoners'
-
-    def url_for_single_result(self, prisoner):
-        return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner['id']})
 
 
 class PrisonerListViewV2(SecuritySearchViewV2):
@@ -183,7 +121,6 @@ class NotificationListView(SecurityView):
     Notification event view
     """
     title = _('Notifications')
-    form_template_name = None
     template_name = 'security/notifications.html'
     form_class = NotificationsForm
     object_list_context_key = 'date_groups'

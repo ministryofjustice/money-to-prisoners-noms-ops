@@ -10,7 +10,6 @@ from security import (
     confirmed_prisons_flag,
     hmpps_employee_flag,
     required_permissions,
-    SEARCH_V2_FLAG,
 )
 from security.tests import api_url
 from security.tests.test_views import (
@@ -35,7 +34,6 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
             user_data=self.get_user_data(
                 flags=[
                     hmpps_employee_flag,
-                    SEARCH_V2_FLAG,
                 ],
             ),
         )
