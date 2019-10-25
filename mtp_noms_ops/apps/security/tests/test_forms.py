@@ -1996,7 +1996,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
 
 class DisbursementFormV2TestCase(SecurityFormTestCase):
     """
-    TODO: delete after search V2 goes live.
+    Tests related to the DisbursementsFormV2.
     """
     form_class = DisbursementsFormV2
     api_list_path = '/disbursements/'

@@ -49,9 +49,6 @@ def validate_prisoner_number(prisoner_number):
 
 
 def validate_range_fields(*fields):
-    """
-    TODO: delete after search V2 goes live.
-    """
     def inner(cls):
         base_clean = cls.clean
 
@@ -93,35 +90,6 @@ class AmountPattern(enum.Enum):
                 for choice in cls
             ],
         ]
-
-    @classmethod
-    def update_query_data(cls, query_data):
-        """
-        TODO: delete after search V2 goes live.
-        """
-        amount_pattern = query_data.pop('amount_pattern', None)
-        try:
-            amount_pattern = cls[amount_pattern]
-        except KeyError:
-            return
-
-        amount_exact = query_data.pop('amount_exact', None)
-        amount_pence = query_data.pop('amount_pence', None)
-
-        if amount_pattern == cls.not_integral:
-            query_data['exclude_amount__endswith'] = '00'
-        elif amount_pattern == cls.not_multiple_5:
-            query_data['exclude_amount__regex'] = '(500|000)$'
-        elif amount_pattern == cls.not_multiple_10:
-            query_data['exclude_amount__endswith'] = '000'
-        elif amount_pattern == cls.gte_100:
-            query_data['amount__gte'] = '10000'
-        elif amount_pattern == cls.exact:
-            query_data['amount'] = parse_amount(amount_exact or '', as_int=False)
-        elif amount_pattern == cls.pence:
-            query_data['amount__endswith'] = '' if amount_pence is None else '%02d' % amount_pence
-        else:
-            raise NotImplementedError
 
 
 class SecurityForm(GARequestErrorReportingMixin, forms.Form):

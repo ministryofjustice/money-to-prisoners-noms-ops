@@ -92,7 +92,6 @@ class SecurityView(FormView):
     Allows form submission via GET, i.e. form is always bound
     """
     title = NotImplemented
-    form_template_name = NotImplemented  # TODO: delete after search V2 goes live.
     advanced_search_template_name = NotImplemented
     object_list_context_key = NotImplemented
     view_type = None

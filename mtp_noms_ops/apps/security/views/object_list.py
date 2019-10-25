@@ -121,7 +121,6 @@ class NotificationListView(SecurityView):
     Notification event view
     """
     title = _('Notifications')
-    form_template_name = None
     template_name = 'security/notifications.html'
     form_class = NotificationsForm
     object_list_context_key = 'date_groups'
