@@ -96,7 +96,7 @@
   {% if is_search_results %}
     <p>
     {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="button print-hidden">{% trans 'Search again' %}</a>
+      <a href="{{ search_form_item.url }}" class="button print-hidden">{% trans 'Start new search' %}</a>
     {% endwith%}
     </p>
 
