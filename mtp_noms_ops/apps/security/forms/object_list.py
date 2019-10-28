@@ -4,6 +4,7 @@ from math import ceil
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
+from django.template.defaultfilters import pluralize
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 from mtp_common.forms.fields import SplitDateField
@@ -160,12 +161,15 @@ class PrisonSelectorSearchFormMixin(forms.Form):
         )
 
     def get_extra_search_description_template_kwargs(self):
+        user_prisons_tot = len(self.request.user_prisons or [])
+
+        if self.was_all_prisons_simple_search_used() or not user_prisons_tot:
+            prisons_filter_description = 'in all prisons'
+        else:
+            prisons_filter_description = f'in your selected prison{pluralize(user_prisons_tot)}'
+
         return {
-            'all_prisons_filter_description': (
-                'from all prisons'
-                if self.was_all_prisons_simple_search_used()
-                else ''
-            ),
+            'prisons_filter_description': prisons_filter_description,
         }
 
 
@@ -416,11 +420,11 @@ class SendersFormV2(
     sender_postcode = forms.CharField(label=_('Postcode'), required=False)
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results {all_prisons_filter_description} that contain {filter_description}'
+    filtered_description_template = 'Results containing {filter_description} {prisons_filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
-        ('the payment source name or the email address “{simple_search}”',),
+        ('“{simple_search}”',),
     )
     description_capitalisation = {}
     unlisted_description = ''
@@ -516,11 +520,11 @@ class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, Security
     prisoner_name = forms.CharField(label=_('Prisoner name'), required=False)
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results {all_prisons_filter_description} that contain {filter_description}'
+    filtered_description_template = 'Results containing {filter_description} {prisons_filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
-        ('the prisoner number or the name “{simple_search}”',),
+        ('“{simple_search}”',),
     )
     description_capitalisation = {}
     unlisted_description = ''
@@ -611,11 +615,11 @@ class CreditsFormV2(
     exclusive_date_params = ['received_at__lt']
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results {all_prisons_filter_description} that contain {filter_description}'
+    filtered_description_template = 'Results containing {filter_description} {prisons_filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
-        ('the payment source name, the email address or the prisoner number “{simple_search}”',),
+        ('“{simple_search}”',),
     )
     description_capitalisation = {}
     unlisted_description = ''
@@ -785,11 +789,11 @@ class DisbursementsFormV2(
     exclusive_date_params = ['created__lt']
 
     # NB: ensure that these templates are HTML-safe
-    filtered_description_template = 'Results {all_prisons_filter_description} that contain {filter_description}'
+    filtered_description_template = 'Results containing {filter_description} {prisons_filter_description}'
     unfiltered_description_template = ''
 
     description_templates = (
-        ('the recipient name or the prisoner number “{simple_search}”',),
+        ('“{simple_search}”',),
     )
     description_capitalisation = {}
     unlisted_description = ''
