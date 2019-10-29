@@ -131,7 +131,6 @@ TEMPLATES = [
                 'mtp_noms_ops.apps.security.context_processors.initial_params',
                 'mtp_noms_ops.apps.security.context_processors.nomis_api_available',
                 'mtp_noms_ops.apps.security.context_processors.prison_choice_available',
-                'mtp_common.analytics.default_genericised_pageview',
             ],
         },
     },
@@ -238,6 +237,7 @@ LOGOUT_URL = 'logout'
 
 OAUTHLIB_INSECURE_TRANSPORT = True
 
+ANALYTICS_REQUIRED = os.environ.get('ANALYTICS_REQUIRED', 'True') == 'True'
 GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', None)
 
 ZENDESK_BASE_URL = 'https://ministryofjustice.zendesk.com'
