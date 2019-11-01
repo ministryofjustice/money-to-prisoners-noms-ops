@@ -129,7 +129,6 @@ TEMPLATES = [
                 'mtp_noms_ops.utils.external_breadcrumbs',
                 'mtp_noms_ops.apps.security.context_processors.common',
                 'mtp_noms_ops.apps.security.context_processors.initial_params',
-                'mtp_noms_ops.apps.security.context_processors.nomis_api_available',
                 'mtp_noms_ops.apps.security.context_processors.prison_choice_available',
             ],
         },
@@ -278,6 +277,10 @@ SHOW_LANGUAGE_SWITCH = os.environ.get('SHOW_LANGUAGE_SWITCH', 'False') == 'True'
 NOMIS_API_BASE_URL = os.environ.get('NOMIS_API_BASE_URL', '')
 NOMIS_API_CLIENT_TOKEN = os.environ.get('NOMIS_API_CLIENT_TOKEN', '')
 NOMIS_API_PRIVATE_KEY = os.environ.get('NOMIS_API_PRIVATE_KEY', '').encode('utf8').decode('unicode_escape')
+
+NOMIS_ELITE_CLIENT_ID = os.environ.get('NOMIS_ELITE_CLIENT_ID', '')
+NOMIS_ELITE_CLIENT_SECRET = os.environ.get('NOMIS_ELITE_CLIENT_SECRET', '')
+NOMIS_ELITE_BASE_URL = os.environ.get('NOMIS_ELITE_BASE_URL', '')
 
 TOKEN_RETRIEVAL_USERNAME = os.environ.get('TOKEN_RETRIEVAL_USERNAME', '_token_retrieval')
 TOKEN_RETRIEVAL_PASSWORD = os.environ.get('TOKEN_RETRIEVAL_PASSWORD', '_token_retrieval')
