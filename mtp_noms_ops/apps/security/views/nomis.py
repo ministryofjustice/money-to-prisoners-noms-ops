@@ -4,16 +4,15 @@ import logging
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.cache import patch_cache_control
-from mtp_common.nomis import get_photograph_data, get_location
+from mtp_common.nomis import can_access_nomis, get_photograph_data, get_location
 from requests.exceptions import RequestException
 
-from security.utils import is_nomis_api_configured
 
 logger = logging.getLogger('mtp')
 
 
 def prisoner_image_view(request, prisoner_number):
-    if is_nomis_api_configured() and prisoner_number:
+    if can_access_nomis() and prisoner_number:
         try:
             b64data = get_photograph_data(prisoner_number)
             if b64data:
@@ -32,7 +31,7 @@ def prisoner_image_view(request, prisoner_number):
 
 def prisoner_nomis_info_view(request, prisoner_number):
     response_data = {}
-    if is_nomis_api_configured() and prisoner_number:
+    if can_access_nomis() and prisoner_number:
         try:
             location = get_location(prisoner_number)
             if 'housing_location' in location:

@@ -2,7 +2,6 @@ import collections
 import datetime
 import re
 
-from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.translation import gettext_lazy as _
@@ -164,14 +163,6 @@ def can_skip_confirming_prisons(user):
     already_confirmed = confirmed_prisons_flag in user.user_data.get('flags', [])
     cannot_choose_prisons = not can_choose_prisons(user)
     return already_confirmed or cannot_choose_prisons
-
-
-def is_nomis_api_configured():
-    return (
-        settings.NOMIS_API_BASE_URL and
-        settings.NOMIS_API_CLIENT_TOKEN and
-        settings.NOMIS_API_PRIVATE_KEY
-    )
 
 
 def remove_whitespaces_and_hyphens(value):

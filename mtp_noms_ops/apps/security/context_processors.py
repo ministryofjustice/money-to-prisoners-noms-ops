@@ -3,11 +3,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import REDIRECT_FIELD_NAME
 
 from security.forms.object_list import PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
-from security.utils import can_choose_prisons, is_nomis_api_configured
-
-
-def nomis_api_available(_):
-    return {'nomis_api_available': is_nomis_api_configured()}
+from security.utils import can_choose_prisons
 
 
 def prison_choice_available(request):
