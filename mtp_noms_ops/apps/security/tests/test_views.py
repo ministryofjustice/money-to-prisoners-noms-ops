@@ -28,21 +28,9 @@ from security import (
 )
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
-from security.tests import api_url, nomis_url, TEST_IMAGE_DATA
+from security.tests import api_url, TEST_IMAGE_DATA
 from security.views.object_base import SEARCH_FORM_SUBMITTED_INPUT_NAME
 
-
-override_nomis_settings = override_settings(
-    NOMIS_API_BASE_URL='https://nomis.local/',
-    NOMIS_API_CLIENT_TOKEN='hello',
-    NOMIS_API_PRIVATE_KEY=(
-        '-----BEGIN EC PRIVATE KEY-----\n'
-        'MHcCAQEEIOhhs3RXk8dU/YQE3j2s6u97mNxAM9s+13S+cF9YVgluoAoGCCqGSM49\n'
-        'AwEHoUQDQgAE6l49nl7NN6k6lJBfGPf4QMeHNuER/o+fLlt8mCR5P7LXBfMG6Uj6\n'
-        'TUeoge9H2N/cCafyhCKdFRdQF9lYB2jB+A==\n'
-        '-----END EC PRIVATE KEY-----\n'
-    ),  # this key is just for tests, doesn't do anything
-)
 
 SAMPLE_PRISONS = [
     {
@@ -1313,7 +1301,6 @@ class PrisonerViewsV2TestCase(
         else:
             self.assertNotIn('Prison PRN', response_content)
 
-    @override_nomis_settings
     def test_detail_view(self):
         prisoner_id = 9
         with responses.RequestsMock() as rsps:
@@ -2014,16 +2001,9 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
         )
 
     @responses.activate
-    @override_nomis_settings
+    @mock.patch('security.views.nomis.can_access_nomis', mock.Mock(return_value=True))
+    @mock.patch('security.views.nomis.get_photograph_data', mock.Mock(return_value=TEST_IMAGE_DATA))
     def test_display_nomis_photo(self):
-        responses.add(
-            responses.GET,
-            nomis_url('/offenders/{prisoner_number}/image'.format(
-                prisoner_number=self.prisoner_profile['prisoner_number'])),
-            json={
-                'image': TEST_IMAGE_DATA
-            },
-        )
         self.login(follow=False)
         response = self.client.get(
             reverse(
@@ -2034,16 +2014,9 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
         self.assertContains(response, base64.b64decode(TEST_IMAGE_DATA))
 
     @responses.activate
-    @override_nomis_settings
+    @mock.patch('security.views.nomis.can_access_nomis', mock.Mock(return_value=True))
+    @mock.patch('security.views.nomis.get_photograph_data', mock.Mock(return_value=None))
     def test_missing_nomis_photo(self):
-        responses.add(
-            responses.GET,
-            nomis_url('/offenders/{prisoner_number}/image'.format(
-                prisoner_number=self.prisoner_profile['prisoner_number'])),
-            json={
-                'image': None
-            },
-        )
         self.login(follow=False)
         response = self.client.get(
             reverse(
@@ -2055,7 +2028,6 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
         self.assertRedirects(response, '/static/images/placeholder-image.png', fetch_redirect_response=False)
 
     @responses.activate
-    @override_nomis_settings
     def test_display_pinned_profile(self):
         self._add_prisoner_data_responses()
         responses.add(
@@ -2090,7 +2062,6 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
                 self.assertEqual(call.request.body, b'{"last_result_count": 4}')
 
     @responses.activate
-    @override_nomis_settings
     def test_pin_profile(self):
         self._add_prisoner_data_responses()
         responses.add(

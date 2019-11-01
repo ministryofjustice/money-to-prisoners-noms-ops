@@ -30,7 +30,3 @@ TEST_IMAGE_DATA = (
 
 def api_url(path):
     return urljoin(settings.API_URL, path)
-
-
-def nomis_url(path):
-    return urljoin(settings.NOMIS_API_BASE_URL, path)
