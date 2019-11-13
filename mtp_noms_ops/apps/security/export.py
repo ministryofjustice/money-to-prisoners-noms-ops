@@ -38,7 +38,7 @@ def write_objects(workbook, object_type, object_list):
     elif object_type == 'disbursements':
         rows = disbursement_row_generator(object_list)
     else:
-        raise ValueError
+        raise NotImplementedError(f'Cannot export {object_type}')
     worksheet = workbook.create_sheet()
     for row in rows:
         worksheet.append([escape_formulae(cell) for cell in row])

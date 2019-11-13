@@ -1572,7 +1572,7 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
         self.assertIn('GEORGE MELLEY', response_content)
         self.assertIn('Mr G Melley', response_content)
         self.assertIn('A1411AE', response_content)
-        self.assertIn('Credited by Maria', response_content)
+        self.assertIn('Maria credited to NOMIS', response_content)
         self.assertIn('Eve', response_content)
         self.assertIn('OK', response_content)
 
@@ -1603,7 +1603,7 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
         self.assertIn('NORMAN STANLEY FLETCHER', response_content)
         self.assertIn('21-96-57', response_content)
         self.assertIn('88447894', response_content)
-        self.assertIn('Credited by Maria', response_content)
+        self.assertIn('Maria credited to NOMIS', response_content)
 
     def test_detail_not_found(self):
         credit_id = 999
