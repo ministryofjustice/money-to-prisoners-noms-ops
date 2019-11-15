@@ -3,7 +3,6 @@ import re
 
 from django.http import HttpResponse
 from django.utils.dateparse import parse_datetime
-from django.utils.translation import gettext
 from openpyxl import Workbook
 
 from security.models import credit_sources, disbursement_methods
@@ -23,173 +22,223 @@ class ObjectListXlsxResponse(HttpResponse):
         )
         super().__init__(**kwargs)
         self['Content-Disposition'] = 'attachment; filename="%s"' % attachment_name
-        wb = Workbook(write_only=True)
-        write_objects(wb, object_type, object_list)
-        wb.save(self)
+        serialiser = ObjectListSerialiser.serialiser_for(object_type)
+        workbook = serialiser.make_workbook(object_list)
+        workbook.save(self)
 
 
-def write_objects(workbook, object_type, object_list):
-    if object_type == 'credits':
-        rows = credit_row_generator(object_list)
-    elif object_type == 'senders':
-        rows = sender_row_generator(object_list)
-    elif object_type == 'prisoners':
-        rows = prisoner_row_generator(object_list)
-    elif object_type == 'disbursements':
-        rows = disbursement_row_generator(object_list)
-    else:
-        raise NotImplementedError(f'Cannot export {object_type}')
-    worksheet = workbook.create_sheet()
-    for row in rows:
-        worksheet.append([escape_formulae(cell) for cell in row])
+class ObjectListSerialiser:
+    serialisers = {}
+    headers = []
+
+    def __init_subclass__(cls, object_type):
+        cls.serialisers[object_type] = cls
+
+    @classmethod
+    def serialiser_for(cls, object_type):
+        try:
+            return cls.serialisers[object_type]()
+        except KeyError:
+            raise NotImplementedError(f'Cannot export {object_type}')
+
+    def make_workbook(self, object_list):
+        workbook = Workbook(write_only=True)
+        worksheet = workbook.create_sheet()
+        worksheet.append(self.headers)
+        for record in object_list:
+            serialised_record = self.serialise(record)
+            worksheet.append([
+                escape_formulae(serialised_record.get(field))
+                for field in self.headers
+            ])
+        return workbook
+
+    def serialise(self, record):
+        raise NotImplementedError
 
 
-def credit_row_generator(object_list):
-    yield [
-        gettext('Prisoner name'), gettext('Prisoner number'), gettext('Prison'),
-        gettext('Sender name'), gettext('Payment method'),
-        gettext('Bank transfer sort code'), gettext('Bank transfer account'), gettext('Bank transfer roll number'),
-        gettext('Debit card number'), gettext('Debit card expiry'), gettext('Address'),
-        gettext('Amount'), gettext('Date received'),
-        gettext('Credited status'), gettext('Date credited'), gettext('NOMIS ID'),
-        gettext('IP'), gettext('Email'),
+class CreditListSerialiser(ObjectListSerialiser, object_type='credits'):
+    headers = [
+        'Internal ID',
+        'Date started', 'Date received', 'Date credited',
+        'Amount',
+        'Prisoner number', 'Prisoner name', 'Prison',
+        'Sender name', 'Payment method',
+        'Bank transfer sort code', 'Bank transfer account', 'Bank transfer roll number',
+        'Debit card number', 'Debit card expiry', 'Debit card billing address',
+        'Sender email', 'Sender IP address',
+        'Status',
+        'NOMIS transaction',
     ]
-    for credit in object_list:
-        yield [
-            credit['prisoner_name'],
-            credit['prisoner_number'],
-            credit['prison_name'],
-            credit['sender_name'],
-            str(credit_sources.get(credit['source'], credit['source'])),
-            format_sort_code(credit['sender_sort_code']) if credit['sender_sort_code'] else '',
-            credit['sender_account_number'],
-            credit['sender_roll_number'],
-            format_card_number(credit['card_number_last_digits']) if credit['card_number_last_digits'] else '',
-            credit['card_expiry_date'],
-            credit_address_for_export(credit['billing_address']),
-            currency(credit['amount']),
-            credit['received_at'],
-            str(format_resolution(credit['resolution'])),
-            credit['credited_at'],
-            credit['nomis_transaction_id'],
-            credit['ip_address'],
-            credit['sender_email'],
-        ]
+
+    def serialise(self, record):
+        return {
+            'Internal ID': record['id'],
+            'Date started': record['started_at'],
+            'Date received': (
+                record['received_at'].strftime('%Y-%m-%d')
+                if record['source'] == 'bank_transfer' else record['received_at']
+            ),
+            'Date credited': record['credited_at'],
+            'Amount': currency(record['amount']),
+            'Prisoner number': record['prisoner_number'],
+            'Prisoner name': record['prisoner_name'],
+            'Prison': record['prison_name'],
+            'Sender name': record['sender_name'],
+            'Payment method': str(credit_sources.get(record['source'], record['source'])),
+            'Bank transfer sort code': (
+                format_sort_code(record['sender_sort_code']) if record['sender_sort_code'] else None
+            ),
+            'Bank transfer account': record['sender_account_number'],
+            'Bank transfer roll number': record['sender_roll_number'],
+            'Debit card number': (
+                f'{record["card_number_first_digits"] or "******"}******{record["card_number_last_digits"]}'
+                if record['card_number_last_digits']
+                else None
+            ),
+            'Debit card expiry': record['card_expiry_date'],
+            'Debit card billing address': credit_address_for_export(record['billing_address']),
+            'Sender email': record['sender_email'],
+            'Sender IP address': record['ip_address'],
+            'Status': str(format_resolution(record['resolution'])),
+            'NOMIS transaction': record['nomis_transaction_id'],
+        }
 
 
-def sender_row_generator(object_list):
-    yield [
-        gettext('Sender name'), gettext('Payment source'),
-        gettext('Credits sent'), gettext('Total amount sent'),
-        gettext('Prisoners sent to'), gettext('Prisons sent to'),
-        gettext('Bank transfer sort code'), gettext('Bank transfer account'), gettext('Bank transfer roll number'),
-        gettext('Debit card number'), gettext('Debit card expiry'), gettext('Debit card postcode'),
-        gettext('Other cardholder names'), gettext('Cardholder emails'),
+class DisbursementListSerialiser(ObjectListSerialiser, object_type='disbursements'):
+    headers = [
+        'Internal ID',
+        'Date entered', 'Date confirmed', 'Date sent',
+        'Amount',
+        'Prisoner number', 'Prisoner name', 'Prison',
+        'Recipient name', 'Payment method',
+        'Bank transfer sort code', 'Bank transfer account', 'Bank transfer roll number',
+        'Recipient address', 'Recipient email',
+        'Status',
+        'NOMIS transaction', 'SOP invoice number',
     ]
-    for sender in object_list:
-        if sender.get('bank_transfer_details'):
-            payment_source = gettext('Bank transfer')
-            bank_transfer = sender['bank_transfer_details'][0]
-            sender_name = bank_transfer['sender_name']
-            bank_transfer = [format_sort_code(bank_transfer['sender_sort_code']),
-                             bank_transfer['sender_account_number'],
-                             bank_transfer['sender_roll_number']]
-            debit_card = ['', '', '', '', '']
-        elif sender.get('debit_card_details'):
-            payment_source = gettext('Debit card')
-            bank_transfer = ['', '', '']
-            debit_card = sender['debit_card_details'][0]
+
+    def serialise(self, record):
+        last_action_dates = {
+            log_item['action']: parse_datetime(log_item['created'])
+            for log_item in record['log_set']
+        }
+        return {
+            'Internal ID': record['id'],
+            'Date entered': record['created'],
+            'Date confirmed': last_action_dates.get('confirmed', ''),
+            'Date sent': last_action_dates.get('sent', ''),
+            'Amount': currency(record['amount']),
+            'Prisoner number': record['prisoner_number'],
+            'Prisoner name': record['prisoner_name'],
+            'Prison': record['prison_name'],
+            'Recipient name': f'{record["recipient_first_name"]} {record["recipient_last_name"]}'.strip(),
+            'Payment method': str(disbursement_methods.get(record['method'], record['method'])),
+            'Bank transfer sort code': (
+                format_sort_code(record['sort_code']) if record['sort_code'] else ''
+            ),
+            'Bank transfer account': record['account_number'],
+            'Bank transfer roll number': record['roll_number'],
+            'Recipient address': disbursement_address_for_export(record),
+            'Recipient email': record['recipient_email'],
+            'Status': str(format_disbursement_resolution(record['resolution'])),
+            'NOMIS transaction': record['nomis_transaction_id'],
+            'SOP invoice number': record['invoice_number'],
+        }
+
+
+class SenderListSerialiser(ObjectListSerialiser, object_type='senders'):
+    headers = [
+        'Sender name', 'Payment method',
+        'Credits sent', 'Total amount sent',
+        'Prisoners sent to', 'Prisons sent to',
+        'Bank transfer sort code', 'Bank transfer account', 'Bank transfer roll number',
+        'Debit card number', 'Debit card expiry', 'Debit card postcode',
+        'Other cardholder names', 'Cardholder emails',
+    ]
+
+    def serialise(self, record):
+        serialised_record = {
+            'Credits sent': record['credit_count'],
+            'Total amount sent': currency(record['credit_total']),
+            'Prisoners sent to': record['prisoner_count'],
+            'Prisons sent to': record['prison_count'],
+        }
+
+        if record.get('bank_transfer_details'):
+            bank_transfer = record['bank_transfer_details'][0]
+            return {
+                **serialised_record,
+                'Sender name': bank_transfer['sender_name'],
+                'Payment method': 'Bank transfer',
+                'Bank transfer sort code': format_sort_code(bank_transfer['sender_sort_code']),
+                'Bank transfer account': bank_transfer['sender_account_number'],
+                'Bank transfer roll number': bank_transfer['sender_roll_number'],
+            }
+
+        if record.get('debit_card_details'):
+            debit_card = record['debit_card_details'][0]
             try:
                 sender_name = debit_card['cardholder_names'][0]
             except IndexError:
-                sender_name = gettext('Unknown')
+                sender_name = 'Unknown'
             other_sender_names = NameSet(debit_card['cardholder_names'])
             if sender_name in other_sender_names:
                 other_sender_names.remove(sender_name)
-            debit_card = [format_card_number(debit_card['card_number_last_digits']),
-                          debit_card['card_expiry_date'],
-                          debit_card['postcode'] or gettext('Unknown'),
-                          ', '.join(other_sender_names),
-                          ', '.join(EmailSet(debit_card['sender_emails']))]
-        else:
-            continue
-        yield [
-            sender_name, payment_source,
-            sender['credit_count'], currency(sender['credit_total']),
-            sender['prisoner_count'], sender['prison_count'],
-        ] + bank_transfer + debit_card
+            return {
+                **serialised_record,
+                'Sender name': sender_name,
+                'Payment method': 'Debit card',
+                'Debit card number': format_card_number(debit_card['card_number_last_digits']),
+                'Debit card expiry': debit_card['card_expiry_date'],
+                'Debit card postcode': debit_card['postcode'] or 'Unknown',
+                'Other cardholder names': ', '.join(other_sender_names),
+                'Cardholder emails': ', '.join(EmailSet(debit_card['sender_emails'])),
+            }
 
-
-def prisoner_row_generator(object_list):
-    yield [
-        gettext('Prisoner number'),
-        gettext('Prisoner name'),
-        gettext('Date of birth'),
-        gettext('Credits received'),
-        gettext('Total amount received'),
-        gettext('Payment sources'),
-        gettext('Current prison'),
-        gettext('Prisons where received credits'),
-        gettext('Names given by senders'),
-        gettext('Disbursements sent'),
-        gettext('Total amount sent'),
-        gettext('Recipients'),
-    ]
-    for prisoner in object_list:
-        if prisoner['current_prison']:
-            current_prison = prisoner['current_prison']['name']
-        else:
-            current_prison = gettext('Not in a public prison')
-        provided_names = NameSet(prisoner['provided_names'])
-        yield [
-            prisoner['prisoner_number'],
-            prisoner['prisoner_name'],
-            prisoner['prisoner_dob'],
-            prisoner['credit_count'],
-            currency(prisoner['credit_total']),
-            prisoner['sender_count'],
-            current_prison,
-            list_prison_names(prisoner['prisons']),
-            ', '.join(provided_names),
-            prisoner['disbursement_count'],
-            currency(prisoner['disbursement_total']),
-            prisoner['recipient_count'],
-        ]
-
-
-def disbursement_row_generator(object_list):
-    yield [
-        gettext('Prisoner name'), gettext('Prisoner number'), gettext('Prison'),
-        gettext('Recipient first name'), gettext('Recipient last name'), gettext('Payment method'),
-        gettext('Address'), gettext('Recipient email'),
-        gettext('Bank transfer sort code'), gettext('Bank transfer account'), gettext('Bank transfer roll number'),
-        gettext('Amount'), gettext('Status'),
-        gettext('Date entered'), gettext('Date confirmed'),  gettext('Date sent'),
-        gettext('NOMIS ID'),
-    ]
-    for disbursement in object_list:
-        last_action_dates = {
-            log_item['action']: parse_datetime(log_item['created'])
-            for log_item in disbursement['log_set']
+        return {
+            **serialised_record,
+            'Sender name': '(Unknown)',
+            'Payment method': '(Unknown)',
         }
-        yield [
-            disbursement['prisoner_name'],
-            disbursement['prisoner_number'],
-            disbursement['prison_name'],
-            disbursement['recipient_first_name'], disbursement['recipient_last_name'],
-            str(disbursement_methods.get(disbursement['method'], disbursement['method'])),
-            disbursement_address_for_export(disbursement),
-            disbursement['recipient_email'],
-            format_sort_code(disbursement['sort_code']) if disbursement['sort_code'] else '',
-            disbursement['account_number'],
-            disbursement['roll_number'],
-            currency(disbursement['amount']),
-            str(format_disbursement_resolution(disbursement['resolution'])),
-            disbursement['created'],
-            last_action_dates.get('confirmed', ''),
-            last_action_dates.get('sent', ''),
-            disbursement['nomis_transaction_id'],
-        ]
+
+
+class PrisonerListSerialiser(ObjectListSerialiser, object_type='prisoners'):
+    headers = [
+        'Prisoner number',
+        'Prisoner name',
+        'Date of birth',
+        'Credits received',
+        'Total amount received',
+        'Payment sources',
+        'Disbursements sent',
+        'Total amount sent',
+        'Recipients',
+        'Current prison',
+        'All known prisons',
+        'Names given by senders',
+    ]
+
+    def serialise(self, record):
+        if record['current_prison']:
+            current_prison = record['current_prison']['name']
+        else:
+            current_prison = 'Not in a public prison'
+        provided_names = NameSet(record['provided_names'])
+        return {
+            'Prisoner number': record['prisoner_number'],
+            'Prisoner name': record['prisoner_name'],
+            'Date of birth': record['prisoner_dob'],
+            'Credits received': record['credit_count'],
+            'Total amount received': currency(record['credit_total']),
+            'Payment sources': record['sender_count'],
+            'Disbursements sent': record['disbursement_count'],
+            'Total amount sent': currency(record['disbursement_total']),
+            'Recipients': record['recipient_count'],
+            'Current prison': current_prison,
+            'All known prisons': list_prison_names(record['prisons']),
+            'Names given by senders': ', '.join(provided_names),
+        }
 
 
 def escape_formulae(value):

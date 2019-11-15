@@ -17,9 +17,9 @@ exports.FormAnalytics = {
       );
     }
 
-    $form.on('submit', function (e) {
+    $form.on('submit', function () {
       // send event for every changed form field name
-      var inputs = $form.find(":input:not(:hidden)").serializeArray();
+      var inputs = $form.find(':input:not(:hidden)').serializeArray();
       var nonEmptyFilters = [];
       $.each(inputs, function () {
         if (this.value) {
