@@ -7,10 +7,9 @@ from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.auth.api_client import get_api_session_with_session
 from mtp_common.spooling import spoolable
 from mtp_common.tasks import default_from_address, prepare_context
-from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 
-from security.export import write_objects
+from security.export import ObjectListSerialiser
 from security.utils import convert_date_fields
 
 
@@ -34,7 +33,7 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
     elif object_type == 'prisoners':
         export_message = gettext('Attached is a list of prisoners you exported from ‘%(service_name)s’.')
     else:
-        export_message = None
+        raise NotImplementedError(f'Cannot export {object_type}')
 
     api_session = get_api_session_with_session(user, session)
     generated_at = timezone.now()
@@ -42,9 +41,9 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
         retrieve_all_pages_for_path(api_session, endpoint_path, **filters)
     )
 
-    wb = Workbook(write_only=True)
-    write_objects(wb, object_type, object_list)
-    output = save_virtual_workbook(wb)
+    serialiser = ObjectListSerialiser.serialiser_for(object_type)
+    workbook = serialiser.make_workbook(object_list)
+    output = save_virtual_workbook(workbook)
 
     attachment_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
