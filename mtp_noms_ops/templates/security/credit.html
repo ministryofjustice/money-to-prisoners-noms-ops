@@ -44,7 +44,7 @@
 
             {% if credit.source == 'online' %}
 
-              {% labelled_data _('Last 4 digits of card number') credit.card_number_last_digits|format_card_number %}
+              {% labelled_data _('Debit card number') credit|format_card_number %}
               <br/>
               {% labelled_data _('Expiry date') credit.card_expiry_date|default:'—' %}
               <br/>

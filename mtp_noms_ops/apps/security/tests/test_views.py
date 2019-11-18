@@ -1093,7 +1093,7 @@ class SenderViewsV2TestCase(
             None,
             None,
             None,
-            '**** **** **** 1234',
+            '************1234',
             '10/20',
             'SW137NJ',
             'Maisie Nolan',
@@ -1178,7 +1178,7 @@ class SenderViewsV2TestCase(
             )
         self.assertEqual(response.status_code, 200)
         response_content = response.content.decode(response.charset)
-        self.assertIn('**** **** **** 1234', response_content)
+        self.assertIn('************1234', response_content)
         self.assertIn('10/20', response_content)
         self.assertIn('SW13 7NJ', response_content)
         self.assertIn('JAMES HALLS', response_content)
