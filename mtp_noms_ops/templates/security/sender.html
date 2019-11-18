@@ -41,7 +41,7 @@
 
       <div class="grid-row mtp-sender-summary__details">
         <div class="column-one-third">
-          {% labelled_data _('Last 4 digits of card number') sender.debit_card_details.0.card_number_last_digits|format_card_number tag='strong' %}
+          {% labelled_data _('Debit card number') sender.debit_card_details.0|format_card_number tag='strong' %}
         </div>
 
         <div class="column-one-quarter">

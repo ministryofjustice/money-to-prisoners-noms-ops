@@ -55,8 +55,10 @@ def format_sort_code(sort_code):
 
 
 @register.filter
-def format_card_number(card_number_last_digits):
-    return '**** **** **** %s' % (card_number_last_digits or '****')
+def format_card_number(credit_or_debit_card_details):
+    card_number_first_digits = credit_or_debit_card_details.get('card_number_first_digits') or '******'
+    card_number_last_digits = credit_or_debit_card_details.get('card_number_last_digits') or '****'
+    return f'{card_number_first_digits}******{card_number_last_digits}'
 
 
 @register.filter

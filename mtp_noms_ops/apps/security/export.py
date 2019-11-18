@@ -189,7 +189,7 @@ class SenderListSerialiser(ObjectListSerialiser, object_type='senders'):
                 **serialised_record,
                 'Sender name': sender_name,
                 'Payment method': 'Debit card',
-                'Debit card number': format_card_number(debit_card['card_number_last_digits']),
+                'Debit card number': format_card_number(debit_card),
                 'Debit card expiry': debit_card['card_expiry_date'],
                 'Debit card postcode': debit_card['postcode'] or 'Unknown',
                 'Other cardholder names': ', '.join(other_sender_names),
