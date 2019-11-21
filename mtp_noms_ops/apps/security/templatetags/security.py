@@ -8,6 +8,7 @@ from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 from mtp_common.utils import format_postcode
 
+from security.forms.object_list import PrisonSelectorSearchFormMixin
 from security.models import (
     credit_sources,
     credit_resolutions,
@@ -105,10 +106,12 @@ def query_string_with_additional_parameter(form, param):
 
 
 def get_profile_search_url(credit, keys, url, redirect_on_single=True):
+    all_prisons_const = PrisonSelectorSearchFormMixin.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE
     params = urlencode((key, credit[key]) for key in keys if key in credit and credit[key])
+    params = f'prison_selector={all_prisons_const}&advanced=True&{params}'
     if redirect_on_single:
-        return url + '?redirect-on-single&' + params
-    return url + '?' + params
+        return f'{url}?redirect-on-single&{params}'
+    return f'{url}?{params}'
 
 
 def get_sender_keys(credit):
@@ -131,7 +134,7 @@ def sender_profile_search_url(credit, redirect_on_single=True):
     if sender_id:
         return reverse('security:sender_detail', kwargs={'sender_id': sender_id})
     keys = list(get_sender_keys(credit))
-    return get_profile_search_url(credit, keys, reverse('security:sender_list'),
+    return get_profile_search_url(credit, keys, reverse('security:sender_search_results'),
                                   redirect_on_single=redirect_on_single)
 
 
@@ -159,7 +162,7 @@ def prisoner_profile_search_url(credit, redirect_on_single=True):
     prisoner_id = credit.get('prisoner_profile')
     if prisoner_id:
         return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner_id})
-    return get_profile_search_url(credit, ['prisoner_number'], reverse('security:prisoner_list'),
+    return get_profile_search_url(credit, ['prisoner_number'], reverse('security:prisoner_search_results'),
                                   redirect_on_single=redirect_on_single)
 
 
