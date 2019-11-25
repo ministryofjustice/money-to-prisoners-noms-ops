@@ -7,6 +7,7 @@ from mtp_common.context_processors import govuk_localisation as inherited_locali
 
 from prisoner_location_admin import required_permissions as prisoner_location_permissions
 from security import required_permissions as security_permissions, notifications_pilot_flag
+from security.utils import can_manage_security_checks
 
 
 class UserPermissionMiddleware:
@@ -23,6 +24,7 @@ class UserPermissionMiddleware:
             prison['pre_approval_required']
             for prison in request.user_prisons
         )
+        request.can_manage_security_checks = can_manage_security_checks(request.user)
 
 
 class SecurityMiddleware(MiddlewareMixin):

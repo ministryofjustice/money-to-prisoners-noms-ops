@@ -10,6 +10,7 @@ from django.test import SimpleTestCase
 from mtp_common.auth.test_utils import generate_tokens
 import responses
 
+from security.forms.check import CheckListForm
 from security.forms.object_base import AmountPattern, SecurityForm
 from security.forms.object_list import (
     AmountSearchFormMixin,
@@ -2380,4 +2381,52 @@ class ReviewCreditsFormTestCase(unittest.TestCase):
             self.assertEqual(
                 json.loads(rsps.calls[-1].request.body.decode()),
                 {'credit_ids': [1, 2]}
+            )
+
+
+class CheckListFormTestCase(SimpleTestCase):
+    """
+    Tests related to the CheckListForm.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.request = mock.MagicMock(
+            user=mock.MagicMock(
+                token=generate_tokens(),
+            ),
+        )
+
+    def test_get_object_list(self):
+        """
+        Test that the form makes the right API call to get the list of checks.
+        """
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
+
+            form = CheckListForm(
+                self.request,
+                data={
+                    'page': 2,
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertListEqual(form.get_object_list(), [])
+
+            api_call_made = rsps.calls[-1].request.url
+            self.assertDictEqual(
+                parse_qs(api_call_made.split('?', 1)[1]),
+                {
+                    'offset': ['20'],
+                    'limit': ['20'],
+                    'status': ['pending'],
+                },
             )

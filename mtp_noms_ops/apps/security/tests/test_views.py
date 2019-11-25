@@ -2484,3 +2484,82 @@ class LegacyViewsRedirectTestCase(SecurityBaseTestCase):
             for view_name in view_names:
                 response = self.client.get(reverse(f'{view_name}_legacy'))
                 self.assertRedirects(response, reverse(view_name))
+
+
+class CheckListViewTestCase(SecurityBaseTestCase):
+    """
+    Tests related to the CheckListView.
+    """
+
+    required_checks_permissions = (
+        *required_permissions,
+        'security.view_check',
+        'security.change_check',
+    )
+
+    def get_user_data(
+        self,
+        *args,
+        permissions=required_checks_permissions,
+        **kwargs,
+    ):
+        """
+        Adds extra permissions to manage checks.
+        """
+        return super().get_user_data(*args, permissions=permissions, **kwargs)
+
+    def test_cannot_access_checks_view(self):
+        """
+        Test that if the logged in user doesn't have the right permissions, he/she
+        gets redirected to the dashboard.
+        """
+        user_data = self.get_user_data(permissions=required_permissions)
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps, user_data=user_data)
+            response = self.client.get(reverse('security:check_list'), follow=True)
+            self.assertRedirects(response, reverse('security:dashboard'))
+
+    def test_view(self):
+        """
+        Test that the view displays the pending checks returned by the API.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'results': [
+                        {
+                            'id': 1,
+                            'description': 'lorem ipsum',
+                            'rules': ['RULE1', 'RULE1'],
+                            'status': 'pending',
+                            'credit': {
+                                'id': 1,
+                                'amount': 1000,
+                                'card_expiry_date': '02/20',
+                                'card_number_first_digits': '1234',
+                                'card_number_last_digits': '987',
+                                'credited_at': '2019-07-02T10:00:00Z',
+                                'prisoner_name': 'John Doe',
+                                'prisoner_number': 'A123B',
+                                'received_at': '2019-07-02T10:00:00Z',
+                                'sender_email': 'sender@example.com',
+                                'sender_name': 'MAISIE NOLAN',
+                                'source': 'online',
+                                'started_at': '2019-07-02T10:00:00Z',
+                            },
+                            'actioned_at': None,
+                            'actioned_by': None,
+                        }
+
+                    ],
+                },
+            )
+
+            response = self.client.get(reverse('security:check_list'), follow=True)
+
+            self.assertContains(response, '1 payment pending')
+            self.assertContains(response, '1234******987 02/20')
