@@ -1,0 +1,7 @@
+.check-list .button {
+    margin-bottom: 1em;
+
+    @include media(mobile) {
+        margin-left: 0;
+    }
+}

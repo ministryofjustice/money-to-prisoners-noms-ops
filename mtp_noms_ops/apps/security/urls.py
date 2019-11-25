@@ -8,20 +8,34 @@ from mtp_common.auth.api_client import get_api_session
 from mtp_noms_ops.utils import user_test
 from security import required_permissions, views
 from security.searches import get_saved_searches, populate_new_result_counts
-from security.utils import can_skip_confirming_prisons, is_hmpps_employee
+from security.utils import can_manage_security_checks, can_skip_confirming_prisons, is_hmpps_employee
 
 
-def security_test(view):
+def security_test(view, extra_tests=None):
     view = user_passes_test(
         can_skip_confirming_prisons,
-        login_url='confirm_prisons'
+        login_url='confirm_prisons',
     )(view)
     view = user_passes_test(
         is_hmpps_employee,
-        login_url='security:hmpps_employee'
+        login_url='security:hmpps_employee',
     )(view)
+
+    for extra_test in (extra_tests or []):
+        view = user_passes_test(
+            extra_test,
+            login_url='root',
+        )(view)
+
     view = user_test(required_permissions)(view)
     return view
+
+
+def fiu_security_test(view):
+    return security_test(
+        view,
+        extra_tests=[can_manage_security_checks],
+    )
 
 
 def dashboard_view(request):
@@ -333,6 +347,13 @@ urlpatterns = [
         r'^security/notifications/$',
         security_test(views.NotificationListView.as_view()),
         name='notification_list',
+    ),
+
+    # checks
+    url(
+        r'^security/checks/$',
+        fiu_security_test(views.CheckListView.as_view()),
+        name='check_list',
     ),
 
     # legacy views, they redirect to their v2 and should be safe to be removed eventually
