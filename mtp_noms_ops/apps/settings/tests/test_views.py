@@ -11,6 +11,7 @@ from security import (
     hmpps_employee_flag,
     required_permissions,
 )
+from security.models import EmailNotifications
 from security.tests import api_url
 from security.tests.test_views import (
     mock_prison_response,
@@ -216,6 +217,11 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
             ])
         )
 
+        responses.add(
+            responses.GET,
+            api_url('/emailpreferences/'),
+            json={'frequency': EmailNotifications.never},
+        )
         response = self.client.get(reverse('settings'), follow=True)
         self.assertContains(response, escape(current_prison['name']))
 
@@ -365,6 +371,11 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         )
 
         self._mock_save_prisons_responses([new_prison])
+        responses.add(
+            responses.GET,
+            api_url('/emailpreferences/'),
+            json={'frequency': EmailNotifications.never},
+        )
 
         response = self.client.post(
             f"{reverse('change_prisons')}?{REDIRECT_FIELD_NAME}=http://google.co.uk",

@@ -23,7 +23,6 @@ from security import (
     confirmed_prisons_flag,
     hmpps_employee_flag,
     not_hmpps_employee_flag,
-    notifications_pilot_flag,
     required_permissions,
 )
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
@@ -2099,15 +2098,9 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
 
 
 class NotificationsTestCase(SecurityBaseTestCase):
-    def test_cannot_access_without_pilot_flag(self):
-        with responses.RequestsMock() as rsps:
-            self.login(follow=False, rsps=rsps)
-            response = self.client.get(reverse('security:notification_list'), follow=True)
-        self.assertNotContains(response, '<!-- security:notification_list -->')
-
-    def login_with_pilot_user(self, rsps):
-        self.login(user_data=self.get_user_data(flags=[
-            notifications_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag,
+    def login(self, rsps):
+        super().login(user_data=self.get_user_data(flags=[
+            hmpps_employee_flag, confirmed_prisons_flag,
         ]), rsps=rsps)
 
     def test_no_notifications_not_monitoring(self):
@@ -2115,7 +2108,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
         Expect to see a message if you're not monitoring anything and have no notifications
         """
         with responses.RequestsMock() as rsps:
-            self.login_with_pilot_user(rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
@@ -2143,7 +2136,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
         Expect to see nothing interesting if monitoring some profile, but have no notifications
         """
         with responses.RequestsMock() as rsps:
-            self.login_with_pilot_user(rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
@@ -2171,7 +2164,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
         Expect to see a message if you're not monitoring anything even if you have notifications
         """
         with responses.RequestsMock() as rsps:
-            self.login_with_pilot_user(rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
@@ -2217,7 +2210,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
         Expect to see a list of notifications when some exist
         """
         with responses.RequestsMock() as rsps:
-            self.login_with_pilot_user(rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
@@ -2258,7 +2251,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
         Expect the correct number of pages if there are many notifications
         """
         with responses.RequestsMock() as rsps:
-            self.login_with_pilot_user(rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
@@ -2305,7 +2298,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
         Expect notifications to be grouped by connected profile
         """
         with responses.RequestsMock() as rsps:
-            self.login_with_pilot_user(rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
@@ -2396,16 +2389,10 @@ class NotificationsTestCase(SecurityBaseTestCase):
 
 
 class SettingsTestCase(SecurityBaseTestCase):
-    def test_cannot_see_email_notifications_switch_without_pilot_flag(self):
-        with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
-            response = self.client.get(reverse('settings'), follow=True)
-        self.assertNotContains(response, 'Email notifications')
-
-    def test_can_turn_on_email_notifications_switch_with_pilot_flag(self):
+    def test_can_turn_on_email_notifications_switch(self):
         with responses.RequestsMock() as rsps:
             self.login(user_data=self.get_user_data(flags=[
-                notifications_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag,
+                hmpps_employee_flag, confirmed_prisons_flag,
             ]), rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -2431,10 +2418,10 @@ class SettingsTestCase(SecurityBaseTestCase):
             last_request_body = json.loads(last_post_call.request.body)
             self.assertDictEqual(last_request_body, {'frequency': 'daily'})
 
-    def test_can_turn_off_email_notifications_switch_with_pilot_flag(self):
+    def test_can_turn_off_email_notifications_switch(self):
         with responses.RequestsMock() as rsps:
             self.login(user_data=self.get_user_data(flags=[
-                notifications_pilot_flag, hmpps_employee_flag, confirmed_prisons_flag,
+                hmpps_employee_flag, confirmed_prisons_flag,
             ]), rsps=rsps)
             rsps.add(
                 rsps.GET,
