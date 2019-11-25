@@ -1,7 +1,10 @@
+import datetime
 import unittest
 
+from django.utils.timezone import localtime, make_aware, utc
+
 from security.templatetags.security import currency, pence, format_sort_code
-from security.utils import NameSet, EmailSet, remove_whitespaces_and_hyphens
+from security.utils import convert_date_fields, NameSet, EmailSet, remove_whitespaces_and_hyphens
 
 
 class UtilTestCase(unittest.TestCase):
@@ -70,4 +73,121 @@ class RemoveWhitespacesAndHyphensTestCase(unittest.TestCase):
         self.assertEqual(
             remove_whitespaces_and_hyphens(' SW 1A-1a A '),
             'SW1A1aA',
+        )
+
+
+class ConvertDateFieldsTestCase(unittest.TestCase):
+    """
+    Tests related to the convert_date_fields function.
+    """
+
+    def test_convert(self):
+        """
+        Test that the function converts dates and datetimes correctly.
+        """
+        objs = [
+            {
+                'started_at': '2019-07-01',
+                'received_at': '2019-07-02T10:00:00Z',  # utc
+                'credited_at': '2019-07-03',
+                'refunded_at': '2019-07-04T11:01:00+01:00',  # BST+1
+                'created': '2019-07-05',
+                'triggered_at': '2019-07-06T10:02:00Z',
+            }
+        ]
+        converted_objects = convert_date_fields(objs)
+        self.assertEqual(
+            converted_objects[0],
+            {
+                'started_at': datetime.date(2019, 7, 1),
+                'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
+                'credited_at': datetime.date(2019, 7, 3),
+                'refunded_at': make_aware(datetime.datetime(2019, 7, 4, 11, 1)),
+                'created': datetime.date(2019, 7, 5),
+                'triggered_at': localtime(datetime.datetime(2019, 7, 6, 10, 2, tzinfo=utc)),
+            },
+        )
+
+    def test_include_nested(self):
+        """
+        Test that if include_nested = True, nested values are converted as well.
+        """
+        objs = [
+            {
+                'field': {
+                    'started_at': '2019-07-01',
+                    'received_at': '2019-07-02T10:00:00Z',  # utc
+                },
+            }
+        ]
+        converted_objects = convert_date_fields(objs, include_nested=True)
+        self.assertEqual(
+            converted_objects[0],
+            {
+                'field': {
+                    'started_at': datetime.date(2019, 7, 1),
+                    'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
+                },
+            },
+        )
+
+    def test_doesnt_convert_if_not_string(self):
+        """
+        Test that if the values are not strings, they are not converted.
+        """
+        objs = [
+            {
+                'started_at': 1,
+                'received_at': ['date'],
+                'credited_at': {'key': 'value'},
+                'refunded_at': datetime.date(2019, 7, 1),
+            }
+        ]
+        converted_objects = convert_date_fields(objs)
+        self.assertEqual(
+            converted_objects[0],
+            {
+                'started_at': 1,
+                'received_at': ['date'],
+                'credited_at': {'key': 'value'},
+                'refunded_at': datetime.date(2019, 7, 1),
+            }
+        )
+
+    def test_doesnt_convert_if_falsy(self):
+        """
+        Test that if the values are falsy, they are not converted.
+        """
+        objs = [
+            {
+                'started_at': None,
+                'received_at': '',
+            }
+        ]
+        converted_objects = convert_date_fields(objs)
+        self.assertEqual(
+            converted_objects[0],
+            {
+                'started_at': None,
+                'received_at': '',
+            }
+        )
+
+    def test_handles_invalid_strings(self):
+        """
+        Test that if the values are invalid, they are not converted.
+        """
+        objs = [
+            {
+                'started_at': '2019-13-01',
+                'received_at': 'invalid',
+            }
+        ]
+        converted_objects = convert_date_fields(objs)
+        self.assertEqual(
+            converted_objects[0],
+            {
+                'started_at': '2019-13-01',
+                'received_at': 'invalid',
+            }
         )
