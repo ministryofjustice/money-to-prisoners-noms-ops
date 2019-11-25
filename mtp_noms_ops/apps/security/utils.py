@@ -175,6 +175,12 @@ def can_skip_confirming_prisons(user):
     return already_confirmed or cannot_choose_prisons
 
 
+def can_manage_security_checks(user):
+    return user.has_perms(
+        ('security.view_check', 'security.change_check'),
+    )
+
+
 def remove_whitespaces_and_hyphens(value):
     """
     Returns value without whitespaces or -
