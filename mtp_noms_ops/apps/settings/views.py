@@ -22,9 +22,8 @@ class NomsOpsSettingsView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         session = get_api_session(self.request)
-        if self.request.can_access_notifications:
-            email_preferences = session.get('/emailpreferences/').json()
-            context['email_notifications'] = email_preferences['frequency'] != EmailNotifications.never
+        email_preferences = session.get('/emailpreferences/').json()
+        context['email_notifications'] = email_preferences['frequency'] != EmailNotifications.never
         return context
 
     def post(self, *args, **kwargs):
