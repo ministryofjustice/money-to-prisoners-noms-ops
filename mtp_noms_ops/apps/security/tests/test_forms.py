@@ -11,7 +11,7 @@ from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 import responses
 
-from security.forms.check import AcceptCheckForm, CheckListForm
+from security.forms.check import AcceptCheckForm, CheckListForm, RejectCheckForm
 from security.forms.object_base import AmountPattern, SecurityForm
 from security.forms.object_list import (
     AmountSearchFormMixin,
@@ -2474,7 +2474,7 @@ class AcceptCheckFormTestCase(SimpleTestCase):
 
     def test_accept(self):
         """
-        Test that the form makes the right API call to accept get the check.
+        Test that the form makes the right API call to accept the check.
         """
         check_id = 1
         check_data = {
@@ -2564,6 +2564,176 @@ class AcceptCheckFormTestCase(SimpleTestCase):
 
             self.assertTrue(form.is_valid())
             self.assertEqual(form.accept(), False)
+            self.assertDictEqual(
+                form.errors,
+                {'__all__': ['There was an error with your request.']},
+            )
+
+
+class RejectCheckFormTestCase(SimpleTestCase):
+    """
+    Tests related to the RejectCheckForm.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.request = mock.MagicMock(
+            user=mock.MagicMock(
+                token=generate_tokens(),
+            ),
+        )
+
+    def test_get_object(self):
+        """
+        Test that the form makes the right API call to get the object.
+        """
+        check_id = 1
+        check_data = {
+            'id': check_id,
+            'description': 'lorem ipsum',
+            'status': 'pending',
+        }
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_data,
+            )
+
+            form = RejectCheckForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'rejection_reason': 'reason',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertEqual(form.get_object(), check_data)
+
+    def test_reject(self):
+        """
+        Test that the form makes the right API call to reject the check.
+        """
+        check_id = 1
+        check_data = {
+            'id': check_id,
+            'description': 'lorem ipsum',
+            'status': 'pending',
+        }
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_data,
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/reject/'),
+                status=204,
+            )
+
+            form = RejectCheckForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'rejection_reason': 'reason',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertEqual(form.reject(), True)
+
+            last_request_body = json.loads(rsps.calls[-1].request.body)
+            self.assertDictEqual(
+                last_request_body,
+                {'rejection_reason': 'reason'},
+            )
+
+    def test_form_invalid_if_check_not_in_pending(self):
+        """
+        Test that if the check is not in pending, the form returns a validation error.
+        """
+        check_id = 1
+        check_data = {
+            'id': check_id,
+            'description': 'lorem ipsum',
+            'status': 'accepted',
+        }
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_data,
+            )
+
+            form = RejectCheckForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'rejection_reason': 'reason',
+                },
+            )
+
+            self.assertFalse(form.is_valid())
+            self.assertEqual(
+                form.errors,
+                {'__all__': ["You cannot reject this payment as it's not in pending"]},
+            )
+
+    def test_form_invalid_with_empty_rejection_reason(self):
+        """
+        Test that if the rejection reason is not given, the form returns a validation error.
+        """
+        check_id = 1
+        form = RejectCheckForm(
+            object_id=check_id,
+            request=self.request,
+            data={
+                'rejection_reason': '',
+            },
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors,
+            {'rejection_reason': ['This field is required']},
+        )
+
+    def test_with_api_error(self):
+        """
+        Test that if the API return a non-2xx status code, the accept method returns False
+        and the error is available in form.errors
+        """
+        check_id = 1
+        check_data = {
+            'id': check_id,
+            'description': 'lorem ipsum',
+            'status': 'pending',
+        }
+        with responses.RequestsMock() as rsps, silence_logger():
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_data,
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/reject/'),
+                status=400,
+                json={'status': 'conflict'},
+            )
+
+            form = RejectCheckForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'rejection_reason': 'reason',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertEqual(form.reject(), False)
             self.assertDictEqual(
                 form.errors,
                 {'__all__': ['There was an error with your request.']},
