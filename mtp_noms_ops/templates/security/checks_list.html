@@ -52,7 +52,7 @@
           {{ check.credit.amount|currency }}
           </td>
           <td class="print-hidden">
-            <a href="" class="button">{% trans 'Accept' %}</a>
+            <a href="{% url 'security:accept_check' check_id=check.id %}" class="button">{% trans 'Accept' %}</a>
             <a href="" class="button button-secondary">{% trans 'Reject' %}</a>
           </td>
         </tr>

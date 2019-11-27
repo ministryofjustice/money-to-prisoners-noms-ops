@@ -2473,9 +2473,9 @@ class LegacyViewsRedirectTestCase(SecurityBaseTestCase):
                 self.assertRedirects(response, reverse(view_name))
 
 
-class CheckListViewTestCase(SecurityBaseTestCase):
+class BaseCheckViewTestCase(SecurityBaseTestCase):
     """
-    Tests related to the CheckListView.
+    Tests related to the check views.
     """
 
     required_checks_permissions = (
@@ -2494,6 +2494,12 @@ class CheckListViewTestCase(SecurityBaseTestCase):
         Adds extra permissions to manage checks.
         """
         return super().get_user_data(*args, permissions=permissions, **kwargs)
+
+
+class CheckListViewTestCase(BaseCheckViewTestCase):
+    """
+    Tests related to CheckListView.
+    """
 
     def test_cannot_access_checks_view(self):
         """
@@ -2550,3 +2556,149 @@ class CheckListViewTestCase(SecurityBaseTestCase):
 
             self.assertContains(response, '1 payment pending')
             self.assertContains(response, '1234******987 02/20')
+
+
+class AcceptCheckViewTestCase(BaseCheckViewTestCase):
+    """
+    Tests related to AcceptCheckView.
+    """
+
+    def test_cannot_access_checks_view(self):
+        """
+        Test that if the logged in user doesn't have the right permissions, he/she
+        gets redirected to the dashboard.
+        """
+        user_data = self.get_user_data(permissions=required_permissions)
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps, user_data=user_data)
+            url = reverse('security:accept_check', kwargs={'check_id': 1})
+            response = self.client.get(url, follow=True)
+            self.assertRedirects(response, reverse('security:dashboard'))
+
+    def test_get(self):
+        """
+        Test that the view displays the pending check returned by the API.
+        """
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json={
+                    'id': check_id,
+                    'description': 'lorem ipsum',
+                    'rules': ['RULE1', 'RULE1'],
+                    'status': 'pending',
+                    'credit': {
+                        'id': 1,
+                        'amount': 1000,
+                        'card_expiry_date': '02/20',
+                        'card_number_first_digits': '1234',
+                        'card_number_last_digits': '987',
+                        'credited_at': '2019-07-02T10:00:00Z',
+                        'prisoner_name': 'John Doe',
+                        'prisoner_number': 'A123B',
+                        'received_at': '2019-07-02T10:00:00Z',
+                        'sender_email': 'sender@example.com',
+                        'sender_name': 'MAISIE NOLAN',
+                        'source': 'online',
+                        'started_at': '2019-07-02T10:00:00Z',
+                    },
+                    'actioned_at': None,
+                    'actioned_by': None,
+                },
+            )
+
+            url = reverse('security:accept_check', kwargs={'check_id': check_id})
+            response = self.client.get(url, follow=True)
+
+            self.assertContains(response, 'Accept payment')
+            self.assertContains(response, '1234******987 02/20')
+
+    def test_accept_check(self):
+        """
+        Test that if a pending check is accepted, the view redirects to the list of checks
+        and a successful message is displayed.
+        """
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json={
+                    'id': check_id,
+                    'description': 'lorem ipsum',
+                    'rules': ['RULE1', 'RULE1'],
+                    'status': 'pending',
+                    'credit': {
+                        'id': 1,
+                        'amount': 1000,
+                        'card_expiry_date': '02/20',
+                        'card_number_first_digits': '1234',
+                        'card_number_last_digits': '987',
+                        'credited_at': '2019-07-02T10:00:00Z',
+                        'prisoner_name': 'John Doe',
+                        'prisoner_number': 'A123B',
+                        'received_at': '2019-07-02T10:00:00Z',
+                        'sender_email': 'sender@example.com',
+                        'sender_name': 'MAISIE NOLAN',
+                        'source': 'online',
+                        'started_at': '2019-07-02T10:00:00Z',
+                    },
+                    'actioned_at': None,
+                    'actioned_by': None,
+                },
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                status=204,
+            )
+
+            url = reverse('security:accept_check', kwargs={'check_id': check_id})
+            response = self.client.post(url, follow=True)
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Payment accepted')
+
+    def test_invalid_form(self):
+        """
+        Test that if a rejected check is accepted, a validation error is displayed.
+        """
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json={
+                    'id': 1,
+                    'description': 'lorem ipsum',
+                    'rules': ['RULE1', 'RULE1'],
+                    'status': 'rejected',
+                    'credit': {
+                        'id': check_id,
+                        'amount': 1000,
+                        'card_expiry_date': '02/20',
+                        'card_number_first_digits': '1234',
+                        'card_number_last_digits': '987',
+                        'credited_at': '2019-07-02T10:00:00Z',
+                        'prisoner_name': 'John Doe',
+                        'prisoner_number': 'A123B',
+                        'received_at': '2019-07-02T10:00:00Z',
+                        'sender_email': 'sender@example.com',
+                        'sender_name': 'MAISIE NOLAN',
+                        'source': 'online',
+                        'started_at': '2019-07-02T10:00:00Z',
+                    },
+                    'actioned_at': None,
+                    'actioned_by': None,
+                },
+            )
+
+            url = reverse('security:accept_check', kwargs={'check_id': check_id})
+            response = self.client.post(url, follow=True)
+
+            self.assertContains(response, 'You cannot accept this payment')

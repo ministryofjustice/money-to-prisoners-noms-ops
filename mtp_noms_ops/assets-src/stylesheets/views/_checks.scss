@@ -1,7 +1,37 @@
 .check-list .button {
-    margin-bottom: 1em;
+  margin-bottom: 1em;
 
-    @include media(mobile) {
-        margin-left: 0;
+  @include media(mobile) {
+    margin-left: 0;
+  }
+}
+
+
+.check-details {
+  margin: 1em 0 1.5em;
+  padding: 1em;
+
+  th, td {
+    border: 0;
+    font-weight: normal;
+    padding: 0 0 0.3em 0;
+  }
+
+  th {
+    padding-right: 1em;
+  }
+
+  tr:last-child{
+    th, td {
+      padding-bottom: 0;
     }
+  }
+
+  td {
+    font-weight: bold;
+  }
+
+  &.panel {
+    margin-left: 1em;
+  }
 }
