@@ -13,11 +13,11 @@
 
   {% include 'mtp_common/includes/message_box.html' %}
 
-  <p>
+  <p class="font-large">
     {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
-      {{ number }} payment pending
+      {{ number }} credit
     {% plural %}
-      {{ number }} payments pending
+      {{ number }} credits
     {% endblocktrans %}
   </p>
 
@@ -52,8 +52,8 @@
           {{ check.credit.amount|currency }}
           </td>
           <td class="print-hidden">
-            <a href="" class="button">{% trans 'Accept' %}</a>
-            <a href="" class="button button-secondary">{% trans 'Reject' %}</a>
+            <a href="{% url 'security:accept_check' check_id=check.id %}" class="button">{% trans 'Accept' %}</a>
+            <a href="{% url 'security:reject_check' check_id=check.id %}" class="button button-secondary">{% trans 'Reject' %}</a>
           </td>
         </tr>
         {% endfor %}
@@ -66,9 +66,9 @@
 
     <p class="mtp-page-list__count">
       {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
-        {{ number }} payment pending
+        {{ number }} credit
       {% plural %}
-        {{ number }} payments pending
+        {{ number }} credits
       {% endblocktrans %}
     </p>
   </div>

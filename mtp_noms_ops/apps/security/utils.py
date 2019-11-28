@@ -14,6 +14,7 @@ from security import hmpps_employee_flag, confirmed_prisons_flag
 def convert_date_fields(object_list, include_nested=False):
     """
     MTP API responds with string date/time fields, this filter converts them to python objects.
+    `object_list` can be either a list or a single object.
     If `include_nested` is True, it will also convert values in nested dicts, nested lists are not
     supported yet.
     """
@@ -43,6 +44,9 @@ def convert_date_fields(object_list, include_nested=False):
                 except (ValueError, TypeError):
                     pass
         return obj
+
+    if isinstance(object_list, dict):
+        return convert(object_list)
 
     return list(map(convert, object_list)) if object_list else object_list
 

@@ -28,7 +28,7 @@
           {% include 'proposition-tab.html' with view_name='security:disbursement_list' subview_names='security:disbursement_list security:disbursement_detail security:disbursement_search_results security:disbursement_advanced_search' link_text=_('Disbursements') params=initial_params %}
           {% include 'proposition-tab.html' with view_name='security:notification_list' subview_names='security:notification_list' link_text=_('Notifications') %}
           {% if request.can_manage_security_checks %}
-            {% include 'proposition-tab.html' with view_name='security:check_list' subview_names='security:check_list' link_text=_('Payments pending') %}
+            {% include 'proposition-tab.html' with view_name='security:check_list' subview_names='security:check_list security:accept_check security:reject_check' link_text=_('Pending') %}
           {% endif %}
         {% elif request.user.is_authenticated and request.can_access_prisoner_location %}
           {% include 'proposition-tab.html' with view_name='location_file_upload' subview_names='location_file_upload' link_text=_('Upload location file') %}

@@ -81,9 +81,9 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
     Tests related to the convert_date_fields function.
     """
 
-    def test_convert(self):
+    def test_converts_lists(self):
         """
-        Test that the function converts dates and datetimes correctly.
+        Test that the function converts dates and datetimes correctly when the input arg is a list.
         """
         objs = [
             {
@@ -98,6 +98,30 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
         converted_objects = convert_date_fields(objs)
         self.assertEqual(
             converted_objects[0],
+            {
+                'started_at': datetime.date(2019, 7, 1),
+                'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
+                'credited_at': datetime.date(2019, 7, 3),
+                'refunded_at': make_aware(datetime.datetime(2019, 7, 4, 11, 1)),
+                'created': datetime.date(2019, 7, 5),
+                'triggered_at': localtime(datetime.datetime(2019, 7, 6, 10, 2, tzinfo=utc)),
+            },
+        )
+
+    def test_converts_objects(self):
+        """
+        Test that the function converts dates and datetimes correctly when the input arg is an object.
+        """
+        obj = {
+            'started_at': '2019-07-01',
+            'received_at': '2019-07-02T10:00:00Z',  # utc
+            'credited_at': '2019-07-03',
+            'refunded_at': '2019-07-04T11:01:00+01:00',  # BST+1
+            'created': '2019-07-05',
+            'triggered_at': '2019-07-06T10:02:00Z',
+        }
+        self.assertEqual(
+            convert_date_fields(obj),
             {
                 'started_at': datetime.date(2019, 7, 1),
                 'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
@@ -131,7 +155,7 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
             },
         )
 
-    def test_doesnt_convert_if_not_string(self):
+    def test_doesnt_convert_non_strings(self):
         """
         Test that if the values are not strings, they are not converted.
         """
@@ -154,7 +178,7 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
             }
         )
 
-    def test_doesnt_convert_if_falsy(self):
+    def test_doesnt_convert_falsy_values(self):
         """
         Test that if the values are falsy, they are not converted.
         """

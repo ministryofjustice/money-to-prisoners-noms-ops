@@ -355,6 +355,16 @@ urlpatterns = [
         fiu_security_test(views.CheckListView.as_view()),
         name='check_list',
     ),
+    url(
+        r'^security/checks/(?P<check_id>\d+)/accept/$',
+        fiu_security_test(views.AcceptCheckView.as_view()),
+        name='accept_check',
+    ),
+    url(
+        r'^security/checks/(?P<check_id>\d+)/reject/$',
+        fiu_security_test(views.RejectCheckView.as_view()),
+        name='reject_check',
+    ),
 
     # legacy views, they redirect to their v2 and should be safe to be removed eventually
     url(
