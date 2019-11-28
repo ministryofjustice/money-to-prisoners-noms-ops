@@ -2554,7 +2554,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
 
             response = self.client.get(reverse('security:check_list'), follow=True)
 
-            self.assertContains(response, '1 payment pending')
+            self.assertContains(response, '1 credit')
             self.assertContains(response, '1234******987 02/20')
 
 
@@ -2613,7 +2613,7 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
             url = reverse('security:accept_check', kwargs={'check_id': check_id})
             response = self.client.get(url, follow=True)
 
-            self.assertContains(response, 'Accept payment')
+            self.assertContains(response, 'Accept credit')
             self.assertContains(response, '1234******987 02/20')
 
     def test_accept_check(self):
@@ -2661,7 +2661,7 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
             response = self.client.post(url, follow=True)
 
             self.assertRedirects(response, reverse('security:check_list'))
-            self.assertContains(response, 'Payment accepted')
+            self.assertContains(response, 'Credit accepted')
 
     def test_invalid_form(self):
         """
@@ -2701,7 +2701,7 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
             url = reverse('security:accept_check', kwargs={'check_id': check_id})
             response = self.client.post(url, follow=True)
 
-            self.assertContains(response, 'You cannot accept this payment')
+            self.assertContains(response, 'You cannot accept this credit')
 
 
 class RejectCheckViewTestCase(BaseCheckViewTestCase):
@@ -2759,7 +2759,7 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
             url = reverse('security:reject_check', kwargs={'check_id': check_id})
             response = self.client.get(url, follow=True)
 
-            self.assertContains(response, 'Reject payment')
+            self.assertContains(response, 'Reject credit')
             self.assertContains(response, '1234******987 02/20')
 
     def test_reject_check(self):
@@ -2813,7 +2813,7 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
             )
 
             self.assertRedirects(response, reverse('security:check_list'))
-            self.assertContains(response, 'Payment rejected')
+            self.assertContains(response, 'Credit rejected')
 
     def test_invalid_if_check_not_in_pending(self):
         """
@@ -2859,7 +2859,7 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
                 follow=True,
             )
 
-            self.assertContains(response, 'You cannot reject this payment')
+            self.assertContains(response, 'You cannot reject this credit')
 
     def test_invalid_with_empty_rejection_reason(self):
         """

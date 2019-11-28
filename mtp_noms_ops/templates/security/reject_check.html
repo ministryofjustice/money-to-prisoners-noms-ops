@@ -17,7 +17,7 @@
     {% csrf_token %}
     {% include 'mtp_common/forms/error-summary.html' with form=form only %}
 
-    <p>{% trans 'Payment details' %}</p>
+    <p>{% trans 'Credit details' %}</p>
     <div class="check-details panel panel-border-wide">
       <table>
         <tbody>
@@ -49,7 +49,7 @@
 
     <div class="form-group">
       <button type="submit" class="button">
-        {% trans 'Reject payment' %}
+        {% trans 'Reject credit' %}
       </button>
     </div>
   </form>

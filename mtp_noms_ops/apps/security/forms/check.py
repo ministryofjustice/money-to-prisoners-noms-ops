@@ -88,7 +88,7 @@ class AcceptCheckForm(ActionCheckForm):
     """
     Accepts a check.
     """
-    non_pending_error_msg = "You cannot accept this payment as it's not in pending"
+    non_pending_error_msg = "You cannot accept this credit as it's not in pending"
 
     def get_accept_object_endpoint_path(self):
         return f'/security/checks/{self.object_id}/accept/'
@@ -114,7 +114,7 @@ class RejectCheckForm(ActionCheckForm):
     """
     rejection_reason = forms.CharField(label=gettext_lazy('Give details'), required=True)
 
-    non_pending_error_msg = "You cannot reject this payment as it's not in pending"
+    non_pending_error_msg = "You cannot reject this credit as it's not in pending"
 
     def get_reject_object_endpoint_path(self):
         return f'/security/checks/{self.object_id}/reject/'

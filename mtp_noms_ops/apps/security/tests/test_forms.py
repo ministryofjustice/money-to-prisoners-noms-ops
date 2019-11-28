@@ -2529,7 +2529,7 @@ class AcceptCheckFormTestCase(SimpleTestCase):
             self.assertFalse(form.is_valid())
             self.assertEqual(
                 form.errors,
-                {'__all__': ["You cannot accept this payment as it's not in pending"]},
+                {'__all__': ["You cannot accept this credit as it's not in pending"]},
             )
 
     def test_with_api_error(self):
@@ -2678,7 +2678,7 @@ class RejectCheckFormTestCase(SimpleTestCase):
             self.assertFalse(form.is_valid())
             self.assertEqual(
                 form.errors,
-                {'__all__': ["You cannot reject this payment as it's not in pending"]},
+                {'__all__': ["You cannot reject this credit as it's not in pending"]},
             )
 
     def test_form_invalid_with_empty_rejection_reason(self):

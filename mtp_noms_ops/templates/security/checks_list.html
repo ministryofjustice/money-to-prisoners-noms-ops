@@ -13,11 +13,11 @@
 
   {% include 'mtp_common/includes/message_box.html' %}
 
-  <p>
+  <p class="font-large">
     {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
-      {{ number }} payment pending
+      {{ number }} credit
     {% plural %}
-      {{ number }} payments pending
+      {{ number }} credits
     {% endblocktrans %}
   </p>
 
@@ -66,9 +66,9 @@
 
     <p class="mtp-page-list__count">
       {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
-        {{ number }} payment pending
+        {{ number }} credit
       {% plural %}
-        {{ number }} payments pending
+        {{ number }} credits
       {% endblocktrans %}
     </p>
   </div>

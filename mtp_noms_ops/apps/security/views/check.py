@@ -12,7 +12,7 @@ class CheckListView(SecurityView):
     """
     View returning the checks in pending status.
     """
-    title = gettext_lazy('Payments pending')
+    title = gettext_lazy('Credits pending')
     template_name = 'security/checks_list.html'
     form_class = CheckListForm
 
@@ -23,7 +23,7 @@ class ActionCheckView(FormView):
     """
     object_list_context_key = 'checks'
 
-    list_title = gettext_lazy('Payments pending')
+    list_title = gettext_lazy('Credits pending')
     id_kwarg_name = 'check_id'
     object_context_key = 'check'
     list_url = reverse_lazy('security:check_list')
@@ -65,7 +65,7 @@ class AcceptCheckView(ActionCheckView):
     """
     View accepting a check in pending status.
     """
-    title = gettext_lazy('Accept this payment')
+    title = gettext_lazy('Accept this credit')
     template_name = 'security/accept_check.html'
     form_class = AcceptCheckForm
 
@@ -78,7 +78,7 @@ class AcceptCheckView(ActionCheckView):
             messages.add_message(
                 self.request,
                 messages.INFO,
-                gettext_lazy('Payment accepted'),
+                gettext_lazy('Credit accepted'),
             )
             return HttpResponseRedirect(self.list_url)
 
@@ -89,7 +89,7 @@ class RejectCheckView(ActionCheckView):
     """
     View rejecting a check in pending status.
     """
-    title = gettext_lazy('Reject this payment')
+    title = gettext_lazy('Reject this credit')
     template_name = 'security/reject_check.html'
     form_class = RejectCheckForm
 
@@ -102,7 +102,7 @@ class RejectCheckView(ActionCheckView):
             messages.add_message(
                 self.request,
                 messages.INFO,
-                gettext_lazy('Payment rejected'),
+                gettext_lazy('Credit rejected'),
             )
             return HttpResponseRedirect(self.list_url)
 
