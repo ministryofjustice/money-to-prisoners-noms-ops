@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+
+{% block inner_content %}
+  <header>
+    <h1 class="heading-xlarge">{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <form method="post">
+    {% csrf_token %}
+    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+
+    <p>{% trans 'Payment details' %}</p>
+    <div class="check-details panel panel-border-wide">
+      <table>
+        <tbody>
+          <tr>
+            <th>{% trans 'Date sent:' %}</th>
+            <td>{{ check.credit.started_at|date:'SHORT_DATETIME_FORMAT'}}</td>
+          </tr>
+          <tr>
+            <th>{% trans 'Sender name (from):' %}</th>
+            <td>{{ check.credit.sender_name }}</td>
+          </tr>
+          <tr>
+            <th>{% trans 'Debit card (from):' %}</th>
+            <td>{{ check.credit|format_card_number }} {{ check.credit.card_expiry_date }}</td>
+          </tr>
+          <tr>
+            <th>{% trans 'Prisoner (to):' %}</th>
+            <td>{{ check.credit.prisoner_name }} ({{ check.credit.prisoner_number }})</td>
+          </tr>
+          <tr>
+            <th>{% trans 'Amount:' %}</th>
+            <td>{{ check.credit.amount|currency }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    {% include 'mtp_common/forms/textarea.html' with field=form.rejection_reason input_classes='form-control-3-4' %}
+
+    <div class="form-group">
+      <button type="submit" class="button">
+        {% trans 'Reject payment' %}
+      </button>
+    </div>
+  </form>
+{% endblock %}
