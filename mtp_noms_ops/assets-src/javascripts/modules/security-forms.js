@@ -15,7 +15,9 @@ var LegacySecurityForms = {
 
   bindAmountPatternSelection: function () {
     var $patternSelect = $('#id_amount_pattern');
-    var valueGetter = function() { return $patternSelect.val() };
+    var valueGetter = function () {
+      return $patternSelect.val();
+    };
 
     // if $patternSelect doesn't exist, check if the radio varient exists instead
     if (!$patternSelect.length && $('[name=amount_pattern]')) {
@@ -26,7 +28,7 @@ var LegacySecurityForms = {
     var $exactWrapper = $('#id_amount_exact-wrapper');
     var $penceWrapper = $('#id_amount_pence-wrapper');
 
-    var hideWrapper = function(wrapper) {
+    var hideWrapper = function (wrapper) {
       wrapper.removeClass('form-group-error').hide();
       wrapper.find('input').val('').removeClass('form-control-error');
       wrapper.find('.error-message').remove();
@@ -154,7 +156,7 @@ exports.SecurityForms = {
   },
 
   bindConditionalShowHideSelection: function (inputName) {
-    var $conditionalSelector = $('[name='+inputName+']');
+    var $conditionalSelector = $('[name=' + inputName + ']');
 
     if (!$conditionalSelector.length) {
       return;
@@ -165,7 +167,7 @@ exports.SecurityForms = {
 
     function update () {
       var selectedValue = $conditionalSelector.filter(':checked').val();
-      var wrapperToReveal = $('#mtp-conditional-'+inputName+'-'+selectedValue);
+      var wrapperToReveal = $('#mtp-conditional-' + inputName + '-' + selectedValue);
       var wrappersToHide = $conditionalContainer.find('.mtp-conditional-wrapper').not(wrapperToReveal);
 
       wrapperToReveal.show();
