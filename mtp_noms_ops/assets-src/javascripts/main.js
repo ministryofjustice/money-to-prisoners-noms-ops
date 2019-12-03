@@ -1,7 +1,7 @@
 (function () {
   'use strict';
-  require('polyfills').Polyfills.init();
 
+  // common
   require('dialogue-box').DialogueBox.init();
   require('upload').Upload.init();
   require('print').Print.init();
@@ -16,6 +16,7 @@
   require('async-load').AsyncLoad.init();
   require('date-picker').DatePicker.init();
 
+  // noms-ops
   require('confirm-checked').ConfirmChecked.init();
   require('security-forms').SecurityForms.init();
   require('autocomplete-select').AutocompleteSelect.init();
