@@ -178,7 +178,6 @@ class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
     def test_can_access_security_dashboard(self):
         response = self.login()
         self.assertContains(response, '<!-- security:dashboard -->')
-        self.assertContains(response, 'Firefox', msg_prefix='IE8 support banner missing')
 
     @responses.activate
     def test_cannot_access_prisoner_location_admin(self):

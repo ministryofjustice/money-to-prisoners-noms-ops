@@ -46,7 +46,7 @@ form .form-group .form-hint {
 // app-specific styles
 
 %table-container {
-  @include media($max-width: $desktop-breakpoint, $ignore-for-ie: true) {
+  @include media($max-width: $desktop-breakpoint) {
     @media screen {
       overflow-x: scroll;
 
@@ -57,7 +57,7 @@ form .form-group .form-hint {
   }
 }
 
-@include media($max-width: $mtp-proposition-tab-breakpoint, $ignore-for-ie: true) {
+@include media($max-width: $mtp-proposition-tab-breakpoint) {
   #mtp-proposition-tabs li.mtp-proposition-tab__show-on-desktop {
     display: none;
   }

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
-  require('polyfills').Polyfills.init();
 
+  // common
   require('dialogue-box').DialogueBox.init();
   require('upload').Upload.init();
   require('print').Print.init();
@@ -9,13 +9,14 @@
   require('tabbed-panel').TabbedPanel.init();
   require('mailcheck-warning').MailcheckWarning.init(
     '.mtp-account-management input[type=email]',
-    ['hmps.gsi.gov.uk', 'noms.gsi.gov.uk', 'justice.gsi.gov.uk'],
-    ['gsi.gov.uk', 'gov.uk']
+    ['justice.gov.uk'],
+    ['gov.uk']
   );
   require('notifications').Notifications.init();
   require('async-load').AsyncLoad.init();
   require('date-picker').DatePicker.init();
 
+  // noms-ops
   require('confirm-checked').ConfirmChecked.init();
   require('security-forms').SecurityForms.init();
   require('autocomplete-select').AutocompleteSelect.init();

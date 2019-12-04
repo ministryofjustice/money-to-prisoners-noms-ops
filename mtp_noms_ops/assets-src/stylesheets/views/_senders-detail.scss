@@ -32,7 +32,7 @@
     background-image: file-url('icon-large-bank@4x.png');
     background-size: 100px 100px;
 
-    @include media(mobile, $ignore-for-ie: true) {
+    @include media(mobile) {
       background-size: 80px 80px;
     }
   }
@@ -45,7 +45,7 @@
     background-image: file-url('icon-large-card@4x.png');
     background-size: 100px 100px;
 
-    @include media(mobile, $ignore-for-ie: true) {
+    @include media(mobile) {
       background-size: 80px 80px;
     }
   }

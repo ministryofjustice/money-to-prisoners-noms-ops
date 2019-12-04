@@ -144,9 +144,8 @@
 .mtp-search-highlight {
   margin-right: 1px;
   background-color: #fff2d3;
-  padding: 2px 0px 0px;
+  padding: 2px 0 0;
 
-  // reset with print as IE8 doesn't support @media not print for the rule above
   @media print {
     margin-right: 0;
     background-color: transparent;
