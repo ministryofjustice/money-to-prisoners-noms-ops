@@ -2588,6 +2588,16 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             response = self.client.get(reverse('security:check_list'), follow=True)
             self.assertContains(response, '2 credits need attention')
 
+    def test_calculation_of_date_before_which_checks_need_attention(self):
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 0)
+            response = self.client.get(reverse('security:check_list'))
+            form = response.context['form']
+            api_call_made = rsps.calls[-2].request.url
+            parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
+            self.assertEqual(parsed_qs['started_at__lt'], [form.need_attention_date.strftime('%Y-%m-%d %H:%M:%S')])
+
 
 class AcceptCheckViewTestCase(BaseCheckViewTestCase):
     """

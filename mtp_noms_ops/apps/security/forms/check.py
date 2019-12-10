@@ -25,8 +25,21 @@ class CheckListForm(SecurityForm):
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        self.need_attention_date = timezone.now() - self.URGENT_IF_OLDER_THAN
+        self.need_attention_date = self.get_need_attention_date()
         self.need_attention_count = 0
+
+    def get_need_attention_date(self):
+        """
+        Gets the cutoff datetime before which a payment is considered needing attention.
+        Now treats checks that would need attention today (before midnight) as needing attention now
+        so that the count will not vary throughout the day.
+
+        Idea: Could alternatively consider (9am the next working day - URGENT_IF_OLDER_THAN) as needs attention cutoff
+        in order to account for long weekends and holidays.
+        """
+        tomorrow = timezone.now() + datetime.timedelta(days=1)
+        tomorrow = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
+        return tomorrow - self.URGENT_IF_OLDER_THAN
 
     def get_api_request_params(self):
         """
