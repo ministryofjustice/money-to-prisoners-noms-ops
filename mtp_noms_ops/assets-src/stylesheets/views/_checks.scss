@@ -6,6 +6,20 @@
   }
 }
 
+.mtp-check-needs-attention {
+  display: inline-block;
+  width: 30px;
+  height: 20px;
+  padding: 3px 0 0 0;
+  margin: 0 10px 0 0;
+  border-radius: 75px;
+  text-align: center;
+  font-size: 19px;
+  font-weight: bold;
+  background: $red;
+  color: $white;
+  white-space: nowrap;
+}
 
 .mtp-check-details {
   margin: 1em 0 1.5em;
@@ -21,7 +35,7 @@
     padding-right: 1em;
   }
 
-  tr:last-child{
+  tr:last-child {
     th, td {
       padding-bottom: 0;
     }

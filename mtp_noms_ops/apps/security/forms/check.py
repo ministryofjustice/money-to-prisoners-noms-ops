@@ -1,7 +1,9 @@
+import datetime
 import logging
 from functools import lru_cache
 
 from django import forms
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy
 from form_error_reporting import GARequestErrorReportingMixin
@@ -19,6 +21,12 @@ class CheckListForm(SecurityForm):
     """
     List of security checks.
     """
+    URGENT_IF_OLDER_THAN = datetime.timedelta(days=3)
+
+    def __init__(self, request, **kwargs):
+        super().__init__(request, **kwargs)
+        self.need_attention_date = timezone.now() - self.URGENT_IF_OLDER_THAN
+        self.need_attention_count = 0
 
     def get_api_request_params(self):
         """
@@ -33,9 +41,20 @@ class CheckListForm(SecurityForm):
 
     def get_object_list(self):
         """
-        Gets objects and converts datetimes found in them.
+        Gets objects, converts datetimes found in them and looks up count of urgent checks.
         """
-        return convert_date_fields(super().get_object_list(), include_nested=True)
+        self.need_attention_count = self.session.get(self.get_object_list_endpoint_path(), params={
+            'status': 'pending',
+            'started_at__lt': self.need_attention_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'offset': 0,
+            'limit': 1,
+        }).json()['count']
+
+        object_list = convert_date_fields(super().get_object_list(), include_nested=True)
+        for check in object_list:
+            check['needs_attention'] = check['credit']['started_at'] < self.need_attention_date
+
+        return object_list
 
 
 class ActionCheckForm(GARequestErrorReportingMixin, forms.Form):
