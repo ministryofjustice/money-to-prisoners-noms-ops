@@ -2476,6 +2476,29 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
     """
     Tests related to the check views.
     """
+    SAMPLE_CHECK = {
+        'id': 1,
+        'description': 'lorem ipsum',
+        'rules': ['RULE1', 'RULE1'],
+        'status': 'pending',
+        'credit': {
+            'id': 1,
+            'amount': 1000,
+            'card_expiry_date': '02/20',
+            'card_number_first_digits': '123456',
+            'card_number_last_digits': '9876',
+            'prisoner_name': 'John Doe',
+            'prisoner_number': 'A1234AB',
+            'sender_email': 'sender@example.com',
+            'sender_name': 'MAISIE NOLAN',
+            'source': 'online',
+            'started_at': '2019-07-02T10:00:00Z',
+            'received_at': None,
+            'credited_at': None,
+        },
+        'actioned_at': None,
+        'actioned_by': None,
+    }
 
     required_checks_permissions = (
         *required_permissions,
@@ -2493,6 +2516,16 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         Adds extra permissions to manage checks.
         """
         return super().get_user_data(*args, permissions=permissions, **kwargs)
+
+    def mock_need_attention_count(self, rsps, count):
+        rsps.add(
+            rsps.GET,
+            api_url('/security/checks/'),
+            json={
+                'count': count,
+                'results': [self.SAMPLE_CHECK] * count,
+            }
+        )
 
 
 class CheckListViewTestCase(BaseCheckViewTestCase):
@@ -2517,44 +2550,43 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 0)
             rsps.add(
                 rsps.GET,
                 api_url('/security/checks/'),
                 json={
                     'count': 1,
-                    'results': [
-                        {
-                            'id': 1,
-                            'description': 'lorem ipsum',
-                            'rules': ['RULE1', 'RULE1'],
-                            'status': 'pending',
-                            'credit': {
-                                'id': 1,
-                                'amount': 1000,
-                                'card_expiry_date': '02/20',
-                                'card_number_first_digits': '1234',
-                                'card_number_last_digits': '987',
-                                'credited_at': '2019-07-02T10:00:00Z',
-                                'prisoner_name': 'John Doe',
-                                'prisoner_number': 'A123B',
-                                'received_at': '2019-07-02T10:00:00Z',
-                                'sender_email': 'sender@example.com',
-                                'sender_name': 'MAISIE NOLAN',
-                                'source': 'online',
-                                'started_at': '2019-07-02T10:00:00Z',
-                            },
-                            'actioned_at': None,
-                            'actioned_by': None,
-                        }
-
-                    ],
+                    'results': [self.SAMPLE_CHECK],
                 },
             )
 
             response = self.client.get(reverse('security:check_list'), follow=True)
+            self.assertContains(response, '123456******9876 02/20')
 
-            self.assertContains(response, '1 credit')
-            self.assertContains(response, '1234******987 02/20')
+            content = response.content.decode()
+            self.assertIn('A1234AB', content)
+            self.assertIn('1 credit', content)
+            self.assertNotIn('credit needs attention', content)
+            self.assertNotIn('credits need attention', content)
+
+    def test_displays_count_of_credits_needing_attention(self):
+        """
+        Test that the view shows how many credits need attention.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 2)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 2,
+                    'results': [self.SAMPLE_CHECK, self.SAMPLE_CHECK],
+                },
+            )
+
+            response = self.client.get(reverse('security:check_list'), follow=True)
+            self.assertContains(response, '2 credits need attention')
 
 
 class AcceptCheckViewTestCase(BaseCheckViewTestCase):
@@ -2595,14 +2627,14 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
                         'card_expiry_date': '02/20',
                         'card_number_first_digits': '1234',
                         'card_number_last_digits': '987',
-                        'credited_at': '2019-07-02T10:00:00Z',
                         'prisoner_name': 'John Doe',
                         'prisoner_number': 'A123B',
-                        'received_at': '2019-07-02T10:00:00Z',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
+                        'received_at': None,
+                        'credited_at': None,
                     },
                     'actioned_at': None,
                     'actioned_by': None,
@@ -2637,14 +2669,14 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
                         'card_expiry_date': '02/20',
                         'card_number_first_digits': '1234',
                         'card_number_last_digits': '987',
-                        'credited_at': '2019-07-02T10:00:00Z',
                         'prisoner_name': 'John Doe',
                         'prisoner_number': 'A123B',
-                        'received_at': '2019-07-02T10:00:00Z',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
+                        'received_at': None,
+                        'credited_at': None,
                     },
                     'actioned_at': None,
                     'actioned_by': None,
@@ -2655,6 +2687,7 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
                 api_url(f'/security/checks/{check_id}/accept/'),
                 status=204,
             )
+            self.mock_need_attention_count(rsps, 0)
 
             url = reverse('security:accept_check', kwargs={'check_id': check_id})
             response = self.client.post(url, follow=True)
@@ -2683,14 +2716,14 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
                         'card_expiry_date': '02/20',
                         'card_number_first_digits': '1234',
                         'card_number_last_digits': '987',
-                        'credited_at': '2019-07-02T10:00:00Z',
                         'prisoner_name': 'John Doe',
                         'prisoner_number': 'A123B',
-                        'received_at': '2019-07-02T10:00:00Z',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
+                        'received_at': None,
+                        'credited_at': None,
                     },
                     'actioned_at': None,
                     'actioned_by': None,
@@ -2741,14 +2774,14 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
                         'card_expiry_date': '02/20',
                         'card_number_first_digits': '1234',
                         'card_number_last_digits': '987',
-                        'credited_at': '2019-07-02T10:00:00Z',
                         'prisoner_name': 'John Doe',
                         'prisoner_number': 'A123B',
-                        'received_at': '2019-07-02T10:00:00Z',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
+                        'received_at': None,
+                        'credited_at': None,
                     },
                     'actioned_at': None,
                     'actioned_by': None,
@@ -2783,14 +2816,14 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
                         'card_expiry_date': '02/20',
                         'card_number_first_digits': '1234',
                         'card_number_last_digits': '987',
-                        'credited_at': '2019-07-02T10:00:00Z',
                         'prisoner_name': 'John Doe',
                         'prisoner_number': 'A123B',
-                        'received_at': '2019-07-02T10:00:00Z',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
+                        'received_at': None,
+                        'credited_at': None,
                     },
                     'actioned_at': None,
                     'actioned_by': None,
@@ -2801,6 +2834,7 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
                 api_url(f'/security/checks/{check_id}/reject/'),
                 status=204,
             )
+            self.mock_need_attention_count(rsps, 0)
 
             url = reverse('security:reject_check', kwargs={'check_id': check_id})
             response = self.client.post(
@@ -2835,14 +2869,14 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
                         'card_expiry_date': '02/20',
                         'card_number_first_digits': '1234',
                         'card_number_last_digits': '987',
-                        'credited_at': '2019-07-02T10:00:00Z',
                         'prisoner_name': 'John Doe',
                         'prisoner_number': 'A123B',
-                        'received_at': '2019-07-02T10:00:00Z',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
+                        'received_at': None,
+                        'credited_at': None,
                     },
                     'actioned_at': None,
                     'actioned_by': None,
@@ -2881,14 +2915,14 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
                         'card_expiry_date': '02/20',
                         'card_number_first_digits': '1234',
                         'card_number_last_digits': '987',
-                        'credited_at': '2019-07-02T10:00:00Z',
                         'prisoner_name': 'John Doe',
                         'prisoner_number': 'A123B',
-                        'received_at': '2019-07-02T10:00:00Z',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
+                        'received_at': None,
+                        'credited_at': None,
                     },
                     'actioned_at': None,
                     'actioned_by': None,

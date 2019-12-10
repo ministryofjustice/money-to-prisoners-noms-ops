@@ -21,10 +21,26 @@
     {% endblocktrans %}
   </p>
 
-  <div class="mtp-results-list-v2 check-list">
-    <table class="table-font-xsmall">
+  {% if form.need_attention_count %}
+    <p class="font-medium">
+      <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
+      <strong>
+        {% blocktrans trimmed count count=form.need_attention_count with number=form.need_attention_count|separate_thousands %}
+          Warning: {{ number }} credit needs attention
+        {% plural %}
+          Warning: {{ number }} credits need attention
+        {% endblocktrans %}
+      </strong>
+    </p>
+  {% endif %}
+
+  <div class="mtp-results-list-v2 mtp-check-list">
+    <table class="mtp-table table-font-xsmall">
       <thead>
         <tr>
+          <th class="mtp-compact-cell">
+            <span class="visually-hidden">{% trans 'Needs attention?' %}</span>
+          </th>
           <th>{% trans 'Date sent' %}</th>
           <th>{% trans 'Debit card (from)' %}</th>
           <th>{% trans 'Prisoner (to)' %}</th>
@@ -35,8 +51,20 @@
       <tbody>
         {% for check in objects %}
         <tr>
+          <td class="mtp-compact-cell">
+            {% if check.needs_attention %}
+              <span class="visually-hidden">
+                {% trans 'This credit needs urgent attention!' %}
+              </span>
+              <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
+            {% else %}
+              <span class="visually-hidden">
+                {% trans 'This credit does not need urgent attention.' %}
+              </span>
+            {% endif %}
+          </td>
           <td>
-          {{ check.credit.started_at|date:'SHORT_DATETIME_FORMAT'}}
+            {{ check.credit.started_at|date:'SHORT_DATETIME_FORMAT'}}
           </td>
           <td>
             <a href="{{ check.credit|sender_profile_search_url }}">{{ check.credit.sender_name }}</a>
@@ -49,13 +77,17 @@
             {{ check.credit.prisoner_name }}
           </td>
           <td>
-          {{ check.credit.amount|currency }}
+            {{ check.credit.amount|currency }}
           </td>
           <td class="print-hidden">
             <a href="{% url 'security:accept_check' check_id=check.id %}" class="button">{% trans 'Accept' %}</a>
             <a href="{% url 'security:reject_check' check_id=check.id %}" class="button button-secondary">{% trans 'Reject' %}</a>
           </td>
         </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6">{% trans 'There are no credits to check.' %}</td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>

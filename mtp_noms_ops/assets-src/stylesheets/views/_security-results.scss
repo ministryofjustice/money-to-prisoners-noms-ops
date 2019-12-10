@@ -124,6 +124,11 @@
       background-position-y: 6px;
     }
 
+    .mtp-compact-cell {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
     @media print {
       td:nth-last-child(2),
       th:nth-last-child(2) {
