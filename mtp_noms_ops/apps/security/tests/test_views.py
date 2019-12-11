@@ -12,6 +12,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test import SimpleTestCase, override_settings
+from django.utils import timezone
 from django.utils.timezone import make_aware
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.test_utils import generate_tokens
@@ -2544,6 +2545,9 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             response = self.client.get(reverse('security:check_list'), follow=True)
             self.assertRedirects(response, reverse('security:dashboard'))
 
+    @mock.patch('security.forms.check.timezone', mock.MagicMock(
+        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2019, 7, 3, 9)))
+    ))
     def test_view(self):
         """
         Test that the view displays the pending checks returned by the API.
@@ -2566,9 +2570,13 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             content = response.content.decode()
             self.assertIn('A1234AB', content)
             self.assertIn('1 credit', content)
+            self.assertIn('This credit does not need attention today', content)
             self.assertNotIn('credit needs attention', content)
             self.assertNotIn('credits need attention', content)
 
+    @mock.patch('security.forms.check.timezone', mock.MagicMock(
+        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2019, 7, 5, 9)))
+    ))
     def test_displays_count_of_credits_needing_attention(self):
         """
         Test that the view shows how many credits need attention.
@@ -2586,7 +2594,11 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             )
 
             response = self.client.get(reverse('security:check_list'), follow=True)
-            self.assertContains(response, '2 credits need attention')
+            self.assertContains(response, '123456******9876 02/20')
+
+            content = response.content.decode()
+            self.assertIn('2 credits need attention', content)
+            self.assertIn('This credit needs attention today!', content)
 
     def test_calculation_of_date_before_which_checks_need_attention(self):
         with responses.RequestsMock() as rsps:

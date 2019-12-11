@@ -26,11 +26,13 @@
       <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
       <strong>
         {% blocktrans trimmed count count=form.need_attention_count with number=form.need_attention_count|separate_thousands %}
-          Warning: {{ number }} credit needs attention
+          Warning: {{ number }} credit needs attention today
         {% plural %}
-          Warning: {{ number }} credits need attention
+          Warning: {{ number }} credits need attention today
         {% endblocktrans %}
       </strong>
+      <br />
+      {% trans 'Credits with a warning are 3 days old or more and will expire soon.' %}
     </p>
   {% endif %}
 
@@ -54,12 +56,12 @@
           <td class="mtp-compact-cell">
             {% if check.needs_attention %}
               <span class="visually-hidden">
-                {% trans 'This credit needs urgent attention!' %}
+                {% trans 'This credit needs attention today!' %}
               </span>
               <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
             {% else %}
               <span class="visually-hidden">
-                {% trans 'This credit does not need urgent attention.' %}
+                {% trans 'This credit does not need attention today.' %}
               </span>
             {% endif %}
           </td>
