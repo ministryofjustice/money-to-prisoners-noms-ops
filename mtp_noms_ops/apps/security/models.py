@@ -23,6 +23,7 @@ credit_resolutions = {
     'manual': _('Requires manual processing'),
     'credited': _('Credited'),
     'refunded': _('Refunded'),
+    'failed': _('Failed or rejected'),
 }
 
 disbursement_methods = {
