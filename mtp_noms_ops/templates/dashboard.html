@@ -6,7 +6,7 @@
 {% block phase_banner %}
   {{ block.super }}
 
-  {% include "security/forms/prison-switcher.html" %}
+  {% include 'security/forms/prison-switcher.html' %}
 {% endblock %}
 
 {% block inner_content %}
@@ -64,6 +64,14 @@
           {% trans 'Notifications' %}
         </a>
       </div>
+
+      {% if request.can_manage_security_checks %}
+        <div class="column-one-third mtp-box">
+          <a href="{% url 'security:check_list' %}">
+            {% trans 'Pending' %}
+          </a>
+        </div>
+      {% endif %}
     </div>
 
   {% endif %}
