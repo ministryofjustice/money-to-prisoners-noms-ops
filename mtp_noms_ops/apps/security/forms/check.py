@@ -3,6 +3,7 @@ import logging
 from functools import lru_cache
 
 from django import forms
+from django.conf import settings
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy
@@ -47,6 +48,9 @@ class CheckListForm(SecurityForm):
         """
         params = super().get_api_request_params()
         params['status'] = 'pending'
+        # TODO: always add credit_resolution filter following delayed capture release
+        if settings.SHOW_ONLY_CHECKS_WITH_INITIAL_CREDIT:
+            params['credit_resolution'] = 'initial'
         return params
 
     def get_object_list_endpoint_path(self):
