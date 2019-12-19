@@ -40,7 +40,7 @@
                   {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' cell_classes='numeric' %}
                   {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' cell_classes='numeric' %}
                   {% sortable_cell _('Amount of credits') form.cleaned_data 'credit_total' cell_classes='numeric' %}
-                  <th class="numeric print-hidden">{% trans 'Action' %}</th>
+                  <th class="numeric print-hidden">{% trans 'Details' %}</th>
                 </tr>
               </thead>
               <tbody>
@@ -114,7 +114,7 @@
                   {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='numeric' %}
                   {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' cell_classes='numeric' %}
                   {% sortable_cell _('Amount of disbursements	') form.cleaned_data 'disbursement_total' cell_classes='numeric' %}
-                  <th class="numeric print-hidden">{% trans 'Action' %}</th>
+                  <th class="numeric print-hidden">{% trans 'Details' %}</th>
                 </tr>
               </thead>
               <tbody>

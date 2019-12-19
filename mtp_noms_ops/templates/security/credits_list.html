@@ -37,7 +37,7 @@
               <th>{% trans 'Prison' %}</th>
               {% endif %}
               {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
-              <th class="numeric print-hidden">{% trans 'Action' %}</th>
+              <th class="numeric">{% trans 'Details' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -69,8 +69,10 @@
                   </span>
                 </td>
 
-                <td class="numeric print-hidden">
-                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}">
+                <td class="numeric">
+                  {{ credit.resolution|format_resolution }}
+                  <br />
+                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}" class="print-hidden">
                     {% trans 'View details' %}
                   </a>
                 </td>
