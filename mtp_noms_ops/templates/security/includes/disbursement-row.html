@@ -42,7 +42,7 @@
   {{ disbursement.prison_name|default:'—' }}
 </td>
 
-<td>
+<td class="numeric">
   {{ disbursement.resolution|format_disbursement_resolution }}
   <br/>
   <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="print-hidden">
