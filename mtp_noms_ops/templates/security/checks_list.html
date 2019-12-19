@@ -74,9 +74,9 @@
             {{ check.credit|format_card_number }} {{ check.credit.card_expiry_date }}
           </td>
           <td>
-            <a href="{{ check.credit|prisoner_profile_search_url }}">{{ check.credit.prisoner_number }}</a>
+            <a href="{{ check.credit|prisoner_profile_search_url }}">{{ check.credit.prisoner_name }}</a>
             <br/>
-            {{ check.credit.prisoner_name }}
+            {{ check.credit.prisoner_number }}
           </td>
           <td>
             {{ check.credit.amount|currency }}
