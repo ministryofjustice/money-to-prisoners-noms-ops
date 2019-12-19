@@ -17,7 +17,7 @@
     </div>
 
     {% if form.is_valid and disbursements %}{% setup_highlight %}
-      <div class="mtp-results-list-v2">
+      <div class="mtp-results-list">
         <div class="print-hidden mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
           &nbsp;

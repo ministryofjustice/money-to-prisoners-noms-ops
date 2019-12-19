@@ -19,6 +19,22 @@
     margin-bottom: 1em;
   }
 
+  .mtp-table {
+    th, td {
+      padding: 0.75em 1em 0.75em 0;
+    }
+
+    td:last-child,
+    th:last-child {
+      padding-right: 0;
+    }
+
+    .mtp-compact-cell {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
   address {
     @include core-19;
     font-style: normal;
@@ -36,6 +52,16 @@
 
     p {
       font-size: 14px;
+    }
+
+    // amount column has special padding as it's right-aligned
+    td:nth-last-child(2),
+    th:nth-last-child(2) {
+      padding-right: 0;
+
+      a, span {
+        padding-right: 0;
+      }
     }
   }
 
@@ -98,42 +124,6 @@
   .mtp-credit-arrow, .mtp-disbursement-arrow {
     padding-top: 0;
     background: none;
-  }
-}
-
-
-.mtp-results-list-v2 {
-  @extend .mtp-results-list;
-
-  .mtp-table {
-    th, td {
-      padding: 0.75em 1em 0.75em 0;
-    }
-
-    td:last-child,
-    th:last-child {
-      padding-right: 0;
-    }
-
-    .mtp-sortable-cell {
-      background-position-y: 6px;
-    }
-
-    .mtp-compact-cell {
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    @media print {
-      td:nth-last-child(2),
-      th:nth-last-child(2) {
-        padding-right: 0;
-
-        a, span {
-          padding-right: 0;
-        }
-      }
-    }
   }
 }
 
