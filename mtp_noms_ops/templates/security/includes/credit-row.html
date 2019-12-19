@@ -35,14 +35,14 @@
   {% endif %}
 </td>
 
+<td>
+  {{ credit.prison_name|default_if_none:'—' }}
+</td>
+
 <td class="numeric">
   <span class="mtp-sortable-cell--pad">
     {{ credit.amount|currency }}
   </span>
-</td>
-
-<td>
-  {{ credit.prison_name|default_if_none:'—' }}
 </td>
 
 <td class="numeric">

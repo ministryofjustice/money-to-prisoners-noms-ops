@@ -13,8 +13,8 @@
   </th>
 {% endif %}
 
-{% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
-
 <th>{% trans 'Prison' %}</th>
+
+{% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
 
 <th class="numeric">{% trans 'Details' %}</th>

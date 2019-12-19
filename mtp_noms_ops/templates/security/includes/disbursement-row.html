@@ -27,14 +27,14 @@
   {% endblocktrans %}
 </td>
 
+<td>
+  {{ disbursement.prison_name|default:'—' }}
+</td>
+
 <td class="numeric">
   <span class="mtp-sortable-cell--pad">
     {{ disbursement.amount|currency }}
   </span>
-</td>
-
-<td>
-  {{ disbursement.prison_name|default:'—' }}
 </td>
 
 <td class="numeric">
