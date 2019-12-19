@@ -13,6 +13,8 @@
 
   {% include 'mtp_common/includes/message_box.html' %}
 
+  {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+
   <p class="mtp-search-description">
     {% if objects %}
       {{ form.search_description.description }}
