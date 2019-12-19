@@ -6,28 +6,6 @@
 </td>
 
 <td>
-  {% if not credit.prisoner_name %}
-    {% trans 'Unknown prisoner' %}
-  {% elif link_prisoner %}
-    <a href="{{ credit|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
-      {{ credit.prisoner_number }}
-    </a>
-    <br/>
-    {{ credit.prisoner_name }}
-  {% else %}
-    {{ credit.prisoner_number }}
-    <br/>
-    {{ credit.prisoner_name }}
-  {% endif %}
-</td>
-
-<td class="mtp-credit-arrow-cell__condensed">
-  <div class="mtp-credit-arrow">
-    <span class="visually-hidden">{{ credit.source|credit_source }}</span>
-  </div>
-</td>
-
-<td>
   {% if link_sender %}
     <a href="{{ credit|sender_profile_search_url }}" title="{% trans 'View payment source details' %}" class="mtp-print-url-hidden">
       {{ credit.sender_name|default:_('Sender details not recorded') }}
@@ -41,17 +19,33 @@
   {% endblocktrans %}
 </td>
 
-<td class="numeric">
-  <span class="mtp-sortable-cell--pad">
-    {{ credit.amount|currency }}
-  </span>
+<td>
+  {% if not credit.prisoner_name %}
+    {% trans 'Unknown prisoner' %}
+  {% elif link_prisoner %}
+    <a href="{{ credit|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
+      {{ credit.prisoner_name }}
+    </a>
+    <br />
+    {{ credit.prisoner_number }}
+  {% else %}
+    {{ credit.prisoner_name }}
+    <br />
+    {{ credit.prisoner_number }}
+  {% endif %}
 </td>
 
 <td>
   {{ credit.prison_name|default_if_none:'—' }}
 </td>
 
-<td>
+<td class="numeric">
+  <span class="mtp-sortable-cell--pad">
+    {{ credit.amount|currency }}
+  </span>
+</td>
+
+<td class="numeric">
   {{ credit.resolution|format_resolution }}
   <br/>
   <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}" class="print-hidden">

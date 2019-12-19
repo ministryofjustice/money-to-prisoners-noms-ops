@@ -6,22 +6,17 @@
 </td>
 
 <td>
-  {% if link_prisoner and disbursement.prisoner_number %}
-    <a href="{{ disbursement|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
-      {{ disbursement.prisoner_number }}
-    </a>
-    <br/>
-  {% elif disbursement.prisoner_number %}
-    {{ disbursement.prisoner_number }}
-    <br/>
-  {% endif %}
   {{ disbursement.prisoner_name|default_if_none:'—' }}
-</td>
-
-<td class="mtp-credit-arrow-cell__condensed">
-  <div class="mtp-disbursement-arrow">
-    <span class="visually-hidden">{{ disbursement.method|disbursement_method }}</span>
-  </div>
+  {% if disbursement.prisoner_number %}
+    <br />
+    {% if link_prisoner %}
+      <a href="{{ disbursement|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
+        {{ disbursement.prisoner_number }}
+      </a>
+    {% else %}
+      {{ disbursement.prisoner_number }}
+    {% endif %}
+  {% endif %}
 </td>
 
 <td>
@@ -32,17 +27,17 @@
   {% endblocktrans %}
 </td>
 
+<td>
+  {{ disbursement.prison_name|default:'—' }}
+</td>
+
 <td class="numeric">
   <span class="mtp-sortable-cell--pad">
     {{ disbursement.amount|currency }}
   </span>
 </td>
 
-<td>
-  {{ disbursement.prison_name|default:'—' }}
-</td>
-
-<td>
+<td class="numeric">
   {{ disbursement.resolution|format_disbursement_resolution }}
   <br/>
   <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="print-hidden">

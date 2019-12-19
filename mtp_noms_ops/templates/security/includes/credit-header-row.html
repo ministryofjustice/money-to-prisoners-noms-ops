@@ -3,22 +3,18 @@
 
 {% sortable_cell _('Date received') form.cleaned_data 'received_at' %}
 
+<th>{% trans 'Payment source (from)' %}</th>
+
 {% if link_prisoner %}
-  {% sortable_cell _('Prisoner') form.cleaned_data 'prisoner_number' %}
+  {% sortable_cell _('Prisoner (to)') form.cleaned_data 'prisoner_number' %}
 {% else %}
   <th>
-    {% trans 'Prisoner' %}
+    {% trans 'Prisoner (to)' %}
   </th>
 {% endif %}
 
-<th>
-  <span class="visually-hidden">{% trans 'Method' %}</span>
-</th>
-
-<th>{% trans 'Payment source' %}</th>
+<th>{% trans 'Prison' %}</th>
 
 {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
 
-<th>{% trans 'Prison' %}</th>
-
-<th>{% trans 'Status' %}</th>
+<th class="numeric">{% trans 'Details' %}</th>
