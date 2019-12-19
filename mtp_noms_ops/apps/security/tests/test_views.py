@@ -2565,7 +2565,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             )
 
             response = self.client.get(reverse('security:check_list'), follow=True)
-            self.assertContains(response, '123456******9876 02/20')
+            self.assertContains(response, '123456******9876 &nbsp; 02/20')
 
             content = response.content.decode()
             self.assertIn('A1234AB', content)
@@ -2594,7 +2594,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             )
 
             response = self.client.get(reverse('security:check_list'), follow=True)
-            self.assertContains(response, '123456******9876 02/20')
+            self.assertContains(response, '123456******9876 &nbsp; 02/20')
 
             content = response.content.decode()
             self.assertIn('2 credits need attention', content)
@@ -2667,7 +2667,7 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
             response = self.client.get(url, follow=True)
 
             self.assertContains(response, 'Accept credit')
-            self.assertContains(response, '1234******987 02/20')
+            self.assertContains(response, '1234******987 &nbsp; 02/20')
 
     def test_accept_check(self):
         """
@@ -2814,7 +2814,7 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
             response = self.client.get(url, follow=True)
 
             self.assertContains(response, 'Reject credit')
-            self.assertContains(response, '1234******987 02/20')
+            self.assertContains(response, '1234******987 &nbsp; 02/20')
 
     def test_reject_check(self):
         """

@@ -60,10 +60,10 @@
                 </div>
                 {% if credit.source == 'online' %}
                   {{ credit.sender_email|default_if_none:'—' }}<br/>
-                  {{ credit|format_card_number }} {{ credit.card_expiry_date|default_if_none:'' }}<br/>
+                  {{ credit|format_card_number }} &nbsp; {{ credit.card_expiry_date|default_if_none:'' }}<br/>
                   {% trans 'Debit card payment' %}
                 {% else %}
-                  {{ credit.sender_account_number }} {{ credit.sender_sort_code|format_sort_code }}<br/>
+                  {{ credit.sender_account_number }} &nbsp; {{ credit.sender_sort_code|format_sort_code }}<br/>
                   {% trans 'Bank transfer' %}
                 {% endif %}
               </td>
