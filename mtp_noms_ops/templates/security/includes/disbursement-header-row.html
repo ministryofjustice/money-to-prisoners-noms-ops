@@ -11,10 +11,6 @@
   </th>
 {% endif %}
 
-<th>
-  <span class="visually-hidden">{% trans 'Method' %}</span>
-</th>
-
 <th>{% trans 'Recipient (to)' %}</th>
 
 {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}

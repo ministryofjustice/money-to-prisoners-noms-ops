@@ -21,12 +21,6 @@
   {% endif %}
 </td>
 
-<td class="mtp-credit-arrow-cell__condensed">
-  <div class="mtp-credit-arrow">
-    <span class="visually-hidden">{{ credit.source|credit_source }}</span>
-  </div>
-</td>
-
 <td>
   {% if link_sender %}
     <a href="{{ credit|sender_profile_search_url }}" title="{% trans 'View payment source details' %}" class="mtp-print-url-hidden">
