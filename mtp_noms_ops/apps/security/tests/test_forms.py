@@ -1956,7 +1956,7 @@ class CreditFormV2TestCase(SecurityFormTestCase):
                     'received_at__gte': [
                         '‘Day’ should be between 1 and 31',
                         '‘Month’ should be between 1 and 12',
-                        '‘Year’ should be between 1900 and 2019',
+                        f'‘Year’ should be between 1900 and {datetime.date.today().year}',
                     ],
                 },
             ),
@@ -2300,7 +2300,7 @@ class DisbursementFormV2TestCase(SecurityFormTestCase):
                     'created__gte': [
                         '‘Day’ should be between 1 and 31',
                         '‘Month’ should be between 1 and 12',
-                        '‘Year’ should be between 1900 and 2019',
+                        f'‘Year’ should be between 1900 and {datetime.date.today().year}',
                     ],
                 },
             ),
