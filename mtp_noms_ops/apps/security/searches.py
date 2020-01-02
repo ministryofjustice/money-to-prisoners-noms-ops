@@ -16,6 +16,9 @@ def get_saved_searches(session):
 
 
 def populate_new_result_counts(session, saved_searches, delete_invalid=True):
+    if len(saved_searches) > 20:
+        # TODO: temporarily prevent listing new transaction counts for saved searches when there are too many to load
+        return []
     modified = []
     for saved_search in saved_searches:
         filters = filter_list_to_dict(saved_search['filters'])
