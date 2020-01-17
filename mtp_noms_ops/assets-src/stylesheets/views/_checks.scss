@@ -6,6 +6,18 @@
   }
 }
 
+table.mtp-table {
+  .mtp-check-row td {
+    border-bottom: none;
+  }
+
+  .mtp-check-description-row td {
+    border-top: none;
+    padding-top: 0;
+    font-size: smaller;
+  }
+}
+
 .mtp-check-needs-attention {
   display: inline-block;
   width: 30px;

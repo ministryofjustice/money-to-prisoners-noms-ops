@@ -53,7 +53,7 @@
       </thead>
       <tbody>
         {% for check in objects %}
-        <tr>
+        <tr class="mtp-check-row">
           <td class="mtp-compact-cell">
             {% if check.needs_attention %}
               <span class="visually-hidden">
@@ -86,6 +86,10 @@
             <a href="{% url 'security:accept_check' check_id=check.id %}" class="button">{% trans 'Accept' %}</a>
             <a href="{% url 'security:reject_check' check_id=check.id %}" class="button button-secondary">{% trans 'Reject' %}</a>
           </td>
+        </tr>
+        <tr class="mtp-check-description-row">
+          <td colspan="2"></td>
+          <td colspan="4" class="text-secondary">{{ check.description }}</td>
         </tr>
         {% empty %}
           <tr>
