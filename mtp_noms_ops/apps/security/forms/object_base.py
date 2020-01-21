@@ -98,6 +98,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     """
     page = forms.IntegerField(min_value=1, initial=1)
     page_size = 20
+    timeout = 60
 
     exclusive_date_params = []
     exclude_private_estate = False
@@ -202,7 +203,11 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
         if filters is None:
             return []
         try:
-            data = self.session.get(self.get_object_list_endpoint_path(), params=filters).json()
+            data = self.session.get(
+                self.get_object_list_endpoint_path(),
+                params=filters,
+                timeout=self.timeout,
+            ).json()
         except RequestException:
             self.add_error(None, _('This service is currently unavailable'))
             return []
