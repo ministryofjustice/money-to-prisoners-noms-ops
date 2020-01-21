@@ -27,9 +27,6 @@ class SendersDetailForm(SecurityDetailForm):
                                       '{ordering_description}.'
     unlisted_description = 'You can’t see credits sent by post.'
 
-    def get_object_endpoint(self):
-        return self.session.senders(self.object_id)
-
     def get_object_endpoint_path(self):
         return '/senders/%s/' % self.object_id
 
@@ -50,9 +47,6 @@ class PrisonersDetailForm(SecurityDetailForm):
     unfiltered_description_template = 'All credits received by this prisoner are shown below ordered by ' \
                                       '{ordering_description}.'
     unlisted_description = 'You can’t see credits received by post.'
-
-    def get_object_endpoint(self):
-        return self.session.prisoners(self.object_id)
 
     def get_object_endpoint_path(self):
         return '/prisoners/%s/' % self.object_id
