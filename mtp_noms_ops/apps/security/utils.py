@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
-from security import hmpps_employee_flag, confirmed_prisons_flag
+from security import hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag
 
 
 def convert_date_fields(object_list, include_nested=False):
@@ -171,6 +171,11 @@ def refresh_user_data(request, api_session=None):
 def is_hmpps_employee(user):
     flags = user.user_data.get('flags') or []
     return hmpps_employee_flag in flags
+
+
+def has_provided_job_information(user):
+    flags = user.user_data.get('flags') or []
+    return provided_job_info_flag in flags
 
 
 def can_skip_confirming_prisons(user):

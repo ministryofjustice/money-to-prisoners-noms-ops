@@ -25,6 +25,7 @@ from security import (
     hmpps_employee_flag,
     not_hmpps_employee_flag,
     required_permissions,
+    provided_job_info_flag,
 )
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
@@ -83,6 +84,19 @@ def no_saved_searches(rsps=None):
     )
 
 
+def mock_post_for_job_info_endpoint(rsps=None):
+    rsps = rsps or responses
+    rsps.add(
+        rsps.POST,
+        api_url('/job-information/'),
+        json={
+            'job_title': 'Evidence collator',
+            'prison_estate': 'National',
+            'tasks': 'Inmate Processing'
+        },
+    )
+
+
 @override_settings(
     CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}},
 )
@@ -133,7 +147,7 @@ class SecurityBaseTestCase(SimpleTestCase):
         email='sam@mtp.local',
         permissions=required_permissions,
         prisons=(SAMPLE_PRISONS[1],),
-        flags=(hmpps_employee_flag, confirmed_prisons_flag,),
+        flags=(hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag),
         roles=('security',),
     ):
         return {
@@ -275,6 +289,115 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
         )
 
 
+class JobInformationViewTestCase(SecurityBaseTestCase):
+    protected_views = [
+        'security:credit_list',
+        'security:dashboard',
+        'security:disbursement_list',
+        'security:prisoner_list',
+        'security:sender_list',
+    ]
+
+    @responses.activate
+    def test_redirects_when_provided_job_info_flag_is_missing(self):
+        self.login(
+            user_data=self.get_user_data(
+                flags=[
+                    confirmed_prisons_flag,
+                    hmpps_employee_flag,
+                ],
+            ),
+        )
+        for view in self.protected_views:
+            response = self.client.get(reverse(view), follow=True)
+            self.assertContains(response, '<!-- job_information -->')
+
+    @responses.activate
+    def test_can_view_app_when_user_has_provided_job_info_flag(self):
+        self.login(
+            user_data=self.get_user_data(
+                flags=[
+                    confirmed_prisons_flag,
+                    hmpps_employee_flag,
+                    provided_job_info_flag,
+                ]
+            ),
+        )
+        response = self.client.get(reverse('security:dashboard'), follow=True)
+        self.assertContains(response, '<!-- security:dashboard -->')
+
+    @responses.activate
+    def test_successful_form_post(self):
+        mock_post_for_job_info_endpoint()
+        self.login(user_data=self.get_user_data(
+            flags=[confirmed_prisons_flag, hmpps_employee_flag])
+        )
+        responses.add(
+            responses.PUT,
+            api_url('/users/shall/flags/%s/' % provided_job_info_flag),
+            json={}
+        )
+
+        response = self.client.post(reverse('job_information'), data={
+            'job_title': 'Evidence collator',
+            'prison_estate': 'National',
+            'tasks': 'yas sir'
+        }, follow=True)
+
+        self.assertContains(response, '<!-- security:dashboard -->')
+
+    @responses.activate
+    def test_unsuccessful_form_post(self):
+        mock_post_for_job_info_endpoint()
+        self.login(
+            user_data=self.get_user_data(
+                flags=[
+                    confirmed_prisons_flag,
+                    hmpps_employee_flag
+                ]
+            )
+        )
+        responses.add(
+            responses.PUT,
+            api_url('/users/shall/flags/%s/' % provided_job_info_flag),
+            json={}
+        )
+
+        response = self.client.post(reverse('job_information'), data={
+            'job_title': '',
+            'prison_estate': '',
+            'tasks': ''
+        }, follow=True)
+
+        self.assertContains(response, '<!-- job_information -->')
+        self.assertContains(response, 'This field is required')
+
+    @responses.activate
+    def test_form_adds_provided_job_info_flag(self):
+        mock_post_for_job_info_endpoint()
+        self.login(
+            user_data=self.get_user_data(
+                flags=[
+                    confirmed_prisons_flag,
+                    hmpps_employee_flag
+                ]
+            )
+        )
+        responses.add(
+            responses.PUT,
+            api_url('/users/shall/flags/%s/' % provided_job_info_flag),
+            json={}
+        )
+
+        response = self.client.post(reverse('job_information'), data={
+            'job_title': 'Evidence collator',
+            'prison_estate': 'National',
+            'tasks': 'yas sir'
+        }, follow=True)
+
+        self.assertIn(provided_job_info_flag, response.context['user'].user_data['flags'])
+
+
 class HMPPSEmployeeTestCase(SecurityBaseTestCase):
     protected_views = [
         'security:credit_list',
@@ -319,6 +442,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
                 flags=[
                     confirmed_prisons_flag,
                     hmpps_employee_flag,
+                    provided_job_info_flag,
                 ]
             )
         )
@@ -334,7 +458,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_employee_flag_set(self):
         self.login(user_data=self.get_user_data(
-            flags=['abc', confirmed_prisons_flag])
+            flags=['abc', confirmed_prisons_flag, provided_job_info_flag])
         )
         responses.add(
             responses.PUT,
@@ -354,6 +478,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
+                    provided_job_info_flag,
                 ],
             ),
         )
@@ -2100,7 +2225,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
 class NotificationsTestCase(SecurityBaseTestCase):
     def login(self, rsps):
         super().login(user_data=self.get_user_data(flags=[
-            hmpps_employee_flag, confirmed_prisons_flag,
+            hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag,
         ]), rsps=rsps)
 
     def test_no_notifications_not_monitoring(self):
@@ -2393,6 +2518,7 @@ class SettingsTestCase(SecurityBaseTestCase):
         with responses.RequestsMock() as rsps:
             self.login(user_data=self.get_user_data(flags=[
                 hmpps_employee_flag, confirmed_prisons_flag,
+                provided_job_info_flag,
             ]), rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -2422,6 +2548,7 @@ class SettingsTestCase(SecurityBaseTestCase):
         with responses.RequestsMock() as rsps:
             self.login(user_data=self.get_user_data(flags=[
                 hmpps_employee_flag, confirmed_prisons_flag,
+                provided_job_info_flag,
             ]), rsps=rsps)
             rsps.add(
                 rsps.GET,
