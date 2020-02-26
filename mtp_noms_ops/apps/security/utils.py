@@ -179,7 +179,8 @@ def has_provided_job_information(user):
 
 
 def can_skip_confirming_prisons(user):
-    already_confirmed = confirmed_prisons_flag in user.user_data.get('flags', [])
+    flags = user.user_data.get('flags') or []
+    already_confirmed = confirmed_prisons_flag in flags
     cannot_choose_prisons = not can_choose_prisons(user)
     return already_confirmed or cannot_choose_prisons
 
