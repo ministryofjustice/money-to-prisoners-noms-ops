@@ -74,11 +74,15 @@ class CheckListForm(SecurityForm):
         return object_list
 
 
-class ActionCheckForm(GARequestErrorReportingMixin, forms.Form):
+class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     Base CheckForm for accepting or rejecting a check.
     """
-    non_pending_error_msg = NotImplementedError
+    rejection_reason = forms.CharField(
+        label=gettext_lazy('Give details'),
+        required=False,
+    )
+    fiu_action = forms.CharField(max_length=10)
 
     def __init__(self, object_id, request, **kwargs):
         super().__init__(**kwargs)
@@ -112,64 +116,43 @@ class ActionCheckForm(GARequestErrorReportingMixin, forms.Form):
         """
         Makes sure that the check is in pending.
         """
+        status = self.cleaned_data['fiu_action']
+        if 'rejection_reason' in self.cleaned_data:
+            reason = self.cleaned_data['rejection_reason']
+        else:
+            reason = ''
+
+        if not reason and status == 'reject':
+            msg = forms.ValidationError('This field is required')
+            self.add_error('rejection_reason', msg)
+
         if not self.errors:  # if already in error => skip
             if self.get_object()['status'] != 'pending':
                 raise forms.ValidationError(
-                    gettext_lazy(self.non_pending_error_msg),
+                    gettext_lazy("You cannot action this credit as it's not in pending"),
                 )
         return super().clean()
 
+    def get_resolve_endpoint_path(self, fiu_action='accept'):
+        return f'/security/checks/{self.object_id}/{fiu_action}/'
 
-class AcceptCheckForm(ActionCheckForm):
-    """
-    Accepts a check.
-    """
-    non_pending_error_msg = "You cannot accept this credit as it's not in pending"
-
-    def get_accept_object_endpoint_path(self):
-        return f'/security/checks/{self.object_id}/accept/'
-
-    def accept(self):
+    def accept_or_reject(self):
         """
-        Accepts the check via the API.
+        Accepts or rejects the check via the API.
         :return: True if the API call was successful.
             If not, it returns False and populating the self.errors dict.
         """
-        try:
-            self.session.post(self.get_accept_object_endpoint_path())
-            return True
-        except RequestException:
-            logger.exception(f'Check {self.object_id} could not be accepted')
-            self.add_error(None, gettext_lazy('There was an error with your request.'))
-            return False
+        endpoint = self.get_resolve_endpoint_path(fiu_action=self.cleaned_data['fiu_action'])
 
-
-class RejectCheckForm(ActionCheckForm):
-    """
-    Rejects a check.
-    """
-    rejection_reason = forms.CharField(label=gettext_lazy('Give details'), required=True)
-
-    non_pending_error_msg = "You cannot reject this credit as it's not in pending"
-
-    def get_reject_object_endpoint_path(self):
-        return f'/security/checks/{self.object_id}/reject/'
-
-    def reject(self):
-        """
-        Rejects the check via the API.
-        :return: True if the API call was successful.
-            If not, it returns False and populating the self.errors dict.
-        """
         try:
             self.session.post(
-                self.get_reject_object_endpoint_path(),
+                endpoint,
                 json={
                     'rejection_reason': self.cleaned_data['rejection_reason'],
                 }
             )
             return True
         except RequestException:
-            logger.exception(f'Check {self.object_id} could not be rejected')
+            logger.exception(f'Check {self.object_id} could not be actioned')
             self.add_error(None, gettext_lazy('There was an error with your request.'))
             return False
