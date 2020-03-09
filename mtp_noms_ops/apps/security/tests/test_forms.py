@@ -11,7 +11,7 @@ from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 import responses
 
-from security.forms.check import AcceptCheckForm, CheckListForm, RejectCheckForm
+from security.forms.check import AcceptOrRejectCheckForm, CheckListForm
 from security.forms.object_base import AmountPattern, SecurityForm
 from security.forms.object_list import (
     AmountSearchFormMixin,
@@ -2470,9 +2470,9 @@ class CheckListFormTestCase(SimpleTestCase):
             )
 
 
-class AcceptCheckFormTestCase(SimpleTestCase):
+class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
     """
-    Tests related to the AcceptCheckForm.
+    Tests related to the AcceptOrRejectCheckForm.
     """
 
     def setUp(self):
@@ -2500,10 +2500,12 @@ class AcceptCheckFormTestCase(SimpleTestCase):
                 json=check_data,
             )
 
-            form = AcceptCheckForm(
+            form = AcceptOrRejectCheckForm(
                 object_id=check_id,
                 request=self.request,
-                data={},
+                data={
+                    'fiu_action': 'accept',
+                },
             )
 
             self.assertTrue(form.is_valid())
@@ -2531,14 +2533,16 @@ class AcceptCheckFormTestCase(SimpleTestCase):
                 status=204,
             )
 
-            form = AcceptCheckForm(
+            form = AcceptOrRejectCheckForm(
                 object_id=check_id,
                 request=self.request,
-                data={},
+                data={
+                    'fiu_action': 'accept',
+                },
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept(), True)
+            self.assertEqual(form.accept_or_reject(), True)
 
     def test_form_invalid(self):
         """
@@ -2557,19 +2561,21 @@ class AcceptCheckFormTestCase(SimpleTestCase):
                 json=check_data,
             )
 
-            form = AcceptCheckForm(
+            form = AcceptOrRejectCheckForm(
                 object_id=check_id,
                 request=self.request,
-                data={},
+                data={
+                    'fiu_action': 'accept',
+                },
             )
 
             self.assertFalse(form.is_valid())
             self.assertEqual(
                 form.errors,
-                {'__all__': ["You cannot accept this credit as it's not in pending"]},
+                {'__all__': ["You cannot action this credit as it's not in pending"]},
             )
 
-    def test_with_api_error(self):
+    def test_accept_with_api_error(self):
         """
         Test that if the API return a non-2xx status code, the accept method returns False
         and the error is available in form.errors
@@ -2593,60 +2599,20 @@ class AcceptCheckFormTestCase(SimpleTestCase):
                 json={'status': 'conflict'},
             )
 
-            form = AcceptCheckForm(
-                object_id=check_id,
-                request=self.request,
-                data={},
-            )
-
-            self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept(), False)
-            self.assertDictEqual(
-                form.errors,
-                {'__all__': ['There was an error with your request.']},
-            )
-
-
-class RejectCheckFormTestCase(SimpleTestCase):
-    """
-    Tests related to the RejectCheckForm.
-    """
-
-    def setUp(self):
-        super().setUp()
-        self.request = mock.MagicMock(
-            user=mock.MagicMock(
-                token=generate_tokens(),
-            ),
-        )
-
-    def test_get_object(self):
-        """
-        Test that the form makes the right API call to get the object.
-        """
-        check_id = 1
-        check_data = {
-            'id': check_id,
-            'description': 'lorem ipsum',
-            'status': 'pending',
-        }
-        with responses.RequestsMock() as rsps:
-            rsps.add(
-                rsps.GET,
-                api_url(f'/security/checks/{check_id}/'),
-                json=check_data,
-            )
-
-            form = RejectCheckForm(
+            form = AcceptOrRejectCheckForm(
                 object_id=check_id,
                 request=self.request,
                 data={
-                    'rejection_reason': 'reason',
+                    'fiu_action': 'accept',
                 },
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.get_object(), check_data)
+            self.assertEqual(form.accept_or_reject(), False)
+            self.assertDictEqual(
+                form.errors,
+                {'__all__': ['There was an error with your request.']},
+            )
 
     def test_reject(self):
         """
@@ -2670,16 +2636,17 @@ class RejectCheckFormTestCase(SimpleTestCase):
                 status=204,
             )
 
-            form = RejectCheckForm(
+            form = AcceptOrRejectCheckForm(
                 object_id=check_id,
                 request=self.request,
                 data={
                     'rejection_reason': 'reason',
+                    'fiu_action': 'reject',
                 },
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.reject(), True)
+            self.assertEqual(form.accept_or_reject(), True)
 
             last_request_body = json.loads(rsps.calls[-1].request.body)
             self.assertDictEqual(
@@ -2704,18 +2671,19 @@ class RejectCheckFormTestCase(SimpleTestCase):
                 json=check_data,
             )
 
-            form = RejectCheckForm(
+            form = AcceptOrRejectCheckForm(
                 object_id=check_id,
                 request=self.request,
                 data={
                     'rejection_reason': 'reason',
+                    'fiu_action': 'reject',
                 },
             )
 
             self.assertFalse(form.is_valid())
             self.assertEqual(
                 form.errors,
-                {'__all__': ["You cannot reject this credit as it's not in pending"]},
+                {'__all__': ["You cannot action this credit as it's not in pending"]},
             )
 
     def test_form_invalid_with_empty_rejection_reason(self):
@@ -2723,11 +2691,12 @@ class RejectCheckFormTestCase(SimpleTestCase):
         Test that if the rejection reason is not given, the form returns a validation error.
         """
         check_id = 1
-        form = RejectCheckForm(
+        form = AcceptOrRejectCheckForm(
             object_id=check_id,
             request=self.request,
             data={
                 'rejection_reason': '',
+                'fiu_action': 'reject',
             },
         )
 
@@ -2737,7 +2706,7 @@ class RejectCheckFormTestCase(SimpleTestCase):
             {'rejection_reason': ['This field is required']},
         )
 
-    def test_with_api_error(self):
+    def test_reject_with_api_error(self):
         """
         Test that if the API return a non-2xx status code, the accept method returns False
         and the error is available in form.errors
@@ -2761,16 +2730,17 @@ class RejectCheckFormTestCase(SimpleTestCase):
                 json={'status': 'conflict'},
             )
 
-            form = RejectCheckForm(
+            form = AcceptOrRejectCheckForm(
                 object_id=check_id,
                 request=self.request,
                 data={
                     'rejection_reason': 'reason',
+                    'fiu_action': 'reject',
                 },
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.reject(), False)
+            self.assertEqual(form.accept_or_reject(), False)
             self.assertDictEqual(
                 form.errors,
                 {'__all__': ['There was an error with your request.']},

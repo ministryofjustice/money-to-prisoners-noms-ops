@@ -61,3 +61,7 @@ table.mtp-table {
     margin-left: 1em;
   }
 }
+
+.button-warning {
+  @include button($red);
+}

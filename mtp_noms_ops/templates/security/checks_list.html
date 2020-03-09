@@ -83,8 +83,7 @@
             {{ check.credit.amount|currency }}
           </td>
           <td class="print-hidden">
-            <a href="{% url 'security:accept_check' check_id=check.id %}" class="button">{% trans 'Accept' %}</a>
-            <a href="{% url 'security:reject_check' check_id=check.id %}" class="button button-secondary">{% trans 'Reject' %}</a>
+            <a href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
           </td>
         </tr>
         <tr class="mtp-check-description-row">
