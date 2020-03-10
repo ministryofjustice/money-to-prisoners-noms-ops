@@ -9,10 +9,10 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from mtp_common.auth.api_client import get_api_session
 
-from security import confirmed_prisons_flag
-from settings.forms import ConfirmPrisonForm, ChangePrisonForm, ALL_PRISONS_CODE
+from security import confirmed_prisons_flag, provided_job_info_flag
+from settings.forms import ConfirmPrisonForm, ChangePrisonForm, ALL_PRISONS_CODE, JobInformationForm
 from security.models import EmailNotifications
-from security.utils import save_user_flags, can_skip_confirming_prisons
+from security.utils import save_user_flags, can_skip_confirming_prisons, has_provided_job_information
 
 
 class NomsOpsSettingsView(TemplateView):
@@ -152,3 +152,34 @@ class ConfirmPrisonsConfirmationView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['prisons'] = self.request.user_prisons
         return context
+
+
+class JobInformationView(SuccessURLAllowedHostsMixin, FormView):
+    title = _('Help us improve this service')
+    template_name = 'settings/job-information.html'
+    form_class = JobInformationForm
+
+    def get_success_url(self):
+        if REDIRECT_FIELD_NAME in self.request.GET:
+            next_page = self.request.GET[REDIRECT_FIELD_NAME]
+            url_is_safe = is_safe_url(
+                url=next_page,
+                allowed_hosts=self.get_success_url_allowed_hosts(),
+                require_https=self.request.is_secure(),
+            )
+
+            if url_is_safe:
+                return next_page
+        return reverse('security:dashboard')
+
+    def form_valid(self, form):
+        if has_provided_job_information(self.request.user):
+            return redirect(self.get_success_url())
+
+        session = get_api_session(self.request)
+        session.post('/job-information/', json={'title': form.cleaned_data['job_title_or_other'],
+                                                'prison_estate': form.cleaned_data['prison_estate'],
+                                                'tasks': form.cleaned_data['tasks']})
+
+        save_user_flags(self.request, provided_job_info_flag)
+        return super().form_valid(form)

@@ -264,3 +264,44 @@ class ChangePrisonForm(ApiForm):
         query_dict = self.request.GET.copy()
         query_dict['prisons'] = prisons
         return urlencode(query_dict, doseq=True)
+
+
+class JobInformationForm(ApiForm):
+    job_titles = [
+        ('Evidence collator', _('Evidence collator')),
+        ('Intelligence analyst', _('Intelligence analyst')),
+        ('Intelligence officer', _('Intelligence officer')),
+        ('Intelligence researcher', _('Intelligence researcher')),
+        ('Intelligence support officer', _('Intelligence support officer')),
+        ('Safety analyst', _('Safety analyst')),
+        ('Security analyst', _('Security analyst')),
+        ('Other', _('Other'))
+    ]
+
+    prison_estates = [
+        ('Local prison', _('Local prison')),
+        ('Regional', _('Regional')),
+        ('National', _('National')),
+    ]
+    job_title = forms.ChoiceField(label=_('What is your job title?'),
+                                  choices=job_titles)
+    prison_estate = forms.ChoiceField(label=_('Which area of the prison estate do you work in?'),
+                                      choices=prison_estates)
+    tasks = forms.CharField(label=_('What are your main tasks?'),
+                            help_text=_('Give a brief description.'))
+
+    other_title = forms.CharField(max_length=100,
+                                  label=_('Tell us your job title'),
+                                  required=False)
+
+    def clean(self):
+        if 'job_title' in self.cleaned_data:
+            if self.cleaned_data['job_title'] == 'Other':
+                if self.cleaned_data['other_title'] == '':
+                    self.add_error('other_title', _('Please enter your job title'))
+                else:
+                    self.cleaned_data['job_title_or_other'] = self.cleaned_data['other_title']
+            else:
+                self.cleaned_data['job_title_or_other'] = self.cleaned_data['job_title']
+
+        return self.cleaned_data

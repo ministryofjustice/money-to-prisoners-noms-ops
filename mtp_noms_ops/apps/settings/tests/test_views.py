@@ -10,6 +10,7 @@ from security import (
     confirmed_prisons_flag,
     hmpps_employee_flag,
     required_permissions,
+    provided_job_info_flag,
 )
 from security.models import EmailNotifications
 from security.tests import api_url
@@ -45,7 +46,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_does_not_redirect_after_confirmation(self):
         self.login(user_data=self.get_user_data(
-            flags=[hmpps_employee_flag, confirmed_prisons_flag])
+            flags=[hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag])
         )
         response = self.client.get(reverse('security:dashboard'), follow=True)
         self.assertContains(response, '<!-- security:dashboard -->')
@@ -53,7 +54,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_does_not_redirect_for_other_roles(self):
         self.login(user_data=self.get_user_data(
-            flags=[hmpps_employee_flag],
+            flags=[hmpps_employee_flag, provided_job_info_flag],
             roles=['security', 'prison-clerk'])
         )
         response = self.client.get(reverse('security:dashboard'), follow=True)
@@ -62,7 +63,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_does_not_redirect_for_user_admin(self):
         self.login(user_data=self.get_user_data(
-            flags=[hmpps_employee_flag],
+            flags=[hmpps_employee_flag, provided_job_info_flag],
             permissions=required_permissions + ['auth.change_user'])
         )
         response = self.client.get(reverse('security:dashboard'), follow=True)

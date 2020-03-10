@@ -8,10 +8,19 @@ from mtp_common.auth.api_client import get_api_session
 from mtp_noms_ops.utils import user_test
 from security import required_permissions, views
 from security.searches import get_saved_searches, populate_new_result_counts
-from security.utils import can_manage_security_checks, can_skip_confirming_prisons, is_hmpps_employee
+from security.utils import (
+    can_manage_security_checks,
+    can_skip_confirming_prisons,
+    is_hmpps_employee,
+    has_provided_job_information,
+)
 
 
 def security_test(view, extra_tests=None):
+    view = user_passes_test(
+        has_provided_job_information,
+        login_url='job_information',
+    )(view)
     view = user_passes_test(
         can_skip_confirming_prisons,
         login_url='confirm_prisons',

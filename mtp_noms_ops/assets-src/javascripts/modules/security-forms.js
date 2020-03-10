@@ -147,12 +147,14 @@ exports.SecurityForms = {
   init: function () {
     LegacySecurityForms.init();
 
-    if (!$('.mtp-security-advanced-search').length) {
-      return;
+    if ($('.mtp-security-advanced-search').length) {
+        this.bindConditionalShowHideSelection('amount_pattern');
+        this.bindConditionalShowHideSelection('prison_selector');
+        this.bindConditionalShowHideSelection('payment_method');
     }
-    this.bindConditionalShowHideSelection('amount_pattern');
-    this.bindConditionalShowHideSelection('prison_selector');
-    this.bindConditionalShowHideSelection('payment_method');
+    if ($('.mtp-job-information-form').length) {
+        this.bindConditionalShowHideSelection('job_title');
+    }
   },
 
   bindConditionalShowHideSelection: function (inputName) {

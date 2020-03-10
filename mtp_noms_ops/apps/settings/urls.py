@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 
 from . import views
 
-
 urlpatterns = [
     url(
         r'^$',
@@ -30,4 +29,9 @@ urlpatterns = [
         login_required(views.ConfirmPrisonsConfirmationView.as_view()),
         name='confirm_prisons_confirmation'
     ),
+    url(
+        r'^job_information/$',
+        login_required(views.JobInformationView.as_view()),
+        name='job_information'
+    )
 ]
