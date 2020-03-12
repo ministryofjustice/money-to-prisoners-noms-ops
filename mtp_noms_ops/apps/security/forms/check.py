@@ -13,7 +13,7 @@ from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
 from security.forms.object_base import SecurityForm
-from security.utils import convert_date_fields
+from security.utils import convert_date_fields, get_need_attention_date
 
 logger = logging.getLogger('mtp')
 
@@ -22,25 +22,11 @@ class CheckListForm(SecurityForm):
     """
     List of security checks.
     """
-    URGENT_IF_OLDER_THAN = datetime.timedelta(days=3)
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
-        self.need_attention_date = self.get_need_attention_date()
+        self.need_attention_date = get_need_attention_date()
         self.need_attention_count = 0
-
-    def get_need_attention_date(self):
-        """
-        Gets the cutoff datetime before which a payment is considered needing attention.
-        Now treats checks that would need attention today (before midnight) as needing attention now
-        so that the count will not vary throughout the day.
-
-        Idea: Could alternatively consider (9am the next working day - URGENT_IF_OLDER_THAN) as needs attention cutoff
-        in order to account for long weekends and holidays.
-        """
-        tomorrow = timezone.now() + datetime.timedelta(days=1)
-        tomorrow = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
-        return tomorrow - self.URGENT_IF_OLDER_THAN
 
     def get_api_request_params(self):
         """
@@ -78,8 +64,9 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     Base CheckForm for accepting or rejecting a check.
     """
+
     rejection_reason = forms.CharField(
-        label=gettext_lazy('Give details'),
+        label=gettext_lazy('Give details (details are optional when accepting)'),
         required=False,
     )
     fiu_action = forms.CharField(max_length=10)
@@ -87,6 +74,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def __init__(self, object_id, request, **kwargs):
         super().__init__(**kwargs)
         self.object_id = object_id
+        self.need_attention_date = get_need_attention_date()
         self.request = request
 
     @lru_cache()
@@ -97,7 +85,9 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         """
         try:
             obj = self.session.get(self.get_object_endpoint_path()).json()
-            return convert_date_fields(obj, include_nested=True)
+            convert_dates_obj = convert_date_fields(obj, include_nested=True)
+            convert_dates_obj['needs_attention'] = convert_dates_obj['credit']['started_at'] < self.need_attention_date
+            return obj
         except HttpNotFoundError:
             self.add_error(None, gettext_lazy('Not found'))
             return None
