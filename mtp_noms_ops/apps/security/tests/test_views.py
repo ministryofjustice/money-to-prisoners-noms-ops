@@ -2672,10 +2672,8 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             response = self.client.get(reverse('security:check_list'), follow=True)
             self.assertRedirects(response, reverse('security:dashboard'))
 
-    @mock.patch('security.forms.check.timezone', mock.MagicMock(
-        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2019, 7, 3, 9)))
-    ))
-    def test_view(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_view(self, mock_get_need_attention_date):
         """
         Test that the view displays the pending checks returned by the API.
         """

@@ -18,6 +18,17 @@ table.mtp-table {
   }
 }
 
+table.mtp-table--review {
+  margin-bottom: 4em;
+  .mtp-check-row > td:nth-of-type(2) {
+    white-space: nowrap;
+  }
+  .mtp-check-description-row td {
+    border-top: 0;
+    font-size: inherit;
+  }
+}
+
 .mtp-check-needs-attention {
   display: inline-block;
   width: 30px;

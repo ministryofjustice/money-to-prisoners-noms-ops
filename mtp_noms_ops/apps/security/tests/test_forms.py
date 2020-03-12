@@ -7,6 +7,8 @@ from urllib.parse import parse_qs
 
 from django import forms
 from django.test import SimpleTestCase, override_settings
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 import responses
@@ -2483,6 +2485,9 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             ),
         )
 
+    @mock.patch('security.forms.check.timezone', mock.MagicMock(
+        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2020, 1, 19, 9)))
+    ))
     def test_get_object(self):
         """
         Test that the form makes the right API call to get the object.
@@ -2492,6 +2497,63 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             'id': check_id,
             'description': 'lorem ipsum',
             'status': 'pending',
+            'credit': {
+                'started_at': '2020-01-19T10:45:13.529053Z',
+            },
+        }
+
+        expected_check_data = {
+            'id': check_id,
+            'description': 'lorem ipsum',
+            'status': 'pending',
+            'needs_attention': False,
+        }
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_data,
+            )
+
+            form = AcceptOrRejectCheckForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'fiu_action': 'accept',
+                },
+            )
+
+            form_object = form.get_object()
+
+            self.assertTrue(form.is_valid())
+            self.assertFalse(form_object['needs_attention'])
+            self.assertEqual(form_object['status'], expected_check_data['status'])
+
+    @mock.patch('security.forms.check.timezone', mock.MagicMock(
+        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2020, 1, 24, 9)))
+    ))
+    def test_sets_needs_attention_true_if_within_time_delta(self):
+        """
+        Test that the form makes the right API call to get the object.
+        """
+        check_id = 1
+        check_data = {
+            'id': check_id,
+            'description': 'lorem ipsum',
+            'status': 'pending',
+            'credit': {
+                'started_at': '2020-01-19T03:45:13.529053Z',
+            },
+        }
+        expected_check_data = {
+            'id': check_id,
+            'description': 'lorem ipsum',
+            'status': 'pending',
+            'needs_attention': True,
+            'credit': {
+                'started_at': parse_datetime('2020-01-19T03:45:13.529053Z'),
+            },
         }
         with responses.RequestsMock() as rsps:
             rsps.add(
@@ -2509,7 +2571,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.get_object(), check_data)
+            self.assertEqual(form.get_object(), expected_check_data)
 
     def test_accept(self):
         """
@@ -2520,6 +2582,9 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             'id': check_id,
             'description': 'lorem ipsum',
             'status': 'pending',
+            'credit': {
+                'started_at': '2020-01-19T03:45:13.529053Z',
+            },
         }
         with responses.RequestsMock() as rsps:
             rsps.add(
@@ -2553,6 +2618,9 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             'id': check_id,
             'description': 'lorem ipsum',
             'status': 'rejected',
+            'credit': {
+                'started_at': '2020-01-19T03:45:13.529053Z',
+            },
         }
         with responses.RequestsMock() as rsps:
             rsps.add(
@@ -2585,6 +2653,9 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             'id': check_id,
             'description': 'lorem ipsum',
             'status': 'pending',
+            'credit': {
+                'started_at': '2020-01-19T03:45:13.529053Z',
+            },
         }
         with responses.RequestsMock() as rsps, silence_logger():
             rsps.add(
@@ -2623,6 +2694,9 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             'id': check_id,
             'description': 'lorem ipsum',
             'status': 'pending',
+            'credit': {
+                'started_at': '2020-01-19T03:45:13.529053Z',
+            },
         }
         with responses.RequestsMock() as rsps:
             rsps.add(
@@ -2663,6 +2737,9 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             'id': check_id,
             'description': 'lorem ipsum',
             'status': 'accepted',
+            'credit': {
+                'started_at': '2020-01-19T03:45:13.529053Z',
+            },
         }
         with responses.RequestsMock() as rsps:
             rsps.add(
@@ -2716,6 +2793,9 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             'id': check_id,
             'description': 'lorem ipsum',
             'status': 'pending',
+            'credit': {
+                'started_at': '2020-01-19T03:45:13.529053Z',
+            },
         }
         with responses.RequestsMock() as rsps, silence_logger():
             rsps.add(
