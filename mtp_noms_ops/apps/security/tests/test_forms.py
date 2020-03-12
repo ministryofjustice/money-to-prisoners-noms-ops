@@ -2716,7 +2716,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                 object_id=check_id,
                 request=self.request,
                 data={
-                    'rejection_reason': 'reason',
+                    'decision_reason': 'reason',
                     'fiu_action': 'reject',
                 },
             )
@@ -2727,7 +2727,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             last_request_body = json.loads(rsps.calls[-1].request.body)
             self.assertDictEqual(
                 last_request_body,
-                {'rejection_reason': 'reason'},
+                {'decision_reason': 'reason'},
             )
 
     def test_form_invalid_if_check_not_in_pending(self):
@@ -2754,7 +2754,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                 object_id=check_id,
                 request=self.request,
                 data={
-                    'rejection_reason': 'reason',
+                    'decision_reason': 'reason',
                     'fiu_action': 'reject',
                 },
             )
@@ -2765,7 +2765,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                 {'__all__': ["You cannot action this credit as it's not in pending"]},
             )
 
-    def test_form_invalid_with_empty_rejection_reason(self):
+    def test_form_invalid_with_empty_decision_reason(self):
         """
         Test that if the rejection reason is not given, the form returns a validation error.
         """
@@ -2774,7 +2774,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             object_id=check_id,
             request=self.request,
             data={
-                'rejection_reason': '',
+                'decision_reason': '',
                 'fiu_action': 'reject',
             },
         )
@@ -2782,7 +2782,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors,
-            {'rejection_reason': ['This field is required']},
+            {'decision_reason': ['This field is required']},
         )
 
     def test_reject_with_api_error(self):
@@ -2816,7 +2816,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                 object_id=check_id,
                 request=self.request,
                 data={
-                    'rejection_reason': 'reason',
+                    'decision_reason': 'reason',
                     'fiu_action': 'reject',
                 },
             )
