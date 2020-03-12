@@ -63,7 +63,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     Base CheckForm for accepting or rejecting a check.
     """
 
-    rejection_reason = forms.CharField(
+    decision_reason = forms.CharField(
         label=gettext_lazy('Give details (details are optional when accepting)'),
         required=False,
     )
@@ -105,14 +105,14 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         Makes sure that the check is in pending.
         """
         status = self.cleaned_data['fiu_action']
-        if 'rejection_reason' in self.cleaned_data:
-            reason = self.cleaned_data['rejection_reason']
+        if 'decision_reason' in self.cleaned_data:
+            reason = self.cleaned_data['decision_reason']
         else:
             reason = ''
 
         if reason == '' and status == 'reject':
             msg = forms.ValidationError('This field is required')
-            self.add_error('rejection_reason', msg)
+            self.add_error('decision_reason', msg)
 
         if not self.errors:  # if already in error => skip
             if self.get_object()['status'] != 'pending':
@@ -136,7 +136,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
             self.session.post(
                 endpoint,
                 json={
-                    'rejection_reason': self.cleaned_data['rejection_reason'],
+                    'decision_reason': self.cleaned_data['decision_reason'],
                 }
             )
             return True

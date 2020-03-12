@@ -2961,7 +2961,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
             response = self.client.post(
                 url,
                 data={
-                    'rejection_reason': 'Some reason',
+                    'decision_reason': 'Some reason',
                     'fiu_action': 'reject',
                 },
                 follow=True,
@@ -3009,7 +3009,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
             response = self.client.post(
                 url,
                 data={
-                    'rejection_reason': 'Some reason',
+                    'decision_reason': 'Some reason',
                     'fiu_action': 'reject',
                 },
                 follow=True,
@@ -3017,7 +3017,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
 
             self.assertContains(response, 'You cannot action this credit')
 
-    def test_invalid_with_empty_rejection_reason(self):
+    def test_invalid_with_empty_decision_reason(self):
         """
         Test that if the rejection reason is not given, a validation error is displayed.
         """
