@@ -6,7 +6,13 @@ from unittest import mock
 from django.utils.timezone import localtime, make_aware, utc
 
 from security.templatetags.security import currency, pence, format_sort_code
-from security.utils import convert_date_fields, NameSet, EmailSet, remove_whitespaces_and_hyphens
+from security.utils import (
+    convert_date_fields,
+    NameSet,
+    EmailSet,
+    remove_whitespaces_and_hyphens,
+    get_need_attention_date
+)
 
 
 class UtilTestCase(unittest.TestCase):
@@ -76,6 +82,18 @@ class RemoveWhitespacesAndHyphensTestCase(unittest.TestCase):
             remove_whitespaces_and_hyphens(' SW 1A-1a A '),
             'SW1A1aA',
         )
+
+
+class GetNeedAttentionDateTestCase(unittest.TestCase):
+    """
+    Test that the get needs attention date set up returns the date
+    that would be 3 days ago, inclusively
+    """
+    @mock.patch('security.utils.timezone', mock.MagicMock(
+        now=mock.MagicMock(return_value=make_aware(datetime.datetime(2019, 7, 3, 9)))
+    ))
+    def test_returns_date_3_days_ago_inclusively(self):
+        self.assertEqual(get_need_attention_date(), make_aware(datetime.datetime(2019, 7, 1)))
 
 
 class ConvertDateFieldsTestCase(unittest.TestCase):

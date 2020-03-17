@@ -12,7 +12,6 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test import SimpleTestCase, override_settings
-from django.utils import timezone
 from django.utils.timezone import make_aware
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.test_utils import generate_tokens
@@ -2677,6 +2676,8 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
         """
         Test that the view displays the pending checks returned by the API.
         """
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
+
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             self.mock_need_attention_count(rsps, 0)
@@ -2699,13 +2700,13 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             self.assertNotIn('credit needs attention', content)
             self.assertNotIn('credits need attention', content)
 
-    @mock.patch('security.forms.check.timezone', mock.MagicMock(
-        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2019, 7, 5, 9)))
-    ))
-    def test_displays_count_of_credits_needing_attention(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_displays_count_of_credits_needing_attention(self, mock_get_need_attention_date):
         """
         Test that the view shows how many credits need attention.
         """
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 9, 9))
+
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             self.mock_need_attention_count(rsps, 2)

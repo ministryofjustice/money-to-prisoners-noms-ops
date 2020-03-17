@@ -11,6 +11,22 @@ from mtp_common.auth.api_client import get_api_session
 from security import hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag
 
 
+def get_need_attention_date():
+    """
+    Gets the cutoff datetime before which a payment is considered needing attention.
+    Now treats checks that would need attention today (before midnight) as needing attention now
+    so that the count will not vary throughout the day.
+
+    Idea: Could alternatively consider (9am the next working day - URGENT_IF_OLDER_THAN) as needs attention cutoff
+    in order to account for long weekends and holidays.
+    """
+    urgent_if_older_than = datetime.timedelta(days=3)
+
+    tomorrow = timezone.now() + datetime.timedelta(days=1)
+    tomorrow = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
+    return tomorrow - urgent_if_older_than
+
+
 def convert_date_fields(object_list, include_nested=False):
     """
     MTP API responds with string date/time fields, this filter converts them to python objects.
