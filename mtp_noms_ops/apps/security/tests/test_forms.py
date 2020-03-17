@@ -7,7 +7,7 @@ from urllib.parse import parse_qs
 
 from django import forms
 from django.test import SimpleTestCase, override_settings
-from django.utils import timezone
+from django.utils.timezone import make_aware
 from django.utils.dateparse import parse_datetime
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
@@ -2485,13 +2485,14 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             ),
         )
 
-    @mock.patch('security.forms.check.timezone', mock.MagicMock(
-        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2020, 1, 19, 9)))
-    ))
-    def test_get_object(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_get_object(self, mock_get_need_attention_date):
         """
         Test that the form makes the right API call to get the object.
         """
+
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
+
         check_id = 1
         check_data = {
             'id': check_id,
@@ -2530,13 +2531,14 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             self.assertFalse(form_object['needs_attention'])
             self.assertEqual(form_object['status'], expected_check_data['status'])
 
-    @mock.patch('security.forms.check.timezone', mock.MagicMock(
-        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2020, 1, 24, 9)))
-    ))
-    def test_sets_needs_attention_true_if_within_time_delta(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_sets_needs_attention_true_if_within_time_delta(self, mock_get_need_attention_date):
         """
         Test that the form makes the right API call to get the object.
         """
+
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2020, 1, 25, 9))
+
         check_id = 1
         check_data = {
             'id': check_id,
