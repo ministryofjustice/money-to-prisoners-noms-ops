@@ -13,4 +13,4 @@ from .object_list import (  # noqa: F401
     NotificationListView,
 )
 from .review import ReviewCreditsView  # noqa: F401
-from .check import AcceptOrRejectCheckView, CheckListView  # noqa: F401
+from .check import AcceptOrRejectCheckView, CheckListView, CreditsHistoryListView  # noqa: F401

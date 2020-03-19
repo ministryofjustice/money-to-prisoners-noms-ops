@@ -58,6 +58,30 @@ class CheckListForm(SecurityForm):
         return object_list
 
 
+class CreditsHistoryListForm(SecurityForm):
+    """
+    List of security checks.
+    """
+
+    def get_api_request_params(self):
+        """
+        Gets all checks where actioned_by is not None.
+        """
+        params = super().get_api_request_params()
+        params['actioned_by'] = True
+        return params
+
+    def get_object_list_endpoint_path(self):
+        return '/security/checks/'
+
+    def get_object_list(self):
+        """
+        Gets objects, converts datetimes found in them.
+        """
+        object_list = convert_date_fields(super().get_object_list(), include_nested=True)
+        return object_list
+
+
 class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     Base CheckForm for accepting or rejecting a check.
