@@ -20,7 +20,7 @@ class FeedbackContextMixin:
 
 class GetHelpView(FeedbackContextMixin, BaseGetHelpView):
     success_url = reverse_lazy('feedback_success')
-    ticket_subject = 'MTP NOMS Ops Feedback'
+    ticket_subject = 'MTP for digital team - Prisoner Money Intelligence'
     ticket_tags = ['feedback', 'mtp', 'noms-ops', settings.ENVIRONMENT]
 
 
