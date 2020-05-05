@@ -2854,6 +2854,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
     Tests related to AcceptOrRejectCheckView.
     """
     sender_id = 2
+    prisoner_id = 3
 
     SENDER_CREDIT = dict(
         list(BaseCheckViewTestCase.SAMPLE_CREDIT_BASE.items())
@@ -2871,9 +2872,31 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         )
     )
     SENDER_CREDIT['security_check']['description'] = '☢☢☢ This looks roight dodgy this does☣☣☣'
+
     SENDER_CHECK = copy.deepcopy(BaseCheckViewTestCase.SAMPLE_CHECK)
     SENDER_CHECK['credit']['sender_profile'] = sender_id
+    SENDER_CHECK['credit']['prisoner_profile'] = prisoner_id
     SENDER_CHECK_REJECTED = dict(list(SENDER_CHECK.items()) + [('status', 'rejected')])
+
+    PRISONER_CREDIT = dict(
+        list(BaseCheckViewTestCase.SAMPLE_CREDIT_BASE.items())
+        + list(
+            {
+                'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
+                'amount': 10,
+                'card_expiry_date': '02/50',
+                'card_number_first_digits': '01199988199',
+                'card_number_last_digits': '7253',
+                'sender_email': 'someoneelse@example.com',
+                'sender_name': 'SOMEONE ELSE',
+                'prison': 'LEI',
+                'prison_name': 'HMP LEEDS',
+                'billing_address': {'line1': 'Somewhere else', 'city': 'London'},
+                'resolution': 'credited',
+            }.items()
+        )
+    )
+    PRISONER_CREDIT['security_check']['description'] = 'I guess this is probably fine???'
 
     def test_cannot_access_view(self):
         """
@@ -2934,6 +2957,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'results': [self.SENDER_CREDIT] * 4,
                 }
             )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{self.prisoner_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.PRISONER_CREDIT] * 4,
+                }
+            )
             response = self.client.get(
                 reverse(
                     'security:resolve_check',
@@ -2946,9 +2977,18 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         self.assertIn('02/20', response_content)
         self.assertIn('John Doe', response_content)
         self.assertIn('£10.00', response_content)
+
+        #Senders previous credit
         self.assertIn('Ms A. Nother Prisoner', response_content)
         self.assertIn('£10,000.00', response_content)
         self.assertIn('☢☢☢ This looks roight dodgy this does☣☣☣', response_content)
+
+        #Prisoners previous credit
+        self.assertIn('10p', response_content)
+        self.assertIn('01199988199******7253', response_content)
+        self.assertIn('02/50', response_content)
+        self.assertIn('SOMEONE ELSE', response_content)
+        self.assertIn('I guess this is probably fine???', response_content)
 
     def test_accept_check(self):
         """
@@ -3000,6 +3040,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 json={
                     'count': 4,
                     'results': [self.SENDER_CREDIT] * 4,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{self.prisoner_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.PRISONER_CREDIT] * 4,
                 }
             )
 
@@ -3067,6 +3115,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'results': [self.SENDER_CREDIT] * 4,
                 }
             )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{self.prisoner_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.PRISONER_CREDIT] * 4,
+                }
+            )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
@@ -3098,6 +3154,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 json={
                     'count': 4,
                     'results': [self.SENDER_CREDIT] * 4,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/prisoners/{self.prisoner_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.PRISONER_CREDIT] * 4,
                 }
             )
 
