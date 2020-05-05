@@ -1,4 +1,5 @@
 import base64
+import copy
 from contextlib import contextmanager
 import datetime
 import json
@@ -2603,50 +2604,32 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
     """
     Tests related to the check views.
     """
-    SAMPLE_CHECK = {
+    SAMPLE_CHECK_BASE = {
         'id': 1,
         'description': 'lorem ipsum',
         'rules': ['RULE1', 'RULE1'],
         'status': 'pending',
-        'credit': {
-            'id': 1,
-            'amount': 1000,
-            'card_expiry_date': '02/20',
-            'card_number_first_digits': '123456',
-            'card_number_last_digits': '9876',
-            'prisoner_name': 'John Doe',
-            'prisoner_number': 'A1234AB',
-            'sender_email': 'sender@example.com',
-            'sender_name': 'MAISIE NOLAN',
-            'source': 'online',
-            'started_at': '2019-07-02T10:00:00Z',
-            'received_at': None,
-            'credited_at': None,
-        },
         'actioned_at': None,
         'actioned_by': None,
     }
 
-    SENDER_CREDIT = {
+    SAMPLE_CREDIT_BASE = {
         'id': 1,
+        'amount': 1000,
+        'card_expiry_date': '02/20',
+        'card_number_first_digits': '123456',
+        'card_number_last_digits': '9876',
+        'prisoner_name': 'John Doe',
+        'prisoner_number': 'A1234AB',
+        'sender_email': 'sender@example.com',
+        'sender_name': 'MAISIE NOLAN',
         'source': 'online',
-        'amount': 23000,
-        'intended_recipient': 'Mr G Melley',
-        'prisoner_number': 'A1411AE',
-        'prisoner_name': 'GEORGE MELLEY',
-        'prison': 'LEI',
-        'prison_name': 'HMP LEEDS',
-        'sender_name': 'Ian Sendy',
-        'sender_email': 'ian@mail.local',
-        'billing_address': {'line1': '102PF', 'city': 'London'},
-        'card_number_first_digits': '111122',
-        'card_number_last_digits': '4444',
-        'card_expiry_date': '07/18',
-        'resolution': 'credited',
-        'started_at': '2016-05-25T20:21:00Z',
-        'received_at': '2016-05-25T20:24:00Z',
-        'credited_at': '2016-05-26T08:27:00Z'
+        'started_at': '2019-07-02T10:00:00Z',
+        'received_at': None,
+        'credited_at': None,
     }
+
+    SAMPLE_CHECK = dict(list(SAMPLE_CHECK_BASE.items()) + [('credit', SAMPLE_CREDIT_BASE)])
 
     required_checks_permissions = (
         *required_permissions,
@@ -2782,6 +2765,24 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
     """
     Tests related to AcceptOrRejectCheckView.
     """
+    sender_id = 2
+
+    SENDER_CREDIT = dict(
+        list(BaseCheckViewTestCase.SAMPLE_CREDIT_BASE.items())
+        + list(
+            {
+                'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE,
+                'intended_recipient': 'Mr G Melley',
+                'prison': 'LEI',
+                'prison_name': 'HMP LEEDS',
+                'billing_address': {'line1': '102PF', 'city': 'London'},
+                'resolution': 'credited',
+            }.items()
+        )
+    )
+    SENDER_CHECK = copy.deepcopy(BaseCheckViewTestCase.SAMPLE_CHECK)
+    SENDER_CHECK['credit']['sender_profile'] = sender_id
+    SENDER_CHECK_REJECTED = dict(list(SENDER_CHECK.items()) + [('status', 'rejected')])
 
     def test_cannot_access_view(self):
         """
@@ -2800,40 +2801,16 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         Test that the view displays the pending check returned by the API.
         """
         check_id = 1
-        sender_id = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
-                json={
-                    'id': check_id,
-                    'description': 'lorem ipsum',
-                    'rules': ['RULE1', 'RULE1'],
-                    'status': 'pending',
-                    'credit': {
-                        'id': 1,
-                        'amount': 1000,
-                        'card_expiry_date': '02/20',
-                        'card_number_first_digits': '1234',
-                        'card_number_last_digits': '987',
-                        'prisoner_name': 'John Doe',
-                        'prisoner_number': 'A123B',
-                        'sender_email': 'sender@example.com',
-                        'sender_name': 'MAISIE NOLAN',
-                        'sender_profile': sender_id,
-                        'source': 'online',
-                        'started_at': '2019-07-02T10:00:00Z',
-                        'received_at': None,
-                        'credited_at': None,
-                    },
-                    'actioned_at': None,
-                    'actioned_by': None,
-                },
+                json=self.SENDER_CHECK
             )
             rsps.add(
                 rsps.GET,
-                api_url(f'/senders/{sender_id}/credits/'),
+                api_url(f'/senders/{self.sender_id}/credits/'),
                 json={
                     'count': 4,
                     'results': [self.SENDER_CREDIT] * 4,
@@ -2844,47 +2821,23 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             response = self.client.get(url, follow=True)
 
             self.assertContains(response, 'Accept credit')
-            self.assertContains(response, '1234******987 &nbsp; 02/20')
+            self.assertContains(response, '123456******9876 &nbsp; 02/20')
 
     def test_check_view_includes_matching_credit_history(self):
         """
         Test that the view displays credits related by sender id to the chedit subject to a check.
         """
         check_id = 1
-        sender_id = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
-                json={
-                    'id': check_id,
-                    'description': 'lorem ipsum',
-                    'rules': ['RULE1', 'RULE1'],
-                    'status': 'pending',
-                    'credit': {
-                        'id': 1,
-                        'amount': 1000,
-                        'card_expiry_date': '02/20',
-                        'card_number_first_digits': '9876',
-                        'card_number_last_digits': '543',
-                        'prisoner_name': 'John Doe',
-                        'prisoner_number': 'A123B',
-                        'sender_email': 'sender@example.com',
-                        'sender_name': 'JAMES NOLAN',
-                        'sender_profile': sender_id,
-                        'source': 'online',
-                        'started_at': '2019-07-02T10:00:00Z',
-                        'received_at': None,
-                        'credited_at': None,
-                    },
-                    'actioned_at': None,
-                    'actioned_by': None,
-                },
+                json=self.SENDER_CHECK
             )
             rsps.add(
                 rsps.GET,
-                api_url(f'/senders/{sender_id}/credits/'),
+                api_url(f'/senders/{self.sender_id}/credits/'),
                 json={
                     'count': 4,
                     'results': [self.SENDER_CREDIT] * 4,
@@ -2898,9 +2851,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
         self.assertEqual(response.status_code, 200)
         response_content = response.content.decode(response.charset)
-        self.assertIn('1234******987', response_content)
+        self.assertIn('123456******9876', response_content)
         self.assertIn('02/20', response_content)
-        self.assertIn('JOHN DOE', response_content)
+        self.assertIn('John Doe', response_content)
         self.assertIn('£10.00', response_content)
 
     def test_accept_check(self):
@@ -2914,29 +2867,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
-                json={
-                    'id': check_id,
-                    'description': 'lorem ipsum',
-                    'rules': ['RULE1', 'RULE1'],
-                    'status': 'pending',
-                    'credit': {
-                        'id': 1,
-                        'amount': 1000,
-                        'card_expiry_date': '02/20',
-                        'card_number_first_digits': '1234',
-                        'card_number_last_digits': '987',
-                        'prisoner_name': 'John Doe',
-                        'prisoner_number': 'A123B',
-                        'sender_email': 'sender@example.com',
-                        'sender_name': 'MAISIE NOLAN',
-                        'source': 'online',
-                        'started_at': '2019-07-02T10:00:00Z',
-                        'received_at': None,
-                        'credited_at': None,
-                    },
-                    'actioned_at': None,
-                    'actioned_by': None,
-                },
+                json=self.SENDER_CHECK
             )
             rsps.add(
                 rsps.POST,
@@ -2962,40 +2893,16 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         Test that if a rejected check is accepted, a validation error is displayed.
         """
         check_id = 1
-        sender_id = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
-                json={
-                    'id': 1,
-                    'description': 'lorem ipsum',
-                    'rules': ['RULE1', 'RULE1'],
-                    'status': 'rejected',
-                    'credit': {
-                        'id': check_id,
-                        'amount': 1000,
-                        'card_expiry_date': '02/20',
-                        'card_number_first_digits': '1234',
-                        'card_number_last_digits': '987',
-                        'prisoner_name': 'John Doe',
-                        'prisoner_number': 'A123B',
-                        'sender_email': 'sender@example.com',
-                        'sender_name': 'MAISIE NOLAN',
-                        'source': 'online',
-                        'sender_profile': sender_id,
-                        'started_at': '2019-07-02T10:00:00Z',
-                        'received_at': None,
-                        'credited_at': None,
-                    },
-                    'actioned_at': None,
-                    'actioned_by': None,
-                },
+                json=self.SENDER_CHECK_REJECTED
             )
             rsps.add(
                 rsps.GET,
-                api_url(f'/senders/{sender_id}/credits/'),
+                api_url(f'/senders/{self.sender_id}/credits/'),
                 json={
                     'count': 4,
                     'results': [self.SENDER_CREDIT] * 4,
@@ -3024,29 +2931,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
-                json={
-                    'id': check_id,
-                    'description': 'lorem ipsum',
-                    'rules': ['RULE1', 'RULE1'],
-                    'status': 'pending',
-                    'credit': {
-                        'id': 1,
-                        'amount': 1000,
-                        'card_expiry_date': '02/20',
-                        'card_number_first_digits': '1234',
-                        'card_number_last_digits': '987',
-                        'prisoner_name': 'John Doe',
-                        'prisoner_number': 'A123B',
-                        'sender_email': 'sender@example.com',
-                        'sender_name': 'MAISIE NOLAN',
-                        'source': 'online',
-                        'started_at': '2019-07-02T10:00:00Z',
-                        'received_at': None,
-                        'credited_at': None,
-                    },
-                    'actioned_at': None,
-                    'actioned_by': None,
-                },
+                json=self.SENDER_CHECK
             )
             rsps.add(
                 rsps.POST,
@@ -3073,40 +2958,16 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         Test that if one tries to reject an already accepted check, a validation error is displayed.
         """
         check_id = 1
-        sender_id = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
-                json={
-                    'id': 1,
-                    'description': 'lorem ipsum',
-                    'rules': ['RULE1', 'RULE1'],
-                    'status': 'rejected',
-                    'credit': {
-                        'id': check_id,
-                        'amount': 1000,
-                        'card_expiry_date': '02/20',
-                        'card_number_first_digits': '1234',
-                        'card_number_last_digits': '987',
-                        'prisoner_name': 'John Doe',
-                        'prisoner_number': 'A123B',
-                        'sender_email': 'sender@example.com',
-                        'sender_name': 'MAISIE NOLAN',
-                        'sender_profile': sender_id,
-                        'source': 'online',
-                        'started_at': '2019-07-02T10:00:00Z',
-                        'received_at': None,
-                        'credited_at': None,
-                    },
-                    'actioned_at': None,
-                    'actioned_by': None,
-                },
+                json=self.SENDER_CHECK_REJECTED
             )
             rsps.add(
                 rsps.GET,
-                api_url(f'/senders/{sender_id}/credits/'),
+                api_url(f'/senders/{self.sender_id}/credits/'),
                 json={
                     'count': 4,
                     'results': [self.SENDER_CREDIT] * 4,
@@ -3130,40 +2991,16 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         Test that if the rejection reason is not given, a validation error is displayed.
         """
         check_id = 1
-        sender_id = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
-                json={
-                    'id': 1,
-                    'description': 'lorem ipsum',
-                    'rules': ['RULE1', 'RULE1'],
-                    'status': 'rejected',
-                    'credit': {
-                        'id': check_id,
-                        'amount': 1000,
-                        'card_expiry_date': '02/20',
-                        'card_number_first_digits': '1234',
-                        'card_number_last_digits': '987',
-                        'prisoner_name': 'John Doe',
-                        'prisoner_number': 'A123B',
-                        'sender_email': 'sender@example.com',
-                        'sender_name': 'MAISIE NOLAN',
-                        'sender_profile': sender_id,
-                        'source': 'online',
-                        'started_at': '2019-07-02T10:00:00Z',
-                        'received_at': None,
-                        'credited_at': None,
-                    },
-                    'actioned_at': None,
-                    'actioned_by': None,
-                },
+                json=self.SENDER_CHECK_REJECTED
             )
             rsps.add(
                 rsps.GET,
-                api_url(f'/senders/{sender_id}/credits/'),
+                api_url(f'/senders/{self.sender_id}/credits/'),
                 json={
                     'count': 4,
                     'results': [self.SENDER_CREDIT] * 4,

@@ -64,12 +64,14 @@ class AcceptOrRejectCheckView(FormView):
         context_data[self.object_context_key] = detail_object
 
         # Get the sender credits
-        context_data['sender_credits'] = api_session.get(f"/senders/{detail_object['credit']['sender_profile']}/credits/")
-                # exclude current credit detail_object['credit']['id']
+        sender_response = api_session.get(f"/senders/{detail_object['credit']['sender_profile']}/credits/")
+        sender_response.raise_for_status()
+        context_data['sender_credits'] = sender_response.json().get('results')
+        # exclude current credit detail_object['credit']['id']
 
         # Get the prisoner credits
         # prisoner_credits = ... detail_object['prisoner_profile']
-                # exclude current credit detail_object['credit']['id']
+        # exclude current credit detail_object['credit']['id']
 
         # merge sender and prisoner credits
 
