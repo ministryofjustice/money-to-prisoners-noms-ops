@@ -2627,42 +2627,26 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'actioned_by': None,
     }
 
-    SAMPLE_CHECK_WITH_ACTIONED_BY = {
+    SENDER_CREDIT = {
         'id': 1,
-        'description': 'A0140QE',
-        'rules': ['RULE1', 'RULE1'],
-        'status': 'accepted',
-        'credit': {
-            'id': 1,
-            'amount': 1000,
-            'card_expiry_date': '02/20',
-            'card_number_first_digits': '123456',
-            'card_number_last_digits': '9876',
-            'prisoner_name': 'John Doe',
-            'prison_name': 'Brixton Prison',
-            'prisoner_number': 'A1234AB',
-            'sender_email': 'sender@example.com',
-            'sender_name': 'MAISIE NOLAN',
-            'source': 'online',
-            'started_at': '2019-07-02T10:00:00Z',
-            'received_at': None,
-            'credited_at': None,
-            'billing_address': {
-                'id': 21,
-                'line1': 'Studio 33',
-                'line2': 'Allen port',
-                'city': 'Gloverside',
-                'country': 'UK',
-                'postcode': 'S1 3HS',
-                'debit_card_sender_details': 17
-            },
-        },
-        'actioned_at': '2020-01-13 12:00:00+00',
-        'actioned_by': 1,
-        'decision_reason': 'Money issues',
-        'actioned_by_name': 'Barry Garlow',
+        'source': 'online',
+        'amount': 23000,
+        'intended_recipient': 'Mr G Melley',
+        'prisoner_number': 'A1411AE',
+        'prisoner_name': 'GEORGE MELLEY',
+        'prison': 'LEI',
+        'prison_name': 'HMP LEEDS',
+        'sender_name': 'Ian Sendy',
+        'sender_email': 'ian@mail.local',
+        'billing_address': {'line1': '102PF', 'city': 'London'},
+        'card_number_first_digits': '111122',
+        'card_number_last_digits': '4444',
+        'card_expiry_date': '07/18',
+        'resolution': 'credited',
+        'started_at': '2016-05-25T20:21:00Z',
+        'received_at': '2016-05-25T20:24:00Z',
+        'credited_at': '2016-05-26T08:27:00Z'
     }
-
     required_checks_permissions = (
         *required_permissions,
         'security.view_check',
@@ -2860,7 +2844,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, 'Brixton Prison')
 
 
-class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
+class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
     """
     Tests related to AcceptOrRejectCheckView.
     """
@@ -2882,6 +2866,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
         Test that the view displays the pending check returned by the API.
         """
         check_id = 1
+        sender_id = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -2902,6 +2887,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         'prisoner_number': 'A123B',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
+                        'sender_profile': sender_id,
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
                         'received_at': None,
@@ -2911,12 +2897,77 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                     'actioned_by': None,
                 },
             )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.SENDER_CREDIT] * 4,
+                }
+            )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.get(url, follow=True)
 
             self.assertContains(response, 'Accept credit')
             self.assertContains(response, '1234******987 &nbsp; 02/20')
+
+    def test_check_view_includes_matching_credit_history(self):
+        """
+        Test that the view displays credits related by sender id to the chedit subject to a check.
+        """
+        check_id = 1
+        sender_id = 2
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json={
+                    'id': check_id,
+                    'description': 'lorem ipsum',
+                    'rules': ['RULE1', 'RULE1'],
+                    'status': 'pending',
+                    'credit': {
+                        'id': 1,
+                        'amount': 1000,
+                        'card_expiry_date': '02/20',
+                        'card_number_first_digits': '9876',
+                        'card_number_last_digits': '543',
+                        'prisoner_name': 'John Doe',
+                        'prisoner_number': 'A123B',
+                        'sender_email': 'sender@example.com',
+                        'sender_name': 'JAMES NOLAN',
+                        'sender_profile': sender_id,
+                        'source': 'online',
+                        'started_at': '2019-07-02T10:00:00Z',
+                        'received_at': None,
+                        'credited_at': None,
+                    },
+                    'actioned_at': None,
+                    'actioned_by': None,
+                },
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.SENDER_CREDIT] * 4,
+                }
+            )
+            response = self.client.get(
+                reverse(
+                    'security:resolve_check',
+                    kwargs={'check_id': check_id},
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('1234******987', response_content)
+        self.assertIn('02/20', response_content)
+        self.assertIn('JOHN DOE', response_content)
+        self.assertIn('£10.00', response_content)
 
     def test_accept_check(self):
         """
@@ -2977,6 +3028,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
         Test that if a rejected check is accepted, a validation error is displayed.
         """
         check_id = 1
+        sender_id = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -2998,6 +3050,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
                         'source': 'online',
+                        'sender_profile': sender_id,
                         'started_at': '2019-07-02T10:00:00Z',
                         'received_at': None,
                         'credited_at': None,
@@ -3005,6 +3058,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                     'actioned_at': None,
                     'actioned_by': None,
                 },
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.SENDER_CREDIT] * 4,
+                }
             )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
@@ -3078,6 +3139,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
         Test that if one tries to reject an already accepted check, a validation error is displayed.
         """
         check_id = 1
+        sender_id = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -3098,6 +3160,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         'prisoner_number': 'A123B',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
+                        'sender_profile': sender_id,
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
                         'received_at': None,
@@ -3106,6 +3169,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                     'actioned_at': None,
                     'actioned_by': None,
                 },
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.SENDER_CREDIT] * 4,
+                }
             )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
@@ -3125,6 +3196,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
         Test that if the rejection reason is not given, a validation error is displayed.
         """
         check_id = 1
+        sender_id = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -3145,6 +3217,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         'prisoner_number': 'A123B',
                         'sender_email': 'sender@example.com',
                         'sender_name': 'MAISIE NOLAN',
+                        'sender_profile': sender_id,
                         'source': 'online',
                         'started_at': '2019-07-02T10:00:00Z',
                         'received_at': None,
@@ -3153,6 +3226,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                     'actioned_at': None,
                     'actioned_by': None,
                 },
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/senders/{sender_id}/credits/'),
+                json={
+                    'count': 4,
+                    'results': [self.SENDER_CREDIT] * 4,
+                }
             )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})

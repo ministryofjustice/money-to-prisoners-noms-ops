@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import Http404, HttpResponseRedirect
 from django.utils.translation import gettext_lazy
 from django.views.generic.edit import FormView
+from mtp_common.auth.api_client import get_api_session
 
 from security.forms.check import AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm
 from security.views.object_base import SecurityView
@@ -52,6 +53,7 @@ class AcceptOrRejectCheckView(FormView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
+        api_session = get_api_session(self.request)
 
         detail_object = context_data['form'].get_object()
         if detail_object is None:
@@ -69,6 +71,18 @@ class AcceptOrRejectCheckView(FormView):
             {'name': self.title},
         ]
         context_data[self.object_context_key] = detail_object
+
+        # Get the sender credits
+        context_data['sender_credits'] = api_session.get(f"/senders/{detail_object['credit']['sender_profile']}/credits/")
+                # exclude current credit detail_object['credit']['id']
+
+        # Get the prisoner credits
+        # prisoner_credits = ... detail_object['prisoner_profile']
+                # exclude current credit detail_object['credit']['id']
+
+        # merge sender and prisoner credits
+
+        # order by date desc
 
         return context_data
 
