@@ -2771,15 +2771,18 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         list(BaseCheckViewTestCase.SAMPLE_CREDIT_BASE.items())
         + list(
             {
-                'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE,
+                'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
                 'intended_recipient': 'Mr G Melley',
+                'prisoner_name': 'Ms A. Nother Prisoner',
+                'amount': 1000000,
                 'prison': 'LEI',
                 'prison_name': 'HMP LEEDS',
                 'billing_address': {'line1': '102PF', 'city': 'London'},
-                'resolution': 'credited',
+                'resolution': 'rejected',
             }.items()
         )
     )
+    SENDER_CREDIT['security_check']['description'] = '☢☢☢ This looks roight dodgy this does☣☣☣'
     SENDER_CHECK = copy.deepcopy(BaseCheckViewTestCase.SAMPLE_CHECK)
     SENDER_CHECK['credit']['sender_profile'] = sender_id
     SENDER_CHECK_REJECTED = dict(list(SENDER_CHECK.items()) + [('status', 'rejected')])
@@ -2855,6 +2858,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         self.assertIn('02/20', response_content)
         self.assertIn('John Doe', response_content)
         self.assertIn('£10.00', response_content)
+        self.assertIn('Ms A. Nother Prisoner', response_content)
+        self.assertIn('£10,000.00', response_content)
+        self.assertIn('☢☢☢ This looks roight dodgy this does☣☣☣', response_content)
 
     def test_accept_check(self):
         """
