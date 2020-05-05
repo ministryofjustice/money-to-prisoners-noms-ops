@@ -91,7 +91,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for credit in sender_credits %}
+        {% for credit in related_credits %}
           <tr class="mtp-check-row">
             <td>
               {{ credit.started_at|date:'SHORT_DATETIME_FORMAT'}}

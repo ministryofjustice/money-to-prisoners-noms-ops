@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import Http404, HttpResponseRedirect
@@ -73,19 +75,35 @@ class AcceptOrRejectCheckView(FormView):
         context_data[self.object_context_key] = detail_object
 
         # Get the sender credits
-        sender_response = api_session.get(f"/senders/{detail_object['credit']['sender_profile']}/credits/")
+        sender_response = api_session.get(
+            '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                sender_profile_id=detail_object['credit']['sender_profile'],
+                querystring=urlencode([
+                    ('exclude_credits__in', [detail_object['credit']['id']]),
+                    ('include_checks:', True)
+                ])
+            )
+        )
         sender_response.raise_for_status()
-        context_data['sender_credits'] = sender_response.json().get('results')
-        # exclude current credit detail_object['credit']['id']
+        sender_credits = sender_response.json().get('results')
 
-        # Get the prisoner credits
-        # prisoner_credits = ... detail_object['prisoner_profile']
-        # exclude current credit detail_object['credit']['id']
+        prisoner_response = api_session.get(
+            '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                prisoner_profile_id=detail_object['credit']['prisoner_profile'],
+                querystring=urlencode([
+                    ('exclude_credits__in', [detail_object['credit']['id']]),
+                    ('include_checks:', True)
+                ])
+            )
+        )
+        prisoner_response.raise_for_status()
+        prisoner_credits = prisoner_response.json().get('results')
 
-        # merge sender and prisoner credits
-
-        # order by date desc
-
+        context_data['related_credits'] = sorted(
+            prisoner_credits + sender_credits,
+            key=lambda c: c['started_at'],
+            reverse=True
+        )
         return context_data
 
     def form_valid(self, form):
