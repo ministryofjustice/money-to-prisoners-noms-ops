@@ -99,6 +99,17 @@ def mock_post_for_job_info_endpoint(rsps=None):
     )
 
 
+def combine_dicts(dictone, dicttwo):
+    return dict(list(dictone.items()) + list(dicttwo.items()))
+
+
+def offset_isodatetime_by_ten_seconds(isodatetime, offset_multiplier=1):
+    return (
+        datetime.datetime.fromisoformat(isodatetime)
+        + datetime.timedelta(seconds=offset_multiplier * 10)
+    ).isoformat()
+
+
 @override_settings(
     CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}},
 )
@@ -3195,34 +3206,22 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         """
         check_id = 1
         sender_credits = [
-            dict(
-                list(self.SENDER_CREDIT.items())
-                + [
-                    ('id', i),
-                    (
-                        'started_at',
-                        (
-                            datetime.datetime.fromisoformat(self.SENDER_CREDIT['started_at'])
-                            + datetime.timedelta(seconds=(i+1) * 10)
-                        ).isoformat()
-                    ),
-                ]
+            combine_dicts(
+                self.SENDER_CREDIT,
+                {
+                    'id': i,
+                    'started_at': offset_isodatetime_by_ten_seconds(self.SENDER_CREDIT['started_at'], i)
+                }
             )
             for i in range(4)
         ]
         prisoner_credits = [
-            dict(
-                list(self.PRISONER_CREDIT.items())
-                + [
-                    ('id', i),
-                    (
-                        'started_at',
-                        (
-                            datetime.datetime.fromisoformat(self.PRISONER_CREDIT['started_at'])
-                            + datetime.timedelta(seconds=(i+1) * 11)
-                        ).isoformat()
-                    ),
-                ]
+            combine_dicts(
+                self.PRISONER_CREDIT,
+                {
+                    'id': i,
+                    'started_at': offset_isodatetime_by_ten_seconds(self.PRISONER_CREDIT['started_at'], i)
+                }
             )
             for i in range(4)
         ]
