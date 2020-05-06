@@ -64,7 +64,11 @@ class AcceptOrRejectCheckView(FormView):
             {'name': self.title},
         ]
         context_data[self.object_context_key] = detail_object
+        context_data['related_credits'] = self._get_related_credits(api_session, context_data[self.object_context_key])
+        return context_data
 
+    @staticmethod
+    def _get_related_credits(api_session, detail_object):
         # Get the sender credits
         sender_response = api_session.get(
             '/senders/{sender_profile_id}/credits/?{querystring}'.format(
@@ -90,12 +94,11 @@ class AcceptOrRejectCheckView(FormView):
         prisoner_response.raise_for_status()
         prisoner_credits = prisoner_response.json().get('results')
 
-        context_data['related_credits'] = sorted(
+        return sorted(
             prisoner_credits + sender_credits,
             key=lambda c: c['started_at'],
             reverse=True
         )
-        return context_data
 
     def form_valid(self, form):
         if self.request.method == 'POST':
