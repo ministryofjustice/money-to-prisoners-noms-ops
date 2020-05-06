@@ -14,21 +14,21 @@ from security.utils import convert_date_fields
 
 class CheckListView(SecurityView):
     """
-    View returning the checks in pending status.
+    View returning the checks in 'To action' (pending) status.
     """
-    title = gettext_lazy('Credits pending')
+    title = gettext_lazy('Credits to action')
     template_name = 'security/checks_list.html'
     form_class = CheckListForm
 
 
 class AcceptOrRejectCheckView(FormView):
     """
-    View rejecting a check in pending status.
+    View rejecting a check in 'to action' (pending) status.
     """
     object_list_context_key = 'checks'
 
-    title = gettext_lazy('Review pending credit')
-    list_title = gettext_lazy('Credits pending')
+    title = gettext_lazy('Review credit')
+    list_title = gettext_lazy('Credits to action')
     id_kwarg_name = 'check_id'
     object_context_key = 'check'
     list_url = reverse_lazy('security:check_list')
