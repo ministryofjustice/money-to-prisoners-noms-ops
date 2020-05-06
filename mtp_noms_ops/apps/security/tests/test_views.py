@@ -2,6 +2,7 @@ import base64
 import copy
 from contextlib import contextmanager
 import datetime
+import itertools
 import json
 import logging
 import re
@@ -30,6 +31,7 @@ from security import (
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
 from security.tests import api_url, TEST_IMAGE_DATA
+from security.views.check import AcceptOrRejectCheckView
 from security.views.object_base import SEARCH_FORM_SUBMITTED_INPUT_NAME
 
 
@@ -2857,8 +2859,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
     prisoner_id = 3
     credit_id = 4
 
-    sender_credit_created_date = datetime.datetime.now() - datetime.timedelta(seconds=10)
-    prisoner_credit_created_date = datetime.datetime.now()
+    credit_created_date = datetime.datetime.now()
 
     SENDER_CREDIT = dict(
         list(BaseCheckViewTestCase.SAMPLE_CREDIT_BASE.items())
@@ -2873,7 +2874,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 'prison_name': 'HMP LEEDS',
                 'billing_address': {'line1': '102PF', 'city': 'London'},
                 'resolution': 'rejected',
-                'started_at': sender_credit_created_date.isoformat()
+                'started_at': credit_created_date.isoformat()
             }.items()
         )
     )
@@ -2901,7 +2902,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 'prison_name': 'HMP LEEDS',
                 'billing_address': {'line1': 'Somewhere else', 'city': 'London'},
                 'resolution': 'credited',
-                'started_at': prisoner_credit_created_date.isoformat()
+                'started_at': credit_created_date.isoformat()
             }.items()
         )
     )
@@ -3275,3 +3276,69 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
 
             self.assertContains(response, 'This field is required')
+
+    def test_credit_history_ordering(self):
+        """
+        Test that the credit history is correctly ordered by `started_at`
+        """
+        check_id = 1
+        sender_credits = [
+            dict(
+                list(self.SENDER_CREDIT.items())
+                + [
+                    ('id', i),
+                    (
+                        'started_at',
+                        (
+                            datetime.datetime.fromisoformat(self.SENDER_CREDIT['started_at'])
+                            + datetime.timedelta(seconds=(i+1) * 10)
+                        ).isoformat()
+                    ),
+                ]
+            )
+            for i in range(4)
+        ]
+        prisoner_credits = [
+            dict(
+                list(self.PRISONER_CREDIT.items())
+                + [
+                    ('id', i),
+                    (
+                        'started_at',
+                        (
+                            datetime.datetime.fromisoformat(self.PRISONER_CREDIT['started_at'])
+                            + datetime.timedelta(seconds=(i+1) * 11)
+                        ).isoformat()
+                    ),
+                ]
+            )
+            for i in range(4)
+        ]
+        # We expect the credits to be ordered according to started at.
+        # Given the offsets above we expect the first sender credit followed by the first prisoner credit
+        # and so on
+        expected_related_credits = list(itertools.chain(*zip(sender_credits, prisoner_credits)))
+        # We want to display the newest credits first
+        expected_related_credits.reverse()
+        mock_api_session = mock.MagicMock()
+        mock_api_session.configure_mock(**{
+            'get.return_value.json.return_value.get': mock.MagicMock(
+                side_effect=[
+                    sender_credits,
+                    prisoner_credits
+                ]
+            )
+        })
+        actual_related_credits = AcceptOrRejectCheckView()._get_related_credits(
+            api_session=mock_api_session,
+            detail_object={
+                'credit': {
+                    'id': self.credit_id,
+                    'prisoner_profile': self.prisoner_id,
+                    'sender_profile': self.sender_id
+                }
+            }
+        )
+        self.assertListEqual(expected_related_credits, actual_related_credits)
+
+
