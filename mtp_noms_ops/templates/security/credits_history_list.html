@@ -12,7 +12,7 @@
   </header>
 
   <aside class="mtp-object-list-toggle print-hidden">
-    <a href="{% url 'security:check_list' %}" class="button-secondary">{% trans 'View pending' %}</a>
+    <a href="{% url 'security:check_list' %}" class="button-secondary">{% trans 'View credits to action' %}</a>
   </aside>
 
   {% include 'mtp_common/includes/message_box.html' %}
@@ -65,7 +65,7 @@
           </td>
           <td>
             <span class="mtp-check-status-tag mtp-check-status-tag--{{ check.status }}">
-              {{ check.status|title }}
+              {{ check.status|format_security_check_status }}
             </span>
             <br />
             {% trans 'by' %}

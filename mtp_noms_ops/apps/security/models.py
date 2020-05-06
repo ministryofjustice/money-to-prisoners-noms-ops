@@ -45,6 +45,12 @@ disbursement_resolutions = {
     'sent': _('Sent'),
 }
 
+security_check_statuses = {
+    'pending': _('To action'),
+    'accepted': _('Accepted'),
+    'rejected': _('Rejected'),
+}
+
 
 class EmailNotifications:
     never = 'never'
