@@ -104,8 +104,9 @@ def combine_dicts(dictone, dicttwo):
 
 
 def offset_isodatetime_by_ten_seconds(isodatetime, offset_multiplier=1):
+    # TODO When we upgrade to python >= 3.7 replace this with datetime.datetime.fromisoformat
     return (
-        datetime.datetime.fromisoformat(isodatetime)
+        datetime.datetime.strptime(isodatetime, '%Y-%m-%dT%H:%M:%S.%f')
         + datetime.timedelta(seconds=offset_multiplier * 10)
     ).isoformat()
 
