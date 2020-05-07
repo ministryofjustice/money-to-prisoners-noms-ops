@@ -9,6 +9,7 @@ from mtp_common.auth.api_client import get_api_session
 
 from security.forms.check import AcceptOrRejectCheckForm, CheckListForm
 from security.views.object_base import SecurityView
+from security.utils import convert_date_fields
 
 
 class CheckListView(SecurityView):
@@ -74,25 +75,29 @@ class AcceptOrRejectCheckView(FormView):
             '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                 sender_profile_id=detail_object['credit']['sender_profile'],
                 querystring=urlencode([
-                    ('exclude_credit__in', [detail_object['credit']['id']]),
-                    ('include_checks:', True)
+                    ('exclude_credit__in', detail_object['credit']['id']),
+                    ('include_checks', True)
                 ])
             )
         )
         sender_response.raise_for_status()
         sender_credits = sender_response.json().get('results')
 
+        sender_credits = convert_date_fields(sender_credits, include_nested=True)
+
         prisoner_response = api_session.get(
             '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                 prisoner_profile_id=detail_object['credit']['prisoner_profile'],
                 querystring=urlencode([
-                    ('exclude_credit__in', [detail_object['credit']['id']]),
-                    ('include_checks:', True)
+                    ('exclude_credit__in', detail_object['credit']['id']),
+                    ('include_checks', True)
                 ])
             )
         )
         prisoner_response.raise_for_status()
         prisoner_credits = prisoner_response.json().get('results')
+
+        prisoner_credits = convert_date_fields(prisoner_credits, include_nested=True)
 
         return sorted(
             prisoner_credits + sender_credits,
