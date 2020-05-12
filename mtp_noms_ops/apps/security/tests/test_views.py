@@ -2950,7 +2950,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )
@@ -2966,7 +2966,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )
@@ -3001,7 +3001,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )
@@ -3017,7 +3017,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )
@@ -3105,7 +3105,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )
@@ -3121,7 +3121,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )
@@ -3194,7 +3194,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )
@@ -3210,7 +3210,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )
@@ -3251,7 +3251,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )
@@ -3267,7 +3267,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', [self.credit_id]),
+                            ('exclude_credit__in', self.credit_id),
                             ('include_checks:', True)
                         ])
                     )

@@ -83,7 +83,7 @@ class AcceptOrRejectCheckView(FormView):
             '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                 sender_profile_id=detail_object['credit']['sender_profile'],
                 querystring=urlencode([
-                    ('exclude_credit__in', [detail_object['credit']['id']]),
+                    ('exclude_credit__in', detail_object['credit']['id']),
                     ('include_checks:', True)
                 ])
             )
@@ -95,7 +95,7 @@ class AcceptOrRejectCheckView(FormView):
             '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                 prisoner_profile_id=detail_object['credit']['prisoner_profile'],
                 querystring=urlencode([
-                    ('exclude_credit__in', [detail_object['credit']['id']]),
+                    ('exclude_credit__in', detail_object['credit']['id']),
                     ('include_checks:', True)
                 ])
             )
