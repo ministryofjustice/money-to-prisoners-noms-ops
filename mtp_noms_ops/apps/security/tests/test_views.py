@@ -1140,7 +1140,7 @@ class ExportSecurityViewTestCaseMixin:
         taking any action.
         """
         # get realistic referer
-        qs = f'ordering=invalid'
+        qs = 'ordering=invalid'
         response = self.client.get('/')
         referer_url = response.wsgi_request.build_absolute_uri(
             f'{reverse(self.view_name)}?{qs}',
