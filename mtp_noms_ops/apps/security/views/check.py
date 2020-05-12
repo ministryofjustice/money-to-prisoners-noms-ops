@@ -8,6 +8,7 @@ from django.views.generic.edit import FormView
 from mtp_common.auth.api_client import get_api_session
 
 from security.forms.check import AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm
+from security.utils import convert_date_fields
 from security.views.object_base import SecurityView
 
 
@@ -15,7 +16,7 @@ class CheckListView(SecurityView):
     """
     View returning the checks in pending status.
     """
-    title = gettext_lazy('Pending')
+    title = gettext_lazy('Credits pending')
     template_name = 'security/checks_list.html'
     form_class = CheckListForm
 
@@ -89,7 +90,7 @@ class AcceptOrRejectCheckView(FormView):
             )
         )
         sender_response.raise_for_status()
-        sender_credits = sender_response.json().get('results')
+        sender_credits = convert_date_fields(sender_response.json().get('results'), include_nested=True)
 
         prisoner_response = api_session.get(
             '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
@@ -101,7 +102,7 @@ class AcceptOrRejectCheckView(FormView):
             )
         )
         prisoner_response.raise_for_status()
-        prisoner_credits = prisoner_response.json().get('results')
+        prisoner_credits = convert_date_fields(prisoner_response.json().get('results'), include_nested=True)
 
         return sorted(
             prisoner_credits + sender_credits,
