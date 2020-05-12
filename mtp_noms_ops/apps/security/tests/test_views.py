@@ -12,7 +12,6 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test import SimpleTestCase, override_settings
-from django.utils import timezone
 from django.utils.timezone import make_aware
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.test_utils import generate_tokens
@@ -2672,13 +2671,13 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             response = self.client.get(reverse('security:check_list'), follow=True)
             self.assertRedirects(response, reverse('security:dashboard'))
 
-    @mock.patch('security.forms.check.timezone', mock.MagicMock(
-        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2019, 7, 3, 9)))
-    ))
-    def test_view(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_view(self, mock_get_need_attention_date):
         """
         Test that the view displays the pending checks returned by the API.
         """
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
+
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             self.mock_need_attention_count(rsps, 0)
@@ -2701,13 +2700,13 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             self.assertNotIn('credit needs attention', content)
             self.assertNotIn('credits need attention', content)
 
-    @mock.patch('security.forms.check.timezone', mock.MagicMock(
-        now=mock.MagicMock(return_value=timezone.make_aware(datetime.datetime(2019, 7, 5, 9)))
-    ))
-    def test_displays_count_of_credits_needing_attention(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_displays_count_of_credits_needing_attention(self, mock_get_need_attention_date):
         """
         Test that the view shows how many credits need attention.
         """
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 9, 9))
+
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             self.mock_need_attention_count(rsps, 2)
@@ -2737,10 +2736,30 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
             self.assertEqual(parsed_qs['started_at__lt'], [form.need_attention_date.strftime('%Y-%m-%d %H:%M:%S')])
 
+    def test_credit_row_has_review_link(self):
+        """
+        Test that the view displays link to review a credit.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 0)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'results': [self.SAMPLE_CHECK],
+                },
+            )
 
-class AcceptCheckViewTestCase(BaseCheckViewTestCase):
+            response = self.client.get(reverse('security:check_list'), follow=True)
+
+            self.assertContains(response, 'Review <span class="visually-hidden">credit to John Doe</span>')
+
+
+class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
     """
-    Tests related to AcceptCheckView.
+    Tests related to AcceptOrRejectCheckView.
     """
 
     def test_cannot_access_view(self):
@@ -2751,7 +2770,7 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
         user_data = self.get_user_data(permissions=required_permissions)
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps, user_data=user_data)
-            url = reverse('security:accept_check', kwargs={'check_id': 1})
+            url = reverse('security:resolve_check', kwargs={'check_id': 1})
             response = self.client.get(url, follow=True)
             self.assertRedirects(response, reverse('security:dashboard'))
 
@@ -2790,7 +2809,7 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
                 },
             )
 
-            url = reverse('security:accept_check', kwargs={'check_id': check_id})
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.get(url, follow=True)
 
             self.assertContains(response, 'Accept credit')
@@ -2798,7 +2817,7 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
 
     def test_accept_check(self):
         """
-        Test that if one tries to acceot an already rejected check, a validation error is displayed.
+        Test that if one tries to accept an already rejected check, a validation error is displayed.
 
         """
         check_id = 1
@@ -2838,8 +2857,14 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
             )
             self.mock_need_attention_count(rsps, 0)
 
-            url = reverse('security:accept_check', kwargs={'check_id': check_id})
-            response = self.client.post(url, follow=True)
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                },
+                follow=True
+            )
 
             self.assertRedirects(response, reverse('security:check_list'))
             self.assertContains(response, 'Credit accepted')
@@ -2879,69 +2904,16 @@ class AcceptCheckViewTestCase(BaseCheckViewTestCase):
                 },
             )
 
-            url = reverse('security:accept_check', kwargs={'check_id': check_id})
-            response = self.client.post(url, follow=True)
-
-            self.assertContains(response, 'You cannot accept this credit')
-
-
-class RejectCheckViewTestCase(BaseCheckViewTestCase):
-    """
-    Tests related to RejectCheckView.
-    """
-
-    def test_cannot_access_view(self):
-        """
-        Test that if the logged in user doesn't have the right permissions, he/she
-        gets redirected to the dashboard.
-        """
-        user_data = self.get_user_data(permissions=required_permissions)
-        with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps, user_data=user_data)
-            url = reverse('security:reject_check', kwargs={'check_id': 1})
-            response = self.client.get(url, follow=True)
-            self.assertRedirects(response, reverse('security:dashboard'))
-
-    def test_get(self):
-        """
-        Test that the view displays the pending check returned by the API.
-        """
-        check_id = 1
-        with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
-            rsps.add(
-                rsps.GET,
-                api_url(f'/security/checks/{check_id}/'),
-                json={
-                    'id': check_id,
-                    'description': 'lorem ipsum',
-                    'rules': ['RULE1', 'RULE1'],
-                    'status': 'pending',
-                    'credit': {
-                        'id': 1,
-                        'amount': 1000,
-                        'card_expiry_date': '02/20',
-                        'card_number_first_digits': '1234',
-                        'card_number_last_digits': '987',
-                        'prisoner_name': 'John Doe',
-                        'prisoner_number': 'A123B',
-                        'sender_email': 'sender@example.com',
-                        'sender_name': 'MAISIE NOLAN',
-                        'source': 'online',
-                        'started_at': '2019-07-02T10:00:00Z',
-                        'received_at': None,
-                        'credited_at': None,
-                    },
-                    'actioned_at': None,
-                    'actioned_by': None,
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
                 },
+                follow=True
             )
 
-            url = reverse('security:reject_check', kwargs={'check_id': check_id})
-            response = self.client.get(url, follow=True)
-
-            self.assertContains(response, 'Reject credit')
-            self.assertContains(response, '1234******987 &nbsp; 02/20')
+            self.assertContains(response, 'You cannot action this credit')
 
     def test_reject_check(self):
         """
@@ -2985,11 +2957,12 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
             )
             self.mock_need_attention_count(rsps, 0)
 
-            url = reverse('security:reject_check', kwargs={'check_id': check_id})
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
                 url,
                 data={
-                    'rejection_reason': 'Some reason',
+                    'decision_reason': 'Some reason',
+                    'fiu_action': 'reject',
                 },
                 follow=True,
             )
@@ -3032,18 +3005,19 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
                 },
             )
 
-            url = reverse('security:reject_check', kwargs={'check_id': check_id})
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
                 url,
                 data={
-                    'rejection_reason': 'Some reason',
+                    'decision_reason': 'Some reason',
+                    'fiu_action': 'reject',
                 },
                 follow=True,
             )
 
-            self.assertContains(response, 'You cannot reject this credit')
+            self.assertContains(response, 'You cannot action this credit')
 
-    def test_invalid_with_empty_rejection_reason(self):
+    def test_invalid_with_empty_decision_reason(self):
         """
         Test that if the rejection reason is not given, a validation error is displayed.
         """
@@ -3078,10 +3052,12 @@ class RejectCheckViewTestCase(BaseCheckViewTestCase):
                 },
             )
 
-            url = reverse('security:reject_check', kwargs={'check_id': check_id})
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
                 url,
-                data={},
+                data={
+                    'fiu_action': 'reject',
+                },
                 follow=True,
             )
 
