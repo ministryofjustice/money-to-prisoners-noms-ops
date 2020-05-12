@@ -85,7 +85,7 @@ class AcceptOrRejectCheckView(FormView):
                 sender_profile_id=detail_object['credit']['sender_profile'],
                 querystring=urlencode([
                     ('exclude_credit__in', detail_object['credit']['id']),
-                    ('include_checks:', True)
+                    ('include_checks', True)
                 ])
             )
         )
@@ -97,7 +97,7 @@ class AcceptOrRejectCheckView(FormView):
                 prisoner_profile_id=detail_object['credit']['prisoner_profile'],
                 querystring=urlencode([
                     ('exclude_credit__in', detail_object['credit']['id']),
-                    ('include_checks:', True)
+                    ('include_checks', True)
                 ])
             )
         )
