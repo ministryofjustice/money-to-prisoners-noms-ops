@@ -2869,7 +2869,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
     """
     sender_id = 2
     prisoner_id = 3
-    credit_id = 4
+    credit_id = 5
 
     credit_created_date = datetime.datetime.now()
 
@@ -2920,6 +2920,16 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
     )
     PRISONER_CREDIT['security_check']['description'] = 'I guess this is probably fine???'
 
+    @classmethod
+    def _get_prisoner_credit_list(cls, length):
+        for i in range(length):
+            yield combine_dicts(cls.PRISONER_CREDIT, {'id': i})
+
+    @classmethod
+    def _get_sender_credit_list(cls, length):
+        for i in range(length):
+            yield combine_dicts(cls.SENDER_CREDIT, {'id': i})
+
     def test_cannot_access_view(self):
         """
         Test that if the logged in user doesn't have the right permissions, he/she
@@ -2936,6 +2946,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         """
         Test that the view displays the pending check returned by the API.
         """
+        response_len = 4
         check_id = 1
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
@@ -2951,13 +2962,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
                             ('exclude_credit__in', self.credit_id),
+                            ('check__isnull', False),
                             ('include_checks', True)
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.SENDER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len)),
                 }
             )
             rsps.add(
@@ -2966,14 +2978,15 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', self.credit_id),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('check__isnull', False),
                             ('include_checks', True)
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.PRISONER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(self._get_prisoner_credit_list(response_len))
                 }
             )
 
@@ -2988,6 +3001,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         Test that the view displays credits related by sender id to the chedit subject to a check.
         """
         check_id = 1
+        response_len = 4
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -3002,13 +3016,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
                             ('exclude_credit__in', self.credit_id),
+                            ('check__isnull', False),
                             ('include_checks', True)
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.SENDER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len))
                 }
             )
             rsps.add(
@@ -3017,14 +3032,15 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', self.credit_id),
-                            ('include_checks', True)
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('check__isnull', False),
+                            ('include_checks', True),
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.PRISONER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(self._get_prisoner_credit_list(response_len))
                 }
             )
             response = self.client.get(
@@ -3092,6 +3108,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         Test that if a rejected check is accepted, a validation error is displayed.
         """
         check_id = 1
+        response_len = 4
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -3106,13 +3123,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
                             ('exclude_credit__in', self.credit_id),
+                            ('check__isnull', False),
                             ('include_checks', True)
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.SENDER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len))
                 }
             )
             rsps.add(
@@ -3121,14 +3139,15 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', self.credit_id),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('check__isnull', False),
                             ('include_checks', True)
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.PRISONER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(self._get_prisoner_credit_list(response_len))
                 }
             )
 
@@ -3181,6 +3200,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         Test that if one tries to reject an already accepted check, a validation error is displayed.
         """
         check_id = 1
+        response_len = 4
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -3195,13 +3215,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
                             ('exclude_credit__in', self.credit_id),
+                            ('check__isnull', False),
                             ('include_checks', True)
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.SENDER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len))
                 }
             )
             rsps.add(
@@ -3210,14 +3231,15 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', self.credit_id),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('check__isnull', False),
                             ('include_checks', True)
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.PRISONER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(list(self._get_prisoner_credit_list(response_len)))
                 }
             )
 
@@ -3238,6 +3260,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         Test that if the rejection reason is not given, a validation error is displayed.
         """
         check_id = 1
+        response_len = 4
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -3252,13 +3275,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
                             ('exclude_credit__in', self.credit_id),
+                            ('check__isnull', False),
                             ('include_checks', True)
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.SENDER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len)),
                 }
             )
             rsps.add(
@@ -3267,14 +3291,15 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('exclude_credit__in', self.credit_id),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('check__isnull', False),
                             ('include_checks', True)
                         ])
                     )
                 ),
                 json={
-                    'count': 4,
-                    'results': [self.PRISONER_CREDIT] * 4,
+                    'count': response_len,
+                    'results': list(self._get_prisoner_credit_list(response_len))
                 }
             )
 

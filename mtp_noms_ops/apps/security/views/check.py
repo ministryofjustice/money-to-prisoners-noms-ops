@@ -85,10 +85,12 @@ class AcceptOrRejectCheckView(FormView):
                 sender_profile_id=detail_object['credit']['sender_profile'],
                 querystring=urlencode([
                     ('exclude_credit__in', detail_object['credit']['id']),
+                    ('check__isnull', False),
                     ('include_checks', True)
                 ])
             )
         )
+
         sender_response.raise_for_status()
         sender_credits = convert_date_fields(sender_response.json().get('results'), include_nested=True)
 
@@ -96,7 +98,13 @@ class AcceptOrRejectCheckView(FormView):
             '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                 prisoner_profile_id=detail_object['credit']['prisoner_profile'],
                 querystring=urlencode([
-                    ('exclude_credit__in', detail_object['credit']['id']),
+                    (
+                        'exclude_credit__in',
+                        # Exclude any credits displayed as part of sender credits, to prevent duplication where
+                        # both prisoner and sender same as the credit in question
+                        ','.join([str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits])
+                    ),
+                    ('check__isnull', False),
                     ('include_checks', True)
                 ])
             )
