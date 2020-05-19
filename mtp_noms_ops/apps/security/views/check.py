@@ -1,11 +1,9 @@
-from urllib.parse import urlencode
-
 from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import Http404, HttpResponseRedirect
 from django.utils.translation import gettext_lazy
 from django.views.generic.edit import FormView
-from mtp_common.auth.api_client import get_api_session
+from mtp_common.api import retrieve_all_pages_for_path
 
 from security.forms.check import AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm
 from security.utils import convert_date_fields
@@ -56,11 +54,12 @@ class AcceptOrRejectCheckView(FormView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        api_session = get_api_session(self.request)
 
         detail_object = context_data['form'].get_object()
         if detail_object is None:
             raise Http404('Detail object not found')
+
+        api_session = context_data['form'].session
 
         # keep query string in breadcrumbs
         list_url = self.request.build_absolute_uri(str(self.list_url))
@@ -80,37 +79,32 @@ class AcceptOrRejectCheckView(FormView):
     @staticmethod
     def _get_related_credits(api_session, detail_object):
         # Get the sender credits
-        sender_response = api_session.get(
-            '/senders/{sender_profile_id}/credits/?{querystring}'.format(
-                sender_profile_id=detail_object['credit']['sender_profile'],
-                querystring=urlencode([
-                    ('exclude_credit__in', detail_object['credit']['id']),
-                    ('check__isnull', False),
-                    ('include_checks', True)
-                ])
-            )
+        sender_response = retrieve_all_pages_for_path(
+            api_session,
+            f'/senders/{detail_object["credit"]["sender_profile"]}/credits',
+            **{
+                'exclude_credit__in': detail_object['credit']['id'],
+                'check__isnull': False,
+                'include_checks': True
+            }
         )
 
-        sender_response.raise_for_status()
-        sender_credits = convert_date_fields(sender_response.json().get('results'), include_nested=True)
+        sender_credits = convert_date_fields(sender_response, include_nested=True)
 
-        prisoner_response = api_session.get(
-            '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
-                prisoner_profile_id=detail_object['credit']['prisoner_profile'],
-                querystring=urlencode([
-                    (
-                        'exclude_credit__in',
-                        # Exclude any credits displayed as part of sender credits, to prevent duplication where
-                        # both prisoner and sender same as the credit in question
-                        ','.join([str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits])
-                    ),
-                    ('check__isnull', False),
-                    ('include_checks', True)
-                ])
-            )
+        prisoner_response = retrieve_all_pages_for_path(
+            api_session,
+            f'/prisoners/{detail_object["credit"]["prisoner_profile"]}/credits',
+            **{
+                # Exclude any credits displayed as part of sender credits, to prevent duplication where
+                # both prisoner and sender same as the credit in question
+                'exclude_credit__in': ','.join(
+                    [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
+                ),
+                'check__isnull': False,
+                'include_checks': True
+            }
         )
-        prisoner_response.raise_for_status()
-        prisoner_credits = convert_date_fields(prisoner_response.json().get('results'), include_nested=True)
+        prisoner_credits = convert_date_fields(prisoner_response, include_nested=True)
 
         return sorted(
             prisoner_credits + sender_credits,

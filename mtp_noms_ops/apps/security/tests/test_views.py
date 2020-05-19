@@ -10,12 +10,14 @@ import tempfile
 from unittest import mock
 from urllib.parse import parse_qs, urlencode
 
+from django.conf import settings
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test import SimpleTestCase, override_settings
+from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
-from mtp_common.auth import USER_DATA_SESSION_KEY
+from mtp_common.auth import USER_DATA_SESSION_KEY, urljoin
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 from openpyxl import load_workbook
@@ -99,14 +101,9 @@ def mock_post_for_job_info_endpoint(rsps=None):
     )
 
 
-def combine_dicts(dictone, dicttwo):
-    return dict(list(dictone.items()) + list(dicttwo.items()))
-
-
 def offset_isodatetime_by_ten_seconds(isodatetime, offset_multiplier=1):
-    # TODO When we upgrade to python >= 3.7 replace this with datetime.datetime.fromisoformat
     return (
-        datetime.datetime.strptime(isodatetime, '%Y-%m-%dT%H:%M:%S.%f')
+        parse_datetime(isodatetime)
         + datetime.timedelta(seconds=offset_multiplier * 10)
     ).isoformat()
 
@@ -2897,38 +2894,36 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
     SENDER_CHECK['credit']['prisoner_profile'] = prisoner_id
     SENDER_CHECK['credit']['id'] = credit_id
 
-    SENDER_CHECK_REJECTED = dict(list(SENDER_CHECK.items()) + [('status', 'rejected')])
+    SENDER_CHECK_REJECTED = dict(SENDER_CHECK, status='rejected')
 
     PRISONER_CREDIT = dict(
-        list(BaseCheckViewTestCase.SAMPLE_CREDIT_BASE.items())
-        + list(
-            {
-                'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
-                'amount': 10,
-                'card_expiry_date': '02/50',
-                'card_number_first_digits': '01199988199',
-                'card_number_last_digits': '7253',
-                'sender_email': 'someoneelse@example.com',
-                'sender_name': 'SOMEONE ELSE',
-                'prison': 'LEI',
-                'prison_name': 'HMP LEEDS',
-                'billing_address': {'line1': 'Somewhere else', 'city': 'London'},
-                'resolution': 'credited',
-                'started_at': credit_created_date.isoformat()
-            }.items()
-        )
+        BaseCheckViewTestCase.SAMPLE_CREDIT_BASE,
+        **{
+            'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
+            'amount': 10,
+            'card_expiry_date': '02/50',
+            'card_number_first_digits': '01199988199',
+            'card_number_last_digits': '7253',
+            'sender_email': 'someoneelse@example.com',
+            'sender_name': 'SOMEONE ELSE',
+            'prison': 'LEI',
+            'prison_name': 'HMP LEEDS',
+            'billing_address': {'line1': 'Somewhere else', 'city': 'London'},
+            'resolution': 'credited',
+            'started_at': credit_created_date.isoformat()
+        }
     )
     PRISONER_CREDIT['security_check']['description'] = 'I guess this is probably fine???'
 
     @classmethod
     def _get_prisoner_credit_list(cls, length):
         for i in range(length):
-            yield combine_dicts(cls.PRISONER_CREDIT, {'id': i})
+            yield dict(cls.PRISONER_CREDIT, **{'id': i})
 
     @classmethod
     def _get_sender_credit_list(cls, length):
         for i in range(length):
-            yield combine_dicts(cls.SENDER_CREDIT, {'id': i})
+            yield dict(cls.SENDER_CREDIT, **{'id': i})
 
     def test_cannot_access_view(self):
         """
@@ -2957,15 +2952,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('check__isnull', False),
                             ('include_checks', True)
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -2974,15 +2973,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('check__isnull', False),
                             ('include_checks', True)
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -3011,15 +3014,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('check__isnull', False),
                             ('include_checks', True)
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -3028,15 +3035,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('check__isnull', False),
                             ('include_checks', True),
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -3118,15 +3129,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('check__isnull', False),
                             ('include_checks', True)
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -3135,15 +3150,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('check__isnull', False),
                             ('include_checks', True)
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -3210,15 +3229,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('check__isnull', False),
                             ('include_checks', True)
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -3227,15 +3250,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('check__isnull', False),
                             ('include_checks', True)
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -3270,15 +3297,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('check__isnull', False),
                             ('include_checks', True)
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -3287,15 +3318,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                api_url(
+                urljoin(
+                    settings.API_URL,
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('check__isnull', False),
                             ('include_checks', True)
                         ])
-                    )
+                    ),
+                    trailing_slash=False
                 ),
                 json={
                     'count': response_len,
@@ -3319,9 +3354,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         Test that the credit history is correctly ordered by `started_at`
         """
         sender_credits = [
-            combine_dicts(
+            dict(
                 self.SENDER_CREDIT,
-                {
+                **{
                     'id': i,
                     'started_at': offset_isodatetime_by_ten_seconds(self.SENDER_CREDIT['started_at'], i)
                 }
@@ -3329,9 +3364,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             for i in range(4)
         ]
         prisoner_credits = [
-            combine_dicts(
+            dict(
                 self.PRISONER_CREDIT,
-                {
+                **{
                     'id': i,
                     'started_at': offset_isodatetime_by_ten_seconds(self.PRISONER_CREDIT['started_at'], i)
                 }
@@ -3348,7 +3383,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         mock_api_session.configure_mock(**{
             'get.return_value.json.return_value.get': mock.MagicMock(
                 side_effect=[
+                    4,
                     sender_credits,
+                    4,
                     prisoner_credits
                 ]
             )
