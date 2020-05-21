@@ -84,7 +84,7 @@ class AcceptOrRejectCheckView(FormView):
             f'/senders/{detail_object["credit"]["sender_profile"]}/credits',
             **{
                 'exclude_credit__in': detail_object['credit']['id'],
-                'check__isnull': False,
+                'security_check__isnull': False,
                 'include_checks': True
             }
         )
@@ -100,7 +100,7 @@ class AcceptOrRejectCheckView(FormView):
                 'exclude_credit__in': ','.join(
                     [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
                 ),
-                'check__isnull': False,
+                'security_check__isnull': False,
                 'include_checks': True
             }
         )

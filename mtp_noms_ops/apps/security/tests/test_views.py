@@ -2960,7 +2960,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -2981,7 +2981,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3022,7 +3022,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3043,7 +3043,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True),
                         ])
                     ),
@@ -3137,7 +3137,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3158,7 +3158,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3237,7 +3237,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3258,7 +3258,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3305,7 +3305,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3326,7 +3326,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('limit', 500),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
-                            ('check__isnull', False),
+                            ('security_check__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
