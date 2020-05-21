@@ -117,13 +117,45 @@
               {{ credit.amount|currency }}
             </td>
             <td>
-              {{ credit.security_check.status|title }}
+              {% if check.status == 'accepted' %}
+                <p class="mtp-accepted-tag">{{ check.status|upper }}</p>
+              {% elif check.status == 'pending'  %}
+                <p class="mtp-pending-tag">{{ check.status|upper }}</p>
+              {% else %}
+                <p class="mtp-rejected-tag">{{ check.status|upper }}</p>
+              {% endif %}
+              {% if check.status != 'pending'  %}
+                {% trans 'by' %}
+                {{ check.actioned_by_name }}
+              {% endif %}
             </td>
           </tr>
           <tr class="mtp-check-description-row">
             <td></td>
-            <td colspan="4">{{ credit.security_check.description }}</td>
+            <td colspan="4"><b>Description:</b> {{ credit.security_check.description }}</td>
           </tr>
+          <tr class="mtp-check-rules-row">
+            <td></td>
+            <td colspan="4"><b>Rules:</b>
+              <ul>
+                {% for rule in credit.security_check.rules %}
+                  <li> {{ rule }} </li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+          {% if credit.security_check.status != 'pending' %}
+            <tr class="mtp-check-decision-row">
+              <td></td>
+              <td colspan="4"><b>Decision Details:</b>
+                {% if credit.security_check.decision_reason %}
+                  {{ credit.security_check.decision_reason }}
+                {% else %}
+                  {% trans 'No decision reason entered' %}
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
         {% empty %}
           <tr>
             <td colspan="5">{% trans 'There are no credits matching sender or prisoner profile.' %}</td>

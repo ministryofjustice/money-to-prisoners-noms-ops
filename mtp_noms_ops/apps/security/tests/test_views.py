@@ -2618,7 +2618,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
     SAMPLE_CHECK_BASE = {
         'id': 1,
         'description': 'lorem ipsum',
-        'rules': ['RULE1', 'RULE1'],
+        'rules': ['RULE1', 'RULE2'],
         'status': 'pending',
         'actioned_at': None,
         'actioned_by': None,
@@ -2630,8 +2630,8 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'card_expiry_date': '02/20',
         'card_number_first_digits': '123456',
         'card_number_last_digits': '9876',
-        'prisoner_name': 'John Doe',
-        'prisoner_number': 'A1234AB',
+        'prisoner_name': 'Jean Valjean',
+        'prisoner_number': '24601',
         'sender_email': 'sender@example.com',
         'sender_name': 'MAISIE NOLAN',
         'source': 'online',
@@ -2710,7 +2710,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, '02/20')
 
             content = response.content.decode()
-            self.assertIn('A1234AB', content)
+            self.assertIn('24601', content)
             self.assertIn('1 credit', content)
             self.assertIn('This credit does not need attention today', content)
             self.assertNotIn('credit needs attention', content)
@@ -2771,15 +2771,22 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
 
             response = self.client.get(reverse('security:check_list'), follow=True)
 
-            self.assertContains(response, 'Review <span class="visually-hidden">credit to John Doe</span>')
+            self.assertContains(response, 'Review <span class="visually-hidden">credit to Jean Valjean</span>')
 
 
 class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
     """
     Tests related to CreditsHistoryListView.
     """
-    SAMPLE_CHECK_WITH_ACTIONED_BY = copy.deepcopy(
-        BaseCheckViewTestCase.SAMPLE_CHECK
+    SAMPLE_CHECK_WITH_ACTIONED_BY = dict(
+        BaseCheckViewTestCase.SAMPLE_CHECK,
+        **{
+            'actioned_at': '2020-01-13 12:00:00+00',
+            'actioned_by': 1,
+            'decision_reason': 'Money issues',
+            'actioned_by_name': 'Barry Garlow',
+            'status': 'accepted'
+        }
     )
 
     SAMPLE_CHECK_WITH_ACTIONED_BY['credit'].update(
@@ -2793,10 +2800,8 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
                 'postcode': 'S1 3HS',
                 'debit_card_sender_details': 17
             },
-            'actioned_at': '2020-01-13 12:00:00+00',
-            'actioned_by': 1,
-            'decision_reason': 'Money issues',
-            'actioned_by_name': 'Barry Garlow',
+            'prison_name': 'Brixton Prison',
+            'prisoner_number': '24601',
         }
     )
 
@@ -2832,7 +2837,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
 
             content = response.content.decode()
 
-            self.assertIn('A1234AB', content)
+            self.assertIn('24601', content)
             self.assertIn('1 credit', content)
 
     def test_view_contains_relevant_data(self):
@@ -2855,7 +2860,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, 'Barry Garlow')
             self.assertContains(response, 'Money issues')
             self.assertContains(response, 'S1 3HS')
-            self.assertContains(response, 'A0140QE')
+            self.assertContains(response, '24601')
             self.assertContains(response, 'accepted')
             self.assertContains(response, 'Brixton Prison')
 
@@ -3064,7 +3069,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         response_content = response.content.decode(response.charset)
         self.assertIn('123456******9876', response_content)
         self.assertIn('02/20', response_content)
-        self.assertIn('John Doe', response_content)
+        self.assertIn('Jean Valjean', response_content)
         self.assertIn('£10.00', response_content)
 
         # Senders previous credit
