@@ -11,6 +11,10 @@
     <h1 class="heading-xlarge">{{ view.title }}</h1>
   </header>
 
+  <aside class="mtp-object-list-toggle print-hidden">
+    <a href="{% url 'security:credits_history' %}" class="button-secondary"> {% trans 'View decision history' %}</a>
+  </aside>
+
   {% include 'mtp_common/includes/message_box.html' %}
 
   <p class="font-large">

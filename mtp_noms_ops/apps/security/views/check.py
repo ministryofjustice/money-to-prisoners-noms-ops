@@ -4,7 +4,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.utils.translation import gettext_lazy
 from django.views.generic.edit import FormView
 
-from security.forms.check import AcceptOrRejectCheckForm, CheckListForm
+from security.forms.check import AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm
 from security.views.object_base import SecurityView
 
 
@@ -12,9 +12,18 @@ class CheckListView(SecurityView):
     """
     View returning the checks in pending status.
     """
-    title = gettext_lazy('Credits pending')
+    title = gettext_lazy('Pending')
     template_name = 'security/checks_list.html'
     form_class = CheckListForm
+
+
+class CreditsHistoryListView(SecurityView):
+    """
+    View history of all accepted and rejected credits.
+    """
+    title = gettext_lazy('Decision history')
+    template_name = 'security/credits_history_list.html'
+    form_class = CreditsHistoryListForm
 
 
 class AcceptOrRejectCheckView(FormView):

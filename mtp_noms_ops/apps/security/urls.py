@@ -369,6 +369,11 @@ urlpatterns = [
         fiu_security_test(views.AcceptOrRejectCheckView.as_view()),
         name='resolve_check',
     ),
+    url(
+        r'^security/credits-history/$',
+        fiu_security_test(views.CreditsHistoryListView.as_view()),
+        name='credits_history',
+    ),
 
     # legacy views, they redirect to their v2 and should be safe to be removed eventually
     url(

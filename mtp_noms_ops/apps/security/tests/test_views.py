@@ -2627,6 +2627,42 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'actioned_by': None,
     }
 
+    SAMPLE_CHECK_WITH_ACTIONED_BY = {
+        'id': 1,
+        'description': 'A0140QE',
+        'rules': ['RULE1', 'RULE1'],
+        'status': 'accepted',
+        'credit': {
+            'id': 1,
+            'amount': 1000,
+            'card_expiry_date': '02/20',
+            'card_number_first_digits': '123456',
+            'card_number_last_digits': '9876',
+            'prisoner_name': 'John Doe',
+            'prison_name': 'Brixton Prison',
+            'prisoner_number': 'A1234AB',
+            'sender_email': 'sender@example.com',
+            'sender_name': 'MAISIE NOLAN',
+            'source': 'online',
+            'started_at': '2019-07-02T10:00:00Z',
+            'received_at': None,
+            'credited_at': None,
+            'billing_address': {
+                'id': 21,
+                'line1': 'Studio 33',
+                'line2': 'Allen port',
+                'city': 'Gloverside',
+                'country': 'UK',
+                'postcode': 'S1 3HS',
+                'debit_card_sender_details': 17
+            },
+        },
+        'actioned_at': '2020-01-13 12:00:00+00',
+        'actioned_by': 1,
+        'decision_reason': 'Money issues',
+        'actioned_by_name': 'Barry Garlow',
+    }
+
     required_checks_permissions = (
         *required_permissions,
         'security.view_check',
@@ -2691,7 +2727,8 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             )
 
             response = self.client.get(reverse('security:check_list'), follow=True)
-            self.assertContains(response, '123456******9876 &nbsp; 02/20')
+            self.assertContains(response, '123456******9876')
+            self.assertContains(response, '02/20')
 
             content = response.content.decode()
             self.assertIn('A1234AB', content)
@@ -2720,7 +2757,8 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             )
 
             response = self.client.get(reverse('security:check_list'), follow=True)
-            self.assertContains(response, '123456******9876 &nbsp; 02/20')
+            self.assertContains(response, '123456******9876')
+            self.assertContains(response, '02/20')
 
             content = response.content.decode()
             self.assertIn('2 credits need attention', content)
@@ -2755,6 +2793,71 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             response = self.client.get(reverse('security:check_list'), follow=True)
 
             self.assertContains(response, 'Review <span class="visually-hidden">credit to John Doe</span>')
+
+
+class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
+    """
+    Tests related to CreditsHistoryListView.
+    """
+
+    def test_cannot_access_view(self):
+        """
+        Test that if the logged in user doesn't have the right permissions, he/she
+        gets redirected to the dashboard.
+        """
+        user_data = self.get_user_data(permissions=required_permissions)
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps, user_data=user_data)
+            response = self.client.get(reverse('security:credits_history'), follow=True)
+            self.assertRedirects(response, reverse('security:dashboard'))
+
+    def test_view(self):
+        """
+        Test that the view displays the history of checks caught by delayed capture by the API.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY],
+                },
+            )
+
+            response = self.client.get(reverse('security:credits_history'))
+            self.assertContains(response, '123456******9876')
+            self.assertContains(response, '02/20')
+
+            content = response.content.decode()
+
+            self.assertIn('A1234AB', content)
+            self.assertIn('1 credit', content)
+
+    def test_view_contains_relevant_data(self):
+        """
+        Test that the view displays the correct data from the API.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY],
+                },
+            )
+            response = self.client.get(reverse('security:credits_history'))
+            self.assertContains(response, '123456******9876')
+            self.assertContains(response, '02/20')
+            self.assertContains(response, 'Barry Garlow')
+            self.assertContains(response, 'Money issues')
+            self.assertContains(response, 'S1 3HS')
+            self.assertContains(response, 'A0140QE')
+            self.assertContains(response, 'accepted')
+            self.assertContains(response, 'Brixton Prison')
 
 
 class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
