@@ -41,5 +41,6 @@
 }
 
 .mtp-object-list-toggle {
-  float: right;
+  display: flex;
+  justify-content: flex-end;
 }
