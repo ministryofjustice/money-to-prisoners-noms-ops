@@ -81,10 +81,11 @@ class AcceptOrRejectCheckView(FormView):
         # Get the sender credits
         sender_response = retrieve_all_pages_for_path(
             api_session,
-            f'/senders/{detail_object["credit"]["sender_profile"]}/credits',
+            f'/senders/{detail_object["credit"]["sender_profile"]}/credits/',
             **{
                 'exclude_credit__in': detail_object['credit']['id'],
                 'security_check__isnull': False,
+                'security_check__actioned_by__isnull': False,
                 'include_checks': True
             }
         )
@@ -93,7 +94,7 @@ class AcceptOrRejectCheckView(FormView):
 
         prisoner_response = retrieve_all_pages_for_path(
             api_session,
-            f'/prisoners/{detail_object["credit"]["prisoner_profile"]}/credits',
+            f'/prisoners/{detail_object["credit"]["prisoner_profile"]}/credits/',
             **{
                 # Exclude any credits displayed as part of sender credits, to prevent duplication where
                 # both prisoner and sender same as the credit in question
@@ -101,6 +102,7 @@ class AcceptOrRejectCheckView(FormView):
                     [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
                 ),
                 'security_check__isnull': False,
+                'security_check__actioned_by__isnull': False,
                 'include_checks': True
             }
         )
@@ -108,7 +110,7 @@ class AcceptOrRejectCheckView(FormView):
 
         return sorted(
             prisoner_credits + sender_credits,
-            key=lambda c: c['started_at'],
+            key=lambda c: c['security_check']['actioned_at'],
             reverse=True
         )
 

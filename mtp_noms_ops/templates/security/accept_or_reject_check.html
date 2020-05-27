@@ -117,17 +117,13 @@
               {{ credit.amount|currency }}
             </td>
             <td>
-              {% if check.status == 'accepted' %}
-                <p class="mtp-accepted-tag">{{ check.status|upper }}</p>
-              {% elif check.status == 'pending'  %}
-                <p class="mtp-pending-tag">{{ check.status|upper }}</p>
+              {% if credit.security_check.status == 'accepted' %}
+                <p class="mtp-accepted-tag">{{ credit.security_check.status |upper }}</p>
               {% else %}
-                <p class="mtp-rejected-tag">{{ check.status|upper }}</p>
+                <p class="mtp-rejected-tag">{{ credit.security_check.status |upper }}</p>
               {% endif %}
-              {% if check.status != 'pending'  %}
-                {% trans 'by' %}
-                {{ check.actioned_by_name }}
-              {% endif %}
+              {% trans 'by' %}
+              {{ credit.security_check.actioned_by_name }}
             </td>
           </tr>
           <tr class="mtp-check-description-row">
@@ -144,18 +140,16 @@
               </ul>
             </td>
           </tr>
-          {% if credit.security_check.status != 'pending' %}
-            <tr class="mtp-check-decision-row">
-              <td></td>
-              <td colspan="4"><b>Decision Details:</b>
-                {% if credit.security_check.decision_reason %}
-                  {{ credit.security_check.decision_reason }}
-                {% else %}
-                  {% trans 'No decision reason entered' %}
-                {% endif %}
-              </td>
-            </tr>
-          {% endif %}
+          <tr class="mtp-check-decision-row">
+            <td></td>
+            <td colspan="4"><b>Decision Details:</b>
+              {% if credit.security_check.decision_reason %}
+                {{ credit.security_check.decision_reason }}
+              {% else %}
+                {% trans 'No decision reason entered' %}
+              {% endif %}
+            </td>
+          </tr>
         {% empty %}
           <tr>
             <td colspan="5">{% trans 'There are no credits matching sender or prisoner profile.' %}</td>

@@ -2893,6 +2893,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         )
     )
     SENDER_CREDIT['security_check']['description'] = '☢☢☢ This looks roight dodgy this does☣☣☣'
+    SENDER_CREDIT['security_check']['actioned_by_name'] = 'Javert'
+    SENDER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
+    SENDER_CREDIT['security_check']['status'] = 'rejected'
 
     SENDER_CHECK = copy.deepcopy(BaseCheckViewTestCase.SAMPLE_CHECK)
     SENDER_CHECK['credit']['sender_profile'] = sender_id
@@ -2915,20 +2918,22 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             'prison_name': 'HMP LEEDS',
             'billing_address': {'line1': 'Somewhere else', 'city': 'London'},
             'resolution': 'credited',
-            'started_at': credit_created_date.isoformat()
         }
     )
     PRISONER_CREDIT['security_check']['description'] = 'I guess this is probably fine???'
+    PRISONER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
+    PRISONER_CREDIT['security_check']['actioned_by_name'] = 'Staff'
+    PRISONER_CREDIT['security_check']['status'] = 'accepted'
 
     @classmethod
     def _get_prisoner_credit_list(cls, length):
         for i in range(length):
-            yield dict(cls.PRISONER_CREDIT, **{'id': i})
+            yield dict(cls.PRISONER_CREDIT, id=i)
 
     @classmethod
     def _get_sender_credit_list(cls, length):
         for i in range(length):
-            yield dict(cls.SENDER_CREDIT, **{'id': i})
+            yield dict(cls.SENDER_CREDIT, id=i)
 
     def test_cannot_access_view(self):
         """
@@ -2966,6 +2971,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -2987,6 +2993,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3006,7 +3013,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
 
     def test_check_view_includes_matching_credit_history(self):
         """
-        Test that the view displays credits related by sender id to the chedit subject to a check.
+        Test that the view displays credits related by sender id to the credit subject to a check.
         """
         check_id = 1
         response_len = 4
@@ -3028,6 +3035,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3049,6 +3057,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True),
                         ])
                     ),
@@ -3076,6 +3085,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         self.assertIn('Ms A. Nother Prisoner', response_content)
         self.assertIn('£10,000.00', response_content)
         self.assertIn('☢☢☢ This looks roight dodgy this does☣☣☣', response_content)
+        self.assertIn('Javert', response_content)
 
         # Prisoners previous credit
         self.assertIn('£0.10', response_content)
@@ -3084,6 +3094,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         self.assertIn('SOMEONE ELSE', response_content)
         self.assertIn('Number 6', response_content)
         self.assertIn('I guess this is probably fine???', response_content)
+        self.assertIn('Staff', response_content)
 
         # TODO add in assertion for ordering
 
@@ -3143,6 +3154,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3164,6 +3176,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3243,6 +3256,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3264,6 +3278,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3311,6 +3326,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3332,6 +3348,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
+                            ('security_check__actioned_by__isnull', False),
                             ('include_checks', True)
                         ])
                     ),
@@ -3363,7 +3380,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 self.SENDER_CREDIT,
                 **{
                     'id': i,
-                    'started_at': offset_isodatetime_by_ten_seconds(self.SENDER_CREDIT['started_at'], i)
+                    'security_check': dict(
+                        self.SENDER_CREDIT['security_check'],
+                        actioned_at=offset_isodatetime_by_ten_seconds(
+                            self.SENDER_CREDIT['security_check']['actioned_at'], i
+                        )
+                    )
                 }
             )
             for i in range(4)
@@ -3373,7 +3395,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 self.PRISONER_CREDIT,
                 **{
                     'id': i,
-                    'started_at': offset_isodatetime_by_ten_seconds(self.PRISONER_CREDIT['started_at'], i)
+                    'security_check': dict(
+                        self.PRISONER_CREDIT['security_check'],
+                        actioned_at=offset_isodatetime_by_ten_seconds(
+                            self.PRISONER_CREDIT['security_check']['actioned_at'], i
+                        )
+                    )
                 }
             )
             for i in range(4)
