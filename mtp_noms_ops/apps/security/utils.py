@@ -34,7 +34,7 @@ def convert_date_fields(object_list, include_nested=False):
     If `include_nested` is True, it will also convert values in nested dicts, nested lists are not
     supported yet.
     """
-    fields = ('started_at', 'received_at', 'credited_at', 'refunded_at', 'created', 'triggered_at')
+    fields = ('started_at', 'received_at', 'credited_at', 'refunded_at', 'created', 'triggered_at', 'actioned_at')
     parsers = (parse_datetime, parse_date)
 
     def convert(obj):

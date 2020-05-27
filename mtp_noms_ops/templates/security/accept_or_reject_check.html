@@ -119,15 +119,11 @@
             <td>
               {% if check.status == 'accepted' %}
                 <p class="mtp-accepted-tag">{{ check.status|upper }}</p>
-              {% elif check.status == 'pending'  %}
-                <p class="mtp-pending-tag">{{ check.status|upper }}</p>
               {% else %}
                 <p class="mtp-rejected-tag">{{ check.status|upper }}</p>
               {% endif %}
-              {% if check.status != 'pending'  %}
-                {% trans 'by' %}
-                {{ check.actioned_by_name }}
-              {% endif %}
+              {% trans 'by' %}
+              {{ check.actioned_by_name }}
             </td>
           </tr>
           <tr class="mtp-check-description-row">

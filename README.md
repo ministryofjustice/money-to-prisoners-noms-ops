@@ -14,8 +14,6 @@ Please refer to the [money-to-prisoners-api](https://github.com/ministryofjustic
 Once the API has started locally, run
 
 ```
-npm install
-
 ./run.py serve
 # or
 ./run.py start

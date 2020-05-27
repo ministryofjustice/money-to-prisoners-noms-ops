@@ -3006,7 +3006,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
 
     def test_check_view_includes_matching_credit_history(self):
         """
-        Test that the view displays credits related by sender id to the chedit subject to a check.
+        Test that the view displays credits related by sender id to the credit subject to a check.
         """
         check_id = 1
         response_len = 4
