@@ -22,4 +22,5 @@
   require('autocomplete-select').AutocompleteSelect.init();
   require('choose-prisons').ChoosePrisons.init();
   require('form-analytics').FormAnalytics.init();
+  require('disable-on-submit').DisableOnSubmit.init();
 }());
