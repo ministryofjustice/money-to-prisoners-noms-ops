@@ -51,7 +51,9 @@
           <td>
             <a href="{{ check.credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ check.credit.sender_name }}</a>
             <br/>
-            {{ check.credit|format_card_number }} &nbsp; {{ check.credit.card_expiry_date }}
+            {{ check.credit|format_card_number }}
+            <br/>
+            {{ check.credit.card_expiry_date }}
             <br />
             {{ check.credit.sender_email }}
             <br />
@@ -100,7 +102,9 @@
             <td>
               <a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name }}</a>
               <br/>
-              {{ credit|format_card_number }} &nbsp; {{ credit.card_expiry_date }}
+              {{ credit|format_card_number }}
+              <br />
+              {{ credit.card_expiry_date }}
               <br />
               {{ credit.sender_email }}
               <br />
@@ -128,21 +132,10 @@
           </tr>
           <tr class="mtp-check-description-row">
             <td></td>
-            <td colspan="4"><b>Description:</b> {{ credit.security_check.description }}</td>
-          </tr>
-          <tr class="mtp-check-rules-row">
-            <td></td>
-            <td colspan="4"><b>Rules:</b>
-              <ul>
-                {% for rule in credit.security_check.rules %}
-                  <li> {{ rule }} </li>
-                {% endfor %}
-              </ul>
-            </td>
-          </tr>
-          <tr class="mtp-check-decision-row">
-            <td></td>
-            <td colspan="4"><b>Decision Details:</b>
+            <td colspan="4">
+              <strong>Rule:</strong> {{ credit.security_check.description }}
+              <br />
+              <strong>Decision Details:</strong>
               {% if credit.security_check.decision_reason %}
                 {{ credit.security_check.decision_reason }}
               {% else %}

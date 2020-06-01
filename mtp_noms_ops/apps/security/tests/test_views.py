@@ -3009,7 +3009,8 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             response = self.client.get(url, follow=True)
 
             self.assertContains(response, 'Accept credit')
-            self.assertContains(response, '123456******9876 &nbsp; 02/20')
+            self.assertContains(response, '123456******9876')
+            self.assertContains(response, '02/20')
 
     def test_check_view_includes_matching_credit_history(self):
         """
