@@ -69,6 +69,7 @@ class CreditsHistoryListForm(SecurityForm):
         params = super().get_api_request_params()
         params['actioned_by'] = True
         params['started_at__gte'] = self.CHECKS_STARTED
+        params['ordering'] = '-created'
         return params
 
     def get_object_list_endpoint_path(self):
