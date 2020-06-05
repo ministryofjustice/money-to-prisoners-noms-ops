@@ -7,9 +7,12 @@
 }
 
 table.mtp-table {
+  .mtp-check-date {
+    white-space: nowrap;
+  }
+
   .mtp-check-row td {
     border-bottom: none;
-    padding-bottom: none;
   }
 
   .mtp-check-description-row td {
@@ -21,10 +24,6 @@ table.mtp-table {
 
 table.mtp-table--review {
   margin-bottom: 4em;
-
-  .mtp-check-row > td:nth-of-type(2) {
-    white-space: nowrap;
-  }
 }
 
 .mtp-check-needs-attention {

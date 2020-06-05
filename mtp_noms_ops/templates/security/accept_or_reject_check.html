@@ -45,7 +45,7 @@
               </span>
             {% endif %}
           </td>
-          <td>
+          <td class="mtp-check-date">
             {{ check.credit.started_at|date:'SHORT_DATETIME_FORMAT'}}
           </td>
           <td>
@@ -94,7 +94,7 @@
       <tbody>
         {% for credit in related_credits %}
           <tr class="mtp-check-row">
-            <td>
+            <td class="mtp-check-date">
               {{ credit.started_at|date:'SHORT_DATETIME_FORMAT'}}
             </td>
             <td>
