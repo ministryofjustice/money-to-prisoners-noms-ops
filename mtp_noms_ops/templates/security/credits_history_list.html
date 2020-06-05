@@ -64,11 +64,10 @@
         {{ check.credit.amount|currency }}
       </td>
       <td>
-        {% if check.status == 'accepted' %}
-          <p class="mtp-accepted-tag">{{ check.status|upper }}</p>
-        {% else %}
-          <p class="mtp-rejected-tag">{{ check.status|upper }}</p>
-        {% endif %}
+        <span class="mtp-check-status-tag mtp-check-status-tag--{{ check.status }}">
+          {{ check.status|title }}
+        </span>
+        <br />
         {% trans 'by' %}
         {{ check.actioned_by_name }}
       </td>

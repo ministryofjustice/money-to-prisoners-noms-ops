@@ -1,9 +1,21 @@
-.mtp-rejected-tag {
-  color: $red;
+// NB: these will be replaced with standard tags from GDS design system
+
+.mtp-check-status-tag {
+  display: inline-block;
+  margin-bottom: 2px;
+  padding: 3px 5px 0;
+  line-height: 1;
+  border: 2px solid transparent;
   font-weight: bold;
+  text-transform: uppercase;
 }
 
-.mtp-accepted-tag{
+.mtp-check-status-tag--accepted {
   color: $green;
-  font-weight: bold;
+  border-color: $green;
+}
+
+.mtp-check-status-tag--rejected {
+  color: $red;
+  border-color: $red;
 }
