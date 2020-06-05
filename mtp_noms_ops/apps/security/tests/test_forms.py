@@ -6,7 +6,7 @@ from unittest import mock
 from urllib.parse import parse_qs
 
 from django import forms
-from django.test import SimpleTestCase, override_settings
+from django.test import SimpleTestCase
 from django.utils.timezone import make_aware
 from django.utils.dateparse import parse_datetime
 from mtp_common.auth.test_utils import generate_tokens
@@ -2403,42 +2403,6 @@ class CheckListFormTestCase(SimpleTestCase):
     def test_get_object_list(self):
         """
         Test that the form makes the right API call to get the list of checks.
-        """
-        with responses.RequestsMock() as rsps:
-            rsps.add(
-                rsps.GET,
-                api_url('/security/checks/'),
-                json={
-                    'count': 0,
-                    'results': [],
-                },
-            )
-
-            form = CheckListForm(
-                self.request,
-                data={
-                    'page': 2,
-                },
-            )
-
-            self.assertTrue(form.is_valid())
-            self.assertListEqual(form.get_object_list(), [])
-
-            api_call_made = rsps.calls[-1].request.url
-            self.assertDictEqual(
-                parse_qs(api_call_made.split('?', 1)[1]),
-                {
-                    'offset': ['20'],
-                    'limit': ['20'],
-                    'status': ['pending'],
-                },
-            )
-
-    @override_settings(SHOW_ONLY_CHECKS_WITH_INITIAL_CREDIT=True)
-    def test_get_object_list_with_initial_credits_only(self):
-        """
-        Test that the form makes the right API call to get the list of checks
-        when settings.SHOW_ONLY_CHECKS_WITH_INITIAL_CREDIT is set.
         """
         with responses.RequestsMock() as rsps:
             rsps.add(
