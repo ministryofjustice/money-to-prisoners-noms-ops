@@ -52,15 +52,6 @@
         {{ check.credit.sender_email }}
         <br/>
         {{ check.credit.billing_address.postcode }}
-        <br/>
-        <br/>
-        <strong>{% trans 'Rule:' %}</strong>
-        {{ check.description }}
-        <br/>
-        {% if check.decision_reason %}
-          <strong>{% trans 'Decision details:' %}</strong>
-          {{ check.decision_reason }}
-        {% endif %}
       </td>
       <td>
         {{ check.credit.prisoner_number }}
@@ -80,6 +71,18 @@
         {% endif %}
         {% trans 'by' %}
         {{ check.actioned_by_name }}
+      </td>
+    </tr>
+    <tr class="mtp-check-description-row">
+      <td></td>
+      <td colspan="4">
+        {{ check.description }}
+        {% if check.decision_reason %}
+          <br/>
+          <br/>
+          <strong>{% trans 'Decision details:' %}</strong>
+          {{ check.decision_reason }}
+        {% endif %}
       </td>
     </tr>
     {% empty %}
