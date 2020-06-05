@@ -29,7 +29,7 @@
 <table class="mtp-table table-font-xsmall">
   <thead>
     <tr>
-      <th>{% trans 'Date sent' %}</th>
+      {% sortable_cell _('Date sent') form.cleaned_data 'created' %}
       <th>{% trans 'Debit card (from)' %}</th>
       <th>{% trans 'Prisoner (to)' %}</th>
       <th>{% trans 'Amount' %}</th>

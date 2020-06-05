@@ -62,6 +62,16 @@ class CreditsHistoryListForm(SecurityForm):
     """
     CHECKS_STARTED = '2020-01-02T12:00:00'
 
+    ordering = forms.ChoiceField(
+        label=_('Order by'),
+        required=False,
+        initial='-created',
+        choices=[
+            ('created', _('Date started (oldest to newest)')),
+            ('-created', _('Date started (newest to oldest)')),
+        ],
+    )
+
     def get_api_request_params(self):
         """
         Gets all checks where actioned_by is not None.
@@ -69,7 +79,6 @@ class CreditsHistoryListForm(SecurityForm):
         params = super().get_api_request_params()
         params['actioned_by'] = True
         params['started_at__gte'] = self.CHECKS_STARTED
-        params['ordering'] = '-created'
         return params
 
     def get_object_list_endpoint_path(self):
