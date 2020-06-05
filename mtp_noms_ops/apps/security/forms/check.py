@@ -32,7 +32,7 @@ class CheckListForm(SecurityForm):
         params = super().get_api_request_params()
         params['status'] = 'pending'
         # TODO: always add credit_resolution filter following delayed capture release
-            params['credit_resolution'] = 'initial'
+        params['credit_resolution'] = 'initial'
         return params
 
     def get_object_list_endpoint_path(self):
@@ -60,6 +60,7 @@ class CreditsHistoryListForm(SecurityForm):
     """
     List of security checks.
     """
+    CHECKS_STARTED = '2020-01-02T12:00:00'
 
     def get_api_request_params(self):
         """
@@ -67,6 +68,7 @@ class CreditsHistoryListForm(SecurityForm):
         """
         params = super().get_api_request_params()
         params['actioned_by'] = True
+        params['started_at__gte'] = self.CHECKS_STARTED
         return params
 
     def get_object_list_endpoint_path(self):
