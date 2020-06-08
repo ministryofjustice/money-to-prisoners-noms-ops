@@ -292,8 +292,6 @@ TOKEN_RETRIEVAL_PASSWORD = os.environ.get('TOKEN_RETRIEVAL_PASSWORD', '_token_re
 CLOUD_PLATFORM_MIGRATION_MODE = os.environ.get('CLOUD_PLATFORM_MIGRATION_MODE', '')
 CLOUD_PLATFORM_MIGRATION_URL = os.environ.get('CLOUD_PLATFORM_MIGRATION_URL', '')
 
-SHOW_ONLY_CHECKS_WITH_INITIAL_CREDIT = os.environ.get('SHOW_ONLY_CHECKS_WITH_INITIAL_CREDIT', 'False') == 'True'
-
 try:
     from .local import *  # noqa
 except ImportError:
