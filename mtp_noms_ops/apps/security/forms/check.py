@@ -2,7 +2,6 @@ import logging
 from functools import lru_cache
 
 from django import forms
-from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy
 from form_error_reporting import GARequestErrorReportingMixin
@@ -33,8 +32,7 @@ class CheckListForm(SecurityForm):
         params = super().get_api_request_params()
         params['status'] = 'pending'
         # TODO: always add credit_resolution filter following delayed capture release
-        if settings.SHOW_ONLY_CHECKS_WITH_INITIAL_CREDIT:
-            params['credit_resolution'] = 'initial'
+        params['credit_resolution'] = 'initial'
         return params
 
     def get_object_list_endpoint_path(self):
@@ -62,6 +60,7 @@ class CreditsHistoryListForm(SecurityForm):
     """
     List of security checks.
     """
+    CHECKS_STARTED = '2020-01-02T12:00:00'
 
     def get_api_request_params(self):
         """
@@ -69,6 +68,8 @@ class CreditsHistoryListForm(SecurityForm):
         """
         params = super().get_api_request_params()
         params['actioned_by'] = True
+        params['started_at__gte'] = self.CHECKS_STARTED
+        params['ordering'] = '-created'
         return params
 
     def get_object_list_endpoint_path(self):

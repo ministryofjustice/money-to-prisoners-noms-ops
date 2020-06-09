@@ -57,8 +57,10 @@
         <strong>{% trans 'Rule:' %}</strong>
         {{ check.description }}
         <br/>
-        <strong>{% trans 'Decision details:' %}</strong>
-        {{ check.decision_reason }}
+        {% if check.decision_reason %}
+          <strong>{% trans 'Decision details:' %}</strong>
+          {{ check.decision_reason }}
+        {% endif %}
       </td>
       <td>
         {{ check.credit.prisoner_number }}

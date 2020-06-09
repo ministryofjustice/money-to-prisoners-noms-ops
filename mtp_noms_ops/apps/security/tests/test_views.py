@@ -2863,6 +2863,27 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, '24601')
             self.assertContains(response, 'accepted')
             self.assertContains(response, 'Brixton Prison')
+            self.assertContains(response, 'Decision details:')
+
+    def test_view_does_not_display_decision_if_none(self):
+        """
+        Test that the view displays the correct data from the API.
+        """
+        self.SAMPLE_CHECK_WITH_ACTIONED_BY['decision_reason'] = None
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY],
+                },
+            )
+            response = self.client.get(reverse('security:credits_history'))
+
+            self.assertNotContains(response, 'Decision details:')
 
 
 class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
