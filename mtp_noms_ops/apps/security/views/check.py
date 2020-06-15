@@ -85,6 +85,7 @@ class AcceptOrRejectCheckView(FormView):
             **{
                 'exclude_credit__in': detail_object['credit']['id'],
                 'security_check__isnull': False,
+                'only_completed': False,
                 'security_check__actioned_by__isnull': False,
                 'include_checks': True
             }
@@ -102,6 +103,7 @@ class AcceptOrRejectCheckView(FormView):
                     [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
                 ),
                 'security_check__isnull': False,
+                'only_completed': False,
                 'security_check__actioned_by__isnull': False,
                 'include_checks': True
             }
