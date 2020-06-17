@@ -9,23 +9,21 @@
 table.mtp-table {
   .mtp-check-row td {
     border-bottom: none;
+    padding-bottom: none;
   }
 
   .mtp-check-description-row td {
     border-top: none;
     padding-top: 0;
-    font-size: smaller;
+    margin-bottom: 0;
   }
 }
 
 table.mtp-table--review {
   margin-bottom: 4em;
+
   .mtp-check-row > td:nth-of-type(2) {
     white-space: nowrap;
-  }
-  .mtp-check-description-row td {
-    border-top: 0;
-    font-size: inherit;
   }
 }
 

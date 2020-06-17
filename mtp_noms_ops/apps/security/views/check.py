@@ -3,8 +3,10 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import Http404, HttpResponseRedirect
 from django.utils.translation import gettext_lazy
 from django.views.generic.edit import FormView
+from mtp_common.api import retrieve_all_pages_for_path
 
 from security.forms.check import AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm
+from security.utils import convert_date_fields
 from security.views.object_base import SecurityView
 
 
@@ -12,7 +14,7 @@ class CheckListView(SecurityView):
     """
     View returning the checks in pending status.
     """
-    title = gettext_lazy('Pending')
+    title = gettext_lazy('Credits pending')
     template_name = 'security/checks_list.html'
     form_class = CheckListForm
 
@@ -57,6 +59,8 @@ class AcceptOrRejectCheckView(FormView):
         if detail_object is None:
             raise Http404('Detail object not found')
 
+        api_session = context_data['form'].session
+
         # keep query string in breadcrumbs
         list_url = self.request.build_absolute_uri(str(self.list_url))
         referrer_url = self.request.META.get('HTTP_REFERER', '-')
@@ -69,8 +73,48 @@ class AcceptOrRejectCheckView(FormView):
             {'name': self.title},
         ]
         context_data[self.object_context_key] = detail_object
-
+        context_data['related_credits'] = self._get_related_credits(api_session, context_data[self.object_context_key])
         return context_data
+
+    @staticmethod
+    def _get_related_credits(api_session, detail_object):
+        # Get the sender credits
+        sender_response = retrieve_all_pages_for_path(
+            api_session,
+            f'/senders/{detail_object["credit"]["sender_profile"]}/credits/',
+            **{
+                'exclude_credit__in': detail_object['credit']['id'],
+                'security_check__isnull': False,
+                'only_completed': False,
+                'security_check__actioned_by__isnull': False,
+                'include_checks': True
+            }
+        )
+
+        sender_credits = convert_date_fields(sender_response, include_nested=True)
+
+        prisoner_response = retrieve_all_pages_for_path(
+            api_session,
+            f'/prisoners/{detail_object["credit"]["prisoner_profile"]}/credits/',
+            **{
+                # Exclude any credits displayed as part of sender credits, to prevent duplication where
+                # both prisoner and sender same as the credit in question
+                'exclude_credit__in': ','.join(
+                    [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
+                ),
+                'security_check__isnull': False,
+                'only_completed': False,
+                'security_check__actioned_by__isnull': False,
+                'include_checks': True
+            }
+        )
+        prisoner_credits = convert_date_fields(prisoner_response, include_nested=True)
+
+        return sorted(
+            prisoner_credits + sender_credits,
+            key=lambda c: c['security_check']['actioned_at'],
+            reverse=True
+        )
 
     def form_valid(self, form):
         if self.request.method == 'POST':
