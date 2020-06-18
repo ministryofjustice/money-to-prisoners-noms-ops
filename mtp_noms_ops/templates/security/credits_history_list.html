@@ -76,11 +76,13 @@
       <td></td>
       <td colspan="4">
         {{ check.description }}
+        <br/>
+        <br/>
+        <strong>{% trans 'Decision details' %}:</strong>
         {% if check.decision_reason %}
-          <br/>
-          <br/>
-          <strong>{% trans 'Decision details:' %}</strong>
           {{ check.decision_reason }}
+        {% else %}
+          {% trans 'No decision reason entered' %}
         {% endif %}
       </td>
     </tr>

@@ -2883,7 +2883,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
             )
             response = self.client.get(reverse('security:credits_history'))
 
-            self.assertNotContains(response, 'Decision details:')
+            self.assertContains(response, 'No decision reason entered')
 
 
 class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
