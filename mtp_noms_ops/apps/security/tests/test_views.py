@@ -2640,7 +2640,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'credited_at': None,
     }
 
-    SAMPLE_CHECK = dict(list(SAMPLE_CHECK_BASE.items()) + [('credit', SAMPLE_CREDIT_BASE)])
+    SAMPLE_CHECK = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
 
     required_checks_permissions = (
         *required_permissions,
@@ -2897,21 +2897,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
     credit_created_date = datetime.datetime.now()
 
     SENDER_CREDIT = dict(
-        list(BaseCheckViewTestCase.SAMPLE_CREDIT_BASE.items())
-        + list(
-            {
-                'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
-                'intended_recipient': 'Mr G Melley',
-                'prisoner_name': 'Ms A. Nother Prisoner',
-                'prisoner_number': 'Number 6',
-                'amount': 1000000,
-                'prison': 'LEI',
-                'prison_name': 'HMP LEEDS',
-                'billing_address': {'line1': '102PF', 'city': 'London'},
-                'resolution': 'rejected',
-                'started_at': credit_created_date.isoformat()
-            }.items()
-        )
+        BaseCheckViewTestCase.SAMPLE_CREDIT_BASE,
+        **{
+            'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
+            'intended_recipient': 'Mr G Melley',
+            'prisoner_name': 'Ms A. Nother Prisoner',
+            'prisoner_number': 'Number 6',
+            'amount': 1000000,
+            'prison': 'LEI',
+            'prison_name': 'HMP LEEDS',
+            'billing_address': {'line1': '102PF', 'city': 'London'},
+            'resolution': 'rejected',
+            'started_at': credit_created_date.isoformat()
+        }
     )
     SENDER_CREDIT['security_check']['description'] = '☢☢☢ This looks roight dodgy this does☣☣☣'
     SENDER_CREDIT['security_check']['actioned_by_name'] = 'Javert'
@@ -3292,7 +3290,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 ),
                 json={
                     'count': response_len,
-                    'results': list(list(self._get_prisoner_credit_list(response_len)))
+                    'results': list(self._get_prisoner_credit_list(response_len)),
                 }
             )
 
