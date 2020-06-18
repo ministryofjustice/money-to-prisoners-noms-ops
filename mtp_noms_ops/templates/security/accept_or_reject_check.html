@@ -68,7 +68,7 @@
             <td>
               {{ check.credit.amount|currency }}
             </td>
-            <td>
+            <td class="print-hidden">
               {{ check.status|title }}
             </td>
           </tr>
@@ -90,7 +90,7 @@
             <th>{% trans 'Debit card (from)' %}</th>
             <th>{% trans 'Prisoner (to)' %}</th>
             <th>{% trans 'Amount' %}</th>
-            <th class="print-hidden">{% trans 'Actions' %}</th>
+            <th>{% trans 'Decision' %}</th>
           </tr>
         </thead>
         <tbody>
