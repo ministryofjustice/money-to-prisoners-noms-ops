@@ -3,7 +3,7 @@ from functools import lru_cache
 
 from django import forms
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import HttpNotFoundError
@@ -62,6 +62,16 @@ class CreditsHistoryListForm(SecurityForm):
     """
     CHECKS_STARTED = '2020-01-02T12:00:00'
 
+    ordering = forms.ChoiceField(
+        label=_('Order by'),
+        required=False,
+        initial='-created',
+        choices=[
+            ('created', _('Date started (oldest to newest)')),
+            ('-created', _('Date started (newest to oldest)')),
+        ],
+    )
+
     def get_api_request_params(self):
         """
         Gets all checks where actioned_by is not None.
@@ -69,7 +79,6 @@ class CreditsHistoryListForm(SecurityForm):
         params = super().get_api_request_params()
         params['actioned_by'] = True
         params['started_at__gte'] = self.CHECKS_STARTED
-        params['ordering'] = '-created'
         return params
 
     def get_object_list_endpoint_path(self):
@@ -89,7 +98,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
 
     decision_reason = forms.CharField(
-        label=gettext_lazy('Give details (details are optional when accepting)'),
+        label=_('Give details (details are optional when accepting)'),
         required=False,
     )
     fiu_action = forms.CharField(max_length=10)
@@ -112,10 +121,10 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
             convert_dates_obj['needs_attention'] = convert_dates_obj['credit']['started_at'] < self.need_attention_date
             return obj
         except HttpNotFoundError:
-            self.add_error(None, gettext_lazy('Not found'))
+            self.add_error(None, _('Not found'))
             return None
         except RequestException:
-            self.add_error(None, gettext_lazy('This service is currently unavailable'))
+            self.add_error(None, _('This service is currently unavailable'))
             return {}
 
     def get_object_endpoint_path(self):
@@ -142,7 +151,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         if not self.errors:  # if already in error => skip
             if self.get_object()['status'] != 'pending':
                 raise forms.ValidationError(
-                    gettext_lazy("You cannot action this credit as it's not in pending"),
+                    _('You cannot action this credit as it’s not in pending'),
                 )
         return super().clean()
 
@@ -167,5 +176,5 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
             return True
         except RequestException:
             logger.exception(f'Check {self.object_id} could not be actioned')
-            self.add_error(None, gettext_lazy('There was an error with your request.'))
+            self.add_error(None, _('There was an error with your request.'))
             return False
