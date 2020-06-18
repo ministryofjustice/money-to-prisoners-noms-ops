@@ -3035,6 +3035,53 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, '123456******9876')
             self.assertContains(response, '02/20')
 
+    def test_check_view_hides_action_buttons_if_resolved_already(self):
+        """
+        There is currently nothing to prevent the view from showing a resolved security check.
+        Test that the accept/reject form is absent for resolved checks.
+        """
+        response_len = 0
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK_REJECTED
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/'.format(
+                        sender_profile_id=self.sender_id,
+                    ),
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len)),
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                    ),
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_prisoner_credit_list(response_len))
+                }
+            )
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.get(url)
+        content = response.content.decode()
+        self.assertNotIn('name="fiu_action"', content, msg='Action button exists on page')
+        self.assertIn('This credit was rejected by', content)
+
     def test_check_view_includes_matching_credit_history(self):
         """
         Test that the view displays credits related by sender id to the credit subject to a check.
