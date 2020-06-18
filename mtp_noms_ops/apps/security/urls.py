@@ -370,7 +370,7 @@ urlpatterns = [
         name='resolve_check',
     ),
     url(
-        r'^security/credits-history/$',
+        r'^security/checks/history/$',
         fiu_security_test(views.CreditsHistoryListView.as_view()),
         name='credits_history',
     ),
