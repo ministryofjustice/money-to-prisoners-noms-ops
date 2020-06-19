@@ -15,6 +15,7 @@ from security.models import (
     disbursement_methods,
     disbursement_actions,
     disbursement_resolutions,
+    security_check_statuses,
 )
 
 logger = logging.getLogger('mtp')
@@ -196,6 +197,11 @@ def format_disbursement_action(value):
 @register.filter
 def format_disbursement_resolution(value):
     return disbursement_resolutions.get(value, value)
+
+
+@register.filter
+def format_security_check_status(value):
+    return security_check_statuses.get(value, value)
 
 
 @register.filter
