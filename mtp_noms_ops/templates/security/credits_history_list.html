@@ -7,13 +7,24 @@
 
 
 {% block inner_content %}
+  <nav class="moj-sub-navigation" aria-label="Sub navigation">
+    <ul class="moj-sub-navigation__list">
+      <li class="moj-sub-navigation__item">
+        <a class="moj-sub-navigation__link" href="{% url 'security:check_list' %}">{% trans 'Credits to action' %}</a>
+      </li>
+      {% if add_to_my_list_enabled %}
+        <li class="moj-sub-navigation__item">
+          <a class="moj-sub-navigation__link">{% trans 'My List' %} ({{ num_credits_to_action }})</a>
+        </li>
+      {% endif %}
+      <li class="moj-sub-navigation__item">
+        <a class="moj-sub-navigation__link" aria-current="page" href="{% url 'security:credits_history' %}" >{% trans 'Decision history' %}</a>
+      </li>
+    </ul>
+  </nav>
   <header>
     <h1 class="heading-xlarge">{{ view.title }}</h1>
   </header>
-
-  <aside class="mtp-object-list-toggle print-hidden">
-    <a href="{% url 'security:check_list' %}" class="button-secondary">{% trans 'View credits to action' %}</a>
-  </aside>
 
   {% include 'mtp_common/includes/message_box.html' %}
 
