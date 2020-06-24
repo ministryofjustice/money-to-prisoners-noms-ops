@@ -74,7 +74,6 @@ table.mtp-table--review {
   @include button($red);
 }
 
-// TODO remove once new gov.uk styling implemented
 .moj-sub-navigation {
   margin-bottom: 0.7rem;
 }
@@ -82,7 +81,7 @@ table.mtp-table--review {
 
 .moj-sub-navigation__list {
   font-size: 0; // Removes white space when using inline-block on child element.
-  box-shadow: inset 0 -1px 0 #b1b4b6;
+  box-shadow: inset 0 -1px 0 $grey-2;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -94,9 +93,7 @@ table.mtp-table--review {
   line-height: 1.31579;
   display: inline-block;
 
-  font-family: "Helvetica Neue", "Inter UI", sans-serif;
-  font-size: 1.1875rem;
-  font-weight: 400;
+  @include core-19;
 
   margin-top: -1px;
   margin-right: 20px;
@@ -120,7 +117,7 @@ table.mtp-table--review {
     position: relative; // Ensure focus sits above everything else.
     box-shadow: none;
     outline: 3px solid transparent;
-    background-color: #ffdd00;
+    background-color: $focus-colour;
   }
 
   &:focus:before {
@@ -140,7 +137,7 @@ table.mtp-table--review {
   text-decoration: none;
 
   &:before {
-    background-color: #1d70b8;
+    background-color: $govuk-blue;
     content: "";
     display: block;
     position: absolute; bottom: 0; left: 0;
