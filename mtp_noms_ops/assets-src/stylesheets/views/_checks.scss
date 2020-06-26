@@ -73,3 +73,81 @@ table.mtp-table--review {
 .button-warning {
   @include button($red);
 }
+
+.moj-sub-navigation {
+  margin-bottom: 0.7rem;
+}
+
+
+.moj-sub-navigation__list {
+  font-size: 0; // Removes white space when using inline-block on child element.
+  box-shadow: inset 0 -1px 0 $grey-2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+}
+
+
+.moj-sub-navigation__item {
+  line-height: 1.31579;
+  display: inline-block;
+
+  @include core-19;
+
+  margin-top: -1px;
+  margin-right: 20px;
+
+  &:last-child {
+    box-shadow: none;
+  }
+}
+
+
+.moj-sub-navigation__link {
+  display: block;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-left: 0.3rem;
+  text-decoration: none;
+  position: relative;
+
+  &:focus {
+    color: black; // Focus colour on yellow should really be black.
+    position: relative; // Ensure focus sits above everything else.
+    box-shadow: none;
+    outline: 3px solid transparent;
+    background-color: $focus-colour;
+  }
+
+  &:focus:before {
+    background-color: black;
+    content: "";
+    display: block;
+    width: 100%;
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 5px;
+  }
+
+}
+
+.moj-sub-navigation__link[aria-current="page"] {
+  color: black;
+  position: relative;
+  text-decoration: none;
+
+  &:before {
+    background-color: $govuk-blue;
+    content: "";
+    display: block;
+    position: absolute; bottom: 0; left: 0;
+    height: 5px;
+    width: 100%;
+  }
+
+  &:focus:before {
+    background-color: black;
+  }
+
+}
+
