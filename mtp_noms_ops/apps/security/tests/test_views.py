@@ -3037,6 +3037,8 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         """
         There is currently nothing to prevent the view from showing a resolved security check.
         Test that the accept/reject form is absent for resolved checks.
+        NB: as this test is not concerned with the api being called with the right parameters, the responses mock
+            does not force the query string to be correct unlike other tests.
         """
         response_len = 0
         check_id = 1
