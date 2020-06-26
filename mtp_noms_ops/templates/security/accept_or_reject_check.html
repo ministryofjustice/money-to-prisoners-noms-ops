@@ -152,16 +152,38 @@
       </table>
     </div>
 
-    <div class="form-group">
+    {% if check.status == 'pending' %}
+
       <h2 class="heading-medium">{% trans 'Your decision' %}</h2>
-      {% include 'mtp_common/forms/textarea.html' with field=form.decision_reason input_classes='form-control-3-4' %}
-      <button type="submit" class="button" name="fiu_action" value="accept">
-        {% trans 'Accept credit' %}
-      </button>
-      <button type="submit" class="button button-warning" name="fiu_action" value="reject">
-        {% trans 'Reject credit' %}
-      </button>
-    </div>
+      <div class="form-group">
+        {% include 'mtp_common/forms/textarea.html' with field=form.decision_reason input_classes='form-control-3-4' %}
+        <button type="submit" class="button" name="fiu_action" value="accept">
+          {% trans 'Accept credit' %}
+        </button>
+        <button type="submit" class="button button-warning" name="fiu_action" value="reject">
+          {% trans 'Reject credit' %}
+        </button>
+      </div>
+
+    {% else %}
+
+      <h2 class="heading-medium">{% trans 'Decision' %}</h2>
+      <p>
+        {% blocktrans trimmed with resolved=check.status|format_security_check_status|lower user=check.actioned_by_name %}
+          This credit was {{ resolved }} by {{ user }}.
+        {% endblocktrans %}
+      </p>
+      <p>
+        <strong>{% trans 'Decision details' %}:</strong>
+        {% if check.decision_reason %}
+          {{ check.decision_reason }}
+        {% else %}
+          {% trans 'No decision reason entered' %}
+        {% endif %}
+      </p>
+
+    {% endif %}
+
   </form>
 
 {% endblock %}

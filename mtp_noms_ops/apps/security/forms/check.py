@@ -6,7 +6,6 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
-from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
 from security.forms.object_base import SecurityForm
@@ -94,9 +93,8 @@ class CreditsHistoryListForm(SecurityForm):
 
 class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
-    Base CheckForm for accepting or rejecting a check.
+    CheckForm for accepting or rejecting a check.
     """
-
     decision_reason = forms.CharField(
         label=_('Give details (details are optional when accepting)'),
         required=False,
@@ -112,7 +110,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     @lru_cache()
     def get_object(self):
         """
-        Gets the security detail object, a sender or prisoner profile
+        Gets the check object
         :return: dict or None if not found
         """
         try:
@@ -120,12 +118,8 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
             convert_dates_obj = convert_date_fields(obj, include_nested=True)
             convert_dates_obj['needs_attention'] = convert_dates_obj['credit']['started_at'] < self.need_attention_date
             return obj
-        except HttpNotFoundError:
-            self.add_error(None, _('Not found'))
-            return None
         except RequestException:
-            self.add_error(None, _('This service is currently unavailable'))
-            return {}
+            return None
 
     def get_object_endpoint_path(self):
         return f'/security/checks/{self.object_id}/'

@@ -56,8 +56,8 @@ class AcceptOrRejectCheckView(FormView):
         context_data = super().get_context_data(**kwargs)
 
         detail_object = context_data['form'].get_object()
-        if detail_object is None:
-            raise Http404('Detail object not found')
+        if not detail_object:
+            raise Http404('Credit to check not found')
 
         api_session = context_data['form'].session
 

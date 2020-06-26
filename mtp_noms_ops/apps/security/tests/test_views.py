@@ -2640,7 +2640,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'credited_at': None,
     }
 
-    SAMPLE_CHECK = dict(list(SAMPLE_CHECK_BASE.items()) + [('credit', SAMPLE_CREDIT_BASE)])
+    SAMPLE_CHECK = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
 
     required_checks_permissions = (
         *required_permissions,
@@ -2897,21 +2897,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
     credit_created_date = datetime.datetime.now()
 
     SENDER_CREDIT = dict(
-        list(BaseCheckViewTestCase.SAMPLE_CREDIT_BASE.items())
-        + list(
-            {
-                'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
-                'intended_recipient': 'Mr G Melley',
-                'prisoner_name': 'Ms A. Nother Prisoner',
-                'prisoner_number': 'Number 6',
-                'amount': 1000000,
-                'prison': 'LEI',
-                'prison_name': 'HMP LEEDS',
-                'billing_address': {'line1': '102PF', 'city': 'London'},
-                'resolution': 'rejected',
-                'started_at': credit_created_date.isoformat()
-            }.items()
-        )
+        BaseCheckViewTestCase.SAMPLE_CREDIT_BASE,
+        **{
+            'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
+            'intended_recipient': 'Mr G Melley',
+            'prisoner_name': 'Ms A. Nother Prisoner',
+            'prisoner_number': 'Number 6',
+            'amount': 1000000,
+            'prison': 'LEI',
+            'prison_name': 'HMP LEEDS',
+            'billing_address': {'line1': '102PF', 'city': 'London'},
+            'resolution': 'rejected',
+            'started_at': credit_created_date.isoformat()
+        }
     )
     SENDER_CREDIT['security_check']['description'] = '☢☢☢ This looks roight dodgy this does☣☣☣'
     SENDER_CREDIT['security_check']['actioned_by_name'] = 'Javert'
@@ -3035,6 +3033,55 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, '123456******9876')
             self.assertContains(response, '02/20')
 
+    def test_check_view_hides_action_buttons_if_resolved_already(self):
+        """
+        There is currently nothing to prevent the view from showing a resolved security check.
+        Test that the accept/reject form is absent for resolved checks.
+        NB: as this test is not concerned with the api being called with the right parameters, the responses mock
+            does not force the query string to be correct unlike other tests.
+        """
+        response_len = 0
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK_REJECTED
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/'.format(
+                        sender_profile_id=self.sender_id,
+                    ),
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len)),
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                    ),
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_prisoner_credit_list(response_len))
+                }
+            )
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.get(url)
+        content = response.content.decode()
+        self.assertNotIn('name="fiu_action"', content, msg='Action button exists on page')
+        self.assertIn('This credit was rejected by', content)
+
     def test_check_view_includes_matching_credit_history(self):
         """
         Test that the view displays credits related by sender id to the credit subject to a check.
@@ -3156,77 +3203,6 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertRedirects(response, reverse('security:check_list'))
             self.assertContains(response, 'Credit accepted')
 
-    def test_invalid_form(self):
-        """
-        Test that if a rejected check is accepted, a validation error is displayed.
-        """
-        check_id = 1
-        response_len = 4
-        with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
-            rsps.add(
-                rsps.GET,
-                api_url(f'/security/checks/{check_id}/'),
-                json=self.SENDER_CHECK_REJECTED
-            )
-            rsps.add(
-                rsps.GET,
-                urljoin(
-                    settings.API_URL,
-                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
-                        sender_profile_id=self.sender_id,
-                        querystring=urlencode([
-                            ('limit', 500),
-                            ('offset', 0),
-                            ('exclude_credit__in', self.credit_id),
-                            ('security_check__isnull', False),
-                            ('only_completed', False),
-                            ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
-                        ])
-                    ),
-                    trailing_slash=False
-                ),
-                json={
-                    'count': response_len,
-                    'results': list(self._get_sender_credit_list(response_len))
-                }
-            )
-            rsps.add(
-                rsps.GET,
-                urljoin(
-                    settings.API_URL,
-                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
-                        prisoner_profile_id=self.prisoner_id,
-                        querystring=urlencode([
-                            ('limit', 500),
-                            ('offset', 0),
-                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
-                            ('security_check__isnull', False),
-                            ('only_completed', False),
-                            ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
-                        ])
-                    ),
-                    trailing_slash=False
-                ),
-                json={
-                    'count': response_len,
-                    'results': list(self._get_prisoner_credit_list(response_len))
-                }
-            )
-
-            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
-            response = self.client.post(
-                url,
-                data={
-                    'fiu_action': 'accept',
-                },
-                follow=True
-            )
-
-            self.assertContains(response, 'You cannot action this credit')
-
     def test_reject_check(self):
         """
         Test that if a pending check is rejected, the view redirects to the list of checks
@@ -3316,7 +3292,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 ),
                 json={
                     'count': response_len,
-                    'results': list(list(self._get_prisoner_credit_list(response_len)))
+                    'results': list(self._get_prisoner_credit_list(response_len)),
                 }
             )
 
