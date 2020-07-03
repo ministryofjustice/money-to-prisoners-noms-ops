@@ -78,7 +78,6 @@ table.mtp-table--review {
   margin-bottom: 0.7rem;
 }
 
-
 .moj-sub-navigation__list {
   font-size: 0; // Removes white space when using inline-block on child element.
   box-shadow: inset 0 -1px 0 $grey-2;
@@ -87,7 +86,6 @@ table.mtp-table--review {
   padding: 0;
 
 }
-
 
 .moj-sub-navigation__item {
   line-height: 1.31579;
@@ -151,3 +149,19 @@ table.mtp-table--review {
 
 }
 
+.mtp-check-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mtp-check-header + .heading-medium {
+  margin-top: 0;
+}
+
+.mtp-check-header__list-toggle {
+  margin-bottom: 3.25rem;
+}
+
+.mtp-check-header__assigned-user {
+  color: $red;
+}

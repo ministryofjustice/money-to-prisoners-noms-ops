@@ -2,6 +2,7 @@ import logging
 from functools import lru_cache
 
 from django import forms
+from django.contrib import messages
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
@@ -171,4 +172,51 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         except RequestException:
             logger.exception(f'Check {self.object_id} could not be actioned')
             self.add_error(None, _('There was an error with your request.'))
+            return False
+
+
+class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
+    assignment = forms.ChoiceField(
+        choices=[
+            ('assign', _('Assign')),
+            ('unassign', _('Unassign')),
+        ],
+        required=True
+    )
+
+    def __init__(self, object_id, request, **kwargs):
+        super().__init__(**kwargs)
+        self.object_id = object_id
+        self.request = request
+
+    @cached_property
+    def session(self):
+        return get_api_session(self.request)
+
+    def get_endpoint_path(self):
+        return f'/security/checks/{self.object_id}/'
+
+    def assign_or_unassign(self):
+        endpoint = self.get_endpoint_path()
+
+        if self.cleaned_data.get('assignment') == 'assign':
+            user_id = self.request.user.pk
+        elif self.cleaned_data.get('assignment') == 'unassign':
+            user_id = None
+
+        try:
+            self.session.patch(
+                endpoint,
+                json={
+                    'assigned_to': user_id
+                }
+            )
+            return True
+        except RequestException:
+            logger.exception(f'Check {self.object_id} could not be assigned')
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                _('There was an error with your request.')
+            )
             return False
