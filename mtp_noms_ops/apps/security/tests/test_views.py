@@ -2751,7 +2751,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             self.mock_need_attention_count(rsps, 0)
             response = self.client.get(reverse('security:check_list'))
             form = response.context['form']
-            api_call_made = rsps.calls[-2].request.url
+            api_call_made = rsps.calls[-3].request.url
             parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
             self.assertEqual(parsed_qs['started_at__lt'], [form.need_attention_date.strftime('%Y-%m-%d %H:%M:%S')])
 

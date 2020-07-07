@@ -28,3 +28,4 @@ ghostdriver.log
 
 # linters / code intelligence
 .mypy_cache/
+pyrightconfig.json

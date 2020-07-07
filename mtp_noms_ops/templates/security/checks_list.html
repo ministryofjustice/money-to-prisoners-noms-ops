@@ -10,13 +10,23 @@
   <nav class="moj-sub-navigation" aria-label="{% trans 'Sub navigation' %}">
     <ul class="moj-sub-navigation__list">
       <li class="moj-sub-navigation__item">
-        <a class="moj-sub-navigation__link" aria-current="page" href="{% url 'security:check_list' %}">{% trans 'Credits to action' %}</a>
+        <a class="moj-sub-navigation__link"
+           {% if view.get_class_name == 'CheckListView' %}
+             aria-current="page"
+           {% endif %}
+           href="{% url 'security:check_list' %}">
+            {% trans 'Credits to action' %}
+        </a>
       </li>
-      {% if add_to_my_list_enabled %}
-        <li class="moj-sub-navigation__item">
-          <a class="moj-sub-navigation__link">{% trans 'My List' %} ({{ num_credits_to_action }})</a>
-        </li>
-      {% endif %}
+      <li class="moj-sub-navigation__item">
+        <a class="moj-sub-navigation__link"
+           {% if view.get_class_name == 'MyListCheckView' %}
+             aria-current="page"
+           {% endif %}
+           href="{% url 'security:my_check_list' %}">
+            {% trans 'My List' %} ({{ form.my_list_count }})
+        </a>
+      </li>
       <li class="moj-sub-navigation__item">
         <a class="moj-sub-navigation__link" href="{% url 'security:credits_history' %}" >{% trans 'Decision history' %}</a>
       </li>

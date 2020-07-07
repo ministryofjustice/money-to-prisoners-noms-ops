@@ -6,7 +6,7 @@ from django.views.generic.edit import BaseFormView, FormView
 from mtp_common.api import retrieve_all_pages_for_path
 
 from security.forms.check import (
-    AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm, AssignCheckToUserForm
+    AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm, AssignCheckToUserForm, UserCheckListForm
 )
 from security.utils import convert_date_fields
 from security.views.object_base import SecurityView
@@ -19,6 +19,15 @@ class CheckListView(SecurityView):
     title = gettext_lazy('Credits to action')
     template_name = 'security/checks_list.html'
     form_class = CheckListForm
+
+
+class MyListCheckView(SecurityView):
+    """
+    View returning the checks in 'To action' (pending) status assigned to current user
+    """
+    title = gettext_lazy('My List')
+    template_name = 'security/checks_list.html'
+    form_class = UserCheckListForm
 
 
 class CreditsHistoryListView(SecurityView):

@@ -1,0 +1,12 @@
+#*
+*.o
+*.pyc
+*.pyo
+*~
+extern/
+heroku.yml
+.mypy_cache/
+.tx/
+node_modules/
+tmp
+vendor/
