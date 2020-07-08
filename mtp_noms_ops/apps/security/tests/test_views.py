@@ -2622,6 +2622,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'status': 'pending',
         'actioned_at': None,
         'actioned_by': None,
+        'assigned_to': None
     }
 
     SAMPLE_CREDIT_BASE = {
@@ -2638,6 +2639,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'started_at': '2019-07-02T10:00:00Z',
         'received_at': None,
         'credited_at': None,
+        'assigned_to': None
     }
 
     SAMPLE_CHECK = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
@@ -3441,3 +3443,308 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             }
         )
         self.assertListEqual(expected_related_credits, actual_related_credits)
+
+
+class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
+    """
+    Tests related to CheckAssignView.
+    """
+    sender_id = 2
+    prisoner_id = 3
+    credit_id = 5
+
+    SENDER_CHECK = copy.deepcopy(BaseCheckViewTestCase.SAMPLE_CHECK)
+    SENDER_CHECK['credit']['sender_profile'] = sender_id
+    SENDER_CHECK['credit']['prisoner_profile'] = prisoner_id
+    SENDER_CHECK['credit']['id'] = credit_id
+
+    def test_assign_view_get_request_redirects_to_resolve_check_page(self):
+        """
+        A GET request should redirect to the resolve page
+        For instance if a session expires and the user hits 'Add to my list'
+        """
+        check_id = 1
+        response_len = 0
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=dict(self.SENDER_CHECK, assigned_to_name='Columbo', assigned_to=777)
+            )
+
+            url = reverse('security:assign_check', kwargs={'check_id': check_id})
+            response = self.client.get(url, follow=True)
+
+            self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
+
+    def test_can_assign_check_to_own_list(self):
+        """
+        Test that a user can add a check to their own list of checks
+        """
+        check_id = 1
+        response_len = 0
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.PATCH,
+                api_url(f'/security/checks/{check_id}/'),
+                json={
+                    'count': 1,
+                    'results': dict(self.SENDER_CHECK, assigned_to_name='Sherlock Holmes', assigned_to=5),
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=dict(self.SENDER_CHECK, assigned_to_name='Sherlock Holmes', assigned_to=5)
+            )
+
+            url = reverse('security:assign_check', kwargs={'check_id': check_id})
+
+            response = self.client.post(
+                url,
+                data={
+                    'assignment': 'assign',
+                },
+                follow=True,
+            )
+
+            self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
+            self.assertContains(response, 'Remove from my List')
+
+    def test_can_remove_check_from_their_list(self):
+        """
+        Test that a user can add a check to their own list of checks
+        """
+        check_id = 1
+        response_len = 0
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.PATCH,
+                api_url(f'/security/checks/{check_id}/'),
+                json={
+                    'count': 1,
+                    'results': dict(self.SENDER_CHECK, assigned_to_name=None, assigned_to=None),
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=dict(self.SENDER_CHECK, assigned_to_name=None, assigned_to=None)
+            )
+
+            url = reverse('security:assign_check', kwargs={'check_id': check_id})
+
+            response = self.client.post(
+                url,
+                data={
+                    'assignment': 'unassign',
+                },
+                follow=True,
+            )
+
+            self.assertTrue(json.loads(rsps.calls[1].request.body) == {'assigned_to': None})
+            self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
+            self.assertContains(response, 'Add to my List')
+
+    def test_resolve_page_displays_other_username_if_assigned_else(self):
+        """
+        Test that a user can see that a different user has already assigned the check to their list
+        """
+        check_id = 1
+        response_len = 0
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=dict(self.SENDER_CHECK, assigned_to_name='Joe Bloggs', assigned_to=200)
+            )
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+
+            response = self.client.get(
+                url,
+                follow=True,
+            )
+
+            self.assertNotContains(response, 'name="assignment"')
+            self.assertContains(response, 'Assigned to Joe Bloggs')

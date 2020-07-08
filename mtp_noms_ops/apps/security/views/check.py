@@ -2,10 +2,12 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import Http404, HttpResponseRedirect
 from django.utils.translation import gettext_lazy
-from django.views.generic.edit import FormView
+from django.views.generic.edit import BaseFormView, FormView
 from mtp_common.api import retrieve_all_pages_for_path
 
-from security.forms.check import AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm
+from security.forms.check import (
+    AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm, AssignCheckToUserForm
+)
 from security.utils import convert_date_fields
 from security.views.object_base import SecurityView
 
@@ -26,6 +28,41 @@ class CreditsHistoryListView(SecurityView):
     title = gettext_lazy('Decision history')
     template_name = 'security/credits_history_list.html'
     form_class = CreditsHistoryListForm
+
+
+class CheckAssignView(BaseFormView):
+    """
+    Modify assignment of check
+    """
+    form_class = AssignCheckToUserForm
+    id_kwarg_name = 'check_id'
+
+    def get_success_url(self):
+        return reverse('security:resolve_check', kwargs={'check_id': self.kwargs[self.id_kwarg_name]})
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs.update(
+            {
+                'request': self.request,
+                'object_id': self.kwargs[self.id_kwarg_name],
+            },
+        )
+        return form_kwargs
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_valid(self, form):
+        result = form.assign_or_unassign()
+        if not result:
+            messages.add_message(
+                self.request,
+                messages.INFO,
+                gettext_lazy('Credit could not be added to your list.')
+            )
+
+        return super().form_valid(form)
 
 
 class AcceptOrRejectCheckView(FormView):

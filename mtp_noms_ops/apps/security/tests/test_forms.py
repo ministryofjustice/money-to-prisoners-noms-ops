@@ -7,13 +7,15 @@ from urllib.parse import parse_qs
 
 from django import forms
 from django.test import SimpleTestCase
+from django.contrib import messages
 from django.utils.timezone import make_aware
 from django.utils.dateparse import parse_datetime
+from django.utils.translation import gettext_lazy as _
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 import responses
 
-from security.forms.check import AcceptOrRejectCheckForm, CheckListForm
+from security.forms.check import AcceptOrRejectCheckForm, CheckListForm, AssignCheckToUserForm
 from security.forms.object_base import AmountPattern, SecurityForm
 from security.forms.object_list import (
     AmountSearchFormMixin,
@@ -2790,4 +2792,101 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             self.assertDictEqual(
                 form.errors,
                 {'__all__': ['There was an error with your request.']},
+            )
+
+
+class AssignCheckToUserFormTestCase(SimpleTestCase):
+    """
+    Tests related to the AssignCheckToUserForm.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.request = mock.MagicMock(
+            user=mock.MagicMock(
+                pk=5,
+                token=generate_tokens(),
+            ),
+        )
+
+    def test_assign_or_unassign(self):
+        """
+        Test that the form makes the right API call to assign the check to a user list.
+        """
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.PATCH,
+                api_url(f'/security/checks/{check_id}/'),
+                status=204,
+                json={
+                    'assigned_to': 5
+                }
+            )
+
+            form = AssignCheckToUserForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'assignment': 'assign',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertEqual(form.assign_or_unassign(), True)
+
+    def test_unassign(self):
+        """
+        Test that the form makes the right API call to unassign the check from a user list.
+        """
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.PATCH,
+                api_url(f'/security/checks/{check_id}/'),
+                status=204,
+                json={
+                    'assigned_to': None
+                }
+            )
+
+            form = AssignCheckToUserForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'assignment': 'unassign',
+                },
+            )
+
+            self.assertTrue(form.is_valid())
+            self.assertEqual(form.assign_or_unassign(), True)
+
+    @mock.patch('django.contrib.messages.add_message')
+    def test_form_returns_error_if_check_already_assigned_to_other_user(self, mock_messages_add_message):
+        """
+        Test that the form returns an error if check is assigned to another user.
+        """
+        check_id = 1
+        with responses.RequestsMock() as rsps, silence_logger():
+            rsps.add(
+                rsps.PATCH,
+                api_url(f'/security/checks/{check_id}/'),
+                status=400
+            )
+
+            form = AssignCheckToUserForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'assignment': 'assign',
+                },
+            )
+
+            form.is_valid()
+
+            self.assertEqual(form.assign_or_unassign(), False)
+            mock_messages_add_message.assert_called_with(
+                self.request,
+                messages.ERROR,
+                _('There was an error with your request.')
             )
