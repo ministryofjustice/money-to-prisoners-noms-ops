@@ -2622,7 +2622,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'status': 'pending',
         'actioned_at': None,
         'actioned_by': None,
-        'assigned_to': None
+        'assigned_to': 7
     }
 
     SAMPLE_CREDIT_BASE = {
@@ -2639,7 +2639,6 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'started_at': '2019-07-02T10:00:00Z',
         'received_at': None,
         'credited_at': None,
-        'assigned_to': None
     }
 
     SAMPLE_CHECK = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
@@ -2776,6 +2775,111 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, 'Review <span class="visually-hidden">credit to Jean Valjean</span>')
 
 
+class MyCheckListViewTestCase(BaseCheckViewTestCase):
+    """
+    Tests related to CheckListView.
+    """
+
+    def test_cannot_access_view(self):
+        """
+        Test that if the logged in user doesn't have the right permissions, he/she
+        gets redirected to the dashboard.
+        """
+        user_data = self.get_user_data(permissions=required_permissions)
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps, user_data=user_data)
+            response = self.client.get(reverse('security:my_check_list'), follow=True)
+            self.assertRedirects(response, reverse('security:dashboard'))
+
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_view(self, mock_get_need_attention_date):
+        """
+        Test that the view displays the pending checks returned by the API.
+        """
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 0)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'results': [self.SAMPLE_CHECK],
+                },
+            )
+
+            response = self.client.get(reverse('security:my_check_list'), follow=True)
+            self.assertContains(response, '123456******9876')
+            self.assertContains(response, '02/20')
+
+            content = response.content.decode()
+            self.assertIn('24601', content)
+            self.assertIn('1 credit', content)
+            self.assertIn('This credit does not need attention today', content)
+            self.assertNotIn('credit needs attention', content)
+            self.assertNotIn('credits need attention', content)
+            self.assertIn('My List (1)', content)
+
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_displays_count_of_credits_needing_attention(self, mock_get_need_attention_date):
+        """
+        Test that the view shows how many credits need attention.
+        """
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 9, 9))
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 2)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 2,
+                    'results': [self.SAMPLE_CHECK, self.SAMPLE_CHECK],
+                },
+            )
+
+            response = self.client.get(reverse('security:my_check_list'), follow=True)
+            self.assertContains(response, '123456******9876')
+            self.assertContains(response, '02/20')
+
+            content = response.content.decode()
+            self.assertIn('2 credits need attention', content)
+            self.assertIn('This credit needs attention today!', content)
+
+    def test_calculation_of_date_before_which_checks_need_attention(self):
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 0)
+            response = self.client.get(reverse('security:my_check_list'))
+            form = response.context['form']
+            api_call_made = rsps.calls[-3].request.url
+            parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
+            self.assertEqual(parsed_qs['started_at__lt'], [form.need_attention_date.strftime('%Y-%m-%d %H:%M:%S')])
+
+    def test_credit_row_has_review_link(self):
+        """
+        Test that the view displays link to review a credit.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 0)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'results': [self.SAMPLE_CHECK],
+                },
+            )
+
+            response = self.client.get(reverse('security:my_check_list'), follow=True)
+
+            self.assertContains(response, 'Review <span class="visually-hidden">credit to Jean Valjean</span>')
+
+
 class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
     """
     Tests related to CreditsHistoryListView.
@@ -2841,6 +2945,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
 
             self.assertIn('24601', content)
             self.assertIn('1 credit', content)
+            self.assertIn('My List (1)', content)
 
     def test_view_contains_relevant_data(self):
         """
