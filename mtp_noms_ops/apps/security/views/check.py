@@ -47,9 +47,15 @@ class CheckAssignView(BaseFormView):
     id_kwarg_name = 'check_id'
 
     def get_success_url(self):
-        return reverse('security:resolve_check', kwargs={'check_id': self.kwargs[self.id_kwarg_name]})
+        if self.kwargs.get('list') == 'list':
+            return reverse('security:check_list') + f'#check-row-{self.kwargs[self.id_kwarg_name]}'
+        else:
+            return reverse('security:resolve_check', kwargs={'check_id': self.kwargs[self.id_kwarg_name]})
 
     def get_form_kwargs(self):
+        if self.kwargs.get('list') not in ('list', None):
+            raise ValueError(f'Last param \'{self.kwargs["list"]}\' not valid')
+
         form_kwargs = super().get_form_kwargs()
         form_kwargs.update(
             {
