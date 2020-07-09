@@ -43,10 +43,8 @@ class CheckListForm(SecurityForm):
 
     def get_object_list(self):
         """
-        Gets objects, converts datetimes found in them and looks up count of urgent checks.
+        Gets objects, converts datetimes found in them and looks up counts of urgent and assigned checks.
         """
-        # TODO this second API call feels unnecessary, look at refactoring it out and implementing date filtering logic
-        # in python space
         self.need_attention_count = self.session.get(self.get_object_list_endpoint_path(), params=dict(
             self.get_api_request_params(),
             **{
