@@ -24,36 +24,58 @@ class CheckListForm(SecurityForm):
         super().__init__(request, **kwargs)
         self.need_attention_date = get_need_attention_date()
         self.need_attention_count = 0
+        self.my_list_count = 0
 
     def get_api_request_params(self):
         """
         Gets pending checks only, for now.
         """
-        params = super().get_api_request_params()
-        params['status'] = 'pending'
-        # TODO: always add credit_resolution filter following delayed capture release
-        params['credit_resolution'] = 'initial'
-        return params
+        return dict(
+            super().get_api_request_params(),
+            **{
+                'status': 'pending',
+                'credit_resolution': 'initial'
+            }
+        )
 
     def get_object_list_endpoint_path(self):
         return '/security/checks/'
 
     def get_object_list(self):
         """
-        Gets objects, converts datetimes found in them and looks up count of urgent checks.
+        Gets objects, converts datetimes found in them and looks up counts of urgent and assigned checks.
         """
-        self.need_attention_count = self.session.get(self.get_object_list_endpoint_path(), params={
-            'status': 'pending',
-            'started_at__lt': self.need_attention_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'offset': 0,
-            'limit': 1,
-        }).json()['count']
+        self.need_attention_count = self.session.get(self.get_object_list_endpoint_path(), params=dict(
+            self.get_api_request_params(),
+            **{
+                'started_at__lt': self.need_attention_date.strftime('%Y-%m-%d %H:%M:%S'),
+                'offset': 0,
+                'limit': 1,
+            }
+        )).json()['count']
+        self.my_list_count = self.session.get(self.get_object_list_endpoint_path(), params=dict(
+            self.get_api_request_params(),
+            **{
+                'assigned_to': self.request.user.pk,
+                'offset': 0,
+                'limit': 1,
+            }
+        )).json()['count']
 
         object_list = convert_date_fields(super().get_object_list(), include_nested=True)
         for check in object_list:
             check['needs_attention'] = check['credit']['started_at'] < self.need_attention_date
 
         return object_list
+
+
+class UserCheckListForm(CheckListForm):
+
+    def get_api_request_params(self):
+        return dict(
+            super().get_api_request_params(),
+            assigned_to=self.request.user.pk
+        )
 
 
 class CreditsHistoryListForm(SecurityForm):
@@ -72,6 +94,10 @@ class CreditsHistoryListForm(SecurityForm):
         ],
     )
 
+    def __init__(self, request, **kwargs):
+        super().__init__(request, **kwargs)
+        self.my_list_count = 0
+
     def get_api_request_params(self):
         """
         Gets all checks where actioned_by is not None.
@@ -89,6 +115,14 @@ class CreditsHistoryListForm(SecurityForm):
         Gets objects, converts datetimes found in them.
         """
         object_list = convert_date_fields(super().get_object_list(), include_nested=True)
+        self.my_list_count = self.session.get(self.get_object_list_endpoint_path(), params=dict(
+            self.get_api_request_params(),
+            **{
+                'assigned_to': self.request.user.pk,
+                'offset': 0,
+                'limit': 1,
+            }
+        )).json()['count']
         return object_list
 
 

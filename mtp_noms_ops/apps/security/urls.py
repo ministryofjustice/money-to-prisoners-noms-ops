@@ -365,6 +365,11 @@ urlpatterns = [
         name='check_list',
     ),
     url(
+        r'^security/checks/my-list/$',
+        fiu_security_test(views.MyListCheckView.as_view()),
+        name='my_check_list',
+    ),
+    url(
         r'^security/checks/(?P<check_id>\d+)/resolve/$',
         fiu_security_test(views.AcceptOrRejectCheckView.as_view()),
         name='resolve_check',
