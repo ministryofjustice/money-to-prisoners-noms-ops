@@ -1,4 +1,4 @@
-.mtp-check-list .button {
+.mtp-check-list .button, .mtp-check-list .button-secondary {
   margin-bottom: 1em;
 
   @include media(mobile) {
@@ -20,6 +20,8 @@ table.mtp-table {
     padding-top: 0;
     margin-bottom: 0;
   }
+  border-spacing: 0;
+  border-collapse: collapse;
 }
 
 table.mtp-table--review {
@@ -164,4 +166,27 @@ table.mtp-table--review {
 
 .mtp-check-header__assigned-user {
   color: $red;
+}
+
+.mtp-check-cell__actions {
+  display: flex;
+  align-items: center;
+}
+.mtp-check-cell__list-status {
+  margin-left: 1rem;
+}
+
+.mtp-check-cell__list-status--my-list {
+  display: inline-block;
+  margin-bottom: 1.6rem;
+}
+
+.mtp-check-cell__list-status--my-list::before {
+	content: "✓";
+	font-size: 1.5em;
+	color: #00703c;
+}
+
+.mtp-check-cell__list-form {
+  display: inline-block;
 }

@@ -3627,6 +3627,95 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
 
             self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
 
+    def test_assign_view_get_request_redirects_to_resolve_check_page_with_kwarg(self):
+        """
+        A GET request should redirect to the resolve page
+        For instance if a session expires and the user hits 'Add to my list'
+        """
+        check_id = 1
+        response_len = 0
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=dict(self.SENDER_CHECK, assigned_to_name='Columbo', assigned_to=777)
+            )
+
+            url = reverse('security:assign_check', kwargs={'check_id': check_id})
+
+            response = self.client.get(url, follow=True)
+
+            self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
+
+    def test_assign_view_get_request_redirects_to_list_check_page_with_kwarg(self):
+        """
+        A GET request should redirect to the list page if called with 'list' as positional url arg
+        """
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'data': [self.SAMPLE_CHECK]
+                }
+            )
+
+            url = reverse('security:assign_check', kwargs={'check_id': check_id, 'list': 'list'})
+
+            response = self.client.get(url, follow=True)
+
+            self.assertRedirects(
+                response, reverse('security:check_list') + f'#check-row-{check_id}'
+            )
+
     def test_can_assign_check_to_own_list(self):
         """
         Test that a user can add a check to their own list of checks

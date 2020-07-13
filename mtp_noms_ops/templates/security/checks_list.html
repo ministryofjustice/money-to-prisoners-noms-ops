@@ -78,7 +78,7 @@
       </thead>
       <tbody>
         {% for check in objects %}
-        <tr class="mtp-check-row">
+        <tr id="check-row-{{ check.id }}" class="mtp-check-row">
           <td class="mtp-compact-cell">
             {% if check.needs_attention %}
               <span class="visually-hidden">
@@ -109,8 +109,32 @@
           <td>
             {{ check.credit.amount|currency }}
           </td>
-          <td class="print-hidden">
-            <a href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
+          <td class="mtp-check-cell__actions">
+            <a class="button print-hidden" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
+            {% if view.get_class_name == 'CheckListView' %}
+              <span class="mtp-check-cell__list-status">
+                {% if check.assigned_to == form.request.user.pk %}
+                  <span class="mtp-check-cell__list-status--my-list">
+                    {% trans 'Added to my list' %}
+                  </span>
+                {% elif check.assigned_to != None %}
+                  <span class="mtp-check-cell__list-status--text">
+                    {% blocktrans trimmed with assigned_to_name=check.assigned_to_name %}
+                      Added to {{ assigned_to_name }}'s list
+                    {% endblocktrans %}
+                  </span>
+                {% else %}
+                  <form class="mtp-check-cell__list-form" action="{% url 'security:assign_check' check_id=check.id list='list' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="assignment" class="button-secondary" value="assign">
+                      {% blocktrans trimmed with credit_to=check.credit.prisoner_name %}
+                        Add <span class="visually-hidden">credit to {{credit_to}}</span> to my list
+                      {% endblocktrans %}
+                    </button>
+                  </form>
+                {% endif %}
+              </span>
+            {% endif %}
           </td>
         </tr>
         <tr class="mtp-check-description-row">
