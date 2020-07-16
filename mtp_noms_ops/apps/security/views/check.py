@@ -71,11 +71,12 @@ class CheckAssignView(BaseFormView):
     def form_valid(self, form):
         result = form.assign_or_unassign()
         if not result:
-            messages.add_message(
-                self.request,
-                messages.INFO,
-                gettext_lazy('Credit could not be added to your list.')
-            )
+            if self.kwargs.get('list') == 'list':
+                return HttpResponseRedirect(reverse('security:check_list'))
+            else:
+                return HttpResponseRedirect(
+                    reverse('security:resolve_check', kwargs={'check_id': self.kwargs[self.id_kwarg_name]})
+                )
 
         return super().form_valid(form)
 
