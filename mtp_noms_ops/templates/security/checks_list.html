@@ -24,7 +24,7 @@
              aria-current="page"
            {% endif %}
            href="{% url 'security:my_check_list' %}">
-            {% trans 'My List' %} ({{ form.my_list_count }})
+            {% trans 'My list' %} ({{ form.my_list_count }})
         </a>
       </li>
       <li class="moj-sub-navigation__item">
@@ -121,7 +121,7 @@
                   {% elif check.assigned_to != None %}
                     <span class="mtp-check-cell__list-status--text">
                       {% blocktrans trimmed with assigned_to_name=check.assigned_to_name %}
-                        Added to {{ assigned_to_name }}'s list
+                        Added to {{ assigned_to_name }}’s list
                       {% endblocktrans %}
                     </span>
                   {% else %}

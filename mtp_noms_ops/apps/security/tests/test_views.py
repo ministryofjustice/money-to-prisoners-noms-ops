@@ -2820,7 +2820,7 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
             self.assertIn('This credit does not need attention today', content)
             self.assertNotIn('credit needs attention', content)
             self.assertNotIn('credits need attention', content)
-            self.assertIn('My List (1)', content)
+            self.assertIn('My list (1)', content)
 
     @mock.patch('security.forms.check.get_need_attention_date')
     def test_displays_count_of_credits_needing_attention(self, mock_get_need_attention_date):
@@ -2977,7 +2977,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
 
             self.assertIn('24601', content)
             self.assertIn('1 credit', content)
-            self.assertIn('My List (2)', content)
+            self.assertIn('My list (2)', content)
 
     def test_view_contains_relevant_data(self):
         """
@@ -3825,7 +3825,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
 
             self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
-            self.assertContains(response, 'Remove from my List')
+            self.assertContains(response, 'Remove from my list')
 
     def test_can_remove_check_from_their_list(self):
         """
@@ -3905,7 +3905,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
 
             self.assertTrue(json.loads(rsps.calls[1].request.body) == {'assigned_to': None})
             self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
-            self.assertContains(response, 'Add to my List')
+            self.assertContains(response, 'Add to my list')
 
     def test_resolve_page_displays_other_username_if_assigned_else(self):
         """
@@ -3973,7 +3973,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
 
             self.assertNotContains(response, 'name="assignment"')
-            self.assertContains(response, 'Assigned to Joe Bloggs')
+            self.assertContains(response, 'Added to Joe Bloggs’s list')
 
     @mock.patch('security.forms.check.get_need_attention_date')
     def test_resolve_page_displays_error_if_assignment_collision_from_list(self, mock_get_need_attention_date):
