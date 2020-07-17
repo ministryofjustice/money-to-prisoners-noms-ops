@@ -2930,11 +2930,43 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
             self.login(rsps=rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/security/checks/'),
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('started_at__gte', '2020-01-02T12:00:00'),
+                            ('actioned_by', True),
+                            ('offset', 0),
+                            ('limit', 20),
+                            ('ordering', '-created')
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
                 json={
                     'count': 1,
                     'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY],
                 },
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('status', 'pending'),
+                            ('credit_resolution', 'initial'),
+                            ('assigned_to', 5),
+                            ('offset', 0),
+                            ('limit', 1)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 2,
+                    'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY, self.SAMPLE_CHECK_WITH_ACTIONED_BY],
+                }
             )
 
             response = self.client.get(reverse('security:credits_history'))
@@ -2945,7 +2977,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
 
             self.assertIn('24601', content)
             self.assertIn('1 credit', content)
-            self.assertIn('My List (1)', content)
+            self.assertIn('My List (2)', content)
 
     def test_view_contains_relevant_data(self):
         """
@@ -3942,3 +3974,114 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
 
             self.assertNotContains(response, 'name="assignment"')
             self.assertContains(response, 'Assigned to Joe Bloggs')
+
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_resolve_page_displays_error_if_assignment_collision_from_list(self, mock_get_need_attention_date):
+        """
+        Test that a user sees an error if trying to assign check to self that's already assigned to someone else from
+        check list view
+        """
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.PATCH,
+                api_url(f'/security/checks/{check_id}/'),
+                status=400,
+                json=[
+                    'That check is already assigned to Someone Else'
+                ]
+            )
+            self.mock_need_attention_count(rsps, 1)
+
+            url = reverse('security:assign_check', kwargs={'check_id': check_id, 'list': 'list'})
+
+            response = self.client.post(
+                url,
+                follow=True,
+                data={'assignment': 'assign'}
+            )
+
+            self.assertNotContains(response, 'name="assignment"')
+            self.assertContains(response, 'That check is already assigned to Someone Else')
+            self.assertRedirects(response, reverse('security:check_list'))
+
+    def test_resolve_page_displays_error_if_assignment_collision_from_accept_reject(self):
+        """
+        Test that a user sees an error if trying to assign check to self that's already assigned to someone else from
+        accept reject check view
+        """
+        check_id = 1
+        response_len = 0
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.PATCH,
+                api_url(f'/security/checks/{check_id}/'),
+                status=400,
+                json=[
+                    'That check is already assigned to Someone Else'
+                ]
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 0,
+                }
+            )
+
+            url = reverse('security:assign_check', kwargs={'check_id': check_id})
+
+            response = self.client.post(
+                url,
+                follow=True,
+                data={'assignment': 'assign'}
+            )
+
+            self.assertNotContains(response, 'name="assignment"')
+            self.assertContains(response, 'That check is already assigned to Someone Else')
+            self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))

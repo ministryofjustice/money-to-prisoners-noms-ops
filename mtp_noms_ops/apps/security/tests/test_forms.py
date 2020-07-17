@@ -2888,5 +2888,5 @@ class AssignCheckToUserFormTestCase(SimpleTestCase):
             mock_messages_add_message.assert_called_with(
                 self.request,
                 messages.ERROR,
-                _('There was an error with your request.')
+                _('Credit could not be added to your list.')
             )

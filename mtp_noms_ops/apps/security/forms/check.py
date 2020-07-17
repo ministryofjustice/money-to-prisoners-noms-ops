@@ -115,14 +115,13 @@ class CreditsHistoryListForm(SecurityForm):
         Gets objects, converts datetimes found in them.
         """
         object_list = convert_date_fields(super().get_object_list(), include_nested=True)
-        self.my_list_count = self.session.get(self.get_object_list_endpoint_path(), params=dict(
-            self.get_api_request_params(),
-            **{
-                'assigned_to': self.request.user.pk,
-                'offset': 0,
-                'limit': 1,
-            }
-        )).json()['count']
+        self.my_list_count = self.session.get(self.get_object_list_endpoint_path(), params={
+            'status': 'pending',
+            'credit_resolution': 'initial',
+            'assigned_to': self.request.user.pk,
+            'offset': 0,
+            'limit': 1
+        }).json()['count']
         return object_list
 
 
@@ -246,11 +245,19 @@ class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
                 }
             )
             return True
-        except RequestException:
+        except RequestException as e:
+            msg = _('Credit could not be added to your list.')
+            if hasattr(e, 'response') and e.response.content:
+                try:
+                    maybe_json = e.response.json()[0]
+                except (ValueError, KeyError):
+                    pass
+                else:
+                    msg = maybe_json
             logger.exception(f'Check {self.object_id} could not be assigned')
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _('There was an error with your request.')
+                msg
             )
             return False
