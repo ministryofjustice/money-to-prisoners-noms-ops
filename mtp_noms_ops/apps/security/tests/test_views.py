@@ -3997,11 +3997,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
 
             url = reverse('security:assign_check', kwargs={'check_id': check_id, 'list': 'list'})
 
-            response = self.client.post(
-                url,
-                follow=True,
-                data={'assignment': 'assign'}
-            )
+            with silence_logger():
+                response = self.client.post(
+                    url,
+                    follow=True,
+                    data={'assignment': 'assign'}
+                )
 
             self.assertNotContains(response, 'name="assignment"')
             self.assertContains(response, 'That check is already assigned to Someone Else')
@@ -4076,11 +4077,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
 
             url = reverse('security:assign_check', kwargs={'check_id': check_id})
 
-            response = self.client.post(
-                url,
-                follow=True,
-                data={'assignment': 'assign'}
-            )
+            with silence_logger():
+                response = self.client.post(
+                    url,
+                    follow=True,
+                    data={'assignment': 'assign'}
+                )
 
             self.assertNotContains(response, 'name="assignment"')
             self.assertContains(response, 'That check is already assigned to Someone Else')
