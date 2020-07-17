@@ -120,8 +120,8 @@
                     </span>
                   {% elif check.assigned_to != None %}
                     <span class="mtp-check-cell__list-status--text">
-                      {% blocktrans trimmed with assigned_to_name=check.assigned_to_name %}
-                        Added to {{ assigned_to_name }}’s list
+                      {% blocktrans trimmed with assigned_to_name=check.assigned_to_name|genitive %}
+                        Added to {{ assigned_to_name }} list
                       {% endblocktrans %}
                     </span>
                   {% else %}

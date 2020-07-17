@@ -3973,7 +3973,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
 
             self.assertNotContains(response, 'name="assignment"')
-            self.assertContains(response, 'Added to Joe Bloggs’s list')
+            self.assertContains(response, 'Added to Joe Bloggs’ list')
 
     @mock.patch('security.forms.check.get_need_attention_date')
     def test_resolve_page_displays_error_if_assignment_collision_from_list(self, mock_get_need_attention_date):

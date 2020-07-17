@@ -13,8 +13,8 @@
     <aside class="mtp-check-header__list-toggle print-hidden">
       {% if check.assigned_to and check.assigned_to != request.user.pk %}
         <strong class="mtp-check-header__assigned-user">
-          {% blocktrans trimmed with assigned_to_name=check.assigned_to_name %}
-            Added to {{ assigned_to_name }}’s list
+          {% blocktrans trimmed with assigned_to_name=check.assigned_to_name|genitive %}
+            Added to {{ assigned_to_name }} list
           {% endblocktrans %}
         </strong>
       {% else %}

@@ -5,7 +5,7 @@ from unittest import mock
 
 from django.utils.timezone import localtime, make_aware, utc
 
-from security.templatetags.security import currency, pence, format_sort_code
+from security.templatetags.security import genitive, currency, pence, format_sort_code
 from security.utils import (
     convert_date_fields,
     NameSet,
@@ -16,6 +16,13 @@ from security.utils import (
 
 
 class UtilTestCase(unittest.TestCase):
+    def test_genitive_filter(self):
+        self.assertEqual(genitive(None), None)
+        self.assertEqual(genitive(123), 123)
+        self.assertEqual(genitive(''), '')
+        self.assertEqual(genitive('Joe'), 'Joe’s')
+        self.assertEqual(genitive('James'), 'James’')
+
     def test_currency_formatting(self):
         self.assertEqual(currency(None), None)
         self.assertEqual(currency(''), '')
