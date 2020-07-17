@@ -182,9 +182,14 @@ table.mtp-table--review {
 }
 
 .mtp-check-cell__list-status--my-list::before {
-	content: "✓";
-	font-size: 1.5em;
-	color: #00703c;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-top: -5px;
+  vertical-align: middle;
+  content: '';
+  background: file-url('added-to-my-list.png') no-repeat;
+  background-image: none, file-url('added-to-my-list.svg');
 }
 
 .mtp-check-cell__list-form {
