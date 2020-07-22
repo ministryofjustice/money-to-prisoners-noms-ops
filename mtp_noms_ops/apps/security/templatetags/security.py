@@ -31,6 +31,15 @@ DEBIT_CARD_SENDER_KEYS = [
 
 
 @register.filter
+def genitive(name):
+    if not isinstance(name, str) or not name:
+        return name
+    if name.endswith('s'):
+        return f'{name}’'
+    return f'{name}’s'
+
+
+@register.filter
 def currency(pence_value):
     try:
         return '£{:,.2f}'.format(pence_value / 100)

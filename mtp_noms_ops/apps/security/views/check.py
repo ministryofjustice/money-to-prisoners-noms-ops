@@ -25,7 +25,7 @@ class MyListCheckView(SecurityView):
     """
     View returning the checks in 'To action' (pending) status assigned to current user
     """
-    title = gettext_lazy('My List')
+    title = gettext_lazy('My list')
     template_name = 'security/checks_list.html'
     form_class = UserCheckListForm
 
