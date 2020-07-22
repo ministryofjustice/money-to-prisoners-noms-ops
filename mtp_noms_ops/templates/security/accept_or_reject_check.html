@@ -91,7 +91,7 @@
         <tr class="mtp-check-description-row">
           <td colspan="2"></td>
           <td colspan="4">
-            <strong>{% trans 'Rules:' %}</strong> {{ check.description }}
+            <strong>{% trans 'Rules:' %}</strong> {{ check.description|join:'. ' }}.
           </td>
         </tr>
       </tbody>
@@ -150,7 +150,7 @@
           <tr class="mtp-check-description-row">
             <td></td>
             <td colspan="4">
-              <strong>{% trans 'Rules:' %}</strong> {{ credit.security_check.description }}
+              <strong>{% trans 'Rules:' %}</strong> {{ credit.security_check.description|join:'. ' }}.
               <br />
               <br />
               <strong>{% trans 'Decision details' %}:</strong>
