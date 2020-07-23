@@ -84,7 +84,7 @@
         <tr class="mtp-check-description-row">
           <td></td>
           <td colspan="4">
-            <strong>{% trans 'Rules:' %}</strong> {{ check.description|join:'. ' }}.
+            {{ check|check_description }}
             <br/>
             <br/>
             <strong>{% trans 'Decision details' %}:</strong>

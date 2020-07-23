@@ -3,9 +3,10 @@ import logging
 
 from django import template
 from django.core.urlresolvers import reverse
-from django.utils.html import escape
+from django.utils.html import escape, format_html
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext
 from mtp_common.utils import format_postcode
 
 from security.forms.object_list import PrisonSelectorSearchFormMixin
@@ -80,6 +81,22 @@ def credit_source(source_key):
 @register.filter
 def format_resolution(resolution):
     return credit_resolutions.get(resolution, resolution)
+
+
+@register.filter
+def check_description(check):
+    description = check['description']
+    if isinstance(description, list):
+        description = '. '.join(description)
+    if description == 'Credit matched no rules and was automatically accepted':
+        return ''
+    elif description.startswith('Credit matched: '):
+        description = description[16:]
+    return format_html(
+        '<strong>{label}:</strong> {description}.',
+        label=gettext('Rules'),
+        description=description,
+    )
 
 
 @register.filter
