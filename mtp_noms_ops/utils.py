@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import gettext, gettext_lazy as _
 from mtp_common.context_processors import govuk_localisation as inherited_localisation
@@ -10,7 +10,7 @@ from security import required_permissions as security_permissions
 from security.utils import can_manage_security_checks
 
 
-class UserPermissionMiddleware:
+class UserPermissionMiddleware(MiddlewareMixin):
     @classmethod
     def process_request(cls, request):
         request.user_prisons = request.user.user_data.get('prisons') or []

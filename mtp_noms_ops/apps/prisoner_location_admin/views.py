@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.contrib import messages
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.translation import gettext, ngettext
 from django.views.generic.edit import FormView
 from mtp_common.spooling import spooler

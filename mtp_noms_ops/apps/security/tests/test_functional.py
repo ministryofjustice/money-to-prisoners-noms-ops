@@ -1,6 +1,6 @@
 import logging
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from mtp_common.test_utils.functional_tests import FunctionalTestCase
 from mtp_common.test_utils import silence_logger
 from selenium.webdriver.common.keys import Keys

@@ -2,8 +2,8 @@ import json
 import logging
 from unittest import mock
 
-from django.core.urlresolvers import reverse
 from django.test import RequestFactory, override_settings
+from django.urls import reverse
 from mtp_common.test_utils import silence_logger
 import responses
 

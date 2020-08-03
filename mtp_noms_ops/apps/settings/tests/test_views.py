@@ -1,7 +1,7 @@
 import json
 
-from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.urls import reverse
 from django.utils.html import escape
 from mtp_common.auth import USER_DATA_SESSION_KEY
 import responses

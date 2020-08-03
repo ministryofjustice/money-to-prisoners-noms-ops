@@ -1,5 +1,5 @@
-from django.core.urlresolvers import reverse_lazy
 from django.http import Http404
+from django.urls import reverse_lazy
 from django.utils.translation import gettext, gettext_lazy as _
 
 from security.forms.object_detail import (

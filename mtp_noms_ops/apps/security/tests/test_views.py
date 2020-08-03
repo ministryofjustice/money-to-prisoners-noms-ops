@@ -12,9 +12,9 @@ from urllib.parse import parse_qs, urlencode
 
 from django.conf import settings
 from django.core import mail
-from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test import SimpleTestCase, override_settings
+from django.urls import reverse
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
 from mtp_common.auth import USER_DATA_SESSION_KEY, urljoin

@@ -2,7 +2,7 @@ import json
 import logging
 from unittest import mock
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from mtp_common.auth.exceptions import Forbidden
 from mtp_common.test_utils import silence_logger
 import responses

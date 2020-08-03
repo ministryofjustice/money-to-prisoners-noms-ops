@@ -2,7 +2,7 @@ import re
 import logging
 
 from django import template
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.html import escape, format_html
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
