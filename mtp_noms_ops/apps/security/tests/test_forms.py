@@ -2462,7 +2462,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         check_id = 1
         check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'pending',
             'credit': {
                 'started_at': '2020-01-19T10:45:13.529053Z',
@@ -2471,7 +2471,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
 
         expected_check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'pending',
             'needs_attention': False,
         }
@@ -2508,7 +2508,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         check_id = 1
         check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'pending',
             'credit': {
                 'started_at': '2020-01-19T03:45:13.529053Z',
@@ -2516,7 +2516,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         }
         expected_check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'pending',
             'needs_attention': True,
             'credit': {
@@ -2548,7 +2548,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         check_id = 1
         check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'pending',
             'credit': {
                 'started_at': '2020-01-19T03:45:13.529053Z',
@@ -2584,7 +2584,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         check_id = 1
         check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'rejected',
             'credit': {
                 'started_at': '2020-01-19T03:45:13.529053Z',
@@ -2619,7 +2619,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         check_id = 1
         check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'pending',
             'credit': {
                 'started_at': '2020-01-19T03:45:13.529053Z',
@@ -2660,7 +2660,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         check_id = 1
         check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'pending',
             'credit': {
                 'started_at': '2020-01-19T03:45:13.529053Z',
@@ -2703,7 +2703,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         check_id = 1
         check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'accepted',
             'credit': {
                 'started_at': '2020-01-19T03:45:13.529053Z',
@@ -2759,7 +2759,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
         check_id = 1
         check_data = {
             'id': check_id,
-            'description': 'lorem ipsum',
+            'description': ['Compliance check failed'],
             'status': 'pending',
             'credit': {
                 'started_at': '2020-01-19T03:45:13.529053Z',

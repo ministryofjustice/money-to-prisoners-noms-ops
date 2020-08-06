@@ -36,7 +36,6 @@ from security.tests import api_url, TEST_IMAGE_DATA
 from security.views.check import AcceptOrRejectCheckView
 from security.views.object_base import SEARCH_FORM_SUBMITTED_INPUT_NAME
 
-
 SAMPLE_PRISONS = [
     {
         'nomis_id': 'AAI',
@@ -3050,7 +3049,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             'started_at': credit_created_date.isoformat()
         }
     )
-    SENDER_CREDIT['security_check']['description'] = '☢☢☢ This looks roight dodgy this does☣☣☣'
+    SENDER_CREDIT['security_check']['description'] = ['Strict compliance check failed']
     SENDER_CREDIT['security_check']['actioned_by_name'] = 'Javert'
     SENDER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
     SENDER_CREDIT['security_check']['status'] = 'rejected'
@@ -3078,7 +3077,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             'resolution': 'credited',
         }
     )
-    PRISONER_CREDIT['security_check']['description'] = 'I guess this is probably fine???'
+    PRISONER_CREDIT['security_check']['description'] = ['Soft compliance check failed']
     PRISONER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
     PRISONER_CREDIT['security_check']['actioned_by_name'] = 'Staff'
     PRISONER_CREDIT['security_check']['status'] = 'accepted'
@@ -3296,7 +3295,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         # Senders previous credit
         self.assertIn('Ms A. Nother Prisoner', response_content)
         self.assertIn('£10,000.00', response_content)
-        self.assertIn('☢☢☢ This looks roight dodgy this does☣☣☣', response_content)
+        self.assertIn('Strict compliance check failed', response_content)
         self.assertIn('Javert', response_content)
 
         # Prisoners previous credit
@@ -3305,7 +3304,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         self.assertIn('02/50', response_content)
         self.assertIn('SOMEONE ELSE', response_content)
         self.assertIn('Number 6', response_content)
-        self.assertIn('I guess this is probably fine???', response_content)
+        self.assertIn('Soft compliance check failed', response_content)
         self.assertIn('Staff', response_content)
 
         # TODO add in assertion for ordering

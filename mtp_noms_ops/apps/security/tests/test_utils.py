@@ -5,13 +5,13 @@ from unittest import mock
 
 from django.utils.timezone import localtime, make_aware, utc
 
-from security.templatetags.security import genitive, currency, pence, format_sort_code
+from security.templatetags.security import genitive, currency, pence, format_sort_code, check_description
 from security.utils import (
     convert_date_fields,
     NameSet,
     EmailSet,
     remove_whitespaces_and_hyphens,
-    get_need_attention_date
+    get_need_attention_date,
 )
 
 
@@ -64,6 +64,47 @@ class UtilTestCase(unittest.TestCase):
         emails = EmailSet(['abc@example.com', 'ABC@EXAMPLE.COM', 'abc@example.co.uk',
                            'abc@example.com ', 'Abc@example.com', ''])
         self.assertSequenceEqual(emails, ('abc@example.com', 'abc@example.co.uk', ''))
+
+    def test_check_description(self):
+        def run_filter(d):
+            check = {'description': d}
+            return check_description(check)
+
+        cases = [
+            # original form
+            (
+                'Credit matched: Compliaces rules failed',
+                'Compliaces rules failed.',
+            ),
+            (
+                'Credit matched: Credit matched rule 1. Credit matched rule 5',
+                'Credit matched rule 1. Credit matched rule 5.',
+            ),
+            # original form with stripped prefix
+            (
+                'Compliaces rules failed',
+                'Compliaces rules failed.',
+            ),
+            (
+                'Credit matched rule 1. Credit matched rule 5',
+                'Credit matched rule 1. Credit matched rule 5.',
+            ),
+            # new form
+            (
+                ['Compliaces rules failed'],
+                'Compliaces rules failed.',
+            ),
+            (
+                ['Credit matched rule 1', 'Credit matched rule 5'],
+                'Credit matched rule 1. Credit matched rule 5.',
+            ),
+        ]
+        for description, expected in cases:
+            # label prefix always expected
+            self.assertIn('Rules:', run_filter(description))
+            # historic prefix should be stripped off
+            self.assertNotIn('Credit matched:', run_filter(description))
+            self.assertIn(expected, run_filter(description))
 
 
 class RemoveWhitespacesAndHyphensTestCase(unittest.TestCase):

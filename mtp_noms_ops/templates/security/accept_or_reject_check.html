@@ -90,7 +90,9 @@
         </tr>
         <tr class="mtp-check-description-row">
           <td colspan="2"></td>
-          <td colspan="4">{{ check.description }}</td>
+          <td colspan="4">
+            {{ check|check_description }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -148,7 +150,7 @@
           <tr class="mtp-check-description-row">
             <td></td>
             <td colspan="4">
-              {{ credit.security_check.description }}
+              {{ credit.security_check|check_description }}
               <br />
               <br />
               <strong>{% trans 'Decision details' %}:</strong>
@@ -161,7 +163,7 @@
             </tr>
           {% empty %}
             <tr>
-              <td colspan="5">{% trans 'There are no credits matching sender or prisoner profile.' %}</td>
+              <td colspan="5">{% trans 'There are no credit decisions matching this debit card or prisoner.' %}</td>
             </tr>
           {% endfor %}
         </tbody>
