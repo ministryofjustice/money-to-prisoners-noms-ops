@@ -88,8 +88,6 @@ def check_description(check):
     description = check['description']
     if isinstance(description, list):
         description = '. '.join(description)
-    if description == 'Credit matched no rules and was automatically accepted':
-        return ''
     elif description.startswith('Credit matched: '):
         description = description[16:]
     return format_html(

@@ -70,10 +70,6 @@ class UtilTestCase(unittest.TestCase):
             check = {'description': d}
             return check_description(check)
 
-        # if no rules matched, don't output description
-        self.assertEqual(run_filter('Credit matched no rules and was automatically accepted'), '')
-        self.assertEqual(run_filter(['Credit matched no rules and was automatically accepted']), '')
-
         cases = [
             # original form
             (
