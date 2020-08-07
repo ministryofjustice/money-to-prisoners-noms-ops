@@ -22,7 +22,9 @@ var LegacySecurityForms = {
     // if $patternSelect doesn't exist, check if the radio varient exists instead
     if (!$patternSelect.length && $('[name=amount_pattern]')) {
       $patternSelect = $('[name=amount_pattern]');
-      valueGetter = function() { return $patternSelect.filter(':checked').val(); };
+      valueGetter = function () {
+        return $patternSelect.filter(':checked').val();
+      };
     }
 
     var $exactWrapper = $('#id_amount_exact-wrapper');
@@ -148,12 +150,12 @@ exports.SecurityForms = {
     LegacySecurityForms.init();
 
     if ($('.mtp-security-advanced-search').length) {
-        this.bindConditionalShowHideSelection('amount_pattern');
-        this.bindConditionalShowHideSelection('prison_selector');
-        this.bindConditionalShowHideSelection('payment_method');
+      this.bindConditionalShowHideSelection('amount_pattern');
+      this.bindConditionalShowHideSelection('prison_selector');
+      this.bindConditionalShowHideSelection('payment_method');
     }
     if ($('.mtp-job-information-form').length) {
-        this.bindConditionalShowHideSelection('job_title');
+      this.bindConditionalShowHideSelection('job_title');
     }
   },
 

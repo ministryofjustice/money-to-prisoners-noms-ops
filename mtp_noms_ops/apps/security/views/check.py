@@ -1,6 +1,6 @@
 from django.contrib import messages
-from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import Http404, HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy
 from django.views.generic.edit import BaseFormView, FormView
 from mtp_common.api import retrieve_all_pages_for_path

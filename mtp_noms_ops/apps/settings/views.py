@@ -1,9 +1,9 @@
 from urllib.parse import urlencode
 
-from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.views import SuccessURLAllowedHostsMixin
 from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
 from django.utils.http import is_safe_url
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView

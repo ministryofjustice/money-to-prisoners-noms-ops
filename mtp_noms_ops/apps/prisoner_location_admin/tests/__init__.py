@@ -3,8 +3,8 @@ import string
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.urlresolvers import reverse
 from django.test import SimpleTestCase
+from django.urls import reverse
 from django.utils.crypto import get_random_string
 from mtp_common.auth.api_client import MoJOAuth2Session
 from mtp_common.auth.test_utils import generate_tokens

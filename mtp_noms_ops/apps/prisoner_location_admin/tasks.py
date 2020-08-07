@@ -4,8 +4,8 @@ import math
 from urllib.parse import urljoin
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.forms import ValidationError
+from django.urls import reverse
 from django.utils.translation import activate, gettext, gettext_lazy as _
 from mtp_common.auth import api_client
 from mtp_common.auth.exceptions import HttpClientError
