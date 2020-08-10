@@ -278,10 +278,6 @@ LOCATION_UPLOADER_PASSWORD = os.environ.get('LOCATION_UPLOADER_PASSWORD', 'priso
 ASYNC_LOCATION_UPLOAD = os.environ.get('ASYNC_LOCATION_UPLOAD', 'True') == 'True'
 SHOW_LANGUAGE_SWITCH = os.environ.get('SHOW_LANGUAGE_SWITCH', 'False') == 'True'
 
-NOMIS_API_BASE_URL = os.environ.get('NOMIS_API_BASE_URL', '')
-NOMIS_API_CLIENT_TOKEN = os.environ.get('NOMIS_API_CLIENT_TOKEN', '')
-NOMIS_API_PRIVATE_KEY = os.environ.get('NOMIS_API_PRIVATE_KEY', '').encode('utf8').decode('unicode_escape')
-
 NOMIS_ELITE_CLIENT_ID = os.environ.get('NOMIS_ELITE_CLIENT_ID', '')
 NOMIS_ELITE_CLIENT_SECRET = os.environ.get('NOMIS_ELITE_CLIENT_SECRET', '')
 NOMIS_ELITE_BASE_URL = os.environ.get('NOMIS_ELITE_BASE_URL', '')
