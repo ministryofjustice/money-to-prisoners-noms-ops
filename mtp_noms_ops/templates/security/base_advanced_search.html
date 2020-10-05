@@ -6,7 +6,7 @@
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 {% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
-{% block body_classes %}{{ block.super }} mtp-with-spaced-header{% endblock body_classes %}
+{% block body_classes %}{{ block.super }} {% if not view.no_spaced_header %}mtp-with-spaced-header{% endif %}{% endblock body_classes %}
 
 {% block inner_content %}
   <form id="advanced-search-{{ view.object_name_plural|slugify }}" class="mtp-security-advanced-search mtp-autocomplete js-FormAnalytics" method="get">

@@ -12,6 +12,29 @@
 {% block inner_content %}
   {% notifications_box request 'noms_ops_security_dashboard' %}
 
+  {% if request.can_access_security %}
+    <div class="grid-row">
+      <div class="column-two-thirds">
+        <div class="mtp-notification mtp-notification--info">
+          <h2 class="mtp-notification__headline">
+            {% trans 'How Nov 2nd policy changes will affect you' %}
+          </h2>
+          <div class="mtp-notification__message" style="display:block">
+
+            <h3><strong>{% trans 'Credits' %}</strong></h3>
+            <p>{% trans 'Senders will no longer be able to send money by bank transfer.' %}</p>
+            <p><a href="{% url 'security:credit_list' %}">{% trans 'More details' %}</a></p>
+
+            <h3><strong>{% trans 'Disbursements' %}</strong></h3>
+            <p>{% trans 'There will be a cap on how much money can be sent out of prison.' %}</p>
+            <p>{% trans 'The cap will be a maximum of £50 a week sent out to each person.' %}</p>
+            <p><a href="{% url 'security:disbursement_list' %}">{% trans 'More details' %}</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
   <header>
     <h1 class="heading-xlarge mtp-unpadded-heading">
       {% blocktrans trimmed with full_name=request.user.get_full_name|default:request.user.username %}
