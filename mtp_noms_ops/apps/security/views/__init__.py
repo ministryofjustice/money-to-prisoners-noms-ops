@@ -20,3 +20,6 @@ from .check import (  # noqa: F401
     CheckAssignView,
     MyListCheckView
 )
+from .views import (  # noqa: F401
+    PolicyChangeView
+)

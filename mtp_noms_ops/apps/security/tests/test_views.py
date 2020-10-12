@@ -4086,3 +4086,11 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             self.assertNotContains(response, 'name="assignment"')
             self.assertContains(response, 'That check is already assigned to Someone Else')
             self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
+
+
+class PolicyChangeViewTestCase(SecurityBaseTestCase):
+    @responses.activate
+    def test_displays_policy_update_page(self):
+        self.login()
+        response = self.client.get(reverse('security:policy_change'), follow=True)
+        self.assertContains(response, 'policy-change-info')
