@@ -18,6 +18,7 @@ from django.urls import reverse
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
 from mtp_common.auth import USER_DATA_SESSION_KEY, urljoin
+from mtp_common.auth.api_client import get_request_token_url
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 from openpyxl import load_workbook
@@ -138,21 +139,34 @@ class SecurityBaseTestCase(SimpleTestCase):
         self.notifications_mock.stop()
         super().tearDown()
 
-    @mock.patch('mtp_common.auth.backends.api_client')
-    def login(self, mock_api_client, follow=True, user_data=None, rsps=None):
+    def login(self, mock_api_client=None, follow=True, user_data=None, rsps=None):
         no_saved_searches(rsps=rsps)
-        return self._login(mock_api_client, follow=follow, user_data=user_data)
+        return self._login(mock_api_client=mock_api_client, follow=follow, user_data=user_data, rsps=rsps)
 
     @mock.patch('mtp_common.auth.backends.api_client')
     def login_test_searches(self, mock_api_client, follow=True):
         return self._login(mock_api_client, follow=follow)
 
-    def _login(self, mock_api_client, follow=True, user_data=None):
-        mock_api_client.authenticate.return_value = {
-            'pk': 5,
-            'token': generate_tokens(),
-            'user_data': user_data or self.get_user_data()
-        }
+    def _login(self, mock_api_client=None, follow=True, user_data=None, rsps=None):
+        if mock_api_client:
+            mock_api_client.authenticate.return_value = {
+                'pk': 5,
+                'token': generate_tokens(),
+                'user_data': user_data or self.get_user_data()
+            }
+        else:
+            returned_user_data = user_data or self.get_user_data()
+            returned_user_data['pk'] = 5
+            rsps.add(
+                rsps.POST,
+                get_request_token_url(),
+                json=generate_tokens()
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(settings.API_URL, '/users/{username}'.format(username=returned_user_data['username'])),
+                json=returned_user_data
+            )
 
         response = self.client.post(
             reverse('login'),
