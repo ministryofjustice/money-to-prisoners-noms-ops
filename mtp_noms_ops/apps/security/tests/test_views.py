@@ -139,34 +139,26 @@ class SecurityBaseTestCase(SimpleTestCase):
         self.notifications_mock.stop()
         super().tearDown()
 
-    def login(self, mock_api_client=None, follow=True, user_data=None, rsps=None):
+    def login(self, rsps, follow=True, user_data=None):
         no_saved_searches(rsps=rsps)
-        return self._login(mock_api_client=mock_api_client, follow=follow, user_data=user_data, rsps=rsps)
+        return self._login(rsps, follow=follow, user_data=user_data)
 
-    @mock.patch('mtp_common.auth.backends.api_client')
-    def login_test_searches(self, mock_api_client, follow=True):
-        return self._login(mock_api_client, follow=follow)
+    def login_test_searches(self, rsps, follow=True):
+        return self._login(rsps, follow=follow)
 
-    def _login(self, mock_api_client=None, follow=True, user_data=None, rsps=None):
-        if mock_api_client:
-            mock_api_client.authenticate.return_value = {
-                'pk': 5,
-                'token': generate_tokens(),
-                'user_data': user_data or self.get_user_data()
-            }
-        else:
-            returned_user_data = user_data or self.get_user_data()
-            returned_user_data['pk'] = 5
-            rsps.add(
-                rsps.POST,
-                get_request_token_url(),
-                json=generate_tokens()
-            )
-            rsps.add(
-                rsps.GET,
-                urljoin(settings.API_URL, '/users/{username}'.format(username=returned_user_data['username'])),
-                json=returned_user_data
-            )
+    def _login(self, rsps, follow=True, user_data=None):
+        returned_user_data = user_data or self.get_user_data()
+        returned_user_data['pk'] = 5
+        rsps.add(
+            rsps.POST,
+            get_request_token_url(),
+            json=generate_tokens()
+        )
+        rsps.add(
+            rsps.GET,
+            urljoin(settings.API_URL, '/users/{username}'.format(username=returned_user_data['username'])),
+            json=returned_user_data
+        )
 
         response = self.client.post(
             reverse('login'),
@@ -231,12 +223,12 @@ class LocaleTestCase(SecurityBaseTestCase):
 class SecurityDashboardViewsTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_can_access_security_dashboard(self):
-        response = self.login()
+        response = self.login(responses)
         self.assertContains(response, '<!-- security:dashboard -->')
 
     @responses.activate
     def test_cannot_access_prisoner_location_admin(self):
-        self.login()
+        self.login(responses)
         no_saved_searches()
         response = self.client.get(reverse('location_file_upload'), follow=True)
         self.assertNotContains(response, '<!-- location_file_upload -->')
@@ -273,6 +265,7 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
             } for index in range(1, 11)
         ]
         self.login(
+            responses,
             user_data=self.get_user_data(prisons=prisons),
         )
         response = self.client.get(reverse('security:sender_list'))
@@ -299,6 +292,7 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
             } for index in range(1, 3)
         ]
         self.login(
+            responses,
             user_data=self.get_user_data(prisons=prisons),
         )
         response = self.client.get(reverse('security:sender_list'))
@@ -320,6 +314,7 @@ class PrisonSwitcherTestCase(SecurityBaseTestCase):
         """
         self._mock_api_responses()
         self.login(
+            responses,
             user_data=self.get_user_data(prisons=[]),
         )
         response = self.client.get(reverse('security:sender_list'))
@@ -341,6 +336,7 @@ class JobInformationViewTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_redirects_when_provided_job_info_flag_is_missing(self):
         self.login(
+            responses,
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
@@ -355,6 +351,7 @@ class JobInformationViewTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_can_view_app_when_user_has_provided_job_info_flag(self):
         self.login(
+            responses,
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
@@ -369,8 +366,11 @@ class JobInformationViewTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_successful_form_post(self):
         mock_post_for_job_info_endpoint()
-        self.login(user_data=self.get_user_data(
-            flags=[confirmed_prisons_flag, hmpps_employee_flag])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                flags=[confirmed_prisons_flag, hmpps_employee_flag]
+            )
         )
         responses.add(
             responses.PUT,
@@ -390,6 +390,7 @@ class JobInformationViewTestCase(SecurityBaseTestCase):
     def test_unsuccessful_form_post(self):
         mock_post_for_job_info_endpoint()
         self.login(
+            responses,
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
@@ -416,6 +417,7 @@ class JobInformationViewTestCase(SecurityBaseTestCase):
     def test_form_adds_provided_job_info_flag(self):
         mock_post_for_job_info_endpoint()
         self.login(
+            responses,
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
@@ -450,6 +452,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_redirects_when_no_flag(self):
         self.login(
+            responses,
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
@@ -463,6 +466,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_non_employee_flag_disallows_entry(self):
         self.login(
+            responses,
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
@@ -478,6 +482,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_employee_can_access(self):
         self.login(
+            responses,
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
@@ -497,8 +502,11 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_employee_flag_set(self):
-        self.login(user_data=self.get_user_data(
-            flags=['abc', confirmed_prisons_flag, provided_job_info_flag])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                flags=['abc', confirmed_prisons_flag, provided_job_info_flag]
+            )
         )
         responses.add(
             responses.PUT,
@@ -515,6 +523,7 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
     @responses.activate
     def test_redirects_to_referrer(self):
         self.login(
+            responses,
             user_data=self.get_user_data(
                 flags=[
                     confirmed_prisons_flag,
@@ -536,8 +545,11 @@ class HMPPSEmployeeTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_non_employee_flag_set(self):
-        self.login(user_data=self.get_user_data(
-            flags=['123', confirmed_prisons_flag])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                flags=['123', confirmed_prisons_flag]
+            )
         )
         responses.add(
             responses.PUT,
@@ -666,7 +678,7 @@ class SecurityViewTestCase(SecurityBaseTestCase):
         if not self.view_name:
             return
         mock_prison_response()
-        self.login()
+        self.login(responses)
         response = self.client.get(reverse(self.view_name), follow=True)
         self.assertContains(response, '<!-- %s -->' % self.view_name)
 
@@ -684,7 +696,7 @@ class SearchV2SecurityTestCaseMixin:
         in case of a simple search.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             api_results = self.get_api_object_list_response_data()
             rsps.add(
@@ -704,7 +716,7 @@ class SearchV2SecurityTestCaseMixin:
         in case of an advanced search.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             api_results = self.get_api_object_list_response_data()
             rsps.add(
@@ -735,7 +747,7 @@ class SearchV2SecurityTestCaseMixin:
         with responses.RequestsMock() as rsps:
             user_data = self.get_user_data(prisons=SAMPLE_PRISONS)
 
-            self.login(user_data=user_data, rsps=rsps)
+            self.login(rsps, user_data=user_data)
             mock_prison_response(rsps=rsps)
             response = self.client.get(reverse(self.view_name))
 
@@ -753,7 +765,7 @@ class SearchV2SecurityTestCaseMixin:
             user_prisons = SAMPLE_PRISONS[:1]
             user_data = self.get_user_data(prisons=user_prisons)
 
-            self.login(user_data=user_data, rsps=rsps)
+            self.login(rsps, user_data=user_data)
             mock_prison_response(rsps=rsps)
 
             url = (
@@ -776,7 +788,7 @@ class SearchV2SecurityTestCaseMixin:
         Test that if prison_selector == all, the API call doesn't include any prison filter.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
 
             url = (
@@ -799,7 +811,7 @@ class SearchV2SecurityTestCaseMixin:
         with responses.RequestsMock() as rsps:
             expected_prison_id = SAMPLE_PRISONS[1]['nomis_id']
 
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
 
             url = (
@@ -825,7 +837,7 @@ class SearchV2SecurityTestCaseMixin:
         SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -854,7 +866,7 @@ class SearchV2SecurityTestCaseMixin:
         SEARCH_FORM_SUBMITTED_INPUT_NAME which gets removed when redirecting.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -884,7 +896,7 @@ class SearchV2SecurityTestCaseMixin:
         The action of submitting the form is represented by the query param SEARCH_FORM_SUBMITTED_INPUT_NAME.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             query_string = 'ordering=invalid&simple_search=test'
             request_url = f'{reverse(self.view_name)}?{query_string}&{SEARCH_FORM_SUBMITTED_INPUT_NAME}=1'
@@ -901,7 +913,7 @@ class SearchV2SecurityTestCaseMixin:
             self.skipTest(f'Advanced search not yet implemented for {self.__class__.__name__}')
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             query_string = 'ordering=invalid&advanced=True'
             request_url = (
@@ -918,7 +930,7 @@ class SearchV2SecurityTestCaseMixin:
         SEARCH_FORM_SUBMITTED_INPUT_NAME.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -939,7 +951,7 @@ class SearchV2SecurityTestCaseMixin:
         a link to search for the same thing in all prisons is shown.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -975,7 +987,7 @@ class SearchV2SecurityTestCaseMixin:
         with responses.RequestsMock() as rsps:
             user_data = self.get_user_data(prisons=None)
 
-            self.login(user_data=user_data, rsps=rsps)
+            self.login(rsps, user_data=user_data)
             mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -1007,7 +1019,7 @@ class SearchV2SecurityTestCaseMixin:
         the API call doesn't include any prison filter.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             api_results = self.get_api_object_list_response_data()
             rsps.add(
@@ -1049,7 +1061,7 @@ class ExportSecurityViewTestCaseMixin:
         ]
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -1085,7 +1097,7 @@ class ExportSecurityViewTestCaseMixin:
         )
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -1115,7 +1127,7 @@ class ExportSecurityViewTestCaseMixin:
         ]
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
 
             rsps.add(
@@ -1145,7 +1157,7 @@ class ExportSecurityViewTestCaseMixin:
         ]
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
 
             rsps.add(
@@ -1188,7 +1200,7 @@ class ExportSecurityViewTestCaseMixin:
         )
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             response = self.client.get(
                 f'{reverse(self.export_email_view_name)}?{qs}',
@@ -1289,7 +1301,7 @@ class SenderViewsV2TestCase(
     def test_detail_view_displays_bank_transfer_detail(self):
         sender_id = 9
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/senders/{sender_id}/'),
@@ -1320,7 +1332,7 @@ class SenderViewsV2TestCase(
     def test_detail_view_displays_debit_card_detail(self):
         sender_id = 9
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/senders/{sender_id}/'),
@@ -1351,7 +1363,7 @@ class SenderViewsV2TestCase(
     def test_detail_not_found(self):
         sender_id = 9
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/senders/{sender_id}/'),
@@ -1369,7 +1381,7 @@ class SenderViewsV2TestCase(
     def test_connection_errors(self):
         sender_id = 9
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -1381,7 +1393,7 @@ class SenderViewsV2TestCase(
         self.assertContains(response, 'non-field-error')
 
         with responses.RequestsMock() as rsps:
-            no_saved_searches(rsps=rsps)
+            no_saved_searches(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/senders/{sender_id}/'),
@@ -1468,7 +1480,7 @@ class PrisonerViewsV2TestCase(
     def test_detail_view(self):
         prisoner_id = 9
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/prisoners/{prisoner_id}/'),
@@ -1499,7 +1511,7 @@ class PrisonerViewsV2TestCase(
     def test_detail_not_found(self):
         prisoner_id = 999
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/prisoners/{prisoner_id}/'),
@@ -1522,7 +1534,7 @@ class PrisonerViewsV2TestCase(
     def test_connection_errors(self):
         prisoner_id = 9
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
             rsps.add(
                 rsps.GET,
@@ -1533,8 +1545,8 @@ class PrisonerViewsV2TestCase(
                 response = self.client.get(reverse(self.view_name))
         self.assertContains(response, 'non-field-error')
 
-        with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+        with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/prisoners/{prisoner_id}/'),
@@ -1723,7 +1735,7 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
                 }
             )
 
-            self.login(rsps=rsps)
+            self.login(rsps)
             response = self.client.get(
                 reverse(
                     self.detail_view_name,
@@ -1754,7 +1766,7 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
                 }
             )
 
-            self.login(rsps=rsps)
+            self.login(rsps)
             response = self.client.get(
                 reverse(
                     self.detail_view_name,
@@ -1783,7 +1795,7 @@ class CreditViewsV2TestCase(SearchV2SecurityTestCaseMixin, ExportSecurityViewTes
                 }
             )
 
-            self.login(rsps=rsps)
+            self.login(rsps)
             with silence_logger('django.request'):
                 response = self.client.get(
                     reverse(
@@ -1979,7 +1991,7 @@ class DisbursementViewsV2TestCase(
                 json=self.bank_transfer_disbursement,
             )
 
-            self.login(rsps=rsps)
+            self.login(rsps)
             response = self.client.get(
                 reverse(
                     self.detail_view_name,
@@ -2004,7 +2016,7 @@ class DisbursementViewsV2TestCase(
                 json=self.cheque_disbursement,
             )
 
-            self.login(rsps=rsps)
+            self.login(rsps)
             response = self.client.get(
                 reverse(
                     self.detail_view_name,
@@ -2081,7 +2093,7 @@ class PinnedProfileTestCase(SecurityViewTestCase):
                 'results': []
             },
         )
-        response = self.login_test_searches()
+        response = self.login_test_searches(rsps=responses)
 
         self.assertContains(response, 'Saved search 1')
         self.assertContains(response, 'Saved search 2')
@@ -2133,7 +2145,7 @@ class PinnedProfileTestCase(SecurityViewTestCase):
             api_url('/searches/2/'),
             status=201,
         )
-        response = self.login_test_searches()
+        response = self.login_test_searches(rsps=responses)
 
         self.assertContains(response, 'Saved search 1')
         self.assertNotContains(response, 'Saved search 2')
@@ -2163,7 +2175,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
     @mock.patch('security.views.nomis.can_access_nomis', mock.Mock(return_value=True))
     @mock.patch('security.views.nomis.get_photograph_data', mock.Mock(return_value=TEST_IMAGE_DATA))
     def test_display_nomis_photo(self):
-        self.login(follow=False)
+        self.login(responses, follow=False)
         response = self.client.get(
             reverse(
                 'security:prisoner_image',
@@ -2176,7 +2188,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
     @mock.patch('security.views.nomis.can_access_nomis', mock.Mock(return_value=True))
     @mock.patch('security.views.nomis.get_photograph_data', mock.Mock(return_value=None))
     def test_missing_nomis_photo(self):
-        self.login(follow=False)
+        self.login(responses, follow=False)
         response = self.client.get(
             reverse(
                 'security:prisoner_image',
@@ -2211,7 +2223,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             api_url('/searches/1/'),
             status=204,
         )
-        self.login(follow=False)
+        self.login(responses, follow=False)
         response = self.client.get(
             reverse('security:prisoner_detail', kwargs={'prisoner_id': 1})
         )
@@ -2242,7 +2254,7 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
             status=204,
         )
 
-        self.login(follow=False)
+        self.login(responses, follow=False)
         self.client.get(
             reverse('security:prisoner_detail', kwargs={'prisoner_id': 1}) +
             '?pin=1'
@@ -2264,9 +2276,14 @@ class PrisonerDetailViewTestCase(SecurityViewTestCase):
 
 class NotificationsTestCase(SecurityBaseTestCase):
     def login(self, rsps):
-        super().login(user_data=self.get_user_data(flags=[
-            hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag,
-        ]), rsps=rsps)
+        super().login(
+            rsps,
+            user_data=self.get_user_data(
+                flags=[
+                    hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag,
+                ]
+            )
+        )
 
     def test_no_notifications_not_monitoring(self):
         """
@@ -2556,10 +2573,13 @@ class NotificationsTestCase(SecurityBaseTestCase):
 class SettingsTestCase(SecurityBaseTestCase):
     def test_can_turn_on_email_notifications_switch(self):
         with responses.RequestsMock() as rsps:
-            self.login(user_data=self.get_user_data(flags=[
-                hmpps_employee_flag, confirmed_prisons_flag,
-                provided_job_info_flag,
-            ]), rsps=rsps)
+            self.login(
+                rsps,
+                user_data=self.get_user_data(flags=[
+                    hmpps_employee_flag, confirmed_prisons_flag,
+                    provided_job_info_flag,
+                ])
+            )
             rsps.add(
                 rsps.GET,
                 api_url('/emailpreferences/'),
@@ -2586,10 +2606,15 @@ class SettingsTestCase(SecurityBaseTestCase):
 
     def test_can_turn_off_email_notifications_switch(self):
         with responses.RequestsMock() as rsps:
-            self.login(user_data=self.get_user_data(flags=[
-                hmpps_employee_flag, confirmed_prisons_flag,
-                provided_job_info_flag,
-            ]), rsps=rsps)
+            self.login(
+                rsps,
+                user_data=self.get_user_data(
+                    flags=[
+                        hmpps_employee_flag, confirmed_prisons_flag,
+                        provided_job_info_flag,
+                    ]
+                )
+            )
             rsps.add(
                 rsps.GET,
                 api_url('/emailpreferences/'),
@@ -2632,7 +2657,7 @@ class LegacyViewsRedirectTestCase(SecurityBaseTestCase):
             'security:prisoner_list',
         )
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             mock_prison_response(rsps=rsps)
 
             for view_name in view_names:
@@ -2788,7 +2813,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
         mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             self.mock_need_attention_count(rsps, 0)
             rsps.add(
                 rsps.GET,
@@ -2818,7 +2843,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
         mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 9, 9))
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             self.mock_need_attention_count(rsps, 2)
             rsps.add(
                 rsps.GET,
@@ -2839,7 +2864,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
 
     def test_calculation_of_date_before_which_checks_need_attention(self):
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             self.mock_need_attention_count(rsps, 0)
             response = self.client.get(reverse('security:check_list'))
             form = response.context['form']
@@ -2852,7 +2877,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
         Test that the view displays link to review a credit.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             self.mock_need_attention_count(rsps, 0)
             rsps.add(
                 rsps.GET,
@@ -2892,7 +2917,7 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
         mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             self.mock_need_attention_count(rsps, 0)
             rsps.add(
                 rsps.GET,
@@ -2923,7 +2948,7 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
         mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 9, 9))
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             self.mock_need_attention_count(rsps, 2)
             rsps.add(
                 rsps.GET,
@@ -2944,7 +2969,7 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
 
     def test_calculation_of_date_before_which_checks_need_attention(self):
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             self.mock_need_attention_count(rsps, 0)
             response = self.client.get(reverse('security:my_check_list'))
             form = response.context['form']
@@ -2957,7 +2982,7 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
         Test that the view displays link to review a credit.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             self.mock_need_attention_count(rsps, 0)
             rsps.add(
                 rsps.GET,
@@ -3020,7 +3045,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
         Test that the view displays the history of checks caught by delayed capture by the API.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 urljoin(
@@ -3077,7 +3102,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
         Test that the view displays the correct data from the API.
         """
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/security/checks/'),
@@ -3104,7 +3129,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
         self.SAMPLE_CHECK_WITH_ACTIONED_BY['decision_reason'] = None
 
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/security/checks/'),
@@ -3264,7 +3289,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         response_len = 4
         check_id = 1
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
@@ -3334,7 +3359,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         response_len = 0
         check_id = 1
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
@@ -3380,7 +3405,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         check_id = 1
         response_len = 4
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
@@ -3474,7 +3499,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         check_id = 1
         response_len = 4
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
@@ -3887,7 +3912,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         check_id = 1
         response_len = 4
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
@@ -3959,7 +3984,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         check_id = 1
         response_len = 2
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
@@ -4108,7 +4133,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
         check_id = 1
         response_len = 0
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 urljoin(
@@ -4172,7 +4197,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
         check_id = 1
         response_len = 0
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 urljoin(
@@ -4235,7 +4260,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
         """
         check_id = 1
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/security/checks/'),
@@ -4286,7 +4311,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
         check_id = 1
         response_len = 0
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.PATCH,
                 api_url(f'/security/checks/{check_id}/'),
@@ -4365,7 +4390,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
         check_id = 1
         response_len = 0
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.PATCH,
                 api_url(f'/security/checks/{check_id}/'),
@@ -4434,7 +4459,8 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 follow=True,
             )
 
-            self.assertTrue(json.loads(rsps.calls[1].request.body) == {'assigned_to': None})
+            calls = list(rsps.calls)
+            self.assertTrue(json.loads(calls[3].request.body) == {'assigned_to': None})
             self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
             self.assertContains(response, 'Add to my list')
 
@@ -4445,7 +4471,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
         check_id = 1
         response_len = 0
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 urljoin(
@@ -4515,7 +4541,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
         mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
         check_id = 1
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.PATCH,
                 api_url(f'/security/checks/{check_id}/'),
@@ -4547,7 +4573,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
         check_id = 1
         response_len = 0
         with responses.RequestsMock() as rsps:
-            self.login(rsps=rsps)
+            self.login(rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
@@ -4624,13 +4650,15 @@ class PolicyChangeViewTestCase(SecurityBaseTestCase):
     @responses.activate
     @override_settings(NOVEMBER_SECOND_CHANGES_LIVE=False)
     def test_displays_policy_warning_page_before_policy_change(self):
-        self.login()
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
         response = self.client.get(reverse('security:policy_change'), follow=True)
         self.assertContains(response, 'policy-change-warning')
 
     @responses.activate
     @override_settings(NOVEMBER_SECOND_CHANGES_LIVE=True)
     def test_displays_policy_update_page_after_policy_change(self):
-        self.login()
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
         response = self.client.get(reverse('security:policy_change'), follow=True)
         self.assertContains(response, 'policy-change-info')
