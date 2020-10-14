@@ -414,4 +414,9 @@ urlpatterns = [
         ),
         name='prisoner_list_legacy',
     ),
+    url(
+        r'^policy-change/$',
+        login_required(views.PolicyChangeView.as_view()),
+        name='policy_change'
+    )
 ]
