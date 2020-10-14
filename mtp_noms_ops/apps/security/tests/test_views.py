@@ -4093,4 +4093,4 @@ class PolicyChangeViewTestCase(SecurityBaseTestCase):
     def test_displays_policy_update_page(self):
         self.login()
         response = self.client.get(reverse('security:policy_change'), follow=True)
-        self.assertContains(response, 'policy-change-info')
+        self.assertContains(response, 'policy-change-warning')
