@@ -6,8 +6,9 @@
 
 {% block inner_content %}
 
-{% static 'downloads/apply-to-send-out-more-than-50.pdf' as form_link %}
+  {% static 'downloads/apply-to-send-out-more-than-50.pdf' as form_link %}
 
+  {% if not view.november_second_changes_live %}
     {% if not is_search_results %}
       <div class="mtp-notification mtp-notification--info mtp-notification--open">
         <h2 class="mtp-notification__headline">
@@ -15,6 +16,7 @@
         </h2>
       </div>
     {% endif %}
+  {% endif %}
 
   <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search js-FormAnalytics" method="get">
 
