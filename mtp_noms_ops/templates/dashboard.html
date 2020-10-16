@@ -24,21 +24,20 @@
     {% else %}
       <div class="mtp-notification mtp-notification--info">
         <h2 class="mtp-notification__headline">
-          {% trans 'How Nov 2nd policy changes will affect you' %}
+          {% trans 'What the Nov 2nd policy changes mean' %}
         </h2>
         <div class="mtp-notification__message" style="display:block">
 
           <h3><strong>{% trans 'Credits' %}</strong></h3>
-          <p>{% trans 'Senders will no longer be able to send money by bank transfer.' %}</p>
+          <p>{% trans 'Senders will no longer be able to send money by bank transfer or pre-paid card.' %}</p>
 
           <h3><strong>{% trans 'Disbursements' %}</strong></h3>
-          <p>{% trans 'There will be a cap on how much money can be sent out of prison.' %}</p>
-          <p>{% trans 'The cap will be a maximum of £50 a week sent out to each person.' %}</p>
+          <p>{% trans 'Prisoners can send out a maximum of £50 a week to up to 5 different people.' %}</p>
 
           <p><a href="{% url 'security:policy_change' %}">{% trans 'More details about Credit and Disbursement changes' %}</a></p>
 
           <h3><strong>{% trans 'Prisoner accounts' %}</strong></h3>
-          <p>{% trans 'There will be a cap of £900 on prisoner accounts.' %}</p>
+          <p>{% trans 'Credits will not be accepted into a prisoner’s account if it holds £900 or more.' %}</p>
         </div>
       </div>
     {% endif %}

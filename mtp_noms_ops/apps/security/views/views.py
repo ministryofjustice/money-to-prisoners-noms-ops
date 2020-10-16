@@ -5,7 +5,7 @@ from django.views.generic import TemplateView
 
 class PolicyChangeView(TemplateView):
     if settings.NOVEMBER_SECOND_CHANGES_LIVE:
-        title = _('How Nov 2nd policy changes will affect you')
+        title = _('What the Nov 2nd policy changes mean')
     else:
         title = _('Policy changes made on Nov 2nd 2020')
 
