@@ -288,6 +288,30 @@ TOKEN_RETRIEVAL_PASSWORD = os.environ.get('TOKEN_RETRIEVAL_PASSWORD', '_token_re
 CLOUD_PLATFORM_MIGRATION_MODE = os.environ.get('CLOUD_PLATFORM_MIGRATION_MODE', '')
 CLOUD_PLATFORM_MIGRATION_URL = os.environ.get('CLOUD_PLATFORM_MIGRATION_URL', '')
 
+# Feature toggle for copy changes relating to bank transfers
+BANK_TRANSFERS_ENABLED = bool(
+    int(
+        os.environ.get(
+            'BANK_TRANSFERS_ENABLED',
+            '1'
+        )
+    )
+)
+
+# THIS SETTING OVERRIDES THE ABOVE SETTINGS
+NOVEMBER_SECOND_CHANGES_LIVE = bool(
+    int(
+        os.environ.get(
+            'NOVEMBER_SECOND_CHANGES_LIVE',
+            '0'
+        )
+    )
+)
+
+if NOVEMBER_SECOND_CHANGES_LIVE:
+    BANK_TRANSFERS_ENABLED = False
+    PRISONER_CAPPING_ENABLED = True
+
 try:
     from .local import *  # noqa
 except ImportError:

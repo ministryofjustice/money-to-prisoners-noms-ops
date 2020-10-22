@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_list import (
@@ -59,6 +60,7 @@ class CreditListViewV2(SecuritySearchViewV2):
     object_name = _('credit')
     object_name_plural = _('credits')
     no_spaced_header = True
+    november_second_changes_live = settings.NOVEMBER_SECOND_CHANGES_LIVE
 
 
 class DisbursementListViewV2(SecuritySearchViewV2):
@@ -76,6 +78,7 @@ class DisbursementListViewV2(SecuritySearchViewV2):
     object_name = _('disbursement')
     object_name_plural = _('disbursements')
     no_spaced_header = True
+    november_second_changes_live = settings.NOVEMBER_SECOND_CHANGES_LIVE
 
 
 class SenderListViewV2(SecuritySearchViewV2):

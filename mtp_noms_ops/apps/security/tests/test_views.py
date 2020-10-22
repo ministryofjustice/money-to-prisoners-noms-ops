@@ -4090,7 +4090,15 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
 
 class PolicyChangeViewTestCase(SecurityBaseTestCase):
     @responses.activate
-    def test_displays_policy_update_page(self):
+    @override_settings(NOVEMBER_SECOND_CHANGES_LIVE=False)
+    def test_displays_policy_warning_page_before_policy_change(self):
+        self.login()
+        response = self.client.get(reverse('security:policy_change'), follow=True)
+        self.assertContains(response, 'policy-change-warning')
+
+    @responses.activate
+    @override_settings(NOVEMBER_SECOND_CHANGES_LIVE=True)
+    def test_displays_policy_update_page_after_policy_change(self):
         self.login()
         response = self.client.get(reverse('security:policy_change'), follow=True)
         self.assertContains(response, 'policy-change-info')

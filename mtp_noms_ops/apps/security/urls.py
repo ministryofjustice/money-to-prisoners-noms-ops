@@ -52,6 +52,7 @@ def dashboard_view(request):
     return render(request, 'dashboard.html', {
         'start_page_url': settings.START_PAGE_URL,
         'saved_searches': populate_new_result_counts(session, get_saved_searches(session)),
+        'november_second_changes_live': settings.NOVEMBER_SECOND_CHANGES_LIVE
     })
 
 
