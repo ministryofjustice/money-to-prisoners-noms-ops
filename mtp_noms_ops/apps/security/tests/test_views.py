@@ -3739,13 +3739,39 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 }
             )
 
-            url = reverse('security:assign_check', kwargs={'check_id': check_id, 'list': 'list'})
+            url = reverse('security:assign_check', kwargs={'check_id': check_id, 'current_page': 1, 'list': 'list'})
 
             response = self.client.get(url, follow=True)
 
             self.assertRedirects(
-                response, reverse('security:check_list') + f'#check-row-{check_id}'
+                response, reverse('security:check_list') + f'?page=1#check-row-{check_id}'
             )
+
+    def test_assign_view_get_request_redirects_to_list_check_page_with_kwarg_and_current_page(self):
+        """
+        A GET request should redirect to the list page if called with 'list' as positional url arg
+        """
+        check_id = 1
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 21,
+                    'data': [self.SAMPLE_CHECK] * 21
+                }
+            )
+
+            url = reverse('security:assign_check', kwargs={'check_id': check_id, 'current_page': 2, 'list': 'list'})
+
+            response = self.client.get(url, follow=True)
+
+            self.assertRedirects(
+                response, reverse('security:check_list') + f'?page=2#check-row-{check_id}'
+            )
+            self.assertContains(response, 'Page 2 of 2')
 
     def test_can_assign_check_to_own_list(self):
         """

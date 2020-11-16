@@ -20,6 +20,12 @@ class CheckListView(SecurityView):
     template_name = 'security/checks_list.html'
     form_class = CheckListForm
 
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['current_page'] = self.request.GET.get('page', 1)
+
+        return context_data
+
 
 class MyListCheckView(SecurityView):
     """
@@ -45,10 +51,12 @@ class CheckAssignView(BaseFormView):
     """
     form_class = AssignCheckToUserForm
     id_kwarg_name = 'check_id'
+    page_kwarg_name = 'current_page'
 
     def get_success_url(self):
         if self.kwargs.get('list') == 'list':
-            return reverse('security:check_list') + f'#check-row-{self.kwargs[self.id_kwarg_name]}'
+            page_params = f'?page={self.kwargs[self.page_kwarg_name]}#check-row-{self.kwargs[self.id_kwarg_name]}'
+            return reverse('security:check_list') + page_params
         else:
             return reverse('security:resolve_check', kwargs={'check_id': self.kwargs[self.id_kwarg_name]})
 
