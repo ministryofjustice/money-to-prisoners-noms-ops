@@ -376,7 +376,7 @@ urlpatterns = [
         name='resolve_check',
     ),
     url(
-        r'^security/checks/(?P<check_id>\d+)/assignment/(?P<list>\w+)?/?$',
+        r'^security/checks/(?P<check_id>\d+)/assignment/(?P<list>\w+)?/(?P<current_page>\d+)?/?$',
         fiu_security_test(views.CheckAssignView.as_view()),
         name='assign_check',
     ),

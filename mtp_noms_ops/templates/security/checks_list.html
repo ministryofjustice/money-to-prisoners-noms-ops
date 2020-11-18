@@ -125,7 +125,7 @@
                       {% endblocktrans %}
                     </span>
                   {% else %}
-                    <form class="mtp-check-cell__list-form" action="{% url 'security:assign_check' check_id=check.id list='list' %}" method="post">
+                    <form class="mtp-check-cell__list-form" action="{% url 'security:assign_check' check_id=check.id current_page=current_page list='list' %}" method="post">
                       {% csrf_token %}
                       <button type="submit" name="assignment" class="button-secondary" value="assign">
                         {% blocktrans trimmed with credit_to=check.credit.prisoner_name %}
