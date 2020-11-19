@@ -129,11 +129,48 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     CheckForm for accepting or rejecting a check.
     """
-    decision_reason = forms.CharField(
-        label=_('Give details (details are optional when accepting)'),
+    fiu_action = forms.CharField(max_length=10)
+    further_details = forms.CharField(
+        label=_('Give Further details (Optional)'),
         required=False,
     )
-    fiu_action = forms.CharField(max_length=10)
+    fiu_investigation_id = forms.CharField(
+        required=False,
+        empty_value=False,
+        label=_('Associated FIU investigation')
+    )
+    intelligence_report_id = forms.CharField(
+        required=False,
+        empty_value=False, label=_('Associated Intelligence Report (IR)')
+    )
+    other_reason = forms.CharField(
+        required=False,
+        empty_value=False, label=_('Other Reason')
+    )
+    payment_source_paying_multiple_prisoners = forms.BooleanField(
+        required=False,
+        label=_('Payment source is paying multiple prisoners')
+    )
+    payment_source_multiple_cards = forms.BooleanField(
+        required=False,
+        label=_('Payment source is using multiple cards')
+    )
+    payment_source_linked_other_prisoners = forms.BooleanField(
+        required=False,
+        label=_('Payment source is linked to other prisoner/s')
+    )
+    payment_source_known_email = forms.BooleanField(
+        required=False,
+        label=_('Payment source is using a known email')
+    )
+    payment_source_unidentified = forms.BooleanField(
+        required=False,
+        label=_('Payment source is unidentified')
+    )
+    prisoner_multiple_payments_payment_sources = forms.BooleanField(
+        required=False,
+        label=_('Prisoner has multiple payments or payment sources')
+    )
 
     def __init__(self, object_id, request, **kwargs):
         super().__init__(**kwargs)
