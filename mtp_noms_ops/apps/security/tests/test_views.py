@@ -21,6 +21,7 @@ from mtp_common.auth import USER_DATA_SESSION_KEY, urljoin
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 from openpyxl import load_workbook
+from parameterized import parameterized
 import responses
 
 from security import (
@@ -2773,6 +2774,75 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
 
             self.assertContains(response, 'Review <span class="visually-hidden">credit to Jean Valjean</span>')
 
+    @parameterized.expand(
+        (
+            ('payment_source_paying_multiple_prisoners', 'Payment source is paying multiple prisoners'),
+            ('payment_source_multiple_cards', 'Payment source is using multiple cards'),
+            ('payment_source_linked_other_prisoners', 'Payment source is linked to other prisoner/s'),
+            ('payment_source_known_email', 'Payment source is using a known email'),
+            ('payment_source_unidentified', 'Payment source is unidentified'),
+            ('prisoner_multiple_payments_payment_sources', 'Prisoner has multiple payments or payment sources'),
+        )
+    )
+    def test_credit_row_has_reason_checkbox_populated(self, rejection_reason_key, rejection_reason_full):
+        """
+        Test that the view displays checkboxes associated with a credit.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 0)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.SAMPLE_CHECK,
+                            **{rejection_reason_key: True}
+                        )
+                    ],
+                },
+            )
+
+            response = self.client.get(reverse('security:check_list'), follow=True)
+
+            self.assertContains(response, rejection_reason_full)
+
+
+    @parameterized.expand(
+        (
+            ('fiu_investigation_id', 'iamanfiuinvestigationid'),
+            ('intelligence_report_id', 'iamaninvestigationreportid'),
+            ('other_reason', 'iamotherreason'),
+            ('further_details', 'iamfurtherdetails'),
+        )
+    )
+    def test_credit_row_has_reason_populated(self, rejection_reason_key, rejection_reason_value):
+        """
+        Test that the view displays the reason for associated populated checkboxes with a credit.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            self.mock_need_attention_count(rsps, 0)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/'),
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.SAMPLE_CHECK,
+                            **{rejection_reason_key: rejection_reason_value}
+                        )
+                    ],
+                },
+            )
+
+            response = self.client.get(reverse('security:check_list'), follow=True)
+
+            self.assertContains(response, rejection_reason_value)
+
 
 class MyCheckListViewTestCase(BaseCheckViewTestCase):
     """
@@ -3311,7 +3381,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
 
     def test_accept_check(self):
         """
-        Test that if one tries to accept an already rejected check, a validation error is displayed.
+        Test that if one tries to accept pending check, check marked as accepted
 
         """
         check_id = 1
@@ -3341,6 +3411,45 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertRedirects(response, reverse('security:check_list'))
             self.assertContains(response, 'Credit accepted')
 
+    def test_accept_check_with_further_details(self):
+        """
+        Test that if one tries to accept pending check with further details, check marked as accepted
+
+        """
+        check_id = 1
+        further_details_string = 'iamfurtherdetails'
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    responses.json_params_matcher({
+                        'further_details': further_details_string,
+                    })
+                ],
+                status=204,
+            )
+            self.mock_need_attention_count(rsps, 0)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                    'further_details': further_details_string,
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Credit accepted')
+
     def test_reject_check(self):
         """
         Test that if a pending check is rejected, the view redirects to the list of checks
@@ -3357,6 +3466,11 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             rsps.add(
                 rsps.POST,
                 api_url(f'/security/checks/{check_id}/reject/'),
+                match=[
+                    responses.json_params_matcher({
+                        'decision_reason': 'Some reason',
+                    })
+                ],
                 status=204,
             )
             self.mock_need_attention_count(rsps, 0)
@@ -3367,6 +3481,61 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 data={
                     'decision_reason': 'Some reason',
                     'fiu_action': 'reject',
+                },
+                follow=True,
+            )
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Credit rejected')
+
+    @parameterized.expand(
+        (
+            ('fiu_investigation_id', 'iamanfiuinvestigationid'),
+            ('intelligence_report_id', 'iamaninvestigationreportid'),
+            ('other_reason', 'iamotherreason'),
+            ('further_details', 'iamfurtherdetails'),
+            ('payment_source_paying_multiple_prisoners', True),
+            ('payment_source_multiple_cards', True),
+            ('payment_source_linked_other_prisoners', True),
+            ('payment_source_known_email', True),
+            ('payment_source_unidentified', True),
+            ('prisoner_multiple_payments_payment_sources', True),
+        )
+    )
+    def test_reject_check_with_reason_associated(self, rejection_reason_key, rejection_reason_value):
+        """
+        Test that if a pending check is rejected with an FIU investigation number associated,
+        the view redirects to the list of checks and a successful message is displayed.
+        """
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/reject/'),
+                match=[
+                    responses.json_params_matcher({
+                        'decision_reason': 'Some reason',
+                        rejection_reason_key: rejection_reason_value
+                        #  'fiu_investigation_id': 'iamanfiuinvestigationid',
+                    })
+                ],
+                status=204,
+            )
+            self.mock_need_attention_count(rsps, 0)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'decision_reason': 'Some reason',
+                    'fiu_action': 'reject',
+                    rejection_reason_key: rejection_reason_value
                 },
                 follow=True,
             )
