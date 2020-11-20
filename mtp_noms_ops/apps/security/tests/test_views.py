@@ -2809,7 +2809,6 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
 
             self.assertContains(response, rejection_reason_full)
 
-
     @parameterized.expand(
         (
             ('fiu_investigation_id', 'iamanfiuinvestigationid'),

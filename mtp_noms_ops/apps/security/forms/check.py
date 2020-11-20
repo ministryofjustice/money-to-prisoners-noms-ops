@@ -130,22 +130,25 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     CheckForm for accepting or rejecting a check.
     """
     fiu_action = forms.CharField(max_length=10)
-    further_details = forms.CharField(
+    accept_further_details = forms.CharField(
+        label=_('Give Further details (Optional)'),
+        required=False,
+    )
+    reject_further_details = forms.CharField(
         label=_('Give Further details (Optional)'),
         required=False,
     )
     fiu_investigation_id = forms.CharField(
         required=False,
-        empty_value=False,
         label=_('Associated FIU investigation')
     )
     intelligence_report_id = forms.CharField(
         required=False,
-        empty_value=False, label=_('Associated Intelligence Report (IR)')
+        label=_('Associated Intelligence Report (IR)')
     )
     other_reason = forms.CharField(
         required=False,
-        empty_value=False, label=_('Other Reason')
+        label=_('Other Reason')
     )
     payment_source_paying_multiple_prisoners = forms.BooleanField(
         required=False,
@@ -171,6 +174,25 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         required=False,
         label=_('Prisoner has multiple payments or payment sources')
     )
+
+    rejection_reason_fields = (
+        fiu_investigation_id,
+        intelligence_report_id,
+        other_reason,
+        payment_source_paying_multiple_prisoners,
+        payment_source_multiple_cards,
+        payment_source_linked_other_prisoners,
+        payment_source_known_email,
+        payment_source_unidentified,
+        prisoner_multiple_payments_payment_sources
+    )
+
+    error_messages = {
+        'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
+        'reject_with_accept_reason': _('You cannot reject with the Add Further Details box under accept populated'),
+        'accept_with_reject_reason': _('You must untick all rejection fields before accepting a credit'),
+        'reject_with_accept_reason': _('You cannot accept with the Add Further Details box under reject populated')
+    }
 
     def __init__(self, object_id, request, **kwargs):
         super().__init__(**kwargs)
@@ -199,25 +221,58 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def session(self):
         return get_api_session(self.request)
 
+    def is_reject_reason_populated(self):
+        return any([
+            self.cleaned_data.get(rejection_field)
+            for rejection_field in self.rejection_reason_fields
+        ])
+
+    def reject_details(self):
+        return self.cleaned_data.get('reject_further_details')
+
+    def accept_details(self):
+        return self.cleaned_data.get('accept_further_details')
+
     def clean(self):
         """
-        Makes sure that the check is in pending.
+        Makes sure that the check is in the correct state and validate field combination.
         """
         status = self.cleaned_data['fiu_action']
-        if 'decision_reason' in self.cleaned_data:
-            reason = self.cleaned_data['decision_reason']
-        else:
-            reason = ''
 
-        if not reason and status == 'reject':
-            msg = forms.ValidationError('This field is required')
-            self.add_error('decision_reason', msg)
+        if status == 'reject':
+            if not self.is_reject_reason_populated():
+                self.add_error(
+                    None,
+                    self.error_messages['missing_reject_reason']
+                )
+            if self.accept_details():
+                self.add_error(
+                    'accept_further_details',
+                    self.error_messages['reject_with_accept_reason']
+                )
+            if self.reject_details():
+                self.cleaned_data['further_details'] = self.reject_details()
+
+        elif status == 'accept':
+            if self.is_reject_reason_populated():
+                self.add_error(
+                    None,
+                    self.error_messages['accept_with_reject_reason'],
+                )
+            if self.reject_details():
+                self.add_error(
+                    'reject_further_details',
+                    self.error_messages['accept_with_reject_reason'],
+                )
+            if self.accept_details():
+                self.cleaned_data['further_details'] = self.accept_details()
 
         if not self.errors:  # if already in error => skip
             if self.get_object()['status'] != 'pending':
                 raise forms.ValidationError(
                     _('You cannot action this credit as it’s not in pending'),
                 )
+
         return super().clean()
 
     def get_resolve_endpoint_path(self, fiu_action='accept'):
