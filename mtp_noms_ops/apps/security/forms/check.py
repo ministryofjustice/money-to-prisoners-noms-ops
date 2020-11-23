@@ -175,10 +175,12 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         label=_('Prisoner has multiple payments or payment sources')
     )
 
-    rejection_reason_fields = (
+    mandatory_rejection_text_fields = (
         fiu_investigation_id,
         intelligence_report_id,
         other_reason,
+    )
+    rejection_checkbox_fields = (
         payment_source_paying_multiple_prisoners,
         payment_source_multiple_cards,
         payment_source_linked_other_prisoners,
@@ -186,6 +188,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         payment_source_unidentified,
         prisoner_multiple_payments_payment_sources
     )
+    rejection_reason_fields = rejection_checkbox_fields + mandatory_rejection_text_fields
 
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
