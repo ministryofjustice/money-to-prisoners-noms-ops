@@ -159,6 +159,9 @@
               {% else %}
                 {% trans 'No decision reason entered' %}
               {% endif %}
+              {% for reason, value in credit.security_check.rejection_reasons.items %}
+                {{ reason }}: {% if value != True %}{{ value }}{% endif %}
+              {% endfor %}
               </td>
             </tr>
           {% empty %}
@@ -184,7 +187,7 @@
               {% trans 'Accept credit' %}
             </button>
             <table class="mtp-table">
-              {% for field in form.rejection_checkbox_fields %}
+              {% for field in form.rejection_checkbox_fields.values %}
               <tr>
               <div id="{{ field.id_for_label }}-wrapper"
                    class="form-group

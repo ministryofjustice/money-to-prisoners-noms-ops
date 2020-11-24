@@ -175,26 +175,28 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         label=_('Prisoner has multiple payments or payment sources')
     )
 
-    mandatory_rejection_text_fields = (
-        fiu_investigation_id,
-        intelligence_report_id,
-        other_reason,
+    mandatory_rejection_text_fields = {
+        'fiu_investigation_id': fiu_investigation_id,
+        'intelligence_report_id': intelligence_report_id,
+        'other_reason': other_reason,
+    }
+    rejection_checkbox_fields = {
+        'payment_source_paying_multiple_prisoners': payment_source_paying_multiple_prisoners,
+        'payment_source_multiple_cards': payment_source_multiple_cards,
+        'payment_source_linked_other_prisoners': payment_source_linked_other_prisoners,
+        'payment_source_known_email': payment_source_known_email,
+        'payment_source_unidentified': payment_source_unidentified,
+        'prisoner_multiple_payments_payment_sources': prisoner_multiple_payments_payment_sources,
+    }
+    rejection_reason_fields = dict(
+        tuple(rejection_checkbox_fields.items()) + tuple(mandatory_rejection_text_fields.items())
     )
-    rejection_checkbox_fields = (
-        payment_source_paying_multiple_prisoners,
-        payment_source_multiple_cards,
-        payment_source_linked_other_prisoners,
-        payment_source_known_email,
-        payment_source_unidentified,
-        prisoner_multiple_payments_payment_sources
-    )
-    rejection_reason_fields = rejection_checkbox_fields + mandatory_rejection_text_fields
 
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
-        'reject_with_accept_reason': _('You cannot reject with the Add Further Details box under accept populated'),
+        'reject_with_accept_details': _('You cannot reject with the Add Further Details box under accept populated'),
+        'accept_with_reject_details': _('You cannot accept with the Add Further Details box under reject populated'),
         'accept_with_reject_reason': _('You must untick all rejection fields before accepting a credit'),
-        'reject_with_accept_reason': _('You cannot accept with the Add Further Details box under reject populated')
     }
 
     def __init__(self, object_id, request, **kwargs):
@@ -227,14 +229,8 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def is_reject_reason_populated(self):
         return any([
             self.cleaned_data.get(rejection_field)
-            for rejection_field in self.rejection_reason_fields
+            for rejection_field in self.rejection_reason_fields.keys()
         ])
-
-    def reject_details(self):
-        return self.cleaned_data.get('reject_further_details')
-
-    def accept_details(self):
-        return self.cleaned_data.get('accept_further_details')
 
     def clean(self):
         """
@@ -242,19 +238,25 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         """
         status = self.cleaned_data['fiu_action']
 
+        if not self.errors:  # if already in error => skip
+            if self.get_object()['status'] != 'pending':
+                raise forms.ValidationError(
+                    _('You cannot action this credit as it’s not in pending'),
+                )
+
         if status == 'reject':
             if not self.is_reject_reason_populated():
                 self.add_error(
                     None,
                     self.error_messages['missing_reject_reason']
                 )
-            if self.accept_details():
+            if self.cleaned_data.get('accept_further_details'):
                 self.add_error(
                     'accept_further_details',
-                    self.error_messages['reject_with_accept_reason']
+                    self.error_messages['reject_with_accept_details']
                 )
-            if self.reject_details():
-                self.cleaned_data['further_details'] = self.reject_details()
+            self.cleaned_data['further_details'] = self.cleaned_data.pop('reject_further_details')
+            del self.cleaned_data['accept_further_details']
 
         elif status == 'accept':
             if self.is_reject_reason_populated():
@@ -262,19 +264,13 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                     None,
                     self.error_messages['accept_with_reject_reason'],
                 )
-            if self.reject_details():
+            if self.cleaned_data.get('reject_further_details'):
                 self.add_error(
                     'reject_further_details',
-                    self.error_messages['accept_with_reject_reason'],
+                    self.error_messages['accept_with_reject_details'],
                 )
-            if self.accept_details():
-                self.cleaned_data['further_details'] = self.accept_details()
-
-        if not self.errors:  # if already in error => skip
-            if self.get_object()['status'] != 'pending':
-                raise forms.ValidationError(
-                    _('You cannot action this credit as it’s not in pending'),
-                )
+            self.cleaned_data['further_details'] = self.cleaned_data.pop('accept_further_details')
+            del self.cleaned_data['reject_further_details']
 
         return super().clean()
 
@@ -287,14 +283,12 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         :return: True if the API call was successful.
             If not, it returns False and populating the self.errors dict.
         """
-        endpoint = self.get_resolve_endpoint_path(fiu_action=self.cleaned_data['fiu_action'])
+        endpoint = self.get_resolve_endpoint_path(fiu_action=self.cleaned_data.pop('fiu_action'))
 
         try:
             self.session.post(
                 endpoint,
-                json={
-                    'decision_reason': self.cleaned_data['decision_reason'],
-                }
+                json=self.cleaned_data
             )
             return True
         except RequestException:
