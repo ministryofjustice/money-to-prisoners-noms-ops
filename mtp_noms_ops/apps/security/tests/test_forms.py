@@ -2826,7 +2826,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             ('other_reason', ),
         )
     )
-    def test_form_does_not_include_fields_with_disabled_attr_in_cleaned_data(self, field_name):
+    def test_form_does_not_include_fields_with_ignore_input_attr_in_cleaned_data(self, field_name):
         check_id = 1
         check_data = {
             'id': check_id,
@@ -2858,7 +2858,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                 },
             )
 
-            form.fields[field_name].widget.attrs.update({'disabled': True})
+            form.fields[field_name].widget.attrs.update({'class': 'ignore-input'})
 
             self.assertTrue(form.is_valid())
             self.assertFalse(form.cleaned_data.get(field_name))
@@ -2880,7 +2880,6 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                     'prisoner_multiple_payments_payment_sources': False,
                 }
             )
-
 
 
 class AssignCheckToUserFormTestCase(SimpleTestCase):

@@ -130,11 +130,18 @@ class ToggleableTextInput(TextInput):
     """
     Omits element value from being returned when clean called on associated field if disabled
 
-    Because it's unintuitive to the user if they select a checkbox for a text field, deselect it and reselect it again we use the disabled attribute on the field (toggled via javascript) to determine if we should process the text box input
+    This serves two purposes. The main one is allow the textinput fields to be toggled without re-rendering the page
+    as this causes the problem of having to move the window back to its previous location.
+
+    The other (more minor) useability improvement is that it removes the unintuitive behaviour of the text disappearing
+    if the user selects the checkbox that toggles this text field, deselects it and then reselects it again.
+
+    We use the ignore-input class on the field (toggled via javascript) to determine if we should include the value of
+    the associated html element in the cleaned_data associated with the field
     """
     def value_from_datadict(self, data, files, name):
         response = super().value_from_datadict(data, files, name)
-        if self.attrs.get('disabled'):
+        if 'ignore-input' in self.attrs.get('class', '').split(' '):
             return ''
         return response
 
@@ -165,6 +172,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     )
     other_reason = forms.CharField(
         required=False,
+        widget=ToggleableTextInput,
         label=_('Other Reason')
     )
     payment_source_paying_multiple_prisoners = forms.BooleanField(

@@ -194,11 +194,20 @@
               {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_unidentified input_classes='form-control-3-4' %}
               {% include 'mtp_common/forms/checkbox-field.html' with field=form.prisoner_multiple_payments_payment_sources input_classes='form-control-3-4' %}
 
+            <div class="multiple-choice">
+              <input class="checkbox js-ToggleTextFieldOnChange" type="checkbox" />
               {% include 'mtp_common/forms/textarea.html' with field=form.fiu_investigation_id input_classes='form-control-3-4' %}
+            </div>
+            <div class="multiple-choice">
+              <input class="checkbox js-ToggleTextFieldOnChange" type="checkbox" />
               {% include 'mtp_common/forms/textarea.html' with field=form.intelligence_report_id input_classes='form-control-3-4' %}
-              {% include 'mtp_common/forms/textarea.html' with field=form.other_reason input_classes='form-control-3-4' %}
+            </div>
+            <div class="multiple-choice">
+              <input class="checkbox js-ToggleTextFieldOnChange" type="checkbox" />
+                {% include 'mtp_common/forms/textarea.html' with field=form.other_reason input_classes='form-control-3-4' %}
+            </div>
             </table>
-            {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='form-control-3-4' %}
+              {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='form-control-3-4' %}
             <button type="submit" class="button button-warning" name="fiu_action" value="reject">
               {% trans 'Reject credit' %}
             </button>
