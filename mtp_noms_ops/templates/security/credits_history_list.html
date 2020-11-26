@@ -93,6 +93,9 @@
             {% else %}
               {% trans 'No decision reason entered' %}
             {% endif %}
+            {% for reason, value in check.rejection_reasons.items %}
+              {{ reason }}: {% if value != True %}{{ value }}{% endif %}
+            {% endfor %}
           </td>
         </tr>
         {% empty %}

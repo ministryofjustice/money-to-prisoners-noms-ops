@@ -3088,6 +3088,139 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
 
             self.assertContains(response, 'No decision reason entered')
 
+    @parameterized.expand(
+        (
+            ('Payment source is paying multiple prisoners:',),
+            ('Payment source is using multiple cards:',),
+            ('Payment source is linked to other prisoner/s:',),
+            ('Payment source is using a known email:',),
+            ('Payment source is unidentified:',),
+            ('Prisoner has multiple payments or payment sources:',),
+        )
+    )
+    def test_credit_history_row_has_reason_checkbox_populated(
+        self, rejection_reason_full
+    ):
+        """
+        Test that the view displays checkboxes associated with a credit.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('started_at__gte', '2020-01-02T12:00:00'),
+                            ('actioned_by', True),
+                            ('offset', 0),
+                            ('limit', 20),
+                            ('ordering', '-created')
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.SENDER_CHECK_REJECTED,
+                            rejection_reasons={rejection_reason_full: True}
+                        )
+                    ]
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('status', 'pending'),
+                            ('credit_resolution', 'initial'),
+                            ('assigned_to', 5),
+                            ('offset', 0),
+                            ('limit', 1)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 2,
+                    'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY, self.SAMPLE_CHECK_WITH_ACTIONED_BY],
+                }
+            )
+
+            response = self.client.get(reverse('security:credits_history'))
+
+            self.assertContains(response, rejection_reason_full)
+
+    @parameterized.expand(
+        (
+            ('Associated FIU investigation', 'iamanfiuinvestigationid'),
+            ('Associated Intelligence Report (IR)', 'iamaninvestigationreportid'),
+            ('Other Reason', 'iamotherreason'),
+        )
+    )
+    def test_credit_history_row_has_string_reason_populated(
+        self, rejection_reason_key, rejection_reason_value
+    ):
+        """
+        Test that the view displays the reason for associated populated checkboxes with a credit.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('started_at__gte', '2020-01-02T12:00:00'),
+                            ('actioned_by', True),
+                            ('offset', 0),
+                            ('limit', 20),
+                            ('ordering', '-created')
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.SENDER_CHECK_REJECTED,
+                            rejection_reasons={rejection_reason_key: rejection_reason_value}
+                        )
+                    ]
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('status', 'pending'),
+                            ('credit_resolution', 'initial'),
+                            ('assigned_to', 5),
+                            ('offset', 0),
+                            ('limit', 1)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 2,
+                    'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY, self.SAMPLE_CHECK_WITH_ACTIONED_BY],
+                }
+            )
+
+            response = self.client.get(reverse('security:credits_history'))
+
+            self.assertContains(response, rejection_reason_value)
+
 
 class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
     """
