@@ -13,6 +13,7 @@ from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
+from parameterized import parameterized
 import responses
 
 from security.forms.check import AcceptOrRejectCheckForm, CheckListForm, AssignCheckToUserForm
@@ -2817,6 +2818,69 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                 form.errors,
                 {'__all__': ['There was an error with your request.']},
             )
+
+    @parameterized.expand(
+        (
+            ('fiu_investigation_id', ),
+            ('intelligence_report_id', ),
+            ('other_reason', ),
+        )
+    )
+    def test_form_does_not_include_fields_with_disabled_attr_in_cleaned_data(self, field_name):
+        check_id = 1
+        check_data = {
+            'id': check_id,
+            'description': ['Compliance check failed'],
+            'status': 'pending',
+            'credit': {
+                'started_at': '2020-01-19T03:45:13.529053Z',
+            },
+        }
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_data,
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/reject/'),
+                status=204,
+            )
+
+            form = AcceptOrRejectCheckForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'payment_source_paying_multiple_prisoners': True,
+                    'fiu_action': 'reject',
+                    field_name: 'thisshouldnotbeincludedinrequest'
+                },
+            )
+
+            form.fields[field_name].widget.attrs.update({'disabled': True})
+
+            self.assertTrue(form.is_valid())
+            self.assertFalse(form.cleaned_data.get(field_name))
+            self.assertEqual(form.accept_or_reject(), True)
+
+            last_request_body = json.loads(rsps.calls[-1].request.body)
+            self.assertDictEqual(
+                last_request_body,
+                {
+                    'fiu_investigation_id': '',
+                    'intelligence_report_id': '',
+                    'other_reason': '',
+                    'further_details': '',
+                    'payment_source_paying_multiple_prisoners': True,
+                    'payment_source_multiple_cards': False,
+                    'payment_source_linked_other_prisoners': False,
+                    'payment_source_known_email': False,
+                    'payment_source_unidentified': False,
+                    'prisoner_multiple_payments_payment_sources': False,
+                }
+            )
+
 
 
 class AssignCheckToUserFormTestCase(SimpleTestCase):

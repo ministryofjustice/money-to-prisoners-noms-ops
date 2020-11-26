@@ -2,6 +2,7 @@ import logging
 from functools import lru_cache
 
 from django import forms
+from django.forms.widgets import TextInput
 from django.contrib import messages
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -125,10 +126,24 @@ class CreditsHistoryListForm(SecurityForm):
         return object_list
 
 
+class ToggleableTextInput(TextInput):
+    """
+    Omits element value from being returned when clean called on associated field if disabled
+
+    Because it's unintuitive to the user if they select a checkbox for a text field, deselect it and reselect it again we use the disabled attribute on the field (toggled via javascript) to determine if we should process the text box input
+    """
+    def value_from_datadict(self, data, files, name):
+        response = super().value_from_datadict(data, files, name)
+        if self.attrs.get('disabled'):
+            return ''
+        return response
+
+
 class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     CheckForm for accepting or rejecting a check.
     """
+
     fiu_action = forms.CharField(max_length=10)
     accept_further_details = forms.CharField(
         label=_('Give Further details (Optional)'),
@@ -140,10 +155,12 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     )
     fiu_investigation_id = forms.CharField(
         required=False,
+        widget=ToggleableTextInput,
         label=_('Associated FIU investigation')
     )
     intelligence_report_id = forms.CharField(
         required=False,
+        widget=ToggleableTextInput,
         label=_('Associated Intelligence Report (IR)')
     )
     other_reason = forms.CharField(
