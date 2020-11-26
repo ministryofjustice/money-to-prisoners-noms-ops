@@ -187,49 +187,16 @@
               {% trans 'Accept credit' %}
             </button>
             <table class="mtp-table">
-              {% for field in form.rejection_checkbox_fields.values %}
-              <tr>
-              <div id="{{ field.id_for_label }}-wrapper"
-                   class="form-group
-                   {% if field.errors %}form-group-error{% endif %}">
-                <div class="multiple-choice">
-                  {% comment %} {% with checked=value|default:field.value|default:field.field.initial %} {% endcomment %}
-                  <input id="{{ field.id_for_label }}"
-                         class="checkbox {{ input_classes }}"
-                         name="{{ field.html_name }}"
-                         type="checkbox" />
-                    {% comment %} {% if checked %}checked{% endif %}/> {% endcomment %}
-                  {% comment %} {% endwith %} {% endcomment %}
-                  {% include 'mtp_common/forms/field-label.html' with field=field only %}
-                </div>
-                {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-              </div>
-                {% comment %} {% include 'mtp_common/forms/checkbox-field.html' with field=checkbox_field input_classes='form-control-3-4' %} {% endcomment %}
-              </tr>
-              {% endfor %}
-              {% for field in form.mandatory_rejection_text_fields %}
-              <tr>
-                {% comment %} {% include 'mtp_common/forms/textarea.html' with field=text_field input_classes='form-control-3-4' %} {% endcomment %}
-              <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
-                {% include 'mtp_common/forms/field-label.html' with field=field only %}
-                {% include 'mtp_common/forms/field-errors.html' with field=field only %}
+              {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_paying_multiple_prisoners input_classes='form-control-3-4' %}
+              {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_multiple_cards input_classes='form-control-3-4' %}
+              {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_linked_other_prisoners input_classes='form-control-3-4' %}
+              {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_known_email input_classes='form-control-3-4' %}
+              {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_unidentified input_classes='form-control-3-4' %}
+              {% include 'mtp_common/forms/checkbox-field.html' with field=form.prisoner_multiple_payments_payment_sources input_classes='form-control-3-4' %}
 
-                <textarea id="{{ field.id_for_label }}"
-                          class="form-control
-                          {% if field.errors %}
-                            form-control-error
-                          {% endif %}
-                          {{ input_classes }}"
-                          name="{{ field.html_name }}"
-                          rows="{{ rows|default:4 }}"
-                          cols="{{ cols|default:50 }}"
-                          {% for attr, attr_val in attrs.items %}
-                            {{ attr }}="{{ attr_val }}"
-                          {% endfor %}>
-                </textarea>
-              </div>
-              </tr>
-              {% endfor %}
+              {% include 'mtp_common/forms/textarea.html' with field=form.fiu_investigation_id input_classes='form-control-3-4' %}
+              {% include 'mtp_common/forms/textarea.html' with field=form.intelligence_report_id input_classes='form-control-3-4' %}
+              {% include 'mtp_common/forms/textarea.html' with field=form.other_reason input_classes='form-control-3-4' %}
             </table>
             {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='form-control-3-4' %}
             <button type="submit" class="button button-warning" name="fiu_action" value="reject">

@@ -175,23 +175,6 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         label=_('Prisoner has multiple payments or payment sources')
     )
 
-    mandatory_rejection_text_fields = {
-        'fiu_investigation_id': fiu_investigation_id,
-        'intelligence_report_id': intelligence_report_id,
-        'other_reason': other_reason,
-    }
-    rejection_checkbox_fields = {
-        'payment_source_paying_multiple_prisoners': payment_source_paying_multiple_prisoners,
-        'payment_source_multiple_cards': payment_source_multiple_cards,
-        'payment_source_linked_other_prisoners': payment_source_linked_other_prisoners,
-        'payment_source_known_email': payment_source_known_email,
-        'payment_source_unidentified': payment_source_unidentified,
-        'prisoner_multiple_payments_payment_sources': prisoner_multiple_payments_payment_sources,
-    }
-    rejection_reason_fields = dict(
-        tuple(rejection_checkbox_fields.items()) + tuple(mandatory_rejection_text_fields.items())
-    )
-
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
         'reject_with_accept_details': _('You cannot reject with the Add Further Details box under accept populated'),
@@ -204,6 +187,20 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         self.object_id = object_id
         self.need_attention_date = get_need_attention_date()
         self.request = request
+        self.mandatory_rejection_text_fields = (
+            'fiu_investigation_id',
+            'intelligence_report_id',
+            'other_reason',
+        )
+        self.rejection_checkbox_fields = (
+            'payment_source_paying_multiple_prisoners',
+            'payment_source_multiple_cards',
+            'payment_source_linked_other_prisoners',
+            'payment_source_known_email',
+            'payment_source_unidentified',
+            'prisoner_multiple_payments_payment_sources',
+        )
+        self.rejection_reason_fields = self.rejection_checkbox_fields + self.mandatory_rejection_text_fields
 
     @lru_cache()
     def get_object(self):
@@ -229,7 +226,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def is_reject_reason_populated(self):
         return any([
             self.cleaned_data.get(rejection_field)
-            for rejection_field in self.rejection_reason_fields.keys()
+            for rejection_field in self.rejection_reason_fields
         ])
 
     def clean(self):
