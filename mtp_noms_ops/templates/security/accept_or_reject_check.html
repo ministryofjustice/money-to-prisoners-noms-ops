@@ -160,6 +160,7 @@
                 {% trans 'No decision reason entered' %}
               {% endif %}
               {% for reason, value in credit.security_check.rejection_reasons.items %}
+                {% comment %} TODO change this to look up the reason given a reason identifier {% endcomment %}
                 {{ reason }}: {% if value != True %}{{ value }}{% endif %}
               {% endfor %}
               </td>
