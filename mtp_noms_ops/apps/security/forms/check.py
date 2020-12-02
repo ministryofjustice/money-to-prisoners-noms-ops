@@ -10,6 +10,7 @@ from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
 from requests.exceptions import RequestException
 
+from security.constants import CHECK_DETAIL_FORM_MAPPING
 from security.forms.object_base import SecurityForm
 from security.utils import convert_date_fields, get_need_attention_date
 
@@ -153,51 +154,51 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
 
     fiu_action = forms.CharField(max_length=10)
     accept_further_details = forms.CharField(
-        label=_('Give Further details (Optional)'),
         required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
     )
     reject_further_details = forms.CharField(
-        label=_('Give Further details (Optional)'),
         required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
     )
     fiu_investigation_id = forms.CharField(
         required=False,
         widget=ToggleableTextInput,
-        label=_('Associated FIU investigation')
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['fiu_investigation_id'],
     )
     intelligence_report_id = forms.CharField(
         required=False,
         widget=ToggleableTextInput,
-        label=_('Associated Intelligence Report (IR)')
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['intelligence_report_id'],
     )
     other_reason = forms.CharField(
         required=False,
         widget=ToggleableTextInput,
-        label=_('Other Reason')
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['other_reason'],
     )
     payment_source_paying_multiple_prisoners = forms.BooleanField(
         required=False,
-        label=_('Payment source is paying multiple prisoners')
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_paying_multiple_prisoners'],
     )
     payment_source_multiple_cards = forms.BooleanField(
         required=False,
-        label=_('Payment source is using multiple cards')
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_multiple_cards'],
     )
     payment_source_linked_other_prisoners = forms.BooleanField(
         required=False,
-        label=_('Payment source is linked to other prisoner/s')
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_linked_other_prisoners'],
     )
     payment_source_known_email = forms.BooleanField(
         required=False,
-        label=_('Payment source is using a known email')
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_known_email'],
     )
     payment_source_unidentified = forms.BooleanField(
         required=False,
-        label=_('Payment source is unidentified')
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_unidentified'],
     )
     prisoner_multiple_payments_payment_sources = forms.BooleanField(
         required=False,
-        label=_('Prisoner has multiple payments or payment sources')
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_paying_multiple_prisoners'],
     )
 
     error_messages = {

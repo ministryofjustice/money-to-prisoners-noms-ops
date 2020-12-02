@@ -16,6 +16,7 @@ from mtp_common.test_utils import silence_logger
 from parameterized import parameterized
 import responses
 
+from security.constants import CHECK_REJECTION_CATEGORY_TEXT_MAPPING
 from security.forms.check import AcceptOrRejectCheckForm, CheckListForm, AssignCheckToUserForm
 from security.forms.object_base import AmountPattern, SecurityForm
 from security.forms.object_list import (
@@ -2820,11 +2821,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
     @parameterized.expand(
-        (
-            ('fiu_investigation_id', ),
-            ('intelligence_report_id', ),
-            ('other_reason', ),
-        )
+        zip(CHECK_REJECTION_CATEGORY_TEXT_MAPPING.keys())
     )
     def test_form_does_not_include_fields_with_ignore_input_attr_in_cleaned_data(self, field_name):
         check_id = 1

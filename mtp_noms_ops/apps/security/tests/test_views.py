@@ -31,6 +31,7 @@ from security import (
     required_permissions,
     provided_job_info_flag,
 )
+from security.constants import CHECK_REJECTION_CATEGORY_TEXT_MAPPING, CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
 from security.tests import api_url, TEST_IMAGE_DATA
@@ -106,6 +107,20 @@ def offset_isodatetime_by_ten_seconds(isodatetime, offset_multiplier=1):
         parse_datetime(isodatetime)
         + datetime.timedelta(seconds=offset_multiplier * 10)
     ).isoformat()
+
+
+def generate_rejection_category_test_cases_text():
+    return [
+        (text_category, f'i_am_a_{text_category}_value')
+        for text_category in CHECK_REJECTION_CATEGORY_TEXT_MAPPING.keys()
+    ]
+
+
+def generate_rejection_category_test_cases_bool():
+    return [
+        (text_category, True)
+        for text_category in CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.keys()
+    ]
 
 
 @override_settings(
@@ -3089,17 +3104,10 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, 'No decision reason entered')
 
     @parameterized.expand(
-        (
-            ('Payment source is paying multiple prisoners:',),
-            ('Payment source is using multiple cards:',),
-            ('Payment source is linked to other prisoner/s:',),
-            ('Payment source is using a known email:',),
-            ('Payment source is unidentified:',),
-            ('Prisoner has multiple payments or payment sources:',),
-        )
+        CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated(
-        self, rejection_reason_full
+        self, rejection_reason_key, rejection_reason_full
     ):
         """
         Test that the view displays checkboxes associated with a credit.
@@ -3126,7 +3134,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
                     'results': [
                         dict(
                             self.SENDER_CHECK_REJECTED,
-                            rejection_reasons={rejection_reason_full: True}
+                            rejection_reasons={rejection_reason_key: True}
                         )
                     ]
                 }
@@ -3157,11 +3165,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, rejection_reason_full)
 
     @parameterized.expand(
-        (
-            ('Associated FIU investigation', 'iamanfiuinvestigationid'),
-            ('Associated Intelligence Report (IR)', 'iamaninvestigationreportid'),
-            ('Other Reason', 'iamotherreason'),
-        )
+        generate_rejection_category_test_cases_text()
     )
     def test_credit_history_row_has_string_reason_populated(
         self, rejection_reason_key, rejection_reason_value
@@ -3445,17 +3449,10 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         # TODO add in assertion for ordering
 
     @parameterized.expand(
-        (
-            ('Payment source is paying multiple prisoners:',),
-            ('Payment source is using multiple cards:',),
-            ('Payment source is linked to other prisoner/s:',),
-            ('Payment source is using a known email:',),
-            ('Payment source is unidentified:',),
-            ('Prisoner has multiple payments or payment sources:',),
-        )
+        CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated_for_prisoner_check(
-        self, rejection_reason_full
+        self, rejection_reason_key, rejection_reason_full
     ):
         """
         Test that the view displays checkboxes associated with a credit.
@@ -3517,7 +3514,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                             self.PRISONER_CREDIT,
                             security_check=dict(
                                 self.PRISONER_CREDIT['security_check'],
-                                rejection_reasons={rejection_reason_full: True}
+                                rejection_reasons={rejection_reason_key: True}
                             )
                         )
                     ],
@@ -3534,17 +3531,10 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, rejection_reason_full)
 
     @parameterized.expand(
-        (
-            ('Payment source is paying multiple prisoners:',),
-            ('Payment source is using multiple cards:',),
-            ('Payment source is linked to other prisoner/s:',),
-            ('Payment source is using a known email:',),
-            ('Payment source is unidentified:',),
-            ('Prisoner has multiple payments or payment sources:',),
-        )
+        CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated_for_sender_check(
-        self, rejection_reason_full
+        self, rejection_reason_key, rejection_reason_full
     ):
         """
         Test that the view displays checkboxes associated with a credit.
@@ -3563,7 +3553,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 id=self.credit_id + 1,
                 security_check=dict(
                     self.SENDER_CREDIT['security_check'],
-                    rejection_reasons={rejection_reason_full: True}
+                    rejection_reasons={rejection_reason_key: True}
                 )
             )
             rsps.add(
@@ -3625,11 +3615,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, rejection_reason_full)
 
     @parameterized.expand(
-        (
-            ('Associated FIU investigation', 'iamanfiuinvestigationid'),
-            ('Associated Intelligence Report (IR)', 'iamaninvestigationreportid'),
-            ('Other Reason', 'iamotherreason'),
-        )
+        generate_rejection_category_test_cases_text()
     )
     def test_credit_history_row_has_string_reason_populated_for_prisoner_check(
         self, rejection_reason_key, rejection_reason_value
@@ -3711,11 +3697,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, rejection_reason_value)
 
     @parameterized.expand(
-        (
-            ('Associated FIU investigation', 'iamanfiuinvestigationid'),
-            ('Associated Intelligence Report (IR)', 'iamaninvestigationreportid'),
-            ('Other Reason', 'iamotherreason'),
-        )
+        generate_rejection_category_test_cases_text()
     )
     def test_credit_history_row_has_string_reason_populated_for_sender_check(
         self, rejection_reason_key, rejection_reason_value
@@ -3848,17 +3830,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, 'Credit accepted')
 
     @parameterized.expand(
-        (
-            ('fiu_investigation_id', 'iamanfiuinvestigationid'),
-            ('intelligence_report_id', 'iamaninvestigationreportid'),
-            ('other_reason', 'iamotherreason'),
-            ('payment_source_paying_multiple_prisoners', True),
-            ('payment_source_multiple_cards', True),
-            ('payment_source_linked_other_prisoners', True),
-            ('payment_source_known_email', True),
-            ('payment_source_unidentified', True),
-            ('prisoner_multiple_payments_payment_sources', True),
-        )
+        generate_rejection_category_test_cases_text() + generate_rejection_category_test_cases_bool()
     )
     def test_reject_check(self, rejection_field_key, rejection_field_value):
         """

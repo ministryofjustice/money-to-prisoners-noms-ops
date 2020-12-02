@@ -154,15 +154,14 @@
               <br />
               <br />
               <strong>{% trans 'Decision details' %}:</strong>
+              {% for reason, value in credit.security_check.rejection_reasons.items %}
+                {{ reason | get_human_readable_check_field }}: {% if value != True %}{{ value }}{% endif %}
+              {% endfor %}
               {% if credit.security_check.decision_reason %}
                 {{ credit.security_check.decision_reason }}
-              {% else %}
+              {% elif not credit.security_check.rejection_reasons %}
                 {% trans 'No decision reason entered' %}
               {% endif %}
-              {% for reason, value in credit.security_check.rejection_reasons.items %}
-                {% comment %} TODO change this to look up the reason given a reason identifier {% endcomment %}
-                {{ reason }}: {% if value != True %}{{ value }}{% endif %}
-              {% endfor %}
               </td>
             </tr>
           {% empty %}

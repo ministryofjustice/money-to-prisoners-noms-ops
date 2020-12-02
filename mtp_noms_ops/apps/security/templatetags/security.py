@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 from mtp_common.utils import format_postcode
 
+from security.constants import CHECK_DETAIL_RENDERED_MAPPING
 from security.forms.object_list import PrisonSelectorSearchFormMixin
 from security.models import (
     credit_sources,
@@ -338,3 +339,8 @@ def extract_best_match(context, items):
         'item': best_match,
         'total_remaining': max(len(item_list)-1, 0),
     }
+
+
+@register.filter
+def get_human_readable_check_field(field):
+    return CHECK_DETAIL_RENDERED_MAPPING[field]

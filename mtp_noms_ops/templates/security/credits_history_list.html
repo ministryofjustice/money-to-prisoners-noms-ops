@@ -88,14 +88,14 @@
             <br/>
             <br/>
             <strong>{% trans 'Decision details' %}:</strong>
+            {% for reason, value in check.rejection_reasons.items %}
+              {{ reason | get_human_readable_check_field }}: {% if value != True %}{{ value }}{% endif %}
+            {% endfor %}
             {% if check.decision_reason %}
               {{ check.decision_reason }}
-            {% else %}
+            {% elif not check.rejection_reasons %}
               {% trans 'No decision reason entered' %}
             {% endif %}
-            {% for reason, value in check.rejection_reasons.items %}
-              {{ reason }}: {% if value != True %}{{ value }}{% endif %}
-            {% endfor %}
           </td>
         </tr>
         {% empty %}
