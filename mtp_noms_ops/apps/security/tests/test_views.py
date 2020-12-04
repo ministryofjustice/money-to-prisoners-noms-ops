@@ -3787,16 +3787,8 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         """
         check_id = 1
         payload_values = {
-            'fiu_investigation_id': '',
-            'intelligence_report_id': '',
-            'other_reason': '',
-            'further_details': '',
-            'payment_source_paying_multiple_prisoners': False,
-            'payment_source_multiple_cards': False,
-            'payment_source_linked_other_prisoners': False,
-            'payment_source_known_email': False,
-            'payment_source_unidentified': False,
-            'prisoner_multiple_payments_payment_sources': False,
+            'decision_reason': '',
+            'rejection_reasons': {},
         }
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
@@ -3839,18 +3831,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         """
         check_id = 1
         payload_values = {
-            'fiu_investigation_id': '',
-            'intelligence_report_id': '',
-            'other_reason': '',
-            'further_details': 'iamfurtherdetails',
-            'payment_source_paying_multiple_prisoners': False,
-            'payment_source_multiple_cards': False,
-            'payment_source_linked_other_prisoners': False,
-            'payment_source_known_email': False,
-            'payment_source_unidentified': False,
-            'prisoner_multiple_payments_payment_sources': False,
+            'decision_reason': 'iamfurtherdetails',
+            'rejection_reasons': {rejection_field_key: rejection_field_value}
         }
-        payload_values.update({rejection_field_key: rejection_field_value})
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(

@@ -6,11 +6,14 @@ exports.ToggleTextFieldOnChange = {
 
   init: function () {
     $(this.selector).each(function () {
+      if ($(this).prop('checked')) {
+        let dataTarget = $(this).parent('div').data('target');
+        $(`[name=${dataTarget}]`).prop('disabled', false).parent('div').removeClass('js-hidden');
+      };
       this.onchange = function() {
-        $(this).parent('div').find('textarea').toggleClass('ignore-input');
+        let dataTarget = $(this).parent('div').data('target');
+        $(`[name=${dataTarget}]`).prop('disabled', function(i, v) { return !v; }).parent('div').toggleClass('js-hidden');
       };
     });
   }
 };
-
-

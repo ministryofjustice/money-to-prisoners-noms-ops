@@ -2,7 +2,6 @@ import logging
 from functools import lru_cache
 
 from django import forms
-from django.forms.widgets import TextInput
 from django.contrib import messages
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -127,26 +126,6 @@ class CreditsHistoryListForm(SecurityForm):
         return object_list
 
 
-class ToggleableTextInput(TextInput):
-    """
-    Omits element value from being returned when clean called on associated field if disabled
-
-    This serves two purposes. The main one is allow the textinput fields to be toggled without re-rendering the page
-    as this causes the problem of having to move the window back to its previous location.
-
-    The other (more minor) useability improvement is that it removes the unintuitive behaviour of the text disappearing
-    if the user selects the checkbox that toggles this text field, deselects it and then reselects it again.
-
-    We use the ignore-input class on the field (toggled via javascript) to determine if we should include the value of
-    the associated html element in the cleaned_data associated with the field
-    """
-    def value_from_datadict(self, data, files, name):
-        response = super().value_from_datadict(data, files, name)
-        if 'ignore-input' in self.attrs.get('class', '').split(' '):
-            return ''
-        return response
-
-
 class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     CheckForm for accepting or rejecting a check.
@@ -163,17 +142,14 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     )
     fiu_investigation_id = forms.CharField(
         required=False,
-        widget=ToggleableTextInput,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['fiu_investigation_id'],
     )
     intelligence_report_id = forms.CharField(
         required=False,
-        widget=ToggleableTextInput,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['intelligence_report_id'],
     )
     other_reason = forms.CharField(
         required=False,
-        widget=ToggleableTextInput,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['other_reason'],
     )
     payment_source_paying_multiple_prisoners = forms.BooleanField(
@@ -200,7 +176,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_paying_multiple_prisoners'],
     )
-
+    human_readable_names = CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
         'reject_with_accept_details': _('You cannot reject with the Add Further Details box under accept populated'),
@@ -213,20 +189,6 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         self.object_id = object_id
         self.need_attention_date = get_need_attention_date()
         self.request = request
-        self.mandatory_rejection_text_fields = (
-            'fiu_investigation_id',
-            'intelligence_report_id',
-            'other_reason',
-        )
-        self.rejection_checkbox_fields = (
-            'payment_source_paying_multiple_prisoners',
-            'payment_source_multiple_cards',
-            'payment_source_linked_other_prisoners',
-            'payment_source_known_email',
-            'payment_source_unidentified',
-            'prisoner_multiple_payments_payment_sources',
-        )
-        self.rejection_reason_fields = self.rejection_checkbox_fields + self.mandatory_rejection_text_fields
 
     @lru_cache()
     def get_object(self):
@@ -252,7 +214,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def is_reject_reason_populated(self):
         return any([
             self.cleaned_data.get(rejection_field)
-            for rejection_field in self.rejection_reason_fields
+            for rejection_field in self.human_readable_names.keys()
         ])
 
     def clean(self):
@@ -260,6 +222,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         Makes sure that the check is in the correct state and validate field combination.
         """
         status = self.cleaned_data['fiu_action']
+        further_details = ''
 
         if not self.errors:  # if already in error => skip
             if self.get_object()['status'] != 'pending':
@@ -278,8 +241,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                     'accept_further_details',
                     self.error_messages['reject_with_accept_details']
                 )
-            self.cleaned_data['further_details'] = self.cleaned_data.pop('reject_further_details')
-            del self.cleaned_data['accept_further_details']
+            further_details = self.cleaned_data['reject_further_details']
 
         elif status == 'accept':
             if self.is_reject_reason_populated():
@@ -292,9 +254,19 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                     'reject_further_details',
                     self.error_messages['accept_with_reject_details'],
                 )
-            self.cleaned_data['further_details'] = self.cleaned_data.pop('accept_further_details')
-            del self.cleaned_data['reject_further_details']
+            further_details = self.cleaned_data['accept_further_details']
 
+        if not self.errors:
+            # We don't want to propagate false-y (i.e. False, or empty string) values to API so we filter on
+            # truthiness of form values
+            self.data_payload = {
+                'decision_reason': further_details,
+                'rejection_reasons': dict(
+                    item
+                    for item in self.cleaned_data.items()
+                    if item[1] and item[0] in self.human_readable_names.keys()
+                )
+            }
         return super().clean()
 
     def get_resolve_endpoint_path(self, fiu_action='accept'):
@@ -311,11 +283,15 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         try:
             self.session.post(
                 endpoint,
-                json=self.cleaned_data
+                json=self.data_payload
             )
             return True
-        except RequestException:
-            logger.exception(f'Check {self.object_id} could not be actioned')
+        except RequestException as e:
+            try:
+                error_payload = e.response.json()
+            except Exception:
+                error_payload = {}
+            logger.exception('Check %s could not be actioned. Error payload: %s', self.object_id, error_payload)
             self.add_error(None, _('There was an error with your request.'))
             return False
 
