@@ -222,10 +222,12 @@
               <input class="form-control" name="other_reason" type="text" id="rejection-other_reason" disabled>
             </div>
           </fieldset>
-          {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='form-control-3-4' %}
-          <button type="submit" class="button button-warning " name="fiu_action" value="reject">
-            {% trans 'Reject credit' %}
-          </button>
+          <div class="mtp-check-details-spacing">
+            {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='form-control-3-4' %}
+            <button type="submit" class="button button-warning " name="fiu_action" value="reject">
+              {% trans 'Reject credit' %}
+            </button>
+          </div>
         </div>
 
       {% else %}
