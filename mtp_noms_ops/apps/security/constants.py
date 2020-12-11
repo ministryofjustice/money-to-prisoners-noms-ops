@@ -3,8 +3,8 @@ from django.utils.translation import gettext_lazy as _
 
 CHECK_REJECTION_CATEGORY_TEXT_MAPPING = {
     'fiu_investigation_id': _('Associated FIU investigation'),
-    'intelligence_report_id': _('Associated Intelligence Report (IR)'),
-    'other_reason': _('Other Reason'),
+    'intelligence_report_id': _('Associated intelligence report (IR)'),
+    'other_reason': _('Other reason'),
 }
 CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING = {
     'payment_source_paying_multiple_prisoners': _('Payment source is paying multiple prisoners'),
@@ -20,7 +20,7 @@ CHECK_DETAIL_RENDERED_MAPPING = dict(
 )
 
 CHECK_DETAIL_FORM_MAPPING = {
-    'decision_reason': _('Give Further details (Optional)'),
+    'decision_reason': _('Give further details (optional)'),
     'rejection_reasons': dict(
         tuple(CHECK_REJECTION_CATEGORY_TEXT_MAPPING.items()) + tuple(CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items())
     )

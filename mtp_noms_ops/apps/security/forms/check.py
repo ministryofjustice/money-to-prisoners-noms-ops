@@ -174,7 +174,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     )
     prisoner_multiple_payments_payment_sources = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_paying_multiple_prisoners'],
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['prisoner_multiple_payments_payment_sources'],
     )
     human_readable_names = CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
     error_messages = {

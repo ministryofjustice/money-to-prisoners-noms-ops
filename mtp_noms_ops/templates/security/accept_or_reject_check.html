@@ -181,7 +181,8 @@
       {% if check.status == 'pending' %}
 
         <div class="form-group">
-          <h2 class="heading-medium">{% trans 'Your decision' %}</h2>
+          <h2 class="heading-medium">{% trans 'Accept or reject this credit' %}</h2>
+          <h3 class="heading-medium">{% trans 'To accept this credit:' %}</h2>
           <div>
             {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='form-control-3-4' %}
             <button type="submit" class="button" name="fiu_action" value="accept">
@@ -189,7 +190,9 @@
             </button>
           </div>
 
+          <h3 class="heading-medium">{% trans 'To reject this credit:' %}</h2>
           <fieldset class="mtp-check-form-spacing">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend">{% trans 'Select all reasons for rejecting this credit:' %}</legend>
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_paying_multiple_prisoners input_classes='form-control-3-4' %}
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_multiple_cards input_classes='form-control-3-4'  %}
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_linked_other_prisoners input_classes='form-control-3-4'  %}
@@ -201,7 +204,7 @@
               <label for="example-fiu_investigation_id">{{ form.human_readable_names.fiu_investigation_id }}</label>
             </div>
             <div class="panel panel-border-narrow js-hidden" id="fiu_investigation_id">
-              <label class="form-label" for="rejection-fiu_investigation_id">{{ form.human_readable_names.fiu_investigation_id }}</label>
+              <label class="form-label" for="rejection-fiu_investigation_id">{% trans 'Give reference' %}</label>
               <input class="form-control" name="fiu_investigation_id" type="text" id="rejection-fiu_investigation_id" disabled>
             </div>
 
@@ -210,7 +213,7 @@
               <label for="example-intelligence_report_id">{{ form.human_readable_names.intelligence_report_id }}</label>
             </div>
             <div class="panel panel-border-narrow js-hidden" id="intelligence_report_id">
-              <label class="form-label" for="rejection-intelligence_report_id">{{ form.human_readable_names.intelligence_report_id }}</label>
+              <label class="form-label" for="rejection-intelligence_report_id">{% trans 'Give reference' %}</label>
               <input class="form-control" name="intelligence_report_id" type="text" id="rejection-intelligence_report_id" disabled>
             </div>
             <div class="multiple-choice form-group" data-target="other_reason">
@@ -218,7 +221,7 @@
               <label for="example-other_reason">{{ form.human_readable_names.other_reason }}</label>
             </div>
             <div class="panel panel-border-narrow js-hidden" id="other_reason">
-              <label class="form-label" for="rejection-other_reason">{{ form.human_readable_names.other_reason }}</label>
+              <label class="form-label" for="rejection-other_reason">{% trans 'Give the reason' %}</label>
               <input class="form-control" name="other_reason" type="text" id="rejection-other_reason" disabled>
             </div>
           </fieldset>

@@ -17,6 +17,11 @@ exports.ToggleTextFieldOnChange = {
           function (_, v) {
             return !v;
           }
+        ).prop(
+          'required',
+          function (_, v) {
+            return !v;
+          }
         ).parent('div').toggleClass('js-hidden');
       });
     });
