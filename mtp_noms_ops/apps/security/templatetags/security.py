@@ -343,4 +343,4 @@ def extract_best_match(context, items):
 
 @register.filter
 def get_human_readable_check_field(field):
-    return CHECK_DETAIL_RENDERED_MAPPING[field]
+    return CHECK_DETAIL_RENDERED_MAPPING.get(field, field)
