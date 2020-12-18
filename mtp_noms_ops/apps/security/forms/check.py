@@ -261,12 +261,14 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
             # truthiness of form values
             self.data_payload = {
                 'decision_reason': further_details,
-                'rejection_reasons': dict(
+            }
+
+            if status == 'reject':
+                self.data_payload['rejection_reasons'] = dict(
                     item
                     for item in self.cleaned_data.items()
                     if item[1] and item[0] in self.human_readable_names.keys()
                 )
-            }
         return super().clean()
 
     def get_resolve_endpoint_path(self, fiu_action='accept'):
