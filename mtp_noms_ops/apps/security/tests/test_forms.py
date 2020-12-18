@@ -2682,7 +2682,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                 object_id=check_id,
                 request=self.request,
                 data={
-                    'decision_reason': 'reason',
+                    'payment_source_paying_multiple_prisoners': True,
                     'fiu_action': 'reject',
                 },
             )
@@ -2693,7 +2693,12 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             last_request_body = json.loads(rsps.calls[-1].request.body)
             self.assertDictEqual(
                 last_request_body,
-                {'decision_reason': 'reason'},
+                {
+                    'decision_reason': '',
+                    'rejection_reasons': {
+                        'payment_source_paying_multiple_prisoners': True,
+                    }
+                }
             )
 
     def test_form_invalid_if_check_not_in_pending(self):
@@ -2731,25 +2736,38 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                 {'__all__': ['You cannot action this credit as it’s not in pending']},
             )
 
-    def test_form_invalid_with_empty_decision_reason(self):
+    def test_form_invalid_with_no_rejection_reason(self):
         """
         Test that if the rejection reason is not given, the form returns a validation error.
         """
         check_id = 1
-        form = AcceptOrRejectCheckForm(
-            object_id=check_id,
-            request=self.request,
-            data={
-                'decision_reason': '',
-                'fiu_action': 'reject',
+        check_data = {
+            'id': check_id,
+            'description': ['Compliance check failed'],
+            'status': 'pending',
+            'credit': {
+                'started_at': '2020-01-19T03:45:13.529053Z',
             },
-        )
+        }
+        with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_data,
+            )
+            form = AcceptOrRejectCheckForm(
+                object_id=check_id,
+                request=self.request,
+                data={
+                    'fiu_action': 'reject',
+                },
+            )
 
-        self.assertFalse(form.is_valid())
-        self.assertEqual(
-            form.errors,
-            {'decision_reason': ['This field is required']},
-        )
+            self.assertFalse(form.is_valid())
+            self.assertEqual(
+                form.errors,
+                {'__all__': ['You must provide a reason for rejecting a credit']}
+            )
 
     def test_reject_with_api_error(self):
         """
@@ -2782,7 +2800,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
                 object_id=check_id,
                 request=self.request,
                 data={
-                    'decision_reason': 'reason',
+                    'payment_source_paying_multiple_prisoners': True,
                     'fiu_action': 'reject',
                 },
             )

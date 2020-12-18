@@ -21,6 +21,7 @@ from mtp_common.auth import USER_DATA_SESSION_KEY, urljoin
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 from openpyxl import load_workbook
+from parameterized import parameterized
 import responses
 
 from security import (
@@ -30,6 +31,7 @@ from security import (
     required_permissions,
     provided_job_info_flag,
 )
+from security.constants import CHECK_REJECTION_CATEGORY_TEXT_MAPPING, CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
 from security.tests import api_url, TEST_IMAGE_DATA
@@ -105,6 +107,20 @@ def offset_isodatetime_by_ten_seconds(isodatetime, offset_multiplier=1):
         parse_datetime(isodatetime)
         + datetime.timedelta(seconds=offset_multiplier * 10)
     ).isoformat()
+
+
+def generate_rejection_category_test_cases_text():
+    return [
+        (text_category, f'i_am_a_{text_category}_value')
+        for text_category in CHECK_REJECTION_CATEGORY_TEXT_MAPPING.keys()
+    ]
+
+
+def generate_rejection_category_test_cases_bool():
+    return [
+        (text_category, True)
+        for text_category in CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.keys()
+    ]
 
 
 @override_settings(
@@ -2614,6 +2630,12 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
     """
     Tests related to the check views.
     """
+    sender_id = 2
+    prisoner_id = 3
+    credit_id = 5
+
+    credit_created_date = datetime.datetime.now()
+
     SAMPLE_CHECK_BASE = {
         'id': 1,
         'description': 'lorem ipsum',
@@ -2642,6 +2664,54 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
 
     SAMPLE_CHECK = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
 
+    SENDER_CREDIT = dict(
+        SAMPLE_CREDIT_BASE,
+        **{
+            'security_check': SAMPLE_CHECK_BASE.copy(),
+            'intended_recipient': 'Mr G Melley',
+            'prisoner_name': 'Ms A. Nother Prisoner',
+            'prisoner_number': 'Number 6',
+            'amount': 1000000,
+            'prison': 'LEI',
+            'prison_name': 'HMP LEEDS',
+            'billing_address': {'line1': '102PF', 'city': 'London'},
+            'resolution': 'rejected',
+            'started_at': credit_created_date.isoformat()
+        }
+    )
+    SENDER_CREDIT['security_check']['description'] = ['Strict compliance check failed']
+    SENDER_CREDIT['security_check']['actioned_by_name'] = 'Javert'
+    SENDER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
+    SENDER_CREDIT['security_check']['status'] = 'rejected'
+
+    SENDER_CHECK = copy.deepcopy(SAMPLE_CHECK)
+    SENDER_CHECK['credit']['sender_profile'] = sender_id
+    SENDER_CHECK['credit']['prisoner_profile'] = prisoner_id
+    SENDER_CHECK['credit']['id'] = credit_id
+
+    SENDER_CHECK_REJECTED = dict(SENDER_CHECK, status='rejected')
+
+    PRISONER_CREDIT = dict(
+        SAMPLE_CREDIT_BASE,
+        **{
+            'security_check': SAMPLE_CHECK_BASE.copy(),
+            'amount': 10,
+            'card_expiry_date': '02/50',
+            'card_number_first_digits': '01199988199',
+            'card_number_last_digits': '7253',
+            'sender_email': 'someoneelse@example.com',
+            'sender_name': 'SOMEONE ELSE',
+            'prison': 'LEI',
+            'prison_name': 'HMP LEEDS',
+            'billing_address': {'line1': 'Somewhere else', 'city': 'London'},
+            'resolution': 'credited',
+        }
+    )
+    PRISONER_CREDIT['security_check']['description'] = ['Soft compliance check failed']
+    PRISONER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
+    PRISONER_CREDIT['security_check']['actioned_by_name'] = 'Staff'
+    PRISONER_CREDIT['security_check']['status'] = 'accepted'
+
     required_checks_permissions = (
         *required_permissions,
         'security.view_check',
@@ -2668,6 +2738,16 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
                 'results': [self.SAMPLE_CHECK] * count,
             }
         )
+
+    @classmethod
+    def _get_prisoner_credit_list(cls, length):
+        for i in range(length):
+            yield dict(cls.PRISONER_CREDIT, id=i)
+
+    @classmethod
+    def _get_sender_credit_list(cls, length):
+        for i in range(length):
+            yield dict(cls.SENDER_CREDIT, id=i)
 
 
 class CheckListViewTestCase(BaseCheckViewTestCase):
@@ -3023,74 +3103,133 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
 
             self.assertContains(response, 'No decision reason entered')
 
+    @parameterized.expand(
+        CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
+    )
+    def test_credit_history_row_has_reason_checkbox_populated(
+        self, rejection_reason_key, rejection_reason_full
+    ):
+        """
+        Test that the view displays checkboxes associated with a credit.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('started_at__gte', '2020-01-02T12:00:00'),
+                            ('actioned_by', True),
+                            ('offset', 0),
+                            ('limit', 20),
+                            ('ordering', '-created')
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.SENDER_CHECK_REJECTED,
+                            rejection_reasons={rejection_reason_key: True}
+                        )
+                    ]
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('status', 'pending'),
+                            ('credit_resolution', 'initial'),
+                            ('assigned_to', 5),
+                            ('offset', 0),
+                            ('limit', 1)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 2,
+                    'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY, self.SAMPLE_CHECK_WITH_ACTIONED_BY],
+                }
+            )
+
+            response = self.client.get(reverse('security:credits_history'))
+
+            self.assertContains(response, rejection_reason_full)
+
+    @parameterized.expand(
+        generate_rejection_category_test_cases_text()
+    )
+    def test_credit_history_row_has_string_reason_populated(
+        self, rejection_reason_key, rejection_reason_value
+    ):
+        """
+        Test that the view displays the reason for associated populated checkboxes with a credit.
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('started_at__gte', '2020-01-02T12:00:00'),
+                            ('actioned_by', True),
+                            ('offset', 0),
+                            ('limit', 20),
+                            ('ordering', '-created')
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.SENDER_CHECK_REJECTED,
+                            rejection_reasons={rejection_reason_key: rejection_reason_value}
+                        )
+                    ]
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('status', 'pending'),
+                            ('credit_resolution', 'initial'),
+                            ('assigned_to', 5),
+                            ('offset', 0),
+                            ('limit', 1)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 2,
+                    'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY, self.SAMPLE_CHECK_WITH_ACTIONED_BY],
+                }
+            )
+
+            response = self.client.get(reverse('security:credits_history'))
+
+            self.assertContains(response, rejection_reason_value)
+
 
 class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
     """
     Tests related to AcceptOrRejectCheckView.
     """
-    sender_id = 2
-    prisoner_id = 3
-    credit_id = 5
-
-    credit_created_date = datetime.datetime.now()
-
-    SENDER_CREDIT = dict(
-        BaseCheckViewTestCase.SAMPLE_CREDIT_BASE,
-        **{
-            'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
-            'intended_recipient': 'Mr G Melley',
-            'prisoner_name': 'Ms A. Nother Prisoner',
-            'prisoner_number': 'Number 6',
-            'amount': 1000000,
-            'prison': 'LEI',
-            'prison_name': 'HMP LEEDS',
-            'billing_address': {'line1': '102PF', 'city': 'London'},
-            'resolution': 'rejected',
-            'started_at': credit_created_date.isoformat()
-        }
-    )
-    SENDER_CREDIT['security_check']['description'] = ['Strict compliance check failed']
-    SENDER_CREDIT['security_check']['actioned_by_name'] = 'Javert'
-    SENDER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
-    SENDER_CREDIT['security_check']['status'] = 'rejected'
-
-    SENDER_CHECK = copy.deepcopy(BaseCheckViewTestCase.SAMPLE_CHECK)
-    SENDER_CHECK['credit']['sender_profile'] = sender_id
-    SENDER_CHECK['credit']['prisoner_profile'] = prisoner_id
-    SENDER_CHECK['credit']['id'] = credit_id
-
-    SENDER_CHECK_REJECTED = dict(SENDER_CHECK, status='rejected')
-
-    PRISONER_CREDIT = dict(
-        BaseCheckViewTestCase.SAMPLE_CREDIT_BASE,
-        **{
-            'security_check': BaseCheckViewTestCase.SAMPLE_CHECK_BASE.copy(),
-            'amount': 10,
-            'card_expiry_date': '02/50',
-            'card_number_first_digits': '01199988199',
-            'card_number_last_digits': '7253',
-            'sender_email': 'someoneelse@example.com',
-            'sender_name': 'SOMEONE ELSE',
-            'prison': 'LEI',
-            'prison_name': 'HMP LEEDS',
-            'billing_address': {'line1': 'Somewhere else', 'city': 'London'},
-            'resolution': 'credited',
-        }
-    )
-    PRISONER_CREDIT['security_check']['description'] = ['Soft compliance check failed']
-    PRISONER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
-    PRISONER_CREDIT['security_check']['actioned_by_name'] = 'Staff'
-    PRISONER_CREDIT['security_check']['status'] = 'accepted'
-
-    @classmethod
-    def _get_prisoner_credit_list(cls, length):
-        for i in range(length):
-            yield dict(cls.PRISONER_CREDIT, id=i)
-
-    @classmethod
-    def _get_sender_credit_list(cls, length):
-        for i in range(length):
-            yield dict(cls.SENDER_CREDIT, id=i)
 
     def test_cannot_access_view(self):
         """
@@ -3309,12 +3448,348 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
 
         # TODO add in assertion for ordering
 
+    @parameterized.expand(
+        CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
+    )
+    def test_credit_history_row_has_reason_checkbox_populated_for_prisoner_check(
+        self, rejection_reason_key, rejection_reason_full
+    ):
+        """
+        Test that the view displays checkboxes associated with a credit.
+        """
+        check_id = 1
+        response_len = 4
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len)),
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.PRISONER_CREDIT,
+                            security_check=dict(
+                                self.PRISONER_CREDIT['security_check'],
+                                rejection_reasons={rejection_reason_key: True}
+                            )
+                        )
+                    ],
+                }
+            )
+
+            response = self.client.get(
+                reverse(
+                    'security:resolve_check',
+                    kwargs={'check_id': check_id},
+                ),
+            )
+
+            self.assertContains(response, rejection_reason_full)
+
+    @parameterized.expand(
+        CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
+    )
+    def test_credit_history_row_has_reason_checkbox_populated_for_sender_check(
+        self, rejection_reason_key, rejection_reason_full
+    ):
+        """
+        Test that the view displays checkboxes associated with a credit.
+        """
+        check_id = 1
+        response_len = 2
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            sender_credit_response = dict(
+                self.SENDER_CREDIT,
+                id=self.credit_id + 1,
+                security_check=dict(
+                    self.SENDER_CREDIT['security_check'],
+                    rejection_reasons={rejection_reason_key: True}
+                )
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 1,
+                    'results': [
+                        sender_credit_response
+                    ]
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', f'{self.credit_id},{sender_credit_response["id"]}'),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_prisoner_credit_list(response_len)),
+                }
+            )
+
+            response = self.client.get(
+                reverse(
+                    'security:resolve_check',
+                    kwargs={'check_id': check_id},
+                ),
+            )
+
+            self.assertContains(response, rejection_reason_full)
+
+    @parameterized.expand(
+        generate_rejection_category_test_cases_text()
+    )
+    def test_credit_history_row_has_string_reason_populated_for_prisoner_check(
+        self, rejection_reason_key, rejection_reason_value
+    ):
+        """
+        Test that the view displays the reason for associated populated checkboxes with a credit.
+        """
+        check_id = 1
+        response_len = 2
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len)),
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.PRISONER_CREDIT,
+                            security_check=dict(
+                                self.PRISONER_CREDIT['security_check'],
+                                rejection_reasons={rejection_reason_key: rejection_reason_value}
+                            )
+                        )
+                    ]
+                }
+            )
+
+            response = self.client.get(
+                reverse(
+                    'security:resolve_check',
+                    kwargs={'check_id': check_id},
+                ),
+            )
+
+            self.assertContains(response, rejection_reason_value)
+
+    @parameterized.expand(
+        generate_rejection_category_test_cases_text()
+    )
+    def test_credit_history_row_has_string_reason_populated_for_sender_check(
+        self, rejection_reason_key, rejection_reason_value
+    ):
+        """
+        Test that the view displays the reason for associated populated checkboxes with a credit.
+        """
+        check_id = 1
+        response_len = 2
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            sender_credit_response = dict(
+                self.SENDER_CREDIT,
+                id=self.credit_id + 1,
+                security_check=dict(
+                    self.SENDER_CREDIT['security_check'],
+                    rejection_reasons={rejection_reason_key: rejection_reason_value}
+                )
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 1,
+                    'results': [
+                        sender_credit_response,
+                    ]
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', f'{self.credit_id},{sender_credit_response["id"]}'),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len)),
+                }
+            )
+
+            response = self.client.get(
+                reverse(
+                    'security:resolve_check',
+                    kwargs={'check_id': check_id},
+                ),
+            )
+
+            self.assertContains(response, rejection_reason_value)
+
     def test_accept_check(self):
         """
-        Test that if one tries to accept an already rejected check, a validation error is displayed.
+        Test that if one tries to accept pending check, check marked as accepted
 
         """
         check_id = 1
+        payload_values = {
+            'decision_reason': '',
+            'rejection_reasons': {},
+        }
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -3325,6 +3800,11 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             rsps.add(
                 rsps.POST,
                 api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    responses.json_params_matcher(
+                        payload_values
+                    )
+                ],
                 status=204,
             )
             self.mock_need_attention_count(rsps, 0)
@@ -3341,12 +3821,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertRedirects(response, reverse('security:check_list'))
             self.assertContains(response, 'Credit accepted')
 
-    def test_reject_check(self):
+    @parameterized.expand(
+        generate_rejection_category_test_cases_text() + generate_rejection_category_test_cases_bool()
+    )
+    def test_reject_check(self, rejection_field_key, rejection_field_value):
         """
         Test that if a pending check is rejected, the view redirects to the list of checks
         and a successful message is displayed.
         """
         check_id = 1
+        payload_values = {
+            'decision_reason': 'iamfurtherdetails',
+            'rejection_reasons': {rejection_field_key: rejection_field_value}
+        }
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -3357,6 +3844,11 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             rsps.add(
                 rsps.POST,
                 api_url(f'/security/checks/{check_id}/reject/'),
+                match=[
+                    responses.json_params_matcher(
+                        payload_values
+                    )
+                ],
                 status=204,
             )
             self.mock_need_attention_count(rsps, 0)
@@ -3365,7 +3857,8 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             response = self.client.post(
                 url,
                 data={
-                    'decision_reason': 'Some reason',
+                    'reject_further_details': 'iamfurtherdetails',
+                    rejection_field_key: rejection_field_value,
                     'fiu_action': 'reject',
                 },
                 follow=True,
@@ -3438,7 +3931,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             response = self.client.post(
                 url,
                 data={
-                    'decision_reason': 'Some reason',
+                    'payment_source_paying_multiple_prisoners': True,
                     'fiu_action': 'reject',
                 },
                 follow=True,
@@ -3446,18 +3939,18 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
 
             self.assertContains(response, 'You cannot action this credit')
 
-    def test_invalid_with_empty_decision_reason(self):
+    def test_invalid_with_no_rejection_reason(self):
         """
         Test that if the rejection reason is not given, a validation error is displayed.
         """
         check_id = 1
-        response_len = 4
+        response_len = 2
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
-                json=self.SENDER_CHECK_REJECTED
+                json=self.SENDER_CHECK
             )
             rsps.add(
                 rsps.GET,
@@ -3515,7 +4008,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 follow=True,
             )
 
-            self.assertContains(response, 'This field is required')
+            self.assertContains(response, 'You must provide a reason for rejecting a credit')
 
     def test_credit_history_ordering(self):
         """

@@ -190,3 +190,15 @@ table.mtp-table--review {
 .mtp-check-cell__list-form {
   display: inline-block;
 }
+
+.mtp-check-form-spacing > div.form-group {
+  // There's an issue here with the margins stacking
+  // for some elements but not others
+  margin-top: 1em !important;
+  margin-bottom: 0em !important;
+  position: relative;
+}
+
+.mtp-check-details-spacing {
+  margin-top: 1em;
+}

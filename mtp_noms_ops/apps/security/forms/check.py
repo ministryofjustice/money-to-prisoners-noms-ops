@@ -9,6 +9,7 @@ from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
 from requests.exceptions import RequestException
 
+from security.constants import CHECK_DETAIL_FORM_MAPPING
 from security.forms.object_base import SecurityForm
 from security.utils import convert_date_fields, get_need_attention_date
 
@@ -129,11 +130,59 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     CheckForm for accepting or rejecting a check.
     """
-    decision_reason = forms.CharField(
-        label=_('Give details (details are optional when accepting)'),
-        required=False,
-    )
+
     fiu_action = forms.CharField(max_length=10)
+    accept_further_details = forms.CharField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
+    )
+    reject_further_details = forms.CharField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
+    )
+    fiu_investigation_id = forms.CharField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['fiu_investigation_id'],
+    )
+    intelligence_report_id = forms.CharField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['intelligence_report_id'],
+    )
+    other_reason = forms.CharField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['other_reason'],
+    )
+    payment_source_paying_multiple_prisoners = forms.BooleanField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_paying_multiple_prisoners'],
+    )
+    payment_source_multiple_cards = forms.BooleanField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_multiple_cards'],
+    )
+    payment_source_linked_other_prisoners = forms.BooleanField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_linked_other_prisoners'],
+    )
+    payment_source_known_email = forms.BooleanField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_known_email'],
+    )
+    payment_source_unidentified = forms.BooleanField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_unidentified'],
+    )
+    prisoner_multiple_payments_payment_sources = forms.BooleanField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['prisoner_multiple_payments_payment_sources'],
+    )
+    human_readable_names = CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
+    error_messages = {
+        'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
+        'reject_with_accept_details': _('You cannot reject with the Add Further Details box under accept populated'),
+        'accept_with_reject_details': _('You cannot accept with the Add Further Details box under reject populated'),
+        'accept_with_reject_reason': _('You must untick all rejection fields before accepting a credit'),
+    }
 
     def __init__(self, object_id, request, **kwargs):
         super().__init__(**kwargs)
@@ -162,25 +211,62 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def session(self):
         return get_api_session(self.request)
 
+    def is_reject_reason_populated(self):
+        return any([
+            self.cleaned_data.get(rejection_field)
+            for rejection_field in self.human_readable_names.keys()
+        ])
+
     def clean(self):
         """
-        Makes sure that the check is in pending.
+        Makes sure that the check is in the correct state and validate field combination.
         """
         status = self.cleaned_data['fiu_action']
-        if 'decision_reason' in self.cleaned_data:
-            reason = self.cleaned_data['decision_reason']
-        else:
-            reason = ''
-
-        if not reason and status == 'reject':
-            msg = forms.ValidationError('This field is required')
-            self.add_error('decision_reason', msg)
+        further_details = ''
 
         if not self.errors:  # if already in error => skip
             if self.get_object()['status'] != 'pending':
                 raise forms.ValidationError(
                     _('You cannot action this credit as it’s not in pending'),
                 )
+
+        if status == 'reject':
+            if not self.is_reject_reason_populated():
+                self.add_error(
+                    None,
+                    self.error_messages['missing_reject_reason']
+                )
+            if self.cleaned_data.get('accept_further_details'):
+                self.add_error(
+                    'accept_further_details',
+                    self.error_messages['reject_with_accept_details']
+                )
+            further_details = self.cleaned_data['reject_further_details']
+
+        elif status == 'accept':
+            if self.is_reject_reason_populated():
+                self.add_error(
+                    None,
+                    self.error_messages['accept_with_reject_reason'],
+                )
+            if self.cleaned_data.get('reject_further_details'):
+                self.add_error(
+                    'reject_further_details',
+                    self.error_messages['accept_with_reject_details'],
+                )
+            further_details = self.cleaned_data['accept_further_details']
+
+        if not self.errors:
+            # We don't want to propagate false-y (i.e. False, or empty string) values to API so we filter on
+            # truthiness of form values
+            self.data_payload = {
+                'decision_reason': further_details,
+                'rejection_reasons': dict(
+                    item
+                    for item in self.cleaned_data.items()
+                    if item[1] and item[0] in self.human_readable_names.keys()
+                )
+            }
         return super().clean()
 
     def get_resolve_endpoint_path(self, fiu_action='accept'):
@@ -192,18 +278,20 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         :return: True if the API call was successful.
             If not, it returns False and populating the self.errors dict.
         """
-        endpoint = self.get_resolve_endpoint_path(fiu_action=self.cleaned_data['fiu_action'])
+        endpoint = self.get_resolve_endpoint_path(fiu_action=self.cleaned_data.pop('fiu_action'))
 
         try:
             self.session.post(
                 endpoint,
-                json={
-                    'decision_reason': self.cleaned_data['decision_reason'],
-                }
+                json=self.data_payload
             )
             return True
-        except RequestException:
-            logger.exception(f'Check {self.object_id} could not be actioned')
+        except RequestException as e:
+            try:
+                error_payload = e.response.json()
+            except Exception:
+                error_payload = {}
+            logger.exception('Check %s could not be actioned. Error payload: %s', self.object_id, error_payload)
             self.add_error(None, _('There was an error with your request.'))
             return False
 

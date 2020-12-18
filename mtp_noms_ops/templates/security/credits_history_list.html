@@ -88,9 +88,13 @@
             <br/>
             <br/>
             <strong>{% trans 'Decision details' %}:</strong>
+            {% for reason, value in check.rejection_reasons.items %}
+              {{ reason | get_human_readable_check_field }}{% if value != True %}: {{ value }}{% endif %}
+              <br/>
+            {% endfor %}
             {% if check.decision_reason %}
-              {{ check.decision_reason }}
-            {% else %}
+              Further Details: {{ check.decision_reason }}
+            {% elif not check.rejection_reasons %}
               {% trans 'No decision reason entered' %}
             {% endif %}
           </td>
