@@ -3788,7 +3788,6 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         check_id = 1
         payload_values = {
             'decision_reason': '',
-            'rejection_reasons': {},
         }
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
