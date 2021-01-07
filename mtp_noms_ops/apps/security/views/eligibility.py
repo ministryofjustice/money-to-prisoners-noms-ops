@@ -39,7 +39,7 @@ class HMPPSEmployeeView(FormView):
         if confirmation == 'yes':
             save_user_flags(self.request, hmpps_employee_flag, api_session)
             success_url = form.cleaned_data['next']
-            if success_url and is_safe_url(success_url, host=self.request.get_host()):
+            if success_url and is_safe_url(success_url, allowed_hosts=self.request.get_host()):
                 self.success_url = success_url
             return super().form_valid(form)
         else:

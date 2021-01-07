@@ -33,6 +33,7 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
     def test_redirects_when_no_flag(self):
         mock_prison_response()
         self.login(
+            responses,
             user_data=self.get_user_data(
                 flags=[
                     hmpps_employee_flag,
@@ -45,26 +46,35 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_does_not_redirect_after_confirmation(self):
-        self.login(user_data=self.get_user_data(
-            flags=[hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                flags=[hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag]
+            )
         )
         response = self.client.get(reverse('security:dashboard'), follow=True)
         self.assertContains(response, '<!-- security:dashboard -->')
 
     @responses.activate
     def test_does_not_redirect_for_other_roles(self):
-        self.login(user_data=self.get_user_data(
-            flags=[hmpps_employee_flag, provided_job_info_flag],
-            roles=['security', 'prison-clerk'])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                flags=[hmpps_employee_flag, provided_job_info_flag],
+                roles=['security', 'prison-clerk']
+            )
         )
         response = self.client.get(reverse('security:dashboard'), follow=True)
         self.assertContains(response, '<!-- security:dashboard -->')
 
     @responses.activate
     def test_does_not_redirect_for_user_admin(self):
-        self.login(user_data=self.get_user_data(
-            flags=[hmpps_employee_flag, provided_job_info_flag],
-            permissions=required_permissions + ['auth.change_user'])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                flags=[hmpps_employee_flag, provided_job_info_flag],
+                permissions=required_permissions + ['auth.change_user']
+            )
         )
         response = self.client.get(reverse('security:dashboard'), follow=True)
         self.assertContains(response, '<!-- security:dashboard -->')
@@ -74,15 +84,18 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
         current_prison = SAMPLE_PRISONS[0]
         new_prison = SAMPLE_PRISONS[1]
         mock_prison_response()
-        self.login(user_data=self.get_user_data(
-            prisons=[current_prison], flags=[hmpps_employee_flag])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                prisons=[current_prison], flags=[hmpps_employee_flag]
+            )
         )
         responses.add(
             responses.PATCH,
             api_url('/users/shall/'),
             json={}
         )
-        responses.add(
+        responses.replace(
             responses.GET,
             api_url('/users/shall/'),
             json=self.get_user_data(prisons=[new_prison])
@@ -126,15 +139,18 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
     def test_prison_confirmation_all_prisons(self):
         current_prison = SAMPLE_PRISONS[0]
         mock_prison_response()
-        self.login(user_data=self.get_user_data(
-            prisons=[current_prison], flags=[hmpps_employee_flag])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                prisons=[current_prison], flags=[hmpps_employee_flag]
+            )
         )
         responses.add(
             responses.PATCH,
             api_url('/users/shall/'),
             json={}
         )
-        responses.add(
+        responses.replace(
             responses.GET,
             api_url('/users/shall/'),
             json=self.get_user_data(prisons=[])
@@ -189,7 +205,7 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
             api_url('/users/shall/'),
             json={},
         )
-        responses.add(
+        responses.replace(
             responses.GET,
             api_url('/users/shall/'),
             json=self.get_user_data(
@@ -211,11 +227,14 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         current_prison = SAMPLE_PRISONS[0]
         new_prison = SAMPLE_PRISONS[1]
         mock_prison_response()
-        self.login(user_data=self.get_user_data(
-            prisons=[current_prison], flags=[
-                hmpps_employee_flag,
-                confirmed_prisons_flag
-            ])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                prisons=[current_prison], flags=[
+                    hmpps_employee_flag,
+                    confirmed_prisons_flag
+                ]
+            )
         )
 
         responses.add(
@@ -244,11 +263,14 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         current_prison = SAMPLE_PRISONS[0]
         new_prison = SAMPLE_PRISONS[1]
         mock_prison_response()
-        self.login(user_data=self.get_user_data(
-            prisons=[current_prison], flags=[
-                hmpps_employee_flag,
-                confirmed_prisons_flag
-            ])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                prisons=[current_prison], flags=[
+                    hmpps_employee_flag,
+                    confirmed_prisons_flag
+                ]
+            )
         )
 
         response = self.client.post(reverse('change_prisons'), data={
@@ -267,11 +289,14 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         current_prison = SAMPLE_PRISONS[0]
         new_prison = SAMPLE_PRISONS[1]
         mock_prison_response()
-        self.login(user_data=self.get_user_data(
-            prisons=[current_prison], flags=[
-                hmpps_employee_flag,
-                confirmed_prisons_flag
-            ])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                prisons=[current_prison], flags=[
+                    hmpps_employee_flag,
+                    confirmed_prisons_flag
+                ]
+            )
         )
 
         response = self.client.post(reverse('change_prisons'), data={
@@ -291,11 +316,14 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         current_prison = SAMPLE_PRISONS[0]
         new_prison = SAMPLE_PRISONS[1]
         mock_prison_response()
-        self.login(user_data=self.get_user_data(
-            prisons=[current_prison], flags=[
-                hmpps_employee_flag,
-                confirmed_prisons_flag
-            ])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                prisons=[current_prison], flags=[
+                    hmpps_employee_flag,
+                    confirmed_prisons_flag
+                ]
+            )
         )
 
         response = self.client.post(reverse('change_prisons'), data={
@@ -314,11 +342,14 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
         """
         current_prison = SAMPLE_PRISONS[0]
         mock_prison_response()
-        self.login(user_data=self.get_user_data(
-            prisons=[current_prison], flags=[
-                hmpps_employee_flag,
-                confirmed_prisons_flag
-            ])
+        self.login(
+            responses,
+            user_data=self.get_user_data(
+                prisons=[current_prison], flags=[
+                    hmpps_employee_flag,
+                    confirmed_prisons_flag
+                ]
+            )
         )
 
         response = self.client.post(reverse('change_prisons'), data={
@@ -338,6 +369,7 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
 
         mock_prison_response()
         self.login(
+            responses,
             user_data=self.get_user_data(
                 prisons=[current_prison],
             ),
@@ -366,6 +398,7 @@ class ChangePrisonTestCase(SecurityBaseTestCase):
 
         mock_prison_response()
         self.login(
+            responses,
             user_data=self.get_user_data(
                 prisons=[current_prison],
             ),
