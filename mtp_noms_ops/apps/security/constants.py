@@ -21,6 +21,7 @@ CHECK_DETAIL_RENDERED_MAPPING = dict(
 
 CHECK_DETAIL_FORM_MAPPING = {
     'decision_reason': _('Give further details (optional)'),
+    'auto_accept_reason': _('Give reason for automatically accepting'),
     'rejection_reasons': dict(
         tuple(CHECK_REJECTION_CATEGORY_TEXT_MAPPING.items()) + tuple(CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items())
     )

@@ -136,6 +136,10 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
     )
+    auto_accept_reason = forms.CharField(
+        required=False,
+        label=CHECK_DETAIL_FORM_MAPPING['auto_accept_reason'],
+    )
     reject_further_details = forms.CharField(
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
@@ -180,6 +184,9 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
         'reject_with_accept_details': _('You cannot reject with the Add Further Details box under accept populated'),
+        'reject_with_auto_accept': _(
+            'You cannot reject with the Automatically Accept Future Credits box under accept populated'
+        ),
         'accept_with_reject_details': _('You cannot accept with the Add Further Details box under reject populated'),
         'accept_with_reject_reason': _('You must untick all rejection fields before accepting a credit'),
     }
@@ -241,6 +248,11 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                     'accept_further_details',
                     self.error_messages['reject_with_accept_details']
                 )
+            if self.cleaned_data.get('auto_accept_reason'):
+                self.add_error(
+                    'auto_accept_reason',
+                    self.error_messages['reject_with_auto_accept']
+                )
             further_details = self.cleaned_data['reject_further_details']
 
         elif status == 'accept':
@@ -274,28 +286,51 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def get_resolve_endpoint_path(self, fiu_action='accept'):
         return f'/security/checks/{self.object_id}/{fiu_action}/'
 
+    def _handle_request_exception(self, e: RequestException, entity: str) -> bool:
+        try:
+            error_payload = e.response.json()
+        except Exception:
+            error_payload = {}
+        logger.exception('%s %s could not be actioned. Error payload: %s', entity, self.object_id, error_payload)
+        self.add_error(None, _('There was an error with your request.'))
+        return False
+
     def accept_or_reject(self):
         """
         Accepts or rejects the check via the API.
         :return: True if the API call was successful.
             If not, it returns False and populating the self.errors dict.
         """
-        endpoint = self.get_resolve_endpoint_path(fiu_action=self.cleaned_data.pop('fiu_action'))
+        fiu_action = self.cleaned_data.pop('fiu_action')
+        endpoint = self.get_resolve_endpoint_path(fiu_action=fiu_action)
 
+        # TODO figure out what we should do in the case that we are unable to persist the auto-accept rule.
+        # Should we revert the state of the check via an update?
         try:
             self.session.post(
                 endpoint,
                 json=self.data_payload
             )
-            return True
         except RequestException as e:
-            try:
-                error_payload = e.response.json()
-            except Exception:
-                error_payload = {}
-            logger.exception('Check %s could not be actioned. Error payload: %s', self.object_id, error_payload)
-            self.add_error(None, _('There was an error with your request.'))
-            return False
+            return self._handle_request_exception(e, 'Check')
+        else:
+            if fiu_action == 'accept' and self.cleaned_data.get('auto_accept_reason'):
+                # This shouldn't make another request due to the lru_cache decorator
+                check = self.get_object()
+                try:
+                    self.session.post(
+                        '/security/checks/auto-accept',
+                        json={
+                            'prisoner_profile': check['credit']['prisoner_profile'],
+                            'debit_card_sender_details': check['credit']['billing_address']['debit_card_sender_details'],
+                            'states': [{
+                                'reason': self.cleaned_data.get('auto_accept_reason')
+                            }]
+                        }
+                    )
+                except RequestException as e:
+                    return self._handle_request_exception(e, 'Auto Accept Rule')
+            return True
 
 
 class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
