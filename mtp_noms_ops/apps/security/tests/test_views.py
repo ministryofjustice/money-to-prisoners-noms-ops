@@ -3860,10 +3860,57 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertRedirects(response, reverse('security:check_list'))
             self.assertContains(response, 'Credit accepted')
 
+    def test_accept_check_without_reactivating_auto_accept(self):
+        """
+        Test that if one tries to accept pending check, check marked as accepted, without reactivating auto_accept
+
+        We implicitly assert that no API call is made to the security/check/auto-accept endpoint even if
+        check.auto_accept_rule populated
+        """
+        check_id = 1
+        auto_accept_rule_id = 35
+        payload_values = {
+            'decision_reason': '',
+        }
+        check_with_inactive_auto_accept = copy.deepcopy(self.SENDER_CHECK)
+        check_with_inactive_auto_accept['auto_accept_rule'] = auto_accept_rule_id
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_with_inactive_auto_accept
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    responses.json_params_matcher(
+                        payload_values
+                    )
+                ],
+                status=204,
+            )
+            self.mock_need_attention_count(rsps, 0)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Credit accepted')
+
     def test_accept_check_with_auto_accept(self):
         """
-        Test that if one tries to accept pending check, check marked as accepted
+        Test that if one tries to accept pending check, check marked as accepted, and auto accept reactivated
 
+        We assert that API call is made to POST security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
+        populated
         """
         check_id = 1
         payload_values = {
@@ -3901,7 +3948,70 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                         auto_accept_payload_values
                     )
                 ],
-                status=204,
+                status=201
+            )
+            self.mock_need_attention_count(rsps, 0)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                    'auto_accept_reason': 'cause I said so'
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Credit accepted')
+
+    def test_accept_check_when_reactivating_auto_accept(self):
+        """
+        Test that if one tries to accept pending check, check marked as accepted, and auto accept reactivated
+
+        We assert that API call is made to PATCH security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
+        and check.auto_accept_rule populated
+
+        """
+        check_id = 1
+        auto_accept_rule_id = 35
+        payload_values = {
+            'decision_reason': '',
+        }
+        check_with_inactive_auto_accept = copy.deepcopy(self.SENDER_CHECK)
+        check_with_inactive_auto_accept['auto_accept_rule'] = auto_accept_rule_id
+        auto_accept_payload_values = {
+            'states': [{
+                'active': True,
+                'reason': 'cause I said so'
+            }]
+        }
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_with_inactive_auto_accept
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    responses.json_params_matcher(
+                        payload_values
+                    )
+                ],
+                status=201,
+            )
+            rsps.add(
+                rsps.PATCH,
+                api_url(f'/security/checks/auto-accept/{auto_accept_rule_id}'),
+                match=[
+                    responses.json_params_matcher(
+                        auto_accept_payload_values
+                    )
+                ],
+                status=200,
             )
             self.mock_need_attention_count(rsps, 0)
 

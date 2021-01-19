@@ -318,16 +318,31 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                 # This shouldn't make another request due to the lru_cache decorator
                 check = self.get_object()
                 try:
-                    self.session.post(
-                        '/security/checks/auto-accept',
-                        json={
-                            'prisoner_profile': check['credit']['prisoner_profile'],
-                            'debit_card_sender_details': check['credit']['billing_address']['debit_card_sender_details'],
-                            'states': [{
-                                'reason': self.cleaned_data.get('auto_accept_reason')
-                            }]
-                        }
-                    )
+                    if check.get('auto_accept_rule'):
+                        # There is an auto-accept rule, which may be in the active or inactive state
+                        self.session.patch(
+                            f'/security/checks/auto-accept/{check["auto_accept_rule"]}',
+                            json={
+                                'states': [{
+                                    'active': True,
+                                    'reason': self.cleaned_data.get('auto_accept_reason')
+                                }]
+                            }
+                        )
+                    else:
+                        self.session.post(
+                            '/security/checks/auto-accept',
+                            json={
+                                'prisoner_profile': check['credit']['prisoner_profile'],
+                                'debit_card_sender_details': check['credit']['billing_address'][
+                                    'debit_card_sender_details'
+                                ],
+                                'states': [{
+                                    'reason': self.cleaned_data.get('auto_accept_reason')
+                                }]
+                            }
+                        )
+
                 except RequestException as e:
                     return self._handle_request_exception(e, 'Auto Accept Rule')
             return True
