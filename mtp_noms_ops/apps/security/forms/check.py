@@ -317,11 +317,15 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
             if fiu_action == 'accept' and self.cleaned_data.get('auto_accept_reason'):
                 # This shouldn't make another request due to the lru_cache decorator
                 check = self.get_object()
+                check_auto_accept_rule_state = check.get('auto_accept_rule_state', {})
+                check_auto_accept_rule_id = None
+                if check_auto_accept_rule_state:
+                    check_auto_accept_rule_id = check_auto_accept_rule_state['auto_accept_rule']
                 try:
-                    if check.get('auto_accept_rule'):
+                    if check_auto_accept_rule_id:
                         # There is an auto-accept rule, which may be in the active or inactive state
                         self.session.patch(
-                            f'/security/checks/auto-accept/{check["auto_accept_rule"]}',
+                            f'/security/checks/auto-accept/{check_auto_accept_rule_id}',
                             json={
                                 'states': [{
                                     'active': True,

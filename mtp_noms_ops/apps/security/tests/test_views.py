@@ -2682,7 +2682,8 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'status': 'pending',
         'actioned_at': None,
         'actioned_by': None,
-        'assigned_to': 7
+        'assigned_to': 7,
+        'auto_accept_rule_state': None
     }
 
     SAMPLE_CREDIT_BASE = {
@@ -3873,7 +3874,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             'decision_reason': '',
         }
         check_with_inactive_auto_accept = copy.deepcopy(self.SENDER_CHECK)
-        check_with_inactive_auto_accept['auto_accept_rule'] = auto_accept_rule_id
+        check_with_inactive_auto_accept['auto_accept_rule_state'] = {
+            'auto_accept_rule': auto_accept_rule_id
+        }
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps)
             rsps.add(
@@ -3979,7 +3982,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             'decision_reason': '',
         }
         check_with_inactive_auto_accept = copy.deepcopy(self.SENDER_CHECK)
-        check_with_inactive_auto_accept['auto_accept_rule'] = auto_accept_rule_id
+        check_with_inactive_auto_accept['auto_accept_rule_state'] = {
+            'auto_accept_rule': auto_accept_rule_id
+        }
         auto_accept_payload_values = {
             'states': [{
                 'active': True,
