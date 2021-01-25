@@ -183,8 +183,8 @@
         <div class="form-group">
           <h2 class="heading-medium">{% trans 'Accept or reject this credit' %}</h2>
           <h3 class="heading-medium">{% trans 'To accept this credit:' %}</h3>
-          <div>
-            {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='form-control-3-4' %}
+          {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='form-control-3-4' %}
+          <div class="mtp-check-accept-container">
             <div class="multiple-choice form-group" data-target="auto_accept_reason">
               <input id="example-auto_accept_reason" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
               <label for="example-auto_accept_reason">
@@ -199,6 +199,7 @@
               <label class="form-label" for="rejection-auto_accept_reason">{% trans 'Give reason for automatically accepting' %}</label>
               <input class="form-control" name="auto_accept_reason" type="text" id="rejection-auto_accept_reason" disabled>
             </div>
+            <br/>
             <button type="submit" class="button" name="fiu_action" value="accept">
               {% trans 'Accept credit' %}
             </button>
