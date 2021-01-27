@@ -26,3 +26,5 @@ CHECK_DETAIL_FORM_MAPPING = {
         tuple(CHECK_REJECTION_CATEGORY_TEXT_MAPPING.items()) + tuple(CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items())
     )
 }
+
+CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR = 'The fields debit_card_sender_details, prisoner_profile must make a unique set.'

@@ -185,10 +185,16 @@ class AcceptOrRejectCheckView(FormView):
 
     def form_valid(self, form):
         if self.request.method == 'POST':
-            result = form.accept_or_reject()
+            result, additional_info_message = form.accept_or_reject()
 
             if not result:
                 return self.form_invalid(form)
+            if additional_info_message:
+                messages.add_message(
+                    self.request,
+                    messages.INFO,
+                    gettext_lazy(additional_info_message),
+                )
 
             if form.data['fiu_action'] == 'accept':
                 ui_message = gettext_lazy('Credit accepted')

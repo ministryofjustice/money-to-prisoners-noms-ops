@@ -3910,7 +3910,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
 
     def test_accept_check_with_auto_accept(self):
         """
-        Test that if one tries to accept pending check, check marked as accepted, and auto accept reactivated
+        Test that if one tries to accept pending check, check marked as accepted, and auto accept added in active state
 
         We assert that API call is made to POST security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
         populated
@@ -3967,6 +3967,82 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
 
             self.assertRedirects(response, reverse('security:check_list'))
             self.assertContains(response, 'Credit accepted')
+
+    def test_accept_check_with_auto_accept_integrity_error(self):
+        """
+        Test that if one tries to accept pending check, check marked as accepted, info message displayed
+
+        We assert that API call is made to POST security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
+        populated
+        """
+        check_id = 1
+        payload_values = {
+            'decision_reason': '',
+        }
+        auto_accept_payload_values = {
+            'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
+            'debit_card_sender_details': self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details'],
+            'states': [{
+                'reason': 'cause I said so'
+            }]
+        }
+        check_get_api_url = api_url(f'/security/checks/{check_id}/')
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                check_get_api_url,
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    responses.json_params_matcher(
+                        payload_values
+                    )
+                ],
+                status=204,
+            )
+            rsps.add(
+                rsps.POST,
+                api_url('/security/checks/auto-accept'),
+                match=[
+                    responses.json_params_matcher(
+                        auto_accept_payload_values
+                    )
+                ],
+                status=400,
+                json={
+                    'non_field_errors': [
+                        'The fields debit_card_sender_details, prisoner_profile must make a unique set.'
+                    ]
+                }
+            )
+            self.mock_need_attention_count(rsps, 0)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                    'auto_accept_reason': 'cause I said so'
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Credit accepted')
+            self.assertContains(
+                response,
+                (
+                    'The auto-accept rule could not be created because an auto-accept rule '
+                    'already exists for {sender_name} and {prisoner_number}'.format(
+                        sender_name=self.SENDER_CHECK['credit']['sender_name'],
+                        prisoner_number=self.SENDER_CHECK['credit']['prisoner_number']
+                    )
+                )
+            )
 
     def test_accept_check_when_reactivating_auto_accept(self):
         """
