@@ -32,7 +32,11 @@ from security import (
     required_permissions,
     provided_job_info_flag,
 )
-from security.constants import CHECK_REJECTION_CATEGORY_TEXT_MAPPING, CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING
+from security.constants import (
+    CHECK_REJECTION_CATEGORY_TEXT_MAPPING,
+    CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING,
+    CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
+)
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
 from security.tests import api_url, TEST_IMAGE_DATA
@@ -4015,7 +4019,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 status=400,
                 json={
                     'non_field_errors': [
-                        'The fields debit_card_sender_details, prisoner_profile must make a unique set.'
+                        CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
                     ]
                 }
             )
