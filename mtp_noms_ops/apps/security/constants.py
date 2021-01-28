@@ -27,4 +27,5 @@ CHECK_DETAIL_FORM_MAPPING = {
     )
 }
 
-CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR = 'An existing AutoAcceptRule is present for this DebitCardSenderDetails/PrisonerProfile pair'
+CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR = \
+    'An existing AutoAcceptRule is present for this DebitCardSenderDetails/PrisonerProfile pair'

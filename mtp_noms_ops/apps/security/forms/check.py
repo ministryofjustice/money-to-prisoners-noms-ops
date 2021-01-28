@@ -287,7 +287,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def get_resolve_endpoint_path(self, fiu_action='accept'):
         return f'/security/checks/{self.object_id}/{fiu_action}/'
 
-    def _handle_request_exception(self, e: RequestException, entity: str) -> bool:
+    def _handle_request_exception(self, e: RequestException, entity: str) -> tuple:
         error_payload = self._get_request_exception_payload(e)
         return self._render_error_response(error_payload, entity)
 
@@ -365,7 +365,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                                 ]
                         ):
                             # TODO do we need to check if the auto-accept rule is active?
-                            # TODO are we happy that this check won't be linked to the existing auto-accept rule in the UI?
+                            # TODO we happy that this check won't be linked to the existing auto-accept rule in the UI?
                             return (
                                 True,
                                 'The auto-accept rule could not be created because an auto-accept rule '
