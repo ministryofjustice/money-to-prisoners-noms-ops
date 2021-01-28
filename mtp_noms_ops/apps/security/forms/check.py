@@ -364,7 +364,6 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                                     for error_string in error_response.get('non_field_errors', [])
                                 ]
                         ):
-                            # TODO do we need to check if the auto-accept rule is active?
                             # TODO we happy that this check won't be linked to the existing auto-accept rule in the UI?
                             return (
                                 True,
