@@ -1,3 +1,4 @@
+from typing import Optional
 from urllib.parse import urlencode
 
 from django.contrib import messages
@@ -116,12 +117,14 @@ class AcceptOrRejectCheckView(FormView):
         return form_kwargs
 
     @staticmethod
-    def is_latest_state_active(auto_accept_rule):
+    def get_latest_auto_accept_state(auto_accept_rule):
         return sorted(
             auto_accept_rule['states'], key=lambda x: x['created']
-        )[-1]['active']
+        )[-1]
 
-    def is_existing_active_auto_accept_rule(self, api_session, debit_card_sender_details_id, prisoner_profile_id):
+    def get_unbound_active_auto_accept_state(
+        self, api_session, debit_card_sender_details_id: int, prisoner_profile_id: int
+    ) -> Optional[dict]:
         query_existing_auto_accept_rule = api_session.get(
             '/security/checks/auto-accept?{}'.format(
                 urlencode((
@@ -133,15 +136,16 @@ class AcceptOrRejectCheckView(FormView):
 
         payload = query_existing_auto_accept_rule.json()
         #  unfortunately django-filters OR's filters rather than ANDing them
-        existing_auto_accept_rules = filter(
+        existing_auto_accept_rules = list(filter(
             lambda x: (
                 x['prisoner_profile'] == prisoner_profile_id
                 and x['debit_card_sender_details'] == debit_card_sender_details_id
-                and self.is_latest_state_active(x)
+                and self.get_latest_auto_accept_state(x)['active']
             ),
             payload['results']
-        )
-        return len(list(existing_auto_accept_rules)) > 0
+        ))
+        if len(existing_auto_accept_rules) == 1:
+            return self.get_latest_auto_accept_state(existing_auto_accept_rules[0])
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
@@ -151,7 +155,7 @@ class AcceptOrRejectCheckView(FormView):
             raise Http404('Credit to check not found')
 
         api_session = context_data['form'].session
-        context_data['can_create_auto_accept'] = not self.is_existing_active_auto_accept_rule(
+        context_data['unbound_active_auto_accept_state'] = self.get_unbound_active_auto_accept_state(
             api_session,
             detail_object['credit']['billing_address'][
                 'debit_card_sender_details'
