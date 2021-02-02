@@ -187,7 +187,6 @@
           <div class="mtp-check-accept-container">
             {% if unbound_active_auto_accept_state %}
               <p>
-                {% comment %} TODO check that the user object is serialized in this context{% endcomment %}
                 {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number added_by_fn=unbound_active_auto_accept_state.added_by.first_name added_by_ln=unbound_active_auto_accept_state.added_by.last_name reason=unbound_active_auto_accept_state.reason %}
                   This check is associated with an active auto-rule between {{ sender_name }} and {{ prisoner_number }}
                   This rule was activated by {{ added_by_fn }} {{ added_by_ln }}. The reason given was {{ reason }}
@@ -276,12 +275,6 @@
             Further Details: {{ check.decision_reason }}
           {% elif not check.rejection_reasons %}
             {% trans 'No decision reason entered' %}
-          {% endif %}
-          {% if check.auto_accept_rule_state.active %}
-            {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number added_by_fn=check.auto_accept_rule_state.added_by.first_name added_by_ln=check.auto_accept_rule_state.added_by.last_name reason=check.auto_accept_rule_state.reason %}
-              This check is associated with an active auto-rule between {{ sender_name }} and {{ prisoner_number }}
-              This rule was activated by {{ added_by_fn }} {{ added_by_ln }}. The reason given was {{ reason }}
-            {% endblocktrans %}
           {% endif %}
         </p>
 

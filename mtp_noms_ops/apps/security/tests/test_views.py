@@ -2679,19 +2679,6 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
 
     credit_created_date = datetime.datetime.now()
 
-    ACTIVE_AUTO_ACCEPT_RULE_STATE = {
-        'reason': 'Prisoners mother',
-        'active': True,
-        'added_by': {
-            'first_name': 'hello',
-            'last_name': 'kitty'
-        },
-        'auto_accept_rule': {
-            'debit_card_sender_details': 17,
-            'prisoner_profile': prisoner_id,
-        }
-    }
-
     SAMPLE_CHECK_BASE = {
         'id': 1,
         'description': 'lorem ipsum',
@@ -2719,7 +2706,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'credited_at': None,
         'prisoner_profile': prisoner_id,
         'billing_address': {
-            'debit_card_sender_details': ACTIVE_AUTO_ACCEPT_RULE_STATE['auto_accept_rule']['debit_card_sender_details']
+            'debit_card_sender_details': 17
         }
     }
 
@@ -2752,11 +2739,6 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
     SENDER_CHECK['credit']['billing_address'] = {'debit_card_sender_details': 42}
 
     SENDER_CHECK_REJECTED = dict(SENDER_CHECK, status='rejected')
-    SENDER_CHECK_ACCEPTED_WITH_RULE = dict(
-        SENDER_CHECK,
-        status='accepted',
-        auto_accept_rule_state=ACTIVE_AUTO_ACCEPT_RULE_STATE
-    )
 
     PRISONER_CREDIT = dict(
         SAMPLE_CREDIT_BASE,
@@ -3617,7 +3599,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             rsps.add(
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
-                json=self.SENDER_CHECK_ACCEPTED_WITH_RULE
+                json=self.SENDER_CHECK_REJECTED
             )
             rsps.add(
                 rsps.GET,
@@ -3650,12 +3632,10 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 '{}/security/checks/auto-accept?{}/'.format(
                     settings.API_URL,
                     urlencode((
-                        ('prisoner_profile_id', self.SENDER_CHECK_ACCEPTED_WITH_RULE['credit']['prisoner_profile']),
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
                         (
                             'debit_card_sender_details_id',
-                            self.SENDER_CHECK_ACCEPTED_WITH_RULE['credit']['billing_address'][
-                                'debit_card_sender_details'
-                            ]
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
                         )
                     ))
                 ),
@@ -3666,15 +3646,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             response = self.client.get(url)
         content = response.content.decode()
         self.assertNotIn('name="fiu_action"', content, msg='Action button exists on page')
-        self.assertIn('This credit was accepted by', content)
-        self.assertContains(
-            response,
-            f'This check is associated with an active auto-rule between '
-            f'{self.SENDER_CHECK["credit"]["sender_name"]} and {self.SENDER_CHECK["credit"]["prisoner_number"]}'
-            f' This rule was activated by {self.ACTIVE_AUTO_ACCEPT_RULE_STATE["added_by"]["first_name"]} '
-            f'{self.ACTIVE_AUTO_ACCEPT_RULE_STATE["added_by"]["last_name"]}. The reason given was '
-            f'{self.ACTIVE_AUTO_ACCEPT_RULE_STATE["reason"]}'
-        )
+        self.assertIn('This credit was rejected by', content)
 
     def test_check_view_includes_matching_credit_history(self):
         """
