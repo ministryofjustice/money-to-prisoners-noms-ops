@@ -225,8 +225,11 @@ def format_disbursement_resolution(value):
 
 
 @register.filter
-def format_security_check_status(value):
-    return security_check_statuses.get(value, value)
+def format_security_check_status(check):
+    if check.get('auto_accept_rule_state') and check['auto_accept_rule_state']['active']:
+        return security_check_statuses['auto-accepted']
+    else:
+        return security_check_statuses.get(check.get('status'), check.get('status'))
 
 
 @register.filter
