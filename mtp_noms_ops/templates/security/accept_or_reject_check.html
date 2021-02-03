@@ -186,11 +186,17 @@
           {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='form-control-3-4' %}
           <div class="mtp-check-accept-container">
             {% if unbound_active_auto_accept_state %}
-              <p>
-                {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number added_by_fn=unbound_active_auto_accept_state.added_by.first_name added_by_ln=unbound_active_auto_accept_state.added_by.last_name reason=unbound_active_auto_accept_state.reason %}
-                  This check is associated with an active auto-rule between {{ sender_name }} and {{ prisoner_number }}
-                  This rule was activated by {{ added_by_fn }} {{ added_by_ln }}. The reason given was {{ reason }}
+              <p class="panel panel-border-wide">
+                {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
+                  Auto accept started for credits from {{sender_name}} to {{prisoner_number}}
                 {% endblocktrans %}
+                </br>
+                <span class="mtp-font-weight-bold">Started by:</span>
+                {{ unbound_active_auto_accept_state.added_by.first_name}} {{ unbound_active_auto_accept_state.added_by.last_name}}
+                <br/>
+                <span class="mtp-font-weight-bold">Date:</span>{{ unbound_active_auto_accept_state.created |date:'SHORT_DATETIME_FORMAT' }}<br/>
+                <span class="mtp-font-weight-bold">Reason for automatically accepting:</span>
+                {{ unbound_active_auto_accept_state.reason }}
               </p>
             {% else %}
               <div class="multiple-choice form-group" data-target="auto_accept_reason">

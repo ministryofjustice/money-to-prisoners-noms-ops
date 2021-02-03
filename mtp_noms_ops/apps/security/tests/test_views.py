@@ -23,6 +23,7 @@ from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 from openpyxl import load_workbook
 from parameterized import parameterized
+import pytz
 import responses
 
 from security import (
@@ -3380,7 +3381,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         response_len = 4
         check_id = 1
         reason = 'Prisoners mother'
-        user_data = self.get_user_data(permissions=required_permissions)
+        different_user_data = self.get_user_data(first_name='different', last_name='user')
         with responses.RequestsMock() as rsps:
             self.login(rsps)
             rsps.add(
@@ -3453,20 +3454,20 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
                     'states': [
                         {
-                            'created': (datetime.datetime.now() - datetime.timedelta(hours=3)).isoformat(),
+                            'created': (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=3)).isoformat(),
                             'active': True
                         },
                         {
-                            'created': (datetime.datetime.now() - datetime.timedelta(hours=2)).isoformat(),
+                            'created': (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=2)).isoformat(),
                             'active': False
                         },
                         {
-                            'created': (datetime.datetime.now() - datetime.timedelta(hours=1)).isoformat(),
+                            'created': (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=1)).isoformat(),
                             'active': True,
                             'reason': reason,
                             'added_by': {
-                                'first_name': user_data['first_name'],
-                                'last_name': user_data['last_name'],
+                                'first_name': different_user_data['first_name'],
+                                'last_name': different_user_data['last_name'],
                             }
                         },
                     ]
@@ -3482,11 +3483,18 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertNotContains(response, 'Automatically accept future credits from')
             self.assertContains(
                 response,
-                f'This check is associated with an active auto-rule between '
-                f'{self.SENDER_CHECK["credit"]["sender_name"]} and {self.SENDER_CHECK["credit"]["prisoner_number"]}'
-                f' This rule was activated by {user_data["first_name"]} {user_data["last_name"]}. The reason given was '
-                f'{reason}'
+                f'Auto accept started for credits from {self.SENDER_CHECK["credit"]["sender_name"]} to '
+                f'{self.SENDER_CHECK["credit"]["prisoner_number"]}'
             )
+            self.assertContains(response, 'Started by:')
+            self.assertContains(response, f'{different_user_data["first_name"]} {different_user_data["last_name"]}')
+            self.assertContains(response, 'Date:')
+            self.assertContains(
+                response,
+                (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=1)).strftime('%d/%m/%Y %H:%M')
+            )
+            self.assertContains(response, 'Reason for automatically accepting:')
+            self.assertContains(response, reason)
 
     def test_get_with_previous_unbound_inactive_auto_accept(self):
         """

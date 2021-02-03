@@ -145,7 +145,7 @@ class AcceptOrRejectCheckView(FormView):
             payload['results']
         ))
         if len(existing_auto_accept_rules) == 1:
-            return self.get_latest_auto_accept_state(existing_auto_accept_rules[0])
+            return convert_date_fields(self.get_latest_auto_accept_state(existing_auto_accept_rules[0]))
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
