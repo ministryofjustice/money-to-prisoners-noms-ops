@@ -126,6 +126,35 @@ class CreditsHistoryListForm(SecurityForm):
         return object_list
 
 
+class AutoAcceptListForm(SecurityForm):
+    """
+    List of AutoAccepts checks.
+    """
+    def __init__(self, request, **kwargs):
+        super().__init__(request, **kwargs)
+        self.my_list_count = 0
+
+    def get_object_list_endpoint_path(self):
+        return '/security/checks/auto-accept'
+
+    def get_check_list_endpoint_path(self):
+        return '/security/checks/'
+
+    def get_object_list(self):
+        """
+        Gets objects, converts datetimes found in them.
+        """
+        object_list = convert_date_fields(super().get_object_list(), include_nested=True)
+        self.my_list_count = self.session.get(self.get_check_list_endpoint_path(), params={
+            'status': 'pending',
+            'credit_resolution': 'initial',
+            'assigned_to': self.request.user.pk,
+            'offset': 0,
+            'limit': 1
+        }).json()['count']
+        return object_list
+
+
 class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     CheckForm for accepting or rejecting a check.

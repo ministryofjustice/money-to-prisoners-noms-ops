@@ -8,10 +8,15 @@ from django.views.generic.edit import BaseFormView, FormView
 from mtp_common.api import retrieve_all_pages_for_path
 
 from security.forms.check import (
-    AcceptOrRejectCheckForm, CheckListForm, CreditsHistoryListForm, AssignCheckToUserForm, UserCheckListForm
+    AutoAcceptListForm,
+    AcceptOrRejectCheckForm,
+    CheckListForm,
+    CreditsHistoryListForm,
+    AssignCheckToUserForm,
+    UserCheckListForm
 )
 from security.utils import convert_date_fields
-from security.views.object_base import SecurityView
+from security.views.object_base import SecurityView, SecurityDetailView
 
 
 class CheckListView(SecurityView):
@@ -45,6 +50,28 @@ class CreditsHistoryListView(SecurityView):
     title = gettext_lazy('Decision history')
     template_name = 'security/credits_history_list.html'
     form_class = CreditsHistoryListForm
+
+
+class AutoAcceptRuleListView(SecurityView):
+    """
+    View history of all auto-accept rules
+    """
+    title = gettext_lazy('Auto Accepts')
+    template_name = 'security/auto_accept_rule_list.html'
+    form_class = AutoAcceptListForm
+
+
+
+class AutoAcceptRuleDetailView(SecurityDetailView):
+    """
+    View history of all auto-accept rules
+    """
+    title = gettext_lazy('Auto Accept')
+    list_title = gettext_lazy('Auto Accepts')
+    #  template_name = 'security/auto_accept_rule.html'
+    object_context_key = 'auto_accept_rule'
+    id_kwarg_name = 'auto_accept_rule_id'
+    list_url = reverse_lazy('security:auto_accept_rule_list')
 
 
 class CheckAssignView(BaseFormView):

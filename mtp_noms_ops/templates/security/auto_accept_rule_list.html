@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+
+{% block inner_content %}
+  <nav class="moj-sub-navigation" aria-label="{% trans 'Sub navigation' %}">
+    <ul class="moj-sub-navigation__list">
+      <li class="moj-sub-navigation__item">
+        <a class="moj-sub-navigation__link" href="{% url 'security:check_list' %}">{% trans 'Credits to action' %}</a>
+      </li>
+      <li class="moj-sub-navigation__item">
+        <a class="moj-sub-navigation__link" href="{% url 'security:my_check_list' %}">{% trans 'My list' %} ({{ form.my_list_count }})</a>
+      </li>
+      <li class="moj-sub-navigation__item">
+        <a class="moj-sub-navigation__link" href="{% url 'security:credits_history' %}" >{% trans 'Decision history' %}</a>
+      </li>
+      <li class="moj-sub-navigation__item">
+        <a class="moj-sub-navigation__link" aria-current="page" href="{% url 'security:auto_accept_rule_list' %}" >{% trans 'Auto Accepts' %}</a>
+      </li>
+    </ul>
+  </nav>
+  <header>
+    <h1 class="heading-xlarge">{{ view.title }}</h1>
+  </header>
+
+  {% include 'mtp_common/includes/message_box.html' %}
+
+  <p class="font-large">
+    {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+    {{ number }} auto accept rule
+    {% plural %}
+    {{ number }} auto accept rules
+    {% endblocktrans %}
+  </p>
+
+  <div class="mtp-results-list mtp-check-list">
+    <table class="mtp-table table-font-xsmall">
+      <thead>
+        <tr>
+          <th>{% trans 'Debit card (from)' %}</th>
+          <th>{% trans 'Prisoner (to)' %}</th>
+          <th>{% trans 'Started by' %}</th>
+          {% comment %} {% sortable_cell _('Start Date') form.cleaned_data '' %} {% endcomment %}
+          <th>{% trans 'Start Date' %}</th>
+          {% comment %} {% sortable_cell _('Start Date') form.cleaned_data '' %} {% endcomment %}
+          <th>{% trans 'Reason' %}</th>
+          <th>{% trans 'Action' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for auto_accept_rule in objects %}
+        <tr>
+          <td>
+            {{ auto_accept_rule.debit_card_sender_details|format_card_number }}
+            <a href="{{ auto_accept_rule.debit_card_sender_details|sender_profile_search_dcsd_url }}" class="mtp-print-url-hidden">
+              {% for cardholder_name in auto_accept_rule.debit_card_sender_details.cardholder_names %}
+                <br/>
+                {{ cardholder_name }}
+              {% endfor %}
+            </a>
+          </td>
+          <td>
+            {{ auto_accept_rule.prisoner_profile.prisoner_number }}
+            <br/>
+            <a href="{{ auto_accept_rule.prisoner_profile|prisoner_profile_search_id_url }}" class="mtp-print-url-hidden">{{ auto_accept_rule.prisoner_profile.prisoner_name }}</a>
+          </td>
+          <td>
+            {{ auto_accept_rule.states| get_latest_auto_accept_state_field:'added_by' | format_name }}
+          </td>
+          <td class="mtp-check-date">
+            {% comment %} TODO this is supposed to be the latest auto-accept activation date, but i'm not convinced we've thought through how inactive auto-accepts work {% endcomment %}
+            {{ auto_accept_rule.states | get_latest_active_auto_accept_state_field:'created' |date:'SHORT_DATETIME_FORMAT' }}
+          </td>
+          <td>
+            {{ auto_accept_rule.states |get_latest_auto_accept_state_field:'reason' |truncatechars:50 }}
+          </td>
+          <td>
+            <a class="button print-hidden"
+               {% comment %} href="{% url 'security:auto_accept_rule_detail' auto_accept_rule_id=auto_accept_rule.id %}" {% endcomment %}
+               aria-label="{% trans 'View auto-accept details' %}">
+              {% trans 'Review' %}
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6">{% trans 'There are no Auto Accept rules' %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mtp-page-list__container">{% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+    <p class="mtp-page-list__count">
+      {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+      {{ number }} auto accept rule
+      {% plural %}
+      {{ number }} auto accept rules
+      {% endblocktrans %}
+    </p>
+  </div>
+{% endblock %}

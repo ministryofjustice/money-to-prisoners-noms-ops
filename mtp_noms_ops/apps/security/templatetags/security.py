@@ -165,6 +165,11 @@ def sender_profile_search_url(credit, redirect_on_single=True):
 
 
 @register.filter
+def sender_profile_search_dcsd_url(debit_card_sender_details):
+    return reverse('security:sender_detail', kwargs={'sender_id': debit_card_sender_details['sender']})
+
+
+@register.filter
 def credit_sender_identifiable(credit):
     keys = get_sender_keys(credit)
     return any([credit[key] for key in keys - {'postcode'}])
@@ -190,6 +195,14 @@ def prisoner_profile_search_url(credit, redirect_on_single=True):
         return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner_id})
     return get_profile_search_url(credit, ['prisoner_number'], reverse('security:prisoner_search_results'),
                                   redirect_on_single=redirect_on_single)
+
+
+@register.filter
+def prisoner_profile_search_id_url(prisoner_profile):
+    """
+    Given an API credit response object, returns the URL for searching this prisoner
+    """
+    return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner_profile['id']})
 
 
 @register.filter
@@ -344,3 +357,29 @@ def extract_best_match(context, items):
 @register.filter
 def get_human_readable_check_field(field):
     return CHECK_DETAIL_RENDERED_MAPPING.get(field, field)
+
+
+@register.filter
+def get_latest_auto_accept_state_field(context, field_name):
+    if any([not context_entry.get(field_name) for context_entry in context]):
+        return ''
+    sorted_states = sorted(context, key=lambda x: x['created'])
+    if sorted_states:
+        return sorted_states[-1].get(field_name, '')
+    else:
+        return ''
+
+
+@register.filter
+def get_latest_active_auto_accept_state_field(context, field_name):
+    return get_latest_auto_accept_state_field(list(filter(lambda x: x['active'], context)), field_name)
+
+
+@register.filter
+def format_name(user_dict):
+    if isinstance(user_dict, str):
+        return user_dict
+    return '{last_name}, {first_name}'.format(
+        first_name=user_dict.get('first_name'),
+        last_name=user_dict.get('last_name')
+    )

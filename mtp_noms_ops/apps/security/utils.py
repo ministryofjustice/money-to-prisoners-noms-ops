@@ -45,6 +45,13 @@ def convert_date_fields(object_list, include_nested=False):
             for field, value in obj.items():
                 if isinstance(value, dict):
                     obj[field] = convert(value)
+                elif isinstance(value, list):
+                    obj[field] = [
+                        convert(element)
+                        if isinstance(element, dict)
+                        else element
+                        for element in value
+                    ]
 
         for field in fields:
             value = obj.get(field)
