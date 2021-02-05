@@ -3908,15 +3908,15 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         self.assertIn('Strict compliance check failed', response_content)
         self.assertIn('Javert', response_content)
         self.assertIn(
-            'Reason for automatically accepting: {}'.format(
-                sender_active_auto_accept_rule_state['reason'],
-            ),
+            'Reason for automatically accepting:',
+            response_content
+        )
+        self.assertIn(
+            sender_active_auto_accept_rule_state['reason'],
             response_content
         )
         self.assertNotIn(
-            'Reason for automatically accepting: {}'.format(
-                sender_inactive_auto_accept_rule_state['reason'],
-            ),
+            sender_inactive_auto_accept_rule_state['reason'],
             response_content
         )
 
@@ -3928,15 +3928,11 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         self.assertIn('Number 6', response_content)
         self.assertIn('Soft compliance check failed', response_content)
         self.assertIn(
-            'Reason for automatically accepting: {}'.format(
-                prisoner_active_auto_accept_rule_state['reason'],
-            ),
+            prisoner_active_auto_accept_rule_state['reason'],
             response_content
         )
         self.assertNotIn(
-            'Reason for automatically accepting: {}'.format(
-                prisoner_inactive_auto_accept_rule_state['reason'],
-            ),
+            prisoner_inactive_auto_accept_rule_state['reason'],
             response_content
         )
 
