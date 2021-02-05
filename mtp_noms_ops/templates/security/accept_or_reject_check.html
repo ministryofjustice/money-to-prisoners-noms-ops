@@ -194,7 +194,7 @@
                 <span class="mtp-font-weight-bold">Started by:</span>
                 {{ unbound_active_auto_accept_state.added_by.first_name}} {{ unbound_active_auto_accept_state.added_by.last_name}}
                 <br/>
-                <span class="mtp-font-weight-bold">Date:</span>{{ unbound_active_auto_accept_state.created |date:'SHORT_DATETIME_FORMAT' }}<br/>
+                <span class="mtp-font-weight-bold">Date:</span> {{ unbound_active_auto_accept_state.created |date:'SHORT_DATETIME_FORMAT' }}<br/>
                 <span class="mtp-font-weight-bold">Reason for automatically accepting:</span>
                 {{ unbound_active_auto_accept_state.reason }}
               </p>
