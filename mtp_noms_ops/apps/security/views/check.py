@@ -61,7 +61,6 @@ class AutoAcceptRuleListView(SecurityView):
     form_class = AutoAcceptListForm
 
 
-
 class AutoAcceptRuleDetailView(SecurityDetailView):
     """
     View history of all auto-accept rules

@@ -152,6 +152,11 @@ class AutoAcceptListForm(SecurityForm):
             'offset': 0,
             'limit': 1
         }).json()['count']
+        self.initial_index = ((self.cleaned_data.get('page', 1) - 1) * self.page_size) + 1
+        self.final_index = min(
+            self.cleaned_data.get('page', 1) * self.page_size,
+            self.total_count
+        )
         return object_list
 
 

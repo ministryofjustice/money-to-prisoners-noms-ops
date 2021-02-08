@@ -97,10 +97,10 @@
 
   <div class="mtp-page-list__container">{% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
     <p class="mtp-page-list__count">
-      {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+      {% blocktrans trimmed count count=form.total_count with initial=form.initial_index final=form.final_index number=form.total_count|separate_thousands %}
       {{ number }} auto accept rule
       {% plural %}
-      {{ number }} auto accept rules
+      Showing {{ initial}} to {{ final }} of {{ number }} auto accept rules
       {% endblocktrans %}
     </p>
   </div>
