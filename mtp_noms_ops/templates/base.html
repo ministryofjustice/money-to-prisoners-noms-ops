@@ -43,20 +43,6 @@
 {% endblock %}
 
 
-{% block footer_support_links %}
-  {# TODO: block is non-functional #}
-  <ul>
-    <li><a href="{% url 'submit_ticket' %}">{% trans 'Help and feedback' %}</a></li>
-    <li>
-      {% trans 'Built by' %}
-      <a href="https://mojdigital.blog.gov.uk/">
-        <abbr title="{% trans 'Ministry of Justice' %}">MOJ</abbr> Digital
-      </a>
-    </li>
-  </ul>
-{% endblock %}
-
-
 {% block body_end %}
   <script src="{% url 'js-i18n' %}?{{ APP_GIT_COMMIT_SHORT }}"></script>
   {{ block.super }}
