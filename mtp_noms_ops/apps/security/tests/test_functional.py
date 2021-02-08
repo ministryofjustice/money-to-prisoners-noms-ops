@@ -27,7 +27,7 @@ class SecurityDashboardTestCase(FunctionalTestCase):
         self.driver.find_element_by_xpath('//button[@type="submit"]').click()
 
     def click_on_nav_tab(self, tab_name):
-        container_element = self.driver.find_element_by_id('mtp-proposition-tabs')
+        container_element = self.driver.find_element_by_css_selector('.mtp-header-app-links')
         tab_element = container_element.find_element_by_link_text(tab_name)
         tab_element.click()
 
