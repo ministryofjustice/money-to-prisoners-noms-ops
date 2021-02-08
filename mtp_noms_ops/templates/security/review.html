@@ -15,7 +15,7 @@
   <h1 class="heading-xlarge">{{ view.title }}</h1>
 </header>
 
-{% include 'mtp_common/includes/message_box.html' %}
+{% notification_banners request %}
 
 <p>
   {% trans 'Credits must be checked by security before cashiers can process them.' %}

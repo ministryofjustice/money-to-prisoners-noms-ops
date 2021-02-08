@@ -9,7 +9,7 @@
   <h1 class="heading-xlarge">{% trans 'Upload prisoner location file' %}</h1>
 </header>
 
-{% include 'mtp_common/includes/message_box.html' %}
+{% notification_banners request %}
 
 <form action="{% url 'location_file_upload' %}"
       method="post"

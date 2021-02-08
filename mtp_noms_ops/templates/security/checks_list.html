@@ -39,7 +39,7 @@
     <h1 class="heading-xlarge">{{ view.title }}</h1>
   </header>
 
-  {% include 'mtp_common/includes/message_box.html' %}
+  {% notification_banners request %}
 
   <p class="font-large">
     {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}

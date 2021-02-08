@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-  {% notifications_box request 'noms_ops_security_dashboard' %}
+  {% notification_banners request 'noms_ops_security_dashboard' %}
 
   {% if request.can_access_security %}
     {% if november_second_changes_live %}
