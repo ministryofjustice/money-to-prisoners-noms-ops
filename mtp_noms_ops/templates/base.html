@@ -4,8 +4,7 @@
 {% load security %}
 
 
-{% block page_title %}{{ app_title }}{% endblock %}
-{% block proposition %}{{ app_title }}{% endblock %}
+{% block page_title %}{% if request.can_access_prisoner_location and not request.can_access_security %}{% trans 'Prisoner location admin' %}{% else %}{% trans 'Prisoner money intelligence' %}{% endif %}{% endblock %}
 
 
 {% block proposition_extra %}

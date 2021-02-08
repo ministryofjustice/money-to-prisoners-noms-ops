@@ -2,8 +2,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.urls import reverse, reverse_lazy
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.translation import gettext, gettext_lazy as _
-from mtp_common.context_processors import govuk_localisation as inherited_localisation
+from django.utils.translation import gettext_lazy as _
 
 from prisoner_location_admin import required_permissions as prisoner_location_permissions
 from security import required_permissions as security_permissions
@@ -44,24 +43,6 @@ def external_breadcrumbs(request):
             {'name': section_title},
         ]
     }
-
-
-def govuk_localisation(request):
-    data = inherited_localisation(request)
-
-    can_access_prisoner_location = getattr(request, 'can_access_prisoner_location', False)
-    can_access_security = getattr(request, 'can_access_security', False)
-    if can_access_prisoner_location and not can_access_security:
-        app_title = _('Prisoner location admin')
-    else:
-        app_title = _('Prisoner money intelligence')
-    data.update(
-        app_title=app_title,
-        homepage_url=data['home_url'],
-        logo_link_title=gettext('Go to the homepage'),
-        global_header_text=app_title,
-    )
-    return data
 
 
 def user_test(permissions):
