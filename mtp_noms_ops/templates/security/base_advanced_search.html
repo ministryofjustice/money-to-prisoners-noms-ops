@@ -8,7 +8,7 @@
 {% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
 {% block body_classes %}{{ block.super }} {% if not view.no_spaced_header %}mtp-with-spaced-header{% endif %}{% endblock body_classes %}
 
-{% block inner_content %}
+{% block content %}
   <form id="advanced-search-{{ view.object_name_plural|slugify }}" class="mtp-security-advanced-search mtp-autocomplete js-FormAnalytics" method="get">
     <input type="hidden" name="{{ form.advanced.html_name }}" value="True" />
     <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />

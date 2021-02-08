@@ -9,7 +9,7 @@
   {% include 'security/forms/prison-switcher.html' %}
 {% endblock %}
 
-{% block inner_content %}
+{% block content %}
   {% notifications_box request 'noms_ops_security_dashboard' %}
 
   {% if request.can_access_security %}

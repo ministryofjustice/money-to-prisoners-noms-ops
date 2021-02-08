@@ -3,18 +3,13 @@
 {% load mtp_common %}
 {% load security %}
 
-{% block body_end %}
-  <script src="{% url 'js-i18n' %}?{{ APP_GIT_COMMIT_SHORT }}"></script>
-  {{ block.super }}
-  {% sentry_js %}
-  <!-- {{ request.resolver_match.view_name }} -->
-{% endblock %}
 
 {% block page_title %}{{ app_title }}{% endblock %}
 {% block proposition %}{{ app_title }}{% endblock %}
 
 
 {% block proposition_extra %}
+  {# TODO: block is non-functional #}
   <nav id="mtp-proposition-extra" class="column-full print-hidden">
     {% spaceless %}
       <ul id="mtp-proposition-tabs">
@@ -41,13 +36,16 @@
   </nav>
 {% endblock %}
 
+
 {% block licence_message %}
   <p>
     <strong>OFFICIAL</strong> — {% trans 'Permission is required to share this content with individuals who are not direct employees of HMPPS working in an intelligence function' %}.
   </p>
 {% endblock %}
 
+
 {% block footer_support_links %}
+  {# TODO: block is non-functional #}
   <ul>
     <li><a href="{% url 'submit_ticket' %}">{% trans 'Help and feedback' %}</a></li>
     <li>
@@ -57,4 +55,12 @@
       </a>
     </li>
   </ul>
+{% endblock %}
+
+
+{% block body_end %}
+  <script src="{% url 'js-i18n' %}?{{ APP_GIT_COMMIT_SHORT }}"></script>
+  {{ block.super }}
+  <!-- {{ request.resolver_match.view_name }} -->
+  {% sentry_js %}
 {% endblock %}
