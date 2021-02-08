@@ -11,7 +11,6 @@
     ['justice.gov.uk'],
     ['gov.uk']
   );
-  require('notifications').Notifications.init();
   require('async-load').AsyncLoad.init();
   require('date-picker').DatePicker.init();
 

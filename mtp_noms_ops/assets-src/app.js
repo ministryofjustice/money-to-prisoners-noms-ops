@@ -6,4 +6,6 @@ initAll();
 
 // mtp common components
 import {initDefaults} from 'mtp_common';
+import {initStaffDefaults} from 'mtp_common/staff-app';
 initDefaults();
+initStaffDefaults();
