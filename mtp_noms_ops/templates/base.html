@@ -36,13 +36,6 @@
 {% endblock %}
 
 
-{% block licence_message %}
-  <p>
-    <strong>OFFICIAL</strong> — {% trans 'Permission is required to share this content with individuals who are not direct employees of HMPPS working in an intelligence function' %}.
-  </p>
-{% endblock %}
-
-
 {% block body_end %}
   <script src="{% url 'js-i18n' %}?{{ APP_GIT_COMMIT_SHORT }}"></script>
   {{ block.super }}

@@ -1,6 +1,7 @@
 {% extends 'govuk-frontend/components/footer.html' %}
 {% load i18n %}
 
+
 {% block footer_support_links %}
   <h2 class="govuk-visually-hidden">
     {% trans 'Support links' %}
@@ -18,4 +19,13 @@
       </a>
     </li>
   </ul>
+{% endblock %}
+
+
+{% block footer_licence %}
+  <span class="govuk-footer__licence-description">
+    <strong class="mtp-footer__official-sensitive">OFFICIAL SENSITIVE</strong>
+    —
+    {% trans 'Permission is required to share this content with individuals who are not direct employees of HMPPS working in an intelligence function' %}.
+  </span>
 {% endblock %}
