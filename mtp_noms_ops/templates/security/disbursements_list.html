@@ -6,15 +6,14 @@
 
 {% block content %}
 
-  {% static 'downloads/apply-to-send-out-more-than-50.pdf' as form_link %}
-
   {% if not view.november_second_changes_live %}
     {% if not is_search_results %}
-      <div class="mtp-notification mtp-notification--info mtp-notification--open">
-        <h2 class="mtp-notification__headline">
-          <a href="{% url 'security:policy_change' %}">{% trans 'How the cap on disbursements works' %}</a>
-        </h2>
-      </div>
+      {% captureoutput as banner_heading %}
+        <a href="{% url 'security:policy_change' %}">
+          {% trans 'How the cap on disbursements works' %}
+        </a>
+      {% endcaptureoutput %}
+      {% include 'mtp_common/components/notification-banner.html' with banner_level='info' banner_title='info'|notification_level banner_heading=banner_heading only %}
     {% endif %}
   {% endif %}
 
