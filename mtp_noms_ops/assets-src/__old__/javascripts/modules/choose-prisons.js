@@ -55,25 +55,27 @@ exports.ChoosePrisons = {
           $hiddenInput.data('visualInput').addClass('form-control-error');
           var $hiddenInputFormGroup = $hiddenInput.data('visualInput').parents('.form-group');
           $hiddenInputFormGroup.addClass('form-group-error');
-          $hiddenInputFormGroup.find('.error-message').remove();
-          $('div.error-summary').remove();
+          $hiddenInputFormGroup.find('.govuk-error-message').remove();
+          $('.govuk-error-summary').remove();
           var emptyErrorMsg = $hiddenInput.data('autocomplete-error-empty');
           var errorSummaryTitle = $hiddenInput.data('autocomplete-error-summary');
           if (emptyErrorMsg) {
             $hiddenInput.data('visualInput').before(
-              '<span class="error-message">' + emptyErrorMsg + '</span>'
+              '<span class="govuk-error-message">' + emptyErrorMsg + '</span>'
             );
 
             $('div.mtp-prison-selection').before(
-              '<div class="error-summary" aria-labeledby="error-summary-heading" tabindex="-1" role="alert">' +
-              '<h2 class="heading-medium error-summary-heading" id="error-summary-heading">' +
+              '<div class="govuk-error-summary" aria-labeledby="error-summary-title__prison-selection" role="alert" tabindex="-1" data-module="govuk-error-summary">' +
+              '<h2 class="govuk-error-summary__title" id="error-summary-title__prison-selection">' +
               errorSummaryTitle +
               '</h2>' +
-              '  <ul class="error-summary-list">' +
-              '      <li class="field-specific-error">' +
+              '<div class="govuk-error-summary__body">' +
+              '  <ul class="govuk-list govuk-error-summary__list">' +
+              '      <li class="mtp-error-summary__field-error">' +
               '        <a href="#id_' + $hiddenInput.attr('name') + '-label">' + emptyErrorMsg + '</a>' +
               '      </li>' +
               '  </ul>' +
+              '</div>' +
               '</div>'
             );
 
@@ -181,18 +183,18 @@ exports.ChoosePrisons = {
       $removalLink.click(function (e) {
         $form.find('#row_' + relatedFieldName).remove();
 
-        var $errorSummary = $form.find('div.error-summary');
+        var $errorSummary = $form.find('.govuk-error-summary');
         if ($errorSummary.length > 0) {
-          var $fieldErrors = $errorSummary.find('li.field-specific-error');
+          var $fieldErrors = $errorSummary.find('li.mtp-error-summary__field-error');
           $fieldErrors.each(function () {
             var $link = $(this).find('a');
             if ($link.attr('href') === '#id_' + relatedFieldName + '-label') {
               $(this).remove();
             }
 
-            if ($errorSummary.find('li.field-specific-error').length === 0 &&
-                $errorSummary.find('li.non-field-error').length === 0) {
-              $form.find('div.error-summary').remove();
+            if ($errorSummary.find('li.mtp-error-summary__field-error').length === 0 &&
+                $errorSummary.find('li.mtp-error-summary__non-field-error').length === 0) {
+              $form.find('.govuk-error-summary').remove();
             }
           });
         }

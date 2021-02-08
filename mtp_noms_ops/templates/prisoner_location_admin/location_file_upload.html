@@ -17,7 +17,7 @@
       class="upload-form">
   {% csrf_token %}
 
-  {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+  {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
   <div class="form-group">
     {% trans 'Run the ‘Electronic Credits and Prisoner Establishment Locations’ report in P-NOMIS, then upload the file on this page in CSV format (.csv)' %}

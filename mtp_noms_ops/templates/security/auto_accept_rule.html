@@ -62,7 +62,7 @@
     </table>
   </div>
   {% if auto_accept_rule_is_active %}
-    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+    {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
     <form class="js-FormAnalytics form-group" method="post">
       {% csrf_token %}
       <h3 class="heading-large">

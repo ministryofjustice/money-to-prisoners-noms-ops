@@ -68,7 +68,7 @@
       <section class="column-half">
         <h2 class="heading-medium">{% trans 'Sign in' %}</h2>
 
-        {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+        {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
         <form action="{{ app_path }}" method="post">
           {% csrf_token %}

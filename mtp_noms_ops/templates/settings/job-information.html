@@ -22,9 +22,7 @@
       <form method="post" class="mtp-job-information-form">
         {% csrf_token %}
 
-        {% if form.errors %}
-          {% include 'mtp_common/forms/error-summary.html' with form=form only %}
-        {% endif %}
+        {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
         {% with field=form.job_title choices=form.job_title.field.choices %}
           <fieldset class="mtp-conditional-container">

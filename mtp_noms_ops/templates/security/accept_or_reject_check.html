@@ -184,7 +184,7 @@
 
     <form id="accept-or-reject-form" method="post" action="{% url 'security:resolve_check' check_id=check.id %}#accept-or-reject-form">
       {% csrf_token %}
-      {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+      {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
       {% if check.status == 'pending' %}
 

@@ -13,7 +13,7 @@
     <input type="hidden" name="{{ form.advanced.html_name }}" value="True" />
     <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
 
-    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+    {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
     <div class="grid-row">
       <div class="column-two-thirds">
