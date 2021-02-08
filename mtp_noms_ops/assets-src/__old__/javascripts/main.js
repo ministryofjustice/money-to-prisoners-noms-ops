@@ -5,7 +5,6 @@
   require('dialogue-box').DialogueBox.init();
   require('upload').Upload.init();
   require('print').Print.init();
-  require('analytics').Analytics.init();
   require('tabbed-panel').TabbedPanel.init();
   require('mailcheck-warning').MailcheckWarning.init(
     '.mtp-account-management input[type=email]',
