@@ -23,6 +23,7 @@ from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 from openpyxl import load_workbook
 from parameterized import parameterized
+import pytz
 import responses
 
 from security import (
@@ -32,7 +33,11 @@ from security import (
     required_permissions,
     provided_job_info_flag,
 )
-from security.constants import CHECK_REJECTION_CATEGORY_TEXT_MAPPING, CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING
+from security.constants import (
+    CHECK_REJECTION_CATEGORY_TEXT_MAPPING,
+    CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING,
+    CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
+)
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
 from security.tests import api_url, TEST_IMAGE_DATA
@@ -2682,7 +2687,8 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'status': 'pending',
         'actioned_at': None,
         'actioned_by': None,
-        'assigned_to': 7
+        'assigned_to': 7,
+        'auto_accept_rule_state': None
     }
 
     SAMPLE_CREDIT_BASE = {
@@ -2699,6 +2705,10 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'started_at': '2019-07-02T10:00:00Z',
         'received_at': None,
         'credited_at': None,
+        'prisoner_profile': prisoner_id,
+        'billing_address': {
+            'debit_card_sender_details': 17
+        }
     }
 
     SAMPLE_CHECK = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
@@ -2727,6 +2737,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
     SENDER_CHECK['credit']['sender_profile'] = sender_id
     SENDER_CHECK['credit']['prisoner_profile'] = prisoner_id
     SENDER_CHECK['credit']['id'] = credit_id
+    SENDER_CHECK['credit']['billing_address'] = {'debit_card_sender_details': 42}
 
     SENDER_CHECK_REJECTED = dict(SENDER_CHECK, status='rejected')
 
@@ -3341,6 +3352,20 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'results': list(self._get_prisoner_credit_list(response_len))
                 }
             )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.get(url, follow=True)
@@ -3348,6 +3373,230 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, 'Accept credit')
             self.assertContains(response, '123456******9876')
             self.assertContains(response, '02/20')
+
+    def test_get_with_previous_unbound_active_auto_accept(self):
+        """
+        Test that the view renders the form without auto-accept form
+        """
+        response_len = 4
+        check_id = 1
+        reason = 'Prisoners mother'
+        different_user_data = self.get_user_data(first_name='different', last_name='user')
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len)),
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_prisoner_credit_list(response_len))
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 1, 'prev': None, 'next': None, 'results': [{
+                    'debit_card_sender_details': self.SENDER_CHECK['credit']['billing_address'][
+                        'debit_card_sender_details'
+                    ],
+                    'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
+                    'states': [
+                        {
+                            'created': (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=3)).isoformat(),
+                            'active': True
+                        },
+                        {
+                            'created': (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=2)).isoformat(),
+                            'active': False
+                        },
+                        {
+                            'created': (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=1)).isoformat(),
+                            'active': True,
+                            'reason': reason,
+                            'added_by': {
+                                'first_name': different_user_data['first_name'],
+                                'last_name': different_user_data['last_name'],
+                            }
+                        },
+                    ]
+                }]}
+            )
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.get(url, follow=True)
+
+            self.assertContains(response, 'Accept credit')
+            self.assertContains(response, '123456******9876')
+            self.assertContains(response, '02/20')
+            self.assertNotContains(response, 'Automatically accept future credits from')
+            self.assertContains(
+                response,
+                f'Auto accept started for credits from {self.SENDER_CHECK["credit"]["sender_name"]} to '
+                f'{self.SENDER_CHECK["credit"]["prisoner_number"]}'
+            )
+            self.assertContains(response, 'Started by:')
+            self.assertContains(response, f'{different_user_data["first_name"]} {different_user_data["last_name"]}')
+            self.assertContains(response, 'Date:')
+            self.assertContains(
+                response,
+                (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=1)).strftime('%d/%m/%Y %H:%M')
+            )
+            self.assertContains(response, 'Reason for automatically accepting:')
+            self.assertContains(response, reason)
+
+    def test_get_with_previous_unbound_inactive_auto_accept(self):
+        """
+        Test that the view renders the form with auto-accept form
+        """
+        response_len = 4
+        check_id = 1
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_sender_credit_list(response_len)),
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': response_len,
+                    'results': list(self._get_prisoner_credit_list(response_len))
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 1, 'prev': None, 'next': None, 'results': [{
+                    'debit_card_sender_details': self.SENDER_CHECK['credit']['billing_address'][
+                        'debit_card_sender_details'
+                    ],
+                    'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
+                    'states': [
+                        {
+                            'created': (datetime.datetime.now() - datetime.timedelta(hours=2)).isoformat(),
+                            'active': True
+                        },
+                        {
+                            'created': (datetime.datetime.now() - datetime.timedelta(hours=1)).isoformat(),
+                            'active': False
+                        },
+                    ]
+                }]}
+            )
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.get(url, follow=True)
+
+            self.assertContains(response, 'Accept credit')
+            self.assertContains(response, '123456******9876')
+            self.assertContains(response, '02/20')
+            self.assertContains(response, 'Automatically accept future credits from')
+            self.assertNotContains(
+                response,
+                f'Auto accept started for credits from {self.SENDER_CHECK["credit"]["sender_name"]} to '
+                f'{self.SENDER_CHECK["credit"]["prisoner_number"]}'
+            )
 
     def test_check_view_hides_action_buttons_if_resolved_already(self):
         """
@@ -3390,6 +3639,20 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'count': response_len,
                     'results': list(self._get_prisoner_credit_list(response_len))
                 }
+            )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
@@ -3457,6 +3720,21 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'results': list(self._get_prisoner_credit_list(response_len))
                 }
             )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
+
             response = self.client.get(
                 reverse(
                     'security:resolve_check',
@@ -3559,6 +3837,20 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     ],
                 }
             )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
 
             response = self.client.get(
                 reverse(
@@ -3643,6 +3935,20 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'results': list(self._get_prisoner_credit_list(response_len)),
                 }
             )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
 
             response = self.client.get(
                 reverse(
@@ -3724,6 +4030,20 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                         )
                     ]
                 }
+            )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
             response = self.client.get(
@@ -3809,6 +4129,20 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'results': list(self._get_sender_credit_list(response_len)),
                 }
             )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
 
             response = self.client.get(
                 reverse(
@@ -3852,6 +4186,254 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                 url,
                 data={
                     'fiu_action': 'accept',
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Credit accepted')
+
+    def test_accept_check_without_reactivating_auto_accept(self):
+        """
+        Test that if one tries to accept pending check, check marked as accepted, without reactivating auto_accept
+
+        We implicitly assert that no API call is made to the security/check/auto-accept endpoint even if
+        check.auto_accept_rule populated
+        """
+        check_id = 1
+        auto_accept_rule_id = 35
+        payload_values = {
+            'decision_reason': '',
+        }
+        check_with_inactive_auto_accept = copy.deepcopy(self.SENDER_CHECK)
+        check_with_inactive_auto_accept['auto_accept_rule_state'] = {
+            'auto_accept_rule': auto_accept_rule_id
+        }
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_with_inactive_auto_accept
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    responses.json_params_matcher(
+                        payload_values
+                    )
+                ],
+                status=204,
+            )
+            self.mock_need_attention_count(rsps, 0)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Credit accepted')
+
+    def test_accept_check_with_auto_accept(self):
+        """
+        Test that if one tries to accept pending check, check marked as accepted, and auto accept added in active state
+
+        We assert that API call is made to POST security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
+        populated
+        """
+        check_id = 1
+        payload_values = {
+            'decision_reason': '',
+        }
+        auto_accept_payload_values = {
+            'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
+            'debit_card_sender_details': self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details'],
+            'states': [{
+                'reason': 'cause I said so'
+            }]
+        }
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    responses.json_params_matcher(
+                        payload_values
+                    )
+                ],
+                status=204,
+            )
+            rsps.add(
+                rsps.POST,
+                api_url('/security/checks/auto-accept'),
+                match=[
+                    responses.json_params_matcher(
+                        auto_accept_payload_values
+                    )
+                ],
+                status=201
+            )
+            self.mock_need_attention_count(rsps, 0)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                    'auto_accept_reason': 'cause I said so'
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Credit accepted')
+
+    def test_accept_check_with_auto_accept_integrity_error(self):
+        """
+        Test that if one tries to accept pending check, check marked as accepted, info message displayed
+
+        We assert that API call is made to POST security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
+        populated
+        """
+        check_id = 1
+        payload_values = {
+            'decision_reason': '',
+        }
+        auto_accept_payload_values = {
+            'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
+            'debit_card_sender_details': self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details'],
+            'states': [{
+                'reason': 'cause I said so'
+            }]
+        }
+        check_get_api_url = api_url(f'/security/checks/{check_id}/')
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                check_get_api_url,
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    responses.json_params_matcher(
+                        payload_values
+                    )
+                ],
+                status=204,
+            )
+            rsps.add(
+                rsps.POST,
+                api_url('/security/checks/auto-accept'),
+                match=[
+                    responses.json_params_matcher(
+                        auto_accept_payload_values
+                    )
+                ],
+                status=400,
+                json={
+                    'non_field_errors': [
+                        CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
+                    ]
+                }
+            )
+            self.mock_need_attention_count(rsps, 0)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                    'auto_accept_reason': 'cause I said so'
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, reverse('security:check_list'))
+            self.assertContains(response, 'Credit accepted')
+            self.assertContains(
+                response,
+                (
+                    'The auto-accept rule could not be created because an auto-accept rule '
+                    'already exists for {sender_name} and {prisoner_number}'.format(
+                        sender_name=self.SENDER_CHECK['credit']['sender_name'],
+                        prisoner_number=self.SENDER_CHECK['credit']['prisoner_number']
+                    )
+                )
+            )
+
+    def test_accept_check_when_reactivating_auto_accept(self):
+        """
+        Test that if one tries to accept pending check, check marked as accepted, and auto accept reactivated
+
+        We assert that API call is made to PATCH security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
+        and check.auto_accept_rule populated
+
+        """
+        check_id = 1
+        auto_accept_rule_id = 35
+        payload_values = {
+            'decision_reason': '',
+        }
+        check_with_inactive_auto_accept = copy.deepcopy(self.SENDER_CHECK)
+        check_with_inactive_auto_accept['auto_accept_rule_state'] = {
+            'auto_accept_rule': auto_accept_rule_id
+        }
+        auto_accept_payload_values = {
+            'states': [{
+                'active': True,
+                'reason': 'cause I said so'
+            }]
+        }
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=check_with_inactive_auto_accept
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    responses.json_params_matcher(
+                        payload_values
+                    )
+                ],
+                status=201,
+            )
+            rsps.add(
+                rsps.PATCH,
+                api_url(f'/security/checks/auto-accept/{auto_accept_rule_id}'),
+                match=[
+                    responses.json_params_matcher(
+                        auto_accept_payload_values
+                    )
+                ],
+                status=200,
+            )
+            self.mock_need_attention_count(rsps, 0)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                    'auto_accept_reason': 'cause I said so'
                 },
                 follow=True
             )
@@ -3964,6 +4546,20 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'results': list(self._get_prisoner_credit_list(response_len)),
                 }
             )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
@@ -4035,6 +4631,20 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'count': response_len,
                     'results': list(self._get_prisoner_credit_list(response_len))
                 }
+            )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
@@ -4183,6 +4793,20 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 api_url(f'/security/checks/{check_id}/'),
                 json=dict(self.SENDER_CHECK, assigned_to_name='Columbo', assigned_to=777)
             )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
 
             url = reverse('security:assign_check', kwargs={'check_id': check_id})
             response = self.client.get(url, follow=True)
@@ -4246,6 +4870,20 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
                 json=dict(self.SENDER_CHECK, assigned_to_name='Columbo', assigned_to=777)
+            )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
             url = reverse('security:assign_check', kwargs={'check_id': check_id})
@@ -4369,6 +5007,20 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 api_url(f'/security/checks/{check_id}/'),
                 json=dict(self.SENDER_CHECK, assigned_to_name='Sherlock Holmes', assigned_to=5)
             )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
 
             url = reverse('security:assign_check', kwargs={'check_id': check_id})
 
@@ -4448,6 +5100,20 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 api_url(f'/security/checks/{check_id}/'),
                 json=dict(self.SENDER_CHECK, assigned_to_name=None, assigned_to=None)
             )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
 
             url = reverse('security:assign_check', kwargs={'check_id': check_id})
 
@@ -4520,6 +5186,20 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 rsps.GET,
                 api_url(f'/security/checks/{check_id}/'),
                 json=dict(self.SENDER_CHECK, assigned_to_name='Joe Bloggs', assigned_to=200)
+            )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
@@ -4630,6 +5310,20 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 json={
                     'count': 0,
                 }
+            )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
             url = reverse('security:assign_check', kwargs={'check_id': check_id})

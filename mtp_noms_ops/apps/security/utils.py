@@ -1,5 +1,6 @@
 import collections
 import datetime
+import logging
 import re
 
 from django.utils import timezone
@@ -9,6 +10,8 @@ from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
 
 from security import hmpps_employee_flag, confirmed_prisons_flag, provided_job_info_flag
+
+logger = logging.getLogger('mtp')
 
 
 def get_need_attention_date():
@@ -57,8 +60,8 @@ def convert_date_fields(object_list, include_nested=False):
                         new_value = timezone.localtime(new_value)
                     obj[field] = new_value
                     break
-                except (ValueError, TypeError):
-                    pass
+                except (ValueError, TypeError) as e:
+                    logger.warning(e)
         return obj
 
     if isinstance(object_list, dict):

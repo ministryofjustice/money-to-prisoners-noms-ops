@@ -21,7 +21,12 @@ CHECK_DETAIL_RENDERED_MAPPING = dict(
 
 CHECK_DETAIL_FORM_MAPPING = {
     'decision_reason': _('Give further details (optional)'),
+    'auto_accept_reason': _('Give reason for automatically accepting'),
     'rejection_reasons': dict(
         tuple(CHECK_REJECTION_CATEGORY_TEXT_MAPPING.items()) + tuple(CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items())
     )
 }
+
+# This is as custom-defined exception within the API service that we match against
+CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR = \
+    'An existing AutoAcceptRule is present for this DebitCardSenderDetails/PrisonerProfile pair'

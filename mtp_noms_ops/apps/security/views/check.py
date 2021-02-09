@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
@@ -113,6 +115,27 @@ class AcceptOrRejectCheckView(FormView):
         )
         return form_kwargs
 
+    @staticmethod
+    def get_latest_auto_accept_state(auto_accept_rule):
+        return sorted(
+            auto_accept_rule['states'], key=lambda x: x['created']
+        )[-1]
+
+    def get_unbound_active_auto_accept_state(
+        self, api_session, debit_card_sender_details_id: int, prisoner_profile_id: int
+    ) -> Optional[dict]:
+        query_existing_auto_accept_rule = api_session.get(
+            '/security/checks/auto-accept',
+            params={
+                'prisoner_profile_id': prisoner_profile_id,
+                'debit_card_sender_details_id': debit_card_sender_details_id
+            }
+        )
+
+        payload = query_existing_auto_accept_rule.json().get('results')
+        if len(payload) == 1 and self.get_latest_auto_accept_state(payload[0]).get('active'):
+            return convert_date_fields(self.get_latest_auto_accept_state(payload[0]))
+
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
@@ -121,6 +144,13 @@ class AcceptOrRejectCheckView(FormView):
             raise Http404('Credit to check not found')
 
         api_session = context_data['form'].session
+        context_data['unbound_active_auto_accept_state'] = self.get_unbound_active_auto_accept_state(
+            api_session,
+            detail_object['credit']['billing_address'][
+                'debit_card_sender_details'
+            ],
+            detail_object['credit']['prisoner_profile'],
+        )
 
         # keep query string in breadcrumbs
         list_url = self.request.build_absolute_uri(str(self.list_url))
@@ -185,10 +215,16 @@ class AcceptOrRejectCheckView(FormView):
 
     def form_valid(self, form):
         if self.request.method == 'POST':
-            result = form.accept_or_reject()
+            result, additional_info_message = form.accept_or_reject()
 
             if not result:
                 return self.form_invalid(form)
+            if additional_info_message:
+                messages.add_message(
+                    self.request,
+                    messages.INFO,
+                    gettext_lazy(additional_info_message),
+                )
 
             if form.data['fiu_action'] == 'accept':
                 ui_message = gettext_lazy('Credit accepted')
