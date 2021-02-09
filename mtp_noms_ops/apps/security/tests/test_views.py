@@ -3876,7 +3876,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
