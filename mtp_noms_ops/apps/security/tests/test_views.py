@@ -3354,7 +3354,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -3437,7 +3437,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -3557,7 +3557,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -3592,6 +3592,11 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, '123456******9876')
             self.assertContains(response, '02/20')
             self.assertContains(response, 'Automatically accept future credits from')
+            self.assertNotContains(
+                response,
+                f'Auto accept started for credits from {self.SENDER_CHECK["credit"]["sender_name"]} to '
+                f'{self.SENDER_CHECK["credit"]["prisoner_number"]}'
+            )
 
     def test_check_view_hides_action_buttons_if_resolved_already(self):
         """
@@ -3637,7 +3642,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -3717,7 +3722,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -3834,7 +3839,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -3932,7 +3937,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -4028,7 +4033,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -4126,7 +4131,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -4543,7 +4548,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -4629,7 +4634,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -4790,7 +4795,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -4868,7 +4873,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -5004,7 +5009,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -5097,7 +5102,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -5184,7 +5189,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
@@ -5308,7 +5313,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
             rsps.add(
                 rsps.GET,
-                '{}/security/checks/auto-accept?{}/'.format(
+                '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode((
                         ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),

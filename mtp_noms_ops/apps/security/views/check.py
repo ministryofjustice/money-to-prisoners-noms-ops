@@ -1,5 +1,4 @@
 from typing import Optional
-from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
@@ -126,26 +125,16 @@ class AcceptOrRejectCheckView(FormView):
         self, api_session, debit_card_sender_details_id: int, prisoner_profile_id: int
     ) -> Optional[dict]:
         query_existing_auto_accept_rule = api_session.get(
-            '/security/checks/auto-accept?{}'.format(
-                urlencode((
-                    ('prisoner_profile_id', prisoner_profile_id),
-                    ('debit_card_sender_details_id', debit_card_sender_details_id)
-                ))
-            )
+            '/security/checks/auto-accept',
+            params={
+                'prisoner_profile_id': prisoner_profile_id,
+                'debit_card_sender_details_id': debit_card_sender_details_id
+            }
         )
 
-        payload = query_existing_auto_accept_rule.json()
-        #  unfortunately django-filters OR's filters rather than ANDing them
-        existing_auto_accept_rules = list(filter(
-            lambda x: (
-                x['prisoner_profile'] == prisoner_profile_id
-                and x['debit_card_sender_details'] == debit_card_sender_details_id
-                and self.get_latest_auto_accept_state(x)['active']
-            ),
-            payload['results']
-        ))
-        if len(existing_auto_accept_rules) == 1:
-            return convert_date_fields(self.get_latest_auto_accept_state(existing_auto_accept_rules[0]))
+        payload = query_existing_auto_accept_rule.json().get('results')
+        if len(payload) == 1 and self.get_latest_auto_accept_state(payload[0]).get('active'):
+            return convert_date_fields(self.get_latest_auto_accept_state(payload[0]))
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
