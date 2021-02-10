@@ -85,7 +85,7 @@
             {{ check.credit.amount|currency }}
           </td>
           <td class="print-hidden">
-            {{ check.status|format_security_check_status }}
+            {{ check|format_security_check_status }}
           </td>
         </tr>
         <tr class="mtp-check-description-row">
@@ -139,12 +139,16 @@
               {{ credit.amount|currency }}
             </td>
             <td>
-              <span class="mtp-check-status-tag mtp-check-status-tag--{{ credit.security_check.status }}">
-                {{ credit.security_check.status|format_security_check_status }}
+              <span class="mtp-check-status-tag mtp-check-status-tag--{{ credit.security_check.status}}">
+                {{ credit.security_check|format_security_check_status }}
               </span>
               <br />
               {% trans 'by' %}
-              {{ credit.security_check.actioned_by_name }}
+              {% if credit.security_check.auto_accept_rule_state and credit.security_check.auto_accept_rule_state.active %}
+                {{ credit.security_check.auto_accept_rule_state.added_by.first_name }} {{ credit.security_check.auto_accept_rule_state.added_by.last_name }}
+              {% else %}
+                {{ credit.security_check.actioned_by_name }}
+              {% endif %}
             </td>
           </tr>
           <tr class="mtp-check-description-row">
@@ -153,15 +157,19 @@
               {{ credit.security_check|check_description }}
               <br />
               <br />
-              <strong>{% trans 'Decision details' %}:</strong>
-              {% for reason, value in credit.security_check.rejection_reasons.items %}
-                {{ reason | get_human_readable_check_field }}{% if value != True %}: {{ value }}{% endif %}
-                <br/>
-              {% endfor %}
-              {% if credit.security_check.decision_reason %}
-                Further Details: {{ credit.security_check.decision_reason }}
-              {% elif not credit.security_check.rejection_reasons %}
-                {% trans 'No decision reason entered' %}
+              {% if credit.security_check.auto_accept_rule_state.active is True %}
+                <strong>{% trans 'Reason for automatically accepting' %}:</strong> {{ credit.security_check.auto_accept_rule_state.reason }}
+              {% else %}
+                <strong>{% trans 'Decision details' %}:</strong>
+                {% for reason, value in credit.security_check.rejection_reasons.items %}
+                  {{ reason | get_human_readable_check_field }}{% if value != True %}: {{ value }}{% endif %}
+                  <br/>
+                {% endfor %}
+                {% if credit.security_check.decision_reason %}
+                <strong>{% trans 'Further Details:' %}</strong> {{ credit.security_check.decision_reason }}
+                {% elif not credit.security_check.rejection_reasons %}
+                  {% trans 'No decision reason entered' %}
+                {% endif %}
               {% endif %}
               </td>
             </tr>
@@ -267,7 +275,7 @@
 
         <h2 class="heading-medium">{% trans 'Decision' %}</h2>
         <p>
-          {% blocktrans trimmed with resolved=check.status|format_security_check_status|lower user=check.actioned_by_name %}
+          {% blocktrans trimmed with resolved=check|format_security_check_status|lower user=check.actioned_by_name %}
             This credit was {{ resolved }} by {{ user }}.
           {% endblocktrans %}
         </p>

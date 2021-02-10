@@ -74,7 +74,7 @@
           </td>
           <td>
             <span class="mtp-check-status-tag mtp-check-status-tag--{{ check.status }}">
-              {{ check.status|format_security_check_status }}
+              {{ check|format_security_check_status }}
             </span>
             <br />
             {% trans 'by' %}

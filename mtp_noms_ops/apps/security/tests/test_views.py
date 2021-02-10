@@ -3765,6 +3765,177 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
 
         # TODO add in assertion for ordering
 
+    def test_check_view_includes_matching_credit_history_including_active_auto_accept(self):
+        """
+        Test that the view displays auto-accepted credits related by sender id to the credit subject to a check.
+        """
+        check_id = 1
+        response_len = 2
+        sender_active_auto_accept_rule_state = {
+            'active': True,
+            'reason': 'I should be here sender'
+        }
+        sender_inactive_auto_accept_rule_state = {
+            'active': False,
+            'reason': 'I shouldnt be here sender'
+        }
+        prisoner_active_auto_accept_rule_state = {
+            'active': True,
+            'reason': 'I should be here prisoner'
+        }
+        prisoner_inactive_auto_accept_rule_state = {
+            'active': False,
+            'reason': 'I shouldnt be here prisoner'
+        }
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
+                        sender_profile_id=self.sender_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', self.credit_id),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 2,
+                    'results': [
+                        dict(
+                            self.SENDER_CREDIT,
+                            id=0,
+                            security_check=dict(
+                                self.PRISONER_CREDIT['security_check'],
+                                auto_accept_rule_state=sender_active_auto_accept_rule_state
+                            )
+                        ),
+                        dict(
+                            self.SENDER_CREDIT,
+                            id=1,
+                            security_check=dict(
+                                self.SENDER_CREDIT['security_check'],
+                                auto_accept_rule_state=sender_inactive_auto_accept_rule_state
+                            )
+                        )
+                    ]
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
+                        prisoner_profile_id=self.prisoner_id,
+                        querystring=urlencode([
+                            ('limit', 500),
+                            ('offset', 0),
+                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
+                            ('security_check__isnull', False),
+                            ('only_completed', False),
+                            ('security_check__actioned_by__isnull', False),
+                            ('include_checks', True),
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                json={
+                    'count': 2,
+                    'results': [
+                        dict(
+                            self.PRISONER_CREDIT,
+                            id=0,
+                            security_check=dict(
+                                self.PRISONER_CREDIT['security_check'],
+                                auto_accept_rule_state=prisoner_active_auto_accept_rule_state
+                            )
+                        ),
+                        dict(
+                            self.PRISONER_CREDIT,
+                            id=1,
+                            security_check=dict(
+                                self.PRISONER_CREDIT['security_check'],
+                                auto_accept_rule_state=prisoner_inactive_auto_accept_rule_state
+                            )
+                        )
+                    ]
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode((
+                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
+                        (
+                            'debit_card_sender_details_id',
+                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
+                        )
+                    ))
+                ),
+                json={'count': 0, 'prev': None, 'next': None, 'results': []}
+            )
+
+            response = self.client.get(
+                reverse(
+                    'security:resolve_check',
+                    kwargs={'check_id': check_id},
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+        self.assertIn('123456******9876', response_content)
+        self.assertIn('02/20', response_content)
+        self.assertIn('Jean Valjean', response_content)
+        self.assertIn('£10.00', response_content)
+
+        # Senders previous credit
+        self.assertIn('Ms A. Nother Prisoner', response_content)
+        self.assertIn('£10,000.00', response_content)
+        self.assertIn('Strict compliance check failed', response_content)
+        self.assertIn('Javert', response_content)
+        self.assertIn(
+            'Reason for automatically accepting:',
+            response_content
+        )
+        self.assertIn(
+            sender_active_auto_accept_rule_state['reason'],
+            response_content
+        )
+        self.assertNotIn(
+            sender_inactive_auto_accept_rule_state['reason'],
+            response_content
+        )
+
+        # Prisoners previous credit
+        self.assertIn('£0.10', response_content)
+        self.assertIn('01199988199******7253', response_content)
+        self.assertIn('02/50', response_content)
+        self.assertIn('SOMEONE ELSE', response_content)
+        self.assertIn('Number 6', response_content)
+        self.assertIn('Soft compliance check failed', response_content)
+        self.assertIn(
+            prisoner_active_auto_accept_rule_state['reason'],
+            response_content
+        )
+        self.assertNotIn(
+            prisoner_inactive_auto_accept_rule_state['reason'],
+            response_content
+        )
+
     @parameterized.expand(
         CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
     )
