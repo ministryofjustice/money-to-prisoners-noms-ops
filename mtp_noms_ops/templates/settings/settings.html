@@ -36,7 +36,7 @@
       <h2 class="govuk-heading-l">
         {% trans 'Your prisons' %}
       </h2>
-      <ul class="list list-bullet">
+      <ul class="govuk-list govuk-list--bullet">
         {% for prison in request.user.user_data.prisons %}
           <li>{{ prison.name }}</li>
         {% empty %}
