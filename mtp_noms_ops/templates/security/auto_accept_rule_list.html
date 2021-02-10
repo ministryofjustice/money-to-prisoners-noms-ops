@@ -74,7 +74,7 @@
             {{ auto_accept_rule.states |get_latest_active_auto_accept_state_field:'reason' |truncatechars:50 }}
           </td>
           <td>
-            <a class="button print-hidden"
+            <a class="button govuk-!-display-none-print"
                href="{% url 'security:auto_accept_rule_detail' auto_accept_rule_id=auto_accept_rule.id %}"
                aria-label="{% trans 'View auto-accept details' %}">
               {% trans 'Review' %}

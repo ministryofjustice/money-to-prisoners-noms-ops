@@ -76,7 +76,7 @@
           <th>{% trans 'Debit card (from)' %}</th>
           <th>{% trans 'Prisoner (to)' %}</th>
           <th>{% trans 'Amount' %}</th>
-          <th class="print-hidden">{% trans 'Actions' %}</th>
+          <th class="govuk-!-display-none-print">{% trans 'Actions' %}</th>
         </tr>
       </thead>
       <tbody>
@@ -114,7 +114,7 @@
           </td>
           <td>
             <div class="mtp-check-cell__actions">
-              <a class="button print-hidden" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="govuk-visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
+              <a class="button govuk-!-display-none-print" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="govuk-visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
               {% if view.get_class_name == 'CheckListView' %}
                 <span class="mtp-check-cell__list-status">
                   {% if check.assigned_to == form.request.user.pk %}

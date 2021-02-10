@@ -21,7 +21,7 @@
 
         {% paneltab name='credits' title=_('Credits') %}
           <div class="mtp-results-list">
-            <div class="print-hidden mtp-links--no-panel">
+            <div class="govuk-!-display-none-print mtp-links--no-panel">
               <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
               &nbsp;
               {% url 'security:prisoner_export' as export_view %}
@@ -40,7 +40,7 @@
                   {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' cell_classes='numeric' %}
                   {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' cell_classes='numeric' %}
                   {% sortable_cell _('Amount of credits') form.cleaned_data 'credit_total' cell_classes='numeric' %}
-                  <th class="numeric print-hidden">{% trans 'Details' %}</th>
+                  <th class="numeric govuk-!-display-none-print">{% trans 'Details' %}</th>
                 </tr>
               </thead>
               <tbody>
@@ -69,7 +69,7 @@
                         {{ prisoner.credit_total|currency }}
                       </span>
                     </td>
-                    <td class="numeric print-hidden">
+                    <td class="numeric govuk-!-display-none-print">
                       <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}">
                         {% trans 'View details' %}
                       </a>
@@ -95,7 +95,7 @@
 
         {% paneltab name='disbursements' title=_('Disbursements') %}
           <div class="mtp-results-list">
-            <div class="print-hidden mtp-links--no-panel">
+            <div class="govuk-!-display-none-print mtp-links--no-panel">
               <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
               &nbsp;
               {% url 'security:prisoner_export' as export_view %}
@@ -114,7 +114,7 @@
                   {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='numeric' %}
                   {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' cell_classes='numeric' %}
                   {% sortable_cell _('Amount of disbursements	') form.cleaned_data 'disbursement_total' cell_classes='numeric' %}
-                  <th class="numeric print-hidden">{% trans 'Details' %}</th>
+                  <th class="numeric govuk-!-display-none-print">{% trans 'Details' %}</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,7 +143,7 @@
                         {{ prisoner.disbursement_total|currency }}
                       </span>
                     </td>
-                    <td class="numeric print-hidden">
+                    <td class="numeric govuk-!-display-none-print">
                       <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}">
                         {% trans 'View details' %}
                       </a>
@@ -173,13 +173,13 @@
   {% if is_search_results %}
     <p>
     {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="button print-hidden">{% trans 'Start new search' %}</a>
+      <a href="{{ search_form_item.url }}" class="button govuk-!-display-none-print">{% trans 'Start new search' %}</a>
     {% endwith%}
     </p>
 
     {% if all_prisons_simple_search_link %}
     <p>
-      <a href="{{ all_prisons_simple_search_link }}" class="print-hidden js-FormAnalytics-click" data-click-track="all-prisons-simple-search,prisoners">
+      <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print js-FormAnalytics-click" data-click-track="all-prisons-simple-search,prisoners">
         {% trans 'See results from all prisons' %}
       </a>
     </p>

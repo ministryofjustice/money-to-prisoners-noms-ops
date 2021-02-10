@@ -15,7 +15,7 @@
           {% endif %}
         </div>
 
-        <div class="govuk-grid-column-one-third print-hidden">
+        <div class="govuk-grid-column-one-third govuk-!-display-none-print">
           <div class="mtp-info-box">
             <div class="mtp-info-box__heading">
               {% trans 'About payment source data' %}
@@ -32,7 +32,7 @@
 
     {% if form.is_valid and senders %}{% setup_highlight %}
       <div class="mtp-results-list">
-        <div class="print-hidden mtp-links--no-panel">
+        <div class="govuk-!-display-none-print mtp-links--no-panel">
           <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
           &nbsp;
           {% url 'security:sender_export' as export_view %}
@@ -54,7 +54,7 @@
               {% sortable_cell _('Number of prisons sent to') form.cleaned_data 'prison_count' cell_classes='numeric' %}
               {% endif %}
               {% sortable_cell _('Total amount sent') form.cleaned_data 'credit_total' cell_classes='numeric' %}
-              <th class="numeric print-hidden">{% trans 'Details' %}</th>
+              <th class="numeric govuk-!-display-none-print">{% trans 'Details' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -141,7 +141,7 @@
                         {{ sender.credit_total|currency }}
                       </span>
                     </td>
-                    <td class="numeric print-hidden">
+                    <td class="numeric govuk-!-display-none-print">
                       <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}">
                         {% trans 'View details' %}
                       </a>
@@ -170,13 +170,13 @@
   {% if is_search_results %}
     <p>
     {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="button print-hidden">{% trans 'Start new search' %}</a>
+      <a href="{{ search_form_item.url }}" class="button govuk-!-display-none-print">{% trans 'Start new search' %}</a>
     {% endwith%}
     </p>
 
     {% if all_prisons_simple_search_link %}
     <p>
-      <a href="{{ all_prisons_simple_search_link }}" class="print-hidden js-FormAnalytics-click" data-click-track="all-prisons-simple-search,senders">
+      <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print js-FormAnalytics-click" data-click-track="all-prisons-simple-search,senders">
         {% trans 'See results from all prisons' %}
       </a>
     </p>

@@ -27,7 +27,7 @@
   <form method="post" class="mtp-review js-ConfirmChecked js-FormAnalytics">
     {% csrf_token %}
 
-    <div class="mtp-review__actions print-hidden">
+    <div class="mtp-review__actions govuk-!-display-none-print">
       <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
       <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print these credits' %}</a>
     </div>
@@ -90,7 +90,7 @@
     </div>
 
 
-    <div class="mtp-review__actions print-hidden">
+    <div class="mtp-review__actions govuk-!-display-none-print">
       <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
     </div>
 

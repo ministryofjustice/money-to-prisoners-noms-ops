@@ -48,7 +48,7 @@
 <td class="numeric">
   {{ credit.resolution|format_resolution }}
   <br/>
-  <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}" class="print-hidden">
+  <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}" class="govuk-!-display-none-print">
     {% trans 'View details' %}
   </a>
 </td>

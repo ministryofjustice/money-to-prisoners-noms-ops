@@ -73,7 +73,7 @@
     {% if form.is_valid %}
       <div class="mtp-results-list">
         {% block object_list %}
-          <aside class="mtp-object-list-toggle print-hidden">
+          <aside class="mtp-object-list-toggle govuk-!-display-none-print">
             <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" class="button-secondary">
               {% trans 'View disbursements' %}
             </a>
@@ -86,7 +86,7 @@
               {{ form.search_description.description }}
             </p>
 
-            <div class="print-hidden mtp-links">
+            <div class="govuk-!-display-none-print mtp-links">
               <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
               &nbsp;
               {% url 'security:prisoner_detail_export' prisoner_id=prisoner.id as export_view %}

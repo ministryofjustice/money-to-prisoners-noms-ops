@@ -37,7 +37,7 @@
 
   {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
-  <div class="print-hidden">
+  <div class="govuk-!-display-none-print">
     <div class="mtp-security-form--simple">
     <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
     {{ form.ordering.as_hidden }}

@@ -2,13 +2,13 @@
 {% load security %}
 
 {% if form.existing_search %}
-  <div class="mtp-save-search print-hidden">
+  <div class="mtp-save-search govuk-!-display-none-print">
     <a class="button" href="?{{ form|query_string_with_additional_parameter:'unpin' }}">
       {{ unpin_label|default:_('Stop monitoring this profile') }}
     </a>
   </div>
 {% else %}
-  <div class="mtp-save-search print-hidden">
+  <div class="mtp-save-search govuk-!-display-none-print">
     <a class="button" href="?{{ form|query_string_with_additional_parameter:'pin' }}">
       {{ pin_label|default:_('Monitor this profile on your home page') }}
     </a>
