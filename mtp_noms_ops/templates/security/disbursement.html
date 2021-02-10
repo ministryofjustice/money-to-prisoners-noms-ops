@@ -69,7 +69,7 @@
               {% if disbursement.remittance_description %}
                 {{ disbursement.remittance_description }}
               {% else %}
-                <span class="text-secondary">({% trans 'None given' %})</span>
+                <span class="govuk-body-m--secondary">({% trans 'None given' %})</span>
               {% endif %}
             </div>
           </td>
@@ -139,9 +139,9 @@
                   {% endblocktrans %}
                   <br/>
                   {% with rejection_reason=disbursement.comments|find_rejection_reason %}
-                    <small>
+                    <span class="govuk-body-s--secondary">
                       {{ rejection_reason|truncatewords:5 }}
-                    </small>
+                    </span>
                     <br/>
                   {% endwith %}
 

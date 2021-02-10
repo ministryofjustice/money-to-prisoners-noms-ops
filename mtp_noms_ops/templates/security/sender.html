@@ -12,7 +12,7 @@
     </header>
 
     {% if sender.bank_transfer_details %}
-      <p class="lede">
+      <p class="govuk-body-l">
         {% trans 'Bank transfer payments with these details' %}
       </p>
 
@@ -33,7 +33,7 @@
       </div>
 
     {% elif sender.debit_card_details %}
-      <p class="lede">
+      <p class="govuk-body-l">
         {% trans 'Debit card payments with these details' %}
         &nbsp;
         <a href="#grouping-info-dialogue" class="js-dialogue-open">{% trans 'How are these grouped?' %}</a>

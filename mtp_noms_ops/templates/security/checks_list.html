@@ -41,7 +41,7 @@
 
   {% notification_banners request %}
 
-  <p class="font-large">
+  <p class="govuk-!-font-size-36">
     {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
       {{ number }} credit
     {% plural %}
@@ -50,7 +50,7 @@
   </p>
 
   {% if form.need_attention_count %}
-    <p class="font-medium">
+    <p class="govuk-body-l">
       <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
       <strong>
         {% blocktrans trimmed count count=form.need_attention_count with number=form.need_attention_count|separate_thousands %}

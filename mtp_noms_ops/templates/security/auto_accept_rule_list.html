@@ -29,7 +29,7 @@
 
   {% notification_banners request %}
 
-  <p class="font-large">
+  <p class="govuk-!-font-size-36">
     {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
     {{ number }} auto accept rule
     {% plural %}
