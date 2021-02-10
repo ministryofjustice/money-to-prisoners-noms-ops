@@ -3,14 +3,14 @@
 
 {% if is_search_results %}
   <header>
-  <h1 class="heading-xlarge">
-    <span class="heading-secondary">{{ view.title }}</span>
-    {% if is_advanced_search_results %}
-      {% trans 'Advanced search results' %}
-    {% else %}
-      {% trans 'Search results' %}
-    {% endif %}
-  </h1>
+    <h1 class="govuk-heading-xl">
+      <span class="govuk-caption-xl">{{ view.title }}</span>
+      {% if is_advanced_search_results %}
+        {% trans 'Advanced search results' %}
+      {% else %}
+        {% trans 'Search results' %}
+      {% endif %}
+    </h1>
   </header>
 
   {% notification_banners request %}
@@ -30,7 +30,7 @@
   </p>
 {% else %}
   <header>
-    <h1 class="heading-xlarge">{{ view.title }}</h1>
+    <h1 class="govuk-heading-xl">{{ view.title }}</h1>
   </header>
 
   {% notification_banners request %}

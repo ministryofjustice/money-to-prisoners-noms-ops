@@ -11,7 +11,7 @@
 {% block content %}
 
   <header>
-    <h1 class="heading-xlarge">{{ view.title }}</h1>
+    <h1 class="govuk-heading-xl">{{ view.title }}</h1>
   </header>
 
   {% notification_banners request %}
@@ -27,7 +27,7 @@
         {% with field=form.job_title choices=form.job_title.field.choices %}
           <fieldset class="mtp-conditional-container">
             <legend id="{{ field.id_for_label }}-label">
-              <strong class="heading-large">{{ field.label }}</strong>
+              <strong class="govuk-heading-l">{{ field.label }}</strong>
             </legend>
 
             <div class="form-group {% if field.errors %}form-group-error{% endif %}">
@@ -53,7 +53,7 @@
         {% with field=form.prison_estate choices=form.prison_estate.field.choices %}
           <fieldset>
             <legend id="{{ field.id_for_label }}-label">
-              <strong class="heading-large">{{ field.label }}</strong>
+              <strong class="govuk-heading-l">{{ field.label }}</strong>
             </legend>
 
             <div class="form-group {% if field.errors %}form-group-error{% endif %}">
@@ -73,7 +73,7 @@
         {% with field=form.tasks %}
           <fieldset>
             <legend id="{{ field.id_for_label }}-label">
-              <strong class="heading-large">{{ field.label }}</strong>
+              <strong class="govuk-heading-l">{{ field.label }}</strong>
             </legend>
             <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
               <p class="form-hint">{{ field.help_text }}</p>

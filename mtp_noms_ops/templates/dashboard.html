@@ -38,7 +38,7 @@
   {% endif %}
 
   <header>
-    <h1 class="heading-xlarge mtp-unpadded-heading">
+    <h1 class="govuk-heading-xl">
       {% blocktrans trimmed with full_name=request.user.get_full_name|default:request.user.username %}
         Welcome {{ full_name }}
       {% endblocktrans %}
@@ -103,7 +103,7 @@
 
   {% if request.can_access_security and saved_searches|length > 0 %}
 
-    <h2 class="heading-medium">{% trans 'Payment sources and prisoners you are monitoring' %}</h2>
+    <h2 class="govuk-heading-m">{% trans 'Payment sources and prisoners you are monitoring' %}</h2>
     {% for search in saved_searches %}
       {% if forloop.counter0|divisibleby:3 %}
       <div class="grid-row">
@@ -131,7 +131,7 @@
 
   {% if request.can_access_security and request.can_pre_approve or request.can_access_user_management or request.can_access_prisoner_location %}
 
-    <h2 class="heading-medium">{% trans 'Admin options' %}</h2>
+    <h2 class="govuk-heading-m">{% trans 'Admin options' %}</h2>
 
     <div class="grid-row">
       {% if request.can_access_security and request.can_pre_approve %}

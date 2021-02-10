@@ -6,7 +6,7 @@
 
 {% block content %}
   <header>
-    <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
+    <h1 class="govuk-heading-xl">{{ view.title }}</h1>
   </header>
 
   {% notification_banners request %}
@@ -14,7 +14,7 @@
   <div class="grid-row">
     <div class="column-two-thirds">
 
-      <h2 class="heading-large">
+      <h2 class="govuk-heading-l">
         {% trans 'Your monitored payment sources and prisoners' %}
       </h2>
       {% if not monitored_count %}
@@ -27,7 +27,7 @@
       {% if form.is_valid %}
         {% for date_group in date_groups %}
 
-          <h3 class="heading-medium" id="date-{{ date_group.date.isoformat }}">
+          <h3 class="govuk-heading-m" id="date-{{ date_group.date.isoformat }}">
             {{ date_group.date|date:'SHORT_DATE_FORMAT' }}
             –
             {% blocktrans trimmed count count=date_group.transaction_count %}
@@ -38,7 +38,7 @@
           </h3>
 
           {% if date_group.senders %}
-            <h4 class="heading-small">{% trans 'Payment sources' %}</h4>
+            <h4 class="govuk-heading-s">{% trans 'Payment sources' %}</h4>
 
             {% for sender in date_group.senders %}
               <a href="{% url 'security:sender_detail' sender_id=sender.id %}">
@@ -55,7 +55,7 @@
           {% endif %}
 
           {% if date_group.prisoners %}
-            <h4 class="heading-small">{% trans 'Prisoners' %}</h4>
+            <h4 class="govuk-heading-s">{% trans 'Prisoners' %}</h4>
 
             {% for prisoner in date_group.prisoners %}
               {% if prisoner.disbursements_only %}

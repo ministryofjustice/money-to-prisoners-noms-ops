@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block advanced_search_fields %}
-  <div class="heading-large">{% trans 'Date received' %}</div>
+  <div class="govuk-heading-l">{% trans 'Date received' %}</div>
   <p>{% trans 'We only keep transaction data for 7 years.' %}
 
   <div class="grid-row">
@@ -17,8 +17,8 @@
 
   {% include 'security/forms/amount-pattern-fieldset.html' %}
 
-  <div class="heading-large">{% trans 'Payment methods' %}</div>
-  <div class="heading-medium">{% trans 'Payment source details' %}</div>
+  <div class="govuk-heading-l">{% trans 'Payment methods' %}</div>
+  <div class="govuk-heading-m">{% trans 'Payment source details' %}</div>
   <p>
     {% trans 'Name, email and postcode are supplied by the sender when they make a debit card payment.' %}
     {% trans 'They are not validated.' %}
@@ -29,10 +29,10 @@
   {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_ip_address %}
 
-  <div class="heading-medium">{% trans 'Payment method' %}</div>
+  <div class="govuk-heading-m">{% trans 'Payment method' %}</div>
   {% include 'security/forms/payment-method-fieldset.html' %}
 
-  <div class="heading-large">{% trans 'Prisoner' %}</div>
+  <div class="govuk-heading-l">{% trans 'Prisoner' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
 

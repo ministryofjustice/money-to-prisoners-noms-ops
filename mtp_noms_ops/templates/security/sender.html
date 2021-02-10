@@ -8,7 +8,7 @@
 {% block content %}
   <div class="mtp-sender-summary {% if sender.bank_transfer_details %}mtp-sender-summary__bank-transfer{% elif sender.debit_card_details %}mtp-sender-summary__debit-card{% endif %}">
     <header>
-      <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
+      <h1 class="govuk-heading-xl">{{ view.title }}</h1>
     </header>
 
     {% if sender.bank_transfer_details %}
@@ -87,7 +87,7 @@
 
     {% if form.is_valid %}
       <div class="mtp-results-list">
-        <h2 class="heading-large">{% trans 'Credits sent' %}</h2>
+        <h2 class="govuk-heading-l">{% trans 'Credits sent' %}</h2>
 
         <div class="panel panel-border-narrow">
           <p class="mtp-search-description--aside">

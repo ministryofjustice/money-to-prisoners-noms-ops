@@ -16,7 +16,7 @@
 
   {% if prison_choice_available %}
     <header>
-      <h1 class="heading-xlarge mtp-slim-heading">{{ view.title }}</h1>
+      <h1 class="govuk-heading-xl">{{ view.title }}</h1>
     </header>
 
     <div class="grid-row">
@@ -69,7 +69,7 @@
     </div>
   {% else %}
     <header>
-      <h1 class="heading-large">{% trans 'You cannot choose your prisons at this time' %}</h1>
+      <h1 class="govuk-heading-l">{% trans 'You cannot choose your prisons at this time' %}</h1>
     </header>
   {% endif %}
 

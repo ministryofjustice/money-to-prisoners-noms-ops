@@ -14,9 +14,9 @@
 
     <div class="mtp-prisoner-summary">
       <header>
-        <h1 class="heading-xlarge mtp-unpadded-heading">{{ prisoner.prisoner_name|default:_('Unknown prisoner') }}</h1>
+        <h1 class="govuk-heading-xl">{{ prisoner.prisoner_name|default:_('Unknown prisoner') }}</h1>
         {% if prisoner.prisoner_number %}
-          <h2 class="heading-large mtp-unpadded-subheading">{{ prisoner.prisoner_number }}</h2>
+          <h2 class="govuk-heading-l">{{ prisoner.prisoner_number }}</h2>
         {% endif %}
       </header>
 
@@ -79,7 +79,7 @@
             </a>
           </aside>
 
-          <h2 class="heading-large">{% trans 'Credits received' %}</h2>
+          <h2 class="govuk-heading-l">{% trans 'Credits received' %}</h2>
 
           <div class="panel panel-border-narrow">
             <p class="mtp-search-description--aside">

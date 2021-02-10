@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block advanced_search_fields %}
-  <div class="heading-large">{% trans 'Payment source details' %}</div>
+  <div class="govuk-heading-l">{% trans 'Payment source details' %}</div>
   <p>
     {% trans 'Name, email and postcode are supplied by the sender when they make a debit card payment.' %}
     {% trans 'They are not validated.' %}
@@ -12,7 +12,7 @@
   {% include 'mtp_common/forms/field.html' with field=form.sender_email %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
 
-  <div class="heading-large">{% trans 'Payment method' %}</div>
+  <div class="govuk-heading-l">{% trans 'Payment method' %}</div>
   {% include 'security/forms/payment-method-fieldset.html' %}
 
   {% include 'security/forms/prison-selector-fieldset.html' %}

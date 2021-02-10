@@ -59,7 +59,6 @@ class CreditListViewV2(SecuritySearchViewV2):
     object_list_context_key = 'credits'
     object_name = _('credit')
     object_name_plural = _('credits')
-    no_spaced_header = True
     november_second_changes_live = settings.NOVEMBER_SECOND_CHANGES_LIVE
 
 
@@ -77,7 +76,6 @@ class DisbursementListViewV2(SecuritySearchViewV2):
     object_list_context_key = 'disbursements'
     object_name = _('disbursement')
     object_name_plural = _('disbursements')
-    no_spaced_header = True
     november_second_changes_live = settings.NOVEMBER_SECOND_CHANGES_LIVE
 
 

@@ -8,7 +8,7 @@
 
 {% block content %}
   <header class="mtp-check-header">
-    <h1 class="heading-xlarge">{{ view.title }}</h1>
+    <h1 class="govuk-heading-xl">{{ view.title }}</h1>
 
     <aside class="mtp-check-header__list-toggle print-hidden">
       {% if check.assigned_to and check.assigned_to != request.user.pk %}
@@ -32,7 +32,7 @@
 
   {% notification_banners request %}
 
-  <h2 class="heading-medium">{% trans 'Credit details' %}</h2>
+  <h2 class="govuk-heading-m">{% trans 'Credit details' %}</h2>
 
   <div class="mtp-results-list table-font-xsmall mtp-check-list">
     <table class="mtp-table mtp-table--review">
@@ -98,7 +98,7 @@
     </table>
   </div>
 
-  <h3 class="heading-medium">{% trans 'Credit decisions matching debit card or prisoner' %}</h3>
+  <h3 class="govuk-heading-m">{% trans 'Credit decisions matching debit card or prisoner' %}</h3>
   <div class="mtp-results-list table-font-xsmall mtp-check-list">
     <table class="mtp-table mtp-table--review">
       <caption class=visually-hidden>{% trans 'This is a table showing any previous credit decisions involving the prisoner or debit card in question' %}</caption>
@@ -189,8 +189,8 @@
       {% if check.status == 'pending' %}
 
         <div class="form-group">
-          <h2 class="heading-medium">{% trans 'Accept or reject this credit' %}</h2>
-          <h3 class="heading-medium">{% trans 'To accept this credit:' %}</h3>
+          <h2 class="govuk-heading-l">{% trans 'Accept or reject this credit' %}</h2>
+          <h3 class="govuk-heading-m">{% trans 'To accept this credit:' %}</h3>
           {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='form-control-3-4' %}
           <div class="mtp-check-accept-container">
             {% if unbound_active_auto_accept_state %}
@@ -228,7 +228,7 @@
             </button>
           </div>
 
-          <h3 class="heading-medium">{% trans 'To reject this credit:' %}</h2>
+          <h3 class="govuk-heading-m">{% trans 'To reject this credit:' %}</h3>
           <fieldset class="mtp-check-form-spacing">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend">{% trans 'Select all reasons for rejecting this credit:' %}</legend>
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_paying_multiple_prisoners input_classes='form-control-3-4' %}
@@ -273,7 +273,7 @@
 
       {% else %}
 
-        <h2 class="heading-medium">{% trans 'Decision' %}</h2>
+        <h2 class="govuk-heading-m">{% trans 'Decision' %}</h2>
         <p>
           {% blocktrans trimmed with resolved=check|format_security_check_status|lower user=check.actioned_by_name %}
             This credit was {{ resolved }} by {{ user }}.

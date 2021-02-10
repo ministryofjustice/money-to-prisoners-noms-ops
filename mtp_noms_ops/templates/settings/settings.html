@@ -7,7 +7,7 @@
       {% csrf_token %}
       {% if email_notifications %}
 
-        <h2 class="heading-large">
+        <h2 class="govuk-heading-l">
           {% trans 'Email notifications' %} – {% trans 'ON' %}
         </h2>
         <p>
@@ -18,7 +18,7 @@
 
       {% else %}
 
-        <h2 class="heading-large">
+        <h2 class="govuk-heading-l">
           {% trans 'Email notifications' %} – {% trans 'OFF' %}
         </h2>
         <p>
@@ -33,7 +33,7 @@
 
   {% if prison_choice_available %}
     <div class="mtp-settings-item">
-      <h2 class="heading-large">
+      <h2 class="govuk-heading-l">
         {% trans 'Your prisons' %}
       </h2>
       <ul class="list list-bullet">

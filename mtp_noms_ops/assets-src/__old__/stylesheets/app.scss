@@ -28,19 +28,6 @@ form .form-group .form-hint {
   margin-top: 0;
 }
 
-// mtp header overrides
-
-.mtp-unpadded-heading {
-  margin-bottom: 0;
-}
-.mtp-unpadded-subheading {
-  margin: 0;
-}
-
-.mtp-slim-heading {
-  margin-bottom: 0.8em;
-}
-
 // app-specific styles
 
 %table-container {
@@ -50,27 +37,6 @@ form .form-group .form-hint {
 
       table {
         min-width: 900px;
-      }
-    }
-  }
-}
-
-.mtp-with-spaced-header {
-  #content {
-    margin-top: 55px;
-
-    @include media(mobile) {
-      margin-top: 35px;
-    }
-  }
-
-  header {
-    .heading-xlarge {
-      margin-top: 0;
-      margin-bottom: 50px;
-
-      @include media(mobile) {
-        margin-bottom: 30px;
       }
     }
   }
