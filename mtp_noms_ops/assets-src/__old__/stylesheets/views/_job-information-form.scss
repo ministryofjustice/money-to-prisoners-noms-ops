@@ -1,6 +1,6 @@
 .mtp-job-information-form {
     .mtp-conditional-wrapper {
-        @extend .panel;
+        @extend .govuk-inset-text;
         border-left-width: 5px;
         margin-left: 18px;
         padding: 0 0 0 26px;
