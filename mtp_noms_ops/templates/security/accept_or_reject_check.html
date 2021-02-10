@@ -39,7 +39,7 @@
       <thead>
         <tr>
           <th class="mtp-compact-cell">
-            <span class="visually-hidden">{% trans 'Needs attention?' %}</span>
+            <span class="govuk-visually-hidden">{% trans 'Needs attention?' %}</span>
           </th>
           <th>{% trans 'Date sent' %}</th>
           <th>{% trans 'Debit card (from)' %}</th>
@@ -52,12 +52,12 @@
         <tr class="mtp-check-row">
           <td class="mtp-compact-cell">
             {% if check.needs_attention %}
-              <span class="visually-hidden">
+              <span class="govuk-visually-hidden">
                 {% trans 'This credit needs attention today!' %}
               </span>
               <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
             {% else %}
-              <span class="visually-hidden">
+              <span class="govuk-visually-hidden">
                 {% trans 'This credit does not need attention today.' %}
               </span>
             {% endif %}
@@ -101,7 +101,7 @@
   <h3 class="govuk-heading-m">{% trans 'Credit decisions matching debit card or prisoner' %}</h3>
   <div class="mtp-results-list table-font-xsmall mtp-check-list">
     <table class="mtp-table mtp-table--review">
-      <caption class=visually-hidden>{% trans 'This is a table showing any previous credit decisions involving the prisoner or debit card in question' %}</caption>
+      <caption class=govuk-visually-hidden>{% trans 'This is a table showing any previous credit decisions involving the prisoner or debit card in question' %}</caption>
       <thead>
         <tr>
           <th>{% trans 'Date sent' %}</th>

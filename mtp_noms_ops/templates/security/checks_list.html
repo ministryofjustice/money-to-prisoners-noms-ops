@@ -70,7 +70,7 @@
       <thead>
         <tr>
           <th class="mtp-compact-cell">
-            <span class="visually-hidden">{% trans 'Needs attention?' %}</span>
+            <span class="govuk-visually-hidden">{% trans 'Needs attention?' %}</span>
           </th>
           <th>{% trans 'Date sent' %}</th>
           <th>{% trans 'Debit card (from)' %}</th>
@@ -84,12 +84,12 @@
         <tr id="check-row-{{ check.id }}" class="mtp-check-row">
           <td class="mtp-compact-cell">
             {% if check.needs_attention %}
-              <span class="visually-hidden">
+              <span class="govuk-visually-hidden">
                 {% trans 'This credit needs attention today!' %}
               </span>
               <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
             {% else %}
-              <span class="visually-hidden">
+              <span class="govuk-visually-hidden">
                 {% trans 'This credit does not need attention today.' %}
               </span>
             {% endif %}
@@ -114,7 +114,7 @@
           </td>
           <td>
             <div class="mtp-check-cell__actions">
-              <a class="button print-hidden" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
+              <a class="button print-hidden" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="govuk-visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
               {% if view.get_class_name == 'CheckListView' %}
                 <span class="mtp-check-cell__list-status">
                   {% if check.assigned_to == form.request.user.pk %}
@@ -132,7 +132,7 @@
                       {% csrf_token %}
                       <button type="submit" name="assignment" class="button-secondary" value="assign">
                         {% blocktrans trimmed with credit_to=check.credit.prisoner_name %}
-                          Add <span class="visually-hidden">credit to {{credit_to}}</span> to my list
+                          Add <span class="govuk-visually-hidden">credit to {{credit_to}}</span> to my list
                         {% endblocktrans %}
                       </button>
                     </form>

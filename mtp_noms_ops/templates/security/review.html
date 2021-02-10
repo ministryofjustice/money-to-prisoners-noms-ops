@@ -34,7 +34,7 @@
 
     <div class="mtp-results-list">
       <table class="mtp-table table-font-xsmall">
-        <caption class="visually-hidden">{% trans 'Please check the following credits' %}</caption>
+        <caption class="govuk-visually-hidden">{% trans 'Please check the following credits' %}</caption>
 
         <thead>
           <tr>
@@ -76,7 +76,7 @@
               </td>
               <td>
                 {% random_string as comment_label %}
-                <label class="visually-hidden" for="mtp-review__comment-{{ comment_label }}">
+                <label class="govuk-visually-hidden" for="mtp-review__comment-{{ comment_label }}">
                   {% blocktrans trimmed with amount=credit.amount|currency prisoner_name=credit.prisoner_name|default_if_none:'—' %}
                     Add security comment for credit of {{ amount }} to {{ prisoner_name }}
                   {% endblocktrans %}

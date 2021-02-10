@@ -2955,7 +2955,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
 
             response = self.client.get(reverse('security:check_list'), follow=True)
 
-            self.assertContains(response, 'Review <span class="visually-hidden">credit to Jean Valjean</span>')
+            self.assertContains(response, 'Review <span class="govuk-visually-hidden">credit to Jean Valjean</span>')
 
 
 class MyCheckListViewTestCase(BaseCheckViewTestCase):
@@ -3060,7 +3060,7 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
 
             response = self.client.get(reverse('security:my_check_list'), follow=True)
 
-            self.assertContains(response, 'Review <span class="visually-hidden">credit to Jean Valjean</span>')
+            self.assertContains(response, 'Review <span class="govuk-visually-hidden">credit to Jean Valjean</span>')
 
 
 class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
