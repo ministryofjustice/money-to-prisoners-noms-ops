@@ -60,6 +60,11 @@ class AutoAcceptRuleListView(SecurityView):
     template_name = 'security/auto_accept_rule_list.html'
     form_class = AutoAcceptListForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['request_params'] = self.request.GET.dict()
+        return context
+
 
 class AutoAcceptRuleDetailView(SecurityDetailView):
     """

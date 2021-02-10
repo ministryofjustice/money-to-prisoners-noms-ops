@@ -43,10 +43,8 @@
         <tr>
           <th>{% trans 'Debit card (from)' %}</th>
           <th>{% trans 'Prisoner (to)' %}</th>
-          <th>{% trans 'Started by' %}</th>
-          {% comment %} {% sortable_cell _('Start Date') form.cleaned_data '' %} {% endcomment %}
-          <th>{% trans 'Start Date' %}</th>
-          {% comment %} {% sortable_cell _('Start Date') form.cleaned_data '' %} {% endcomment %}
+          {% sortable_cell _('Started By') request_params 'states__added_by__last_name' %}
+          {% sortable_cell _('Start Date') request_params 'states__created' %}
           <th>{% trans 'Reason' %}</th>
           <th>{% trans 'Action' %}</th>
         </tr>
