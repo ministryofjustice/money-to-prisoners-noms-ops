@@ -19,6 +19,7 @@ from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
+from security.constants import SECURITY_FORMS_DEFAULT_PAGE_SIZE
 from security.models import PrisonList
 from security.searches import (
     save_search, update_result_count, delete_search, get_existing_search
@@ -97,7 +98,7 @@ class SecurityForm(GARequestErrorReportingMixin, forms.Form):
     Base form for security searches, always uses initial values as defaults
     """
     page = forms.IntegerField(min_value=1, initial=1)
-    page_size = 20
+    page_size = SECURITY_FORMS_DEFAULT_PAGE_SIZE
     timeout = 60
 
     exclusive_date_params = []

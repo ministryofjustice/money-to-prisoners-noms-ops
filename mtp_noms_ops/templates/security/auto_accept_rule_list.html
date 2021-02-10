@@ -76,7 +76,7 @@
             {{ auto_accept_rule.states | get_latest_active_auto_accept_state_field:'created' |date:'SHORT_DATETIME_FORMAT' }}
           </td>
           <td>
-            {{ auto_accept_rule.states |get_latest_auto_accept_state_field:'reason' |truncatechars:50 }}
+            {{ auto_accept_rule.states |get_latest_active_auto_accept_state_field:'reason' |truncatechars:50 }}
           </td>
           <td>
             <a class="button print-hidden"

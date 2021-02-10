@@ -5,11 +5,13 @@ import datetime
 import itertools
 import json
 import logging
+import random
 import re
 import tempfile
 from unittest import mock
 from urllib.parse import parse_qs, urlencode
 
+from dateutil import parser
 from django.conf import settings
 from django.core import mail
 from django.http import QueryDict
@@ -36,7 +38,8 @@ from security import (
 from security.constants import (
     CHECK_REJECTION_CATEGORY_TEXT_MAPPING,
     CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING,
-    CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
+    CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR,
+    SECURITY_FORMS_DEFAULT_PAGE_SIZE
 )
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
@@ -5338,6 +5341,114 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             self.assertNotContains(response, 'name="assignment"')
             self.assertContains(response, 'That check is already assigned to Someone Else')
             self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
+
+
+class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
+    """
+    Tests related to AutoAcceptListView.
+    """
+
+    def _generate_auto_accept_response(self, length, page_size):
+        return {
+            'count': length,
+            'prev': None,
+            'next': None,
+            'results': [
+                {
+                    'id': i,
+                    'debit_card_sender_details': {
+                        'card_number_last_digits': str(random.randint(1000, 9999)),
+                        'cardholder_names': [
+                            f'Cardholder Name {i}'
+                        ],
+                        'id': random.randint(0, 5000),
+                        'sender': random.randint(0, 5000),
+                    },
+                    'prisoner_profile': {
+                        'id': random.randint(0, 5000),
+                        'prisoner_name': f'Prisoner {i}',
+                        'prisoner_number': 'A{}SB'.format(random.randint(1000, 9999)),
+                    },
+                    'states': [
+                        {
+                            'added_by': {
+                                'first_name': f'First name {i}',
+                                'last_name': f'Last Name {i}'
+                            },
+                            'active': not j % 2,
+                            'reason': f'I am an automatically generated auto-accept number {i}',
+                            'created': (
+                                datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=(5 - j))
+                            ).isoformat(),
+                            'auto_accept_rule': i
+                        } for j in range(random.randint(1, 5))
+                    ]
+                }
+                for i in range(page_size)
+            ]
+        }
+
+    @staticmethod
+    def _only_active_states(states):
+        return list(filter(lambda x: x['active'], states))
+
+    def test_cannot_access_view(self):
+        """
+        Test that if the logged in user doesn't have the right permissions, he/she
+        gets redirected to the dashboard.
+        """
+        user_data = self.get_user_data(permissions=required_permissions)
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps, user_data=user_data)
+            response = self.client.get(reverse('security:auto_accept_rule_list'), follow=True)
+            self.assertRedirects(response, reverse('security:dashboard'))
+
+    def test_view(self):
+        """
+        Test that the view displays all auto-accepts returned by the API.
+        """
+        api_auto_accept_response_len = 50
+        page_size = SECURITY_FORMS_DEFAULT_PAGE_SIZE
+        api_auto_accept_response = self._generate_auto_accept_response(api_auto_accept_response_len, page_size)
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            self.mock_need_attention_count(rsps, 0)
+            rsps.add(
+                rsps.GET,
+                api_url('/security/checks/auto-accept/'),
+                json=api_auto_accept_response
+            )
+
+            response = self.client.get(reverse('security:auto_accept_rule_list'), follow=True)
+
+            content = response.content.decode()
+            for resp in api_auto_accept_response['results']:
+                self.assertIn(f'************{resp["debit_card_sender_details"]["card_number_last_digits"]}', content)
+                self.assertIn(resp['debit_card_sender_details']['cardholder_names'][0], content)
+                self.assertIn(resp['prisoner_profile']['prisoner_number'], content)
+                self.assertIn(resp['prisoner_profile']['prisoner_name'], content)
+                self.assertIn(
+                    '{last_name}, {first_name}'.format(
+                        last_name=self._only_active_states(resp['states'])[-1]['added_by']['last_name'],
+                        first_name=self._only_active_states(resp['states'])[-1]['added_by']['first_name']
+                    ),
+                    content
+                )
+                self.assertIn(
+                    parser.isoparse(
+                        self._only_active_states(resp['states'])[-1]['created']
+                    ).strftime('%d/%m/%Y %H:%M'),
+                    content
+                )
+                self.assertIn(
+                    f'Showing 1 to {page_size} of {api_auto_accept_response_len} auto accept rules',
+                    content
+                )
+                self.assertIn(
+                    f'{api_auto_accept_response_len} auto accept rules',
+                    content
+                )
 
 
 class PolicyChangeViewTestCase(SecurityBaseTestCase):
