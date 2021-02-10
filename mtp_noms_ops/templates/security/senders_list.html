@@ -6,8 +6,8 @@
 {% block content %}
   <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search js-FormAnalytics" method="get">
 
-    <div class="grid-row">
-        <div class="column-two-thirds">
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
           {% include 'security/forms/top-area-object-list.html' %}
 
           {% if not is_search_results %}
@@ -15,7 +15,7 @@
           {% endif %}
         </div>
 
-        <div class="column-one-third print-hidden">
+        <div class="govuk-grid-column-one-third print-hidden">
           <div class="mtp-info-box">
             <div class="mtp-info-box__heading">
               {% trans 'About payment source data' %}

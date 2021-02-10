@@ -12,14 +12,14 @@
 
   <div class="mtp-login__header">
     <div class="mtp-login__content">
-      <div class="grid-row">
-        <div class="column-full">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
           {% language_switch %}
         </div>
       </div>
 
-      <div class="grid-row">
-        <header class="column-two-thirds">
+      <div class="govuk-grid-row">
+        <header class="govuk-grid-column-two-thirds">
           <h1 class="govuk-heading-xl">
             {% trans 'Monitor prisoner money' %}
           </h1>
@@ -34,7 +34,7 @@
           </aside>
         </header>
 
-        <div class="column-one-third">
+        <div class="govuk-grid-column-one-third">
           <img alt="{% trans 'Prisoner money intelligence' %}" src="{% static 'images/landing-noms-ops.png' %}" srcset="{% static 'images/landing-noms-ops@2x.png' %} 2x"/>
         </div>
       </div>
@@ -44,8 +44,8 @@
   <div class="mtp-login__content">
     {% notification_banners request 'noms_ops_login' %}
 
-    <div class="grid-row">
-      <section class="column-half">
+    <div class="govuk-grid-row">
+      <section class="govuk-grid-column-one-half">
         <h2 class="govuk-heading-m">{% trans 'How to get access' %}</h2>
         <p>
           {% trans 'Your head of security can set up an account for you if you don’t have access already.' %}
@@ -65,7 +65,7 @@
         </p>
       </section>
 
-      <section class="column-half">
+      <section class="govuk-grid-column-one-half">
         <h2 class="govuk-heading-m">{% trans 'Sign in' %}</h2>
 
         {% include 'govuk-frontend/components/error-summary.html' with form=form only %}

@@ -22,14 +22,14 @@
 .mtp-prisoner-summary {
   margin: 0;
 
-  .column-one-quarter {
+  .govuk-grid-column-one-quarter {
     padding-left: 0;
     padding-right: 30px;
     width: auto;
   }
 
   @media print {
-    .column-one-quarter {
+    .govuk-grid-column-one-quarter {
       display: block;
     }
   }

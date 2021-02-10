@@ -3,9 +3,9 @@
 <fieldset>
   <legend class="form-label">{{ range_label }}</legend>
 
-  <div class="grid-row">
+  <div class="govuk-grid-row">
     {% with field=since_field %}
-      <div class="column-one-third">
+      <div class="govuk-grid-column-one-third">
         <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
           <label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="form-label sublabel">{% trans 'From' %}</label>
           {% include 'mtp_common/forms/field-errors.html' with field=field only %}
@@ -17,7 +17,7 @@
     {% endwith %}
 
     {% with field=until_field %}
-      <div class="column-one-third">
+      <div class="govuk-grid-column-one-third">
         <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
           <label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="form-label sublabel">{% trans 'To' %}</label>
           {% include 'mtp_common/forms/field-errors.html' with field=field only %}

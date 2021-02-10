@@ -23,26 +23,26 @@
       <br />
 
       <div class="mtp-prisoner-summary__details">
-        <div class="column-one-quarter">
+        <div class="govuk-grid-column-one-quarter">
           {% labelled_data _('Credits received') prisoner.credit_count tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="govuk-grid-column-one-quarter">
           {% labelled_data _('Payment sources')  prisoner.sender_count tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="govuk-grid-column-one-quarter">
           {% labelled_data _('Total received') prisoner.credit_total|currency tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="govuk-grid-column-one-quarter">
           {% labelled_data _('Disbursements sent') prisoner.disbursement_count tag='strong' %}
         </div>
       </div>
 
       <div class="mtp-prisoner-summary__details">
         {% if provided_names %}
-          <div class="column-one-quarter">
+          <div class="govuk-grid-column-one-quarter">
             {% random_string as profile_label %}
             <div id="mtp-label-{{ profile_label }}" class="mtp-detail-label">{% trans 'Names given by senders' %}</div>
             <span aria-labelledby="mtp-label-{{ profile_label }}">
@@ -53,11 +53,11 @@
           </div>
         {% endif %}
 
-        <div class="column-one-quarter">
+        <div class="govuk-grid-column-one-quarter">
           {% labelled_data _('Prison') prisoner.current_prison.name tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="govuk-grid-column-one-quarter">
           <div id="location-label" class="mtp-detail-label">{% trans 'Location' %}</div>
           <strong class="js-async-load" data-path="{% url 'security:prisoner_nomis_info' prisoner_number=prisoner.prisoner_number %}" data-key="housing_location" aria-labelledby="location-label">–</strong>
         </div>

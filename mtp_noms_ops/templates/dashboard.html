@@ -47,8 +47,8 @@
 
   {% if request.can_access_security %}
 
-    <div class="grid-row">
-      <div class="column-two-thirds">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
         <p class="lede">
           {% blocktrans trimmed %}
             Use this tool to monitor all credits sent to prisoners using the <a href="{{ start_page_url }}">Send money to someone in prison</a> service.
@@ -57,41 +57,41 @@
       </div>
     </div>
 
-    <div class="grid-row">
-      <div class="column-one-third mtp-box">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-third mtp-box">
         <a href="{% url 'security:prisoner_list' %}?{{ initial_params }}">
           {% trans 'Prisoners' %}
         </a>
       </div>
 
-      <div class="column-one-third mtp-box">
+      <div class="govuk-grid-column-one-third mtp-box">
         <a href="{% url 'security:sender_list' %}?{{ initial_params }}">
           {% trans 'Payment sources' %}
         </a>
       </div>
 
-      <div class="column-one-third mtp-box">
+      <div class="govuk-grid-column-one-third mtp-box">
         <a href="{% url 'security:credit_list' %}?{{ initial_params }}">
           {% trans 'Credits' %}
         </a>
       </div>
     </div>
 
-    <div class="grid-row">
-      <div class="column-one-third mtp-box">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-third mtp-box">
         <a href="{% url 'security:disbursement_list' %}?{{ initial_params }}">
           {% trans 'Disbursements' %}
         </a>
       </div>
 
-      <div class="column-one-third mtp-box">
+      <div class="govuk-grid-column-one-third mtp-box">
         <a href="{% url 'security:notification_list' %}">
           {% trans 'Notifications' %}
         </a>
       </div>
 
       {% if request.can_manage_security_checks %}
-        <div class="column-one-third mtp-box">
+        <div class="govuk-grid-column-one-third mtp-box">
           <a href="{% url 'security:check_list' %}">
             {% trans 'Credits to action' %}
           </a>
@@ -106,9 +106,9 @@
     <h2 class="govuk-heading-m">{% trans 'Payment sources and prisoners you are monitoring' %}</h2>
     {% for search in saved_searches %}
       {% if forloop.counter0|divisibleby:3 %}
-      <div class="grid-row">
+      <div class="govuk-grid-row">
       {% endif %}
-        <div class="column-one-third mtp-box mtp-box-pinned">
+        <div class="govuk-grid-column-one-third mtp-box mtp-box-pinned">
           <a href="{{ search.site_url }}">
             {{ search.description }}
             {% if search.new_result_count %}
@@ -133,9 +133,9 @@
 
     <h2 class="govuk-heading-m">{% trans 'Admin options' %}</h2>
 
-    <div class="grid-row">
+    <div class="govuk-grid-row">
       {% if request.can_access_security and request.can_pre_approve %}
-        <div class="column-one-third mtp-box">
+        <div class="govuk-grid-column-one-third mtp-box">
           <a href="{% url 'security:review_credits' %}">
             {% trans 'New credits check' %}
           </a>
@@ -143,7 +143,7 @@
       {% endif %}
 
       {% if request.can_access_user_management %}
-        <div class="column-one-third mtp-box">
+        <div class="govuk-grid-column-one-third mtp-box">
           <a href="{% url 'list-users' %}">
             {% trans 'Manage users' %}
           </a>
@@ -151,7 +151,7 @@
       {% endif %}
 
       {% if request.can_access_prisoner_location %}
-        <div class="column-one-third mtp-box">
+        <div class="govuk-grid-column-one-third mtp-box">
           <a href="{% url 'location_file_upload' %}">
             {% trans 'Upload prisoner location file' %}
           </a>

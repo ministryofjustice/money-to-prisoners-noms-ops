@@ -5,12 +5,12 @@
   <div class="govuk-heading-l">{% trans 'Date entered' %}</div>
   <p>{% trans 'We only keep transaction data for 7 years.' %}
 
-  <div class="grid-row">
-    <div class="column-one-half">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
       {% include 'security/forms/split-date-field.html' with field=form.created__gte %}
     </div>
 
-    <div class="column-one-half mtp-split-date-to-wrapper">
+    <div class="govuk-grid-column-one-half mtp-split-date-to-wrapper">
       {% include 'security/forms/split-date-field.html' with field=form.created__lt %}
     </div>
   </div>

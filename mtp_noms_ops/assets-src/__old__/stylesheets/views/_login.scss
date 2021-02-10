@@ -30,7 +30,7 @@
 .mtp-login__content {
   @extend %site-width-container;
 
-  .column-half {
+  .govuk-grid-column-one-half {
     padding-right: ($gutter * 2);
   }
 }
@@ -51,7 +51,7 @@
     }
   }
 
-  .column-two-thirds {
+  .govuk-grid-column-two-thirds {
     padding-right: 3 * $gutter;
 
     @include media(mobile) {
@@ -59,7 +59,7 @@
     }
   }
 
-  .column-one-third {
+  .govuk-grid-column-one-third {
     overflow: hidden;
 
     img {

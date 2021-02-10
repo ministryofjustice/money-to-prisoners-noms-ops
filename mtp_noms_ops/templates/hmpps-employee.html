@@ -5,7 +5,7 @@
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 {% block proposition_extra %}
-  <nav id="mtp-proposition-extra" class="column-full print-hidden"></nav>
+  <nav id="mtp-proposition-extra" class="govuk-grid-column-full print-hidden"></nav>
 {% endblock %}
 
 {% block content %}
@@ -16,8 +16,8 @@
 
   {% notification_banners request %}
 
-  <div class="grid-row">
-    <div class="column-two-thirds">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
       <p>
         {% blocktrans trimmed with job_title=_('direct employee of HMPPS or a contracted prison and working in an intelligence function')|wrapwithtag:'strong' %}

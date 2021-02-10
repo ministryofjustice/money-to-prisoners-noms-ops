@@ -8,7 +8,7 @@
   {% if can_navigate_away %}
     {{ block.super }}
   {% else %}
-    <nav id="mtp-proposition-extra" class="column-full print-hidden"></nav>
+    <nav id="mtp-proposition-extra" class="govuk-grid-column-full print-hidden"></nav>
   {% endif %}
 {% endblock %}
 
@@ -19,8 +19,8 @@
       <h1 class="govuk-heading-xl">{{ view.title }}</h1>
     </header>
 
-    <div class="grid-row">
-      <div class="column-two-thirds">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
 
         <form method="post" class="mtp-confirm-prison">
           {% csrf_token %}

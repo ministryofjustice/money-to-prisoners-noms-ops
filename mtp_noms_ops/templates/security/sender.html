@@ -16,17 +16,17 @@
         {% trans 'Bank transfer payments with these details' %}
       </p>
 
-      <div class="grid-row mtp-sender-summary__details">
-        <div class="column-one-third">
+      <div class="govuk-grid-row mtp-sender-summary__details">
+        <div class="govuk-grid-column-one-third">
           {% labelled_data _('Account number') sender.bank_transfer_details.0.sender_account_number|default:'—' tag='strong' %}
         </div>
 
-        <div class="column-one-third">
+        <div class="govuk-grid-column-one-third">
           {% labelled_data _('Sort code') sender.bank_transfer_details.0.sender_sort_code|format_sort_code tag='strong' %}
         </div>
 
         {% if sender.bank_transfer_details.0.sender_roll_number %}
-          <div class="column-one-third">
+          <div class="govuk-grid-column-one-third">
             {% labelled_data _('Roll number (for building societies)') sender.bank_transfer_details.0.sender_roll_number tag='strong' %}
           </div>
         {% endif %}
@@ -39,16 +39,16 @@
         <a href="#grouping-info-dialogue" class="js-dialogue-open">{% trans 'How are these grouped?' %}</a>
       </p>
 
-      <div class="grid-row mtp-sender-summary__details">
-        <div class="column-one-third">
+      <div class="govuk-grid-row mtp-sender-summary__details">
+        <div class="govuk-grid-column-one-third">
           {% labelled_data _('Debit card number') sender.debit_card_details.0|format_card_number tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="govuk-grid-column-one-quarter">
           {% labelled_data _('Expiry date') sender.debit_card_details.0.card_expiry_date|default_if_none:'—' tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="govuk-grid-column-one-quarter">
           {% labelled_data _('Postcode') sender.debit_card_details.0.postcode|postcode|default_if_none:'—' tag='strong' %}
         </div>
       </div>
@@ -59,22 +59,22 @@
 
     {% endif %}
 
-    <div class="grid-row mtp-sender-summary__details">
-      <div class="column-two-thirds">
-        <div class="column-one-third col-1">
+    <div class="govuk-grid-row mtp-sender-summary__details">
+      <div class="govuk-grid-column-two-thirds">
+        <div class="govuk-grid-column-one-third col-1">
           {% labelled_data _('Credits sent') sender.credit_count tag='strong' %}
         </div>
 
-        <div class="column-one-third">
+        <div class="govuk-grid-column-one-third">
           {% labelled_data _('Prisoners') sender.prisoner_count tag='strong' %}
         </div>
 
-        <div class="column-one-third">
+        <div class="govuk-grid-column-one-third">
           {% labelled_data _('Prisons') sender.prison_count tag='strong' %}
         </div>
       </div>
 
-      <div class="column-one-third">
+      <div class="govuk-grid-column-one-third">
         {% labelled_data _('Total amount sent') sender.credit_total|currency tag='strong' %}
       </div>
     </div>
