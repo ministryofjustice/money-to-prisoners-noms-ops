@@ -111,7 +111,7 @@
   {% if is_search_results %}
     <p>
     {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="button govuk-!-display-none-print">{% trans 'Start new search' %}</a>
+      <a href="{{ search_form_item.url }}" class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button">{% trans 'Start new search' %}</a>
     {% endwith%}
     </p>
 

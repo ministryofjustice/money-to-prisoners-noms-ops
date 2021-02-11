@@ -4,7 +4,7 @@
 
 {% block object_list %}
   <aside class="mtp-object-list-toggle govuk-!-display-none-print">
-    <a href="{% url 'security:prisoner_detail' prisoner.id %}" class="button-secondary">
+    <a href="{% url 'security:prisoner_detail' prisoner.id %}" class="govuk-button govuk-button--secondary" data-module="govuk-button" role="button">
       {% trans 'View credits' %}
     </a>
   </aside>

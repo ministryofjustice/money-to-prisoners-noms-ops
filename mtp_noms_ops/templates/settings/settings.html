@@ -14,7 +14,7 @@
           {% trans 'You’re currently receiving email notifications for payment sources and prisoners you are monitoring.' %}
         </p>
         <input type="hidden" name="email_notifications" value="False" />
-        <input type="submit" class="button" value="{% trans 'Turn off email notifications' %}"/>
+        <input type="submit" class="govuk-button" data-module="govuk-button" value="{% trans 'Turn off email notifications' %}"/>
 
       {% else %}
 
@@ -25,7 +25,7 @@
           {% trans 'You’re not currently receiving email notifications for payment sources and prisoners you are monitoring.' %}
         </p>
         <input type="hidden" name="email_notifications" value="True" />
-        <input type="submit" class="button" value="{% trans 'Turn on email notifications' %}"/>
+        <input type="submit" class="govuk-button" data-module="govuk-button" value="{% trans 'Turn on email notifications' %}"/>
 
       {% endif %}
     </form>
@@ -43,7 +43,7 @@
           <li>{% trans 'All prisons' %}</li>
         {% endfor %}
       </ul>
-      <a class="button" href="{% url 'change_prisons' %}">{% trans 'Change prisons' %}</a>
+      <a class="govuk-button" data-module="govuk-button" role="button" href="{% url 'change_prisons' %}">{% trans 'Change prisons' %}</a>
     </div>
   {% endif %}
 {% endblock %}

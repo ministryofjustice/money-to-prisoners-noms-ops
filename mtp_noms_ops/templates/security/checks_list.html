@@ -114,7 +114,7 @@
           </td>
           <td>
             <div class="mtp-check-cell__actions">
-              <a class="button govuk-!-display-none-print" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="govuk-visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
+              <a class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="govuk-visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
               {% if view.get_class_name == 'CheckListView' %}
                 <span class="mtp-check-cell__list-status">
                   {% if check.assigned_to == form.request.user.pk %}
@@ -130,7 +130,7 @@
                   {% else %}
                     <form class="mtp-check-cell__list-form" action="{% url 'security:assign_check' check_id=check.id current_page=current_page list='list' %}" method="post">
                       {% csrf_token %}
-                      <button type="submit" name="assignment" class="button-secondary" value="assign">
+                      <button type="submit" name="assignment" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="assign">
                         {% blocktrans trimmed with credit_to=check.credit.prisoner_name %}
                           Add <span class="govuk-visually-hidden">credit to {{credit_to}}</span> to my list
                         {% endblocktrans %}

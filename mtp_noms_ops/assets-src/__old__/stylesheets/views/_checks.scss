@@ -64,10 +64,6 @@ table.mtp-table--review {
   }
 }
 
-.button-warning {
-  @include button($red);
-}
-
 .moj-sub-navigation {
   margin-bottom: 0.7rem;
 }
@@ -165,7 +161,7 @@ table.mtp-table--review {
   display: flex;
   align-items: center;
 
-  .button, .button-secondary {
+  .govuk-button {
     margin-bottom: 1rem;
 
     @include media(mobile) {

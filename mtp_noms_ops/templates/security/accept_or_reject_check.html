@@ -21,9 +21,9 @@
         <form action="{% url 'security:assign_check' check_id=check.id %}" method="post">
           {% csrf_token %}
           {% if check.assigned_to %}
-            <button type="submit" name="assignment" class="button-secondary" value="unassign">{% trans 'Remove from my list' %}</button>
+            <button type="submit" name="assignment" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="unassign">{% trans 'Remove from my list' %}</button>
           {% else %}
-            <button type="submit" name="assignment" class="button-secondary" value="assign">{% trans 'Add to my list' %}</button>
+            <button type="submit" name="assignment" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="assign">{% trans 'Add to my list' %}</button>
           {% endif %}
         </form>
       {% endif %}
@@ -223,7 +223,7 @@
               </div>
             {% endif %}
             <br/>
-            <button type="submit" class="button" name="fiu_action" value="accept">
+            <button type="submit" class="govuk-button" data-module="govuk-button" name="fiu_action" value="accept">
               {% trans 'Accept credit' %}
             </button>
           </div>
@@ -265,7 +265,7 @@
           </fieldset>
           <div class="mtp-check-details-spacing">
             {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='form-control-3-4' %}
-            <button type="submit" class="button button-warning " name="fiu_action" value="reject">
+            <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button" name="fiu_action" value="reject">
               {% trans 'Reject credit' %}
             </button>
           </div>

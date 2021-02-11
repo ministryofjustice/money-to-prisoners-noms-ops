@@ -30,7 +30,7 @@
           Go back and <a href="{{ link }}">change this</a> or edit it on your settings page at any time.
         {% endblocktrans %}
       </p>
-      <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'security:dashboard' %}{% endif %}" class="button">
+      <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'security:dashboard' %}{% endif %}" class="govuk-button" data-module="govuk-button" role="button">
         {% trans 'Continue' %}
       </a>
     </div>

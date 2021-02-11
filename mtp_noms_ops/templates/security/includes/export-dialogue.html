@@ -20,8 +20,8 @@
       {% trans 'This may take a few minutes.' %}
     </p>
     <p>
-      <a href="{{ email_export_view }}?{{ request.GET.urlencode }}" class="button" role="button">{% trans 'Email me the file' %}</a>
-      <a href="#" class="button button-secondary {{ dialogue_close_class }}" role="button">{% trans 'Close' %}</a>
+      <a href="{{ email_export_view }}?{{ request.GET.urlencode }}" class="govuk-button" data-module="govuk-button" role="button">{% trans 'Email me the file' %}</a>
+      <a href="#" class="govuk-button govuk-button--secondary {{ dialogue_close_class }}" data-module="govuk-button" role="button">{% trans 'Close' %}</a>
     </p>
   {% enddialoguebox %}
 
@@ -35,7 +35,7 @@
       {% trans 'Try filtering the results to get a shorter list.' %}
     </p>
     <p>
-      <a href="#" class="button button-secondary {{ dialogue_close_class }}" role="button">{% trans 'Close' %}</a>
+      <a href="#" class="govuk-button govuk-button--secondary {{ dialogue_close_class }}" data-module="govuk-button" role="button">{% trans 'Close' %}</a>
     </p>
   {% enddialoguebox %}
 
