@@ -5422,6 +5422,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
 
             response = self.client.get(reverse('security:auto_accept_rule_list'), follow=True)
 
+            self.assertEqual(response.status_code, 200)
             content = response.content.decode()
             for resp in api_auto_accept_response['results']:
                 self.assertIn(f'************{resp["debit_card_sender_details"]["card_number_last_digits"]}', content)
@@ -5449,6 +5450,50 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                     f'{api_auto_accept_response_len} auto accept rules',
                     content
                 )
+
+    def test_auto_accept_list_ordering(self):
+        """
+        Test that the auto_accept list is correctly ordered by parameter passed in
+        """
+        api_auto_accept_response_len = 50
+        page_size = SECURITY_FORMS_DEFAULT_PAGE_SIZE
+        api_auto_accept_response = self._generate_auto_accept_response(api_auto_accept_response_len, page_size)
+        api_auto_accept_response['results'] = sorted(
+            api_auto_accept_response['results'],
+            key=lambda aa: self._only_active_states(aa['states'])[-1]['created']
+        )
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            self.mock_need_attention_count(rsps, 0)
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode([
+                        ('ordering', '-states__added_by__last_name'),
+                        ('offset', 0),
+                        ('limit', page_size)
+                    ])
+                ),
+                match_querystring=True,
+                json=api_auto_accept_response
+            )
+
+            response = self.client.get(
+                '{}?{}'.format(
+                    reverse('security:auto_accept_rule_list'),
+                    urlencode((
+                        ('ordering', '-states__added_by__last_name'),
+                        ('offset', 0),
+                        ('limit', page_size)
+                    ))
+                ),
+                follow=True
+            )
+            self.assertEqual(response.status_code, 200)
+        # Implicit assertion here that RequestsMock was called with parameters specified above
+        # once context manager __exit__ called
 
 
 class PolicyChangeViewTestCase(SecurityBaseTestCase):

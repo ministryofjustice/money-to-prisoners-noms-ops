@@ -16,7 +16,7 @@ from security.forms.check import (
     UserCheckListForm
 )
 from security.utils import convert_date_fields
-from security.views.object_base import SecurityView, SecurityDetailView
+from security.views.object_base import SecurityView  # , SecurityDetailView
 
 
 class CheckListView(SecurityView):
@@ -66,16 +66,16 @@ class AutoAcceptRuleListView(SecurityView):
         return context
 
 
-class AutoAcceptRuleDetailView(SecurityDetailView):
-    """
-    View history of all auto-accept rules
-    """
-    title = gettext_lazy('Auto Accept')
-    list_title = gettext_lazy('Auto Accepts')
-    #  template_name = 'security/auto_accept_rule.html'
-    object_context_key = 'auto_accept_rule'
-    id_kwarg_name = 'auto_accept_rule_id'
-    list_url = reverse_lazy('security:auto_accept_rule_list')
+#  class AutoAcceptRuleDetailView(SecurityDetailView):
+    #  """
+    #  View history of all auto-accept rules
+    #  """
+    #  title = gettext_lazy('Auto Accept')
+    #  list_title = gettext_lazy('Auto Accepts')
+    #  #  template_name = 'security/auto_accept_rule.html'
+    #  object_context_key = 'auto_accept_rule'
+    #  id_kwarg_name = 'auto_accept_rule_id'
+    #  list_url = reverse_lazy('security:auto_accept_rule_list')
 
 
 class CheckAssignView(BaseFormView):

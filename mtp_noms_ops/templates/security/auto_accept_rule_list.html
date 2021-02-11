@@ -41,12 +41,12 @@
     <table class="mtp-table table-font-xsmall">
       <thead>
         <tr>
-          <th>{% trans 'Debit card (from)' %}</th>
-          <th>{% trans 'Prisoner (to)' %}</th>
+          <th scope="col">{% trans 'Debit card (from)' %}</th>
+          <th scope="col">{% trans 'Prisoner (to)' %}</th>
           {% sortable_cell _('Started By') request_params 'states__added_by__last_name' %}
           {% sortable_cell _('Start Date') request_params 'states__created' %}
-          <th>{% trans 'Reason' %}</th>
-          <th>{% trans 'Action' %}</th>
+          <th scope="col">{% trans 'Reason' %}</th>
+          <th scope="col">{% trans 'Action' %}</th>
         </tr>
       </thead>
       <tbody>
@@ -77,11 +77,11 @@
             {{ auto_accept_rule.states |get_latest_active_auto_accept_state_field:'reason' |truncatechars:50 }}
           </td>
           <td>
-            <a class="button print-hidden"
-               {% comment %} href="{% url 'security:auto_accept_rule_detail' auto_accept_rule_id=auto_accept_rule.id %}" {% endcomment %}
-               aria-label="{% trans 'View auto-accept details' %}">
-              {% trans 'Review' %}
-            </a>
+            {% comment %} <a class="button print-hidden" {% endcomment %}
+            {% comment %}    href="{% url 'security:auto_accept_rule_detail' auto_accept_rule_id=auto_accept_rule.id %}" {% endcomment %}
+            {% comment %}    aria-label="{% trans 'View auto-accept details' %}"> {% endcomment %}
+            {% comment %}   {% trans 'Review' %} {% endcomment %}
+            {% comment %} </a> {% endcomment %}
           </td>
         </tr>
         {% empty %}

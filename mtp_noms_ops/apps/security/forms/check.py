@@ -130,12 +130,24 @@ class AutoAcceptListForm(SecurityForm):
     """
     List of AutoAccepts checks.
     """
+    ordering = forms.ChoiceField(
+        label=_('Order by'),
+        required=False,
+        initial='-states__created',
+        choices=[
+            ('states__created', _('Date started (oldest to newest)')),
+            ('-states__created', _('Date started (newest to oldest)')),
+            ('states__added_by__last_name', _('Surname of person who last activated (oldest to newest)')),
+            ('-states__added_by__last_name', _('Surname of person who last activated (newest to oldest)')),
+        ],
+    )
+
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)
         self.my_list_count = 0
 
     def get_object_list_endpoint_path(self):
-        return '/security/checks/auto-accept'
+        return '/security/checks/auto-accept/'
 
     def get_check_list_endpoint_path(self):
         return '/security/checks/'
