@@ -27,17 +27,3 @@
 form .form-group .form-hint {
   margin-top: 0;
 }
-
-// app-specific styles
-
-%table-container {
-  @include media($max-width: $desktop-breakpoint) {
-    @media screen {
-      overflow-x: scroll;
-
-      table {
-        min-width: 900px;
-      }
-    }
-  }
-}

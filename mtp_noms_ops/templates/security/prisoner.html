@@ -71,7 +71,7 @@
     {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
     {% if form.is_valid %}
-      <div class="mtp-results-list">
+      <div class="mtp-table__container mtp-results-list">
         {% block object_list %}
           <aside class="mtp-object-list-toggle govuk-!-display-none-print">
             <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" class="govuk-button govuk-button--secondary" data-module="govuk-button" role="button">

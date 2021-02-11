@@ -1,18 +1,11 @@
 // app-specific styles
 
 .mtp-results-list {
-  @extend %table-container;
-  width: 100%;
-  margin-top: 1.25em;
+  margin: govuk-spacing(6) 0;
 
   h2 {
     margin-top: 0;
     display: inline-block;
-  }
-
-  table {
-    width: 100%;
-    margin-bottom: 1em;
   }
 
   .mtp-table {
