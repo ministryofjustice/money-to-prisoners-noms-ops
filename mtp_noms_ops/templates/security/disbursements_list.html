@@ -49,14 +49,14 @@
               {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
               <th>{% trans 'Prison' %}</th>
               {% endif %}
-              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
-              <th class="numeric">{% trans 'Details' %}</th>
+              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
+              <th class="govuk-table__header--numeric">{% trans 'Details' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for disbursement in disbursements %}
               <tr>
-                <td class="mtp-numeric-left">
+                <td class="mtp-table__cell--numeric-left">
                   {{ disbursement.created|date:'j F Y' }}
                 </td>
 
@@ -76,13 +76,13 @@
                 <td>{{ disbursement.prison_name }}</td>
                 {% endif %}
 
-                <td class="numeric">
+                <td class="govuk-table__cell--numeric">
                   <span class="mtp-sortable-cell--pad">
                     {{ disbursement.amount|currency }}
                   </span>
                 </td>
 
-                <td class="numeric">
+                <td class="govuk-table__cell--numeric">
                   {{ disbursement.resolution|format_disbursement_resolution }}
                   <br />
                   <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="govuk-!-display-none-print">

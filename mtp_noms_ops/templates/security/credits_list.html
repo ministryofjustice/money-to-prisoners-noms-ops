@@ -48,14 +48,14 @@
               {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
               <th>{% trans 'Prison' %}</th>
               {% endif %}
-              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
-              <th class="numeric">{% trans 'Details' %}</th>
+              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
+              <th class="govuk-table__header--numeric">{% trans 'Details' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for credit in credits %}
               <tr>
-                <td class="mtp-numeric-left">
+                <td class="mtp-table__cell--numeric-left">
                   {{ credit.received_at|date:'j F Y' }}
                 </td>
 
@@ -75,13 +75,13 @@
                 <td>{{ credit.prison_name }}</td>
                 {% endif %}
 
-                <td class="numeric">
+                <td class="govuk-table__cell--numeric">
                   <span class="mtp-sortable-cell--pad">
                     {{ credit.amount|currency }}
                   </span>
                 </td>
 
-                <td class="numeric">
+                <td class="govuk-table__cell--numeric">
                   {{ credit.resolution|format_resolution }}
                   <br />
                   <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}" class="govuk-!-display-none-print">

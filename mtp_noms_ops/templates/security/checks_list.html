@@ -75,7 +75,7 @@
           <th>{% trans 'Date sent' %}</th>
           <th>{% trans 'Debit card (from)' %}</th>
           <th>{% trans 'Prisoner (to)' %}</th>
-          <th>{% trans 'Amount' %}</th>
+          <th class="govuk-table__header--numeric">{% trans 'Amount' %}</th>
           <th class="govuk-!-display-none-print">{% trans 'Actions' %}</th>
         </tr>
       </thead>
@@ -109,7 +109,7 @@
             <br/>
             {{ check.credit.prison_name }}
           </td>
-          <td>
+          <td class="govuk-table__cell--numeric">
             {{ check.credit.amount|currency }}
           </td>
           <td>

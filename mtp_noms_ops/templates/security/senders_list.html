@@ -46,15 +46,15 @@
             <tr>
               <th>{% trans 'Payment source' %}</th>
               <th>{% trans 'Payment method' %}</th>
-              {% sortable_cell _('Number of credits sent') form.cleaned_data 'credit_count' cell_classes='numeric' %}
-              {% sortable_cell _('Prisoners sent to') form.cleaned_data 'prisoner_count' cell_classes='numeric' %}
+              {% sortable_cell _('Number of credits sent') form.cleaned_data 'credit_count' cell_classes='govuk-table__header--numeric' %}
+              {% sortable_cell _('Prisoners sent to') form.cleaned_data 'prisoner_count' cell_classes='govuk-table__header--numeric' %}
               {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
               <th>{% trans 'Prisons sent to' %}</th>
               {% else %}
-              {% sortable_cell _('Number of prisons sent to') form.cleaned_data 'prison_count' cell_classes='numeric' %}
+              {% sortable_cell _('Number of prisons sent to') form.cleaned_data 'prison_count' cell_classes='govuk-table__header--numeric' %}
               {% endif %}
-              {% sortable_cell _('Total amount sent') form.cleaned_data 'credit_total' cell_classes='numeric' %}
-              <th class="numeric govuk-!-display-none-print">{% trans 'Details' %}</th>
+              {% sortable_cell _('Total amount sent') form.cleaned_data 'credit_total' cell_classes='govuk-table__header--numeric' %}
+              <th class="govuk-table__header--numeric govuk-!-display-none-print">{% trans 'Details' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -108,12 +108,12 @@
                       -
                     {% endif %}
                     </td>
-                    <td class="numeric">
+                    <td class="govuk-table__cell--numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.credit_count }}
                       </span>
                     </td>
-                    <td class="numeric">
+                    <td class="govuk-table__cell--numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.prisoner_count }}
                       </span>
@@ -130,18 +130,18 @@
                       {% endif %}
                     </td>
                     {% else %}
-                    <td class="numeric">
+                    <td class="govuk-table__cell--numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.prison_count }}
                       </span>
                     </td>
                     {% endif %}
-                    <td class="numeric">
+                    <td class="govuk-table__cell--numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.credit_total|currency }}
                       </span>
                     </td>
-                    <td class="numeric govuk-!-display-none-print">
+                    <td class="govuk-table__cell--numeric govuk-!-display-none-print">
                       <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}">
                         {% trans 'View details' %}
                       </a>
