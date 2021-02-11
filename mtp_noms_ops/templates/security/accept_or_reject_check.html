@@ -38,7 +38,7 @@
     <table class="mtp-table mtp-table--small mtp-table--review">
       <thead>
         <tr>
-          <th class="mtp-compact-cell">
+          <th class="mtp-table__header--compact">
             <span class="govuk-visually-hidden">{% trans 'Needs attention?' %}</span>
           </th>
           <th>{% trans 'Date sent' %}</th>
@@ -50,7 +50,7 @@
       </thead>
       <tbody>
         <tr class="mtp-check-row">
-          <td class="mtp-compact-cell">
+          <td class="mtp-table__cell--compact">
             {% if check.needs_attention %}
               <span class="govuk-visually-hidden">
                 {% trans 'This credit needs attention today!' %}
