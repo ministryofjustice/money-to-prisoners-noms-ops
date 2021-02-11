@@ -41,7 +41,7 @@
   {% endwith %}
 
   <div class="form-group upload-control">
-    <input type="submit" value="{% trans 'Upload file' %}" class="govuk-button js-DisableOnSubmit" data-module="govuk-button" />
+    <input type="submit" value="{% trans 'Upload file' %}" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true" />
   </div>
   <p class="upload-otherfilelink"><a href=".">{% trans 'Upload another file' %}</a></p>
 </form>
