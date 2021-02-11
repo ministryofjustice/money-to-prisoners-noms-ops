@@ -33,7 +33,7 @@
     </div>
 
     <div class="mtp-table__container mtp-results-list">
-      <table class="mtp-table table-font-xsmall">
+      <table class="mtp-table mtp-table--small">
         <caption class="govuk-visually-hidden">{% trans 'Please check the following credits' %}</caption>
 
         <thead>
@@ -48,8 +48,8 @@
         <tbody>
           {% for credit in credits %}
             <tr>
-              <td class="font-xsmall">
-                <div class="font-small">
+              <td>
+                <div>
                   {% with known_sender=credit|credit_sender_identifiable %}
                     {% if known_sender %}
                       <a class="mtp-link--print-plain" href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default_if_none:'—' }}</a>
@@ -67,8 +67,8 @@
                   {% trans 'Bank transfer' %}
                 {% endif %}
               </td>
-              <td class="font-xsmall">
-                <div class="font-small"><a class="mtp-link--print-plain" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
+              <td>
+                <div><a class="mtp-link--print-plain" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
                 {{ credit.prisoner_name|default_if_none:'—' }}
               </td>
               <td class="numeric">
