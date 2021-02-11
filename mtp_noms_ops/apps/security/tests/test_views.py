@@ -4255,8 +4255,8 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             'decision_reason': '',
         }
         auto_accept_payload_values = {
-            'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
-            'debit_card_sender_details': self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details'],
+            'prisoner_profile_id': self.SENDER_CHECK['credit']['prisoner_profile'],
+            'debit_card_sender_details_id': self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details'],
             'states': [{
                 'reason': 'cause I said so'
             }]
@@ -4315,8 +4315,8 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             'decision_reason': '',
         }
         auto_accept_payload_values = {
-            'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
-            'debit_card_sender_details': self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details'],
+            'prisoner_profile_id': self.SENDER_CHECK['credit']['prisoner_profile'],
+            'debit_card_sender_details_id': self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details'],
             'states': [{
                 'reason': 'cause I said so'
             }]

@@ -393,8 +393,8 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                         self.session.post(
                             '/security/checks/auto-accept',
                             json={
-                                'prisoner_profile': check['credit']['prisoner_profile'],
-                                'debit_card_sender_details': check['credit']['billing_address'][
+                                'prisoner_profile_id': check['credit']['prisoner_profile'],
+                                'debit_card_sender_details_id': check['credit']['billing_address'][
                                     'debit_card_sender_details'
                                 ],
                                 'states': [{
