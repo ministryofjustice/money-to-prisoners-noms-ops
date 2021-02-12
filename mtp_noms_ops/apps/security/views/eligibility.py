@@ -26,6 +26,7 @@ class HMPPSEmployeeView(FormView):
             return redirect(self.success_url)
         if not_hmpps_employee_flag in flags:
             return redirect(self.not_employee_url)
+        request.cannot_navigate_away = True
         return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
@@ -57,4 +58,5 @@ class NotHMPPSEmployeeView(TemplateView):
         flags = request.user.user_data.get('flags') or []
         if request.user.is_authenticated and not_hmpps_employee_flag not in flags:
             return redirect(reverse(settings.LOGIN_REDIRECT_URL))
+        request.cannot_navigate_away = True
         return super().dispatch(request, *args, **kwargs)

@@ -58,7 +58,7 @@ class ConfirmPrisonsView(FormView):
         query_dict = self.request.GET.copy()
         query_dict['prisons'] = selected_prisons
         context['change_prison_query'] = urlencode(query_dict, doseq=True)
-        context['can_navigate_away'] = can_skip_confirming_prisons(self.request.user)
+        self.request.cannot_navigate_away = not can_skip_confirming_prisons(self.request.user)
         return context
 
     def get_form_kwargs(self):
@@ -112,7 +112,6 @@ class ChangePrisonsView(SuccessURLAllowedHostsMixin, FormView):
         context['current_prisons'] = ','.join([
             p['nomis_id'] for p in self.request.user.user_data['prisons']
         ] if self.request.user.user_data.get('prisons') else ['ALL'])
-        context['can_navigate_away'] = True
         return context
 
     def get_form_kwargs(self):
@@ -134,7 +133,7 @@ class AddOrRemovePrisonsView(ChangePrisonsView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['can_navigate_away'] = can_skip_confirming_prisons(self.request.user)
+        self.request.cannot_navigate_away = not can_skip_confirming_prisons(self.request.user)
         return context
 
     def form_valid(self, form):
@@ -158,6 +157,10 @@ class JobInformationView(SuccessURLAllowedHostsMixin, FormView):
     title = _('Help us improve this service')
     template_name = 'settings/job-information.html'
     form_class = JobInformationForm
+
+    def dispatch(self, request, *args, **kwargs):
+        request.cannot_navigate_away = True
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         if REDIRECT_FIELD_NAME in self.request.GET:
