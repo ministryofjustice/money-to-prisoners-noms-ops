@@ -9,15 +9,14 @@
 {% endblock %}
 
 {% block content %}
-
-  <header>
-    <h1 class="govuk-heading-xl">{{ view.title }}</h1>
-  </header>
-
-  {% notification_banners request %}
-
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
+
+      <header>
+        <h1 class="govuk-heading-xl">{{ view.title }}</h1>
+      </header>
+
+      {% notification_banners request %}
 
       <p>
         {% blocktrans trimmed with job_title=_('direct employee of HMPPS or a contracted prison and working in an intelligence function')|wrapwithtag:'strong' %}
@@ -60,5 +59,4 @@
 
     </div>
   </div>
-
 {% endblock %}

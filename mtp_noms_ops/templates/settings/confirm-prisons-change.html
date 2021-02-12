@@ -13,13 +13,14 @@
 {% endblock %}
 
 {% block content %}
-  {% if prison_choice_available %}
-    <header>
-      <h1 class="govuk-heading-xl">{{ view.title }}</h1>
-    </header>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-two-thirds">
+      {% if prison_choice_available %}
+        <header>
+          <h1 class="govuk-heading-xl">{{ view.title }}</h1>
+        </header>
+
         <form method="post" class="mtp-autocomplete mtp-choose-prison">
           {% csrf_token %}
 
@@ -83,13 +84,17 @@
             </button>
           </div>
         </form>
-     </div>
+
+      {% else %}
+
+        <header>
+          <h1 class="govuk-heading-l">{% trans 'You cannot choose your prisons at this time' %}</h1>
+        </header>
+
+      {% endif %}
+
     </div>
-  {% else %}
-    <header>
-      <h1 class="govuk-heading-l">{% trans 'You cannot choose your prisons at this time' %}</h1>
-    </header>
-  {% endif %}
+  </div>
 {% endblock %}
 
 

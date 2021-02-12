@@ -7,6 +7,7 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
+
       <div class="govuk-panel govuk-panel--confirmation">
         <h1 class="govuk-panel__title">
           {% trans 'Your prisons have been saved' %}
@@ -33,6 +34,7 @@
       <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'security:dashboard' %}{% endif %}" class="govuk-button" data-module="govuk-button" role="button">
         {% trans 'Continue' %}
       </a>
+
     </div>
   </div>
 {% endblock %}

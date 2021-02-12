@@ -4,18 +4,17 @@
 {% load static %}
 
 {% block content %}
-
-  {% static 'downloads/apply-to-send-out-more-than-50.pdf' as form_link %}
-
-  {% notification_banners request %}
-
-  <!--[policy-change-info]-->
-  <header>
-    <h1 class="govuk-heading-xl">{% trans 'Recent policy changes (Nov 2nd 2020) that may affect your work' %}</h1>
-  </header>
-
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
+
+      {% static 'downloads/apply-to-send-out-more-than-50.pdf' as form_link %}
+
+      {% notification_banners request %}
+
+      <!--[policy-change-info]-->
+      <header>
+        <h1 class="govuk-heading-xl">{% trans 'Recent policy changes (Nov 2nd 2020) that may affect your work' %}</h1>
+      </header>
 
       <h2 class="govuk-heading-l">{% trans 'Credits' %}</h2>
 
