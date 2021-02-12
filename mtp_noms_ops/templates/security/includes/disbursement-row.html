@@ -10,7 +10,7 @@
   {% if disbursement.prisoner_number %}
     <br />
     {% if link_prisoner %}
-      <a href="{{ disbursement|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
+      <a href="{{ disbursement|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-link--print-plain">
         {{ disbursement.prisoner_number }}
       </a>
     {% else %}

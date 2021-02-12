@@ -52,7 +52,7 @@
                 <div class="font-small">
                   {% with known_sender=credit|credit_sender_identifiable %}
                     {% if known_sender %}
-                      <a class="mtp-print-url-hidden" href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default_if_none:'—' }}</a>
+                      <a class="mtp-link--print-plain" href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default_if_none:'—' }}</a>
                     {% else %}
                       {% trans 'Sender details not recorded' %}
                     {% endif %}
@@ -68,7 +68,7 @@
                 {% endif %}
               </td>
               <td class="font-xsmall">
-                <div class="font-small"><a class="mtp-print-url-hidden" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
+                <div class="font-small"><a class="mtp-link--print-plain" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
                 {{ credit.prisoner_name|default_if_none:'—' }}
               </td>
               <td class="numeric">

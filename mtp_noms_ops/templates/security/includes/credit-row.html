@@ -7,7 +7,7 @@
 
 <td>
   {% if link_sender %}
-    <a href="{{ credit|sender_profile_search_url }}" title="{% trans 'View payment source details' %}" class="mtp-print-url-hidden">
+    <a href="{{ credit|sender_profile_search_url }}" title="{% trans 'View payment source details' %}" class="mtp-link--print-plain">
       {{ credit.sender_name|default:_('Sender details not recorded') }}
     </a>
   {% else %}
@@ -23,7 +23,7 @@
   {% if not credit.prisoner_name %}
     {% trans 'Unknown prisoner' %}
   {% elif link_prisoner %}
-    <a href="{{ credit|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
+    <a href="{{ credit|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-link--print-plain">
       {{ credit.prisoner_name }}
     </a>
     <br />
