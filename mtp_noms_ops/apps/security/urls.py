@@ -1,13 +1,10 @@
-from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render
-from django.views.generic.base import RedirectView
-from mtp_common.auth.api_client import get_api_session
+from django.views.generic import RedirectView
+
 
 from mtp_noms_ops.utils import user_test
 from security import required_permissions, views
-from security.searches import get_saved_searches, populate_new_result_counts
 from security.utils import (
     can_manage_security_checks,
     can_skip_confirming_prisons,
@@ -47,18 +44,13 @@ def fiu_security_test(view):
     )
 
 
-def dashboard_view(request):
-    session = get_api_session(request)
-    return render(request, 'dashboard.html', {
-        'start_page_url': settings.START_PAGE_URL,
-        'saved_searches': populate_new_result_counts(session, get_saved_searches(session)),
-        'november_second_changes_live': settings.NOVEMBER_SECOND_CHANGES_LIVE
-    })
-
-
 app_name = 'security'
 urlpatterns = [
-    url(r'^security/$', security_test(dashboard_view), name='dashboard'),
+    url(
+        r'^security/$',
+        security_test(views.DashboardView.as_view()),
+        name='dashboard',
+    ),
     url(
         r'^security/confirm-hmpps-employee/$',
         login_required(views.HMPPSEmployeeView.as_view()),

@@ -1,3 +1,4 @@
+from .dashboard import DashboardView  # noqa: F401
 from .eligibility import HMPPSEmployeeView, NotHMPPSEmployeeView  # noqa: F401
 from .nomis import prisoner_image_view, prisoner_nomis_info_view  # noqa: F401
 from .object_detail import (  # noqa: F401
