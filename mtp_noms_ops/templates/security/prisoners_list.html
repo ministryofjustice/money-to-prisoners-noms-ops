@@ -33,14 +33,14 @@
               <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
               <thead>
                 <tr>
-                  <th>{% trans 'Prisoner' %}</th>
+                  <th scope="col">{% trans 'Prisoner' %}</th>
                   {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-                  <th>{% trans 'Prison' %}</th>
+                    <th scope="col">{% trans 'Prison' %}</th>
                   {% endif %}
                   {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' cell_classes='govuk-table__header--numeric' %}
                   {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' cell_classes='govuk-table__header--numeric' %}
                   {% sortable_cell _('Amount of credits') form.cleaned_data 'credit_total' cell_classes='govuk-table__header--numeric' %}
-                  <th class="govuk-table__header--numeric govuk-!-display-none-print">{% trans 'Details' %}</th>
+                  <th class="govuk-table__header--numeric govuk-!-display-none-print" scope="col">{% trans 'Details' %}</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,14 +107,14 @@
               <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
               <thead>
                 <tr>
-                  <th>{% trans 'Prisoner' %}</th>
+                  <th scope="col">{% trans 'Prisoner' %}</th>
                   {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-                  <th>{% trans 'Prison' %}</th>
+                    <th scope="col">{% trans 'Prison' %}</th>
                   {% endif %}
                   {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='govuk-table__header--numeric' %}
                   {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' cell_classes='govuk-table__header--numeric' %}
                   {% sortable_cell _('Amount of disbursements	') form.cleaned_data 'disbursement_total' cell_classes='govuk-table__header--numeric' %}
-                  <th class="govuk-table__header--numeric govuk-!-display-none-print">{% trans 'Details' %}</th>
+                  <th class="govuk-table__header--numeric govuk-!-display-none-print" scope="col">{% trans 'Details' %}</th>
                 </tr>
               </thead>
               <tbody>

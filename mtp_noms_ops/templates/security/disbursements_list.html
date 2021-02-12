@@ -44,13 +44,13 @@
           <thead>
             <tr>
               {% sortable_cell _('Date entered') form.cleaned_data 'created' %}
-              <th>{% trans 'Prisoner (from)' %}</th>
-              <th>{% trans 'Recipient (to)' %}</th>
+              <th scope="col">{% trans 'Prisoner (from)' %}</th>
+              <th scope="col">{% trans 'Recipient (to)' %}</th>
               {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-              <th>{% trans 'Prison' %}</th>
+                <th scope="col">{% trans 'Prison' %}</th>
               {% endif %}
               {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
-              <th class="govuk-table__header--numeric">{% trans 'Details' %}</th>
+              <th class="govuk-table__header--numeric" scope="col">{% trans 'Details' %}</th>
             </tr>
           </thead>
           <tbody>

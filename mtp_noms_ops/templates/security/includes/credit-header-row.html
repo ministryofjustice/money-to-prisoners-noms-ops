@@ -3,18 +3,18 @@
 
 {% sortable_cell _('Date received') form.cleaned_data 'received_at' %}
 
-<th>{% trans 'Payment source (from)' %}</th>
+<th scope="col">{% trans 'Payment source (from)' %}</th>
 
 {% if link_prisoner %}
   {% sortable_cell _('Prisoner (to)') form.cleaned_data 'prisoner_number' %}
 {% else %}
-  <th>
+  <th scope="col">
     {% trans 'Prisoner (to)' %}
   </th>
 {% endif %}
 
-<th>{% trans 'Prison' %}</th>
+<th scope="col">{% trans 'Prison' %}</th>
 
 {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
 
-<th class="govuk-table__header--numeric">{% trans 'Details' %}</th>
+<th class="govuk-table__header--numeric" scope="col">{% trans 'Details' %}</th>
