@@ -28,7 +28,10 @@
       <p>{% trans 'Residents will be able to send out a maximum of £50 a week to up to 5 different people, totalling £250.' %}</p>
 
       <h3 class="govuk-heading-m">{% trans 'If they want to send out more' %}</h3>
-      <p>{% trans 'A resident must apply for approval from the governor if they want to send more than £50 per person per week. In exceptional circumstances, this might be granted.' %}</p>
+      <p>
+        {% trans 'A resident must apply for approval from the governor if they want to send more than £50 per person per week.' %}
+        {% trans 'In exceptional circumstances, this might be granted.' %}
+      </p>
       <p>
         {% blocktrans trimmed %}
           It must be applied for each time by filling in a <a href="{{ form_link }}">form</a> which is attached to their disbursement before handing in.

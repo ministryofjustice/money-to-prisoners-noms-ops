@@ -26,8 +26,10 @@
 
       <p>{% trans 'Residents can only send out £50 a week to up to 5 different people, totalling £250.' %}</p>
       <p>
+        {% trans 'A resident must apply for approval from the governor if they want to send more than £50 per person per week.' %}
+        {% trans 'Approval is granted only in exceptional circumstances.' %}
         {% blocktrans trimmed %}
-          A resident must apply for approval from the governor if they want to send more than £50 per person per week. Approval is granted only in exceptional circumstances. It must be applied for each time by filling in <a href="{{ form_link }}">a form</a> which they attach to their disbursement before handing in.
+          It must be applied for each time by filling in <a href="{{ form_link }}">a form</a> which they attach to their disbursement before handing in.
         {% endblocktrans %}
       </p>
 
