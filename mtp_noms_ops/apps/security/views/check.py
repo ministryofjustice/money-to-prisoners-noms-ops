@@ -56,7 +56,7 @@ class AutoAcceptRuleListView(SecurityView):
     """
     View history of all auto-accept rules
     """
-    title = gettext_lazy('Auto Accepts')
+    title = gettext_lazy('Active Auto Accepts')
     template_name = 'security/auto_accept_rule_list.html'
     form_class = AutoAcceptListForm
 

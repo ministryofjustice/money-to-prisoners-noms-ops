@@ -5472,6 +5472,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                     settings.API_URL,
                     urlencode([
                         ('ordering', '-states__added_by__last_name'),
+                        ('is_active', True),
                         ('offset', 0),
                         ('limit', page_size)
                     ])
@@ -5485,6 +5486,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                     reverse('security:auto_accept_rule_list'),
                     urlencode((
                         ('ordering', '-states__added_by__last_name'),
+                        ('is_active', True),
                         ('offset', 0),
                         ('limit', page_size)
                     ))

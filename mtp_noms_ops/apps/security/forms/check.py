@@ -146,6 +146,14 @@ class AutoAcceptListForm(SecurityForm):
         super().__init__(request, **kwargs)
         self.my_list_count = 0
 
+    def get_api_request_params(self):
+        """
+        Gets all checks where last associated state created has active = True
+        """
+        params = super().get_api_request_params()
+        params['is_active'] = True
+        return params
+
     def get_object_list_endpoint_path(self):
         return '/security/checks/auto-accept/'
 
