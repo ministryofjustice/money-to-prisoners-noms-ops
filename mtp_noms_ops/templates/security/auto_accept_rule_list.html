@@ -77,11 +77,11 @@
             {{ auto_accept_rule.states |get_latest_active_auto_accept_state_field:'reason' |truncatechars:50 }}
           </td>
           <td>
-            {% comment %} <a class="button print-hidden" {% endcomment %}
-            {% comment %}    href="{% url 'security:auto_accept_rule_detail' auto_accept_rule_id=auto_accept_rule.id %}" {% endcomment %}
-            {% comment %}    aria-label="{% trans 'View auto-accept details' %}"> {% endcomment %}
-            {% comment %}   {% trans 'Review' %} {% endcomment %}
-            {% comment %} </a> {% endcomment %}
+            <a class="button print-hidden"
+               href="{% url 'security:auto_accept_rule_detail' auto_accept_rule_id=auto_accept_rule.id %}"
+               aria-label="{% trans 'View auto-accept details' %}">
+              {% trans 'Review' %}
+            </a>
           </td>
         </tr>
         {% empty %}

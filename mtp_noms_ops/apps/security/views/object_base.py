@@ -301,8 +301,8 @@ class SecurityDetailView(SecurityView):
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
-
-        context_data['form'].check_and_update_saved_searches(str(self.title))
+        if hasattr(context_data['form'], 'check_and_update_saved_searches'):
+            context_data['form'].check_and_update_saved_searches(str(self.title))
         return context_data
 
     def get_title_for_object(self, detail_object):

@@ -1,0 +1,81 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block inner_content %}
+  <div>
+    <header>
+      <h1 class="heading-xlarge mtp-unpadded-heading">
+        {{ view.title }}
+      </h1>
+    </header>
+  </div>
+
+  <div class="mtp-results-list">
+    <h3 class="heading-large">
+      {% trans 'Auto accept history' %}
+    </h3>
+
+    <table class="mtp-table table-font-xsmall">
+      <caption class="visually-hidden">
+        {{ view.title }}
+      </caption>
+      <thead>
+        <th>
+          {% trans 'Date' %}
+        </th>
+        <th>
+          {% trans 'Started by' %}
+        </th>
+        <th>
+          {% trans 'Action' %}
+        </th>
+        <th>
+          {% trans 'Reason' %}
+          {% comment %} {% include 'security/includes/credit-header-row.html' with link_prisoner=True %} {% endcomment %}
+        </th>
+      </thead>
+      <tbody>
+        {% for auto_accept_state in auto_accept_rule.states %}
+          <tr>
+            <td>
+            {{ auto_accept_state.created | date:'SHORT_DATETIME_FORMAT' }}
+            </td>
+            <td>
+            {{ auto_accept_state.added_by.last_name }}, {{ auto_accept_state.added_by.first_name }}
+            </td>
+            <td>
+            {% if auto_accept_state.active %}
+              {% trans 'Start' %}
+            {% else %}
+              {% trans 'Stop' %}
+            {% endif %}
+            </td>
+            <td>
+            {{ auto_accept_state.reason }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if auto_accept_rule_is_active %}
+    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+    <form class="js-FormAnalytics" method="post">
+      {% csrf_token %}
+      <h3 class="heading-large">
+        {% trans 'To stop auto accept:' %}
+      </h3>
+      {% include 'mtp_common/forms/textarea.html' with field=form.deactivation_reason input_classes='form-control-3-4' %}
+      <button type="submit" class="button">
+        {% trans 'Stop auto accept' %}
+      </button>
+    </form>
+  {% endif %}
+
+
+{% endblock %}

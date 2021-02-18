@@ -8,6 +8,7 @@ from django.views.generic.edit import BaseFormView, FormView
 from mtp_common.api import retrieve_all_pages_for_path
 
 from security.forms.check import (
+    AutoAcceptDetailForm,
     AutoAcceptListForm,
     AcceptOrRejectCheckForm,
     CheckListForm,
@@ -16,7 +17,7 @@ from security.forms.check import (
     UserCheckListForm
 )
 from security.utils import convert_date_fields
-from security.views.object_base import SecurityView  # , SecurityDetailView
+from security.views.object_base import SecurityView, SecurityDetailView
 
 
 class CheckListView(SecurityView):
@@ -66,16 +67,52 @@ class AutoAcceptRuleListView(SecurityView):
         return context
 
 
-#  class AutoAcceptRuleDetailView(SecurityDetailView):
-    #  """
-    #  View history of all auto-accept rules
-    #  """
-    #  title = gettext_lazy('Auto Accept')
-    #  list_title = gettext_lazy('Auto Accepts')
-    #  #  template_name = 'security/auto_accept_rule.html'
-    #  object_context_key = 'auto_accept_rule'
-    #  id_kwarg_name = 'auto_accept_rule_id'
-    #  list_url = reverse_lazy('security:auto_accept_rule_list')
+class AutoAcceptRuleDetailView(SecurityDetailView):
+    """
+    View history of all auto-accept rules
+    """
+    list_title = gettext_lazy('Auto Accepts')
+    template_name = 'security/auto_accept_rule.html'
+    object_context_key = 'auto_accept_rule'
+    id_kwarg_name = 'auto_accept_rule_id'
+    list_url = reverse_lazy('security:auto_accept_rule_list')
+    form_class = AutoAcceptDetailForm
+
+    def get_title_for_object(self, detail_object):
+        return '{} {} {} {}'.format(
+            gettext_lazy('Review auto accept of credits from'),
+            ','.join(detail_object['debit_card_sender_details']['cardholder_names']),
+            gettext_lazy('to'),
+            detail_object['prisoner_profile']['prisoner_name']
+        )
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+
+        detail_object = context_data['form'].get_object()
+        if not detail_object:
+            raise Http404('Auto-accept not found')
+        context_data['auto_accept_rule_is_active'] = sorted(
+            detail_object['states'],
+            key=lambda s: s['created'],
+            reverse=True
+        )[0]['active']
+        return context_data
+
+    def form_valid(self, form):
+        if self.request.method == 'POST':
+            result = form.deactivate_auto_accept_rule()
+            if not result:
+                return self.form_invalid(form)
+
+            messages.add_message(
+                self.request,
+                messages.INFO,
+                gettext_lazy('Auto accept rule was deactivated'),
+            )
+            return HttpResponseRedirect(self.list_url)
+
+        return super().form_valid(form)
 
 
 class CheckAssignView(BaseFormView):

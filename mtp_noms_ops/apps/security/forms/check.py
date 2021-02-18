@@ -7,6 +7,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
+from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
 from security.constants import CHECK_DETAIL_FORM_MAPPING, CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
@@ -430,6 +431,69 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                         else:
                             return self._handle_request_exception(e, 'Auto Accept Rule')
             return (True, '')
+
+
+class AutoAcceptDetailForm(SecurityForm):
+    deactivation_reason = forms.CharField(label='Give details why auto accept is to stop')
+
+    def __init__(self, object_id, **kwargs):
+        super().__init__(**kwargs)
+        self.object_id = object_id
+
+    def get_object_endpoint_path(self):
+        return f'/security/checks/auto-accept/{self.object_id}/'
+
+    def get_object_list_endpoint_path(self):
+        return '/security/checks/auto-accepts/'
+
+    def get_deactivate_endpoint_path(self):
+        return '/security/checks/auto-accepts/'
+
+    def get_object(self):
+        """
+        Gets the security detail object, a sender or prisoner profile
+        :return: dict or None if not found
+        """
+        try:
+            return convert_date_fields(self.session.get(self.get_object_endpoint_path()).json(), include_nested=True)
+        except HttpNotFoundError:
+            self.add_error(None, _('Not found'))
+            return None
+        except RequestException:
+            self.add_error(None, _('This service is currently unavailable'))
+            return {}
+
+    def deactivate_auto_accept_rule(self):
+        """
+        Deactivates auto accept rule via the API.
+        :returns: True if the API call was successful. If not, False
+        """
+        endpoint = self.get_deactivate_endpoint_path()
+        try:
+            # There is an auto-accept rule, which may be in the active or inactive state
+            self.session.patch(
+                endpoint,
+                json={
+                    'states': [{
+                        'active': True,
+                        'reason': self.cleaned_data['deactivation_reason']
+                    }]
+                }
+            )
+        except RequestException as e:
+            try:
+                error_payload = e.response.json()
+            except Exception:
+                error_payload = {}
+            logger.exception(
+                'Auto-accept deactivation for id %s could not be actioned. Error payload: %s',
+                self.object_id,
+                error_payload
+            )
+            self.add_error(None, _('There was an error with your request.'))
+
+            return False
+        return True
 
 
 class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
