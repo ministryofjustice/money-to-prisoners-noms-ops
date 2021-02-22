@@ -1,7 +1,7 @@
 {% extends 'security/base_advanced_search.html' %}
 
 {% block advanced_search_fields %}
-  {% include 'mtp_common/forms/field.html' with field=form.prisoner_number input_classes='govuk-input--width-10' %}
+  {% include 'mtp_common/forms/field.html' with field=form.prisoner_number input_classes='govuk-input--width-10 mtp-input--prisoner-number' %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_name input_classes='govuk-input--width-20' %}
 
   {% include 'security/forms/prison-selector-fieldset.html' %}
