@@ -12,7 +12,6 @@
     ['gov.uk']
   );
   require('async-load').AsyncLoad.init();
-  require('date-picker').DatePicker.init();
 
   // noms-ops
   require('confirm-checked').ConfirmChecked.init();
