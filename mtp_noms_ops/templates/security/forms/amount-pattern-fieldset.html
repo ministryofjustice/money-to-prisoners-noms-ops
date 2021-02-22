@@ -7,7 +7,7 @@
       <strong>{{ field.label }}</strong>
     </legend>
 
-    <div class="{% if field.errors %}form-group-error{% endif %}">
+    <div class="{% if field.errors %}govuk-form-group--error{% endif %}">
       {% for value, label in choices %}
         <div class="multiple-choice">
           <input id="{{ field.html_name }}-{{ value }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == field.value|default:"" %}checked{% endif %}>

@@ -29,7 +29,7 @@
               <strong class="govuk-heading-l">{{ field.label }}</strong>
             </legend>
 
-            <div class="form-group {% if field.errors %}form-group-error{% endif %}">
+            <div class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
             {% include 'mtp_common/forms/field-errors.html' with field=field only %}
 
             {% with initial=value|default:field.value %}
@@ -55,7 +55,7 @@
               <strong class="govuk-heading-l">{{ field.label }}</strong>
             </legend>
 
-            <div class="form-group {% if field.errors %}form-group-error{% endif %}">
+            <div class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
               {% include 'mtp_common/forms/field-errors.html' with field=field only %}
               {% with initial=value|default:field.value %}
                 {% for value, label in choices %}
@@ -74,7 +74,7 @@
             <legend id="{{ field.id_for_label }}-label">
               <strong class="govuk-heading-l">{{ field.label }}</strong>
             </legend>
-            <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
+            <div id="{{ field.id_for_label }}-wrapper" class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
               <p class="form-hint">{{ field.help_text }}</p>
               {% include 'mtp_common/forms/field-errors.html' with field=field only %}
 
@@ -83,7 +83,7 @@
           </fieldset>
         {% endwith %}
 
-        <div class="form-group">
+        <div class="govuk-form-group">
           <button type="submit" class="govuk-button" data-module="govuk-button">
             {% trans 'Continue' %}
           </button>

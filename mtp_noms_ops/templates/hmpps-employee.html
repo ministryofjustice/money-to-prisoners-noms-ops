@@ -35,7 +35,7 @@
               <strong>{{ field.label }}</strong>
             </legend>
 
-            <div class="form-group {% if field.errors %}form-group-error{% endif %}">
+            <div class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
               {% for value, label in choices %}
                 <div class="multiple-choice">
                   <input id="{{ field.html_name }}-{{ value }}" type="radio" name="{{ field.html_name }}" value="{{ value }}">
@@ -46,7 +46,7 @@
           </fieldset>
         {% endwith %}
 
-        <div class="form-group">
+        <div class="govuk-form-group">
           <button type="submit" class="govuk-button" data-module="govuk-button">
             {% trans 'Next' %}
           </button>

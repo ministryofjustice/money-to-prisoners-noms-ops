@@ -6,7 +6,7 @@
   <div class="govuk-grid-row">
     {% with field=since_field %}
       <div class="govuk-grid-column-one-third">
-        <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
+        <div id="{{ field.id_for_label }}-wrapper" class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
           <label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="form-label sublabel">{% trans 'From' %}</label>
           {% include 'mtp_common/forms/field-errors.html' with field=field only %}
           {% include 'mtp_common/forms/field-help-text.html' with field=field only %}
@@ -18,7 +18,7 @@
 
     {% with field=until_field %}
       <div class="govuk-grid-column-one-third">
-        <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
+        <div id="{{ field.id_for_label }}-wrapper" class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
           <label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="form-label sublabel">{% trans 'To' %}</label>
           {% include 'mtp_common/forms/field-errors.html' with field=field only %}
           {% include 'mtp_common/forms/field-help-text.html' with field=field only %}

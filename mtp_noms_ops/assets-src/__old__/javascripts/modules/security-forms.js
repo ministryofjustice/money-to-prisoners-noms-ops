@@ -31,7 +31,7 @@ var LegacySecurityForms = {
     var $penceWrapper = $('#id_amount_pence-wrapper');
 
     var hideWrapper = function (wrapper) {
-      wrapper.removeClass('form-group-error').hide();
+      wrapper.removeClass('govuk-form-group--error').hide();
       wrapper.find('input').val('').removeClass('form-control-error');
       wrapper.find('.error-message').remove();
     };
@@ -177,7 +177,7 @@ exports.SecurityForms = {
       wrapperToReveal.show();
 
       wrappersToHide.find('input').val('').removeClass('form-control-error');
-      wrappersToHide.find('.form-group-error').removeClass('form-group-error');
+      wrappersToHide.find('.govuk-form-group--error').removeClass('govuk-form-group--error');
       wrappersToHide.find('.error-message').remove();
       wrappersToHide.hide();
     }

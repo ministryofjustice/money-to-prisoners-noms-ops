@@ -2,12 +2,12 @@
 
 <div class="govuk-heading-l">{% trans 'Prison' %}</div>
 {% with field=form.prison_selector choices=form.prison_selector.field.choices %}
-  <fieldset class="form-group mtp-conditional-container">
+  <fieldset class="govuk-form-group mtp-conditional-container">
     <legend id="{{ field.id_for_label }}-label" class="govuk-visually-hidden">
       <strong>{{ field.label }}</strong>
     </legend>
 
-    <div class="{% if field.errors %}form-group-error{% endif %}">
+    <div class="{% if field.errors %}govuk-form-group--error{% endif %}">
       {% for value, label in choices %}
         {% if not user.user_data.prisons and value == form.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE %}
           {% comment %}User's prisons is already all prisons so we don't want to have two repeated choices.{% endcomment %}
@@ -29,7 +29,7 @@
 
       {% with sub_field=form.prison %}
       <div class="mtp-conditional-wrapper" id="mtp-conditional-prison_selector-exact">
-        <div id="{{ sub_field.id_for_label }}-wrapper" class="form-group {% if sub_field.errors %}form-group-error{% endif %}">
+        <div id="{{ sub_field.id_for_label }}-wrapper" class="govuk-form-group {% if sub_field.errors %}govuk-form-group--error{% endif %}">
 
           {% include 'mtp_common/forms/field-label.html' with field=sub_field only %}
           {% include 'mtp_common/forms/field-errors.html' with field=sub_field only %}

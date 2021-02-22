@@ -22,9 +22,9 @@
 
         {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
-        <div class="form-group">
+        <p>
           {% trans 'Run the ‘Electronic Credits and Prisoner Establishment Locations’ report in P-NOMIS, then upload the file on this page in CSV format (.csv)' %}
-        </div>
+        </p>
 
         <div class="govuk-inset-text">
           <p>
@@ -36,14 +36,14 @@
         </div>
 
         {% with field=form.location_file %}
-          <div class="form-group {% if field.errors %}form-group-error{% endif %}">
+          <div class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
             {% include 'mtp_common/forms/field-errors.html' with field=field only %}
             <span class="upload-filename"></span><label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="upload-choose button-secondary">{% trans 'Choose file' %}</label>
             {{ field }}
           </div>
         {% endwith %}
 
-        <div class="form-group upload-control">
+        <div class="govuk-form-group upload-control">
           <input type="submit" value="{% trans 'Upload file' %}" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true" />
         </div>
         <p class="upload-otherfilelink"><a href=".">{% trans 'Upload another file' %}</a></p>

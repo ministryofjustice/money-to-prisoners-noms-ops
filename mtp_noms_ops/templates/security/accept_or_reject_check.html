@@ -188,7 +188,7 @@
 
       {% if check.status == 'pending' %}
 
-        <div class="form-group">
+        <div class="govuk-form-group">
           <h2 class="govuk-heading-l">{% trans 'Accept or reject this credit' %}</h2>
           <h3 class="govuk-heading-m">{% trans 'To accept this credit:' %}</h3>
           {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='form-control-3-4' %}
@@ -207,7 +207,7 @@
                 {{ unbound_active_auto_accept_state.reason }}
               </p>
             {% else %}
-              <div class="multiple-choice form-group" data-target="auto_accept_reason">
+              <div class="multiple-choice govuk-form-group" data-target="auto_accept_reason">
                 <input id="example-auto_accept_reason" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
                 <label for="example-auto_accept_reason">
                   {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
@@ -237,7 +237,7 @@
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_known_email input_classes='form-control-3-4' %}
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_unidentified input_classes='form-control-3-4' %}
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.prisoner_multiple_payments_payment_sources input_classes='form-control-3-4' %}
-            <div class="multiple-choice form-group" data-target="fiu_investigation_id">
+            <div class="multiple-choice govuk-form-group" data-target="fiu_investigation_id">
               <input id="example-fiu_investigation_id" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
               <label for="example-fiu_investigation_id">{{ form.human_readable_names.fiu_investigation_id }}</label>
             </div>
@@ -246,7 +246,7 @@
               <input class="form-control" name="fiu_investigation_id" type="text" id="rejection-fiu_investigation_id" disabled>
             </div>
 
-            <div class="multiple-choice form-group" data-target="intelligence_report_id">
+            <div class="multiple-choice govuk-form-group" data-target="intelligence_report_id">
               <input id="example-intelligence_report_id" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
               <label for="example-intelligence_report_id">{{ form.human_readable_names.intelligence_report_id }}</label>
             </div>
@@ -254,7 +254,7 @@
               <label class="form-label" for="rejection-intelligence_report_id">{% trans 'Give reference' %}</label>
               <input class="form-control" name="intelligence_report_id" type="text" id="rejection-intelligence_report_id" disabled>
             </div>
-            <div class="multiple-choice form-group" data-target="other_reason">
+            <div class="multiple-choice govuk-form-group" data-target="other_reason">
               <input id="example-other_reason" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
               <label for="example-other_reason">{{ form.human_readable_names.other_reason }}</label>
             </div>

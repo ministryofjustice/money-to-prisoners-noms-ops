@@ -53,8 +53,8 @@ exports.ChoosePrisons = {
         // error if they type something but don't select anything
         if (!$hiddenInput.val() && $visualInput.val()) {
           $hiddenInput.data('visualInput').addClass('form-control-error');
-          var $hiddenInputFormGroup = $hiddenInput.data('visualInput').parents('.form-group');
-          $hiddenInputFormGroup.addClass('form-group-error');
+          var $hiddenInputFormGroup = $hiddenInput.data('visualInput').parents('.govuk-form-group');
+          $hiddenInputFormGroup.addClass('govuk-form-group--error');
           $hiddenInputFormGroup.find('.govuk-error-message').remove();
           $('.govuk-error-summary').remove();
           var emptyErrorMsg = $hiddenInput.data('autocomplete-error-empty');
