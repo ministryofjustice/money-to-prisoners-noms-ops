@@ -229,8 +229,8 @@
           </div>
 
           <h3 class="govuk-heading-m">{% trans 'To reject this credit:' %}</h3>
-          <fieldset class="mtp-check-form-spacing">
-            <legend class="govuk-fieldset__legend govuk-fieldset__legend">{% trans 'Select all reasons for rejecting this credit:' %}</legend>
+          <fieldset class="govuk-fieldset mtp-check-form-spacing">
+            <legend class="govuk-fieldset__legend">{% trans 'Select all reasons for rejecting this credit:' %}</legend>
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_paying_multiple_prisoners input_classes='form-control-3-4' %}
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_multiple_cards input_classes='form-control-3-4'  %}
             {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_linked_other_prisoners input_classes='form-control-3-4'  %}
