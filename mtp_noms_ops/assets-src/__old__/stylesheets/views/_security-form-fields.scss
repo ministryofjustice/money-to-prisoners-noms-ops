@@ -72,14 +72,6 @@ select[disabled] {
 // govuk elements overrides
 
 .mtp-security-form {
-  .form-label {
-    font-weight: bold;
-
-    &.sublabel {
-      font-weight: normal;
-    }
-  }
-
   #id_sender_account_number-wrapper,
   #id_sender_sort_code-wrapper,
   #id_card_number_last_digits-wrapper,
