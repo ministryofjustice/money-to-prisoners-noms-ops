@@ -49,33 +49,13 @@
           </fieldset>
         {% endwith %}
 
-        {% with field=form.prison_estate choices=form.prison_estate.field.choices %}
-          <fieldset>
-            <legend id="{{ field.id_for_label }}-label">
-              <strong class="govuk-heading-l">{{ field.label }}</strong>
-            </legend>
-
-            <div class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
-              {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-              {% with initial=value|default:field.value %}
-                {% for value, label in choices %}
-                  <div class="multiple-choice">
-                    <input id="{{ field.html_name }}-{{ value|slugify }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == initial %}checked{% endif %}>
-                    <label for="{{ field.html_name }}-{{ value|slugify }}">{{ label }}</label>
-                  </div>
-                {% endfor %}
-              {% endwith %}
-            </div>
-          </fieldset>
-        {% endwith %}
+        {% include 'mtp_common/forms/radio-field.html' with field=form.prison_estate label_classes='govuk-fieldset__legend--l' only %}
 
         {% include 'mtp_common/forms/textarea.html' with field=form.tasks label_classes='govuk-label--l' only %}
 
-        <div class="govuk-form-group">
-          <button type="submit" class="govuk-button" data-module="govuk-button">
-            {% trans 'Continue' %}
-          </button>
-        </div>
+        <button type="submit" class="govuk-button" data-module="govuk-button">
+          {% trans 'Continue' %}
+        </button>
       </form>
 
     </div>
