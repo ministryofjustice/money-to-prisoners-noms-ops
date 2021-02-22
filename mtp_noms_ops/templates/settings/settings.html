@@ -1,8 +1,12 @@
 {% extends 'mtp_common/settings.html' %}
 {% load i18n %}
 
-{% block extra_settings %}
-  <div class="mtp-settings-item">
+{% block settings %}
+  {{ block.super }}
+
+  {% if request.can_access_security %}
+    {% include 'govuk-frontend/components/section-break.html' with visible=True size='l' %}
+
     <form method="post">
       {% csrf_token %}
       {% if email_notifications %}
@@ -29,21 +33,21 @@
 
       {% endif %}
     </form>
-  </div>
+  {% endif %}
 
   {% if prison_choice_available %}
-    <div class="mtp-settings-item">
-      <h2 class="govuk-heading-l">
-        {% trans 'Your prisons' %}
-      </h2>
-      <ul class="govuk-list govuk-list--bullet">
-        {% for prison in request.user.user_data.prisons %}
-          <li>{{ prison.name }}</li>
-        {% empty %}
-          <li>{% trans 'All prisons' %}</li>
-        {% endfor %}
-      </ul>
-      <a class="govuk-button" data-module="govuk-button" role="button" href="{% url 'change_prisons' %}">{% trans 'Change prisons' %}</a>
-    </div>
+    {% include 'govuk-frontend/components/section-break.html' with visible=True size='l' %}
+
+    <h2 class="govuk-heading-l">
+      {% trans 'Your prisons' %}
+    </h2>
+    <ul class="govuk-list govuk-list--bullet">
+      {% for prison in request.user.user_data.prisons %}
+        <li>{{ prison.name }}</li>
+      {% empty %}
+        <li>{% trans 'All prisons' %}</li>
+      {% endfor %}
+    </ul>
+    <a class="govuk-button" data-module="govuk-button" role="button" href="{% url 'change_prisons' %}">{% trans 'Change prisons' %}</a>
   {% endif %}
 {% endblock %}

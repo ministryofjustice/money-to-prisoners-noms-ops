@@ -8,6 +8,7 @@ from django.utils.http import is_safe_url
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from mtp_common.auth.api_client import get_api_session
+from mtp_common.views import SettingsView
 
 from security import confirmed_prisons_flag, provided_job_info_flag
 from settings.forms import ConfirmPrisonForm, ChangePrisonForm, ALL_PRISONS_CODE, JobInformationForm
@@ -15,19 +16,19 @@ from security.models import EmailNotifications
 from security.utils import save_user_flags, can_skip_confirming_prisons, has_provided_job_information
 
 
-class NomsOpsSettingsView(TemplateView):
-    title = _('Settings')
+class NomsOpsSettingsView(SettingsView):
     template_name = 'settings/settings.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        session = get_api_session(self.request)
-        email_preferences = session.get('/emailpreferences/').json()
-        context['email_notifications'] = email_preferences['frequency'] != EmailNotifications.never
+        if self.request.can_access_security:
+            session = get_api_session(self.request)
+            email_preferences = session.get('/emailpreferences/').json()
+            context['email_notifications'] = email_preferences['frequency'] != EmailNotifications.never
         return context
 
     def post(self, *args, **kwargs):
-        if 'email_notifications' in self.request.POST:
+        if self.request.can_access_security and 'email_notifications' in self.request.POST:
             session = get_api_session(self.request)
             if self.request.POST['email_notifications'] == 'True':
                 session.post('/emailpreferences/', json={'frequency': EmailNotifications.daily})
