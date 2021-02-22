@@ -159,21 +159,6 @@ select[disabled] {
     display: block;
   }
 
-  .mtp-form-group-year {
-    max-width: 88px;
-    width: 100%;
-  }
-
-  .mtp-split-date-legend {
-    font-weight: bold;
-  }
-
-  .mtp-split-date-to-wrapper {
-    @include media(mobile) {
-      margin-top: 20px;
-    }
-  }
-
   .mtp-conditional-wrapper {
     @extend .govuk-inset-text;
     border-left-width: 5px;

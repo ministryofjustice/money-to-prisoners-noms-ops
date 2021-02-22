@@ -7,11 +7,11 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
-      {% include 'security/forms/split-date-field.html' with field=form.received_at__gte %}
+      {% include 'mtp_common/forms/date-field.html' with field=form.received_at__gte label_classes='govuk-fieldset__legend--s' only %}
     </div>
 
-    <div class="govuk-grid-column-one-half mtp-split-date-to-wrapper">
-      {% include 'security/forms/split-date-field.html' with field=form.received_at__lt %}
+    <div class="govuk-grid-column-one-half">
+      {% include 'mtp_common/forms/date-field.html' with field=form.received_at__lt label_classes='govuk-fieldset__legend--s' only %}
     </div>
   </div>
 
