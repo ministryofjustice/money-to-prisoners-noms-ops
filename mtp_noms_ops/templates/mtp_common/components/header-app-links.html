@@ -1,9 +1,9 @@
 {% extends 'mtp_common/components/header-app-links.html' %}
 
 {% block app_links %}
-  {% if not request.cannot_navigate_away %}
+  {% if request.user.is_authenticated and not request.cannot_navigate_away %}
     <ul>
-      {% if request.user.is_authenticated and request.can_access_security %}
+      {% if request.can_access_security %}
         {% if request.can_pre_approve %}
           <li>
             {% include 'mtp_common/components/header-app-link.html' with view_name='security:review_credits' link_text=_('New credits check') %}
@@ -29,13 +29,9 @@
             {% include 'mtp_common/components/header-app-link.html' with view_name='security:check_list' subview_names='security:my_check_list security:credits_history security:resolve_check security:auto_accept_rule_list security:auto_accept_rule_detail' link_text=_('Credits to action') %}
           </li>
         {% endif %}
-      {% elif request.user.is_authenticated and request.can_access_prisoner_location %}
+      {% elif request.can_access_prisoner_location %}
         <li>
           {% include 'mtp_common/components/header-app-link.html' with view_name='location_file_upload' link_text=_('Upload location file') %}
-        </li>
-      {% else %}
-        <li>
-          {% include 'mtp_common/components/header-app-link.html' with view_name='login' link_text=_('Sign in') %}
         </li>
       {% endif %}
       <li>
