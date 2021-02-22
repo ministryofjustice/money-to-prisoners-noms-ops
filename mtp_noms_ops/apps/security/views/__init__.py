@@ -15,6 +15,8 @@ from .object_list import (  # noqa: F401
 from .review import ReviewCreditsView  # noqa: F401
 from .check import (  # noqa: F401
     AcceptOrRejectCheckView,
+    AutoAcceptRuleListView,
+    #  AutoAcceptRuleDetailView,
     CheckListView,
     CreditsHistoryListView,
     CheckAssignView,

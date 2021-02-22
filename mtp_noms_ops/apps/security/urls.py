@@ -371,6 +371,16 @@ urlpatterns = [
         name='my_check_list',
     ),
     url(
+        r'^security/checks/auto-accept-rules/$',
+        fiu_security_test(views.AutoAcceptRuleListView.as_view()),
+        name='auto_accept_rule_list',
+    ),
+    #  url(
+    #      r'^security/checks/auto-accept-rules/$(?P<auto_accept_rule_id>\d+)$',
+    #      fiu_security_test(views.AutoAcceptRuleDetailView.as_view()),
+    #      name='auto_accept_rule_detail',
+    #  ),
+    url(
         r'^security/checks/(?P<check_id>\d+)/resolve/$',
         fiu_security_test(views.AcceptOrRejectCheckView.as_view()),
         name='resolve_check',

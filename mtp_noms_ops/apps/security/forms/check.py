@@ -126,6 +126,60 @@ class CreditsHistoryListForm(SecurityForm):
         return object_list
 
 
+class AutoAcceptListForm(SecurityForm):
+    """
+    List of AutoAccepts checks.
+    """
+    ordering = forms.ChoiceField(
+        label=_('Order by'),
+        required=False,
+        initial='-states__created',
+        choices=[
+            ('states__created', _('Date started (oldest to newest)')),
+            ('-states__created', _('Date started (newest to oldest)')),
+            ('states__added_by__last_name', _('Surname of person who last activated (oldest to newest)')),
+            ('-states__added_by__last_name', _('Surname of person who last activated (newest to oldest)')),
+        ],
+    )
+
+    def __init__(self, request, **kwargs):
+        super().__init__(request, **kwargs)
+        self.my_list_count = 0
+
+    def get_api_request_params(self):
+        """
+        Gets all checks where last associated state created has active = True
+        """
+        params = super().get_api_request_params()
+        params['is_active'] = True
+        return params
+
+    def get_object_list_endpoint_path(self):
+        return '/security/checks/auto-accept/'
+
+    def get_check_list_endpoint_path(self):
+        return '/security/checks/'
+
+    def get_object_list(self):
+        """
+        Gets objects, converts datetimes found in them.
+        """
+        object_list = convert_date_fields(super().get_object_list(), include_nested=True)
+        self.my_list_count = self.session.get(self.get_check_list_endpoint_path(), params={
+            'status': 'pending',
+            'credit_resolution': 'initial',
+            'assigned_to': self.request.user.pk,
+            'offset': 0,
+            'limit': 1
+        }).json()['count']
+        self.initial_index = ((self.cleaned_data.get('page', 1) - 1) * self.page_size) + 1
+        self.final_index = min(
+            self.cleaned_data.get('page', 1) * self.page_size,
+            self.total_count
+        )
+        return object_list
+
+
 class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     CheckForm for accepting or rejecting a check.
@@ -347,8 +401,8 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                         self.session.post(
                             '/security/checks/auto-accept',
                             json={
-                                'prisoner_profile': check['credit']['prisoner_profile'],
-                                'debit_card_sender_details': check['credit']['billing_address'][
+                                'prisoner_profile_id': check['credit']['prisoner_profile'],
+                                'debit_card_sender_details_id': check['credit']['billing_address'][
                                     'debit_card_sender_details'
                                 ],
                                 'states': [{
