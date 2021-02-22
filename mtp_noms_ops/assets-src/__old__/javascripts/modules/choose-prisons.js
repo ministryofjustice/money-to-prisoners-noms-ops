@@ -52,7 +52,7 @@ exports.ChoosePrisons = {
         var $visualInput = $('input#id_' + $hiddenInput.attr('name'));
         // error if they type something but don't select anything
         if (!$hiddenInput.val() && $visualInput.val()) {
-          $hiddenInput.data('visualInput').addClass('form-control-error');
+          $hiddenInput.data('visualInput').addClass('govuk-input--error');
           var $hiddenInputFormGroup = $hiddenInput.data('visualInput').parents('.govuk-form-group');
           $hiddenInputFormGroup.addClass('govuk-form-group--error');
           $hiddenInputFormGroup.find('.govuk-error-message').remove();

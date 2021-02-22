@@ -32,7 +32,7 @@ var LegacySecurityForms = {
 
     var hideWrapper = function (wrapper) {
       wrapper.removeClass('govuk-form-group--error').hide();
-      wrapper.find('input').val('').removeClass('form-control-error');
+      wrapper.find('input').val('').removeClass('govuk-input--error');
       wrapper.find('.error-message').remove();
     };
 
@@ -176,7 +176,7 @@ exports.SecurityForms = {
 
       wrapperToReveal.show();
 
-      wrappersToHide.find('input').val('').removeClass('form-control-error');
+      wrappersToHide.find('input').val('').removeClass('govuk-input--error');
       wrappersToHide.find('.govuk-form-group--error').removeClass('govuk-form-group--error');
       wrappersToHide.find('.error-message').remove();
       wrappersToHide.hide();

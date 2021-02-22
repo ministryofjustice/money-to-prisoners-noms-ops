@@ -8,9 +8,9 @@
     {% trans 'They are not validated.' %}
   </p>
   <p>{% trans 'When the sender makes a bank transfer, the bank supplies the name on the bank account.' %}</p>
-  {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
-  {% include 'mtp_common/forms/field.html' with field=form.sender_email %}
-  {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_name input_classes='govuk-input--width-20' %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_email input_classes='govuk-input--width-20' %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_postcode input_classes='govuk-input--width-5' %}
 
   <div class="govuk-heading-l">{% trans 'Payment method' %}</div>
   {% include 'security/forms/payment-method-fieldset.html' %}

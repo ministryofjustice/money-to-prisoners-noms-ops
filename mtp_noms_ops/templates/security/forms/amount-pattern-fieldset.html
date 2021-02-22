@@ -22,7 +22,7 @@
 
         {% if value == 'pence' %}
         <div class="mtp-conditional-wrapper" id="mtp-conditional-amount_pattern-pence">
-          {% include 'mtp_common/forms/field.html' with field=form.amount_pence only %}
+          {% include 'mtp_common/forms/field.html' with field=form.amount_pence input_classes='govuk-input--width-2' only %}
         </div>
         {% endif %}
       {% endfor %}

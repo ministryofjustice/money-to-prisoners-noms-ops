@@ -34,7 +34,7 @@
           {% include 'mtp_common/forms/field-label.html' with field=sub_field only %}
           {% include 'mtp_common/forms/field-errors.html' with field=sub_field only %}
 
-          <select id="{{ sub_field.id_for_label }}" class="form-control {% if sub_field.errors %}form-control-error{% endif %} mtp-autocomplete" name="{{ sub_field.html_name }}">
+          <select id="{{ sub_field.id_for_label }}" class="govuk-select {% if sub_field.errors %}govuk-select--error{% endif %} mtp-autocomplete" name="{{ sub_field.html_name }}">
               <option value=""></option>
             {% for key, title in sub_field.field.choices %}
               <option value="{{ key }}" {% if key in sub_field.value %}selected{% endif %}>{{ title }}</option>

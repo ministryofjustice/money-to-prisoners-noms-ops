@@ -191,14 +191,14 @@
         <div class="govuk-form-group">
           <h2 class="govuk-heading-l">{% trans 'Accept or reject this credit' %}</h2>
           <h3 class="govuk-heading-m">{% trans 'To accept this credit:' %}</h3>
-          {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='form-control-3-4' %}
+          {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='govuk-!-width-three-quarters' %}
           <div class="mtp-check-accept-container">
             {% if unbound_active_auto_accept_state %}
               <p class="govuk-inset-text">
                 {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
                   Auto accept started for credits from {{sender_name}} to {{prisoner_number}}
                 {% endblocktrans %}
-                </br>
+                <br/>
                 <span class="mtp-font-weight-bold">Started by:</span>
                 {{ unbound_active_auto_accept_state.added_by.first_name}} {{ unbound_active_auto_accept_state.added_by.last_name}}
                 <br/>
@@ -219,7 +219,7 @@
               </div>
               <div class="govuk-inset-text js-hidden" id="auto_accept_reason">
                 <label class="form-label" for="rejection-auto_accept_reason">{% trans 'Give reason for automatically accepting' %}</label>
-                <textarea class="form-control mtp-check-form-auto-accept" name="auto_accept_reason" type="text" id="rejection-auto_accept_reason" disabled></textarea>
+                <textarea class="govuk-textarea mtp-check-form-auto-accept" name="auto_accept_reason" type="text" id="rejection-auto_accept_reason" disabled></textarea>
               </div>
             {% endif %}
             <br/>
@@ -231,19 +231,19 @@
           <h3 class="govuk-heading-m">{% trans 'To reject this credit:' %}</h3>
           <fieldset class="govuk-fieldset mtp-check-form-spacing">
             <legend class="govuk-fieldset__legend">{% trans 'Select all reasons for rejecting this credit:' %}</legend>
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_paying_multiple_prisoners input_classes='form-control-3-4' %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_multiple_cards input_classes='form-control-3-4'  %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_linked_other_prisoners input_classes='form-control-3-4'  %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_known_email input_classes='form-control-3-4' %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_unidentified input_classes='form-control-3-4' %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.prisoner_multiple_payments_payment_sources input_classes='form-control-3-4' %}
+            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_paying_multiple_prisoners %}
+            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_multiple_cards  %}
+            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_linked_other_prisoners  %}
+            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_known_email %}
+            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_unidentified %}
+            {% include 'mtp_common/forms/checkbox-field.html' with field=form.prisoner_multiple_payments_payment_sources %}
             <div class="multiple-choice govuk-form-group" data-target="fiu_investigation_id">
               <input id="example-fiu_investigation_id" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
               <label for="example-fiu_investigation_id">{{ form.human_readable_names.fiu_investigation_id }}</label>
             </div>
             <div class="govuk-inset-text js-hidden" id="fiu_investigation_id">
               <label class="form-label" for="rejection-fiu_investigation_id">{% trans 'Give reference' %}</label>
-              <input class="form-control" name="fiu_investigation_id" type="text" id="rejection-fiu_investigation_id" disabled>
+              <input class="govuk-input govuk-input--width-10" name="fiu_investigation_id" type="text" id="rejection-fiu_investigation_id" disabled>
             </div>
 
             <div class="multiple-choice govuk-form-group" data-target="intelligence_report_id">
@@ -252,7 +252,7 @@
             </div>
             <div class="govuk-inset-text js-hidden" id="intelligence_report_id">
               <label class="form-label" for="rejection-intelligence_report_id">{% trans 'Give reference' %}</label>
-              <input class="form-control" name="intelligence_report_id" type="text" id="rejection-intelligence_report_id" disabled>
+              <input class="govuk-input govuk-input--width-10" name="intelligence_report_id" type="text" id="rejection-intelligence_report_id" disabled>
             </div>
             <div class="multiple-choice govuk-form-group" data-target="other_reason">
               <input id="example-other_reason" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
@@ -260,11 +260,11 @@
             </div>
             <div class="govuk-inset-text js-hidden" id="other_reason">
               <label class="form-label" for="rejection-other_reason">{% trans 'Give the reason' %}</label>
-              <input class="form-control" name="other_reason" type="text" id="rejection-other_reason" disabled>
+              <input class="govuk-input govuk-input--width-20" name="other_reason" type="text" id="rejection-other_reason" disabled>
             </div>
           </fieldset>
           <div class="mtp-check-details-spacing">
-            {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='form-control-3-4' %}
+            {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='govuk-!-width-three-quarters' %}
             <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button" name="fiu_action" value="reject">
               {% trans 'Reject credit' %}
             </button>

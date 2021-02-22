@@ -69,19 +69,7 @@
           </fieldset>
         {% endwith %}
 
-        {% with field=form.tasks %}
-          <fieldset>
-            <legend id="{{ field.id_for_label }}-label">
-              <strong class="govuk-heading-l">{{ field.label }}</strong>
-            </legend>
-            <div id="{{ field.id_for_label }}-wrapper" class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
-              <p class="form-hint">{{ field.help_text }}</p>
-              {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-
-              <textarea id="{{ field.id_for_label }}" class="form-control {% if field.errors %}form-control-error{% endif %} {{ input_classes }}" name="{{ field.html_name }}" rows="4" cols="50" {% for attr, attr_val in attrs.items %} {{ attr }}="{{ attr_val }}" {% endfor %}>{{ value|default:field.value|default_if_none:'' }}</textarea>
-            </div>
-          </fieldset>
-        {% endwith %}
+        {% include 'mtp_common/forms/textarea.html' with field=form.tasks label_classes='govuk-label--l' only %}
 
         <div class="govuk-form-group">
           <button type="submit" class="govuk-button" data-module="govuk-button">

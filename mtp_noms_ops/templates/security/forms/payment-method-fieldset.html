@@ -15,14 +15,14 @@
 
         {% if value == 'bank_transfer' %}
         <div class="mtp-conditional-wrapper" id="mtp-conditional-payment_method-bank_transfer">
-          {% include 'mtp_common/forms/field.html' with field=form.account_number only %}
-          {% include 'mtp_common/forms/field.html' with field=form.sort_code only %}
+          {% include 'mtp_common/forms/field.html' with field=form.account_number input_classes='govuk-input--width-10' only %}
+          {% include 'mtp_common/forms/field.html' with field=form.sort_code input_classes='govuk-input--width-5' only %}
         </div>
         {% endif %}
 
         {% if value == 'online' %}
         <div class="mtp-conditional-wrapper" id="mtp-conditional-payment_method-online">
-          {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits only %}
+          {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits input_classes='govuk-input--width-5' only %}
         </div>
         {% endif %}
       {% endfor %}
