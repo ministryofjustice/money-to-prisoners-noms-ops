@@ -3,11 +3,6 @@
 
   // common
   require('upload').Upload.init();
-  require('mailcheck-warning').MailcheckWarning.init(
-    '.mtp-account-management input[type=email]',
-    ['justice.gov.uk'],
-    ['gov.uk']
-  );
 
   // noms-ops
   require('confirm-checked').ConfirmChecked.init();
