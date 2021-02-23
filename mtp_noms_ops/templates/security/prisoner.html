@@ -59,7 +59,7 @@
 
         <div class="govuk-grid-column-one-quarter">
           <div id="location-label" class="mtp-detail-label">{% trans 'Location' %}</div>
-          <strong class="js-async-load" data-path="{% url 'security:prisoner_nomis_info' prisoner_number=prisoner.prisoner_number %}" data-key="housing_location" aria-labelledby="location-label">–</strong>
+          <strong class="mtp-async-load" data-path="{% url 'security:prisoner_nomis_info' prisoner_number=prisoner.prisoner_number %}" data-key="housing_location" aria-labelledby="location-label">–</strong>
         </div>
       </div>
 

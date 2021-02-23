@@ -8,7 +8,6 @@
     ['justice.gov.uk'],
     ['gov.uk']
   );
-  require('async-load').AsyncLoad.init();
 
   // noms-ops
   require('confirm-checked').ConfirmChecked.init();
