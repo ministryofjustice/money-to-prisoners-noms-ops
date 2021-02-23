@@ -1,0 +1,24 @@
+.mtp-prison-switcher {
+  @include govuk-clearfix;
+  overflow: hidden;
+  margin-top: govuk-spacing(2);
+  margin-bottom: govuk-spacing(1);
+  padding-bottom: govuk-spacing(2);
+  border-bottom: 1px solid $govuk-border-colour;
+}
+
+.mtp-prison-switcher__prison-names, .mtp-prison-switcher__change-link {
+  box-sizing: border-box;
+  float: left;
+}
+
+.mtp-prison-switcher__prison-names {
+  @include govuk-font($size: 19, $weight: bold);
+  width: 80%;
+}
+
+.mtp-prison-switcher__change-link {
+  @include govuk-font($size: 16);
+  width: 20%;
+  text-align: right;
+}

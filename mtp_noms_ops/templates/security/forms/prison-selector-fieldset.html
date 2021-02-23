@@ -11,7 +11,7 @@
 
 {% block radio_label %}
   {% if choice == PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE %}
-    {% include 'security/forms/user-prison-names-ellipsis.html' %}
+    {% include 'security/includes/user-prison-names-ellipsis.html' %}
   {% else %}
     {{ label }}
   {% endif %}

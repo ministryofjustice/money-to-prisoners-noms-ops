@@ -9,6 +9,6 @@
   {{ block.super }}
 
   {% if not is_advanced_search_results and not is_all_prisons_simple_search_results %}
-    {% include "security/forms/prison-switcher.html" %}
+    {% include 'security/includes/prison-switcher.html' %}
   {% endif %}
 {% endblock %}
