@@ -33,4 +33,6 @@ Upload.init();
 
 // app components
 import {FormAnalytics} from './components/form-analytics';
+import {Security} from './components/security';
 FormAnalytics.init();
+Security.init();
