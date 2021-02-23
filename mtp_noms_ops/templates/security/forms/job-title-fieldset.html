@@ -1,0 +1,10 @@
+{% extends 'security/forms/radio-fieldset.html' %}
+{% load i18n %}
+
+{% block conditional_fields %}
+  {% if choice == 'Other' %}
+    <div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="{{ field.id_for_label }}-{{ choice_slug }}-conditional">
+      {% include 'mtp_common/forms/field.html' with field=form.other_title input_classes='govuk-input--width-10' only %}
+    </div>
+  {% endif %}
+{% endblock %}

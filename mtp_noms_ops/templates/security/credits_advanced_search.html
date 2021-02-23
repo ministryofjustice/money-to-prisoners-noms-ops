@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  {% include 'security/forms/amount-pattern-fieldset.html' %}
+  {% include 'security/forms/amount-pattern-fieldset.html' with field=form.amount_pattern %}
 
   <div class="govuk-heading-l">{% trans 'Payment methods' %}</div>
   <div class="govuk-heading-m">{% trans 'Payment source details' %}</div>
@@ -29,12 +29,11 @@
   {% include 'mtp_common/forms/field.html' with field=form.sender_postcode input_classes='govuk-input--width-5' %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_ip_address input_classes='govuk-input--width-10' %}
 
-  <div class="govuk-heading-m">{% trans 'Payment method' %}</div>
-  {% include 'security/forms/payment-method-fieldset.html' %}
+  {% include 'security/forms/payment-method-fieldset.html' with field=form.payment_method label_classes='govuk-fieldset__legend--m' %}
 
   <div class="govuk-heading-l">{% trans 'Prisoner' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number input_classes='govuk-input--width-10 mtp-input--prisoner-number' %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_name input_classes='govuk-input--width-20' %}
 
-  {% include 'security/forms/prison-selector-fieldset.html' %}
+  {% include 'security/forms/prison-selector-fieldset.html' with field=form.prison_selector %}
 {% endblock advanced_search_fields %}

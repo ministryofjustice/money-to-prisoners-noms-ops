@@ -159,14 +159,6 @@ select[disabled] {
     display: block;
   }
 
-  .mtp-conditional-wrapper {
-    @extend .govuk-inset-text;
-    border-left-width: 5px;
-    margin-left: 18px;
-    padding: 0 0 0 26px;
-    display: none;
-  }
-
   .mtp-invoice-nr-header {
     margin-top: 15px;
   }

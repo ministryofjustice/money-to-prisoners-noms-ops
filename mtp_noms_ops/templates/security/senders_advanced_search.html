@@ -12,8 +12,7 @@
   {% include 'mtp_common/forms/field.html' with field=form.sender_email input_classes='govuk-input--width-20' %}
   {% include 'mtp_common/forms/field.html' with field=form.sender_postcode input_classes='govuk-input--width-5' %}
 
-  <div class="govuk-heading-l">{% trans 'Payment method' %}</div>
-  {% include 'security/forms/payment-method-fieldset.html' %}
+  {% include 'security/forms/payment-method-fieldset.html' with field=form.payment_method label_classes='govuk-fieldset__legend--m' %}
 
-  {% include 'security/forms/prison-selector-fieldset.html' %}
+  {% include 'security/forms/prison-selector-fieldset.html' with field=form.prison_selector %}
 {% endblock advanced_search_fields %}

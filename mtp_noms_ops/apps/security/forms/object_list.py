@@ -69,7 +69,7 @@ class PrisonSelectorSearchFormMixin(forms.Form):
     PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE = 'all'
 
     prison_selector = forms.ChoiceField(
-        label=_('Choose a prison'),
+        label=_('Prison'),
         required=False,
         choices=(
             (PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE, _('Your prisons')),

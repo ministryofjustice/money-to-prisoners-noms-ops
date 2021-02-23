@@ -15,7 +15,6 @@
 
   // noms-ops
   require('confirm-checked').ConfirmChecked.init();
-  require('security-forms').SecurityForms.init();
   require('autocomplete-select').AutocompleteSelect.init();
   require('choose-prisons').ChoosePrisons.init();
   require('form-analytics').FormAnalytics.init();

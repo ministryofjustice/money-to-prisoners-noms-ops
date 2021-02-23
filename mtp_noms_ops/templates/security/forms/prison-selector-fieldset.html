@@ -1,49 +1,39 @@
+{% extends 'security/forms/radio-fieldset.html' %}
 {% load i18n %}
 
-<div class="govuk-heading-l">{% trans 'Prison' %}</div>
-{% with field=form.prison_selector choices=form.prison_selector.field.choices %}
-  <fieldset class="govuk-form-group mtp-conditional-container">
-    <legend id="{{ field.id_for_label }}-label" class="govuk-visually-hidden">
-      <strong>{{ field.label }}</strong>
-    </legend>
+{% block radio_item %}
+  {% if not user.user_data.prisons and choice == form.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE %}
+    {# User's prisons is already all prisons so we don't want to have two repeated choices. #}
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
 
-    <div class="{% if field.errors %}govuk-form-group--error{% endif %}">
-      {% for value, label in choices %}
-        {% if not user.user_data.prisons and value == form.PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE %}
-          {% comment %}User's prisons is already all prisons so we don't want to have two repeated choices.{% endcomment %}
-        {% else %}
-        <div class="multiple-choice">
-          <input id="{{ field.html_name }}-{{ value }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == field.value %}checked{% endif %}>
+{% block radio_label %}
+  {% if choice == PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE %}
+    {% include 'security/forms/user-prison-names-ellipsis.html' %}
+  {% else %}
+    {{ label }}
+  {% endif %}
+{% endblock %}
 
-          <label for="{{ field.html_name }}-{{ value }}">
-            {% if value == PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE %}
-              {% include 'security/forms/user-prison-names-ellipsis.html' %}
-            {% else %}
-              {{ label }}
-            {% endif %}
-          </label>
+{% block conditional_fields %}
+  {% if choice == 'exact' %}
+    <div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="{{ field.id_for_label }}-{{ choice_slug }}-conditional">
+      {% with field=form.prison %}
+        <div id="{{ field.id_for_label }}-wrapper" class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
+          {% include 'mtp_common/forms/field-label.html' with field=field only %}
+          {% include 'mtp_common/forms/field-errors.html' with field=field only %}
 
-        </div>
-        {% endif %}
-      {% endfor %}
-
-      {% with sub_field=form.prison %}
-      <div class="mtp-conditional-wrapper" id="mtp-conditional-prison_selector-exact">
-        <div id="{{ sub_field.id_for_label }}-wrapper" class="govuk-form-group {% if sub_field.errors %}govuk-form-group--error{% endif %}">
-
-          {% include 'mtp_common/forms/field-label.html' with field=sub_field only %}
-          {% include 'mtp_common/forms/field-errors.html' with field=sub_field only %}
-
-          <select id="{{ sub_field.id_for_label }}" class="govuk-select {% if sub_field.errors %}govuk-select--error{% endif %} mtp-autocomplete" name="{{ sub_field.html_name }}">
-              <option value=""></option>
-            {% for key, title in sub_field.field.choices %}
-              <option value="{{ key }}" {% if key in sub_field.value %}selected{% endif %}>{{ title }}</option>
+          <select id="{{ field.id_for_label }}" class="govuk-select {% if field.errors %}govuk-select--error{% endif %} mtp-autocomplete" name="{{ field.html_name }}">
+            <option value=""></option>
+            {% for key, title in field.field.choices %}
+              <option value="{{ key }}" {% if key in field.value %}selected{% endif %}>{{ title }}</option>
             {% endfor %}
           </select>
 
         </div>
-        {% endwith %}
-      </div>
+      {% endwith %}
     </div>
-  </fieldset>
-{% endwith %}
+  {% endif %}
+{% endblock %}
