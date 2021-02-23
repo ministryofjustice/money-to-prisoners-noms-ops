@@ -22,7 +22,7 @@
         {% paneltab name='credits' title=_('Credits') %}
           <div class="mtp-table__container mtp-results-list">
             <div class="govuk-!-display-none-print mtp-links--no-panel">
-              <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+              <a class="mtp-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
               &nbsp;
               {% url 'security:prisoner_export' as export_view %}
               {% url 'security:prisoner_email_export' as email_export_view %}
@@ -96,7 +96,7 @@
         {% paneltab name='disbursements' title=_('Disbursements') %}
           <div class="mtp-table__container mtp-results-list">
             <div class="govuk-!-display-none-print mtp-links--no-panel">
-              <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+              <a class="mtp-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
               &nbsp;
               {% url 'security:prisoner_export' as export_view %}
               {% url 'security:prisoner_email_export' as email_export_view %}

@@ -32,7 +32,7 @@
     {% if form.is_valid and disbursements %}{% setup_highlight %}
       <div class="mtp-table__container mtp-results-list">
         <div class="govuk-!-display-none-print mtp-links--no-panel">
-          <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+          <a class="mtp-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
           &nbsp;
           {% url 'security:disbursement_export' as export_view %}
           {% url 'security:disbursement_email_export' as email_export_view %}

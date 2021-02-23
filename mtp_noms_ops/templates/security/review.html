@@ -29,7 +29,7 @@
 
     <div class="mtp-review__actions govuk-!-display-none-print">
       <button type="submit" name="submit" class="govuk-button" data-module="govuk-button" value="submit">{% trans 'Credits checked by security' %}</button>
-      <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print these credits' %}</a>
+      <a class="mtp-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print these credits' %}</a>
     </div>
 
     <div class="mtp-table__container mtp-results-list">
