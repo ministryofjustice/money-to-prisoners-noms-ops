@@ -4,7 +4,6 @@
   // common
   require('upload').Upload.init();
   require('print').Print.init();
-  require('tabbed-panel').TabbedPanel.init();
   require('mailcheck-warning').MailcheckWarning.init(
     '.mtp-account-management input[type=email]',
     ['justice.gov.uk'],
