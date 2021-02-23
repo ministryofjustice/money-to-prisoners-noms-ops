@@ -61,7 +61,7 @@
   </div>
   {% if auto_accept_rule_is_active %}
     {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
-    <form class="js-FormAnalytics govuk-form-group" method="post">
+    <form class="govuk-form-group mtp-form-analytics" method="post">
       {% csrf_token %}
       <h2 class="govuk-heading-m">
         {% trans 'To stop auto accept:' %}

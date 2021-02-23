@@ -67,7 +67,7 @@
     </div>
   </div>
 
-  <form class="js-FormAnalytics" method="get">
+  <form class="mtp-form-analytics" method="get">
     {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
     {% if form.is_valid %}
@@ -87,7 +87,7 @@
             </p>
 
             <div class="govuk-!-display-none-print mtp-links">
-              <a class="mtp-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+              <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
               &nbsp;
               {% url 'security:prisoner_detail_export' prisoner_id=prisoner.id as export_view %}
               {% url 'security:prisoner_detail_email_export' prisoner_id=prisoner.id as email_export_view %}

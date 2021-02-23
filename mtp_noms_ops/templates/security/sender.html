@@ -82,7 +82,7 @@
     {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this sender on your home page') unpin_label=_('Stop monitoring this sender') only %}
   </div>
 
-  <form class="js-FormAnalytics" method="get">
+  <form class="mtp-form-analytics" method="get">
     {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
     {% if form.is_valid %}
@@ -95,7 +95,7 @@
           </p>
 
           <div class="govuk-!-display-none-print mtp-links">
-            <a class="mtp-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+            <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
             &nbsp;
             {% url 'security:sender_detail_export' sender_id=sender.id as export_view %}
             {% url 'security:sender_detail_email_export' sender_id=sender.id as email_export_view %}

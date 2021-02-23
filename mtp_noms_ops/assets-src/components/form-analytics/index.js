@@ -1,10 +1,11 @@
+// track form submissions (only field names are sent for privacy)
 'use strict';
 
-var analytics = require('analytics');
+import {Analytics} from 'mtp_common/components/analytics';
 
-exports.FormAnalytics = {
+export var FormAnalytics = {
   init: function () {
-    $('.js-FormAnalytics').each(this.bindForm);
+    $('.mtp-form-analytics').each(this.bindForm);
   },
 
   bindForm: function () {
@@ -12,7 +13,7 @@ exports.FormAnalytics = {
     var formId = $form.attr('id');
 
     function sendEvent (category, action, label) {
-      analytics.Analytics.send(
+      Analytics.send(
         'event', category, action, label
       );
     }
@@ -36,7 +37,7 @@ exports.FormAnalytics = {
       }
     });
 
-    $('.js-FormAnalytics-click', $form[0]).click(function () {
+    $('.mtp-form-analytics__click', $form[0]).click(function () {
       // send click event, e.g. for print or export
       var $element = $(this);
       var eventDetails = $element.data('click-track').split(',');
@@ -45,7 +46,7 @@ exports.FormAnalytics = {
         sendEvent('form-link', eventDetails[0], eventDetails[1]);
 
         if (clickAsPageview) {
-          analytics.Analytics.rawSend(
+          Analytics.rawSend(
             'pageview',
             $element.attr('href').split('?')[0]
           );

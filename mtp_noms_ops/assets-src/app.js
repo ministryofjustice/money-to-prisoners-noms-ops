@@ -28,3 +28,7 @@ MailcheckWarning.init(
 PrintTrigger.init();
 TabbedPanel.init();
 Upload.init();
+
+// app components
+import {FormAnalytics} from './components/form-analytics';
+FormAnalytics.init();

@@ -17,7 +17,7 @@
     {% endif %}
   {% endif %}
 
-  <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search js-FormAnalytics" method="get">
+  <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search mtp-form-analytics" method="get">
 
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
@@ -32,7 +32,7 @@
     {% if form.is_valid and disbursements %}{% setup_highlight %}
       <div class="mtp-table__container mtp-results-list">
         <div class="govuk-!-display-none-print mtp-links--no-panel">
-          <a class="mtp-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+          <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
           &nbsp;
           {% url 'security:disbursement_export' as export_view %}
           {% url 'security:disbursement_email_export' as email_export_view %}
@@ -117,7 +117,7 @@
 
     {% if all_prisons_simple_search_link %}
     <p>
-      <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print js-FormAnalytics-click" data-click-track="all-prisons-simple-search,disbursements">
+      <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print mtp-form-analytics__click" data-click-track="all-prisons-simple-search,disbursements">
         {% trans 'See results from all prisons' %}
       </a>
     </p>
