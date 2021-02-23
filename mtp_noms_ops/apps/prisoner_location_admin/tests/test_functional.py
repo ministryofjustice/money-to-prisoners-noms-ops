@@ -81,7 +81,6 @@ class UploadTests(PrisonerLocationAdminTestCase):
     def test_checking_upload_page(self):
         self.assertInSource('Upload prisoner location file')
         self.assertInSource('upload the file on this page in CSV format')
-        self.assertCssProperty('.upload-otherfilelink', 'display', 'none')
 
     @silence_logger(level=logging.WARNING)
     def test_upload_valid_file(self):

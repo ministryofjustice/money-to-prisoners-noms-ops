@@ -12,6 +12,7 @@ import {DialogueBox} from 'mtp_common/components/dialogue-box';
 import {MailcheckWarning} from 'mtp_common/components/mailcheck-warning';
 import {PrintTrigger} from 'mtp_common/components/print-trigger';
 import {TabbedPanel} from 'mtp_common/components/tabbed-panel';
+import {Upload} from 'mtp_common/components/upload';
 initDefaults();
 initStaffDefaults();
 AsyncLoad.init();
@@ -24,3 +25,4 @@ MailcheckWarning.init(
 );
 PrintTrigger.init();
 TabbedPanel.init();
+Upload.init();

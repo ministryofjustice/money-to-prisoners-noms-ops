@@ -1,9 +1,6 @@
 (function () {
   'use strict';
 
-  // common
-  require('upload').Upload.init();
-
   // noms-ops
   require('confirm-checked').ConfirmChecked.init();
   require('autocomplete-select').AutocompleteSelect.init();

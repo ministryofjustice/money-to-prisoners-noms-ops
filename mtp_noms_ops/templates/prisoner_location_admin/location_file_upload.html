@@ -14,10 +14,7 @@
 
       {% notification_banners request %}
 
-      <form action="{% url 'location_file_upload' %}"
-            method="post"
-            enctype="multipart/form-data"
-            class="upload-form">
+      <form action="{% url 'location_file_upload' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
@@ -35,18 +32,9 @@
           <p>{% trans 'Please note the uploaded prisoner locations will replace all those currently stored in the system.' %}</p>
         </div>
 
-        {% with field=form.location_file %}
-          <div class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
-            {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-            <span class="upload-filename"></span><label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="upload-choose button-secondary">{% trans 'Choose file' %}</label>
-            {{ field }}
-          </div>
-        {% endwith %}
+        {% include 'mtp_common/forms/file-field.html' with field=form.location_file %}
 
-        <div class="govuk-form-group upload-control">
-          <input type="submit" value="{% trans 'Upload file' %}" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true" />
-        </div>
-        <p class="upload-otherfilelink"><a href=".">{% trans 'Upload another file' %}</a></p>
+        <input type="submit" value="{% trans 'Upload file' %}" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true" />
       </form>
 
     </div>
