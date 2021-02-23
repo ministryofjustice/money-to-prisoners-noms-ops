@@ -7,7 +7,7 @@
 
 {% elif form.total_count <= view.export_email_limit %}
 
-  <a class="js-dialogue-open js-FormAnalytics-click" href="#export-dialogue" data-click-track="export-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Export' %}</a>
+  <a class="mtp-dialogue__open-trigger-link js-FormAnalytics-click" href="#export-dialogue" data-click-track="export-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Export' %}</a>
 
   {% dialoguebox html_id="export-dialogue" title=_('Export') %}
     <p>
@@ -27,7 +27,7 @@
 
 {% else %}
 
-  <a class="js-dialogue-open js-FormAnalytics-click" href="#export-dialogue" data-click-track="export-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Export' %}</a>
+  <a class="mtp-dialogue__open-trigger-link js-FormAnalytics-click" href="#export-dialogue" data-click-track="export-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Export' %}</a>
 
   {% dialoguebox html_id="export-dialogue" title=_('Export') %}
     <p>

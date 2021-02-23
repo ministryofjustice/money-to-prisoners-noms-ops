@@ -2,7 +2,6 @@
   'use strict';
 
   // common
-  require('dialogue-box').DialogueBox.init();
   require('upload').Upload.init();
   require('print').Print.init();
   require('tabbed-panel').TabbedPanel.init();
