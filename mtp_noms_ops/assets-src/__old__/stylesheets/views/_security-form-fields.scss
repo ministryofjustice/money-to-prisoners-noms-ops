@@ -108,35 +108,6 @@ select[disabled] {
   }
 }
 
-.mtp-security-form--simple {
-  margin-bottom: 32px;
-
-  @include media(mobile) {
-    margin-bottom: 22px;
-  }
-
-  #id_simple_search-label {
-    font-size: 27px;
-
-    @include media(mobile) {
-      font-size: 18px;
-    }
-  }
-
-  #id_simple_search {
-    width: 100%;
-  }
-
-  #id_simple_search-hint {
-    margin-bottom: 10px;
-
-    @include media(mobile) {
-      margin-top: 5px;
-    }
-  }
-}
-
-
 .mtp-security-advanced-search {
   #id_sender_name, #id_sender_email, #id_sender_postcode, #id_prison, #id_prisoner_name,
   #id_prisoner_number, #id_recipient_name, #id_recipient_email, #id_postcode, #id_invoice_number {

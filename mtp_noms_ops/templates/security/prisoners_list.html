@@ -5,14 +5,12 @@
 
 {% block content %}
   <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search mtp-form-analytics" method="get">
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-          {% include 'security/forms/top-area-object-list.html' %}
 
-          {% if not is_search_results %}
-          <a href="{% url 'security:prisoner_advanced_search' %}">{% trans 'Advanced search' %}</a>
-          {% endif %}
-        </div>
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        {% url 'security:prisoner_advanced_search' as advanced_search_url %}
+        {% include 'security/forms/top-area-object-list.html' %}
+      </div>
     </div>
 
     {% if form.is_valid and prisoners %}{% setup_highlight %}
