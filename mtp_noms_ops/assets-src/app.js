@@ -8,6 +8,7 @@ initAll();
 import {initDefaults} from 'mtp_common';
 import {initStaffDefaults} from 'mtp_common/staff-app';
 import {AsyncLoad} from 'mtp_common/components/async-load';
+import {AutocompleteSelect} from 'mtp_common/components/autocomplete-select';
 import {DialogueBox} from 'mtp_common/components/dialogue-box';
 import {MailcheckWarning} from 'mtp_common/components/mailcheck-warning';
 import {PrintTrigger} from 'mtp_common/components/print-trigger';
@@ -16,6 +17,7 @@ import {Upload} from 'mtp_common/components/upload';
 initDefaults();
 initStaffDefaults();
 AsyncLoad.init();
+AutocompleteSelect.init();
 DialogueBox.init();
 MailcheckWarning.init(
   '.mtp-page-with-staff-email-input input[type=email]',

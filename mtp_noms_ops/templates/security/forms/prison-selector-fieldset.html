@@ -20,20 +20,7 @@
 {% block conditional_fields %}
   {% if choice == 'exact' %}
     <div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="{{ field.id_for_label }}-{{ choice_slug }}-conditional">
-      {% with field=form.prison %}
-        <div id="{{ field.id_for_label }}-wrapper" class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
-          {% include 'mtp_common/forms/field-label.html' with field=field only %}
-          {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-
-          <select id="{{ field.id_for_label }}" class="govuk-select {% if field.errors %}govuk-select--error{% endif %} mtp-autocomplete" name="{{ field.html_name }}">
-            <option value=""></option>
-            {% for key, title in field.field.choices %}
-              <option value="{{ key }}" {% if key in field.value %}selected{% endif %}>{{ title }}</option>
-            {% endfor %}
-          </select>
-
-        </div>
-      {% endwith %}
+      {% include 'mtp_common/forms/select-field.html' with field=form.prison input_classes='mtp-select--autocomplete govuk-input--width-10' only %}
     </div>
   {% endif %}
 {% endblock %}

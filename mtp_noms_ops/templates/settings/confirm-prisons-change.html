@@ -13,7 +13,7 @@
           <h1 class="govuk-heading-xl">{{ view.title }}</h1>
         </header>
 
-        <form method="post" class="mtp-autocomplete mtp-choose-prison">
+        <form method="post" class="mtp-choose-prison">
           {% csrf_token %}
 
           {% include 'govuk-frontend/components/error-summary.html' %}
@@ -26,7 +26,7 @@
               {% elif not form.all_prisons.value  %}
                 <div class="mtp-prison-selection-row" id="row_{{ field.name }}">
                   <div class="mtp-prison-selection-row__prison">
-                    {% include 'mtp_common/forms/select-field.html' with field=field  input_classes='mtp-autocomplete mtp-choose-prison-select' attrs=data_attrs only %}
+                    {% include 'mtp_common/forms/select-field.html' with field=field input_classes='mtp-select--autocomplete govuk-input--width-10 mtp-choose-prison-select' attrs=data_attrs only %}
                   </div>
                   <div class="mtp-prison-selection-row__remove">
                     <input class="mtp-link-submit" type="submit" name="submit_remove_{{ field.name }}" value="{% trans 'Remove' %}"/>
@@ -96,7 +96,7 @@
     {% with field=form.template_prison_selection %}
       <div class="mtp-prison-selection-row" id="row_{{ field.name }}">
         <div class="mtp-prison-selection-row__prison">
-          {% include 'mtp_common/forms/select-field.html' with field=field input_classes='mtp-autocomplete mtp-choose-prison-select' attrs=data_attrs only %}
+          {% include 'mtp_common/forms/select-field.html' with field=field input_classes='mtp-select--autocomplete govuk-input--width-10 mtp-choose-prison-select' attrs=data_attrs only %}
         </div>
         <div class="mtp-prison-selection-row__remove">
           <input class="mtp-link-submit" type="submit" name="submit_remove_{{ field.name }}" value="{% trans 'Remove' %}"/>

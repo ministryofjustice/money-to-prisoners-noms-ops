@@ -6,7 +6,7 @@
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 {% block content %}
-  <form id="advanced-search-{{ view.object_name_plural|slugify }}" class="mtp-security-advanced-search mtp-autocomplete js-FormAnalytics" method="get">
+  <form id="advanced-search-{{ view.object_name_plural|slugify }}" class="mtp-security-advanced-search js-FormAnalytics" method="get">
     <input type="hidden" name="{{ form.advanced.html_name }}" value="True" />
     <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
 
