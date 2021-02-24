@@ -30,7 +30,7 @@
 
   {% include 'security/forms/prison-selector-fieldset.html' with field=form.prison_selector %}
 
-  <div class="govuk-heading-l mtp-invoice-nr-header">{% trans 'Invoice number' %}</div>
+  <div class="govuk-heading-l">{% trans 'Invoice number' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.invoice_number input_classes='govuk-input--width-10' %}
 
 {% endblock advanced_search_fields %}
