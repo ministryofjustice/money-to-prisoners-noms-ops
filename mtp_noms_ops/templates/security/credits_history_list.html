@@ -76,9 +76,7 @@
             {{ check.credit.amount|currency }}
           </td>
           <td>
-            <span class="mtp-check-status-tag mtp-check-status-tag--{{ check.status }}">
-              {{ check|format_security_check_status }}
-            </span>
+            {{ check|tag_for_security_check }}
             <br />
             {% trans 'by' %}
             {% if check.auto_accept_rule_state and check.auto_accept_rule_state.active %}

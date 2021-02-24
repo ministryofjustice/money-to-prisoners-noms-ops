@@ -3183,7 +3183,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, 'Money issues')
             self.assertContains(response, 'S1 3HS')
             self.assertContains(response, '24601')
-            self.assertContains(response, 'accepted')
+            self.assertContains(response, 'Accepted')
             self.assertContains(response, 'Brixton Prison')
             self.assertContains(response, 'Decision details:')
 
