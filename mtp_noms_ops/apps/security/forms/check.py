@@ -433,21 +433,26 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
             return (True, '')
 
 
-class AutoAcceptDetailForm(SecurityForm):
+class AutoAcceptDetailForm(forms.Form):
     deactivation_reason = forms.CharField(label='Give details why auto accept is to stop')
 
-    def __init__(self, object_id, **kwargs):
+    def __init__(self, object_id, request, **kwargs):
         super().__init__(**kwargs)
+        self.request = request
         self.object_id = object_id
 
     def get_object_endpoint_path(self):
         return f'/security/checks/auto-accept/{self.object_id}/'
 
     def get_object_list_endpoint_path(self):
-        return '/security/checks/auto-accepts/'
+        return '/security/checks/auto-accept/'
 
     def get_deactivate_endpoint_path(self):
-        return '/security/checks/auto-accepts/'
+        return '/security/checks/auto-accept/'
+
+    @cached_property
+    def session(self):
+        return get_api_session(self.request)
 
     def get_object(self):
         """

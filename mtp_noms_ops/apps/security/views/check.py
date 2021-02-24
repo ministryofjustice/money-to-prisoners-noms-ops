@@ -17,7 +17,7 @@ from security.forms.check import (
     UserCheckListForm
 )
 from security.utils import convert_date_fields
-from security.views.object_base import SecurityView, SecurityDetailView
+from security.views.object_base import SecurityView, SecurityDetailView, SimpleSecurityDetailView
 
 
 class CheckListView(SecurityView):
@@ -67,7 +67,7 @@ class AutoAcceptRuleListView(SecurityView):
         return context
 
 
-class AutoAcceptRuleDetailView(SecurityDetailView):
+class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
     """
     View history of all auto-accept rules
     """
@@ -77,6 +77,20 @@ class AutoAcceptRuleDetailView(SecurityDetailView):
     id_kwarg_name = 'auto_accept_rule_id'
     list_url = reverse_lazy('security:auto_accept_rule_list')
     form_class = AutoAcceptDetailForm
+    # SecurityView aliases the GET handler to post to enforce form submission from query args
+    # In this context we want to use the GET endpoint to render a template so we revert to the
+    # FormView implementation of GET
+    # TODO break out SecurityView into a SecurityGETFormView class that makes this behaviour obvious
+    # This doesn't seem to be the whole story, time for more debuggers!
+    def get_form_kwargs(self):
+        return dict(super().get_form_kwargs(), request=self.request, object_id=self.kwargs[self.id_kwarg_name])
+
+    def get_object_request_params(self):
+        return {
+            'url': '/security/checks/auto-accept/',
+            'params': {'pk': self.kwargs[self.id_kwarg_name]}
+        }
+        return super().get_object_request_params()
 
     def get_title_for_object(self, detail_object):
         return '{} {} {} {}'.format(
@@ -92,6 +106,8 @@ class AutoAcceptRuleDetailView(SecurityDetailView):
         detail_object = context_data['form'].get_object()
         if not detail_object:
             raise Http404('Auto-accept not found')
+        self.title = self.get_title_for_object(detail_object)
+        context_data[self.object_context_key] = detail_object
         context_data['auto_accept_rule_is_active'] = sorted(
             detail_object['states'],
             key=lambda s: s['created'],
