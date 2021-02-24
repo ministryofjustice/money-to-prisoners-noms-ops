@@ -19,27 +19,6 @@
   }
 }
 
-.mtp-prisoner-summary {
-  margin: 0;
-
-  .govuk-grid-column-one-quarter {
-    padding-left: 0;
-    padding-right: 30px;
-    width: auto;
-  }
-
-  @media print {
-    .govuk-grid-column-one-quarter {
-      display: block;
-    }
-  }
-}
-
-.mtp-prisoner-summary__details {
-  overflow: hidden;
-  margin-bottom: 1em;
-}
-
 .mtp-object-list-toggle {
   display: flex;
   justify-content: flex-end;

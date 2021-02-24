@@ -1,0 +1,30 @@
+// detail pages with nested results lists; i.e. a prisoner or sender profile
+
+.mtp-results-profile {
+  @include govuk-clearfix;
+}
+
+.mtp-results-profile__photo, .mtp-results-profile__icon {
+  float: left;
+
+  @media print {
+    display: none;
+  }
+}
+
+.mtp-results-profile__summary {
+  width: 70%;
+  float: left;
+
+  @media print {
+    width: 100%;
+  }
+}
+
+.mtp-results-profile__label {
+  width: auto;
+
+  @media print {
+    display: inline-block;
+  }
+}

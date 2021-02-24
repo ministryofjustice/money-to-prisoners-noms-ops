@@ -2,47 +2,44 @@
 {% load i18n %}
 {% load mtp_common %}
 {% load security %}
-{% load static %}
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 {% block content %}
-  <div>
-    <div class="mtp-prisoner-image">
+  <div class="mtp-results-profile mtp-results-profile--prisoner">
+    <div class="mtp-results-profile__photo govuk-!-margin-right-5 govuk-!-margin-bottom-3">
       <img src="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}" srcset="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}?ratio=2x 2x" alt="{% trans 'Photo of the prisoner' %}"/>
     </div>
 
-    <div class="mtp-prisoner-summary">
+    <div class="mtp-results-profile__summary">
       <header>
-        <h1 class="govuk-heading-xl">{{ prisoner.prisoner_name|default:_('Unknown prisoner') }}</h1>
+        <h1 class="govuk-heading-xl govuk-!-margin-bottom-1">{{ prisoner.prisoner_name|default:_('Unknown prisoner') }}</h1>
         {% if prisoner.prisoner_number %}
-          <h2 class="govuk-heading-l">{{ prisoner.prisoner_number }}</h2>
+          <span class="govuk-heading-l govuk-!-margin-bottom-3">{{ prisoner.prisoner_number }}</span>
         {% endif %}
       </header>
 
-      <br />
-
-      <div class="mtp-prisoner-summary__details">
-        <div class="govuk-grid-column-one-quarter">
+      <div class="govuk-grid-row govuk-!-margin-top-6 govuk-!-margin-bottom-3">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Credits received') prisoner.credit_count tag='strong' %}
         </div>
 
-        <div class="govuk-grid-column-one-quarter">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Payment sources')  prisoner.sender_count tag='strong' %}
         </div>
 
-        <div class="govuk-grid-column-one-quarter">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Total received') prisoner.credit_total|currency tag='strong' %}
         </div>
 
-        <div class="govuk-grid-column-one-quarter">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Disbursements sent') prisoner.disbursement_count tag='strong' %}
         </div>
       </div>
 
-      <div class="mtp-prisoner-summary__details">
+      <div class="govuk-grid-row govuk-!-margin-bottom-3">
         {% if provided_names %}
-          <div class="govuk-grid-column-one-quarter">
+          <div class="mtp-results-profile__label govuk-grid-column-one-half">
             {% captureoutput as names_given_by_senders %}
               {% for provided_name in provided_names %}
                 <strong>{{ provided_name }}</strong>{% if not forloop.last %},{% endif %}
@@ -52,11 +49,11 @@
           </div>
         {% endif %}
 
-        <div class="govuk-grid-column-one-quarter">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Prison') prisoner.current_prison.name tag='strong' %}
         </div>
 
-        <div class="govuk-grid-column-one-quarter">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% captureoutput as current_location %}
             <span class="mtp-async-load" data-path="{% url 'security:prisoner_nomis_info' prisoner_number=prisoner.prisoner_number %}" data-key="housing_location">–</span>
           {% endcaptureoutput %}
