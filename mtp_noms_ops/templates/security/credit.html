@@ -97,9 +97,7 @@
           </td>
           <td colspan="2">
 
-            {% random_string as comment_label %}
-            <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'History' %}</div>
-            <div aria-labelledby="mtp-label-{{ comment_label }}">
+            {% captureoutput as history %}
               {% if credit.source == 'online' %}
                 {{ credit.started_at|date:'SHORT_DATETIME_FORMAT'|default:'–' }}
                 –
@@ -123,7 +121,8 @@
                 {% endblocktrans %}
                 <br/>
               {% endif %}
-            </div>
+            {% endcaptureoutput %}
+            {% labelled_data _('History') history %}
 
           </td>
         </tr>
@@ -132,14 +131,13 @@
           <tr>
             <td colspan="4">
 
-              {% random_string as comment_label %}
-              <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'Security check' %}</div>
-              <div aria-labelledby="mtp-label-{{ comment_label }}">
+              {% captureoutput as comments %}
                 {% for comment in credit.comments %}
                   <cite>{{ comment.user_full_name }}</cite>:
                   <q>{{ comment.comment }}</q>
                 {% endfor %}
-              </div>
+              {% endcaptureoutput %}
+              {% labelled_data _('Security check') comments %}
 
             </td>
           </tr>

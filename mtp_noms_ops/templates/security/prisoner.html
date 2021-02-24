@@ -43,13 +43,12 @@
       <div class="mtp-prisoner-summary__details">
         {% if provided_names %}
           <div class="govuk-grid-column-one-quarter">
-            {% random_string as profile_label %}
-            <div id="mtp-label-{{ profile_label }}" class="mtp-detail-label">{% trans 'Names given by senders' %}</div>
-            <span aria-labelledby="mtp-label-{{ profile_label }}">
+            {% captureoutput as names_given_by_senders %}
               {% for provided_name in provided_names %}
                 <strong>{{ provided_name }}</strong>{% if not forloop.last %},{% endif %}
               {% endfor %}
-            </span>
+            {% endcaptureoutput %}
+            {% labelled_data _('Names given by senders') names_given_by_senders tag='strong' %}
           </div>
         {% endif %}
 
@@ -58,8 +57,10 @@
         </div>
 
         <div class="govuk-grid-column-one-quarter">
-          <div id="location-label" class="mtp-detail-label">{% trans 'Location' %}</div>
-          <strong class="mtp-async-load" data-path="{% url 'security:prisoner_nomis_info' prisoner_number=prisoner.prisoner_number %}" data-key="housing_location" aria-labelledby="location-label">–</strong>
+          {% captureoutput as current_location %}
+            <span class="mtp-async-load" data-path="{% url 'security:prisoner_nomis_info' prisoner_number=prisoner.prisoner_number %}" data-key="housing_location">–</span>
+          {% endcaptureoutput %}
+          {% labelled_data _('Location') current_location tag='strong' %}
         </div>
       </div>
 
