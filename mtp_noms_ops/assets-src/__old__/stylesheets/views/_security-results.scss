@@ -73,23 +73,3 @@
     background: none;
   }
 }
-
-.mtp-results-list-wrapper {
-  margin-top: 50px;
-}
-
-.mtp-search-highlight {
-  margin-right: 1px;
-  background-color: #fff2d3;
-  padding: 2px 0 0;
-
-  @media print {
-    margin-right: 0;
-    background-color: transparent;
-    padding: 0;
-  }
-}
-
-#simple-search-prisoners .mtp-results-list-wrapper {
-  margin-bottom: $gutter;
-}

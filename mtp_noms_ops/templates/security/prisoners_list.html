@@ -14,7 +14,6 @@
     </div>
 
     {% if form.is_valid and prisoners %}{% setup_highlight %}
-    <div class="mtp-results-list-wrapper">
       {% tabbedpanel cookie_name='mtp-tab-prisoners-results' collapsable=False tab_label=_('View credits or disbursements') css_class='govuk-grey' %}
 
         {% paneltab name='credits' title=_('Credits') %}
@@ -169,7 +168,6 @@
           </div>
         {% endpaneltab %}
       {% endtabbedpanel %}
-    </div>
     {% endif %}
 
   {% if is_search_results %}

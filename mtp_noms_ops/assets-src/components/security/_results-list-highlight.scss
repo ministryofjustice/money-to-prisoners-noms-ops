@@ -1,0 +1,11 @@
+// search results pages with search term highlighting
+
+.mtp-search-highlight {
+  padding-top: 2px;
+  background-color: #fff2d3;
+
+  @media print {
+    padding: 0;
+    background-color: transparent;
+  }
+}
