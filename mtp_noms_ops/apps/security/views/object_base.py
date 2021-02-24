@@ -73,18 +73,25 @@ class SimpleSecurityDetailView(TemplateView):
         context_data = super().get_context_data(**kwargs)
         context_data[self.object_context_key] = self.object
 
+        list_url = self.get_list_url()
+
+        context_data['breadcrumbs'] = self.get_breadcrumbs(list_url)
+        return context_data
+
+    def get_list_url(self):
         list_url = self.request.build_absolute_uri(str(self.list_url))
         referrer_url = self.request.META.get('HTTP_REFERER', '-')
         if referrer_url.split('?', 1)[0] == list_url:
             list_url = referrer_url
+        return list_url
 
-        context_data['breadcrumbs'] = [
+
+    def get_breadcrumbs(self, list_url):
+        return [
             {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
-        return context_data
-
 
 class SecurityView(FormView):
     """

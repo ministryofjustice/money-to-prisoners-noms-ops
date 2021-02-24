@@ -77,11 +77,7 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
     id_kwarg_name = 'auto_accept_rule_id'
     list_url = reverse_lazy('security:auto_accept_rule_list')
     form_class = AutoAcceptDetailForm
-    # SecurityView aliases the GET handler to post to enforce form submission from query args
-    # In this context we want to use the GET endpoint to render a template so we revert to the
-    # FormView implementation of GET
-    # TODO break out SecurityView into a SecurityGETFormView class that makes this behaviour obvious
-    # This doesn't seem to be the whole story, time for more debuggers!
+
     def get_form_kwargs(self):
         return dict(super().get_form_kwargs(), request=self.request, object_id=self.kwargs[self.id_kwarg_name])
 
@@ -108,11 +104,18 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
             raise Http404('Auto-accept not found')
         self.title = self.get_title_for_object(detail_object)
         context_data[self.object_context_key] = detail_object
+
         context_data['auto_accept_rule_is_active'] = sorted(
             detail_object['states'],
             key=lambda s: s['created'],
             reverse=True
         )[0]['active']
+
+        # These must be called again even though called from base class,
+        # as they rely on self.title being populated, which in this case
+        # requires the detail_object
+        list_url = self.get_list_url()
+        context_data['breadcrumbs'] = self.get_breadcrumbs(list_url)
         return context_data
 
     def form_valid(self, form):
