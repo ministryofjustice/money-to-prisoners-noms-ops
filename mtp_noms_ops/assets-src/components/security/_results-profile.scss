@@ -28,3 +28,64 @@
     display: inline-block;
   }
 }
+
+.mtp-results-profile__photo {
+  img {
+    width: 160px;
+    height: 200px;
+    border: 1px solid $govuk-border-colour;
+
+    @include govuk-media-query($until: tablet) {
+      width: 96px;
+      height: 120px;
+    }
+  }
+}
+
+.mtp-results-profile__icon {
+  width: 100px;
+  height: 100px;
+  margin-right: govuk-spacing(3);
+  background: mtp-static-url('images/sender-profile--unknown@2x.png') no-repeat scroll 0 0;
+
+  @include govuk-device-pixel-ratio {
+    background-image: mtp-static-url('images/sender-profile--unknown@4x.png');
+    background-size: 100px 100px;
+  }
+
+  @include govuk-media-query($until: tablet) {
+    width: 60px;
+    height: 60px;
+    background-size: 60px 60px;
+  }
+}
+
+.mtp-results-profile--sender--bank_transfer {
+  .mtp-results-profile__icon {
+    background-image: mtp-static-url('images/sender-profile--bank_transfer@2x.png');
+
+    @include govuk-device-pixel-ratio {
+      background-image: mtp-static-url('images/sender-profile--bank_transfer@4x.png');
+    }
+  }
+}
+
+.mtp-results-profile--sender--online {
+  .mtp-results-profile__icon {
+    background-image: mtp-static-url('images/sender-profile--online@2x.png');
+
+    @include govuk-device-pixel-ratio {
+      background-image: mtp-static-url('images/sender-profile--online@4x.png');
+    }
+  }
+}
+
+.mtp-results-profile--sender {
+  .mtp-results-profile__summary {
+    padding-top: govuk-spacing(5);
+
+    @include govuk-media-query($until: tablet) {
+      padding-top: govuk-spacing(3);
+    }
+  }
+}

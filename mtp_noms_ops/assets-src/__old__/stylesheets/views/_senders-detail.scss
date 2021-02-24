@@ -1,29 +1,3 @@
-.mtp-sender-summary__bank-transfer {
-  background: file-url('icon-large-bank@2x.png') no-repeat scroll 0 0;
-
-  @include device-pixel-ratio {
-    background-image: file-url('icon-large-bank@4x.png');
-    background-size: 100px 100px;
-
-    @include media(mobile) {
-      background-size: 80px 80px;
-    }
-  }
-}
-
-.mtp-sender-summary__debit-card {
-  background: file-url('icon-large-card@2x.png') no-repeat scroll 0 0;
-
-  @include device-pixel-ratio {
-    background-image: file-url('icon-large-card@4x.png');
-    background-size: 100px 100px;
-
-    @include media(mobile) {
-      background-size: 80px 80px;
-    }
-  }
-}
-
 .mtp-sender-summary__sender-warning {
   background-color: $orange;
   color: #fff;
