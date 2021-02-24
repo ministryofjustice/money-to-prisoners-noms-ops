@@ -21,15 +21,13 @@
           <div class="mtp-prison-selection">
             {% for field in form %}
               {% if field.name == 'all_prisons' %}
-                <span class="hidden">{{ form.all_prisons }}</span>
+                <span class="govuk-!-display-none">{{ form.all_prisons }}</span>
               {% elif field.name == 'template_prison_selection' %}
               {% elif not form.all_prisons.value  %}
                 <div class="mtp-prison-selection-row" id="row_{{ field.name }}">
-                  <div class="mtp-prison-selection-row__prison">
-                    {% include 'mtp_common/forms/select-field.html' with field=field input_classes='mtp-select--autocomplete govuk-input--width-10 mtp-choose-prison-select' attrs=data_attrs only %}
-                  </div>
+                  {% include 'mtp_common/forms/select-field.html' with field=field input_classes='mtp-select--autocomplete govuk-!-width-one-half' attrs=data_attrs only %}
                   <div class="mtp-prison-selection-row__remove">
-                    <input class="mtp-link-submit" type="submit" name="submit_remove_{{ field.name }}" value="{% trans 'Remove' %}"/>
+                    <input class="govuk-link" type="submit" name="submit_remove_{{ field.name }}" value="{% trans 'Remove' %}"/>
                   </div>
                 </div>
               {% endif %}
@@ -47,34 +45,33 @@
                   </p>
                 </div>
               </div>
-              <div class="mtp-prison-list">
-                <div class="mtp-prison-row">
-                  <div class="mtp-prison-row__prison">
+
+              <ul class="govuk-list mtp-prison-list">
+                <li>
+                  <div class="mtp-prison-list__name">
                     <strong>{% trans 'All prisons' %}</strong>
                   </div>
-                  <div class="mtp-prison-row__remove">
-                    <input class="mtp-link-submit" type="submit" data-analytics="event,PrisonConfirmation,Remove,{{ form.all_prisons_code }}" name="submit_notall" value="{% trans 'Remove' %}"/>
+                  <div class="mtp-prison-list__action">
+                    <input class="govuk-link" type="submit" data-analytics="event,PrisonConfirmation,Remove,{{ form.all_prisons_code }}" name="submit_notall" value="{% trans 'Remove' %}"/>
                   </div>
-                </div>
-              </div>
+                </li>
+              </ul>
             {% endif %}
           </div>
 
           {% if not form.all_prisons.value %}
             <p>
-              <input class="mtp-link-submit" type="submit" name="submit_add" value="{% trans 'Add another prison' %}" data-analytics="event,PrisonConfirmation,Add,"/>
+              <input class="govuk-link" type="submit" name="submit_add" value="{% trans 'Add another prison' %}" data-analytics="event,PrisonConfirmation,Add,"/>
             </p>
             <p>{% trans 'Or' %}</p>
             <p>
-              <input class="mtp-link-submit" type="submit" name="submit_all" value="{% trans 'Add all prisons' %}" data-analytics="event,PrisonConfirmation,Add,{{ form.all_prisons_code }}"/>
+              <input class="govuk-link" type="submit" name="submit_all" value="{% trans 'Add all prisons' %}" data-analytics="event,PrisonConfirmation,Add,{{ form.all_prisons_code }}"/>
             </p>
           {% endif %}
 
-          <div class="govuk-form-group">
-            <button type="submit" name="submit_save" class="govuk-button" data-module="govuk-button">
-              {% trans 'Save' %}
-            </button>
-          </div>
+          <button type="submit" name="submit_save" class="govuk-button" data-module="govuk-button">
+            {% trans 'Save' %}
+          </button>
         </form>
 
       {% else %}
@@ -92,14 +89,13 @@
 
 {% block body_end %}
   {{ block.super }}
-  <div id="prison-field-template" class="hidden">
+
+  <div id="prison-field-template" class="govuk-!-display-none">
     {% with field=form.template_prison_selection %}
       <div class="mtp-prison-selection-row" id="row_{{ field.name }}">
-        <div class="mtp-prison-selection-row__prison">
-          {% include 'mtp_common/forms/select-field.html' with field=field input_classes='mtp-select--autocomplete govuk-input--width-10 mtp-choose-prison-select' attrs=data_attrs only %}
-        </div>
+        {% include 'mtp_common/forms/select-field.html' with field=field input_classes='mtp-select--autocomplete govuk-!-width-one-half' attrs=data_attrs only %}
         <div class="mtp-prison-selection-row__remove">
-          <input class="mtp-link-submit" type="submit" name="submit_remove_{{ field.name }}" value="{% trans 'Remove' %}"/>
+          <input class="govuk-link" type="submit" name="submit_remove_{{ field.name }}" value="{% trans 'Remove' %}"/>
         </div>
       </div>
     {% endwith %}

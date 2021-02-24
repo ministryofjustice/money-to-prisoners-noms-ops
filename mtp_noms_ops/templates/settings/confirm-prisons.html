@@ -32,29 +32,28 @@
             </div>
           {% endif %}
 
-          <div class="mtp-prison-list">
+          <ul class="govuk-list mtp-prison-list">
             {% for prison, label in form.selected_prisons %}
-              <div class="mtp-prison-row">
+              <li>
                 <strong>{{ label }}</strong>
-              </div>
+              </li>
             {% endfor %}
-          </div>
+          </ul>
 
-          <span class="hidden">
+          <span class="govuk-!-display-none">
             {{ form.prisons }}
           </span>
-          <div class="govuk-form-group">
-            <button type="submit" name="submit_confirm" class="govuk-button" data-module="govuk-button" data-current-prisons="{{ current_prisons }}">
-              {% trans 'Confirm prisons' %}
-            </button>
-          </div>
+
+          <button type="submit" name="submit_confirm" class="govuk-button" data-module="govuk-button" data-current-prisons="{{ current_prisons }}">
+            {% trans 'Confirm prisons' %}
+          </button>
         </form>
 
-        <div>
+        <p>
           <a class="govuk-link--no-visited-state" href="{% url 'confirm_prisons_add_remove' %}?{{ change_prison_query }}">
             {% trans 'Add or remove prisons ' %}
           </a>
-        </div>
+        </p>
 
       {% else %}
 

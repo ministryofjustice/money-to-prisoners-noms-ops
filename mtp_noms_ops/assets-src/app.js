@@ -32,7 +32,9 @@ TabbedPanel.init();
 Upload.init();
 
 // app components
+import {ChoosePrisons} from './components/choose-prisons';
 import {FormAnalytics} from './components/form-analytics';
 import {Security} from './components/security';
+ChoosePrisons.init();
 FormAnalytics.init();
 Security.init();

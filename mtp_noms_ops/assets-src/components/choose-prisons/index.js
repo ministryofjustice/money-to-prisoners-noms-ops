@@ -1,9 +1,9 @@
 'use strict';
 
-var analytics = require('analytics');
-var autocomplete = require('autocomplete-select');
+import {Analytics} from 'mtp_common/components/analytics';
+import {AutocompleteSelect} from 'mtp_common/components/autocomplete-select';
 
-exports.ChoosePrisons = {
+export var ChoosePrisons = {
   init: function () {
     this.initChangePrisons();
     this.initConfirmPrisons();
@@ -24,7 +24,7 @@ exports.ChoosePrisons = {
     } else {
       currentPrisons = this.addedPrisons($hiddenInputs);
     }
-    analytics.Analytics.send(
+    Analytics.send(
       'event', 'PrisonConfirmation', 'Change', currentPrisons
     );
 
@@ -64,7 +64,7 @@ exports.ChoosePrisons = {
               '<span class="govuk-error-message">' + emptyErrorMsg + '</span>'
             );
 
-            $('div.mtp-prison-selection').before(
+            $('.mtp-prison-selection').before(
               '<div class="govuk-error-summary" aria-labeledby="error-summary-title__prison-selection" role="alert" tabindex="-1" data-module="govuk-error-summary">' +
               '<h2 class="govuk-error-summary__title" id="error-summary-title__prison-selection">' +
               errorSummaryTitle +
@@ -79,7 +79,7 @@ exports.ChoosePrisons = {
               '</div>'
             );
 
-            analytics.Analytics.send(
+            Analytics.send(
               'event',
               'security.forms.preferences.ChoosePrisonForm',
               'new_prison',
@@ -101,7 +101,7 @@ exports.ChoosePrisons = {
       } else {
         addedPrisons = self.addedPrisons($hiddenInputs);
       }
-      analytics.Analytics.send(
+      Analytics.send(
         'event', 'PrisonConfirmation', 'Save', addedPrisons
       );
       return true;
@@ -130,7 +130,7 @@ exports.ChoosePrisons = {
       var newPrisonsStr = self.addedPrisons($chosenPrisons);
 
       var eventLabel = $confirmButton.data('current-prisons') + ' > ' + newPrisonsStr;
-      analytics.Analytics.send(
+      Analytics.send(
         'event', 'PrisonConfirmation', 'Confirm', eventLabel
       );
     });
@@ -160,7 +160,7 @@ exports.ChoosePrisons = {
       var $newRow = $(template);
       $newRow.addClass('hidden');
       $('.mtp-prison-selection').append($newRow);
-      autocomplete.AutocompleteSelect.replaceSelect.call($newRow.find('select'));
+      AutocompleteSelect.replaceSelect.call($newRow.find('select'));
       self.setupInputs();
       self.initRemovePrison();
       $newRow.removeClass('hidden');
@@ -176,7 +176,7 @@ exports.ChoosePrisons = {
       return;
     }
 
-    var $removalLinks = $form.find('.mtp-prison-selection-row__remove > input');
+    var $removalLinks = $form.find('.mtp-prison-selection-row__remove input');
     $removalLinks.each(function () {
       var $removalLink = $(this);
       var relatedFieldName = $removalLink.attr('name').substring(14);
