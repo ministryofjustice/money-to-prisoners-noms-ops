@@ -13,17 +13,19 @@
       </div>
 
       <div class="govuk-grid-column-one-third govuk-!-display-none-print">
-        <div class="mtp-info-box">
+        <aside class="mtp-info-box">
           <div class="mtp-info-box__heading">
             {% trans 'About payment source data' %}
           </div>
-          <p>
-            {% trans 'One sender using many cards displays as many payment sources.' %}
-          </p>
-          <p>
-            {% trans "We can’t check names match their cards, we can’t match senders by name to different cards and we can’t check if email addresses are real." %}
-          </p>
-        </div>
+          <div class="mtp-info-box__contents">
+            <p>
+              {% trans 'One sender using many cards displays as many payment sources.' %}
+            </p>
+            <p>
+              {% trans "We can’t check names match their cards, we can’t match senders by name to different cards and we can’t check if email addresses are real." %}
+            </p>
+          </div>
+        </aside>
       </div>
     </div>
 

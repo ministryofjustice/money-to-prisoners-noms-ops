@@ -86,28 +86,6 @@ select[disabled] {
   }
 }
 
-#simple-search-payment-sources {
-  .govuk-grid-column-one-third {
-    .mtp-info-box {
-      padding: 1em;
-
-      @include media(mobile) {
-        margin-top: 1em;
-      }
-
-      .mtp-info-box__heading {
-        font-size: 19px;
-      }
-
-      p {
-        margin-top: em(20, 16);
-        margin-bottom: 0;
-        font-size: 16px;
-      }
-    }
-  }
-}
-
 .mtp-security-advanced-search {
   #id_sender_name, #id_sender_email, #id_sender_postcode, #id_prison, #id_prisoner_name,
   #id_prisoner_number, #id_recipient_name, #id_recipient_email, #id_postcode, #id_invoice_number {

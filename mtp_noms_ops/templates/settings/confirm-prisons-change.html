@@ -38,13 +38,13 @@
             {% if form.all_prisons.value %}
               <div class="mtp-info-box">
                 <div class="mtp-info-box__heading">{% trans 'The data you see will be more useful if you confirm prisons relevant to you' %}</div>
-                <br/>
-                <div>
-                  {% trans 'If you’re happy with ‘All prisons’, click ‘Save’.' %}
-                </div>
-                <br/>
-                <div>
-                  {% trans 'If not, ‘Remove’ and add the prisons you need.' %}
+                <div class="mtp-info-box__contents">
+                  <p>
+                    {% trans 'If you’re happy with ‘All prisons’, click ‘Save’.' %}
+                  </p>
+                  <p>
+                    {% trans 'If not, ‘Remove’ and add the prisons you need.' %}
+                  </p>
                 </div>
               </div>
               <div class="mtp-prison-list">

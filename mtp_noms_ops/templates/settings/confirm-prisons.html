@@ -21,13 +21,13 @@
           {% if form.all_prisons_code in form.prisons.initial %}
             <div class="mtp-info-box">
               <div class="mtp-info-box__heading">{% trans 'The data you see will be more useful if you confirm prisons relevant to you' %}</div>
-              <br/>
-              <div>
-                {% trans 'If you’re happy with ‘All prisons’, click ‘Confirm prisons’.' %}
-              </div>
-                <br/>
-              <div>
-                {% trans 'If not, click ‘Add or remove prisons’.' %}
+              <div class="mtp-info-box__contents">
+                <p>
+                  {% trans 'If you’re happy with ‘All prisons’, click ‘Confirm prisons’.' %}
+                </p>
+                <p>
+                  {% trans 'If not, click ‘Add or remove prisons’.' %}
+                </p>
               </div>
             </div>
           {% endif %}
