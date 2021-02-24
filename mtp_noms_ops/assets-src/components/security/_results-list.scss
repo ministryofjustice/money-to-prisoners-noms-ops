@@ -1,0 +1,30 @@
+// search results pages; includes credits, disbursements, prisoners, senders, prisoner profiles and sender profiles
+
+.mtp-results-list {
+  @include govuk-responsive-margin(6, 'bottom');
+
+  .mtp-table {
+    th, td {
+      padding-left: 0;
+    }
+
+    th:last-child, td:last-child {
+      padding-right: 0;
+    }
+  }
+
+  @media print {
+    td {
+      padding-top: 2px;
+      padding-bottom: 2px;
+
+      p {
+        margin-bottom: 0;
+      }
+    }
+
+    p {
+      font-size: 14px;
+    }
+  }
+}

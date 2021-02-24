@@ -1,36 +1,5 @@
 // app-specific styles
 
-.mtp-results-list {
-  margin: govuk-spacing(6) 0;
-
-  h2 {
-    margin-top: 0;
-    display: inline-block;
-  }
-
-  .mtp-table {
-    td:last-child,
-    th:last-child {
-      padding-right: 0;
-    }
-  }
-
-  @media print {
-    td {
-      padding-top: 2px;
-      padding-bottom: 2px;
-
-      p {
-        margin-bottom: 0;
-      }
-    }
-
-    p {
-      font-size: 14px;
-    }
-  }
-}
-
 .mtp-result-detail {
   td {
     padding-left: 0;
