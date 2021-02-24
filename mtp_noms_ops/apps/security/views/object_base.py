@@ -71,12 +71,15 @@ class SimpleSecurityDetailView(TemplateView):
         self.object = self.get_object()
 
         context_data = super().get_context_data(**kwargs)
-        context_data[self.object_context_key] = self.object
+        context_data[self.object_context_key] = self.get_object_for_template(self.object)
 
         list_url = self.get_list_url()
 
         context_data['breadcrumbs'] = self.get_breadcrumbs(list_url)
         return context_data
+
+    def get_object_for_template(self, obj):
+        return obj
 
     def get_list_url(self):
         list_url = self.request.build_absolute_uri(str(self.list_url))

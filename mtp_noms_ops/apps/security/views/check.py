@@ -83,8 +83,7 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
 
     def get_object_request_params(self):
         return {
-            'url': '/security/checks/auto-accept/',
-            'params': {'pk': self.kwargs[self.id_kwarg_name]}
+            'url': f'/security/checks/auto-accept/{self.kwargs[self.id_kwarg_name]}/'
         }
         return super().get_object_request_params()
 
@@ -99,14 +98,13 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        detail_object = context_data['form'].get_object()
-        if not detail_object:
+        if not self.object:
             raise Http404('Auto-accept not found')
-        self.title = self.get_title_for_object(detail_object)
-        context_data[self.object_context_key] = detail_object
+
+        self.title = self.get_title_for_object(self.object)
 
         context_data['auto_accept_rule_is_active'] = sorted(
-            detail_object['states'],
+            self.object['states'],
             key=lambda s: s['created'],
             reverse=True
         )[0]['active']
@@ -117,6 +115,9 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         list_url = self.get_list_url()
         context_data['breadcrumbs'] = self.get_breadcrumbs(list_url)
         return context_data
+
+    def get_object_for_template(self, obj):
+        return convert_date_fields(obj, include_nested=True)
 
     def form_valid(self, form):
         if self.request.method == 'POST':

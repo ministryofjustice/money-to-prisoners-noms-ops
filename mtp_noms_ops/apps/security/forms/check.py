@@ -441,32 +441,15 @@ class AutoAcceptDetailForm(forms.Form):
         self.request = request
         self.object_id = object_id
 
-    def get_object_endpoint_path(self):
-        return f'/security/checks/auto-accept/{self.object_id}/'
-
     def get_object_list_endpoint_path(self):
         return '/security/checks/auto-accept/'
 
     def get_deactivate_endpoint_path(self):
-        return '/security/checks/auto-accept/'
+        return f'/security/checks/auto-accept/{self.object_id}/'
 
     @cached_property
     def session(self):
         return get_api_session(self.request)
-
-    def get_object(self):
-        """
-        Gets the security detail object, a sender or prisoner profile
-        :return: dict or None if not found
-        """
-        try:
-            return convert_date_fields(self.session.get(self.get_object_endpoint_path()).json(), include_nested=True)
-        except HttpNotFoundError:
-            self.add_error(None, _('Not found'))
-            return None
-        except RequestException:
-            self.add_error(None, _('This service is currently unavailable'))
-            return {}
 
     def deactivate_auto_accept_rule(self):
         """
@@ -480,7 +463,7 @@ class AutoAcceptDetailForm(forms.Form):
                 endpoint,
                 json={
                     'states': [{
-                        'active': True,
+                        'active': False,
                         'reason': self.cleaned_data['deactivation_reason']
                     }]
                 }
@@ -491,8 +474,7 @@ class AutoAcceptDetailForm(forms.Form):
             except Exception:
                 error_payload = {}
             logger.exception(
-                'Auto-accept deactivation for id %s could not be actioned. Error payload: %s',
-                self.object_id,
+                'Auto-accept deactivation could not be actioned. Error payload: %s',
                 error_payload
             )
             self.add_error(None, _('There was an error with your request.'))
