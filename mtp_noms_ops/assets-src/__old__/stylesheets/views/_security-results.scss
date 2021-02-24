@@ -30,16 +30,6 @@
     }
   }
 
-  .mtp-search-description--aside {
-    float: left;
-    margin-bottom: 0;
-    width: 80%;
-
-    @include media (mobile) {
-      width: 100%;
-    }
-  }
-
   .mtp-credit-arrow-cell {
     width: 8em;
     padding: 0;

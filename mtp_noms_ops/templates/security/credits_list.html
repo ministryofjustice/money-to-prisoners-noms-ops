@@ -27,12 +27,14 @@
 
     {% if form.is_valid and credits %}{% setup_highlight %}
       <div class="mtp-table__container mtp-results-list">
-        <div class="govuk-!-display-none-print mtp-links--no-panel">
-          <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
-          &nbsp;
-          {% url 'security:credit_export' as export_view %}
-          {% url 'security:credit_email_export' as email_export_view %}
-          {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
+        <div class="mtp-results-list-actions">
+          <div class="mtp-results-list-actions__links govuk-!-display-none-print">
+            <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+            &nbsp;
+            {% url 'security:credit_export' as export_view %}
+            {% url 'security:credit_email_export' as email_export_view %}
+            {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many credits to download.') %}
+          </div>
         </div>
 
         <table class="mtp-table mtp-table--small">

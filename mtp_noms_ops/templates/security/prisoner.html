@@ -81,12 +81,12 @@
 
           <h2 class="govuk-heading-l">{% trans 'Credits received' %}</h2>
 
-          <div class="govuk-inset-text">
-            <p class="mtp-search-description--aside">
+          <div class="mtp-results-list-actions govuk-inset-text">
+            <p class="mtp-results-list-actions__description">
               {{ form.search_description.description }}
             </p>
 
-            <div class="govuk-!-display-none-print mtp-links">
+            <div class="mtp-results-list-actions__links govuk-!-display-none-print">
               <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
               &nbsp;
               {% url 'security:prisoner_detail_export' prisoner_id=prisoner.id as export_view %}

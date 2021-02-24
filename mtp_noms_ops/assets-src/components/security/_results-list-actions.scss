@@ -1,0 +1,25 @@
+// actions displayed at the top of search results pages
+
+.mtp-results-list-actions {
+  @include govuk-responsive-margin(6, 'bottom');
+  @include govuk-clearfix;
+}
+
+.mtp-results-list-actions__description, .mtp-results-list-actions__links {
+  @extend %govuk-body-m;
+  margin-bottom: 0;
+}
+
+.mtp-results-list-actions__description {
+  width: 80%;
+  float: left;
+
+  @include govuk-media-query($until: tablet) {
+    width: 100%;
+  }
+}
+
+.mtp-results-list-actions__links {
+  display: inline-block;
+  float: right;
+}

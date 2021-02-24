@@ -12,17 +12,6 @@
   }
 }
 
-.mtp-links {
-  float: right;
-  display: inline-block;
-
-  &--no-panel {
-    @extend .mtp-links;
-
-    margin-bottom: em(15, 19);
-  }
-}
-
 // tabs
 
 .mtp-results-form__submit {
