@@ -33,9 +33,9 @@
             {% endif %}
 
           </td>
-          <td class="mtp-credit-arrow-cell">
+          <td>
 
-            <div class="mtp-credit-arrow">{{ credit.source|credit_source }}</div>
+            {% labelled_data _('Payment method') credit.source|credit_source %}
 
           </td>
           <td>

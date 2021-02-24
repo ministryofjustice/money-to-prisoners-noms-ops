@@ -28,9 +28,9 @@
             <br/>
 
           </td>
-          <td class="mtp-credit-arrow-cell">
+          <td>
 
-            <div class="mtp-disbursement-arrow">{{ disbursement.method|disbursement_method }}</div>
+            {% labelled_data _('Payment method') disbursement.method|disbursement_method %}
 
           </td>
           <td>

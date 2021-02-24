@@ -29,12 +29,6 @@
       font-size: 14px;
     }
   }
-
-  .mtp-credit-arrow-cell {
-    width: 8em;
-    padding: 0;
-    vertical-align: middle;
-  }
 }
 
 .mtp-result-detail {
@@ -43,33 +37,5 @@
     border-top: 1px solid $border-colour;
     border-bottom: none;
     vertical-align: top;
-  }
-}
-
-.mtp-credit-arrow, .mtp-disbursement-arrow {
-  display: inline-block;
-  min-width: 33px;
-  padding-top: 30px;
-  background: file-url('credit-arrow.png') no-repeat scroll 50% 0;
-  text-align: center;
-
-  @include device-pixel-ratio {
-    background-image: file-url('credit-arrow@2x.png');
-    background-size: 32px 22px;
-  }
-}
-
-.mtp-disbursement-arrow {
-  background-image: file-url('disbursement-arrow.png');
-
-  @include device-pixel-ratio {
-    background-image: file-url('disbursement-arrow@2x.png');
-  }
-}
-
-@media print {
-  .mtp-credit-arrow, .mtp-disbursement-arrow {
-    padding-top: 0;
-    background: none;
   }
 }
