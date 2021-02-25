@@ -2802,6 +2802,56 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         for i in range(length):
             yield dict(cls.SENDER_CREDIT, id=i)
 
+    @classmethod
+    def _generate_auto_accept_response(cls, length, page_size, active=None):
+        return {
+            'count': length,
+            'prev': None,
+            'next': None,
+            'results': [
+                {
+                    'id': i,
+                    'debit_card_sender_details': {
+                        'card_number_last_digits': str(random.randint(1000, 9999)),
+                        'cardholder_names': [
+                            f'Cardholder Name {i}'
+                        ],
+                        'id': random.randint(0, 5000),
+                        'sender': random.randint(0, 5000),
+                    },
+                    'prisoner_profile': {
+                        'id': random.randint(0, 5000),
+                        'prisoner_name': f'Prisoner {i}',
+                        'prisoner_number': 'A{}SB'.format(random.randint(1000, 9999)),
+                    },
+                    'states': [
+                        {
+                            'added_by': {
+                                'first_name': f'First name {i}',
+                                'last_name': f'Last Name {i}'
+                            },
+                            'active': not j ,
+                            'reason': f'I am an automatically generated auto-accept number {i}',
+                            'created': (
+                                datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=(5 - j))
+                            ).isoformat(),
+                            'auto_accept_rule': i
+                        } for j in cls._generate_auto_accept_state_range(active)
+                    ]
+                }
+                for i in range(page_size)
+            ]
+        }
+
+    @staticmethod
+    def _generate_auto_accept_state_range(active):
+        if active is None:
+            return range(random.randint(1, 5))
+        if active is True:
+            return [0]
+        if active is False:
+            return [0,1]
+
 
 class CheckListViewTestCase(BaseCheckViewTestCase):
     """
@@ -5519,46 +5569,6 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
     Tests related to AutoAcceptListView.
     """
 
-    def _generate_auto_accept_response(self, length, page_size):
-        return {
-            'count': length,
-            'prev': None,
-            'next': None,
-            'results': [
-                {
-                    'id': i,
-                    'debit_card_sender_details': {
-                        'card_number_last_digits': str(random.randint(1000, 9999)),
-                        'cardholder_names': [
-                            f'Cardholder Name {i}'
-                        ],
-                        'id': random.randint(0, 5000),
-                        'sender': random.randint(0, 5000),
-                    },
-                    'prisoner_profile': {
-                        'id': random.randint(0, 5000),
-                        'prisoner_name': f'Prisoner {i}',
-                        'prisoner_number': 'A{}SB'.format(random.randint(1000, 9999)),
-                    },
-                    'states': [
-                        {
-                            'added_by': {
-                                'first_name': f'First name {i}',
-                                'last_name': f'Last Name {i}'
-                            },
-                            'active': not j % 2,
-                            'reason': f'I am an automatically generated auto-accept number {i}',
-                            'created': (
-                                datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=(5 - j))
-                            ).isoformat(),
-                            'auto_accept_rule': i
-                        } for j in range(random.randint(1, 5))
-                    ]
-                }
-                for i in range(page_size)
-            ]
-        }
-
     @staticmethod
     def _only_active_states(states):
         return list(filter(lambda x: x['active'], states))
@@ -5667,6 +5677,146 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
             self.assertEqual(response.status_code, 200)
         # Implicit assertion here that RequestsMock was called with parameters specified above
         # once context manager __exit__ called
+
+
+class AutoAcceptDetailViewTestCase(BaseCheckViewTestCase):
+
+    @parameterized.expand([(True,), (False,)])
+    def test_auto_accept_detail_render_auto_accept_rule(self, auto_accept_active):
+        """
+        Test that the auto_accept detail correctly renders auto_accept_rule
+        """
+        # Setup
+        auto_accept = self._generate_auto_accept_response(1, 1, active=auto_accept_active)['results'][0]
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/{}/'.format(
+                    settings.API_URL,
+                    auto_accept['id']
+                ),
+                json=auto_accept
+            )
+
+            # Execute
+            response = self.client.get(
+                reverse(
+                    'security:auto_accept_rule_detail',
+                    kwargs={'auto_accept_rule_id': auto_accept['id']}
+                ),
+                follow=True
+            )
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            parser.isoparse(
+                auto_accept['states'][0]['created']
+            ).strftime('%d/%m/%Y %H:%M')
+        )
+        self.assertContains(
+            response,
+            '{last_name}, {first_name}'.format(
+                last_name=auto_accept['states'][0]['added_by']['last_name'],
+                first_name=auto_accept['states'][0]['added_by']['first_name'],
+            )
+        )
+        self.assertContains(
+            response,
+            auto_accept['states'][0]['reason']
+        )
+        self.assertContains(response, 'Start')
+
+        if auto_accept_active:
+            self.assertContains(response, 'To stop auto accept:')
+            self.assertContains(response, 'Give details why auto accept is to stop')
+            self.assertContains(response, 'Stop auto accept')
+        else:
+            self.assertContains(
+                response,
+                parser.isoparse(
+                    auto_accept['states'][1]['created']
+                ).strftime('%d/%m/%Y %H:%M')
+            )
+            self.assertContains(
+                response,
+                '{last_name}, {first_name}'.format(
+                    last_name=auto_accept['states'][1]['added_by']['last_name'],
+                    first_name=auto_accept['states'][1]['added_by']['first_name'],
+                )
+            )
+            self.assertContains(
+                response,
+                auto_accept['states'][1]['reason']
+            )
+            self.assertContains(response, 'Stop')
+            self.assertNotContains(response, 'To stop auto accept:')
+            self.assertNotContains(response, 'Give details why auto accept is to stop')
+            self.assertNotContains(response, 'Stop auto accept')
+
+    def test_auto_accept_detail_deactivate_auto_accept_rule(self):
+        # Setup
+        api_auto_accept_response_len = 50
+        page_size = SECURITY_FORMS_DEFAULT_PAGE_SIZE
+        auto_accept_list = self._generate_auto_accept_response(api_auto_accept_response_len, page_size)
+        auto_accept_detail = self._generate_auto_accept_response(1, 1, active=True)['results'][0]
+        deactivation_reason = 'Oops, butterfingers!'
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            self.mock_need_attention_count(rsps, 0)
+            rsps.add(
+                rsps.GET,
+                '{}/security/checks/auto-accept/?{}'.format(
+                    settings.API_URL,
+                    urlencode([
+                        ('ordering', '-states__created'),
+                        ('is_active', True),
+                        ('offset', 0),
+                        ('limit', page_size)
+                    ])
+                ),
+                match_querystring=True,
+                json=auto_accept_list
+            )
+
+            rsps.add(
+                rsps.PATCH,
+                '{}/security/checks/auto-accept/{}/'.format(
+                    settings.API_URL,
+                    auto_accept_detail['id']
+                ),
+                json=auto_accept_detail
+            )
+
+            # Execute
+            response = self.client.post(
+                reverse(
+                    'security:auto_accept_rule_detail',
+                    kwargs={'auto_accept_rule_id': auto_accept_detail['id']}
+                ),
+                data={
+                    'deactivation_reason': deactivation_reason,
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, reverse('security:auto_accept_rule_list'))
+            self.assertContains(response, 'Auto accept rule was deactivated')
+            patch_calls = list(filter(lambda call: call.request.method == rsps.PATCH, rsps.calls))
+            self.assertEqual(len(patch_calls), 1)
+            patch_request_body = json.loads(patch_calls[0].request.body)
+            self.assertDictEqual(
+                patch_request_body,
+                {
+                    'states': [{
+                        'active': False,
+                        'reason': deactivation_reason
+                    }]
+                }
+            )
 
 
 class PolicyChangeViewTestCase(SecurityBaseTestCase):
