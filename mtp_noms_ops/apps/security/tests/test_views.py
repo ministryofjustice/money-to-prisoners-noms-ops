@@ -2830,7 +2830,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
                                 'first_name': f'First name {i}',
                                 'last_name': f'Last Name {i}'
                             },
-                            'active': not j ,
+                            'active': not j,
                             'reason': f'I am an automatically generated auto-accept number {i}',
                             'created': (
                                 datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=(5 - j))
@@ -2850,7 +2850,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         if active is True:
             return [0]
         if active is False:
-            return [0,1]
+            return [0, 1]
 
 
 class CheckListViewTestCase(BaseCheckViewTestCase):

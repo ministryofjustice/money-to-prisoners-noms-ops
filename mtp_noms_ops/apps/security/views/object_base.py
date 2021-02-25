@@ -88,13 +88,13 @@ class SimpleSecurityDetailView(TemplateView):
             list_url = referrer_url
         return list_url
 
-
     def get_breadcrumbs(self, list_url):
         return [
             {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
+
 
 class SecurityView(FormView):
     """
@@ -311,8 +311,7 @@ class SecurityDetailView(SecurityView):
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
-        if hasattr(context_data['form'], 'check_and_update_saved_searches'):
-            context_data['form'].check_and_update_saved_searches(str(self.title))
+        context_data['form'].check_and_update_saved_searches(str(self.title))
         return context_data
 
     def get_title_for_object(self, detail_object):

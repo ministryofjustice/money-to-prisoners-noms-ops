@@ -7,7 +7,6 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
-from mtp_common.auth.exceptions import HttpNotFoundError
 from requests.exceptions import RequestException
 
 from security.constants import CHECK_DETAIL_FORM_MAPPING, CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR

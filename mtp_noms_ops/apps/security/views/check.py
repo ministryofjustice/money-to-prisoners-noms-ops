@@ -17,7 +17,7 @@ from security.forms.check import (
     UserCheckListForm
 )
 from security.utils import convert_date_fields
-from security.views.object_base import SecurityView, SecurityDetailView, SimpleSecurityDetailView
+from security.views.object_base import SecurityView, SimpleSecurityDetailView
 
 
 class CheckListView(SecurityView):
