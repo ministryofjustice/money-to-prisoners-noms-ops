@@ -8,7 +8,7 @@
     margin-top: -5px;
     vertical-align: middle;
     content: '';
-    background: file-url('icon-tick.png') no-repeat;
-    background-image: none, file-url('icon-tick.svg');
+    background: mtp-static-url('images/icon-tick.png') no-repeat;
+    background-image: none, mtp-static-url('images/icon-tick.svg');
   }
 }

@@ -1,25 +1,3 @@
-table.mtp-table {
-  .mtp-check-date {
-    white-space: nowrap;
-  }
-
-  .mtp-check-row td {
-    border-bottom: none;
-  }
-
-  .mtp-check-description-row td {
-    border-top: none;
-    padding-top: 0;
-    margin-bottom: 0;
-  }
-  border-spacing: 0;
-  border-collapse: collapse;
-}
-
-table.mtp-table--review {
-  margin-bottom: 4em;
-}
-
 .mtp-check-details {
   margin: 1em 0 1.5em;
   padding: 1em;
@@ -140,36 +118,6 @@ table.mtp-table--review {
 
 .mtp-check-header__assigned-user {
   color: $red;
-}
-
-.mtp-check-cell__actions {
-  display: flex;
-  align-items: center;
-
-  .govuk-button {
-    margin-bottom: 1rem;
-
-    @include media(mobile) {
-      width: auto;
-    }
-  }
-}
-
-.mtp-check-cell__list-status {
-  margin-left: 1rem;
-}
-
-.mtp-check-cell__list-status--my-list, .mtp-check-cell__list-status--text {
-  display: inline-block;
-  margin-bottom: 0.6rem;
-}
-
-.mtp-check-cell__list-status--my-list {
-  @extend %mtp-text-with-tick;
-}
-
-.mtp-check-cell__list-form {
-  display: inline-block;
 }
 
 .mtp-check-form-spacing > div.govuk-form-group {

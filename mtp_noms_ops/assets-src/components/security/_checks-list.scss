@@ -1,0 +1,39 @@
+.mtp-check-date {
+  white-space: nowrap;
+}
+
+.mtp-check-description-row td {
+  border-top: 0;
+  padding-top: 0;
+  margin-bottom: 0;
+}
+
+.mtp-check-cell__actions {
+  display: flex;
+  align-items: center;
+
+  .govuk-button {
+    margin-bottom: govuk-spacing(3);
+
+    @include govuk-media-query($until: tablet) {
+      width: auto;
+    }
+  }
+}
+
+.mtp-check-cell__list-status {
+  margin-left: govuk-spacing(3);
+}
+
+.mtp-check-cell__list-status--my-list, .mtp-check-cell__list-status--text {
+  display: inline-block;
+  margin-bottom: govuk-spacing(2);
+}
+
+.mtp-check-cell__list-status--my-list {
+  @extend %mtp-text-with-tick;
+}
+
+.mtp-check-cell__list-form {
+  display: inline-block;
+}
