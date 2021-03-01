@@ -2803,7 +2803,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
             yield dict(cls.SENDER_CREDIT, id=i)
 
     @classmethod
-    def _generate_auto_accept_response(cls, length, page_size, active=None):
+    def _generate_auto_accept_response(cls, length, page_size, active=None, number_of_cardholder_names=1):
         return {
             'count': length,
             'prev': None,
@@ -2814,7 +2814,8 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
                     'debit_card_sender_details': {
                         'card_number_last_digits': str(random.randint(1000, 9999)),
                         'cardholder_names': [
-                            f'Cardholder Name {i}'
+                            f'Cardholder Name {j}'
+                            for j in range(number_of_cardholder_names)
                         ],
                         'id': random.randint(0, 5000),
                         'sender': random.randint(0, 5000),
@@ -5687,7 +5688,9 @@ class AutoAcceptDetailViewTestCase(BaseCheckViewTestCase):
         Test that the auto_accept detail correctly renders auto_accept_rule
         """
         # Setup
-        auto_accept = self._generate_auto_accept_response(1, 1, active=auto_accept_active)['results'][0]
+        auto_accept = self._generate_auto_accept_response(
+            1, 1, active=auto_accept_active, number_of_cardholder_names=3
+        )['results'][0]
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
@@ -5711,6 +5714,14 @@ class AutoAcceptDetailViewTestCase(BaseCheckViewTestCase):
 
         # Assert
         self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Review auto accept of credits from {} and 2 more names to {}'.format(
+                auto_accept['debit_card_sender_details']['cardholder_names'][0],
+                auto_accept['prisoner_profile']['prisoner_name']
+            )
+        )
+
         self.assertContains(
             response,
             parser.isoparse(
