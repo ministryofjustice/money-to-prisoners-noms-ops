@@ -1,7 +1,7 @@
 from typing import Optional
 
 from django.contrib import messages
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponseServerError
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy
 from django.views.generic.edit import BaseFormView, FormView
@@ -16,7 +16,7 @@ from security.forms.check import (
     AssignCheckToUserForm,
     UserCheckListForm
 )
-from security.utils import convert_date_fields
+from security.utils import convert_date_fields, get_abbreviated_cardholder_names
 from security.views.object_base import SecurityView, SimpleSecurityDetailView
 
 
@@ -76,6 +76,7 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
     object_context_key = 'auto_accept_rule'
     id_kwarg_name = 'auto_accept_rule_id'
     list_url = reverse_lazy('security:auto_accept_rule_list')
+    success_url = reverse_lazy('security:auto_accept_rule_list')
     form_class = AutoAcceptDetailForm
 
     def get_form_kwargs(self):
@@ -85,12 +86,11 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         return {
             'url': f'/security/checks/auto-accept/{self.kwargs[self.id_kwarg_name]}/'
         }
-        return super().get_object_request_params()
 
     def get_title_for_object(self, detail_object):
         return '{} {} {} {}'.format(
             gettext_lazy('Review auto accept of credits from'),
-            ','.join(detail_object['debit_card_sender_details']['cardholder_names']),
+            get_abbreviated_cardholder_names(detail_object),
             gettext_lazy('to'),
             detail_object['prisoner_profile']['prisoner_name']
         )
@@ -99,7 +99,7 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         context_data = super().get_context_data(**kwargs)
 
         if not self.object:
-            raise Http404('Auto-accept not found')
+            raise HttpResponseServerError(gettext_lazy('This service is currently unavailable'))
 
         self.title = self.get_title_for_object(self.object)
 
@@ -120,18 +120,15 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         return convert_date_fields(obj, include_nested=True)
 
     def form_valid(self, form):
-        if self.request.method == 'POST':
-            result = form.deactivate_auto_accept_rule()
-            if not result:
-                return self.form_invalid(form)
+        result = form.deactivate_auto_accept_rule()
+        if not result:
+            return self.form_invalid(form)
 
-            messages.add_message(
-                self.request,
-                messages.INFO,
-                gettext_lazy('Auto accept rule was deactivated'),
-            )
-            return HttpResponseRedirect(self.list_url)
-
+        messages.add_message(
+            self.request,
+            messages.INFO,
+            gettext_lazy('Auto accept rule was deactivated'),
+        )
         return super().form_valid(form)
 
 

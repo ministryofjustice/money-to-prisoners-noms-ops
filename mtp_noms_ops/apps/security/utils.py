@@ -224,3 +224,15 @@ def remove_whitespaces_and_hyphens(value):
     if not value:
         return value
     return re.sub(r'[\s-]+', '', value)
+
+
+def get_abbreviated_cardholder_names(detail_object):
+    cardholder_names = detail_object['debit_card_sender_details']['cardholder_names']
+    if len(cardholder_names) == 2:
+        return _('%(cardholder_name)s and 1 more name' % {'cardholder_name': cardholder_names[0]})
+    elif len(cardholder_names) >= 2:
+        return _('%(cardholder_name)s and %(number_of_remaining_names)s more names' % {
+            'cardholder_name': cardholder_names[0], 'number_of_remaining_names': len(cardholder_names) - 1
+        })
+    else:
+        return cardholder_names[0]
