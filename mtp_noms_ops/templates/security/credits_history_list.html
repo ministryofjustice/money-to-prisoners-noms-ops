@@ -81,7 +81,11 @@
             </span>
             <br />
             {% trans 'by' %}
-            {{ check.actioned_by_name }}
+            {% if check.auto_accept_rule_state and check.auto_accept_rule_state.active %}
+              {{ check.auto_accept_rule_state.added_by.first_name }} {{ check.auto_accept_rule_state.added_by.last_name }}
+            {% else %}
+              {{ check.actioned_by_name }}
+            {% endif %}
           </td>
         </tr>
         <tr class="mtp-check-description-row">
@@ -90,15 +94,19 @@
             {{ check|check_description }}
             <br/>
             <br/>
+            {% if check.auto_accept_rule_state.active is True %}
+              <strong>{% trans 'Reason for automatically accepting' %}:</strong> {{ check.auto_accept_rule_state.reason }}
+            {% else %}
             <strong>{% trans 'Decision details' %}:</strong>
-            {% for reason, value in check.rejection_reasons.items %}
-              {{ reason | get_human_readable_check_field }}{% if value != True %}: {{ value }}{% endif %}
-              <br/>
-            {% endfor %}
-            {% if check.decision_reason %}
-              Further Details: {{ check.decision_reason }}
-            {% elif not check.rejection_reasons %}
-              {% trans 'No decision reason entered' %}
+              {% for reason, value in check.rejection_reasons.items %}
+                {{ reason | get_human_readable_check_field }}{% if value != True %}: {{ value }}{% endif %}
+                <br/>
+              {% endfor %}
+              {% if check.decision_reason %}
+                Further Details: {{ check.decision_reason }}
+              {% elif not check.rejection_reasons %}
+                {% trans 'No decision reason entered' %}
+              {% endif %}
             {% endif %}
           </td>
         </tr>
