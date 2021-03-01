@@ -237,12 +237,16 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     human_readable_names = CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
-        'reject_with_accept_details': _('You cannot reject with the Add Further Details box under accept populated'),
+        'reject_with_accept_details': _(
+            "You have added details in the 'accept' box. You cannot reject a credit with this box filled"),
         'reject_with_auto_accept': _(
-            'You cannot reject with the Automatically Accept Future Credits box under accept populated'
+            "You have ticked 'auto-accept' and given a reason for this in the text box. "
+            'You cannot reject a credit with these ticked and filled.'
         ),
-        'accept_with_reject_details': _('You cannot accept with the Add Further Details box under reject populated'),
-        'accept_with_reject_reason': _('You must untick all rejection fields before accepting a credit'),
+        'accept_with_reject_details': _(
+            "You have added details in the 'reject' box. You cannot accept a credit with this box filled."
+        ),
+        'accept_with_reject_reason': _("You cannot accept a credit when you have ticked any of the 'reject' tickboxes.")
     }
 
     def __init__(self, object_id, request, **kwargs):
@@ -289,7 +293,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         if not self.errors:  # if already in error => skip
             if self.get_object()['status'] != 'pending':
                 raise forms.ValidationError(
-                    _('You cannot action this credit as it’s not in pending'),
+                    _("You cannot action this credit because it is not in 'pending'.")
                 )
 
         if status == 'reject':
