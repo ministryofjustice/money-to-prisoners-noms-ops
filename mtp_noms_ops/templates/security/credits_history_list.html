@@ -42,10 +42,10 @@
       <thead>
         <tr>
           {% sortable_cell _('Date sent') form.cleaned_data 'created' %}
-          <th>{% trans 'Debit card (from)' %}</th>
-          <th>{% trans 'Prisoner (to)' %}</th>
-          <th class="govuk-table__header--numeric">{% trans 'Amount' %}</th>
-          <th>{% trans 'Decision' %}</th>
+          <th scope="col">{% trans 'Debit card (from)' %}</th>
+          <th scope="col">{% trans 'Prisoner (to)' %}</th>
+          <th class="govuk-table__header--numeric" scope="col">{% trans 'Amount' %}</th>
+          <th scope="col">{% trans 'Decision' %}</th>
         </tr>
       </thead>
       <tbody>

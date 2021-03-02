@@ -22,18 +22,20 @@
         {{ view.title }}
       </caption>
       <thead>
-        <th>
-          {% trans 'Date' %}
-        </th>
-        <th>
-          {% trans 'Started by' %}
-        </th>
-        <th>
-          {% trans 'Action' %}
-        </th>
-        <th>
-          {% trans 'Reason' %}
-        </th>
+        <tr>
+          <th scope="col">
+            {% trans 'Date' %}
+          </th>
+          <th scope="col">
+            {% trans 'Started by' %}
+          </th>
+          <th scope="col">
+            {% trans 'Action' %}
+          </th>
+          <th scope="col">
+            {% trans 'Reason' %}
+          </th>
+        </tr>
       </thead>
       <tbody>
         {% for auto_accept_state in auto_accept_rule.states %}

@@ -38,14 +38,14 @@
     <table class="mtp-table mtp-table--small govuk-!-margin-bottom-9">
       <thead>
         <tr>
-          <th class="mtp-table__header--compact">
+          <th class="mtp-table__header--compact" scope="col">
             <span class="govuk-visually-hidden">{% trans 'Needs attention?' %}</span>
           </th>
-          <th>{% trans 'Date sent' %}</th>
-          <th>{% trans 'Debit card (from)' %}</th>
-          <th>{% trans 'Prisoner (to)' %}</th>
-          <th class="govuk-table__header--numeric">{% trans 'Amount' %}</th>
-          <th class="govuk-!-display-none-print">{% trans 'Actions' %}</th>
+          <th scope="col">{% trans 'Date sent' %}</th>
+          <th scope="col">{% trans 'Debit card (from)' %}</th>
+          <th scope="col">{% trans 'Prisoner (to)' %}</th>
+          <th class="govuk-table__header--numeric" scope="col">{% trans 'Amount' %}</th>
+          <th class="govuk-!-display-none-print" scope="col">{% trans 'Actions' %}</th>
         </tr>
       </thead>
       <tbody>
@@ -104,11 +104,11 @@
       <caption class=govuk-visually-hidden>{% trans 'This is a table showing any previous credit decisions involving the prisoner or debit card in question' %}</caption>
       <thead>
         <tr>
-          <th>{% trans 'Date sent' %}</th>
-          <th>{% trans 'Debit card (from)' %}</th>
-          <th>{% trans 'Prisoner (to)' %}</th>
-          <th class="govuk-table__header--numeric">{% trans 'Amount' %}</th>
-          <th>{% trans 'Decision' %}</th>
+          <th scope="col">{% trans 'Date sent' %}</th>
+          <th scope="col">{% trans 'Debit card (from)' %}</th>
+          <th scope="col">{% trans 'Prisoner (to)' %}</th>
+          <th class="govuk-table__header--numeric" scope="col">{% trans 'Amount' %}</th>
+          <th scope="col">{% trans 'Decision' %}</th>
         </tr>
       </thead>
       <tbody>

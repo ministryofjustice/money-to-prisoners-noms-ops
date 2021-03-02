@@ -69,14 +69,14 @@
     <table class="mtp-table mtp-table--small">
       <thead>
         <tr>
-          <th class="mtp-table__header--compact">
+          <th class="mtp-table__header--compact" scope="col">
             <span class="govuk-visually-hidden">{% trans 'Needs attention?' %}</span>
           </th>
-          <th>{% trans 'Date sent' %}</th>
-          <th>{% trans 'Debit card (from)' %}</th>
-          <th>{% trans 'Prisoner (to)' %}</th>
-          <th class="govuk-table__header--numeric">{% trans 'Amount' %}</th>
-          <th class="govuk-!-display-none-print">{% trans 'Actions' %}</th>
+          <th scope="col">{% trans 'Date sent' %}</th>
+          <th scope="col">{% trans 'Debit card (from)' %}</th>
+          <th scope="col">{% trans 'Prisoner (to)' %}</th>
+          <th class="govuk-table__header--numeric" scope="col">{% trans 'Amount' %}</th>
+          <th class="govuk-!-display-none-print" scope="col">{% trans 'Actions' %}</th>
         </tr>
       </thead>
       <tbody>
