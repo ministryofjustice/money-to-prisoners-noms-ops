@@ -10,3 +10,5 @@ pdbpp
 django-pdb
 django-pudb3
 pudb
+django-stubs
+types-requests

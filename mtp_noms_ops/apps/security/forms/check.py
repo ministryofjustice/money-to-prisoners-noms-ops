@@ -237,12 +237,16 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     human_readable_names = CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
-        'reject_with_accept_details': _('You cannot reject with the Add Further Details box under accept populated'),
+        'reject_with_accept_details': _(
+            "You have added details in the 'accept' box. You cannot reject a credit with this box filled"),
         'reject_with_auto_accept': _(
-            'You cannot reject with the Automatically Accept Future Credits box under accept populated'
+            "You have ticked 'auto-accept' and given a reason for this in the text box. "
+            'You cannot reject a credit with these ticked and filled.'
         ),
-        'accept_with_reject_details': _('You cannot accept with the Add Further Details box under reject populated'),
-        'accept_with_reject_reason': _('You must untick all rejection fields before accepting a credit'),
+        'accept_with_reject_details': _(
+            "You have added details in the 'reject' box. You cannot accept a credit with this box filled."
+        ),
+        'accept_with_reject_reason': _("You cannot accept a credit when you have ticked any of the 'reject' tickboxes.")
     }
 
     def __init__(self, object_id, request, **kwargs):
@@ -289,7 +293,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         if not self.errors:  # if already in error => skip
             if self.get_object()['status'] != 'pending':
                 raise forms.ValidationError(
-                    _('You cannot action this credit as it’s not in pending'),
+                    _("You cannot action this credit because it is not in 'pending'.")
                 )
 
         if status == 'reject':
@@ -430,6 +434,56 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                         else:
                             return self._handle_request_exception(e, 'Auto Accept Rule')
             return (True, '')
+
+
+class AutoAcceptDetailForm(forms.Form):
+    deactivation_reason = forms.CharField(label='Give details why auto accept is to stop')
+
+    def __init__(self, object_id, request, **kwargs):
+        super().__init__(**kwargs)
+        self.request = request
+        self.object_id = object_id
+
+    def get_object_list_endpoint_path(self):
+        return '/security/checks/auto-accept/'
+
+    def get_deactivate_endpoint_path(self):
+        return f'/security/checks/auto-accept/{self.object_id}/'
+
+    @cached_property
+    def session(self):
+        return get_api_session(self.request)
+
+    def deactivate_auto_accept_rule(self):
+        """
+        Deactivates auto accept rule via the API.
+        :returns: True if the API call was successful. If not, False
+        """
+        endpoint = self.get_deactivate_endpoint_path()
+        try:
+            # There is an auto-accept rule, which may be in the active or inactive state
+            self.session.patch(
+                endpoint,
+                json={
+                    'states': [{
+                        'active': False,
+                        'reason': self.cleaned_data['deactivation_reason']
+                    }]
+                }
+            )
+        except RequestException as e:
+            try:
+                error_payload = e.response.json()
+            except Exception:
+                error_payload = {}
+            logger.exception(
+                'Auto-accept deactivation could not be actioned. Error payload: %s',
+                error_payload
+            )
+            self.add_error(None, _('There was an error with your request.'))
+
+            return False
+        return True
 
 
 class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
