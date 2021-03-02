@@ -1,7 +1,7 @@
 from typing import Optional
 
 from django.contrib import messages
-from django.http import Http404, HttpResponseRedirect, HttpResponseServerError
+from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy
 from django.views.generic.edit import BaseFormView, FormView
@@ -99,7 +99,8 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         context_data = super().get_context_data(**kwargs)
 
         if not self.object:
-            raise HttpResponseServerError(gettext_lazy('This service is currently unavailable'))
+            # raise a generic error to display standard 500 page if auto-accept rule failed to load for some reason
+            raise ValueError('Could not load auto-accept rule')
 
         self.title = self.get_title_for_object(self.object)
 
