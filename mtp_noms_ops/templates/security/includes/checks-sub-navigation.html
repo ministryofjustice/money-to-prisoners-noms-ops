@@ -32,7 +32,7 @@
 
     <li class="mtp-sub-navigation__list-item {% if current_view == 'AutoAcceptRuleListView' %}mtp-sub-navigation__list-item--current{% endif %}">
       <a href="{% url 'security:auto_accept_rule_list' %}" class="mtp-sub-navigation__link">
-        {% trans 'Auto Accepts' %}
+        {% trans 'Auto accepts' %}
         {% if current_view == 'AutoAcceptRuleListView' %}
           <span class="govuk-visually-hidden">{% trans '(current page)' %}</span>
         {% endif %}

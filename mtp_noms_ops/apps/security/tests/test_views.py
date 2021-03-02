@@ -3400,7 +3400,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
         self.assertEqual(response.status_code, 200)
         response_content = response.content.decode(response.charset)
 
-        self.assertIn('Auto Accepted', response_content)
+        self.assertIn('Auto accepted', response_content)
         self.assertIn('123456******9876', response_content)
         self.assertIn('02/20', response_content)
         self.assertIn('MAISIE NOLAN', response_content)
