@@ -5,24 +5,12 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
+{% block before_content %}
+  {{ block.super }}
+  {% include 'security/includes/checks-sub-navigation.html' with current_view=view.get_class_name %}
+{% endblock %}
 
 {% block content %}
-  <nav class="moj-sub-navigation" aria-label="{% trans 'Sub navigation' %}">
-    <ul class="moj-sub-navigation__list">
-      <li class="moj-sub-navigation__item">
-        <a class="moj-sub-navigation__link" href="{% url 'security:check_list' %}">{% trans 'Credits to action' %}</a>
-      </li>
-      <li class="moj-sub-navigation__item">
-        <a class="moj-sub-navigation__link" href="{% url 'security:my_check_list' %}">{% trans 'My list' %} ({{ form.my_list_count }})</a>
-      </li>
-      <li class="moj-sub-navigation__item">
-        <a class="moj-sub-navigation__link" aria-current="page" href="{% url 'security:credits_history' %}" >{% trans 'Decision history' %}</a>
-      </li>
-      <li class="moj-sub-navigation__item">
-        <a class="moj-sub-navigation__link" href="{% url 'security:auto_accept_rule_list' %}" >{% trans 'Auto Accepts' %}</a>
-      </li>
-    </ul>
-  </nav>
   <header>
     <h1 class="govuk-heading-xl">{{ view.title }}</h1>
   </header>
