@@ -3329,6 +3329,92 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
 
             self.assertContains(response, rejection_reason_value)
 
+    def test_view_includes_matching_credit_history_including_active_auto_accept(self):
+        """
+        Test that the view displays auto-accepted credits related by sender id to the credit subject to a check.
+        """
+        check_to_return = dict(
+            self.SENDER_CHECK,
+            status='accepted',
+            auto_accept_rule_state={
+                'added_by': {
+                    'username': 'security-fiu-0',
+                    'first_name': 'Security FIU',
+                    'last_name': 'Staff'
+                },
+                'active': True,
+                'reason': 'I am an automatically generated auto-accept inactive state number 0',
+                'created': '2021-02-28T20:53:40.131236Z',
+                'auto_accept_rule': 651
+            }
+        )
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('ordering', '-created'),
+                            ('actioned_by', True),
+                            ('started_at__gte', '2020-01-02T12:00:00'),
+                            ('offset', 0),
+                            ('limit', 20),
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                match_querystring=True,
+                json={
+                    'count': 1,
+                    'results': [check_to_return]
+                }
+            )
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('status', 'pending'),
+                            ('credit_resolution', 'initial'),
+                            ('assigned_to', 5),
+                            ('offset', 0),
+                            ('limit', 1)
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                match_querystring=True,
+                json={
+                    'count': 1,
+                    'results': [check_to_return],
+                }
+            )
+            response = self.client.get(
+                reverse(
+                    'security:credits_history',
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        response_content = response.content.decode(response.charset)
+
+        self.assertIn('Auto Accepted', response_content)
+        self.assertIn('123456******9876', response_content)
+        self.assertIn('02/20', response_content)
+        self.assertIn('MAISIE NOLAN', response_content)
+        self.assertIn('£10.00', response_content)
+        self.assertIn('Jean Valjean', response_content)
+        self.assertIn(
+            'Reason for automatically accepting:',
+            response_content
+        )
+        self.assertIn(
+            'I am an automatically generated auto-accept inactive state number 0',
+            response_content
+        )
+
 
 class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
     """
