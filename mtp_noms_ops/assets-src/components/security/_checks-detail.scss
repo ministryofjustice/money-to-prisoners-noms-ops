@@ -1,0 +1,16 @@
+.mtp-check-header {
+  position: relative;
+}
+
+.mtp-check-header__list-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.mtp-check-header__assigned-user {
+  display: block;
+  margin-top: govuk-spacing(3);
+  @include govuk-font($size: 19, $weight: bold);
+  color: govuk-colour('red');
+}

@@ -1,32 +1,3 @@
-.mtp-check-details {
-  margin: 1em 0 1.5em;
-  padding: 1em;
-
-  th, td {
-    border: 0;
-    font-weight: normal;
-    padding: 0 0 0.3em 0;
-  }
-
-  th {
-    padding-right: 1em;
-  }
-
-  tr:last-child {
-    th, td {
-      padding-bottom: 0;
-    }
-  }
-
-  td {
-    font-weight: bold;
-  }
-
-  &.govuk-inset-text {
-    margin-left: 1em;
-  }
-}
-
 .moj-sub-navigation {
   margin-bottom: 0.7rem;
 }
@@ -102,44 +73,10 @@
 
 }
 
-.mtp-check-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.mtp-check-header + .govuk-heading-m {
-  margin-top: 0;
-}
-
-.mtp-check-header__list-toggle {
-  margin-bottom: 3.25rem;
-}
-
-.mtp-check-header__assigned-user {
-  color: $red;
-}
-
 .mtp-check-form-spacing > div.govuk-form-group {
   // There's an issue here with the margins stacking
   // for some elements but not others
   margin-top: 1em !important;
   margin-bottom: 0em !important;
   position: relative;
-}
-
-.mtp-check-details-spacing {
-  margin-top: 1em;
-}
-
-.mtp-check-accept-container {
-  display: inline-block;
-}
-
-.mtp-font-weight-bold {
-  font-weight: bold;
-}
-
-textarea.mtp-check-form-auto-accept {
-  width: 100%;
 }

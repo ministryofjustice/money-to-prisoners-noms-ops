@@ -61,19 +61,25 @@
       </tbody>
     </table>
   </div>
-  {% if auto_accept_rule_is_active %}
-    {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
-    <form class="govuk-form-group mtp-form-analytics" method="post">
-      {% csrf_token %}
-      <h2 class="govuk-heading-m">
-        {% trans 'To stop auto accept:' %}
-      </h2>
-      {% include 'mtp_common/forms/textarea.html' with field=form.deactivation_reason input_classes='form-control-3-4' %}
-      <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button">
-        {% trans 'Stop auto accept' %}
-      </button>
-    </form>
-  {% endif %}
 
+  {% if auto_accept_rule_is_active %}
+    <div class="govuk-grid-row govuk-!-margin-top-9">
+      <div class="govuk-grid-column-two-thirds">
+
+        {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
+        <form class="govuk-form-group mtp-form-analytics" method="post">
+          {% csrf_token %}
+          <h2 class="govuk-heading-m">
+            {% trans 'To stop auto accept:' %}
+          </h2>
+          {% include 'mtp_common/forms/textarea.html' with field=form.deactivation_reason %}
+          <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button">
+            {% trans 'Stop auto accept' %}
+          </button>
+        </form>
+
+      </div>
+    </div>
+  {% endif %}
 
 {% endblock %}
