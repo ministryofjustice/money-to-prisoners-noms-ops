@@ -191,7 +191,7 @@
 
         <h2 class="govuk-heading-l">{% trans 'Accept or reject this credit' %}</h2>
         <h3 class="govuk-heading-m">{% trans 'To accept this credit:' %}</h3>
-        {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='govuk-!-width-three-quarters' %}
+        {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details rows=2 %}
         <div class="mtp-check-accept-container">
           {% if unbound_active_auto_accept_state %}
             <p class="govuk-inset-text">
@@ -221,7 +221,7 @@
             </div>
             <div class="govuk-inset-text js-hidden" id="auto_accept_reason">
               <label class="govuk-label" for="rejection-auto_accept_reason">{% trans 'Give reason for automatically accepting' %}</label>
-              <textarea class="govuk-textarea mtp-check-form-auto-accept" name="auto_accept_reason" type="text" id="rejection-auto_accept_reason" disabled></textarea>
+              <textarea class="govuk-textarea" name="auto_accept_reason" id="rejection-auto_accept_reason" rows="1" disabled></textarea>
             </div>
           {% endif %}
           <br/>
@@ -262,16 +262,17 @@
           </div>
           <div class="govuk-inset-text js-hidden" id="other_reason">
             <label class="govuk-label" for="rejection-other_reason">{% trans 'Give the reason' %}</label>
-            <input class="govuk-input govuk-input--width-20" name="other_reason" type="text" id="rejection-other_reason" disabled>
+            <textarea class="govuk-textarea" name="other_reason" id="rejection-other_reason" rows="1" disabled></textarea>
           </div>
         </fieldset>
 
         <div class="govuk-!-margin-top-6">
-          {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='govuk-!-width-three-quarters' %}
-          <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button" name="fiu_action" value="reject">
-            {% trans 'Reject credit' %}
-          </button>
+          {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details rows=2 %}
         </div>
+
+        <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button" name="fiu_action" value="reject">
+          {% trans 'Reject credit' %}
+        </button>
 
       {% else %}
 
