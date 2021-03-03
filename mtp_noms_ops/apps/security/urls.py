@@ -378,8 +378,13 @@ urlpatterns = [
         name='resolve_check',
     ),
     url(
-        r'^security/checks/(?P<check_id>\d+)/assignment/(?P<list>\w+)?/(?P<current_page>\d+)?/?$',
-        fiu_security_test(views.CheckAssignView.as_view()),
+        r'^security/checks/(?P<check_id>\d+)/assignment/list/(?P<page>\d+)/$',
+        fiu_security_test(views.CheckAssignView.as_view(redirect_to_list=True)),
+        name='assign_check_then_list',
+    ),
+    url(
+        r'^security/checks/(?P<check_id>\d+)/assignment/$',
+        fiu_security_test(views.CheckAssignView.as_view(redirect_to_list=False)),
         name='assign_check',
     ),
     url(

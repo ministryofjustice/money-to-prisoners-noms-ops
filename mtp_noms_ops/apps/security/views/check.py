@@ -28,12 +28,6 @@ class CheckListView(SecurityView):
     template_name = 'security/checks_list.html'
     form_class = CheckListForm
 
-    def get_context_data(self, **kwargs):
-        context_data = super().get_context_data(**kwargs)
-        context_data['current_page'] = self.request.GET.get('page', 1)
-
-        return context_data
-
 
 class MyListCheckView(SecurityView):
     """
@@ -138,26 +132,25 @@ class CheckAssignView(BaseFormView):
     Modify assignment of check
     """
     form_class = AssignCheckToUserForm
+    redirect_to_list = False
     id_kwarg_name = 'check_id'
-    page_kwarg_name = 'current_page'
+    page_kwarg_name = 'page'
 
     def get_success_url(self):
-        if self.kwargs.get('list') == 'list':
-            page_params = f'?page={self.kwargs[self.page_kwarg_name]}#check-row-{self.kwargs[self.id_kwarg_name]}'
+        check_id = self.kwargs[self.id_kwarg_name]
+        if self.redirect_to_list:
+            page = self.kwargs[self.page_kwarg_name]
+            page_params = f'?page={page}#check-row-{check_id}'
             return reverse('security:check_list') + page_params
         else:
-            return reverse('security:resolve_check', kwargs={'check_id': self.kwargs[self.id_kwarg_name]})
+            return reverse('security:resolve_check', kwargs={'check_id': check_id})
 
     def get_form_kwargs(self):
-        if self.kwargs.get('list') not in ('list', None):
-            raise ValueError(f'Last param \'{self.kwargs["list"]}\' not valid')
-
+        check_id = self.kwargs[self.id_kwarg_name]
         form_kwargs = super().get_form_kwargs()
         form_kwargs.update(
-            {
-                'request': self.request,
-                'object_id': self.kwargs[self.id_kwarg_name],
-            },
+            request=self.request,
+            object_id=check_id,
         )
         return form_kwargs
 
@@ -165,13 +158,14 @@ class CheckAssignView(BaseFormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def form_valid(self, form):
+        check_id = self.kwargs[self.id_kwarg_name]
         result = form.assign_or_unassign()
         if not result:
-            if self.kwargs.get('list') == 'list':
+            if self.redirect_to_list:
                 return HttpResponseRedirect(reverse('security:check_list'))
             else:
                 return HttpResponseRedirect(
-                    reverse('security:resolve_check', kwargs={'check_id': self.kwargs[self.id_kwarg_name]})
+                    reverse('security:resolve_check', kwargs={'check_id': check_id})
                 )
 
         return super().form_valid(form)

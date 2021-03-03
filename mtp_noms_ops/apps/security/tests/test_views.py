@@ -5124,88 +5124,9 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
 
             self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
 
-    def test_assign_view_get_request_redirects_to_resolve_check_page_with_kwarg(self):
-        """
-        A GET request should redirect to the resolve page
-        For instance if a session expires and the user hits 'Add to my list'
-        """
-        check_id = 1
-        response_len = 0
-        with responses.RequestsMock() as rsps:
-            self.login(rsps)
-            rsps.add(
-                rsps.GET,
-                urljoin(
-                    settings.API_URL,
-                    '/senders/{sender_profile_id}/credits/?{querystring}'.format(
-                        sender_profile_id=self.sender_id,
-                        querystring=urlencode([
-                            ('limit', 500),
-                            ('offset', 0),
-                            ('exclude_credit__in', self.credit_id),
-                            ('security_check__isnull', False),
-                            ('only_completed', False),
-                            ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
-                        ])
-                    ),
-                    trailing_slash=False
-                ),
-                json={
-                    'count': 0,
-                }
-            )
-            rsps.add(
-                rsps.GET,
-                urljoin(
-                    settings.API_URL,
-                    '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
-                        prisoner_profile_id=self.prisoner_id,
-                        querystring=urlencode([
-                            ('limit', 500),
-                            ('offset', 0),
-                            ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
-                            ('security_check__isnull', False),
-                            ('only_completed', False),
-                            ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
-                        ])
-                    ),
-                    trailing_slash=False
-                ),
-                json={
-                    'count': 0,
-                }
-            )
-            rsps.add(
-                rsps.GET,
-                api_url(f'/security/checks/{check_id}/'),
-                json=dict(self.SENDER_CHECK, assigned_to_name='Columbo', assigned_to=777)
-            )
-            rsps.add(
-                rsps.GET,
-                '{}/security/checks/auto-accept/?{}'.format(
-                    settings.API_URL,
-                    urlencode((
-                        ('prisoner_profile_id', self.SENDER_CHECK['credit']['prisoner_profile']),
-                        (
-                            'debit_card_sender_details_id',
-                            self.SENDER_CHECK['credit']['billing_address']['debit_card_sender_details']
-                        )
-                    ))
-                ),
-                json={'count': 0, 'prev': None, 'next': None, 'results': []}
-            )
-
-            url = reverse('security:assign_check', kwargs={'check_id': check_id})
-
-            response = self.client.get(url, follow=True)
-
-            self.assertRedirects(response, reverse('security:resolve_check', kwargs={'check_id': check_id}))
-
     def test_assign_view_get_request_redirects_to_list_check_page_with_kwarg(self):
         """
-        A GET request should redirect to the list page if called with 'list' as positional url arg
+        A GET request should redirect to the checks list page
         """
         check_id = 1
         with responses.RequestsMock() as rsps:
@@ -5219,7 +5140,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 }
             )
 
-            url = reverse('security:assign_check', kwargs={'check_id': check_id, 'current_page': 1, 'list': 'list'})
+            url = reverse('security:assign_check_then_list', kwargs={'check_id': check_id, 'page': 1})
 
             response = self.client.get(url, follow=True)
 
@@ -5229,7 +5150,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
 
     def test_assign_view_get_request_redirects_to_list_check_page_with_kwarg_and_current_page(self):
         """
-        A GET request should redirect to the list page if called with 'list' as positional url arg
+        A GET request should redirect to the checks list page
         """
         check_id = 1
 
@@ -5244,7 +5165,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                 }
             )
 
-            url = reverse('security:assign_check', kwargs={'check_id': check_id, 'current_page': 2, 'list': 'list'})
+            url = reverse('security:assign_check_then_list', kwargs={'check_id': check_id, 'page': 2})
 
             response = self.client.get(url, follow=True)
 
@@ -5543,7 +5464,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
             )
             self.mock_need_attention_count(rsps, 1)
 
-            url = reverse('security:assign_check', kwargs={'check_id': check_id, 'list': 'list'})
+            url = reverse('security:assign_check_then_list', kwargs={'check_id': check_id, 'page': 1})
 
             with silence_logger():
                 response = self.client.post(

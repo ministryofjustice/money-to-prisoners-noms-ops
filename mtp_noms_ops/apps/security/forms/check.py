@@ -530,7 +530,7 @@ class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
 
         if self.cleaned_data.get('assignment') == 'assign':
             user_id = self.request.user.pk
-        elif self.cleaned_data.get('assignment') == 'unassign':
+        else:
             user_id = None
 
         try:
