@@ -19,6 +19,7 @@ from security.models import (
     disbursement_resolutions,
     security_check_statuses,
 )
+from security.utils import get_abbreviated_cardholder_names
 
 logger = logging.getLogger('mtp')
 register = template.Library()
@@ -386,3 +387,8 @@ def format_name(user_dict):
         first_name=user_dict.get('first_name'),
         last_name=user_dict.get('last_name')
     )
+
+
+@register.filter
+def get_abbreviated_cardholder_names_from_list(cardholder_names):
+    return get_abbreviated_cardholder_names(cardholder_names)

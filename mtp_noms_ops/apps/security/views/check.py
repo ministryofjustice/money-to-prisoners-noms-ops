@@ -90,7 +90,7 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
     def get_title_for_object(self, detail_object):
         return '{} {} {} {}'.format(
             gettext_lazy('Review auto accept of credits from'),
-            get_abbreviated_cardholder_names(detail_object),
+            get_abbreviated_cardholder_names(detail_object['debit_card_sender_details']['cardholder_names']),
             gettext_lazy('to'),
             detail_object['prisoner_profile']['prisoner_name']
         )
