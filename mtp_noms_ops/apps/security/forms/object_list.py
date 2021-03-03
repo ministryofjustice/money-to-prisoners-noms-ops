@@ -181,6 +181,7 @@ class AmountSearchFormMixin(forms.Form):
         label=_('Amount'),
         required=False,
         choices=AmountPattern.get_choices(),
+        initial='',
     )
     amount_exact = forms.CharField(
         label=AmountPattern.exact.value,
@@ -275,6 +276,7 @@ class PaymentMethodSearchFormMixin(forms.Form):
         label=_('Payment method'),
         required=False,
         choices=[],
+        initial='',
     )
     account_number = forms.CharField(label=_('Account number'), required=False)
     sort_code = forms.CharField(label=_('Sort code'), required=False)
