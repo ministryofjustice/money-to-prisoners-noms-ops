@@ -11,6 +11,7 @@ import {AsyncLoad} from 'mtp_common/components/async-load';
 import {AutocompleteSelect} from 'mtp_common/components/autocomplete-select';
 import {Card} from 'mtp_common/components/card';
 import {DialogueBox} from 'mtp_common/components/dialogue-box';
+import {HiddenLongText} from 'mtp_common/components/hidden-long-text';
 import {MailcheckWarning} from 'mtp_common/components/mailcheck-warning';
 import {PrintTrigger} from 'mtp_common/components/print-trigger';
 import {TabbedPanel} from 'mtp_common/components/tabbed-panel';
@@ -21,6 +22,7 @@ AsyncLoad.init();
 AutocompleteSelect.init();
 Card.init();
 DialogueBox.init();
+HiddenLongText.init();
 MailcheckWarning.init(
   '.mtp-page-with-staff-email-input input[type=email]',
   ['justice.gov.uk'],

@@ -137,7 +137,7 @@
                   <br/>
                   {% with rejection_reason=disbursement.comments|find_rejection_reason %}
                     <span class="govuk-body-s--secondary">
-                      {{ rejection_reason|truncatewords:5 }}
+                      {{ rejection_reason|hide_long_text:5 }}
                     </span>
                     <br/>
                   {% endwith %}
