@@ -190,6 +190,11 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
     )
+    auto_accept = forms.BooleanField(
+        required=False,
+        label=_('Automatically accept future credits'),  # label is replaced in template
+        help_text=_('They will be flagged in decision history'),
+    )
     auto_accept_reason = forms.CharField(
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['auto_accept_reason'],

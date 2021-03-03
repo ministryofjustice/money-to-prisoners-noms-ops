@@ -192,43 +192,40 @@
         <h2 class="govuk-heading-l">{% trans 'Accept or reject this credit' %}</h2>
         <h3 class="govuk-heading-m">{% trans 'To accept this credit:' %}</h3>
         {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details rows=2 %}
-        <div class="mtp-check-accept-container">
-          {% if unbound_active_auto_accept_state %}
-            <p class="govuk-inset-text">
-              {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
-                Auto accept started for credits from {{sender_name}} to {{prisoner_number}}
-              {% endblocktrans %}
-              <br/>
-              <strong>{% trans 'Started by' %}:</strong>
-              {{ unbound_active_auto_accept_state.added_by.first_name}} {{ unbound_active_auto_accept_state.added_by.last_name}}
-              <br/>
-              <strong>{% trans 'Date' %}:</strong>
-              {{ unbound_active_auto_accept_state.created |date:'SHORT_DATETIME_FORMAT' }}
-              <br/>
-              <strong>{% trans 'Reason for automatically accepting' %}:</strong>
-              {{ unbound_active_auto_accept_state.reason }}
-            </p>
-          {% else %}
-            <div class="multiple-choice govuk-form-group" data-target="auto_accept_reason">
-              <input id="example-auto_accept_reason" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
-              <label for="example-auto_accept_reason">
-                {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
-                  Automatically accept future credits from {{ sender_name }} to {{ prisoner_number }}
-                {% endblocktrans %}
-                <br/>
-                {% trans 'They will be flagged in Decision history.' %}
-              </label>
-            </div>
-            <div class="govuk-inset-text js-hidden" id="auto_accept_reason">
-              <label class="govuk-label" for="rejection-auto_accept_reason">{% trans 'Give reason for automatically accepting' %}</label>
-              <textarea class="govuk-textarea" name="auto_accept_reason" id="rejection-auto_accept_reason" rows="1" disabled></textarea>
-            </div>
-          {% endif %}
-          <br/>
-          <button type="submit" class="govuk-button" data-module="govuk-button" name="fiu_action" value="accept">
-            {% trans 'Accept credit' %}
-          </button>
-        </div>
+        {% if unbound_active_auto_accept_state %}
+
+          <p class="govuk-inset-text">
+            {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
+              Auto accept started for credits from {{sender_name}} to {{prisoner_number}}
+            {% endblocktrans %}
+            <br/>
+            <strong>{% trans 'Started by' %}:</strong>
+            {{ unbound_active_auto_accept_state.added_by.first_name}} {{ unbound_active_auto_accept_state.added_by.last_name}}
+            <br/>
+            <strong>{% trans 'Date' %}:</strong>
+            {{ unbound_active_auto_accept_state.created |date:'SHORT_DATETIME_FORMAT' }}
+            <br/>
+            <strong>{% trans 'Reason for automatically accepting' %}:</strong>
+            {{ unbound_active_auto_accept_state.reason }}
+          </p>
+
+        {% else %}
+
+          {% captureoutput as auto_accept_label %}
+            {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
+              Automatically accept future credits from {{ sender_name }} to {{ prisoner_number }}
+            {% endblocktrans %}
+          {% endcaptureoutput %}
+          {% captureoutput as conditional_content %}
+            {% include 'mtp_common/forms/textarea.html' with field=form.auto_accept_reason rows=1 only %}
+          {% endcaptureoutput %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.auto_accept label=auto_accept_label conditional_content=conditional_content only %}
+
+        {% endif %}
+        <br/>
+        <button type="submit" class="govuk-button" data-module="govuk-button" name="fiu_action" value="accept">
+          {% trans 'Accept credit' %}
+        </button>
 
         <h3 class="govuk-heading-m govuk-!-margin-top-6">{% trans 'To reject this credit:' %}</h3>
         <fieldset class="govuk-fieldset govuk-!-width-three-quarters govuk-!-margin-bottom-6 mtp-form-checkbox-group">
