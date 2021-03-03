@@ -251,7 +251,6 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['prisoner_multiple_payments_payment_sources'],
     )
-    human_readable_names = CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
 
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
@@ -297,10 +296,10 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         return get_api_session(self.request)
 
     def is_reject_reason_populated(self):
-        return any([
+        return any(
             self.cleaned_data.get(rejection_field)
-            for rejection_field in self.human_readable_names.keys()
-        ])
+            for rejection_field in CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
+        )
 
     def clean(self):
         """
@@ -357,7 +356,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                 self.data_payload['rejection_reasons'] = dict(
                     item
                     for item in self.cleaned_data.items()
-                    if item[1] and item[0] in self.human_readable_names.keys()
+                    if item[1] and item[0] in CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
                 )
         return super().clean()
 
