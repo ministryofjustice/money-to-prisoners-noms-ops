@@ -32,9 +32,11 @@ TabbedPanel.init();
 Upload.init();
 
 // app components
+import {CheckboxWithConditionalSubfields} from './components/checkbox-with-conditional-subfields';
 import {ChoosePrisons} from './components/choose-prisons';
 import {FormAnalytics} from './components/form-analytics';
 import {Security} from './components/security';
+CheckboxWithConditionalSubfields.init();
 ChoosePrisons.init();
 FormAnalytics.init();
 Security.init();

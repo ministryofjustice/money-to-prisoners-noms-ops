@@ -198,17 +198,29 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
     )
-    fiu_investigation_id = forms.CharField(
+    has_fiu_investigation_id = forms.BooleanField(
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['fiu_investigation_id'],
     )
-    intelligence_report_id = forms.CharField(
+    fiu_investigation_id = forms.CharField(
+        required=False,
+        label=_('Give FIU reference'),
+    )
+    has_intelligence_report_id = forms.BooleanField(
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['intelligence_report_id'],
     )
-    other_reason = forms.CharField(
+    intelligence_report_id = forms.CharField(
+        required=False,
+        label=_('Give reference'),
+    )
+    has_other_reason = forms.BooleanField(
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['other_reason'],
+    )
+    other_reason = forms.CharField(
+        required=False,
+        label=_('Give the reason'),
     )
     payment_source_paying_multiple_prisoners = forms.BooleanField(
         required=False,
@@ -235,6 +247,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['prisoner_multiple_payments_payment_sources'],
     )
     human_readable_names = CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
+
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
         'reject_with_accept_details': _(
@@ -254,6 +267,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         self.object_id = object_id
         self.need_attention_date = get_need_attention_date()
         self.request = request
+        self.data_payload = None
 
     @lru_cache()
     def get_object(self):
