@@ -169,16 +169,19 @@
                   {% trans 'No decision reason entered' %}
                 {% endif %}
               {% endif %}
-              </td>
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="5">{% trans 'There are no credit decisions matching this debit card or prisoner.' %}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">{% trans 'There are no credit decisions matching this debit card or prisoner.' %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
     <form id="accept-or-reject-form" method="post" action="{% url 'security:resolve_check' check_id=check.id %}#accept-or-reject-form">
       {% csrf_token %}
@@ -294,5 +297,8 @@
       {% endif %}
 
     </form>
+
+    </div>
+  </div>
 
 {% endblock %}
