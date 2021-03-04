@@ -17,7 +17,6 @@ class DashboardView(TemplateView):
             'link_cards': self.get_link_cards(),
             'saved_search_cards': self.get_saved_search_cards(),
             'admin_cards': self.get_admin_cards(),
-            'november_second_changes_live': settings.NOVEMBER_SECOND_CHANGES_LIVE,
         })
         return super().get_context_data(**kwargs)
 

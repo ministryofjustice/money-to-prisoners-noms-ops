@@ -12,31 +12,6 @@
 {% block content %}
   {% notification_banners request 'noms_ops_security_dashboard' %}
 
-  {% if request.can_access_security %}
-    {% if november_second_changes_live %}
-      {% captureoutput as banner_heading %}
-        <a href="{% url 'security:policy_change' %}">
-          {% trans 'Check you’re up to date with recent policy changes' %}
-        </a>
-      {% endcaptureoutput %}
-      {% include 'mtp_common/components/notification-banner.html' with banner_level='info' banner_title='info'|notification_level banner_heading=banner_heading only %}
-    {% else %}
-      {% captureoutput as banner_message %}{% spaceless %}
-        <h3><strong>{% trans 'Credits' %}</strong></h3>
-        <p>{% trans 'Senders will no longer be able to send money by bank transfer or pre-paid card.' %}</p>
-
-        <h3><strong>{% trans 'Disbursements' %}</strong></h3>
-        <p>{% trans 'Prisoners can send out a maximum of £50 a week to up to 5 different people.' %}</p>
-
-        <p><a href="{% url 'security:policy_change' %}">{% trans 'More details about Credit and Disbursement changes' %}</a></p>
-
-        <h3><strong>{% trans 'Prisoner accounts' %}</strong></h3>
-        <p>{% trans 'Credits will not be accepted into a prisoner’s account if it holds £900 or more.' %}</p>
-      {% endspaceless %}{% endcaptureoutput %}
-      {% include 'mtp_common/components/notification-banner.html' with banner_level='info' banner_title='info'|notification_level banner_heading=_('What the Nov 2nd policy changes mean') banner_message=banner_message only %}
-    {% endif %}
-  {% endif %}
-
   <header>
     <h1 class="govuk-heading-xl">
       {% blocktrans trimmed with full_name=request.user.get_full_name|default:request.user.username %}

@@ -5,17 +5,6 @@
 
 {% block content %}
 
-  {% if not view.november_second_changes_live %}
-    {% if not is_search_results %}
-      {% captureoutput as banner_heading %}
-        <a href="{% url 'security:policy_change' %}">
-          {% trans 'No more bank transfers' %}
-        </a>
-      {% endcaptureoutput %}
-      {% include 'mtp_common/components/notification-banner.html' with banner_level='info' banner_title='info'|notification_level banner_heading=banner_heading only %}
-    {% endif %}
-  {% endif %}
-
   <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search mtp-form-analytics" method="get">
 
     <div class="govuk-grid-row">
