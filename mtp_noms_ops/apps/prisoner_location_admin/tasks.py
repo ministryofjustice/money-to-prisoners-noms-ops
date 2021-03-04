@@ -71,7 +71,7 @@ def update_locations(*, user, locations, context: Context):
                 errors += format_errors(json.loads(e.content.decode()))
             except ValueError:
                 errors.append(e.content)
-    except:  # noqa: E722
+    except:  # noqa: E722,B001
         logger.exception('Prisoner locations update by %s failed!' % user_description)
 
     if not errors:
