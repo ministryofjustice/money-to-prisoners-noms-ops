@@ -1,0 +1,8 @@
+// detail pages; i.e. a single credit or disbursement
+
+.mtp-results-detail {
+  .govuk-table td {
+    border-top: 1px solid $govuk-border-colour;
+    border-bottom: 0;
+  }
+}

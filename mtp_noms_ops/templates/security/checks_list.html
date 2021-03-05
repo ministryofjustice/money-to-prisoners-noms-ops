@@ -5,43 +5,19 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
+{% block before_content %}
+  {{ block.super }}
+  {% include 'security/includes/checks-sub-navigation.html' with current_view=view.get_class_name %}
+{% endblock %}
 
-{% block inner_content %}
-  <nav class="moj-sub-navigation" aria-label="{% trans 'Sub navigation' %}">
-    <ul class="moj-sub-navigation__list">
-      <li class="moj-sub-navigation__item">
-        <a class="moj-sub-navigation__link"
-           {% if view.get_class_name == 'CheckListView' %}
-             aria-current="page"
-           {% endif %}
-           href="{% url 'security:check_list' %}">
-            {% trans 'Credits to action' %}
-        </a>
-      </li>
-      <li class="moj-sub-navigation__item">
-        <a class="moj-sub-navigation__link"
-           {% if view.get_class_name == 'MyListCheckView' %}
-             aria-current="page"
-           {% endif %}
-           href="{% url 'security:my_check_list' %}">
-            {% trans 'My list' %} ({{ form.my_list_count }})
-        </a>
-      </li>
-      <li class="moj-sub-navigation__item">
-        <a class="moj-sub-navigation__link" href="{% url 'security:credits_history' %}" >{% trans 'Decision history' %}</a>
-      </li>
-      <li class="moj-sub-navigation__item">
-        <a class="moj-sub-navigation__link" href="{% url 'security:auto_accept_rule_list' %}" >{% trans 'Auto Accepts' %}</a>
-      </li>
-    </ul>
-  </nav>
+{% block content %}
   <header>
-    <h1 class="heading-xlarge">{{ view.title }}</h1>
+    <h1 class="govuk-heading-xl">{{ view.title }}</h1>
   </header>
 
-  {% include 'mtp_common/includes/message_box.html' %}
+  {% notification_banners request %}
 
-  <p class="font-large">
+  <p class="govuk-!-font-size-36">
     {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
       {{ number }} credit
     {% plural %}
@@ -50,7 +26,7 @@
   </p>
 
   {% if form.need_attention_count %}
-    <p class="font-medium">
+    <p class="govuk-body-l">
       <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
       <strong>
         {% blocktrans trimmed count count=form.need_attention_count with number=form.need_attention_count|separate_thousands %}
@@ -65,31 +41,31 @@
     <br />
   {% endif %}
 
-  <div class="mtp-results-list mtp-check-list">
-    <table class="mtp-table table-font-xsmall">
+  <div class="mtp-table__container mtp-results-list">
+    <table class="mtp-table mtp-table--small">
       <thead>
         <tr>
-          <th class="mtp-compact-cell">
-            <span class="visually-hidden">{% trans 'Needs attention?' %}</span>
+          <th class="mtp-table__header--compact" scope="col">
+            <span class="govuk-visually-hidden">{% trans 'Needs attention?' %}</span>
           </th>
-          <th>{% trans 'Date sent' %}</th>
-          <th>{% trans 'Debit card (from)' %}</th>
-          <th>{% trans 'Prisoner (to)' %}</th>
-          <th>{% trans 'Amount' %}</th>
-          <th class="print-hidden">{% trans 'Actions' %}</th>
+          <th scope="col">{% trans 'Date sent' %}</th>
+          <th scope="col">{% trans 'Debit card (from)' %}</th>
+          <th scope="col">{% trans 'Prisoner (to)' %}</th>
+          <th class="govuk-table__header--numeric" scope="col">{% trans 'Amount' %}</th>
+          <th class="govuk-!-display-none-print" scope="col">{% trans 'Actions' %}</th>
         </tr>
       </thead>
       <tbody>
         {% for check in objects %}
         <tr id="check-row-{{ check.id }}" class="mtp-check-row">
-          <td class="mtp-compact-cell">
+          <td class="mtp-table__cell--compact">
             {% if check.needs_attention %}
-              <span class="visually-hidden">
+              <span class="govuk-visually-hidden">
                 {% trans 'This credit needs attention today!' %}
               </span>
               <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
             {% else %}
-              <span class="visually-hidden">
+              <span class="govuk-visually-hidden">
                 {% trans 'This credit does not need attention today.' %}
               </span>
             {% endif %}
@@ -109,12 +85,12 @@
             <br/>
             {{ check.credit.prison_name }}
           </td>
-          <td>
+          <td class="govuk-table__cell--numeric">
             {{ check.credit.amount|currency }}
           </td>
           <td>
             <div class="mtp-check-cell__actions">
-              <a class="button print-hidden" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
+              <a class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="govuk-visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
               {% if view.get_class_name == 'CheckListView' %}
                 <span class="mtp-check-cell__list-status">
                   {% if check.assigned_to == form.request.user.pk %}
@@ -128,11 +104,11 @@
                       {% endblocktrans %}
                     </span>
                   {% else %}
-                    <form class="mtp-check-cell__list-form" action="{% url 'security:assign_check' check_id=check.id current_page=current_page list='list' %}" method="post">
+                    <form class="mtp-check-cell__list-form" action="{% url 'security:assign_check_then_list' check_id=check.id page=form.cleaned_data.page %}" method="post">
                       {% csrf_token %}
-                      <button type="submit" name="assignment" class="button-secondary" value="assign">
+                      <button type="submit" name="assignment" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="assign">
                         {% blocktrans trimmed with credit_to=check.credit.prisoner_name %}
-                          Add <span class="visually-hidden">credit to {{credit_to}}</span> to my list
+                          Add <span class="govuk-visually-hidden">credit to {{credit_to}}</span> to my list
                         {% endblocktrans %}
                       </button>
                     </form>

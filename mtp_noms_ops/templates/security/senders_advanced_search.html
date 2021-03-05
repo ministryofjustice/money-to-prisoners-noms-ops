@@ -2,18 +2,17 @@
 {% load i18n %}
 
 {% block advanced_search_fields %}
-  <div class="heading-large">{% trans 'Payment source details' %}</div>
+  <div class="govuk-heading-l">{% trans 'Payment source details' %}</div>
   <p>
     {% trans 'Name, email and postcode are supplied by the sender when they make a debit card payment.' %}
     {% trans 'They are not validated.' %}
   </p>
   <p>{% trans 'When the sender makes a bank transfer, the bank supplies the name on the bank account.' %}</p>
-  {% include 'mtp_common/forms/field.html' with field=form.sender_name %}
-  {% include 'mtp_common/forms/field.html' with field=form.sender_email %}
-  {% include 'mtp_common/forms/field.html' with field=form.sender_postcode %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_name input_classes='govuk-input--width-20' %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_email input_classes='govuk-input--width-20' %}
+  {% include 'mtp_common/forms/field.html' with field=form.sender_postcode input_classes='govuk-input--width-5' %}
 
-  <div class="heading-large">{% trans 'Payment method' %}</div>
-  {% include 'security/forms/payment-method-fieldset.html' %}
+  {% include 'security/forms/payment-method-fieldset.html' with field=form.payment_method label_classes='govuk-fieldset__legend--m' %}
 
-  {% include 'security/forms/prison-selector-fieldset.html' %}
+  {% include 'security/forms/prison-selector-fieldset.html' with field=form.prison_selector %}
 {% endblock advanced_search_fields %}

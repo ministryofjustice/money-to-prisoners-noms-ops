@@ -8,6 +8,7 @@ from django.utils.http import is_safe_url
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from mtp_common.auth.api_client import get_api_session
+from mtp_common.views import SettingsView
 
 from security import confirmed_prisons_flag, provided_job_info_flag
 from settings.forms import ConfirmPrisonForm, ChangePrisonForm, ALL_PRISONS_CODE, JobInformationForm
@@ -15,19 +16,19 @@ from security.models import EmailNotifications
 from security.utils import save_user_flags, can_skip_confirming_prisons, has_provided_job_information
 
 
-class NomsOpsSettingsView(TemplateView):
-    title = _('Settings')
+class NomsOpsSettingsView(SettingsView):
     template_name = 'settings/settings.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        session = get_api_session(self.request)
-        email_preferences = session.get('/emailpreferences/').json()
-        context['email_notifications'] = email_preferences['frequency'] != EmailNotifications.never
+        if self.request.can_access_security:
+            session = get_api_session(self.request)
+            email_preferences = session.get('/emailpreferences/').json()
+            context['email_notifications'] = email_preferences['frequency'] != EmailNotifications.never
         return context
 
     def post(self, *args, **kwargs):
-        if 'email_notifications' in self.request.POST:
+        if self.request.can_access_security and 'email_notifications' in self.request.POST:
             session = get_api_session(self.request)
             if self.request.POST['email_notifications'] == 'True':
                 session.post('/emailpreferences/', json={'frequency': EmailNotifications.daily})
@@ -58,7 +59,7 @@ class ConfirmPrisonsView(FormView):
         query_dict = self.request.GET.copy()
         query_dict['prisons'] = selected_prisons
         context['change_prison_query'] = urlencode(query_dict, doseq=True)
-        context['can_navigate_away'] = can_skip_confirming_prisons(self.request.user)
+        self.request.cannot_navigate_away = not can_skip_confirming_prisons(self.request.user)
         return context
 
     def get_form_kwargs(self):
@@ -112,7 +113,6 @@ class ChangePrisonsView(SuccessURLAllowedHostsMixin, FormView):
         context['current_prisons'] = ','.join([
             p['nomis_id'] for p in self.request.user.user_data['prisons']
         ] if self.request.user.user_data.get('prisons') else ['ALL'])
-        context['can_navigate_away'] = True
         return context
 
     def get_form_kwargs(self):
@@ -134,7 +134,7 @@ class AddOrRemovePrisonsView(ChangePrisonsView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['can_navigate_away'] = can_skip_confirming_prisons(self.request.user)
+        self.request.cannot_navigate_away = not can_skip_confirming_prisons(self.request.user)
         return context
 
     def form_valid(self, form):
@@ -158,6 +158,10 @@ class JobInformationView(SuccessURLAllowedHostsMixin, FormView):
     title = _('Help us improve this service')
     template_name = 'settings/job-information.html'
     form_class = JobInformationForm
+
+    def dispatch(self, request, *args, **kwargs):
+        request.cannot_navigate_away = True
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         if REDIRECT_FIELD_NAME in self.request.GET:

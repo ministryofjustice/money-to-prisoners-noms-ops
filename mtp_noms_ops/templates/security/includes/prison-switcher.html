@@ -1,0 +1,11 @@
+{% load i18n %}
+
+<div class="mtp-prison-switcher govuk-!-display-none-print">
+  <div class="mtp-prison-switcher__prison-names">
+    {% include 'security/includes/user-prison-names-ellipsis.html' %}
+  </div>
+
+  <div class="mtp-prison-switcher__change-link">
+    <a href="{% url 'change_prisons' %}?{{ REDIRECT_FIELD_NAME }}={{ request.path|urlencode }}?{{ request.GET.urlencode|urlencode }}">{% trans 'Change' %}</a>
+  </div>
+</div>

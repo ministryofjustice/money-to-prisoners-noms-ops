@@ -4,94 +4,65 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
-{% block proposition_extra %}
-  {% if can_navigate_away %}
-    {{ block.super }}
-  {% else %}
-    <nav id="mtp-proposition-extra" class="column-full print-hidden"></nav>
-  {% endif %}
-{% endblock %}
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
-{% block inner_content %}
-
-  {% if prison_choice_available %}
-    <header>
-      <h1 class="heading-xlarge mtp-slim-heading">{{ view.title }}</h1>
-    </header>
-
-    <div class="grid-row">
-      <div class="column-two-thirds">
+      {% if prison_choice_available %}
+        <header>
+          <h1 class="govuk-heading-xl">{{ view.title }}</h1>
+        </header>
 
         <form method="post" class="mtp-confirm-prison">
           {% csrf_token %}
 
-          {% if form.errors %}
-            <div class="error-summary" aria-labelledby="error-summary-heading" tabindex="-1" role="alert">
-              <h2 class="heading-medium error-summary-heading" id="error-summary-heading">
-                {% trans 'There is a problem' %}
-              </h2>
-              <ul class="error-summary-list">
-                {% get_form_errors form as errors %}
-
-                {% for error in errors.non_field %}
-                  <li class="non-field-error">{{ error }}<span class="visually-hidden">.</span></li>
-                {% endfor %}
-
-                {% for field, field_errors in errors.field_specific.items %}
-                  {% for field_error in field_errors %}
-                    <li class="field-specific-error">
-                      <a href="#{{ field.id_for_label }}-label">{{ field_error }}<span class="visually-hidden">.</span></a>
-                    </li>
-                  {% endfor %}
-                {% endfor %}
-              </ul>
-            </div>
-          {% endif %}
+          {% include 'govuk-frontend/components/error-summary.html' %}
 
           {% if form.all_prisons_code in form.prisons.initial %}
             <div class="mtp-info-box">
               <div class="mtp-info-box__heading">{% trans 'The data you see will be more useful if you confirm prisons relevant to you' %}</div>
-              <br/>
-              <div>
-                {% trans 'If you’re happy with ‘All prisons’, click ‘Confirm prisons’.' %}
-              </div>
-                <br/>
-              <div>
-                {% trans 'If not, click ‘Add or remove prisons’.' %}
+              <div class="mtp-info-box__contents">
+                <p>
+                  {% trans 'If you’re happy with ‘All prisons’, click ‘Confirm prisons’.' %}
+                </p>
+                <p>
+                  {% trans 'If not, click ‘Add or remove prisons’.' %}
+                </p>
               </div>
             </div>
           {% endif %}
 
-          <div class="mtp-prison-list">
+          <ul class="govuk-list mtp-prison-list">
             {% for prison, label in form.selected_prisons %}
-              <div class="mtp-prison-row">
+              <li>
                 <strong>{{ label }}</strong>
-              </div>
+              </li>
             {% endfor %}
-          </div>
+          </ul>
 
-          <span class="hidden">
+          <span class="govuk-!-display-none">
             {{ form.prisons }}
           </span>
-          <div class="form-group">
-            <button type="submit" name="submit_confirm" class="button" data-current-prisons="{{ current_prisons }}">
-              {% trans 'Confirm prisons' %}
-            </button>
-          </div>
+
+          <button type="submit" name="submit_confirm" class="govuk-button" data-module="govuk-button" data-current-prisons="{{ current_prisons }}">
+            {% trans 'Confirm prisons' %}
+          </button>
         </form>
 
-        <div>
-          <a class="mtp-ignore-visited" href="{% url 'confirm_prisons_add_remove' %}?{{ change_prison_query }}">
+        <p>
+          <a class="govuk-link--no-visited-state" href="{% url 'confirm_prisons_add_remove' %}?{{ change_prison_query }}">
             {% trans 'Add or remove prisons ' %}
           </a>
-        </div>
+        </p>
 
-      </div>
+      {% else %}
+
+        <header>
+          <h1 class="govuk-heading-l">{% trans 'You cannot choose your prisons at this time' %}</h1>
+        </header>
+
+      {% endif %}
+
     </div>
-  {% else %}
-    <header>
-      <h1 class="heading-large">{% trans 'You cannot choose your prisons at this time' %}</h1>
-    </header>
-  {% endif %}
-
+  </div>
 {% endblock %}

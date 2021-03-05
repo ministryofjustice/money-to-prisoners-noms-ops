@@ -9,9 +9,6 @@
   {{ block.super }}
 
   {% if not is_advanced_search_results and not is_all_prisons_simple_search_results %}
-    {% include "security/forms/prison-switcher.html" %}
+    {% include 'security/includes/prison-switcher.html' %}
   {% endif %}
 {% endblock %}
-
-{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
-{% block body_classes %}{{ block.super }} {% if not view.no_spaced_header %}mtp-with-spaced-header{% endif %}{% endblock body_classes %}

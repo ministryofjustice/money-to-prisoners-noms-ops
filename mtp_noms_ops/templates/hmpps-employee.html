@@ -4,20 +4,15 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
-{% block proposition_extra %}
-  <nav id="mtp-proposition-extra" class="column-full print-hidden"></nav>
-{% endblock %}
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
-{% block inner_content %}
+      <header>
+        <h1 class="govuk-heading-xl">{{ view.title }}</h1>
+      </header>
 
-  <header>
-    <h1 class="heading-xlarge">{{ view.title }}</h1>
-  </header>
-
-  {% include 'mtp_common/includes/message_box.html' %}
-
-  <div class="grid-row">
-    <div class="column-two-thirds">
+      {% notification_banners request %}
 
       <p>
         {% blocktrans trimmed with job_title=_('direct employee of HMPPS or a contracted prison and working in an intelligence function')|wrapwithtag:'strong' %}
@@ -28,37 +23,19 @@
 
       <form method="post">
         {% csrf_token %}
-        {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+        {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
         {% with field=form.next %}
           <input type="hidden" name="{{ field.html_name }}" value="{{ field.value|default:field.field.initial|default:'' }}" />
         {% endwith %}
 
-        {% with field=form.confirmation choices=form.confirmation.field.choices %}
-          <fieldset>
-            <legend id="{{ field.id_for_label }}-label">
-              <strong>{{ field.label }}</strong>
-            </legend>
+        {% include 'mtp_common/forms/radio-field.html' with field=form.confirmation label_classes='govuk-fieldset__legend--s' only %}
 
-            <div class="form-group {% if field.errors %}form-group-error{% endif %}">
-              {% for value, label in choices %}
-                <div class="multiple-choice">
-                  <input id="{{ field.html_name }}-{{ value }}" type="radio" name="{{ field.html_name }}" value="{{ value }}">
-                  <label for="{{ field.html_name }}-{{ value }}">{{ label }}</label>
-                </div>
-              {% endfor %}
-            </div>
-          </fieldset>
-        {% endwith %}
-
-        <div class="form-group">
-          <button type="submit" class="button">
-            {% trans 'Next' %}
-          </button>
-        </div>
+        <button type="submit" class="govuk-button" data-module="govuk-button">
+          {% trans 'Next' %}
+        </button>
       </form>
 
     </div>
   </div>
-
 {% endblock %}

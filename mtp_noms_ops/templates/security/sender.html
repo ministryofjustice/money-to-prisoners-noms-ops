@@ -5,97 +5,109 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
-{% block inner_content %}
-  <div class="mtp-sender-summary {% if sender.bank_transfer_details %}mtp-sender-summary__bank-transfer{% elif sender.debit_card_details %}mtp-sender-summary__debit-card{% endif %}">
-    <header>
-      <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
-    </header>
-
-    {% if sender.bank_transfer_details %}
-      <p class="lede">
-        {% trans 'Bank transfer payments with these details' %}
-      </p>
-
-      <div class="grid-row mtp-sender-summary__details">
-        <div class="column-one-third">
-          {% labelled_data _('Account number') sender.bank_transfer_details.0.sender_account_number|default:'—' tag='strong' %}
-        </div>
-
-        <div class="column-one-third">
-          {% labelled_data _('Sort code') sender.bank_transfer_details.0.sender_sort_code|format_sort_code tag='strong' %}
-        </div>
-
-        {% if sender.bank_transfer_details.0.sender_roll_number %}
-          <div class="column-one-third">
-            {% labelled_data _('Roll number (for building societies)') sender.bank_transfer_details.0.sender_roll_number tag='strong' %}
-          </div>
+{% block content %}
+  <div class="mtp-results-profile mtp-results-profile--sender mtp-results-profile--sender--{% if sender.bank_transfer_details %}bank_transfer{% elif sender.debit_card_details %}online{% else %}unknown{% endif %}">
+    <div class="mtp-results-profile__icon govuk-!-margin-right-5">
+      <span class="govuk-visually-hidden">
+        {% if sender.bank_transfer_details %}
+          {% trans 'Bank account' %}
+        {% elif sender.debit_card_details %}
+          {% trans 'Debit card' %}
+        {% else %}
+          {% trans 'Unknown payment source' %}
         {% endif %}
-      </div>
+      </span>
+    </div>
 
-    {% elif sender.debit_card_details %}
-      <p class="lede">
-        {% trans 'Debit card payments with these details' %}
-        &nbsp;
-        <a href="#grouping-info-dialogue" class="js-dialogue-open">{% trans 'How are these grouped?' %}</a>
-      </p>
+    <div class="mtp-results-profile__summary">
+      <header>
+        <h1 class="govuk-heading-xl govuk-!-margin-bottom-1">{{ view.title }}</h1>
+      </header>
 
-      <div class="grid-row mtp-sender-summary__details">
-        <div class="column-one-third">
-          {% labelled_data _('Debit card number') sender.debit_card_details.0|format_card_number tag='strong' %}
+      {% if sender.bank_transfer_details %}
+        <p class="govuk-body-l govuk-!-margin-bottom-3">
+          {% trans 'Bank transfer payments with these details' %}
+        </p>
+
+        <div class="govuk-grid-row govuk-!-margin-top-6 govuk-!-margin-bottom-3">
+          <div class="mtp-results-profile__label govuk-grid-column-one-third">
+            {% labelled_data _('Account number') sender.bank_transfer_details.0.sender_account_number|default:'—' tag='strong' %}
+          </div>
+
+          <div class="mtp-results-profile__label govuk-grid-column-one-third">
+            {% labelled_data _('Sort code') sender.bank_transfer_details.0.sender_sort_code|format_sort_code tag='strong' %}
+          </div>
+
+          {% if sender.bank_transfer_details.0.sender_roll_number %}
+            <div class="mtp-results-profile__label govuk-grid-column-one-third">
+              {% labelled_data _('Roll number (for building societies)') sender.bank_transfer_details.0.sender_roll_number tag='strong' %}
+            </div>
+          {% endif %}
         </div>
 
-        <div class="column-one-quarter">
-          {% labelled_data _('Expiry date') sender.debit_card_details.0.card_expiry_date|default_if_none:'—' tag='strong' %}
+      {% elif sender.debit_card_details %}
+        <p class="govuk-body-l govuk-!-margin-bottom-3">
+          {% trans 'Debit card payments with these details' %}
+          &nbsp;
+          <a href="#grouping-info-dialogue" class="mtp-dialogue__open-trigger-link">{% trans 'How are these grouped?' %}</a>
+        </p>
+
+        <div class="govuk-grid-row govuk-!-margin-top-6 govuk-!-margin-bottom-3">
+          <div class="mtp-results-profile__label govuk-grid-column-one-half">
+            {% labelled_data _('Debit card number') sender.debit_card_details.0|format_card_number tag='strong' %}
+          </div>
+
+          <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
+            {% labelled_data _('Expiry date') sender.debit_card_details.0.card_expiry_date|default_if_none:'—' tag='strong' %}
+          </div>
+
+          <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
+            {% labelled_data _('Postcode') sender.debit_card_details.0.postcode|postcode|default_if_none:'—' tag='strong' %}
+          </div>
         </div>
 
-        <div class="column-one-quarter">
-          {% labelled_data _('Postcode') sender.debit_card_details.0.postcode|postcode|default_if_none:'—' tag='strong' %}
-        </div>
-      </div>
+      {% else %}
 
-    {% else %}
+        <p class="govuk-body-l govuk-!-margin-bottom-3">—</p>
 
-      <p>—</p>
+      {% endif %}
 
-    {% endif %}
-
-    <div class="grid-row mtp-sender-summary__details">
-      <div class="column-two-thirds">
-        <div class="column-one-third col-1">
+      <div class="govuk-grid-row govuk-!-margin-bottom-3">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Credits sent') sender.credit_count tag='strong' %}
         </div>
 
-        <div class="column-one-third">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Prisoners') sender.prisoner_count tag='strong' %}
         </div>
 
-        <div class="column-one-third">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Prisons') sender.prison_count tag='strong' %}
+        </div>
+
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
+          {% labelled_data _('Total amount sent') sender.credit_total|currency tag='strong' %}
         </div>
       </div>
 
-      <div class="column-one-third">
-        {% labelled_data _('Total amount sent') sender.credit_total|currency tag='strong' %}
-      </div>
+      {% include 'security/includes/monitor-button.html' with form=form pin_label=_('Monitor this sender on your home page') unpin_label=_('Stop monitoring this sender') only %}
     </div>
-
-    {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this sender on your home page') unpin_label=_('Stop monitoring this sender') only %}
   </div>
 
-  <form class="js-FormAnalytics" method="get">
-    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+  <form class="mtp-form-analytics" method="get">
+    {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
     {% if form.is_valid %}
-      <div class="mtp-results-list">
-        <h2 class="heading-large">{% trans 'Credits sent' %}</h2>
+      <div class="mtp-table__container mtp-results-list">
+        <h2 class="govuk-heading-l">{% trans 'Credits sent' %}</h2>
 
-        <div class="panel panel-border-narrow">
-          <p class="mtp-search-description--aside">
+        <div class="mtp-results-list-actions govuk-inset-text">
+          <p class="mtp-results-list-actions__description">
             {{ form.search_description.description }}
           </p>
 
-          <div class="print-hidden mtp-links">
-            <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+          <div class="mtp-results-list-actions__links govuk-!-display-none-print">
+            <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
             &nbsp;
             {% url 'security:sender_detail_export' sender_id=sender.id as export_view %}
             {% url 'security:sender_detail_email_export' sender_id=sender.id as email_export_view %}
@@ -103,8 +115,8 @@
           </div>
         </div>
 
-        <table class="mtp-table table-font-xsmall">
-          <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+        <table class="mtp-table mtp-table--small">
+          <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
               {% include 'security/includes/credit-header-row.html' with link_prisoner=True %}
@@ -147,7 +159,7 @@
       {% trans 'In almost all cases, this results in one specific card and cardholder.' %}
       {% trans 'But, for the avoidance of doubt, we’ve listed details for each transaction below.' %}
     </p>
-    <button type="button" class="button {{ dialogue_close_class }}">{% trans 'OK' %}</button>
+    <button type="button" class="govuk-button {{ dialogue_close_class }}" data-module="govuk-button">{% trans 'OK' %}</button>
   {% enddialoguebox %}
 
 {% endblock %}

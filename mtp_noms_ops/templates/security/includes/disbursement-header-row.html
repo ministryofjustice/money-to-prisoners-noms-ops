@@ -6,15 +6,15 @@
 {% if link_prisoner %}
   {% sortable_cell _('Prisoner (from)') form.cleaned_data 'prisoner_number' %}
 {% else %}
-  <th>
+  <th scope="col">
     {% trans 'Prisoner (from)' %}
   </th>
 {% endif %}
 
-<th>{% trans 'Recipient (to)' %}</th>
+<th scope="col">{% trans 'Recipient (to)' %}</th>
 
-<th>{% trans 'Prison' %}</th>
+<th scope="col">{% trans 'Prison' %}</th>
 
-{% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
+{% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
 
-<th class="numeric">{% trans 'Details' %}</th>
+<th class="govuk-table__header--numeric" scope="col">{% trans 'Details' %}</th>

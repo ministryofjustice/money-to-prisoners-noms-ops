@@ -1,0 +1,14 @@
+%mtp-text-with-tick {
+  display: inline-block;
+
+  &::before {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-top: -5px;
+    vertical-align: middle;
+    content: '';
+    background: mtp-static-url('images/icon-tick.png') no-repeat;
+    background-image: none, mtp-static-url('images/icon-tick.svg');
+  }
+}

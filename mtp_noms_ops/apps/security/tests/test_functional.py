@@ -27,7 +27,7 @@ class SecurityDashboardTestCase(FunctionalTestCase):
         self.driver.find_element_by_xpath('//button[@type="submit"]').click()
 
     def click_on_nav_tab(self, tab_name):
-        container_element = self.driver.find_element_by_id('mtp-proposition-tabs')
+        container_element = self.driver.find_element_by_css_selector('.mtp-header-app-links')
         tab_element = container_element.find_element_by_link_text(tab_name)
         tab_element.click()
 
@@ -89,12 +89,12 @@ class SecurityCreditSearchTests(SecurityDashboardTestCase):
         amount_pattern = self.get_element('id_amount_pattern')
         amount_pattern.find_element_by_xpath('//option[text()="Not a multiple of £5"]').click()
         self.click_on_submit()
-        search_description = self.get_element('.lede')
+        search_description = self.get_element('.govuk-body-l')
         self.assertIn('Below are credits sent that are not a multiple of £5, ordered by received date',
                       search_description.text)
 
         self.get_element('.mtp-results-list th:nth-child(5) a').click()
-        search_description = self.get_element('.lede')
+        search_description = self.get_element('.govuk-body-l')
         self.assertIn('Below are credits sent that are not a multiple of £5, ordered by amount sent (low to high)',
                       search_description.text)
 

@@ -3,23 +3,21 @@
 {% load mtp_common %}
 {% load security %}
 
-{% block inner_content %}
-  <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search js-FormAnalytics" method="get">
+{% block content %}
+  <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search mtp-form-analytics" method="get">
 
-    <div class="grid-row">
-        <div class="column-two-thirds">
-          {% include 'security/forms/top-area-object-list.html' %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        {% url 'security:sender_advanced_search' as advanced_search_url %}
+        {% include 'security/forms/top-area-object-list.html' %}
+      </div>
 
-          {% if not is_search_results %}
-          <a href="{% url 'security:sender_advanced_search' %}">{% trans 'Advanced search' %}</a>
-          {% endif %}
-        </div>
-
-        <div class="column-one-third print-hidden">
-          <div class="mtp-info-box">
-            <div class="mtp-info-box__heading">
-              {% trans 'About payment source data' %}
-            </div>
+      <div class="govuk-grid-column-one-third govuk-!-display-none-print">
+        <aside class="mtp-info-box">
+          <div class="mtp-info-box__heading">
+            {% trans 'About payment source data' %}
+          </div>
+          <div class="mtp-info-box__contents">
             <p>
               {% trans 'One sender using many cards displays as many payment sources.' %}
             </p>
@@ -27,34 +25,37 @@
               {% trans "We can’t check names match their cards, we can’t match senders by name to different cards and we can’t check if email addresses are real." %}
             </p>
           </div>
-        </div>
+        </aside>
+      </div>
     </div>
 
     {% if form.is_valid and senders %}{% setup_highlight %}
-      <div class="mtp-results-list">
-        <div class="print-hidden mtp-links--no-panel">
-          <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
-          &nbsp;
-          {% url 'security:sender_export' as export_view %}
-          {% url 'security:sender_email_export' as email_export_view %}
-          {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many payment sources to download.') %}
+      <div class="mtp-table__container mtp-results-list">
+        <div class="mtp-results-list-actions">
+          <div class="mtp-results-list-actions__links govuk-!-display-none-print">
+            <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+            &nbsp;
+            {% url 'security:sender_export' as export_view %}
+            {% url 'security:sender_email_export' as email_export_view %}
+            {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many payment sources to download.') %}
+          </div>
         </div>
 
-        <table class="mtp-table table-font-xsmall">
-          <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+        <table class="mtp-table mtp-table--small">
+          <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
-              <th>{% trans 'Payment source' %}</th>
-              <th>{% trans 'Payment method' %}</th>
-              {% sortable_cell _('Number of credits sent') form.cleaned_data 'credit_count' cell_classes='numeric' %}
-              {% sortable_cell _('Prisoners sent to') form.cleaned_data 'prisoner_count' cell_classes='numeric' %}
+              <th scope="col">{% trans 'Payment source' %}</th>
+              <th scope="col">{% trans 'Payment method' %}</th>
+              {% sortable_cell _('Number of credits sent') form.cleaned_data 'credit_count' cell_classes='govuk-table__header--numeric' %}
+              {% sortable_cell _('Prisoners sent to') form.cleaned_data 'prisoner_count' cell_classes='govuk-table__header--numeric' %}
               {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-              <th>{% trans 'Prisons sent to' %}</th>
+                <th scope="col">{% trans 'Prisons sent to' %}</th>
               {% else %}
-              {% sortable_cell _('Number of prisons sent to') form.cleaned_data 'prison_count' cell_classes='numeric' %}
+                {% sortable_cell _('Number of prisons sent to') form.cleaned_data 'prison_count' cell_classes='govuk-table__header--numeric' %}
               {% endif %}
-              {% sortable_cell _('Total amount sent') form.cleaned_data 'credit_total' cell_classes='numeric' %}
-              <th class="numeric print-hidden">{% trans 'Details' %}</th>
+              {% sortable_cell _('Total amount sent') form.cleaned_data 'credit_total' cell_classes='govuk-table__header--numeric' %}
+              <th class="govuk-table__header--numeric govuk-!-display-none-print" scope="col">{% trans 'Details' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -108,12 +109,12 @@
                       -
                     {% endif %}
                     </td>
-                    <td class="numeric">
+                    <td class="govuk-table__cell--numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.credit_count }}
                       </span>
                     </td>
-                    <td class="numeric">
+                    <td class="govuk-table__cell--numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.prisoner_count }}
                       </span>
@@ -130,18 +131,18 @@
                       {% endif %}
                     </td>
                     {% else %}
-                    <td class="numeric">
+                    <td class="govuk-table__cell--numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.prison_count }}
                       </span>
                     </td>
                     {% endif %}
-                    <td class="numeric">
+                    <td class="govuk-table__cell--numeric">
                       <span class="mtp-sortable-cell--pad">
                         {{ sender.credit_total|currency }}
                       </span>
                     </td>
-                    <td class="numeric print-hidden">
+                    <td class="govuk-table__cell--numeric govuk-!-display-none-print">
                       <a href="{% url 'security:sender_detail' sender.id %}" title="{% trans 'View payment source details' %}">
                         {% trans 'View details' %}
                       </a>
@@ -170,13 +171,13 @@
   {% if is_search_results %}
     <p>
     {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="button print-hidden">{% trans 'Start new search' %}</a>
+      <a href="{{ search_form_item.url }}" class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button">{% trans 'Start new search' %}</a>
     {% endwith%}
     </p>
 
     {% if all_prisons_simple_search_link %}
     <p>
-      <a href="{{ all_prisons_simple_search_link }}" class="print-hidden js-FormAnalytics-click" data-click-track="all-prisons-simple-search,senders">
+      <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print mtp-form-analytics__click" data-click-track="all-prisons-simple-search,senders">
         {% trans 'See results from all prisons' %}
       </a>
     </p>

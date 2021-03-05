@@ -1,0 +1,31 @@
+{% extends 'govuk-frontend/components/footer.html' %}
+{% load i18n %}
+
+
+{% block footer_support_links %}
+  <h2 class="govuk-visually-hidden">
+    {% trans 'Support links' %}
+  </h2>
+  <ul class="govuk-footer__inline-list">
+    <li class="govuk-footer__inline-list-item">
+      <a class="govuk-footer__link" href="{% url 'submit_ticket' %}">
+        {% trans 'Help and feedback' %}
+      </a>
+    </li>
+    <li class="govuk-footer__inline-list-item">
+      {% trans 'Built by' %}
+      <a class="govuk-footer__link" href="https://mojdigital.blog.gov.uk/">
+        <abbr title="{% trans 'Ministry of Justice' %}">MOJ</abbr> Digital
+      </a>
+    </li>
+  </ul>
+{% endblock %}
+
+
+{% block footer_licence %}
+  <span class="govuk-footer__licence-description">
+    <strong class="mtp-footer__official-sensitive">OFFICIAL SENSITIVE</strong>
+    —
+    {% trans 'Permission is required to share this content with individuals who are not direct employees of HMPPS working in an intelligence function' %}.
+  </span>
+{% endblock %}

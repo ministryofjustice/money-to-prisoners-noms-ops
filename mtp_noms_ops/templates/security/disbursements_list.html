@@ -2,62 +2,59 @@
 {% load i18n %}
 {% load mtp_common %}
 {% load security %}
-{% load static %}
 
-{% block inner_content %}
-
-  {% static 'downloads/apply-to-send-out-more-than-50.pdf' as form_link %}
+{% block content %}
 
   {% if not view.november_second_changes_live %}
     {% if not is_search_results %}
-      <div class="mtp-notification mtp-notification--info mtp-notification--open">
-        <h2 class="mtp-notification__headline">
-          <a href="{% url 'security:policy_change' %}">{% trans 'How the cap on disbursements works' %}</a>
-        </h2>
-      </div>
+      {% captureoutput as banner_heading %}
+        <a href="{% url 'security:policy_change' %}">
+          {% trans 'How the cap on disbursements works' %}
+        </a>
+      {% endcaptureoutput %}
+      {% include 'mtp_common/components/notification-banner.html' with banner_level='info' banner_title='info'|notification_level banner_heading=banner_heading only %}
     {% endif %}
   {% endif %}
 
-  <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search js-FormAnalytics" method="get">
+  <form id="simple-search-{{ view.object_name_plural|slugify }}" class="mtp-security-search mtp-form-analytics" method="get">
 
-    <div class="grid-row">
-        <div class="column-two-thirds">
-          {% include 'security/forms/top-area-object-list.html' %}
-
-          {% if not is_search_results %}
-          <a href="{% url 'security:disbursement_advanced_search' %}">{% trans 'Advanced search' %}</a>
-          {% endif %}
-        </div>
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        {% url 'security:disbursement_advanced_search' as advanced_search_url %}
+        {% include 'security/forms/top-area-object-list.html' %}
+      </div>
     </div>
 
     {% if form.is_valid and disbursements %}{% setup_highlight %}
-      <div class="mtp-results-list">
-        <div class="print-hidden mtp-links--no-panel">
-          <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
-          &nbsp;
-          {% url 'security:disbursement_export' as export_view %}
-          {% url 'security:disbursement_email_export' as email_export_view %}
-          {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many disbursements to download.') %}
+      <div class="mtp-table__container mtp-results-list">
+        <div class="mtp-results-list-actions">
+          <div class="mtp-results-list-actions__links govuk-!-display-none-print">
+            <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+            &nbsp;
+            {% url 'security:disbursement_export' as export_view %}
+            {% url 'security:disbursement_email_export' as email_export_view %}
+            {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many disbursements to download.') %}
+          </div>
         </div>
 
-        <table class="mtp-table table-font-xsmall">
-          <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+        <table class="mtp-table mtp-table--small">
+          <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
           <thead>
             <tr>
               {% sortable_cell _('Date entered') form.cleaned_data 'created' %}
-              <th>{% trans 'Prisoner (from)' %}</th>
-              <th>{% trans 'Recipient (to)' %}</th>
+              <th scope="col">{% trans 'Prisoner (from)' %}</th>
+              <th scope="col">{% trans 'Recipient (to)' %}</th>
               {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-              <th>{% trans 'Prison' %}</th>
+                <th scope="col">{% trans 'Prison' %}</th>
               {% endif %}
-              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='numeric' %}
-              <th class="numeric">{% trans 'Details' %}</th>
+              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
+              <th class="govuk-table__header--numeric" scope="col">{% trans 'Details' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for disbursement in disbursements %}
               <tr>
-                <td class="mtp-numeric-left">
+                <td class="mtp-table__cell--numeric-left">
                   {{ disbursement.created|date:'j F Y' }}
                 </td>
 
@@ -77,16 +74,16 @@
                 <td>{{ disbursement.prison_name }}</td>
                 {% endif %}
 
-                <td class="numeric">
+                <td class="govuk-table__cell--numeric">
                   <span class="mtp-sortable-cell--pad">
                     {{ disbursement.amount|currency }}
                   </span>
                 </td>
 
-                <td class="numeric">
+                <td class="govuk-table__cell--numeric">
                   {{ disbursement.resolution|format_disbursement_resolution }}
                   <br />
-                  <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="print-hidden">
+                  <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="govuk-!-display-none-print">
                     {% trans 'View details' %}
                   </a>
                 </td>
@@ -112,13 +109,13 @@
   {% if is_search_results %}
     <p>
     {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="button print-hidden">{% trans 'Start new search' %}</a>
+      <a href="{{ search_form_item.url }}" class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button">{% trans 'Start new search' %}</a>
     {% endwith%}
     </p>
 
     {% if all_prisons_simple_search_link %}
     <p>
-      <a href="{{ all_prisons_simple_search_link }}" class="print-hidden js-FormAnalytics-click" data-click-track="all-prisons-simple-search,disbursements">
+      <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print mtp-form-analytics__click" data-click-track="all-prisons-simple-search,disbursements">
         {% trans 'See results from all prisons' %}
       </a>
     </p>

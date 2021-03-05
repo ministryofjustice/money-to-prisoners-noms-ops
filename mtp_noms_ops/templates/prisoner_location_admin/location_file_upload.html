@@ -4,46 +4,39 @@
 
 {% block page_title %}{% trans 'Upload prisoner location file' %} – {{ block.super }}{% endblock %}
 
-{% block inner_content %}
-<header>
-  <h1 class="heading-xlarge">{% trans 'Upload prisoner location file' %}</h1>
-</header>
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
-{% include 'mtp_common/includes/message_box.html' %}
+      <header>
+        <h1 class="govuk-heading-xl">{% trans 'Upload prisoner location file' %}</h1>
+      </header>
 
-<form action="{% url 'location_file_upload' %}"
-      method="post"
-      enctype="multipart/form-data"
-      class="upload-form">
-  {% csrf_token %}
+      {% notification_banners request %}
 
-  {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+      <form action="{% url 'location_file_upload' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
 
-  <div class="form-group">
-    {% trans 'Run the ‘Electronic Credits and Prisoner Establishment Locations’ report in P-NOMIS, then upload the file on this page in CSV format (.csv)' %}
-  </div>
+        {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
-  <div class="panel panel-border-wide">
-    <p>
-      {% blocktrans trimmed %}
-        Ensure you use the full report <strong>including the private estate</strong>.
-      {% endblocktrans %}
-    </p>
-    <p>{% trans 'Please note the uploaded prisoner locations will replace all those currently stored in the system.' %}</p>
-  </div>
+        <p>
+          {% trans 'Run the ‘Electronic Credits and Prisoner Establishment Locations’ report in P-NOMIS, then upload the file on this page in CSV format (.csv)' %}
+        </p>
 
-  {% with field=form.location_file %}
-    <div class="form-group {% if field.errors %}form-group-error{% endif %}">
-      {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-      <span class="upload-filename"></span><label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="upload-choose button-secondary">{% trans 'Choose file' %}</label>
-      {{ field }}
+        <div class="govuk-inset-text">
+          <p>
+            {% blocktrans trimmed %}
+              Ensure you use the full report <strong>including the private estate</strong>.
+            {% endblocktrans %}
+          </p>
+          <p>{% trans 'Please note the uploaded prisoner locations will replace all those currently stored in the system.' %}</p>
+        </div>
+
+        {% include 'mtp_common/forms/file-field.html' with field=form.location_file %}
+
+        <input type="submit" value="{% trans 'Upload file' %}" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true" />
+      </form>
+
     </div>
-  {% endwith %}
-
-  <div class="form-group upload-control">
-    <input type="submit" value="{% trans 'Upload file' %}" class="button js-DisableOnSubmit" />
   </div>
-  <p class="upload-otherfilelink"><a href=".">{% trans 'Upload another file' %}</a></p>
-</form>
-
 {% endblock %}

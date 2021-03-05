@@ -1,0 +1,35 @@
+{% load i18n %}
+
+<div id="{{ field.id_for_label }}-wrapper" class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
+  <fieldset class="govuk-fieldset" {% if field.help_text %}aria-describedby="{{ field.id_for_label }}-hint"{% endif %}>
+    <legend id="{{ field.id_for_label }}-label" class="govuk-fieldset__legend {{ label_classes|default:'govuk-fieldset__legend--l' }}">
+      {{ field.label }}
+    </legend>
+    {% include 'mtp_common/forms/field-help-text.html' with field=field only %}
+    {% include 'mtp_common/forms/field-errors.html' with field=field only %}
+
+    <div class="govuk-radios govuk-radios--conditional" data-module="govuk-radios">
+      {% with initial=field.value|default:field.field.initial %}
+        {% for choice, label in field.field.choices %}
+
+          {% block radio_item %}
+
+            {% with choice_slug=choice|slugify %}
+              <div class="govuk-radios__item">
+                <input id="{{ field.id_for_label }}-{{ choice_slug }}" class="govuk-radios__input" type="radio" name="{{ field.html_name }}" value="{{ choice }}" {% if choice == initial %}checked{% endif %} data-aria-controls="{{ field.id_for_label }}-{{ choice_slug }}-conditional" />
+                <label for="{{ field.id_for_label }}-{{ choice_slug }}" id="{{ field.id_for_label }}-{{ choice_slug }}-label" class="govuk-label govuk-radios__label">
+                  {% block radio_label %}{{ label }}{% endblock %}
+                </label>
+              </div>
+
+              {% block conditional_fields %}{% endblock %}
+            {% endwith %}
+
+          {% endblock %}
+
+        {% endfor %}
+      {% endwith %}
+    </div>
+
+  </fieldset>
+</div>

@@ -48,7 +48,7 @@ disbursement_resolutions = {
 security_check_statuses = {
     'pending': _('To action'),
     'accepted': _('Accepted'),
-    'auto-accepted': _('Auto Accepted'),
+    'auto-accepted': _('Auto accepted'),
     'rejected': _('Rejected'),
 }
 

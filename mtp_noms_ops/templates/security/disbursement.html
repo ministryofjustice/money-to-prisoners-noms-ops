@@ -5,17 +5,17 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
-{% block inner_content %}
+{% block content %}
 
   <header>
-    <h1 class="heading-xlarge mtp-unpadded-heading">{{ view.title }}</h1>
+    <h1 class="govuk-heading-xl">{{ view.title }}</h1>
   </header>
 
-  {% include 'mtp_common/includes/message_box.html' %}
+  {% notification_banners request %}
 
-  <div class="mtp-results-list mtp-result-detail">
-    <table>
-      <caption class="visually-hidden">{% trans 'Disbursement details' %}</caption>
+  <div class="mtp-table__container mtp-results-detail">
+    <table class="govuk-table">
+      <caption class="govuk-visually-hidden">{% trans 'Disbursement details' %}</caption>
       <tbody>
         <tr>
           <td>
@@ -28,9 +28,9 @@
             <br/>
 
           </td>
-          <td class="mtp-credit-arrow-cell">
+          <td>
 
-            <div class="mtp-disbursement-arrow">{{ disbursement.method|disbursement_method }}</div>
+            {% labelled_data _('Payment method') disbursement.method|disbursement_method %}
 
           </td>
           <td>
@@ -61,19 +61,18 @@
           </td>
         </tr>
         <tr>
-
           <td colspan="4">
-            {% random_string as comment_label %}
-            <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'Payment description on remittance advice' %}</div>
-            <div aria-labelledby="mtp-label-{{ comment_label }}">
+
+            {% captureoutput as remittance_description %}
               {% if disbursement.remittance_description %}
                 {{ disbursement.remittance_description }}
               {% else %}
-                <span class="text-secondary">({% trans 'None given' %})</span>
+                <span class="govuk-body-m--secondary">({% trans 'None given' %})</span>
               {% endif %}
-            </div>
-          </td>
+            {% endcaptureoutput %}
+            {% labelled_data _('Payment description on remittance advice') remittance_description %}
 
+          </td>
         </tr>
         <tr>
           <td colspan="2">
@@ -86,8 +85,8 @@
             {% endif %}
             {% if disbursement.resolution == 'sent' %}
               {% labelled_data _('Invoice number') disbursement.invoice_number %}
-              <span class="mtp-detail-label">
-                {% trans 'Use this to track the disbursement in AP or SOP.' %}
+              <span class="mtp-labelled-data__label">
+                {% trans 'Use this to track the disbursement in SOP and Accounts Payable.' %}
               </span>
               <br/>
             {% endif %}
@@ -95,9 +94,7 @@
           </td>
           <td colspan="2">
 
-            {% random_string as comment_label %}
-            <div id="mtp-label-{{ comment_label }}" class="mtp-detail-label">{% trans 'History' %}</div>
-            <div aria-labelledby="mtp-label-{{ comment_label }}">
+            {% captureoutput as history %}
               {% for log_item in disbursement.log_set %}
                 {% if log_item.action == 'created' %}
                   {{ log_item.created|date:'SHORT_DATETIME_FORMAT' }}
@@ -139,15 +136,16 @@
                   {% endblocktrans %}
                   <br/>
                   {% with rejection_reason=disbursement.comments|find_rejection_reason %}
-                    <small>
-                      {{ rejection_reason|truncatewords:5 }}
-                    </small>
+                    <span class="govuk-body-s--secondary">
+                      {{ rejection_reason|hide_long_text:5 }}
+                    </span>
                     <br/>
                   {% endwith %}
 
                 {% endif %}
               {% endfor %}
-            </div>
+            {% endcaptureoutput %}
+            {% labelled_data _('History') history %}
 
           </td>
         </tr>

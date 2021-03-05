@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load security %}
 
-<td class="mtp-numeric-left">
+<td class="mtp-table__cell--numeric-left">
   {{ disbursement.created|date:'SHORT_DATE_FORMAT' }}
 </td>
 
@@ -10,7 +10,7 @@
   {% if disbursement.prisoner_number %}
     <br />
     {% if link_prisoner %}
-      <a href="{{ disbursement|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-print-url-hidden">
+      <a href="{{ disbursement|prisoner_profile_search_url }}" title="{% trans 'View prisoner details' %}" class="mtp-link--print-plain">
         {{ disbursement.prisoner_number }}
       </a>
     {% else %}
@@ -31,16 +31,16 @@
   {{ disbursement.prison_name|default:'—' }}
 </td>
 
-<td class="numeric">
+<td class="govuk-table__cell--numeric">
   <span class="mtp-sortable-cell--pad">
     {{ disbursement.amount|currency }}
   </span>
 </td>
 
-<td class="numeric">
+<td class="govuk-table__cell--numeric">
   {{ disbursement.resolution|format_disbursement_resolution }}
   <br/>
-  <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="print-hidden">
+  <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="govuk-!-display-none-print">
     {% trans 'View details' %}
   </a>
 </td>

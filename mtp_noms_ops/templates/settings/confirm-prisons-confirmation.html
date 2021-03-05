@@ -4,18 +4,19 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
-{% block inner_content %}
-  <div class="grid-row">
-    <div class="column-two-thirds">
-      <div class="govuk-box-highlight">
-        <strong class="bold-xlarge">
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <div class="govuk-panel govuk-panel--confirmation">
+        <h1 class="govuk-panel__title">
           {% trans 'Your prisons have been saved' %}
-        </strong>
+        </h1>
       </div>
-      <h3 class="heading-medium">
+      <h3 class="govuk-heading-m">
         {% trans 'You have chosen:' %}
       </h3>
-      <ul class="list list-bullet">
+      <ul class="govuk-list govuk-list--bullet">
         {% if prisons %}
           {% for prison in prisons %}
             <li>{{ prison.name }}</li>
@@ -30,9 +31,10 @@
           Go back and <a href="{{ link }}">change this</a> or edit it on your settings page at any time.
         {% endblocktrans %}
       </p>
-      <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'security:dashboard' %}{% endif %}" class="button">
+      <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'security:dashboard' %}{% endif %}" class="govuk-button" data-module="govuk-button" role="button">
         {% trans 'Continue' %}
       </a>
+
     </div>
   </div>
 {% endblock %}

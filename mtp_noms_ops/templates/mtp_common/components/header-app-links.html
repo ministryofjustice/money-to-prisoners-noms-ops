@@ -1,0 +1,42 @@
+{% extends 'mtp_common/components/header-app-links.html' %}
+
+{% block app_links %}
+  {% if request.user.is_authenticated and not request.cannot_navigate_away %}
+    <ul>
+      {% if request.can_access_security %}
+        {% if request.can_pre_approve %}
+          <li>
+            {% include 'mtp_common/components/header-app-link.html' with view_name='security:review_credits' link_text=_('New credits check') %}
+          </li>
+        {% endif %}
+        <li>
+          {% include 'mtp_common/components/header-app-link.html' with view_name='security:prisoner_list' params=initial_params subview_names='security:prisoner_list_legacy security:prisoner_detail security:prisoner_disbursement_detail security:prisoner_search_results security:prisoner_advanced_search' link_text=_('Prisoners') %}
+        </li>
+        <li>
+          {% include 'mtp_common/components/header-app-link.html' with view_name='security:sender_list' params=initial_params subview_names='security:sender_list_legacy security:sender_detail security:sender_search_results security:sender_advanced_search' link_text=_('Payment sources') %}
+        </li>
+        <li>
+          {% include 'mtp_common/components/header-app-link.html' with view_name='security:credit_list' params=initial_params subview_names='security:credit_detail security:credit_search_results security:credit_advanced_search' link_text=_('Credits') %}
+        </li>
+        <li>
+          {% include 'mtp_common/components/header-app-link.html' with view_name='security:disbursement_list' params=initial_params subview_names='security:disbursement_detail security:disbursement_search_results security:disbursement_advanced_search' link_text=_('Disbursements') %}
+        </li>
+        <li>
+          {% include 'mtp_common/components/header-app-link.html' with view_name='security:notification_list' link_text=_('Notifications') %}
+        </li>
+        {% if request.can_manage_security_checks %}
+          <li>
+            {% include 'mtp_common/components/header-app-link.html' with view_name='security:check_list' subview_names='security:my_check_list security:credits_history security:resolve_check security:auto_accept_rule_list security:auto_accept_rule_detail' link_text=_('Credits to action') %}
+          </li>
+        {% endif %}
+      {% elif request.can_access_prisoner_location %}
+        <li>
+          {% include 'mtp_common/components/header-app-link.html' with view_name='location_file_upload' link_text=_('Upload location file') %}
+        </li>
+      {% endif %}
+      <li>
+        {% include 'mtp_common/components/header-app-link.html' with view_name='submit_ticket' subview_names='feedback_success' link_text=_('Help and feedback') %}
+      </li>
+    </ul>
+  {% endif %}
+{% endblock %}

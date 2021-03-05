@@ -5,28 +5,25 @@
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
-{% comment %}TODO: Move body_classes block to base.html when search V2 goes live to make all the existing pages consistent.{% endcomment %}
-{% block body_classes %}{{ block.super }} {% if not view.no_spaced_header %}mtp-with-spaced-header{% endif %}{% endblock body_classes %}
-
-{% block inner_content %}
-  <form id="advanced-search-{{ view.object_name_plural|slugify }}" class="mtp-security-advanced-search mtp-autocomplete js-FormAnalytics" method="get">
+{% block content %}
+  <form id="advanced-search-{{ view.object_name_plural|slugify }}" class="mtp-security-advanced-search mtp-form-analytics" method="get">
     <input type="hidden" name="{{ form.advanced.html_name }}" value="True" />
     <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
 
-    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+    {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
-    <div class="grid-row">
-      <div class="column-two-thirds">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
         <header>
-          <h1 class="heading-xlarge">
-            <span class="heading-secondary">{{ view.title }}</span>
+          <h1 class="govuk-heading-xl">
+            <span class="govuk-caption-xl">{{ view.title }}</span>
             {% trans 'Advanced search' %}
           </h1>
         </header>
 
         {% block advanced_search_fields %}{% endblock advanced_search_fields %}
 
-        <button type="submit" class="button" value="submit">{% blocktrans with object_name=view.object_name_plural %}Search {{ object_name }}{% endblocktrans %}</button>
+        <button type="submit" class="govuk-button" data-module="govuk-button" value="submit">{% blocktrans with object_name=view.object_name_plural %}Search {{ object_name }}{% endblocktrans %}</button>
       </div>
     </div>
 

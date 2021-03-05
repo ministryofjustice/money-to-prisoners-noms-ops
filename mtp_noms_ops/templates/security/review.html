@@ -7,15 +7,15 @@
 
 {% block phase_banner %}
   {{ block.super }}
-  {% include "security/forms/prison-switcher.html" %}
+  {% include 'security/includes/prison-switcher.html' %}
 {% endblock %}
 
-{% block inner_content %}
+{% block content %}
 <header>
-  <h1 class="heading-xlarge">{{ view.title }}</h1>
+  <h1 class="govuk-heading-xl">{{ view.title }}</h1>
 </header>
 
-{% include 'mtp_common/includes/message_box.html' %}
+{% notification_banners request %}
 
 <p>
   {% trans 'Credits must be checked by security before cashiers can process them.' %}
@@ -24,35 +24,35 @@
 </p>
 
 {% if credits %}
-  <form method="post" class="mtp-review js-ConfirmChecked js-FormAnalytics">
+  <form method="post" class="mtp-review mtp-form-analytics">
     {% csrf_token %}
 
-    <div class="mtp-review__actions print-hidden">
-      <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
-      <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print these credits' %}</a>
-    </div>
+    <p class="govuk-!-display-none-print">
+      <button type="submit" name="submit" class="govuk-button" data-module="govuk-button" value="submit">{% trans 'Credits checked by security' %}</button>
+      <a class="mtp-print-trigger mtp-form-analytics__click mtp-link--form-cancel" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print these credits' %}</a>
+    </p>
 
-    <div class="mtp-results-list">
-      <table class="mtp-table table-font-xsmall">
-        <caption class="visually-hidden">{% trans 'Please check the following credits' %}</caption>
+    <div class="mtp-table__container mtp-results-list">
+      <table class="mtp-table mtp-table--small">
+        <caption class="govuk-visually-hidden">{% trans 'Please check the following credits' %}</caption>
 
         <thead>
           <tr>
-            <th>{% trans 'Payment source' %}</th>
-            <th>{% trans 'Prisoner' %}</th>
-            <th class="numeric">{% trans 'Amount' %}</th>
-            <th>{% trans 'Security comments' %}</th>
+            <th scope="col">{% trans 'Payment source' %}</th>
+            <th scope="col">{% trans 'Prisoner' %}</th>
+            <th class="govuk-table__header--numeric" scope="col">{% trans 'Amount' %}</th>
+            <th scope="col">{% trans 'Security comments' %}</th>
           </tr>
         </thead>
 
         <tbody>
           {% for credit in credits %}
             <tr>
-              <td class="font-xsmall">
-                <div class="font-small">
+              <td>
+                <div>
                   {% with known_sender=credit|credit_sender_identifiable %}
                     {% if known_sender %}
-                      <a class="mtp-print-url-hidden" href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default_if_none:'—' }}</a>
+                      <a class="mtp-link--print-plain" href="{{ credit|sender_profile_search_url }}">{{ credit.sender_name|default_if_none:'—' }}</a>
                     {% else %}
                       {% trans 'Sender details not recorded' %}
                     {% endif %}
@@ -67,21 +67,21 @@
                   {% trans 'Bank transfer' %}
                 {% endif %}
               </td>
-              <td class="font-xsmall">
-                <div class="font-small"><a class="mtp-print-url-hidden" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
+              <td>
+                <div><a class="mtp-link--print-plain" href="{{ credit|prisoner_profile_search_url }}">{{ credit.prisoner_number }}</a></div>
                 {{ credit.prisoner_name|default_if_none:'—' }}
               </td>
-              <td class="numeric">
+              <td class="govuk-table__cell--numeric">
                 {{ credit.amount|currency }}
               </td>
               <td>
                 {% random_string as comment_label %}
-                <label class="visually-hidden" for="mtp-review__comment-{{ comment_label }}">
+                <label class="govuk-visually-hidden" for="mtp-review__comment-{{ comment_label }}">
                   {% blocktrans trimmed with amount=credit.amount|currency prisoner_name=credit.prisoner_name|default_if_none:'—' %}
                     Add security comment for credit of {{ amount }} to {{ prisoner_name }}
                   {% endblocktrans %}
                 </label>
-                <textarea id="mtp-review__comment-{{ comment_label }}" class="form-control" rows="4" name="comment_{{ credit.id }}"></textarea>
+                <textarea id="mtp-review__comment-{{ comment_label }}" class="govuk-textarea" rows="2" name="comment_{{ credit.id }}"></textarea>
               </td>
             </tr>
           {% endfor %}
@@ -89,19 +89,18 @@
       </table>
     </div>
 
-
-    <div class="mtp-review__actions print-hidden">
-      <button type="submit" name="submit" class="button" value="submit">{% trans 'Credits checked by security' %}</button>
-    </div>
+    <p class="govuk-!-display-none-print">
+      <button type="submit" name="submit" class="govuk-button" data-module="govuk-button" value="submit">{% trans 'Credits checked by security' %}</button>
+    </p>
 
     {% dialoguebox html_id='confirm-checked' title=_('Have you checked these credits?') %}
       <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
       <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
       <br/>
-      <button type="submit" class="button" value="override">
+      <button type="submit" class="govuk-button govuk-!-margin-right-2" data-module="govuk-button" value="override">
         {% trans 'Yes, all credits checked' %}
       </button>
-      <button type="button" class="button-secondary {{ dialogue_close_class }}">
+      <button type="button" class="govuk-button govuk-button--secondary {{ dialogue_close_class }}" data-module="govuk-button">
         {% trans 'No, continue checking' %}
       </button>
     {% enddialoguebox %}

@@ -3,24 +3,20 @@
 {% load static %}
 {% load mtp_common %}
 
-{% block body_classes %}{{ block.super }} mtp-login{% endblock %}
+{% block body_classes %}{{ block.super }} mtp-page-with-masthead{% endblock %}
 {% block page_title %}{% trans 'Sign in' %} – {{ block.super }}{% endblock %}
 
-{% block proposition_extra %}{% endblock %}
+{% block main %}
+  <div class="mtp-masthead govuk-!-margin-bottom-9">
+    <div class="govuk-width-container">
 
-{% block inner_content %}
-
-  <div class="mtp-login__header">
-    <div class="mtp-login__content">
-      <div class="grid-row">
-        <div class="column-full">
-          {% language_switch %}
-        </div>
+      <div class="govuk-grid-row">
+        {% language_switch %}
       </div>
 
-      <div class="grid-row">
-        <header class="column-two-thirds">
-          <h1 class="heading-xlarge">
+      <div class="govuk-grid-row govuk-!-margin-top-9 govuk-!-margin-bottom-6">
+        <header class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-xl">
             {% trans 'Monitor prisoner money' %}
           </h1>
 
@@ -30,23 +26,26 @@
                 Use this tool to monitor and investigate money sent using the <a href="{{ start_page_url }}">Send money to someone in prison</a> service.
               {% endblocktrans %}
             </p>
-            {% trans 'The tool also gives insight into the digital movement of money, not only in your prison, but in all other public sector prisons in England and Wales.' %}
+            <p>
+              {% trans 'The tool also gives insight into the digital movement of money, not only in your prison, but in all other prisons in England and Wales.' %}
+            </p>
           </aside>
         </header>
 
-        <div class="column-one-third">
+        <div class="govuk-grid-column-one-third">
           <img alt="{% trans 'Prisoner money intelligence' %}" src="{% static 'images/landing-noms-ops.png' %}" srcset="{% static 'images/landing-noms-ops@2x.png' %} 2x"/>
         </div>
       </div>
+
     </div>
   </div>
 
-  <div class="mtp-login__content">
-    {% notifications_box request 'noms_ops_login' %}
+  <div class="govuk-width-container govuk-!-margin-bottom-9">
+    {% notification_banners request 'noms_ops_login' %}
 
-    <div class="grid-row">
-      <section class="column-half">
-        <h2 class="heading-medium">{% trans 'How to get access' %}</h2>
+    <div class="govuk-grid-row">
+      <section class="govuk-grid-column-one-half">
+        <h2 class="govuk-heading-m">{% trans 'How to get access' %}</h2>
         <p>
           {% trans 'Your head of security can set up an account for you if you don’t have access already.' %}
         </p>
@@ -56,7 +55,7 @@
           </a>
         </p>
 
-        <h2 class="heading-medium">{% trans 'New disbursement tool' %}</h2>
+        <h2 class="govuk-heading-m">{% trans 'New disbursement tool' %}</h2>
         <p>
           {% trans 'We’ve launched a new digital disbursement tool which tracks money sent out of prisons.' %}
         </p>
@@ -65,21 +64,19 @@
         </p>
       </section>
 
-      <section class="column-half">
-        <h2 class="heading-medium">{% trans 'Sign in' %}</h2>
+      <section class="govuk-grid-column-one-half">
+        <h2 class="govuk-heading-m">{% trans 'Sign in' %}</h2>
 
-        {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+        {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
         <form action="{{ app_path }}" method="post">
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ next }}">
 
-          {% include 'mtp_common/forms/field.html' with field=form.username input_classes='form-control-3-4' only %}
-          {% include 'mtp_common/forms/field.html' with field=form.password input_classes='form-control-3-4' only %}
+          {% include 'mtp_common/forms/field.html' with field=form.username input_classes='govuk-input--width-10' only %}
+          {% include 'mtp_common/forms/field.html' with field=form.password input_classes='govuk-input--width-10' only %}
 
-          <div class="form-group">
-            <button type="submit" class="button" name="signin">{% trans 'Sign in' %}</button>
-          </div>
+          <button type="submit" class="govuk-button" data-module="govuk-button" name="signin">{% trans 'Sign in' %}</button>
         </form>
 
         <p><a href="{% url 'reset_password' %}">{% trans 'Forgotten your password?' %}</a></p>

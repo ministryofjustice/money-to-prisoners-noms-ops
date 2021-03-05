@@ -1,0 +1,24 @@
+// mtp-common components
+@import 'mtp_common';
+@import 'mtp_common/staff-app';
+@import 'mtp_common/components/autocomplete-select';
+@import 'mtp_common/components/card';
+@import 'mtp_common/components/dialogue-box';
+@import 'mtp_common/components/hidden-long-text';
+@import 'mtp_common/components/labelled-data';
+@import 'mtp_common/components/mailcheck-warning';
+@import 'mtp_common/components/masthead';
+@import 'mtp_common/components/sub-navigation';
+@import 'mtp_common/components/tabbed-panel';
+@import 'mtp_common/components/upload';
+
+// app components
+@import './display';
+@import './utils/text-with-tick';
+@import './components/checkbox-group';
+@import './components/choose-prisons';
+@import './components/footer';
+@import './components/info-box';
+@import './components/labelled-data';
+@import './components/prisoner-number';
+@import './components/security';

@@ -69,7 +69,7 @@ class PrisonSelectorSearchFormMixin(forms.Form):
     PRISON_SELECTOR_ALL_PRISONS_CHOICE_VALUE = 'all'
 
     prison_selector = forms.ChoiceField(
-        label=_('Choose a prison'),
+        label=_('Prison'),
         required=False,
         choices=(
             (PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE, _('Your prisons')),
@@ -181,6 +181,7 @@ class AmountSearchFormMixin(forms.Form):
         label=_('Amount'),
         required=False,
         choices=AmountPattern.get_choices(),
+        initial='',
     )
     amount_exact = forms.CharField(
         label=AmountPattern.exact.value,
@@ -275,6 +276,7 @@ class PaymentMethodSearchFormMixin(forms.Form):
         label=_('Payment method'),
         required=False,
         choices=[],
+        initial='',
     )
     account_number = forms.CharField(label=_('Account number'), required=False)
     sort_code = forms.CharField(label=_('Sort code'), required=False)

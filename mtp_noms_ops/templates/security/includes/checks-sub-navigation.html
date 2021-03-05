@@ -1,0 +1,43 @@
+{% load i18n %}
+
+<nav class="mtp-sub-navigation mtp-sub-navigation--checks govuk-clearfix" aria-label="{% trans 'Sub navigation for credits to action' %}">
+  <ul class="mtp-sub-navigation__list mtp-sub-navigation__list--padded">
+
+    <li class="mtp-sub-navigation__list-item {% if current_view == 'CheckListView' %}mtp-sub-navigation__list-item--current{% endif %}">
+      <a href="{% url 'security:check_list' %}" class="mtp-sub-navigation__link">
+        {% trans 'Credits to action' %}
+        {% if current_view == 'CheckListView' %}
+          <span class="govuk-visually-hidden">{% trans '(current page)' %}</span>
+        {% endif %}
+      </a>
+    </li>
+
+    <li class="mtp-sub-navigation__list-item {% if current_view == 'MyListCheckView' %}mtp-sub-navigation__list-item--current{% endif %}">
+      <a href="{% url 'security:my_check_list' %}" class="mtp-sub-navigation__link">
+        {% trans 'My list' %} ({{ form.my_list_count }})
+        {% if current_view == 'MyListCheckView' %}
+          <span class="govuk-visually-hidden">{% trans '(current page)' %}</span>
+        {% endif %}
+      </a>
+    </li>
+
+    <li class="mtp-sub-navigation__list-item {% if current_view == 'CreditsHistoryListView' %}mtp-sub-navigation__list-item--current{% endif %}">
+      <a href="{% url 'security:credits_history' %}" class="mtp-sub-navigation__link">
+        {% trans 'Decision history' %}
+        {% if current_view == 'CreditsHistoryListView' %}
+          <span class="govuk-visually-hidden">{% trans '(current page)' %}</span>
+        {% endif %}
+      </a>
+    </li>
+
+    <li class="mtp-sub-navigation__list-item {% if current_view == 'AutoAcceptRuleListView' %}mtp-sub-navigation__list-item--current{% endif %}">
+      <a href="{% url 'security:auto_accept_rule_list' %}" class="mtp-sub-navigation__link">
+        {% trans 'Auto accepts' %}
+        {% if current_view == 'AutoAcceptRuleListView' %}
+          <span class="govuk-visually-hidden">{% trans '(current page)' %}</span>
+        {% endif %}
+      </a>
+    </li>
+
+  </ul>
+</nav>

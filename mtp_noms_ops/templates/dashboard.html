@@ -6,165 +6,57 @@
 {% block phase_banner %}
   {{ block.super }}
 
-  {% include 'security/forms/prison-switcher.html' %}
+  {% include 'security/includes/prison-switcher.html' %}
 {% endblock %}
 
-{% block inner_content %}
-  {% notifications_box request 'noms_ops_security_dashboard' %}
+{% block content %}
+  {% notification_banners request 'noms_ops_security_dashboard' %}
 
   {% if request.can_access_security %}
     {% if november_second_changes_live %}
-      <div class="mtp-notification mtp-notification--info mtp-notification--open">
-        <p class="mtp-notification__headline">
-
-          <a href="{% url 'security:policy_change' %}">{% trans 'Check you’re up to date with recent policy changes' %}</a>
-
-        </p>
-      </div>
+      {% captureoutput as banner_heading %}
+        <a href="{% url 'security:policy_change' %}">
+          {% trans 'Check you’re up to date with recent policy changes' %}
+        </a>
+      {% endcaptureoutput %}
+      {% include 'mtp_common/components/notification-banner.html' with banner_level='info' banner_title='info'|notification_level banner_heading=banner_heading only %}
     {% else %}
-      <div class="mtp-notification mtp-notification--info">
-        <h2 class="mtp-notification__headline">
-          {% trans 'What the Nov 2nd policy changes mean' %}
-        </h2>
-        <div class="mtp-notification__message" style="display:block">
+      {% captureoutput as banner_message %}{% spaceless %}
+        <h3><strong>{% trans 'Credits' %}</strong></h3>
+        <p>{% trans 'Senders will no longer be able to send money by bank transfer or pre-paid card.' %}</p>
 
-          <h3><strong>{% trans 'Credits' %}</strong></h3>
-          <p>{% trans 'Senders will no longer be able to send money by bank transfer or pre-paid card.' %}</p>
+        <h3><strong>{% trans 'Disbursements' %}</strong></h3>
+        <p>{% trans 'Prisoners can send out a maximum of £50 a week to up to 5 different people.' %}</p>
 
-          <h3><strong>{% trans 'Disbursements' %}</strong></h3>
-          <p>{% trans 'Prisoners can send out a maximum of £50 a week to up to 5 different people.' %}</p>
+        <p><a href="{% url 'security:policy_change' %}">{% trans 'More details about Credit and Disbursement changes' %}</a></p>
 
-          <p><a href="{% url 'security:policy_change' %}">{% trans 'More details about Credit and Disbursement changes' %}</a></p>
-
-          <h3><strong>{% trans 'Prisoner accounts' %}</strong></h3>
-          <p>{% trans 'Credits will not be accepted into a prisoner’s account if it holds £900 or more.' %}</p>
-        </div>
-      </div>
+        <h3><strong>{% trans 'Prisoner accounts' %}</strong></h3>
+        <p>{% trans 'Credits will not be accepted into a prisoner’s account if it holds £900 or more.' %}</p>
+      {% endspaceless %}{% endcaptureoutput %}
+      {% include 'mtp_common/components/notification-banner.html' with banner_level='info' banner_title='info'|notification_level banner_heading=_('What the Nov 2nd policy changes mean') banner_message=banner_message only %}
     {% endif %}
   {% endif %}
 
   <header>
-    <h1 class="heading-xlarge mtp-unpadded-heading">
+    <h1 class="govuk-heading-xl">
       {% blocktrans trimmed with full_name=request.user.get_full_name|default:request.user.username %}
         Welcome {{ full_name }}
       {% endblocktrans %}
     </h1>
   </header>
 
-  {% if request.can_access_security %}
-
-    <div class="grid-row">
-      <div class="column-two-thirds">
-        <p class="lede">
-          {% blocktrans trimmed %}
-            Use this tool to monitor all credits sent to prisoners using the <a href="{{ start_page_url }}">Send money to someone in prison</a> service.
-          {% endblocktrans %}
-        </p>
-      </div>
-    </div>
-
-    <div class="grid-row">
-      <div class="column-one-third mtp-box">
-        <a href="{% url 'security:prisoner_list' %}?{{ initial_params }}">
-          {% trans 'Prisoners' %}
-        </a>
-      </div>
-
-      <div class="column-one-third mtp-box">
-        <a href="{% url 'security:sender_list' %}?{{ initial_params }}">
-          {% trans 'Payment sources' %}
-        </a>
-      </div>
-
-      <div class="column-one-third mtp-box">
-        <a href="{% url 'security:credit_list' %}?{{ initial_params }}">
-          {% trans 'Credits' %}
-        </a>
-      </div>
-    </div>
-
-    <div class="grid-row">
-      <div class="column-one-third mtp-box">
-        <a href="{% url 'security:disbursement_list' %}?{{ initial_params }}">
-          {% trans 'Disbursements' %}
-        </a>
-      </div>
-
-      <div class="column-one-third mtp-box">
-        <a href="{% url 'security:notification_list' %}">
-          {% trans 'Notifications' %}
-        </a>
-      </div>
-
-      {% if request.can_manage_security_checks %}
-        <div class="column-one-third mtp-box">
-          <a href="{% url 'security:check_list' %}">
-            {% trans 'Credits to action' %}
-          </a>
-        </div>
-      {% endif %}
-    </div>
-
+  {% if link_cards %}
+    {% card_group link_cards %}
   {% endif %}
 
-  {% if request.can_access_security and saved_searches|length > 0 %}
-
-    <h2 class="heading-medium">{% trans 'Payment sources and prisoners you are monitoring' %}</h2>
-    {% for search in saved_searches %}
-      {% if forloop.counter0|divisibleby:3 %}
-      <div class="grid-row">
-      {% endif %}
-        <div class="column-one-third mtp-box mtp-box-pinned">
-          <a href="{{ search.site_url }}">
-            {{ search.description }}
-            {% if search.new_result_count %}
-              <span>
-                {% blocktrans trimmed count count=search.new_result_count %}
-                  1 new credit
-                {% plural %}
-                  {{ count }} new credits
-                {% endblocktrans %}
-              </span>
-            {% endif %}
-          </a>
-        </div>
-      {% if forloop.counter|divisibleby:3 or forloop.last %}
-      </div>
-      {% endif %}
-    {% endfor %}
-
+  {% if saved_search_cards %}
+    <h2 class="govuk-heading-m">{% trans 'Payment sources and prisoners you are monitoring' %}</h2>
+    {% card_group saved_search_cards %}
   {% endif %}
 
-  {% if request.can_access_security and request.can_pre_approve or request.can_access_user_management or request.can_access_prisoner_location %}
-
-    <h2 class="heading-medium">{% trans 'Admin options' %}</h2>
-
-    <div class="grid-row">
-      {% if request.can_access_security and request.can_pre_approve %}
-        <div class="column-one-third mtp-box">
-          <a href="{% url 'security:review_credits' %}">
-            {% trans 'New credits check' %}
-          </a>
-        </div>
-      {% endif %}
-
-      {% if request.can_access_user_management %}
-        <div class="column-one-third mtp-box">
-          <a href="{% url 'list-users' %}">
-            {% trans 'Manage users' %}
-          </a>
-        </div>
-      {% endif %}
-
-      {% if request.can_access_prisoner_location %}
-        <div class="column-one-third mtp-box">
-          <a href="{% url 'location_file_upload' %}">
-            {% trans 'Upload prisoner location file' %}
-          </a>
-        </div>
-      {% endif %}
-    </div>
-
+  {% if admin_cards %}
+    <h2 class="govuk-heading-m">{% trans 'Admin options' %}</h2>
+    {% card_group admin_cards %}
   {% endif %}
 
 {% endblock %}

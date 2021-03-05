@@ -2,92 +2,91 @@
 {% load i18n %}
 {% load mtp_common %}
 {% load security %}
-{% load static %}
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
-{% block inner_content %}
-  <div>
-    <div class="mtp-prisoner-image">
+{% block content %}
+  <div class="mtp-results-profile mtp-results-profile--prisoner">
+    <div class="mtp-results-profile__photo govuk-!-margin-right-5 govuk-!-margin-bottom-3">
       <img src="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}" srcset="{% url 'security:prisoner_image' prisoner_number=prisoner.prisoner_number %}?ratio=2x 2x" alt="{% trans 'Photo of the prisoner' %}"/>
     </div>
 
-    <div class="mtp-prisoner-summary">
+    <div class="mtp-results-profile__summary">
       <header>
-        <h1 class="heading-xlarge mtp-unpadded-heading">{{ prisoner.prisoner_name|default:_('Unknown prisoner') }}</h1>
+        <h1 class="govuk-heading-xl govuk-!-margin-bottom-1">{{ prisoner.prisoner_name|default:_('Unknown prisoner') }}</h1>
         {% if prisoner.prisoner_number %}
-          <h2 class="heading-large mtp-unpadded-subheading">{{ prisoner.prisoner_number }}</h2>
+          <span class="govuk-heading-l govuk-!-margin-bottom-3">{{ prisoner.prisoner_number }}</span>
         {% endif %}
       </header>
 
-      <br />
-
-      <div class="mtp-prisoner-summary__details">
-        <div class="column-one-quarter">
+      <div class="govuk-grid-row govuk-!-margin-top-6 govuk-!-margin-bottom-3">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Credits received') prisoner.credit_count tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Payment sources')  prisoner.sender_count tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Total received') prisoner.credit_total|currency tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Disbursements sent') prisoner.disbursement_count tag='strong' %}
         </div>
       </div>
 
-      <div class="mtp-prisoner-summary__details">
+      <div class="govuk-grid-row govuk-!-margin-bottom-3">
         {% if provided_names %}
-          <div class="column-one-quarter">
-            {% random_string as profile_label %}
-            <div id="mtp-label-{{ profile_label }}" class="mtp-detail-label">{% trans 'Names given by senders' %}</div>
-            <span aria-labelledby="mtp-label-{{ profile_label }}">
+          <div class="mtp-results-profile__label govuk-grid-column-one-half">
+            {% captureoutput as names_given_by_senders %}
               {% for provided_name in provided_names %}
                 <strong>{{ provided_name }}</strong>{% if not forloop.last %},{% endif %}
               {% endfor %}
-            </span>
+            {% endcaptureoutput %}
+            {% labelled_data _('Names given by senders') names_given_by_senders tag='strong' %}
           </div>
         {% endif %}
 
-        <div class="column-one-quarter">
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
           {% labelled_data _('Prison') prisoner.current_prison.name tag='strong' %}
         </div>
 
-        <div class="column-one-quarter">
-          <div id="location-label" class="mtp-detail-label">{% trans 'Location' %}</div>
-          <strong class="js-async-load" data-path="{% url 'security:prisoner_nomis_info' prisoner_number=prisoner.prisoner_number %}" data-key="housing_location" aria-labelledby="location-label">–</strong>
+        <div class="mtp-results-profile__label govuk-grid-column-one-quarter">
+          {% captureoutput as current_location %}
+            <span class="mtp-async-load" data-path="{% url 'security:prisoner_nomis_info' prisoner_number=prisoner.prisoner_number %}" data-key="housing_location">–</span>
+          {% endcaptureoutput %}
+          {% labelled_data _('Location') current_location tag='strong' %}
         </div>
       </div>
 
-      {% include 'security/includes/save-search.html' with form=form pin_label=_('Monitor this prisoner on your home page') unpin_label=_('Stop monitoring this prisoner') only %}
+      {% include 'security/includes/monitor-button.html' with form=form pin_label=_('Monitor this prisoner on your home page') unpin_label=_('Stop monitoring this prisoner') only %}
     </div>
   </div>
 
-  <form class="js-FormAnalytics" method="get">
-    {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+  <form class="mtp-form-analytics" method="get">
+    {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
     {% if form.is_valid %}
-      <div class="mtp-results-list">
+      <div class="mtp-table__container mtp-results-list">
         {% block object_list %}
-          <aside class="mtp-object-list-toggle print-hidden">
-            <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" class="button-secondary">
-              {% trans 'View disbursements' %}
-            </a>
-          </aside>
+          <div class="mtp-results-profile__toggle">
+            <aside class="govuk-!-display-none-print">
+              <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button" role="button">
+                {% trans 'View disbursements' %}
+              </a>
+            </aside>
+            <h2 class="govuk-heading-l govuk-!-margin-bottom-0">{% trans 'Credits received' %}</h2>
+          </div>
 
-          <h2 class="heading-large">{% trans 'Credits received' %}</h2>
-
-          <div class="panel panel-border-narrow">
-            <p class="mtp-search-description--aside">
+          <div class="mtp-results-list-actions govuk-inset-text">
+            <p class="mtp-results-list-actions__description">
               {{ form.search_description.description }}
             </p>
 
-            <div class="print-hidden mtp-links">
-              <a class="js-print-trigger js-FormAnalytics-click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+            <div class="mtp-results-list-actions__links govuk-!-display-none-print">
+              <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
               &nbsp;
               {% url 'security:prisoner_detail_export' prisoner_id=prisoner.id as export_view %}
               {% url 'security:prisoner_detail_email_export' prisoner_id=prisoner.id as email_export_view %}
@@ -95,8 +94,8 @@
             </div>
           </div>
 
-          <table class="mtp-table table-font-xsmall">
-            <caption class="visually-hidden">{{ form.search_description.description }}</caption>
+          <table class="mtp-table mtp-table--small">
+            <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
             <thead>
               <tr>
                 {% include 'security/includes/credit-header-row.html' %}

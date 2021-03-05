@@ -3,40 +3,39 @@
 {% load mtp_common %}
 {% load static %}
 
-{% block inner_content %}
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
-  {% static 'downloads/apply-to-send-out-more-than-50.pdf' as form_link %}
+      {% static 'downloads/apply-to-send-out-more-than-50.pdf' as form_link %}
 
-  {% notifications_box request 'cashbook_dashboard' 'cashbook_all' %}
+      {% notification_banners request %}
 
-  {% include 'mtp_common/includes/message_box.html' %}
+      <!--[policy-change-info]-->
+      <header>
+        <h1 class="govuk-heading-xl">{% trans 'Recent policy changes (Nov 2nd 2020) that may affect your work' %}</h1>
+      </header>
 
-  <!--[policy-change-info]-->
-  <header>
-    <h1 class="heading-xlarge">{% trans 'Recent policy changes (Nov 2nd 2020) that may affect your work' %}</h1>
-  </header>
-
-  <div class="grid-row">
-    <div class="column-two-thirds">
-
-      <h2 class="heading-large">{% trans 'Credits' %}</h2>
+      <h2 class="govuk-heading-l">{% trans 'Credits' %}</h2>
 
       <p>{% trans 'Senders can only send money to a prisoner online using a debit card.' %}</p>
       <p>{% trans 'They can no longer send money by bank transfer or pre-paid card.' %}</p>
       <p>{% trans 'They can only send cash, cheque or postal order if they prove to the governor that they don’t have a bank account or can’t use the service.' %}</p>
 
-      <h2 class="heading-large">{% trans 'Disbursements' %}</h2>
+      <h2 class="govuk-heading-l">{% trans 'Disbursements' %}</h2>
 
       <p>{% trans 'Residents can only send out £50 a week to up to 5 different people, totalling £250.' %}</p>
       <p>
+        {% trans 'A resident must apply for approval from the governor if they want to send more than £50 per person per week.' %}
+        {% trans 'Approval is granted only in exceptional circumstances.' %}
         {% blocktrans trimmed %}
-          A resident must apply for approval from the governor if they want to send more than £50 per person per week. Approval is granted only in exceptional circumstances. It must be applied for each time by filling in <a href="{{ form_link }}">a form</a> which they attach to their disbursement before handing in.
+          It must be applied for each time by filling in <a href="{{ form_link }}">a form</a> which they attach to their disbursement before handing in.
         {% endblocktrans %}
       </p>
 
       <p>{% trans 'Exceptional circumstances could be:' %}</p>
 
-      <ul class="list list-bullet">
+      <ul class="govuk-list govuk-list--bullet">
         <li>{% trans 'paying off debts if you have no external bank account' %}</li>
         <li>{% trans 'sending financial support to family' %}</li>
         <li>{% trans 'paying for a legitimate service, e.g. legal fees, dentistry' %}</li>
@@ -44,7 +43,7 @@
         <li>{% trans 'transferring your money from prison to a new or existing bank account' %}</li>
       </ul>
 
-      <h2 class="heading-large">{% trans 'Prisoner bank accounts' %}</h2>
+      <h2 class="govuk-heading-l">{% trans 'Prisoner bank accounts' %}</h2>
 
       <p>{% trans 'Credits will not go into a prisoner’s account if it holds £900 or more.' %}</p>
 

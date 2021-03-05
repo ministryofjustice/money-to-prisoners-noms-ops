@@ -2,36 +2,35 @@
 {% load i18n %}
 
 {% block advanced_search_fields %}
-  <div class="heading-large">{% trans 'Date entered' %}</div>
+  <div class="govuk-heading-l">{% trans 'Date entered' %}</div>
   <p>{% trans 'We only keep transaction data for 7 years.' %}
 
-  <div class="grid-row">
-    <div class="column-one-half">
-      {% include 'security/forms/split-date-field.html' with field=form.created__gte %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      {% include 'mtp_common/forms/date-field.html' with field=form.created__gte label_classes='govuk-fieldset__legend--s' only %}
     </div>
 
-    <div class="column-one-half mtp-split-date-to-wrapper">
-      {% include 'security/forms/split-date-field.html' with field=form.created__lt %}
+    <div class="govuk-grid-column-one-half">
+      {% include 'mtp_common/forms/date-field.html' with field=form.created__lt label_classes='govuk-fieldset__legend--s' only %}
     </div>
   </div>
 
-  {% include 'security/forms/amount-pattern-fieldset.html' %}
+  {% include 'security/forms/amount-pattern-fieldset.html' with field=form.amount_pattern %}
 
-  <div class="heading-large">{% trans 'Recipient' %}</div>
-  {% include 'mtp_common/forms/field.html' with field=form.recipient_name %}
-  {% include 'mtp_common/forms/field.html' with field=form.recipient_email %}
-  {% include 'mtp_common/forms/field.html' with field=form.postcode %}
+  <div class="govuk-heading-l">{% trans 'Recipient' %}</div>
+  {% include 'mtp_common/forms/field.html' with field=form.recipient_name input_classes='govuk-input--width-20' %}
+  {% include 'mtp_common/forms/field.html' with field=form.recipient_email input_classes='govuk-input--width-20' %}
+  {% include 'mtp_common/forms/field.html' with field=form.postcode input_classes='govuk-input--width-5' %}
 
-  <div class="heading-large">{% trans 'Payment method' %}</div>
-  {% include 'security/forms/payment-method-fieldset.html' %}
+  {% include 'security/forms/payment-method-fieldset.html' with field=form.payment_method label_classes='govuk-fieldset__legend--m' %}
 
-  <div class="heading-large">{% trans 'Prisoner' %}</div>
-  {% include 'mtp_common/forms/field.html' with field=form.prisoner_number %}
-  {% include 'mtp_common/forms/field.html' with field=form.prisoner_name %}
+  <div class="govuk-heading-l">{% trans 'Prisoner' %}</div>
+  {% include 'mtp_common/forms/field.html' with field=form.prisoner_number input_classes='govuk-input--width-10 mtp-input--prisoner-number' %}
+  {% include 'mtp_common/forms/field.html' with field=form.prisoner_name input_classes='govuk-input--width-20' %}
 
-  {% include 'security/forms/prison-selector-fieldset.html' %}
+  {% include 'security/forms/prison-selector-fieldset.html' with field=form.prison_selector %}
 
-  <div class="heading-large mtp-invoice-nr-header">{% trans 'Invoice number' %}</div>
-  {% include 'mtp_common/forms/field.html' with field=form.invoice_number %}
+  <div class="govuk-heading-l">{% trans 'Invoice number' %}</div>
+  {% include 'mtp_common/forms/field.html' with field=form.invoice_number input_classes='govuk-input--width-10' %}
 
 {% endblock advanced_search_fields %}

@@ -6,11 +6,11 @@
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
 
-{% block inner_content %}
+{% block content %}
   <header class="mtp-check-header">
-    <h1 class="heading-xlarge">{{ view.title }}</h1>
+    <h1 class="govuk-heading-xl">{{ view.title }}</h1>
 
-    <aside class="mtp-check-header__list-toggle print-hidden">
+    <aside class="mtp-check-header__list-toggle govuk-!-display-none-print">
       {% if check.assigned_to and check.assigned_to != request.user.pk %}
         <strong class="mtp-check-header__assigned-user">
           {% blocktrans trimmed with assigned_to_name=check.assigned_to_name|genitive %}
@@ -21,43 +21,43 @@
         <form action="{% url 'security:assign_check' check_id=check.id %}" method="post">
           {% csrf_token %}
           {% if check.assigned_to %}
-            <button type="submit" name="assignment" class="button-secondary" value="unassign">{% trans 'Remove from my list' %}</button>
+            <button type="submit" name="assignment" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="unassign">{% trans 'Remove from my list' %}</button>
           {% else %}
-            <button type="submit" name="assignment" class="button-secondary" value="assign">{% trans 'Add to my list' %}</button>
+            <button type="submit" name="assignment" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="assign">{% trans 'Add to my list' %}</button>
           {% endif %}
         </form>
       {% endif %}
     </aside>
   </header>
 
-  {% include 'mtp_common/includes/message_box.html' %}
+  {% notification_banners request %}
 
-  <h2 class="heading-medium">{% trans 'Credit details' %}</h2>
+  <h2 class="govuk-heading-m">{% trans 'Credit details' %}</h2>
 
-  <div class="mtp-results-list table-font-xsmall mtp-check-list">
-    <table class="mtp-table mtp-table--review">
+  <div class="mtp-table__container mtp-results-list">
+    <table class="mtp-table mtp-table--small govuk-!-margin-bottom-9">
       <thead>
         <tr>
-          <th class="mtp-compact-cell">
-            <span class="visually-hidden">{% trans 'Needs attention?' %}</span>
+          <th class="mtp-table__header--compact" scope="col">
+            <span class="govuk-visually-hidden">{% trans 'Needs attention?' %}</span>
           </th>
-          <th>{% trans 'Date sent' %}</th>
-          <th>{% trans 'Debit card (from)' %}</th>
-          <th>{% trans 'Prisoner (to)' %}</th>
-          <th>{% trans 'Amount' %}</th>
-          <th class="print-hidden">{% trans 'Actions' %}</th>
+          <th scope="col">{% trans 'Date sent' %}</th>
+          <th scope="col">{% trans 'Debit card (from)' %}</th>
+          <th scope="col">{% trans 'Prisoner (to)' %}</th>
+          <th class="govuk-table__header--numeric" scope="col">{% trans 'Amount' %}</th>
+          <th class="govuk-!-display-none-print" scope="col">{% trans 'Actions' %}</th>
         </tr>
       </thead>
       <tbody>
         <tr class="mtp-check-row">
-          <td class="mtp-compact-cell">
+          <td class="mtp-table__cell--compact">
             {% if check.needs_attention %}
-              <span class="visually-hidden">
+              <span class="govuk-visually-hidden">
                 {% trans 'This credit needs attention today!' %}
               </span>
               <span class="mtp-check-needs-attention" aria-hidden="true">!</span>
             {% else %}
-              <span class="visually-hidden">
+              <span class="govuk-visually-hidden">
                 {% trans 'This credit does not need attention today.' %}
               </span>
             {% endif %}
@@ -66,7 +66,7 @@
             {{ check.credit.started_at|date:'SHORT_DATETIME_FORMAT'}}
           </td>
           <td>
-            <a href="{{ check.credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ check.credit.sender_name }}</a>
+            <a href="{{ check.credit|sender_profile_search_url }}" class="mtp-link--print-plain">{{ check.credit.sender_name }}</a>
             <br/>
             {{ check.credit|format_card_number }} &nbsp; {{ check.credit.card_expiry_date }}
             <br />
@@ -75,16 +75,16 @@
             {{ check.credit.billing_address.postcode }}
           </td>
           <td>
-            <a href="{{ check.credit|prisoner_profile_search_url }}" class="mtp-print-url-hidden">{{ check.credit.prisoner_name }}</a>
+            <a href="{{ check.credit|prisoner_profile_search_url }}" class="mtp-link--print-plain">{{ check.credit.prisoner_name }}</a>
             <br/>
             {{ check.credit.prisoner_number }}
             <br />
             {{ check.credit.prison_name }}
           </td>
-          <td>
+          <td class="govuk-table__cell--numeric">
             {{ check.credit.amount|currency }}
           </td>
-          <td class="print-hidden">
+          <td class="govuk-!-display-none-print">
             {{ check|format_security_check_status }}
           </td>
         </tr>
@@ -98,17 +98,17 @@
     </table>
   </div>
 
-  <h3 class="heading-medium">{% trans 'Credit decisions matching debit card or prisoner' %}</h3>
-  <div class="mtp-results-list table-font-xsmall mtp-check-list">
-    <table class="mtp-table mtp-table--review">
-      <caption class=visually-hidden>{% trans 'This is a table showing any previous credit decisions involving the prisoner or debit card in question' %}</caption>
+  <h3 class="govuk-heading-m">{% trans 'Credit decisions matching debit card or prisoner' %}</h3>
+  <div class="mtp-table__container mtp-results-list">
+    <table class="mtp-table mtp-table--small govuk-!-margin-bottom-9">
+      <caption class=govuk-visually-hidden>{% trans 'This is a table showing any previous credit decisions involving the prisoner or debit card in question' %}</caption>
       <thead>
         <tr>
-          <th>{% trans 'Date sent' %}</th>
-          <th>{% trans 'Debit card (from)' %}</th>
-          <th>{% trans 'Prisoner (to)' %}</th>
-          <th>{% trans 'Amount' %}</th>
-          <th>{% trans 'Decision' %}</th>
+          <th scope="col">{% trans 'Date sent' %}</th>
+          <th scope="col">{% trans 'Debit card (from)' %}</th>
+          <th scope="col">{% trans 'Prisoner (to)' %}</th>
+          <th class="govuk-table__header--numeric" scope="col">{% trans 'Amount' %}</th>
+          <th scope="col">{% trans 'Decision' %}</th>
         </tr>
       </thead>
       <tbody>
@@ -118,7 +118,7 @@
               {{ credit.started_at|date:'SHORT_DATETIME_FORMAT' }}
             </td>
             <td>
-              <a href="{{ credit|sender_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.sender_name }}</a>
+              <a href="{{ credit|sender_profile_search_url }}" class="mtp-link--print-plain">{{ credit.sender_name }}</a>
               <br/>
               {{ credit|format_card_number }}
               <br />
@@ -129,19 +129,17 @@
               {{ credit.billing_address.postcode }}
             </td>
             <td>
-              <a href="{{ credit|prisoner_profile_search_url }}" class="mtp-print-url-hidden">{{ credit.prisoner_name }}</a>
+              <a href="{{ credit|prisoner_profile_search_url }}" class="mtp-link--print-plain">{{ credit.prisoner_name }}</a>
               <br/>
               {{ credit.prisoner_number }}
               <br />
               {{ credit.prison_name }}
             </td>
-            <td>
+            <td class="govuk-table__cell--numeric">
               {{ credit.amount|currency }}
             </td>
             <td>
-              <span class="mtp-check-status-tag mtp-check-status-tag--{{ credit.security_check.status}}">
-                {{ credit.security_check|format_security_check_status }}
-              </span>
+              {{ credit.security_check|tag_for_security_check }}
               <br />
               {% trans 'by' %}
               {% if credit.security_check.auto_accept_rule_state and credit.security_check.auto_accept_rule_state.active %}
@@ -171,109 +169,100 @@
                   {% trans 'No decision reason entered' %}
                 {% endif %}
               {% endif %}
-              </td>
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="5">{% trans 'There are no credit decisions matching this debit card or prisoner.' %}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">{% trans 'There are no credit decisions matching this debit card or prisoner.' %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
     <form id="accept-or-reject-form" method="post" action="{% url 'security:resolve_check' check_id=check.id %}#accept-or-reject-form">
       {% csrf_token %}
-      {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+      {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
       {% if check.status == 'pending' %}
 
-        <div class="form-group">
-          <h2 class="heading-medium">{% trans 'Accept or reject this credit' %}</h2>
-          <h3 class="heading-medium">{% trans 'To accept this credit:' %}</h3>
-          {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details input_classes='form-control-3-4' %}
-          <div class="mtp-check-accept-container">
-            {% if unbound_active_auto_accept_state %}
-              <p class="panel panel-border-wide">
-                {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
-                  Auto accept started for credits from {{sender_name}} to {{prisoner_number}}
-                {% endblocktrans %}
-                </br>
-                <span class="mtp-font-weight-bold">Started by:</span>
-                {{ unbound_active_auto_accept_state.added_by.first_name}} {{ unbound_active_auto_accept_state.added_by.last_name}}
-                <br/>
-                <span class="mtp-font-weight-bold">Date:</span> {{ unbound_active_auto_accept_state.created |date:'SHORT_DATETIME_FORMAT' }}<br/>
-                <span class="mtp-font-weight-bold">Reason for automatically accepting:</span>
-                {{ unbound_active_auto_accept_state.reason }}
-              </p>
-            {% else %}
-              <div class="multiple-choice form-group" data-target="auto_accept_reason">
-                <input id="example-auto_accept_reason" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
-                <label for="example-auto_accept_reason">
-                  {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
-                    Automatically accept future credits from {{ sender_name }} to {{ prisoner_number }}
-                  {% endblocktrans %}
-                  <br/>
-                  {% trans 'They will be flagged in Decision history.' %}
-                </label>
-              </div>
-              <div class="panel panel-border-narrow js-hidden" id="auto_accept_reason">
-                <label class="form-label" for="rejection-auto_accept_reason">{% trans 'Give reason for automatically accepting' %}</label>
-                <textarea class="form-control mtp-check-form-auto-accept" name="auto_accept_reason" type="text" id="rejection-auto_accept_reason" disabled></textarea>
-              </div>
-            {% endif %}
+        <h2 class="govuk-heading-l">{% trans 'Accept or reject this credit' %}</h2>
+        <h3 class="govuk-heading-m">{% trans 'To accept this credit:' %}</h3>
+        {% include 'mtp_common/forms/textarea.html' with field=form.accept_further_details rows=2 %}
+        {% if unbound_active_auto_accept_state %}
+
+          <p class="govuk-inset-text">
+            {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
+              Auto accept started for credits from {{sender_name}} to {{prisoner_number}}
+            {% endblocktrans %}
             <br/>
-            <button type="submit" class="button" name="fiu_action" value="accept">
-              {% trans 'Accept credit' %}
-            </button>
-          </div>
+            <strong>{% trans 'Started by' %}:</strong>
+            {{ unbound_active_auto_accept_state.added_by.first_name}} {{ unbound_active_auto_accept_state.added_by.last_name}}
+            <br/>
+            <strong>{% trans 'Date' %}:</strong>
+            {{ unbound_active_auto_accept_state.created |date:'SHORT_DATETIME_FORMAT' }}
+            <br/>
+            <strong>{% trans 'Reason for automatically accepting' %}:</strong>
+            {{ unbound_active_auto_accept_state.reason }}
+          </p>
 
-          <h3 class="heading-medium">{% trans 'To reject this credit:' %}</h2>
-          <fieldset class="mtp-check-form-spacing">
-            <legend class="govuk-fieldset__legend govuk-fieldset__legend">{% trans 'Select all reasons for rejecting this credit:' %}</legend>
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_paying_multiple_prisoners input_classes='form-control-3-4' %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_multiple_cards input_classes='form-control-3-4'  %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_linked_other_prisoners input_classes='form-control-3-4'  %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_known_email input_classes='form-control-3-4' %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.payment_source_unidentified input_classes='form-control-3-4' %}
-            {% include 'mtp_common/forms/checkbox-field.html' with field=form.prisoner_multiple_payments_payment_sources input_classes='form-control-3-4' %}
-            <div class="multiple-choice form-group" data-target="fiu_investigation_id">
-              <input id="example-fiu_investigation_id" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
-              <label for="example-fiu_investigation_id">{{ form.human_readable_names.fiu_investigation_id }}</label>
-            </div>
-            <div class="panel panel-border-narrow js-hidden" id="fiu_investigation_id">
-              <label class="form-label" for="rejection-fiu_investigation_id">{% trans 'Give reference' %}</label>
-              <input class="form-control" name="fiu_investigation_id" type="text" id="rejection-fiu_investigation_id" disabled>
-            </div>
+        {% else %}
 
-            <div class="multiple-choice form-group" data-target="intelligence_report_id">
-              <input id="example-intelligence_report_id" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
-              <label for="example-intelligence_report_id">{{ form.human_readable_names.intelligence_report_id }}</label>
-            </div>
-            <div class="panel panel-border-narrow js-hidden" id="intelligence_report_id">
-              <label class="form-label" for="rejection-intelligence_report_id">{% trans 'Give reference' %}</label>
-              <input class="form-control" name="intelligence_report_id" type="text" id="rejection-intelligence_report_id" disabled>
-            </div>
-            <div class="multiple-choice form-group" data-target="other_reason">
-              <input id="example-other_reason" class="js-ToggleTextFieldOnChange" type="checkbox" name="checkbox-rejection-group" value="No">
-              <label for="example-other_reason">{{ form.human_readable_names.other_reason }}</label>
-            </div>
-            <div class="panel panel-border-narrow js-hidden" id="other_reason">
-              <label class="form-label" for="rejection-other_reason">{% trans 'Give the reason' %}</label>
-              <input class="form-control" name="other_reason" type="text" id="rejection-other_reason" disabled>
-            </div>
-          </fieldset>
-          <div class="mtp-check-details-spacing">
-            {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details input_classes='form-control-3-4' %}
-            <button type="submit" class="button button-warning " name="fiu_action" value="reject">
-              {% trans 'Reject credit' %}
-            </button>
-          </div>
-        </div>
+          {% captureoutput as auto_accept_label %}
+            {% blocktrans trimmed with sender_name=check.credit.sender_name prisoner_number=check.credit.prisoner_number %}
+              Automatically accept future credits from {{ sender_name }} to {{ prisoner_number }}
+            {% endblocktrans %}
+          {% endcaptureoutput %}
+          {% captureoutput as conditional_content %}
+            {% include 'mtp_common/forms/textarea.html' with field=form.auto_accept_reason rows=1 only %}
+          {% endcaptureoutput %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.auto_accept label=auto_accept_label conditional_content=conditional_content only %}
+
+        {% endif %}
+        <br/>
+        <button type="submit" class="govuk-button" data-module="govuk-button" name="fiu_action" value="accept">
+          {% trans 'Accept credit' %}
+        </button>
+
+        <h3 class="govuk-heading-m govuk-!-margin-top-6">{% trans 'To reject this credit:' %}</h3>
+        <fieldset class="govuk-fieldset govuk-!-width-three-quarters govuk-!-margin-bottom-6 mtp-form-checkbox-group">
+          <legend class="govuk-fieldset__legend">{% trans 'Select all reasons for rejecting this credit:' %}</legend>
+
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_paying_multiple_prisoners small=True only %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_multiple_cards small=True only %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_linked_other_prisoners small=True only %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_known_email small=True only %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_unidentified small=True only %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.prisoner_multiple_payments_payment_sources small=True only %}
+
+          {% captureoutput as conditional_content %}
+            {% include 'mtp_common/forms/field.html' with field=form.fiu_investigation_id only %}
+          {% endcaptureoutput %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.has_fiu_investigation_id conditional_content=conditional_content small=True only %}
+
+          {% captureoutput as conditional_content %}
+            {% include 'mtp_common/forms/field.html' with field=form.intelligence_report_id only %}
+          {% endcaptureoutput %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.has_intelligence_report_id conditional_content=conditional_content small=True only %}
+
+          {% captureoutput as conditional_content %}
+            {% include 'mtp_common/forms/textarea.html' with field=form.other_reason rows=2 only %}
+          {% endcaptureoutput %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.has_other_reason conditional_content=conditional_content small=True only %}
+        </fieldset>
+
+        {% include 'mtp_common/forms/textarea.html' with field=form.reject_further_details rows=2 %}
+
+        <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button" name="fiu_action" value="reject">
+          {% trans 'Reject credit' %}
+        </button>
 
       {% else %}
 
-        <h2 class="heading-medium">{% trans 'Decision' %}</h2>
+        <h2 class="govuk-heading-m">{% trans 'Decision' %}</h2>
         <p>
           {% blocktrans trimmed with resolved=check|format_security_check_status|lower user=check.actioned_by_name %}
             This credit was {{ resolved }} by {{ user }}.
@@ -286,7 +275,7 @@
             <br/>
           {% endfor %}
           {% if check.decision_reason %}
-            Further Details: {{ check.decision_reason }}
+            {% trans 'Further details' %}: {{ check.decision_reason }}
           {% elif not check.rejection_reasons %}
             {% trans 'No decision reason entered' %}
           {% endif %}
@@ -295,5 +284,8 @@
       {% endif %}
 
     </form>
+
+    </div>
+  </div>
 
 {% endblock %}

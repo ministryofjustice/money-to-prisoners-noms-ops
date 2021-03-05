@@ -1,21 +1,23 @@
 {% load i18n %}
+{% load mtp_common %}
+
 {% if is_search_results %}
   <header>
-  <h1 class="heading-xlarge">
-    <span class="heading-secondary">{{ view.title }}</span>
-    {% if is_advanced_search_results %}
-      {% trans 'Advanced search results' %}
-    {% else %}
-      {% trans 'Search results' %}
-    {% endif %}
-  </h1>
+    <h1 class="govuk-heading-xl">
+      <span class="govuk-caption-xl">{{ view.title }}</span>
+      {% if is_advanced_search_results %}
+        {% trans 'Advanced search results' %}
+      {% else %}
+        {% trans 'Search results' %}
+      {% endif %}
+    </h1>
   </header>
 
-  {% include 'mtp_common/includes/message_box.html' %}
+  {% notification_banners request %}
 
-  {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+  {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
-  <p class="mtp-search-description">
+  <p class="govuk-body-l">
     {% if objects %}
       {{ form.search_description.description }}
     {% else %}
@@ -28,28 +30,23 @@
   </p>
 {% else %}
   <header>
-    <h1 class="heading-xlarge">{{ view.title }}</h1>
+    <h1 class="govuk-heading-xl">{{ view.title }}</h1>
   </header>
 
-  {% include 'mtp_common/includes/message_box.html' %}
+  {% notification_banners request %}
 
-  {% include 'mtp_common/forms/error-summary.html' with form=form only %}
+  {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
-  <div class="print-hidden">
-    <div class="mtp-security-form--simple">
+  <div class="govuk-!-display-none-print">
     <input type="hidden" name="{{ search_form_submitted_input_name }}" value="1" />
     {{ form.ordering.as_hidden }}
     {{ form.prison_selector.as_hidden }}
-
-    {% with field=form.simple_search %}
-      <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
-        {% include 'mtp_common/forms/field-label.html' with field=field only %}
-        {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-
-        <input id="{{ field.id_for_label }}" class="form-control {% if field.errors %}form-control-error{% endif %}" name="{{ field.html_name }}" value="{{ field.value|default_if_none:'' }}" type="{{ field.field.widget.input_type|default:'text' }}" />
-      </div>
-      <button type="submit" class="button" value="submit">{% blocktrans with object_name=view.object_name_plural %}Search {{ object_name }}{% endblocktrans %}</button>
-    {% endwith %}
-    </div>
+    {% include 'mtp_common/forms/field.html' with field=form.simple_search label_classes='govuk-!-font-size-27' only %}
+    <p>
+      <button type="submit" class="govuk-button" data-module="govuk-button" value="submit">{% blocktrans with object_name=view.object_name_plural %}Search {{ object_name }}{% endblocktrans %}</button>
+      <a href="{{ advanced_search_url }}" class="mtp-link--form-cancel">
+        {% trans 'Advanced search' %}
+      </a>
+    </p>
   </div>
 {% endif %}

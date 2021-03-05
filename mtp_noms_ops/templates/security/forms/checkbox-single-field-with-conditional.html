@@ -1,0 +1,28 @@
+{% load i18n %}
+
+{# extension of mtp_common/forms/checkbox-single-field.html which contains conditionally-revealed content #}
+
+<div id="{{ field.id_for_label }}-wrapper" class="govuk-form-group {% if field.errors %}govuk-form-group--error{% endif %}">
+  {% include 'mtp_common/forms/field-errors.html' with field=field only %}
+
+  <div class="govuk-checkboxes {% if conditional_content %}govuk-checkboxes--conditional mtp-checkbox-with-conditional-subfields{% endif %} {% if small %}govuk-checkboxes--small{% endif %}" data-module="govuk-checkboxes">
+    {% with checked=value|default:field.value|default:field.field.initial %}
+      <div class="govuk-checkboxes__item">
+        <input id="{{ field.id_for_label }}" class="govuk-checkboxes__input {{ input_classes }}" name="{{ field.html_name }}" type="checkbox" {% if checked %}checked{% endif %} {% if conditional_content %}data-aria-controls="{{ field.id_for_label }}-{{ choice_slug }}-conditional"{% endif %} />
+        <label for="{{ field.id_for_label }}" id="{{ field.id_for_label }}-label" class="govuk-label govuk-checkboxes__label">
+          {{ label|default:field.label }}
+        </label>
+        {% if field.help_text %}
+          <span id="{{ field.id_for_label }}-hint" class="govuk-hint govuk-checkboxes__hint">
+            {{ field.help_text }}
+          </span>
+        {% endif %}
+      </div>
+      {% if conditional_content %}
+        <div class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden" id="{{ field.id_for_label }}-{{ choice_slug }}-conditional">
+          {{ conditional_content }}
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
+</div>

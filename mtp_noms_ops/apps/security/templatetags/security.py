@@ -247,6 +247,24 @@ def format_security_check_status(check):
 
 
 @register.filter
+def tag_for_security_check(check):
+    status = check.get('status') or 'unknown'
+    if status == 'accepted':
+        css_class = 'govuk-tag--green'
+    elif status == 'rejected':
+        css_class = 'govuk-tag--red'
+    elif status == 'pending':
+        css_class = 'govuk-tag--yellow'
+    else:
+        css_class = 'govuk-tag--grey'
+    return format_html(
+        '<span class="govuk-tag {css_class}">{description}</span>',
+        css_class=css_class,
+        description=format_security_check_status(check),
+    )
+
+
+@register.filter
 def find_rejection_reason(comment_set):
     for comment in filter(lambda comment: comment['category'] == 'reject', comment_set):
         return comment['comment']

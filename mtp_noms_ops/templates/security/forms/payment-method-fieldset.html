@@ -1,31 +1,15 @@
+{% extends 'security/forms/radio-fieldset.html' %}
 {% load i18n %}
 
-{% with field=form.payment_method choices=form.payment_method.field.choices %}
-  <fieldset class="mtp-conditional-container">
-    <legend id="{{ field.id_for_label }}-label" class="visually-hidden">
-      <strong>{{ field.label }}</strong>
-    </legend>
-
-    <div class="{% if field.errors %}form-group-error{% endif %}">
-      {% for value, label in choices %}
-        <div class="multiple-choice">
-          <input id="{{ field.html_name }}-{{ value }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == field.value|default:"" %}checked{% endif %}>
-          <label for="{{ field.html_name }}-{{ value }}">{{ label }}</label>
-        </div>
-
-        {% if value == 'bank_transfer' %}
-        <div class="mtp-conditional-wrapper" id="mtp-conditional-payment_method-bank_transfer">
-          {% include 'mtp_common/forms/field.html' with field=form.account_number only %}
-          {% include 'mtp_common/forms/field.html' with field=form.sort_code only %}
-        </div>
-        {% endif %}
-
-        {% if value == 'online' %}
-        <div class="mtp-conditional-wrapper" id="mtp-conditional-payment_method-online">
-          {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits only %}
-        </div>
-        {% endif %}
-      {% endfor %}
+{% block conditional_fields %}
+  {% if choice == 'bank_transfer' %}
+    <div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="{{ field.id_for_label }}-{{ choice_slug }}-conditional">
+      {% include 'mtp_common/forms/field.html' with field=form.account_number input_classes='govuk-input--width-10' only %}
+      {% include 'mtp_common/forms/field.html' with field=form.sort_code input_classes='govuk-input--width-5' only %}
     </div>
-  </fieldset>
-{% endwith %}
+  {% elif choice == 'online' %}
+    <div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="{{ field.id_for_label }}-{{ choice_slug }}-conditional">
+      {% include 'mtp_common/forms/field.html' with field=form.card_number_last_digits input_classes='govuk-input--width-5' only %}
+    </div>
+  {% endif %}
+{% endblock %}

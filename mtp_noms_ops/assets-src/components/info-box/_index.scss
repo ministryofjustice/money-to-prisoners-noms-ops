@@ -1,0 +1,22 @@
+.mtp-info-box {
+  margin-bottom: 1em;
+  padding: 1em 1em 1.75em;
+  background-color: govuk-colour('blue');
+  color: govuk-colour('white');
+
+  .mtp-info-box__heading {
+    @extend %govuk-heading-s;
+    color: govuk-colour('white');
+  }
+
+  .mtp-info-box__contents {
+    p {
+      @extend %govuk-body-s;
+      color: govuk-colour('white');
+    }
+
+    :last-child {
+      margin-bottom: 0;
+    }
+  }
+}

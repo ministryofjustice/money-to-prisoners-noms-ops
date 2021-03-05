@@ -8,89 +8,28 @@
   {{ block.super }}
 {% endblock %}
 
-{% block inner_content %}
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
-  <header>
-    <h1 class="heading-xlarge">{{ view.title }}</h1>
-  </header>
+      <header>
+        <h1 class="govuk-heading-xl">{{ view.title }}</h1>
+      </header>
 
-  {% include 'mtp_common/includes/message_box.html' %}
+      {% notification_banners request %}
 
-  <div class="grid-row">
-    <div class="column-two-thirds">
-
-      <form method="post" class="mtp-job-information-form">
+      <form method="post">
         {% csrf_token %}
 
-        {% if form.errors %}
-          {% include 'mtp_common/forms/error-summary.html' with form=form only %}
-        {% endif %}
+        {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
-        {% with field=form.job_title choices=form.job_title.field.choices %}
-          <fieldset class="mtp-conditional-container">
-            <legend id="{{ field.id_for_label }}-label">
-              <strong class="heading-large">{{ field.label }}</strong>
-            </legend>
+        {% include 'security/forms/job-title-fieldset.html' with field=form.job_title %}
+        {% include 'mtp_common/forms/radio-field.html' with field=form.prison_estate label_classes='govuk-fieldset__legend--l' only %}
+        {% include 'mtp_common/forms/textarea.html' with field=form.tasks label_classes='govuk-label--l' only %}
 
-            <div class="form-group {% if field.errors %}form-group-error{% endif %}">
-            {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-
-            {% with initial=value|default:field.value %}
-              {% for value, label in choices %}
-                <div class="multiple-choice">
-                  <input id="{{ field.html_name }}-{{ value|slugify }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == initial %}checked{% endif %}>
-                  <label for="{{ field.html_name }}-{{ value|slugify }}">{{ label }}</label>
-                </div>
-                {% if value == 'Other' %}
-                  <div class="mtp-conditional-wrapper" id="mtp-conditional-job_title-Other">
-                    {% include 'mtp_common/forms/field.html' with field=form.other_title only %}
-                  </div>
-                {% endif %}
-              {% endfor %}
-            {% endwith %}
-            </div>
-          </fieldset>
-        {% endwith %}
-
-        {% with field=form.prison_estate choices=form.prison_estate.field.choices %}
-          <fieldset>
-            <legend id="{{ field.id_for_label }}-label">
-              <strong class="heading-large">{{ field.label }}</strong>
-            </legend>
-
-            <div class="form-group {% if field.errors %}form-group-error{% endif %}">
-              {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-              {% with initial=value|default:field.value %}
-                {% for value, label in choices %}
-                  <div class="multiple-choice">
-                    <input id="{{ field.html_name }}-{{ value|slugify }}" type="radio" name="{{ field.html_name }}" value="{{ value }}" {% if value == initial %}checked{% endif %}>
-                    <label for="{{ field.html_name }}-{{ value|slugify }}">{{ label }}</label>
-                  </div>
-                {% endfor %}
-              {% endwith %}
-            </div>
-          </fieldset>
-        {% endwith %}
-
-        {% with field=form.tasks %}
-          <fieldset>
-            <legend id="{{ field.id_for_label }}-label">
-              <strong class="heading-large">{{ field.label }}</strong>
-            </legend>
-            <div id="{{ field.id_for_label }}-wrapper" class="form-group {% if field.errors %}form-group-error{% endif %}">
-              <p class="form-hint">{{ field.help_text }}</p>
-              {% include 'mtp_common/forms/field-errors.html' with field=field only %}
-
-              <textarea id="{{ field.id_for_label }}" class="form-control {% if field.errors %}form-control-error{% endif %} {{ input_classes }}" name="{{ field.html_name }}" rows="4" cols="50" {% for attr, attr_val in attrs.items %} {{ attr }}="{{ attr_val }}" {% endfor %}>{{ value|default:field.value|default_if_none:'' }}</textarea>
-            </div>
-          </fieldset>
-        {% endwith %}
-
-        <div class="form-group">
-          <button type="submit" class="button">
-            {% trans 'Continue' %}
-          </button>
-        </div>
+        <button type="submit" class="govuk-button" data-module="govuk-button">
+          {% trans 'Continue' %}
+        </button>
       </form>
 
     </div>

@@ -190,6 +190,11 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
     )
+    auto_accept = forms.BooleanField(
+        required=False,
+        label=_('Automatically accept future credits'),  # label is replaced in template
+        help_text=_('They will be flagged in decision history'),
+    )
     auto_accept_reason = forms.CharField(
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['auto_accept_reason'],
@@ -198,17 +203,29 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
     )
-    fiu_investigation_id = forms.CharField(
+    has_fiu_investigation_id = forms.BooleanField(
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['fiu_investigation_id'],
     )
-    intelligence_report_id = forms.CharField(
+    fiu_investigation_id = forms.CharField(
+        required=False,
+        label=_('Give FIU reference'),
+    )
+    has_intelligence_report_id = forms.BooleanField(
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['intelligence_report_id'],
     )
-    other_reason = forms.CharField(
+    intelligence_report_id = forms.CharField(
+        required=False,
+        label=_('Give reference'),
+    )
+    has_other_reason = forms.BooleanField(
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['other_reason'],
+    )
+    other_reason = forms.CharField(
+        required=False,
+        label=_('Give the reason'),
     )
     payment_source_paying_multiple_prisoners = forms.BooleanField(
         required=False,
@@ -234,7 +251,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         required=False,
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['prisoner_multiple_payments_payment_sources'],
     )
-    human_readable_names = CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
+
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
         'reject_with_accept_details': _(
@@ -254,6 +271,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         self.object_id = object_id
         self.need_attention_date = get_need_attention_date()
         self.request = request
+        self.data_payload = None
 
     @lru_cache()
     def get_object(self):
@@ -278,10 +296,10 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         return get_api_session(self.request)
 
     def is_reject_reason_populated(self):
-        return any([
+        return any(
             self.cleaned_data.get(rejection_field)
-            for rejection_field in self.human_readable_names.keys()
-        ])
+            for rejection_field in CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
+        )
 
     def clean(self):
         """
@@ -338,7 +356,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                 self.data_payload['rejection_reasons'] = dict(
                     item
                     for item in self.cleaned_data.items()
-                    if item[1] and item[0] in self.human_readable_names.keys()
+                    if item[1] and item[0] in CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
                 )
         return super().clean()
 
@@ -512,7 +530,7 @@ class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
 
         if self.cleaned_data.get('assignment') == 'assign':
             user_id = self.request.user.pk
-        elif self.cleaned_data.get('assignment') == 'unassign':
+        else:
             user_id = None
 
         try:
