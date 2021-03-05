@@ -40,43 +40,49 @@
           {% if date_group.senders %}
             <h4 class="govuk-heading-s">{% trans 'Payment sources' %}</h4>
 
-            {% for sender in date_group.senders %}
-              <a href="{% url 'security:sender_detail' sender_id=sender.id %}">
-                {{ sender.description }}
-                –
-                {% blocktrans trimmed count count=sender.transaction_count %}
-                  {{ count }} transaction
-                {% plural %}
-                  {{ count }} transactions
-                {% endblocktrans %}
-              </a>
-              <br />
-            {% endfor %}
+            <ul class="govuk-list">
+              {% for sender in date_group.senders %}
+                <li>
+                  <a href="{% url 'security:sender_detail' sender_id=sender.id %}">
+                    {{ sender.description }}
+                    –
+                    {% blocktrans trimmed count count=sender.transaction_count %}
+                      {{ count }} transaction
+                    {% plural %}
+                      {{ count }} transactions
+                    {% endblocktrans %}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
           {% endif %}
 
           {% if date_group.prisoners %}
             <h4 class="govuk-heading-s">{% trans 'Prisoners' %}</h4>
 
-            {% for prisoner in date_group.prisoners %}
-              {% if prisoner.disbursements_only %}
-                {% url 'security:prisoner_disbursement_detail' prisoner_id=prisoner.id as prisoner_url %}
-              {% else %}
-                {% url 'security:prisoner_detail' prisoner_id=prisoner.id as prisoner_url %}
-              {% endif %}
-              <a href="{{ prisoner_url }}">
-                {{ prisoner.description }}
-                –
-                {% blocktrans trimmed count count=prisoner.transaction_count %}
-                  {{ count }} transaction
-                {% plural %}
-                  {{ count }} transactions
-                {% endblocktrans %}
-              </a>
-              <br />
-            {% endfor %}
+            <ul class="govuk-list">
+              {% for prisoner in date_group.prisoners %}
+                <li>
+                  {% if prisoner.disbursements_only %}
+                    {% url 'security:prisoner_disbursement_detail' prisoner_id=prisoner.id as prisoner_url %}
+                  {% else %}
+                    {% url 'security:prisoner_detail' prisoner_id=prisoner.id as prisoner_url %}
+                  {% endif %}
+                  <a href="{{ prisoner_url }}">
+                    {{ prisoner.description }}
+                    –
+                    {% blocktrans trimmed count count=prisoner.transaction_count %}
+                      {{ count }} transaction
+                    {% plural %}
+                      {{ count }} transactions
+                    {% endblocktrans %}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
           {% endif %}
 
-          <hr />
+          {% include 'govuk-frontend/components/section-break.html' with visible=True size='l' %}
         {% endfor %}
 
         <div class="mtp-page-list__container">
