@@ -27,10 +27,10 @@
   <form method="post" class="mtp-review mtp-form-analytics">
     {% csrf_token %}
 
-    <p class="govuk-!-display-none-print">
+    <div class="govuk-button-group govuk-!-display-none-print">
       <button type="submit" name="submit" class="govuk-button" data-module="govuk-button" value="submit">{% trans 'Credits checked by security' %}</button>
-      <a class="mtp-print-trigger mtp-form-analytics__click mtp-link--form-cancel" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print these credits' %}</a>
-    </p>
+      <a class="mtp-print-trigger mtp-form-analytics__click govuk-link" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print these credits' %}</a>
+    </div>
 
     <div class="mtp-table__container mtp-results-list">
       <table class="mtp-table mtp-table--small">
