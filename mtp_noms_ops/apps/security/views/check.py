@@ -111,6 +111,13 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         context_data['breadcrumbs'] = self.get_breadcrumbs(list_url)
         return context_data
 
+    def get_breadcrumbs(self, list_url):
+        return [
+            {'name': gettext_lazy('Home'), 'url': reverse('security:dashboard')},
+            {'name': self.list_title, 'url': list_url},
+            {'name': gettext_lazy('Review')},
+        ]
+
     def get_object_for_template(self, obj):
         return convert_date_fields(obj, include_nested=True)
 
@@ -241,7 +248,7 @@ class AcceptOrRejectCheckView(FormView):
         context_data['breadcrumbs'] = [
             {'name': gettext_lazy('Home'), 'url': reverse('security:dashboard')},
             {'name': self.list_title, 'url': list_url},
-            {'name': gettext_lazy('Review')},
+            {'name': self.title}
         ]
         context_data[self.object_context_key] = detail_object
         context_data['related_credits'] = self._get_related_credits(api_session, context_data[self.object_context_key])
