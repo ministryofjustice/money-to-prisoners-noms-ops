@@ -22,4 +22,4 @@ export var Security = {
       $('#confirm-checked').trigger('dialogue:open');
     });
   }
-}
+};
