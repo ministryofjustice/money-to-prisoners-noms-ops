@@ -241,7 +241,7 @@ class AcceptOrRejectCheckView(FormView):
         context_data['breadcrumbs'] = [
             {'name': gettext_lazy('Home'), 'url': reverse('security:dashboard')},
             {'name': self.list_title, 'url': list_url},
-            {'name': self.title},
+            {'name': gettext_lazy('Review')},
         ]
         context_data[self.object_context_key] = detail_object
         context_data['related_credits'] = self._get_related_credits(api_session, context_data[self.object_context_key])
