@@ -44,7 +44,7 @@
             {{ auto_accept_state.created | date:'SHORT_DATETIME_FORMAT' }}
             </td>
             <td>
-            {{ auto_accept_state.added_by.last_name }}, {{ auto_accept_state.added_by.first_name }}
+            {{ auto_accept_state.added_by | format_name }}
             </td>
             <td>
             {% if auto_accept_state.active %}

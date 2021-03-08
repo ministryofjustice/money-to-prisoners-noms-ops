@@ -5619,7 +5619,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                 self.assertIn(resp['prisoner_profile']['prisoner_number'], content)
                 self.assertIn(resp['prisoner_profile']['prisoner_name'], content)
                 self.assertIn(
-                    '{last_name}, {first_name}'.format(
+                    '{first_name} {last_name}'.format(
                         last_name=self._only_active_states(resp['states'])[-1]['added_by']['last_name'],
                         first_name=self._only_active_states(resp['states'])[-1]['added_by']['first_name']
                     ),
@@ -5660,7 +5660,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                 '{}/security/checks/auto-accept/?{}'.format(
                     settings.API_URL,
                     urlencode([
-                        ('ordering', '-states__added_by__last_name'),
+                        ('ordering', '-states__added_by__first_name'),
                         ('is_active', True),
                         ('offset', 0),
                         ('limit', page_size)
@@ -5674,7 +5674,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                 '{}?{}'.format(
                     reverse('security:auto_accept_rule_list'),
                     urlencode((
-                        ('ordering', '-states__added_by__last_name'),
+                        ('ordering', '-states__added_by__first_name'),
                         ('is_active', True),
                         ('offset', 0),
                         ('limit', page_size)
@@ -5737,7 +5737,7 @@ class AutoAcceptDetailViewTestCase(BaseCheckViewTestCase):
         )
         self.assertContains(
             response,
-            '{last_name}, {first_name}'.format(
+            '{first_name} {last_name}'.format(
                 last_name=auto_accept['states'][0]['added_by']['last_name'],
                 first_name=auto_accept['states'][0]['added_by']['first_name'],
             )
@@ -5761,7 +5761,7 @@ class AutoAcceptDetailViewTestCase(BaseCheckViewTestCase):
             )
             self.assertContains(
                 response,
-                '{last_name}, {first_name}'.format(
+                '{first_name} {last_name}'.format(
                     last_name=auto_accept['states'][1]['added_by']['last_name'],
                     first_name=auto_accept['states'][1]['added_by']['first_name'],
                 )

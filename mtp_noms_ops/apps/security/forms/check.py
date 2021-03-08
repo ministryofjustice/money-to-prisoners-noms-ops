@@ -137,8 +137,8 @@ class AutoAcceptListForm(SecurityForm):
         choices=[
             ('states__created', _('Date started (oldest to newest)')),
             ('-states__created', _('Date started (newest to oldest)')),
-            ('states__added_by__last_name', _('Surname of person who last activated (oldest to newest)')),
-            ('-states__added_by__last_name', _('Surname of person who last activated (newest to oldest)')),
+            ('states__added_by__first_name', _('Forename of person who last activated (lexical order)')),
+            ('-states__added_by__first_name', _('Forename of person who last activated (reverse lexical order)')),
         ],
     )
 

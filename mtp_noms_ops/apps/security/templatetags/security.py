@@ -401,7 +401,7 @@ def get_latest_active_auto_accept_state_field(context, field_name):
 def format_name(user_dict):
     if isinstance(user_dict, str):
         return user_dict
-    return '{last_name}, {first_name}'.format(
+    return '{first_name} {last_name}'.format(
         first_name=user_dict.get('first_name'),
         last_name=user_dict.get('last_name')
     )
