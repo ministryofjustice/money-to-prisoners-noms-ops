@@ -19,9 +19,9 @@
 
   <p class="govuk-!-font-size-36">
     {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
-    {{ number }} auto accept rule
+    {{ number }} auto accept
     {% plural %}
-    {{ number }} auto accept rules
+    {{ number }} auto accepts
     {% endblocktrans %}
   </p>
 
@@ -31,8 +31,8 @@
         <tr>
           <th scope="col">{% trans 'Debit card (from)' %}</th>
           <th scope="col">{% trans 'Prisoner (to)' %}</th>
-          {% sortable_cell _('Started By') request_params 'states__added_by__first_name' %}
-          {% sortable_cell _('Start Date') request_params 'states__created' %}
+          {% sortable_cell _('Started by') request_params 'states__added_by__first_name' %}
+          {% sortable_cell _('Start date') request_params 'states__created' %}
           <th scope="col">{% trans 'Reason' %}</th>
           <th scope="col">{% trans 'Action' %}</th>
         </tr>
@@ -71,7 +71,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6">{% trans 'There are no auto accept rules' %}</td>
+          <td colspan="6">{% trans 'There are no auto accepts' %}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -81,9 +81,9 @@
   <div class="mtp-page-list__container">{% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
     <p class="mtp-page-list__count">
       {% blocktrans trimmed count count=form.total_count with initial=form.initial_index final=form.final_index number=form.total_count|separate_thousands %}
-      {{ number }} auto accept rule
+        <b>{{ number }}</b> auto accept
       {% plural %}
-      Showing {{ initial}} to {{ final }} of {{ number }} auto accept rules
+        Showing <b>{{ initial}}</b> to <b>{{ final }}</b> of <b>{{ number }}</b> auto accepts
       {% endblocktrans %}
     </p>
   </div>

@@ -443,7 +443,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                             # TODO we happy that this check won't be linked to the existing auto-accept rule in the UI?
                             return (
                                 True,
-                                'The auto-accept rule could not be created because an auto-accept rule '
+                                'The auto-accept could not be created because an auto-accept '
                                 'already exists for {sender_name} and {prisoner_number}'.format(
                                     sender_name=check['credit']['sender_name'],
                                     prisoner_number=check['credit']['prisoner_number']
@@ -455,7 +455,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
 
 
 class AutoAcceptDetailForm(forms.Form):
-    deactivation_reason = forms.CharField(label='Give details why auto accept is to stop')
+    deactivation_reason = forms.CharField(label='Give reason why auto accept is to stop')
 
     def __init__(self, object_id, request, **kwargs):
         super().__init__(**kwargs)

@@ -129,7 +129,7 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         messages.add_message(
             self.request,
             messages.INFO,
-            gettext_lazy('Auto accept rule was deactivated'),
+            gettext_lazy('The auto accept was stopped'),
         )
         return super().form_valid(form)
 
