@@ -4679,7 +4679,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(
                 response,
                 (
-                    'The auto-accept rule could not be created because an auto-accept rule '
+                    'The auto-accept could not be created because an auto-accept '
                     'already exists for {sender_name} and {prisoner_number}'.format(
                         sender_name=self.SENDER_CHECK['credit']['sender_name'],
                         prisoner_number=self.SENDER_CHECK['credit']['prisoner_number']
@@ -5632,11 +5632,11 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                     content
                 )
                 self.assertIn(
-                    f'Showing 1 to {page_size} of {api_auto_accept_response_len} auto accept rules',
+                    f'Showing <b>1</b> to <b>{page_size}</b> of <b>{api_auto_accept_response_len}</b> auto accepts',
                     content
                 )
                 self.assertIn(
-                    f'{api_auto_accept_response_len} auto accept rules',
+                    f'<b>{api_auto_accept_response_len}</b> auto accepts',
                     content
                 )
 
@@ -5750,7 +5750,7 @@ class AutoAcceptDetailViewTestCase(BaseCheckViewTestCase):
 
         if auto_accept_active:
             self.assertContains(response, 'To stop auto accept:')
-            self.assertContains(response, 'Give details why auto accept is to stop')
+            self.assertContains(response, 'Give reason why auto accept is to stop')
             self.assertContains(response, 'Stop auto accept')
         else:
             self.assertContains(
@@ -5822,7 +5822,7 @@ class AutoAcceptDetailViewTestCase(BaseCheckViewTestCase):
             )
 
             self.assertRedirects(response, reverse('security:auto_accept_rule_list'))
-            self.assertContains(response, 'Auto accept rule was deactivated')
+            self.assertContains(response, 'The auto accept was stopped')
             patch_calls = list(filter(lambda call: call.request.method == rsps.PATCH, rsps.calls))
             self.assertEqual(len(patch_calls), 1)
             patch_request_body = json.loads(patch_calls[0].request.body)
