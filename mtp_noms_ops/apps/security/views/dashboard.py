@@ -65,7 +65,7 @@ class DashboardView(TemplateView):
                 'link': search['site_url'],
                 'description': (
                     ngettext('%d new credit', '%d new credits', search['new_result_count']) % search['new_result_count']
-                    if search['new_result_count']
+                    if search.get('new_result_count')
                     else ''
                 )
             }
