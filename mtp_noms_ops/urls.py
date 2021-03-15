@@ -15,6 +15,8 @@ from mtp_common.auth import views as auth_views
 from mtp_common.auth.exceptions import Unauthorized
 from mtp_common.metrics.views import metrics_view
 
+from views import FAQView
+
 
 def login_view(request):
     return auth_views.login(request, template_name='mtp_auth/login.html', extra_context={
@@ -37,6 +39,8 @@ urlpatterns = i18n_patterns(
     url(r'^$', root_view, name='root'),
     url(r'^prisoner-location/', include('prisoner_location_admin.urls')),
     url(r'^settings/', include('settings.urls')),
+
+    url(r'^faq/', FAQView.as_view(), name='faq'),
     url(r'^feedback/', include('feedback.urls')),
 
     url(r'^login/$', login_view, name='login'),
