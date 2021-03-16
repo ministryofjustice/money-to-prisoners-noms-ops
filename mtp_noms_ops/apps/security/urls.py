@@ -57,6 +57,7 @@ urlpatterns = [
         name='hmpps_employee',
     ),
     url(r'^security/not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
+    url(r'^security/faq/$', login_required(views.FAQView.as_view()), name='faq'),
 
     # credits
     url(

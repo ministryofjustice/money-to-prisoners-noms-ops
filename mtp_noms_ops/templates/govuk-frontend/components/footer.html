@@ -8,7 +8,12 @@
   </h2>
   <ul class="govuk-footer__inline-list">
     <li class="govuk-footer__inline-list-item">
-      <a class="govuk-footer__link" href="{% url 'faq' %}">
+      {% if request.user.is_authenticated %}
+        {% url 'security:faq' as get_help_url %}
+      {% else %}
+        {% url 'faq' as get_help_url %}
+      {% endif %}
+      <a class="govuk-footer__link" href="{{ get_help_url }}">
         {% trans 'Help and feedback' %}
       </a>
     </li>

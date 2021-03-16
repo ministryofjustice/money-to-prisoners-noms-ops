@@ -24,5 +24,6 @@ from .check import (  # noqa: F401
     MyListCheckView
 )
 from .views import (  # noqa: F401
+    FAQView,
     PolicyChangeView
 )

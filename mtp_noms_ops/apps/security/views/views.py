@@ -14,3 +14,15 @@ class PolicyChangeView(TemplateView):
             return ['security/policy-change-info.html']
         else:
             return ['security/policy-change-warning.html']
+
+
+class FAQView(TemplateView):
+    template_name = 'security/faq.html'
+    title = _('What do you need help with?')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['fiu_email'] = settings.FIU_EMAIL
+
+        return context
