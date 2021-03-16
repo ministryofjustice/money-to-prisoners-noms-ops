@@ -44,6 +44,8 @@ SEND_MONEY_URL = (
 )
 SITE_URL = NOMS_OPS_URL
 
+FIU_EMAIL = os.environ.get('FIU_EMAIL', '')
+
 # Application definition
 INSTALLED_APPS = (
     'django.contrib.sessions',

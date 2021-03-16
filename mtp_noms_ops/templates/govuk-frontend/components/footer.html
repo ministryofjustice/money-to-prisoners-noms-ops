@@ -9,7 +9,7 @@
   <ul class="govuk-footer__inline-list">
     <li class="govuk-footer__inline-list-item">
       {% if request.user.is_authenticated %}
-        {% url 'submit_ticket' as get_help_url %}
+        {% url 'security:faq' as get_help_url %}
       {% else %}
         {% url 'faq' as get_help_url %}
       {% endif %}
