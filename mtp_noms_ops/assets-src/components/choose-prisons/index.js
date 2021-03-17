@@ -65,7 +65,8 @@ export var ChoosePrisons = {
             );
 
             $('.mtp-prison-selection').before(
-              '<div class="govuk-error-summary" aria-labeledby="error-summary-title__prison-selection" role="alert" tabindex="-1" data-module="govuk-error-summary">' +
+              '<div class="govuk-error-summary" aria-labeledby="error-summary-title__prison-selection"' +
+              ' role="alert" tabindex="-1" data-module="govuk-error-summary">' +
               '<h2 class="govuk-error-summary__title" id="error-summary-title__prison-selection">' +
               errorSummaryTitle +
               '</h2>' +
