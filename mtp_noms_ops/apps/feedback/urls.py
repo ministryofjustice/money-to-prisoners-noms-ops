@@ -7,6 +7,8 @@ from mtp_common.views import (
     GetHelpSuccessView as BaseGetHelpSuccessView,
 )
 
+from .forms import ContactUsForm
+
 
 class FeedbackContextMixin:
     """
@@ -14,11 +16,12 @@ class FeedbackContextMixin:
     """
 
     def get_context_data(self, **kwargs):
-        kwargs['get_help_title'] = gettext('Get help and leave feedback')
+        kwargs['get_help_title'] = gettext('Contact us')
         return super(FeedbackContextMixin, self).get_context_data(**kwargs)
 
 
 class GetHelpView(FeedbackContextMixin, BaseGetHelpView):
+    form_class = ContactUsForm
     success_url = reverse_lazy('feedback_success')
     ticket_subject = 'MTP for digital team - Prisoner Money Intelligence'
     ticket_tags = ['feedback', 'mtp', 'noms-ops', settings.ENVIRONMENT]
