@@ -1,0 +1,11 @@
+{% extends 'mtp_common/user_admin/sign-up-success.html' %}
+{% load i18n %}
+{% load mtp_common %}
+
+{% block whats_next_message %}
+  <p>
+    {% blocktrans trimmed with approver=approver|wrapwithtag:'strong' %}
+      Once {{ approver }} has approved your request, you’ll get an email with your sign in details.
+    {% endblocktrans %}
+  </p>
+{% endblock %}
