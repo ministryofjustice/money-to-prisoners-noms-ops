@@ -24,7 +24,7 @@ class AcceptRequestForm(AcceptRequestFormBase):
 
 class SignUpForm(BaseSignUpForm, BaseTicketForm):
 
-    account_request_zendesk_subject = _('MTP for digital team - Prisoner money intelligence - Request for new staff account')
+    account_request_zendesk_subject = _('MTP for digital team - Prisoner money intelligence - Request for new staff account')  # noqa: E501
     zendesk_tags = ('feedback', 'mtp', 'noms-ops', 'account_request', settings.ENVIRONMENT)
 
     role = forms.CharField(label=_('Role'), initial='security')
