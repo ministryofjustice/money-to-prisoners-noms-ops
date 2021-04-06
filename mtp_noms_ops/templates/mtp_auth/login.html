@@ -45,22 +45,19 @@
 
     <div class="govuk-grid-row">
       <section class="govuk-grid-column-one-half">
-        <h2 class="govuk-heading-m">{% trans 'How to get access' %}</h2>
+        <h2 class="govuk-heading-m">{% trans 'Request an account' %}</h2>
         <p>
-          {% trans 'Your head of security can set up an account for you if you don’t have access already.' %}
+          {% trans 'If you work in intelligence in a public or private prison in England or Wales, you can request an intelligence tool account.' %}
         </p>
+
         <p>
-          <a href="{% url 'faq' %}">
-            {% trans 'Need more help?' %}
+          <a href="{% url 'sign-up' %}">
+            {% trans 'Request an account' %}
           </a>
         </p>
 
-        <h2 class="govuk-heading-m">{% trans 'New disbursement tool' %}</h2>
         <p>
-          {% trans 'We’ve launched a new digital disbursement tool which tracks money sent out of prisons.' %}
-        </p>
-        <p>
-          {% trans 'All public UK prisons now have access.' %}
+          <a href="{% url 'faq' %}">{% trans 'Get help' %}</a> if you're having difficulties getting an account or signing in.
         </p>
       </section>
 
