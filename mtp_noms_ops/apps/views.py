@@ -14,8 +14,6 @@ class FAQView(TemplateView):
         context['breadcrumbs_back'] = reverse_lazy('login')
         context['cashbook_url'] = settings.CASHBOOK_URL
         context['reset_password_url'] = reverse_lazy('reset_password')
-        # TODO: Stop-gap solution: Replace with sign-up URL once functionality is there
-        # context['sign_up_url'] = reverse_lazy('sign-up')
-        context['sign_up_url'] = reverse_lazy('submit_ticket') + '?message=I%20want%20to%20request%20an%20account.%20%5BPlease%20provide%20your%20name%2C%20email%20address%20and%20Quantum%20ID%5D'  # noqa: E501
+        context['sign_up_url'] = reverse_lazy('sign-up')
 
         return context
