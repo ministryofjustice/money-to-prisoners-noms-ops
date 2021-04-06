@@ -2834,7 +2834,9 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
                             'active': not j,
                             'reason': f'I am an automatically generated auto-accept number {i}',
                             'created': (
-                                datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=(5 - j))
+                                datetime.datetime.now(
+                                    tz=pytz.timezone('Europe/London')
+                                ) - datetime.timedelta(hours=(5 - j))
                             ).isoformat(),
                             'auto_accept_rule': i
                         } for j in cls._generate_auto_accept_state_range(active)
@@ -3594,15 +3596,27 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
                     'states': [
                         {
-                            'created': (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=3)).isoformat(),
+                            'created': (
+                                datetime.datetime.now(
+                                    tz=pytz.timezone('Europe/London')
+                                ) - datetime.timedelta(hours=3)
+                            ).isoformat(),
                             'active': True
                         },
                         {
-                            'created': (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=2)).isoformat(),
+                            'created': (
+                                datetime.datetime.now(
+                                    tz=pytz.timezone('Europe/London')
+                                ) - datetime.timedelta(hours=2)
+                            ).isoformat(),
                             'active': False
                         },
                         {
-                            'created': (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=1)).isoformat(),
+                            'created': (
+                                datetime.datetime.now(
+                                    tz=pytz.timezone('Europe/London')
+                                ) - datetime.timedelta(hours=1)
+                            ).isoformat(),
                             'active': True,
                             'reason': reason,
                             'added_by': {
@@ -3631,7 +3645,9 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, 'Date:')
             self.assertContains(
                 response,
-                (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(hours=1)).strftime('%d/%m/%Y %H:%M')
+                (
+                    datetime.datetime.now(tz=pytz.timezone('Europe/London')) - datetime.timedelta(hours=1)
+                ).strftime('%d/%m/%Y %H:%M')
             )
             self.assertContains(response, 'Reason for automatically accepting:')
             self.assertContains(response, reason)
