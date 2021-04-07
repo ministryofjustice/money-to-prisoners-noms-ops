@@ -15,6 +15,7 @@ from mtp_common.auth import views as auth_views
 from mtp_common.auth.exceptions import Unauthorized
 from mtp_common.metrics.views import metrics_view
 
+from user_admin.views import UserCreationView
 from views import FAQView
 
 
@@ -88,6 +89,8 @@ urlpatterns = i18n_patterns(
     ),
     url(r'^', include('security.urls', namespace='security')),
 
+    # Override mtp_common.user_admin's /users/new/ view
+    url(r'^users/new/$', UserCreationView.as_view(), name='new-user'),
     url(r'^', include('mtp_common.user_admin.urls')),
 
     url(r'^js-i18n.js$', cache_control(public=True, max_age=86400)(JavaScriptCatalog.as_view()), name='js-i18n'),
