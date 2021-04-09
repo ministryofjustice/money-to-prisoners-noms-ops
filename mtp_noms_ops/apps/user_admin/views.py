@@ -4,7 +4,6 @@ from mtp_common.user_admin.views import UserCreationView as UserCreationViewBase
 from .forms import UserUpdateForm
 
 
-
 class UserCreationView(UserCreationViewBase):
     title = _('Create a new user account')
     form_class = UserUpdateForm
