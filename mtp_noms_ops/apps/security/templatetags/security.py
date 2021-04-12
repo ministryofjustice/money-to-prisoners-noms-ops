@@ -148,7 +148,7 @@ def get_sender_keys(credit):
     elif credit['source'] == 'online':
         keys.update(DEBIT_CARD_SENDER_KEYS)
     else:
-        logger.error('Credit %s had an unknown source' % credit.get('id'))
+        logger.error('Credit had an unknown source', {'credit_id': credit.get('id')})
     return keys
 
 

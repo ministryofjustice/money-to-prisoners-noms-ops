@@ -65,14 +65,14 @@ def update_locations(*, user, locations, context: Context):
         })
         return location_count
     except HttpClientError as e:
-        logger.exception('Prisoner locations update by %s failed!' % user_description)
+        logger.exception('Prisoner locations update failed!', {'user': user_description})
         if hasattr(e, 'content') and e.content:
             try:
                 errors += format_errors(json.loads(e.content.decode()))
             except ValueError:
                 errors.append(e.content)
     except:  # noqa: E722,B001
-        logger.exception('Prisoner locations update by %s failed!' % user_description)
+        logger.exception('Prisoner locations update failed!', {'user': user_description})
 
     if not errors:
         errors.append(_('An unknown error occurred uploading prisoner locations'))

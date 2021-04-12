@@ -22,7 +22,7 @@ def prisoner_image_view(request, prisoner_number):
                 patch_cache_control(response, private=True, max_age=2592000)
                 return response
         except RequestException:
-            logger.warning('Could not load image for %s' % prisoner_number)
+            logger.warning('Could not load image for a prisoner', {'prisoner_number': prisoner_number})
     if request.GET.get('ratio') == '2x':
         return HttpResponseRedirect(staticfiles_storage.url('images/placeholder-image@2x.png'))
     else:
@@ -44,7 +44,7 @@ def prisoner_nomis_info_view(request, prisoner_number):
                 else:
                     response_data['housing_location'] = housing['description']
         except RequestException:
-            logger.warning('Could not load location for %s' % prisoner_number)
+            logger.warning('Could not load location for a prisoner', {'prisoner_number': prisoner_number})
     response = JsonResponse(response_data)
     patch_cache_control(response, private=True, max_age=3600)
     return response
