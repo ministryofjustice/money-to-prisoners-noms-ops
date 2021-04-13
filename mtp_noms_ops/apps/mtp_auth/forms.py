@@ -48,9 +48,6 @@ class SignUpForm(BaseSignUpForm, BaseTicketForm):
         self.cleaned_data['role'] = 'security'
 
         if self.is_valid() and self.user_already_requested_account():
-            # Subsequent account requests sent to ZenDesk are approved by Family Services
-            self.request.session['approver'] = _('Family Services')
-
             return self.submit_ticket(
                 self.request,
                 subject=self.account_request_zendesk_subject,

@@ -16,12 +16,6 @@ class SignUpView(BaseSignUpView):
     form_class = SignUpForm
 
     def get_context_data(self, **kwargs):
-        approver = self.request.session.get(
-            'approver',
-            _('a member of the Financial Investigations Unit'),
-        )
-
         kwargs['breadcrumbs_back'] = reverse_lazy('root')
-        kwargs['approver'] = approver
 
         return super().get_context_data(**kwargs)

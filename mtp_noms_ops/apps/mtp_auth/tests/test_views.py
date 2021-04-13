@@ -50,7 +50,6 @@ class RequestAccessTestCase(SimpleTestCase):
             self.assertIn('role=security', rsps.calls[1].request.body)
 
         self.assertContains(response, 'Your request for access has been sent')
-        self.assertContains(response, 'a member of the Financial Investigations Unit')
 
     def test_request_account_already_requested(self):
         with responses.RequestsMock() as rsps:
@@ -112,7 +111,6 @@ class RequestAccessTestCase(SimpleTestCase):
             )
 
         self.assertContains(response, 'Your request for access has been sent')
-        self.assertContains(response, 'Family Services')
 
     def test_api_response_error(self):
         with responses.RequestsMock() as rsps, silence_logger():
