@@ -1,8 +1,7 @@
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from mtp_common.user_admin.views import (
-    SignUpView as BaseSignUpView,
     AcceptRequestView as AcceptRequestViewBase,
+    SignUpView as BaseSignUpView,
 )
 
 from .forms import AcceptRequestForm, SignUpForm
