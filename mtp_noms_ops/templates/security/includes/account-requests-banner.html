@@ -13,5 +13,5 @@
         </a>
     {% endcaptureoutput %}
 
-    {% include 'mtp_common/components/notification-banner.html' with banner_level=_('Important') banner_title=_('Important') banner_heading=account_requests_heading only %}
+    {% include 'mtp_common/components/notification-banner.html' with banner_level='important' banner_title=_('Important') banner_heading=account_requests_heading only %}
 {% endif %}
