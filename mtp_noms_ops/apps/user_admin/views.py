@@ -1,7 +1,14 @@
 from django.utils.translation import gettext_lazy as _
-from mtp_common.user_admin.views import UserCreationView as UserCreationViewBase
+from mtp_common.user_admin.views import (
+    UserCreationView as UserCreationViewBase,
+    UserUpdateView as UserUpdateViewBase,
+)
 
 from .forms import UserUpdateForm
+
+
+class UserUpdateView(UserUpdateViewBase):
+    form_class = UserUpdateForm
 
 
 class UserCreationView(UserCreationViewBase):
