@@ -69,6 +69,13 @@ class ConfirmPrisonTestCase(SecurityBaseTestCase):
 
     @responses.activate
     def test_does_not_redirect_for_user_admin(self):
+        responses.add(
+            responses.GET,
+            api_url('/requests') + '?page_size=1',
+            json={'count': 0},
+            status=200,
+        )
+
         self.login(
             responses,
             user_data=self.get_user_data(
