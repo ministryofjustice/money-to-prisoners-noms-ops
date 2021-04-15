@@ -1,11 +1,17 @@
+import logging
+
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import gettext, ngettext
 from django.views.generic import TemplateView
 from mtp_common.auth.api_client import get_api_session
+from requests.exceptions import RequestException
 
 from security.context_processors import initial_params
 from security.searches import get_saved_searches, populate_new_result_counts
+
+
+logger = logging.getLogger('mtp')
 
 
 class DashboardView(TemplateView):
@@ -17,8 +23,20 @@ class DashboardView(TemplateView):
             'link_cards': self.get_link_cards(),
             'saved_search_cards': self.get_saved_search_cards(),
             'admin_cards': self.get_admin_cards(),
+            'user_request_count': self.get_user_request_count(),
         })
         return super().get_context_data(**kwargs)
+
+    def get_user_request_count(self) -> int:
+        if self.request.user.has_perm('auth.change_user'):
+            try:
+                api_session = get_api_session(self.request)
+                response = api_session.get('requests/', params={'page_size': 1})
+                return response.json().get('count', 0)
+            except RequestException:
+                logger.exception('Failed to get number of account requests')
+
+        return 0
 
     def get_link_cards(self):
         if not self.request.can_access_security:

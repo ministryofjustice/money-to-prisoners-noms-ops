@@ -1,0 +1,14 @@
+{% extends 'mtp_common/user_admin/accept-request.html' %}
+{% load i18n %}
+
+
+{% block sign_up_extras_fields %}
+  <tr>
+      <th scope="row">
+        {% trans 'Manager’s email' %}
+      </th>
+      <td>
+        {{ account_request.manager_email }}
+      </td>
+  </tr>
+{% endblock %}

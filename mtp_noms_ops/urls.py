@@ -15,6 +15,7 @@ from mtp_common.auth import views as auth_views
 from mtp_common.auth.exceptions import Unauthorized
 from mtp_common.metrics.views import metrics_view
 
+from mtp_auth.views import AcceptRequestView
 from user_admin.views import UserCreationView, UserUpdateView
 from views import FAQView
 
@@ -94,6 +95,11 @@ urlpatterns = i18n_patterns(
     # Override mtp_common.user_admin's /users/{ID}/edit/ view
     url(r'^users/(?P<username>[^/]+)/edit/$', UserUpdateView.as_view(), name='edit-user'),
     url(r'^', include('mtp_common.user_admin.urls')),
+    url(
+        r'^users/request/(?P<account_request>\d+)/accept/$',
+        AcceptRequestView.as_view(),
+        name='accept-request'
+    ),
 
     url(r'^js-i18n.js$', cache_control(public=True, max_age=86400)(JavaScriptCatalog.as_view()), name='js-i18n'),
 
