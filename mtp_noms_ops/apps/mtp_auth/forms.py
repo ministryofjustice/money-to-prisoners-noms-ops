@@ -2,7 +2,7 @@ import logging
 
 from django import forms
 from django.conf import settings
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from mtp_common.user_admin.forms import (
     AcceptRequestForm as AcceptRequestFormBase,
     SignUpForm as BaseSignUpForm,
