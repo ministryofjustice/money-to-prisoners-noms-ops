@@ -45,6 +45,8 @@ urlpatterns = i18n_patterns(
     url(r'^faq/', FAQView.as_view(), name='faq'),
     url(r'^feedback/', include('feedback.urls')),
 
+    url(r'^', include('mtp_auth.urls')),
+
     url(r'^login/$', login_view, name='login'),
     url(
         r'^logout/$', auth_views.logout, {

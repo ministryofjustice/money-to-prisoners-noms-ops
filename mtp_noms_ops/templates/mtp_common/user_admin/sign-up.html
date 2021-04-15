@@ -1,3 +1,8 @@
 {% extends 'mtp_common/user_admin/sign-up.html' %}
 
 {% block body_classes %}{{ block.super }} mtp-page-with-staff-email-input{% endblock %}
+
+
+{% block sign_up_extras_fields %}
+  {% include 'mtp_common/forms/field.html' with field=form.manager_email input_classes="govuk-input--width-10" only %}
+{% endblock %}

@@ -56,6 +56,7 @@ INSTALLED_APPS = (
 )
 PROJECT_APPS = (
     'anymail',
+    'mtp_auth',
     'mtp_common',
     'mtp_common.metrics',
     'widget_tweaks',

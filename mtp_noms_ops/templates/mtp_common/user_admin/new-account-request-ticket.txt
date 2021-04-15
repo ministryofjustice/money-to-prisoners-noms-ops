@@ -1,0 +1,13 @@
+Requesting a new staff account - Prisoner money intelligence
+============================================================
+
+Reason for requesting account: {{ reason|safe }}
+
+---
+
+Forename: {{ first_name|safe }}
+Surname: {{ last_name|safe }}
+Username (Quantum ID): {{ username|safe }}
+Staff email: {{ email|safe }}
+Account Type: {{ role|safe }}
+Manager email: {{ manager_email|safe }}
