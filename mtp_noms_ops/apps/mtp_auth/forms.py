@@ -48,8 +48,6 @@ class SignUpForm(BaseSignUpForm, BaseTicketForm):
             self.add_error(None, _('This service is currently unavailable'))
 
     def clean(self):
-        self.cleaned_data['role'] = 'security'
-
         if self.is_valid() and self.user_already_requested_account():
             return self.submit_ticket(
                 self.request,
