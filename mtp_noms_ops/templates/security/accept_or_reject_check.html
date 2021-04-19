@@ -164,7 +164,10 @@
                   <br/>
                 {% endfor %}
                 {% if credit.security_check.decision_reason %}
-                <strong>{% trans 'Further Details:' %}</strong> {{ credit.security_check.decision_reason }}
+                  {% if credit.security_check.rejection_reasons %}
+                    {% trans 'Further details' %}:
+                  {% endif %}
+                  {{ credit.security_check.decision_reason }}
                 {% elif not credit.security_check.rejection_reasons %}
                   {% trans 'No decision reason entered' %}
                 {% endif %}
