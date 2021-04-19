@@ -369,7 +369,7 @@ urlpatterns = [
         name='auto_accept_rule_list',
     ),
     url(
-        r'^security/checks/auto-accept-rules/(?P<auto_accept_rule_id>\d+)$',
+        r'^security/checks/auto-accept-rules/(?P<auto_accept_rule_id>\d+)/$',
         fiu_security_test(views.AutoAcceptRuleDetailView.as_view()),
         name='auto_accept_rule_detail',
     ),
