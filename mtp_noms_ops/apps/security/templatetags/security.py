@@ -3,13 +3,13 @@ import logging
 
 from django import template
 from django.urls import reverse
-from django.utils.html import escape, format_html
+from django.utils.html import escape, format_html, format_html_join
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
+from mtp_common.security.checks import human_readable_check_rejection_reasons
 from mtp_common.utils import format_postcode
 
-from security.constants import CHECK_DETAIL_RENDERED_MAPPING
 from security.forms.object_list import PrisonSelectorSearchFormMixin
 from security.models import (
     credit_sources,
@@ -247,6 +247,17 @@ def format_security_check_status(check):
 
 
 @register.filter
+def format_security_check_rejection_reasons(check):
+    if not check or not check.get('rejection_reasons'):
+        return ''
+    return format_html_join(
+        mark_safe('<br />\n'),
+        '{}',
+        map(lambda description: [description], human_readable_check_rejection_reasons(check['rejection_reasons']))
+    )
+
+
+@register.filter
 def tag_for_security_check(check):
     status = check.get('status') or 'unknown'
     if status == 'accepted':
@@ -374,11 +385,6 @@ def extract_best_match(context, items):
         'item': best_match,
         'total_remaining': max(len(item_list)-1, 0),
     }
-
-
-@register.filter
-def get_human_readable_check_field(field):
-    return CHECK_DETAIL_RENDERED_MAPPING.get(field, field)
 
 
 @register.filter
