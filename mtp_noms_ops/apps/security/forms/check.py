@@ -252,8 +252,18 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['prisoner_multiple_payments_payment_sources'],
     )
 
+    # conditional fields that are hidden behind checkboxes are not required by default
+    # however if the checkbox is checked they are required
+    conditional_fields = {
+        'auto_accept': ['auto_accept_reason'],
+        'has_fiu_investigation_id': ['fiu_investigation_id'],
+        'has_intelligence_report_id': ['intelligence_report_id'],
+        'has_other_reason': ['other_reason'],
+    }
+
     error_messages = {
         'missing_reject_reason': _('You must provide a reason for rejecting a credit'),
+        'missing_details': _('You must provide details'),
         'reject_with_accept_details': _(
             "You have added details in the 'accept' box. You cannot reject a credit with this box filled"),
         'reject_with_auto_accept': _(
@@ -345,6 +355,8 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                 )
             further_details = self.cleaned_data['accept_further_details']
 
+        self._clean_conditional_fields()
+
         if not self.errors:
             # We don't want to propagate false-y (i.e. False, or empty string) values to API so we filter on
             # truthiness of form values
@@ -359,6 +371,32 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                     if item[1] and item[0] in CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
                 )
         return super().clean()
+
+    def _clean_conditional_fields(self):
+        # validate conditional subfields controlled by checkboxes
+        for conditional_checkbox_field, conditional_subfields in self.conditional_fields.items():
+            if not self.cleaned_data.get(conditional_checkbox_field):
+                # checkbox not selected, subfields are not required
+                # TODO: should probably remove subfield values from self.cleaned_data
+                #       in case javascript is disabled and hence disabled property was not set correctly on subfields
+                continue
+
+            # checkbox was selected, ensure all subfields are provided
+            all_subfields_valid = True
+            for conditional_subfield in conditional_subfields:
+                if not self.cleaned_data.get(conditional_subfield):
+                    all_subfields_valid = False
+                    # if subfield missing, add an error
+                    self.add_error(
+                        conditional_subfield,
+                        self.fields[conditional_subfield].error_messages['required']
+                    )
+            if not all_subfields_valid:
+                # if any subfield missing, add an error
+                self.add_error(
+                    conditional_checkbox_field,
+                    self.error_messages['missing_details']
+                )
 
     def get_resolve_endpoint_path(self, fiu_action='accept'):
         return f'/security/checks/{self.object_id}/{fiu_action}/'
