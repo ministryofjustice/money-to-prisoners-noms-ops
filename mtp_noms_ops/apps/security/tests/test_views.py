@@ -2301,7 +2301,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 0, 'newest': None, 'oldest': None},
                 match_querystring=True
             )
@@ -2329,7 +2329,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 0, 'newest': None, 'oldest': None},
                 match_querystring=True
             )
@@ -2357,7 +2357,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
                 match_querystring=True
             )
@@ -2403,7 +2403,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
                 match_querystring=True
             )
@@ -2444,7 +2444,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 32, 'newest': '2019-07-15', 'oldest': '2019-06-21'},
                 match_querystring=True
             )
@@ -2491,7 +2491,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
                 match_querystring=True
             )
