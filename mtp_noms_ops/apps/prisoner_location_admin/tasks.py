@@ -54,7 +54,7 @@ def update_locations(*, user, locations, context: Context):
             )
         session.post('/prisoner_locations/actions/delete_old/')
 
-        logger.info('%d prisoner locations updated successfully by %s' % (
+        logger.info('%d prisoner locations updated successfully by %s', (
             location_count,
             user_description,
         ), extra={
@@ -65,18 +65,18 @@ def update_locations(*, user, locations, context: Context):
         })
         return location_count
     except HttpClientError as e:
-        logger.exception('Prisoner locations update failed!', {'user': user_description})
+        logger.exception('Prisoner locations update by %(user)s failed!', {'user': user_description})
         if hasattr(e, 'content') and e.content:
             try:
                 errors += format_errors(json.loads(e.content.decode()))
             except ValueError:
                 errors.append(e.content)
     except:  # noqa: E722,B001
-        logger.exception('Prisoner locations update failed!', {'user': user_description})
+        logger.exception('Prisoner locations update by %(user)s failed!', {'user': user_description})
 
     if not errors:
         errors.append(_('An unknown error occurred uploading prisoner locations'))
-    logger.error(errors)
+    logger.error('Prisoner locations update failed: %r', errors)
 
     if context.spooled:
         if user.email:
