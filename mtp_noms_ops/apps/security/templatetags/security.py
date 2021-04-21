@@ -253,7 +253,10 @@ def format_security_check_rejection_reasons(check):
     return format_html_join(
         mark_safe('<br />\n'),
         '{}',
-        map(lambda description: [description], human_readable_check_rejection_reasons(check['rejection_reasons']))
+        (
+            (description,)
+            for description in human_readable_check_rejection_reasons(check['rejection_reasons'])
+        )
     )
 
 
