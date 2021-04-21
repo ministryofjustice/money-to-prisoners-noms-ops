@@ -34,7 +34,7 @@ def external_breadcrumbs(request):
         return {}
     url_name = '%s:%s' % (request.resolver_match.namespace, request.resolver_match.url_name)
     if url_name in (':submit_ticket', ':feedback_success'):
-        section_title = _('Help and feedback')
+        section_title = _('Get help')
     else:
         return {}
     return {
