@@ -7,9 +7,14 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
+from mtp_common.security.checks import (
+    CHECK_REJECTION_TEXT_CATEGORY_LABELS,
+    CHECK_REJECTION_BOOL_CATEGORY_LABELS,
+    CHECK_REJECTION_CATEGORIES,
+)
 from requests.exceptions import RequestException
 
-from security.constants import CHECK_DETAIL_FORM_MAPPING, CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
+from security.constants import CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
 from security.forms.object_base import SecurityForm
 from security.utils import convert_date_fields, get_need_attention_date
 
@@ -184,11 +189,11 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     """
     CheckForm for accepting or rejecting a check.
     """
-
     fiu_action = forms.CharField(max_length=10)
+
     accept_further_details = forms.CharField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
+        label=_('Give further details (optional)'),
     )
     auto_accept = forms.BooleanField(
         required=False,
@@ -197,15 +202,16 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     )
     auto_accept_reason = forms.CharField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['auto_accept_reason'],
+        label=_('Give reason for automatically accepting'),
     )
+
     reject_further_details = forms.CharField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['decision_reason'],
+        label=_('Give further details (optional)'),
     )
     has_fiu_investigation_id = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['fiu_investigation_id'],
+        label=CHECK_REJECTION_TEXT_CATEGORY_LABELS['fiu_investigation_id'],
     )
     fiu_investigation_id = forms.CharField(
         required=False,
@@ -213,7 +219,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     )
     has_intelligence_report_id = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['intelligence_report_id'],
+        label=CHECK_REJECTION_TEXT_CATEGORY_LABELS['intelligence_report_id'],
     )
     intelligence_report_id = forms.CharField(
         required=False,
@@ -221,7 +227,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     )
     has_other_reason = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['other_reason'],
+        label=CHECK_REJECTION_TEXT_CATEGORY_LABELS['other_reason'],
     )
     other_reason = forms.CharField(
         required=False,
@@ -229,27 +235,27 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     )
     payment_source_paying_multiple_prisoners = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_paying_multiple_prisoners'],
+        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_paying_multiple_prisoners'],
     )
     payment_source_multiple_cards = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_multiple_cards'],
+        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_multiple_cards'],
     )
     payment_source_linked_other_prisoners = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_linked_other_prisoners'],
+        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_linked_other_prisoners'],
     )
     payment_source_known_email = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_known_email'],
+        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_known_email'],
     )
     payment_source_unidentified = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['payment_source_unidentified'],
+        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_unidentified'],
     )
     prisoner_multiple_payments_payment_sources = forms.BooleanField(
         required=False,
-        label=CHECK_DETAIL_FORM_MAPPING['rejection_reasons']['prisoner_multiple_payments_payment_sources'],
+        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['prisoner_multiple_payments_payment_sources'],
     )
 
     # conditional fields that are hidden behind checkboxes are not required by default
@@ -308,7 +314,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def is_reject_reason_populated(self):
         return any(
             self.cleaned_data.get(rejection_field)
-            for rejection_field in CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
+            for rejection_field in CHECK_REJECTION_CATEGORIES
         )
 
     def clean(self):
@@ -366,9 +372,9 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
 
             if status == 'reject':
                 self.data_payload['rejection_reasons'] = dict(
-                    item
-                    for item in self.cleaned_data.items()
-                    if item[1] and item[0] in CHECK_DETAIL_FORM_MAPPING['rejection_reasons']
+                    (rejection_reason_key, rejection_reason_value)
+                    for rejection_reason_key, rejection_reason_value in self.cleaned_data.items()
+                    if rejection_reason_value and rejection_reason_key in CHECK_REJECTION_CATEGORIES
                 )
         return super().clean()
 

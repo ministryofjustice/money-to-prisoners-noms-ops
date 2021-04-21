@@ -22,6 +22,7 @@ from django.utils.timezone import make_aware
 from mtp_common.auth import USER_DATA_SESSION_KEY, urljoin
 from mtp_common.auth.api_client import get_request_token_url
 from mtp_common.auth.test_utils import generate_tokens
+from mtp_common.security.checks import CHECK_REJECTION_TEXT_CATEGORY_LABELS, CHECK_REJECTION_BOOL_CATEGORY_LABELS
 from mtp_common.test_utils import silence_logger
 from openpyxl import load_workbook
 from parameterized import parameterized
@@ -35,12 +36,7 @@ from security import (
     required_permissions,
     provided_job_info_flag,
 )
-from security.constants import (
-    CHECK_REJECTION_CATEGORY_TEXT_MAPPING,
-    CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING,
-    CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR,
-    SECURITY_FORMS_DEFAULT_PAGE_SIZE
-)
+from security.constants import SECURITY_FORMS_DEFAULT_PAGE_SIZE, CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
 from security.models import EmailNotifications
 from security.tests import api_url, TEST_IMAGE_DATA
@@ -120,15 +116,15 @@ def offset_isodatetime_by_ten_seconds(isodatetime, offset_multiplier=1):
 
 def generate_rejection_category_test_cases_text():
     return [
-        (text_category, f'i_am_a_{text_category}_value')
-        for text_category in CHECK_REJECTION_CATEGORY_TEXT_MAPPING.keys()
+        (text_category, f'User-entered {text_category} text')
+        for text_category in CHECK_REJECTION_TEXT_CATEGORY_LABELS
     ]
 
 
 def generate_rejection_category_test_cases_bool():
     return [
         (text_category, True)
-        for text_category in CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.keys()
+        for text_category in CHECK_REJECTION_BOOL_CATEGORY_LABELS
     ]
 
 
@@ -2301,7 +2297,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 0, 'newest': None, 'oldest': None},
                 match_querystring=True
             )
@@ -2329,7 +2325,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 0, 'newest': None, 'oldest': None},
                 match_querystring=True
             )
@@ -2357,7 +2353,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
                 match_querystring=True
             )
@@ -2403,7 +2399,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
                 match_querystring=True
             )
@@ -2444,7 +2440,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 32, 'newest': '2019-07-15', 'oldest': '2019-06-21'},
                 match_querystring=True
             )
@@ -2491,7 +2487,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
             self.login(rsps)
             rsps.add(
                 rsps.GET,
-                api_url('/events/pages/') + '?rule=MONP&rule=MONS&offset=0&limit=25',
+                api_url('/events/pages/') + f'?rule=MONP&rule=MONS&offset=0&limit={SECURITY_FORMS_DEFAULT_PAGE_SIZE}',
                 json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
                 match_querystring=True
             )
@@ -3210,7 +3206,7 @@ class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, 'No decision reason entered')
 
     @parameterized.expand(
-        CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
+        CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated(
         self, rejection_reason_key, rejection_reason_full
@@ -4093,7 +4089,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         )
 
     @parameterized.expand(
-        CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
+        CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated_for_prisoner_check(
         self, rejection_reason_key, rejection_reason_full
@@ -4189,7 +4185,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(response, rejection_reason_full)
 
     @parameterized.expand(
-        CHECK_REJECTION_CATEGORY_BOOLEAN_MAPPING.items()
+        CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated_for_sender_check(
         self, rejection_reason_key, rejection_reason_full

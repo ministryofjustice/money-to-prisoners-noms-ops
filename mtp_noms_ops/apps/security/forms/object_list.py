@@ -9,6 +9,7 @@ from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 from mtp_common.forms.fields import SplitDateField
 
+from security.constants import SECURITY_FORMS_DEFAULT_PAGE_SIZE
 from security.forms.object_base import (
     AmountPattern,
     parse_amount,
@@ -881,7 +882,7 @@ class NotificationsForm(SecurityForm):
     unfiltered_description_template = 'All notifications are shown below.'
     description_templates = ()
 
-    page_size = 25
+    page_size = SECURITY_FORMS_DEFAULT_PAGE_SIZE
 
     def __init__(self, request, **kwargs):
         super().__init__(request, **kwargs)

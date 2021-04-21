@@ -84,10 +84,7 @@
               <strong>{% trans 'Reason for automatically accepting' %}:</strong> {{ check.auto_accept_rule_state.reason }}
             {% else %}
             <strong>{% trans 'Decision details' %}:</strong>
-              {% for reason, value in check.rejection_reasons.items %}
-                {{ reason | get_human_readable_check_field }}{% if value != True %}: {{ value }}{% endif %}
-                <br/>
-              {% endfor %}
+              {{ check|format_security_check_rejection_reasons }}
               {% if check.decision_reason %}
                 {% if check.rejection_reasons %}
                   {% trans 'Further details' %}:
