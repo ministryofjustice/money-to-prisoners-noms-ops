@@ -68,13 +68,13 @@ class ConfirmPrisonForm(ApiForm):
             if self.all_prisons_code in prisons:
                 prisons = []
 
-            logger.info('{user} confirmed prisons {current} > {new}'.format(
-                user=self.request.user.username,
-                current=[
+            logger.info('%(user)s confirmed prisons %(current)s > %(new)s', {
+                'user': self.request.user.username,
+                'current': [
                     prison['nomis_id'] for prison in self.request.user_prisons
                 ],
-                new=prisons
-            ))
+                'new': prisons
+            })
             self.api_session.patch(
                 '/users/%s/' % (self.request.user.username),
                 json={
@@ -234,13 +234,13 @@ class ChangePrisonForm(ApiForm):
                     if self.cleaned_data[field_name]:
                         prisons.append(self.cleaned_data[field_name])
 
-            logger.info('{user} confirmed prisons {current} > {new}'.format(
-                user=self.request.user.username,
-                current=[
+            logger.info('%(user)s confirmed prisons %(current)s > %(new)s', {
+                'user': self.request.user.username,
+                'current': [
                     prison['nomis_id'] for prison in self.request.user_prisons
                 ],
-                new=prisons
-            ))
+                'new': prisons,
+            })
             self.api_session.patch(
                 '/users/%s/' % (self.request.user.username),
                 json={

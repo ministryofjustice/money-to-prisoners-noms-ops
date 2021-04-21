@@ -67,8 +67,8 @@ def convert_date_fields(object_list, include_nested=False):
                         new_value = timezone.localtime(new_value)
                     obj[field] = new_value
                     break
-                except (ValueError, TypeError) as e:
-                    logger.warning(e)
+                except (ValueError, TypeError):
+                    logger.exception('Failed to convert date fields in object list')
         return obj
 
     if isinstance(object_list, dict):

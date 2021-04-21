@@ -406,7 +406,10 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         return self._render_error_response(error_payload, entity)
 
     def _render_error_response(self, error_payload, entity):
-        logger.exception('%s %s could not be actioned. Error payload: %s', entity, self.object_id, error_payload)
+        logger.exception(
+            f'{entity} %(object_id)s could not be actioned. Error payload: %(exception)r',
+            {'object_id': self.object_id, 'exception': error_payload}
+        )
         self.add_error(None, _('There was an error with your request.'))
         return (False, '')
 
@@ -533,8 +536,8 @@ class AutoAcceptDetailForm(forms.Form):
             except Exception:
                 error_payload = {}
             logger.exception(
-                'Auto-accept deactivation could not be actioned. Error payload: %s',
-                error_payload
+                'Auto-accept deactivation could not be actioned. Error payload: %(exception)r',
+                {'exception': error_payload}
             )
             self.add_error(None, _('There was an error with your request.'))
 
@@ -588,7 +591,7 @@ class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
                     pass
                 else:
                     msg = maybe_json
-            logger.exception(f'Check {self.object_id} could not be assigned')
+            logger.exception('Check %(check_id)s could not be assigned', {'check_id': self.object_id})
             messages.add_message(
                 self.request,
                 messages.ERROR,
