@@ -139,7 +139,7 @@ class GetNeedAttentionDateTestCase(unittest.TestCase):
     that would be 3 days ago, inclusively
     """
     @mock.patch('security.utils.timezone', mock.MagicMock(
-        now=mock.MagicMock(return_value=make_aware(datetime.datetime(2019, 7, 3, 9)))
+        localtime=mock.MagicMock(return_value=make_aware(datetime.datetime(2019, 7, 3, 9)))
     ))
     def test_returns_date_3_days_ago_inclusively(self):
         self.assertEqual(get_need_attention_date(), make_aware(datetime.datetime(2019, 7, 1)))
