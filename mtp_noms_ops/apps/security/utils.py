@@ -64,7 +64,10 @@ def convert_date_fields(object_list, include_nested=False):
                         continue
 
                     if isinstance(new_value, datetime.datetime):
+                        if timezone.is_aware(new_value):
                         new_value = timezone.localtime(new_value)
+                        else:
+                            new_value = timezone.make_aware(new_value)
                     obj[field] = new_value
                     break
                 except (ValueError, TypeError):
