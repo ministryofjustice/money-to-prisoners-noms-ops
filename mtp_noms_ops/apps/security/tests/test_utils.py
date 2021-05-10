@@ -4,6 +4,7 @@ import unittest
 from unittest import mock
 
 from django.utils.timezone import localtime, make_aware, utc
+from mtp_common.test_utils import silence_logger
 
 from security.templatetags.security import genitive, currency, pence, format_sort_code, check_description
 from security.utils import (
@@ -138,7 +139,7 @@ class GetNeedAttentionDateTestCase(unittest.TestCase):
     that would be 3 days ago, inclusively
     """
     @mock.patch('security.utils.timezone', mock.MagicMock(
-        now=mock.MagicMock(return_value=make_aware(datetime.datetime(2019, 7, 3, 9)))
+        localtime=mock.MagicMock(return_value=make_aware(datetime.datetime(2019, 7, 3, 9)))
     ))
     def test_returns_date_3_days_ago_inclusively(self):
         self.assertEqual(get_need_attention_date(), make_aware(datetime.datetime(2019, 7, 1)))
@@ -223,6 +224,32 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
             },
         )
 
+    def test_handles_timezone_aware_and_naive_datetimes(self):
+        objs = [{
+            # dates in BST
+            'started_at': '2021-05-07',
+            'received_at': '2021-05-07T12:00:00',  # naive so assumed Europe/London (i.e. BST)
+            'credited_at': '2021-05-07T12:00:00Z',  # 12pm UTC is 1pm in Europe/London (i.e. BST)
+            'refunded_at': '2021-05-07T12:00:00+01:00',  # explicit time zone
+            # dates in GMT
+            'created': '2021-03-01T00:00:00',  # naive so assumed Europe/London (i.e. GMT)
+            'triggered_at': '2021-03-01T00:00:00Z',  # 12am UTC is 12am in Europe/London (i.e. GMT)
+            'actioned_at': '2021-03-01T00:00:00+00:00',  # explicit time zone
+        }]
+        converted_objects = convert_date_fields(objs)
+        self.assertEqual(
+            converted_objects[0],
+            {
+                'started_at': datetime.date(2021, 5, 7),
+                'received_at': make_aware(datetime.datetime(2021, 5, 7, 12)),
+                'credited_at': make_aware(datetime.datetime(2021, 5, 7, 13)),
+                'refunded_at': make_aware(datetime.datetime(2021, 5, 7, 12)),
+                'created': make_aware(datetime.datetime(2021, 3, 1)),
+                'triggered_at': make_aware(datetime.datetime(2021, 3, 1)),
+                'actioned_at': make_aware(datetime.datetime(2021, 3, 1)),
+            },
+        )
+
     def test_doesnt_convert_non_strings(self):
         """
         Test that if the values are not strings, they are not converted.
@@ -275,7 +302,8 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
                 'received_at': 'invalid',
             }
         ]
-        converted_objects = convert_date_fields(objs)
+        with silence_logger():
+            converted_objects = convert_date_fields(objs)
         self.assertEqual(
             converted_objects[0],
             {

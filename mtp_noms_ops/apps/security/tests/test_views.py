@@ -17,8 +17,8 @@ from django.core import mail
 from django.http import QueryDict
 from django.test import SimpleTestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from django.utils.timezone import make_aware
 from mtp_common.auth import USER_DATA_SESSION_KEY, urljoin
 from mtp_common.auth.api_client import get_request_token_url
 from mtp_common.auth.test_utils import generate_tokens
@@ -26,7 +26,6 @@ from mtp_common.security.checks import CHECK_REJECTION_TEXT_CATEGORY_LABELS, CHE
 from mtp_common.test_utils import silence_logger
 from openpyxl import load_workbook
 from parameterized import parameterized
-import pytz
 import responses
 
 from security import (
@@ -2457,7 +2456,9 @@ class NotificationsTestCase(SecurityBaseTestCase):
                         'id': 1 + days,
                         'rule': 'MONP',
                         'triggered_at': (
-                            make_aware(datetime.datetime(2019, 7, 15, 10) - datetime.timedelta(days)).isoformat()
+                            timezone.make_aware(
+                                datetime.datetime(2019, 7, 15, 10) - datetime.timedelta(days)
+                            ).isoformat()
                         ),
                         'credit_id': 1 + days, 'disbursement_id': None,
                         'sender_profile': None, 'recipient_profile': None,
@@ -2677,7 +2678,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
     prisoner_id = 3
     credit_id = 5
 
-    credit_created_date = datetime.datetime.now()
+    credit_created_date = timezone.localtime()
 
     SAMPLE_CHECK_BASE = {
         'id': 1,
@@ -2830,9 +2831,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
                             'active': not j,
                             'reason': f'I am an automatically generated auto-accept number {i}',
                             'created': (
-                                datetime.datetime.now(
-                                    tz=pytz.timezone('Europe/London')
-                                ) - datetime.timedelta(hours=(5 - j))
+                                timezone.localtime() - datetime.timedelta(hours=(5 - j))
                             ).isoformat(),
                             'auto_accept_rule': i
                         } for j in cls._generate_auto_accept_state_range(active)
@@ -2873,7 +2872,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
         """
         Test that the view displays the pending checks returned by the API.
         """
-        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 2, 9))
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
@@ -2903,7 +2902,7 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
         """
         Test that the view shows how many credits need attention.
         """
-        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 9, 9))
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
@@ -2977,7 +2976,7 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
         """
         Test that the view displays the pending checks returned by the API.
         """
-        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 2, 9))
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
@@ -3008,7 +3007,7 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
         """
         Test that the view shows how many credits need attention.
         """
-        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 9, 9))
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
@@ -3593,25 +3592,19 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'states': [
                         {
                             'created': (
-                                datetime.datetime.now(
-                                    tz=pytz.timezone('Europe/London')
-                                ) - datetime.timedelta(hours=3)
+                                timezone.localtime() - datetime.timedelta(hours=3)
                             ).isoformat(),
                             'active': True
                         },
                         {
                             'created': (
-                                datetime.datetime.now(
-                                    tz=pytz.timezone('Europe/London')
-                                ) - datetime.timedelta(hours=2)
+                                timezone.localtime() - datetime.timedelta(hours=2)
                             ).isoformat(),
                             'active': False
                         },
                         {
                             'created': (
-                                datetime.datetime.now(
-                                    tz=pytz.timezone('Europe/London')
-                                ) - datetime.timedelta(hours=1)
+                                timezone.localtime() - datetime.timedelta(hours=1)
                             ).isoformat(),
                             'active': True,
                             'reason': reason,
@@ -3642,7 +3635,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(
                 response,
                 (
-                    datetime.datetime.now(tz=pytz.timezone('Europe/London')) - datetime.timedelta(hours=1)
+                    timezone.localtime() - datetime.timedelta(hours=1)
                 ).strftime('%d/%m/%Y %H:%M')
             )
             self.assertContains(response, 'Reason for automatically accepting:')
@@ -3726,11 +3719,11 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     'prisoner_profile': self.SENDER_CHECK['credit']['prisoner_profile'],
                     'states': [
                         {
-                            'created': (datetime.datetime.now() - datetime.timedelta(hours=2)).isoformat(),
+                            'created': (timezone.localtime() - datetime.timedelta(hours=2)).isoformat(),
                             'active': True
                         },
                         {
-                            'created': (datetime.datetime.now() - datetime.timedelta(hours=1)).isoformat(),
+                            'created': (timezone.localtime() - datetime.timedelta(hours=1)).isoformat(),
                             'active': False
                         },
                     ]
@@ -5462,7 +5455,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
         Test that a user sees an error if trying to assign check to self that's already assigned to someone else from
         check list view
         """
-        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 2, 9))
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 2, 9))
         check_id = 1
         with responses.RequestsMock() as rsps:
             self.login(rsps)

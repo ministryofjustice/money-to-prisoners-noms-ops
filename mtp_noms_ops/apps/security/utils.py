@@ -25,7 +25,7 @@ def get_need_attention_date():
     """
     urgent_if_older_than = datetime.timedelta(days=3)
 
-    tomorrow = timezone.now() + datetime.timedelta(days=1)
+    tomorrow = timezone.localtime() + datetime.timedelta(days=1)
     tomorrow = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
     return tomorrow - urgent_if_older_than
 
@@ -64,7 +64,10 @@ def convert_date_fields(object_list, include_nested=False):
                         continue
 
                     if isinstance(new_value, datetime.datetime):
-                        new_value = timezone.localtime(new_value)
+                        if timezone.is_aware(new_value):
+                            new_value = timezone.localtime(new_value)
+                        else:
+                            new_value = timezone.make_aware(new_value)
                     obj[field] = new_value
                     break
                 except (ValueError, TypeError):
