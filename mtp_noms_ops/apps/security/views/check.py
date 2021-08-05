@@ -261,13 +261,11 @@ class AcceptOrRejectCheckView(FormView):
             sender_response = retrieve_all_pages_for_path(
                 api_session,
                 f'/senders/{detail_object["credit"]["sender_profile"]}/credits/',
-                **{
-                    'exclude_credit__in': detail_object['credit']['id'],
-                    'security_check__isnull': False,
-                    'only_completed': False,
-                    'security_check__actioned_by__isnull': False,
-                    'include_checks': True
-                }
+                exclude_credit__in=detail_object['credit']['id'],
+                security_check__isnull=False,
+                only_completed=False,
+                security_check__actioned_by__isnull=False,
+                include_checks=True,
             )
         else:
             sender_response = []
@@ -278,17 +276,15 @@ class AcceptOrRejectCheckView(FormView):
             prisoner_response = retrieve_all_pages_for_path(
                 api_session,
                 f'/prisoners/{detail_object["credit"]["prisoner_profile"]}/credits/',
-                **{
-                    # Exclude any credits displayed as part of sender credits, to prevent duplication where
-                    # both prisoner and sender same as the credit in question
-                    'exclude_credit__in': ','.join(
-                        [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
-                    ),
-                    'security_check__isnull': False,
-                    'only_completed': False,
-                    'security_check__actioned_by__isnull': False,
-                    'include_checks': True
-                }
+                # Exclude any credits displayed as part of sender credits, to prevent duplication where
+                # both prisoner and sender same as the credit in question
+                exclude_credit__in=','.join(
+                    [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
+                ),
+                security_check__isnull=False,
+                only_completed=False,
+                security_check__actioned_by__isnull=False,
+                include_checks=True,
             )
         else:
             prisoner_response = []

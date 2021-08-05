@@ -38,10 +38,8 @@ class CheckListForm(SecurityForm):
         """
         return dict(
             super().get_api_request_params(),
-            **{
-                'status': 'pending',
-                'credit_resolution': 'initial'
-            }
+            status='pending',
+            credit_resolution='initial',
         )
 
     def get_object_list_endpoint_path(self):
@@ -53,19 +51,15 @@ class CheckListForm(SecurityForm):
         """
         self.need_attention_count = self.session.get(self.get_object_list_endpoint_path(), params=dict(
             self.get_api_request_params(),
-            **{
-                'started_at__lt': self.need_attention_date.strftime('%Y-%m-%d %H:%M:%S'),
-                'offset': 0,
-                'limit': 1,
-            }
+            started_at__lt=self.need_attention_date.strftime('%Y-%m-%d %H:%M:%S'),
+            offset=0,
+            limit=1,
         )).json()['count']
         self.my_list_count = self.session.get(self.get_object_list_endpoint_path(), params=dict(
             self.get_api_request_params(),
-            **{
-                'assigned_to': self.request.user.pk,
-                'offset': 0,
-                'limit': 1,
-            }
+            assigned_to=self.request.user.pk,
+            offset=0,
+            limit=1,
         )).json()['count']
 
         object_list = convert_date_fields(super().get_object_list(), include_nested=True)
