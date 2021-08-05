@@ -5625,11 +5625,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                     content
                 )
                 self.assertIn(
-                    f'Showing <b>1</b> to <b>{page_size}</b> of <b>{api_auto_accept_response_len}</b> auto accepts',
-                    content
-                )
-                self.assertIn(
-                    f'<b>{api_auto_accept_response_len}</b> auto accepts',
+                    f'{api_auto_accept_response_len} auto accepts',
                     content
                 )
 
