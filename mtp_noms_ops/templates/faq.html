@@ -16,35 +16,32 @@
 
 
       <h2 class="govuk-heading-m" id="faq-locked-out">
-        {% trans "I’m locked out" %}
+        {% trans 'I’m locked out' %}
       </h2>
 
       <p>
-        {% blocktrans trimmed %}
-          If you mis-type your password too many times, you'll be locked out.
-        {% endblocktrans %}
-        {% blocktrans trimmed %}
-          Try again in about half an hour.
-        {% endblocktrans %}
+        {% trans 'If you mis-type your password too many times, you’ll be locked out.' %}
+        {% trans 'Try again in about half an hour.' %}
       </p>
 
 
       <h2 class="govuk-heading-m" id="faq-may-have-account">
-        {% trans "I may already have an account" %}
+        {% trans 'I may already have an account' %}
       </h2>
 
       <p>
         {% blocktrans trimmed %}
           Try <a href="{{ reset_password_url }}">resetting your password</a>.
         {% endblocktrans %}
+        {% trans 'If you have an account, you’ll get an email with a link.' %}
         {% blocktrans trimmed %}
-          If you have an account, you'll get an email with a link. If not, <a href="{{ sign_up_url }}">request an account</a>.
+          If not, <a href="{{ sign_up_url }}">request an account</a>.
         {% endblocktrans %}
       </p>
 
 
       <h2 class="govuk-heading-m" id="faq-username">
-        {% trans "I've forgotten or need to change my username" %}
+        {% trans 'I’ve forgotten or need to change my username' %}
       </h2>
 
       <p>
@@ -56,7 +53,7 @@
 
 
       <h2 class="govuk-heading-m" id="faq-reset-password">
-        {% trans "Reset password isn’t working" %}
+        {% trans 'Reset password isn’t working' %}
       </h2>
 
       <p>
@@ -68,13 +65,11 @@
 
 
       <h2 class="govuk-heading-m" id="faq-cashbook-account">
-        {% trans "I want a digital cashbook account to process money in and out of prison" %}
+        {% trans 'I want a digital cashbook account to process money in and out of prison' %}
       </h2>
 
       <p>
-        {% blocktrans trimmed %}
-          You can only have one account - intelligence tool OR digital cashbook.
-        {% endblocktrans %}
+        {% trans 'You can only have one account - intelligence tool OR digital cashbook.' %}
         <br />
         {% blocktrans trimmed %}
           If you need a cashbook account, instead of an intelligence tool one, go directly to the <a href="{{ cashbook_url }}">digital cashbook</a> and request it.
