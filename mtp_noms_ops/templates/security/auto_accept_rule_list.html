@@ -44,7 +44,7 @@
             {{ auto_accept_rule.debit_card_sender_details|format_card_number }}
             <br/>
             <a href="{{ auto_accept_rule.debit_card_sender_details|sender_profile_search_dcsd_url }}" class="mtp-link--print-plain">
-              {{auto_accept_rule.debit_card_sender_details.cardholder_names | get_abbreviated_cardholder_names_from_list}}
+              {{auto_accept_rule.debit_card_sender_details.cardholder_names|get_abbreviated_cardholder_names_from_list}}
             </a>
           </td>
           <td>
@@ -53,13 +53,13 @@
             <a href="{{ auto_accept_rule.prisoner_profile|prisoner_profile_search_id_url }}" class="mtp-link--print-plain">{{ auto_accept_rule.prisoner_profile.prisoner_name }}</a>
           </td>
           <td>
-            {{ auto_accept_rule.states | get_latest_auto_accept_state_field:'added_by' | format_name }}
+            {{ auto_accept_rule.states|get_latest_auto_accept_state_field:'added_by'|format_name }}
           </td>
           <td class="mtp-check-date">
-            {{ auto_accept_rule.states | get_latest_active_auto_accept_state_field:'created' | date:'SHORT_DATETIME_FORMAT' }}
+            {{ auto_accept_rule.states|get_latest_active_auto_accept_state_field:'created'|date:'SHORT_DATETIME_FORMAT' }}
           </td>
           <td>
-            {{ auto_accept_rule.states | get_latest_active_auto_accept_state_field:'reason' | hide_long_text:7 }}
+            {{ auto_accept_rule.states|get_latest_active_auto_accept_state_field:'reason'|hide_long_text:7 }}
           </td>
           <td>
             <a class="govuk-button govuk-button--secondary govuk-!-display-none-print"
