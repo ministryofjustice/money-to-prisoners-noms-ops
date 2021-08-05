@@ -12,7 +12,7 @@ from security.forms.check import (
     AutoAcceptListForm,
     AcceptOrRejectCheckForm,
     CheckListForm,
-    CreditsHistoryListForm,
+    CheckHistoryForm,
     AssignCheckToUserForm,
     UserCheckListForm
 )
@@ -29,7 +29,7 @@ class CheckListView(SecurityView):
     form_class = CheckListForm
 
 
-class MyListCheckView(SecurityView):
+class MyCheckListView(SecurityView):
     """
     View returning the checks in 'To action' (pending) status assigned to current user
     """
@@ -38,13 +38,13 @@ class MyListCheckView(SecurityView):
     form_class = UserCheckListForm
 
 
-class CreditsHistoryListView(SecurityView):
+class CheckHistoryListView(SecurityView):
     """
     View history of all accepted and rejected credits.
     """
     title = _('Decision history')
     template_name = 'security/credits_history_list.html'
-    form_class = CreditsHistoryListForm
+    form_class = CheckHistoryForm
 
 
 class AutoAcceptRuleListView(SecurityView):

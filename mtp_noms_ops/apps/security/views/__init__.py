@@ -19,11 +19,11 @@ from .check import (  # noqa: F401
     AutoAcceptRuleListView,
     AutoAcceptRuleDetailView,
     CheckListView,
-    CreditsHistoryListView,
+    CheckHistoryListView,
     CheckAssignView,
-    MyListCheckView
+    MyCheckListView,
 )
 from .views import (  # noqa: F401
     FAQView,
-    PolicyChangeView
+    PolicyChangeView,
 )

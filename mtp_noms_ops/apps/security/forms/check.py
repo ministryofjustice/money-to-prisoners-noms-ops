@@ -78,7 +78,7 @@ class UserCheckListForm(CheckListForm):
         )
 
 
-class CreditsHistoryListForm(SecurityForm):
+class CheckHistoryForm(SecurityForm):
     """
     List of security checks.
     """

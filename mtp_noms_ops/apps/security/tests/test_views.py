@@ -3056,9 +3056,9 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, 'Review <span class="govuk-visually-hidden">credit to Jean Valjean</span>')
 
 
-class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
+class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
     """
-    Tests related to CreditsHistoryListView.
+    Tests related to CheckHistoryListView.
     """
     SAMPLE_CHECK_WITH_ACTIONED_BY = dict(
         BaseCheckViewTestCase.SAMPLE_CHECK,

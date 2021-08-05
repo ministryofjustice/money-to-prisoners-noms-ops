@@ -360,7 +360,7 @@ urlpatterns = [
     ),
     url(
         r'^security/checks/my-list/$',
-        fiu_security_test(views.MyListCheckView.as_view()),
+        fiu_security_test(views.MyCheckListView.as_view()),
         name='my_check_list',
     ),
     url(
@@ -390,7 +390,7 @@ urlpatterns = [
     ),
     url(
         r'^security/checks/history/$',
-        fiu_security_test(views.CreditsHistoryListView.as_view()),
+        fiu_security_test(views.CheckHistoryListView.as_view()),
         name='credits_history',
     ),
 
