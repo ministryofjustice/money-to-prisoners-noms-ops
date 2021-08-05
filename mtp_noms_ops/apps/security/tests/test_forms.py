@@ -2574,7 +2574,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept_or_reject(), (True, ''))
+            self.assertEqual(form.accept_or_reject(), (True, None))
 
     def test_form_invalid(self):
         """
@@ -2646,7 +2646,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept_or_reject(), (False, ''))
+            self.assertEqual(form.accept_or_reject(), (False, None))
             self.assertDictEqual(
                 form.errors,
                 {'__all__': ['There was an error with your request.']},
@@ -2687,7 +2687,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept_or_reject(), (True, ''))
+            self.assertEqual(form.accept_or_reject(), (True, None))
 
             last_request_body = json.loads(rsps.calls[-1].request.body)
             self.assertDictEqual(
@@ -2805,7 +2805,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept_or_reject(), (False, ''))
+            self.assertEqual(form.accept_or_reject(), (False, None))
             self.assertDictEqual(
                 form.errors,
                 {'__all__': ['There was an error with your request.']},

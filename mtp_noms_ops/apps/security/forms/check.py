@@ -403,15 +403,12 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
 
     def _handle_request_exception(self, e: RequestException, entity: str) -> tuple:
         error_payload = self._get_request_exception_payload(e)
-        return self._render_error_response(error_payload, entity)
-
-    def _render_error_response(self, error_payload, entity):
         logger.exception(
             f'{entity} %(object_id)s could not be actioned. Error payload: %(exception)r',
             {'object_id': self.object_id, 'exception': error_payload}
         )
         self.add_error(None, _('There was an error with your request.'))
-        return (False, '')
+        return False, None
 
     def _get_request_exception_payload(self, e: RequestException) -> dict:
         try:
@@ -425,7 +422,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
         Accepts or rejects the check via the API.
         :rtype tuple(bool, str)
         :returns: First element: True if the API call was successful. If not, False
-                  Second element: Additional information string to populate as message or empty string
+                  Second element: Additional information string to populate as message or None
         """
         fiu_action = self.cleaned_data.pop('fiu_action')
         endpoint = self.get_resolve_endpoint_path(fiu_action=fiu_action)
@@ -458,7 +455,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                             }
                         )
                     except RequestException as e:
-                        return self._handle_request_exception(e, 'Auto Accept Rule')
+                        return self._handle_request_exception(e, 'Auto accept rule')
                 else:
                     try:
                         self.session.post(
@@ -484,15 +481,17 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
                             # TODO we happy that this check won't be linked to the existing auto-accept rule in the UI?
                             return (
                                 True,
-                                'The auto-accept could not be created because an auto-accept '
-                                'already exists for {sender_name} and {prisoner_number}'.format(
-                                    sender_name=check['credit']['sender_name'],
-                                    prisoner_number=check['credit']['prisoner_number']
-                                )
+                                _(
+                                    'The auto-accept could not be created because one '
+                                    'already exists for %(sender_name)s and %(prisoner_number)s'
+                                ) % {
+                                    'sender_name': check['credit']['sender_name'],
+                                    'prisoner_number': check['credit']['prisoner_number'],
+                                }
                             )
                         else:
-                            return self._handle_request_exception(e, 'Auto Accept Rule')
-            return (True, '')
+                            return self._handle_request_exception(e, 'Auto accept rule')
+            return True, None
 
 
 class AutoAcceptDetailForm(forms.Form):

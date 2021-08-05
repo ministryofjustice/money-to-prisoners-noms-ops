@@ -4676,7 +4676,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(
                 response,
                 (
-                    'The auto-accept could not be created because an auto-accept '
+                    'The auto-accept could not be created because one '
                     'already exists for {sender_name} and {prisoner_number}'.format(
                         sender_name=self.SENDER_CHECK['credit']['sender_name'],
                         prisoner_number=self.SENDER_CHECK['credit']['prisoner_number']
