@@ -124,11 +124,7 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         if not result:
             return self.form_invalid(form)
 
-        messages.add_message(
-            self.request,
-            messages.INFO,
-            _('The auto accept was stopped'),
-        )
+        messages.info(self.request, _('The auto accept was stopped'))
         return super().form_valid(form)
 
 
@@ -301,22 +297,14 @@ class AcceptOrRejectCheckView(FormView):
             if not result:
                 return self.form_invalid(form)
             if additional_info_message:
-                messages.add_message(
-                    self.request,
-                    messages.INFO,
-                    _(additional_info_message),
-                )
+                messages.info(self.request, _(additional_info_message))
 
             if form.data['fiu_action'] == 'accept':
                 ui_message = _('Credit accepted')
             else:
                 ui_message = _('Credit rejected')
+            messages.info(self.request, ui_message)
 
-            messages.add_message(
-                self.request,
-                messages.INFO,
-                _(ui_message),
-            )
             return HttpResponseRedirect(self.list_url)
 
         return super().form_valid(form)

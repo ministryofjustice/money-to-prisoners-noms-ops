@@ -19,8 +19,8 @@ class ReviewCreditsView(FormView):
 
     def form_valid(self, form):
         count = form.review()
-        messages.add_message(
-            self.request, messages.INFO,
+        messages.info(
+            self.request,
             _('%(count)d credits have been marked as checked by security') % {'count': count}
         )
         return super().form_valid(form=form)

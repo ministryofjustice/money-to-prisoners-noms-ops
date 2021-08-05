@@ -592,9 +592,5 @@ class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
                 else:
                     msg = maybe_json
             logger.exception('Check %(check_id)s could not be assigned', {'check_id': self.object_id})
-            messages.add_message(
-                self.request,
-                messages.ERROR,
-                msg
-            )
+            messages.error(self.request, msg)
             return False
