@@ -1,12 +1,12 @@
-from anymail.message import AnymailMessage
 from django.conf import settings
-from django.template import loader as template_loader
-from django.utils.translation import gettext, activate, get_language
+from django.template.defaultfilters import striptags
 from django.utils import timezone
+from django.utils.dateformat import format as format_date
+from django.utils.translation import gettext, activate, get_language
 from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.auth.api_client import get_api_session_with_session
 from mtp_common.spooling import spoolable
-from mtp_common.tasks import default_from_address, prepare_context
+from mtp_common.tasks import send_email
 from openpyxl.writer.excel import save_virtual_workbook
 
 from security.export import ObjectListSerialiser
@@ -14,24 +14,28 @@ from security.utils import convert_date_fields
 
 
 @spoolable(body_params=('user', 'session', 'filters'))
-def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, export_description,
-                      attachment_name):
+def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, export_description):
     if not get_language():
         language = getattr(settings, 'LANGUAGE_CODE', 'en')
         activate(language)
 
     if object_type == 'credits':
-        export_message = gettext('Attached are the credits you exported from ‘%(service_name)s’.')
+        export_message = gettext('Click the link to download the credits you exported from ‘%(service_name)s’.')
     elif object_type == 'disbursements':
         export_message = (
-            gettext('Attached are the bank transfer and cheque disbursements you exported from ‘%(service_name)s’.') +
+            gettext('Click the link to download the bank transfer and '
+                    'cheque disbursements you exported from ‘%(service_name)s’.') +
             ' ' +
             gettext('You can’t see cash or postal orders here.')
         )
     elif object_type == 'senders':
-        export_message = gettext('Attached is a list of payment sources you exported from ‘%(service_name)s’.')
+        export_message = gettext(
+            'Click the link to download the list of payment sources you exported from ‘%(service_name)s’.'
+        )
     elif object_type == 'prisoners':
-        export_message = gettext('Attached is a list of prisoners you exported from ‘%(service_name)s’.')
+        export_message = gettext(
+            'Click the link to download the list of prisoners you exported from ‘%(service_name)s’.'
+        )
     else:
         raise NotImplementedError(f'Cannot export {object_type}')
 
@@ -43,28 +47,18 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
 
     serialiser = ObjectListSerialiser.serialiser_for(object_type)
     workbook = serialiser.make_workbook(object_list)
-    output = save_virtual_workbook(workbook)
+    attachment = save_virtual_workbook(workbook)
 
-    attachment_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-
-    template_context = prepare_context({
-        'export_description': export_description,
-        'generated_at': generated_at,
-        'export_message': export_message % {
-            'service_name': gettext('Prisoner money intelligence')
-        }
-    })
-
-    subject = '%s - %s' % (gettext('Prisoner money intelligence'), gettext('Exported data'))
-    text_body = template_loader.get_template('security/email/export.txt').render(template_context)
-    html_body = template_loader.get_template('security/email/export.html').render(template_context)
-    email = AnymailMessage(
-        subject=subject,
-        body=text_body.strip('\n'),
-        from_email=default_from_address(),
-        to=[user.email],
-        tags=['export'],
+    send_email(
+        template_name='noms-ops-export',
+        to=user.email,
+        personalisation={
+            'export_message': export_message % {
+                'service_name': gettext('Prisoner money intelligence')
+            },
+            'export_description': striptags(export_description),
+            'generated_at': format_date(generated_at, 'd/m/Y H:I'),
+            'attachment': attachment,
+        },
+        staff_email=True,
     )
-    email.attach_alternative(html_body, mimetype='text/html')
-    email.attach(attachment_name, output, mimetype=attachment_type)
-    email.send()
