@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.forms import ValidationError
 from django.urls import reverse
-from django.utils.translation import activate, gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from mtp_common.auth import api_client
 from mtp_common.auth.exceptions import HttpClientError
 from mtp_common.spooling import Context, spoolable
@@ -80,17 +80,23 @@ def update_locations(*, user, locations, context: Context):
 
     if context.spooled:
         if user.email:
-            send_task_failure_notification(user.email, {'errors': errors})
+            send_task_failure_notification(user.email, errors)
     else:
         raise ValidationError(errors)
 
 
-def send_task_failure_notification(email, context):
-    activate(settings.LANGUAGE_CODE)
-    context['feedback_url'] = urljoin(settings.SITE_URL, reverse('submit_ticket'))
+def send_task_failure_notification(email, errors):
+    errors = '\n'.join(
+        f'• {error}'
+        for error in errors
+    )
+    feedback_url = urljoin(settings.SITE_URL, reverse('submit_ticket'))
     send_email(
-        email, 'prisoner_location_admin/email/failure-notification.txt',
-        gettext('Prisoner money: prisoner location update failed'),
-        context=context, html_template='prisoner_location_admin/email/failure-notification.html',
-        anymail_tags=['locations-failed'],
+        template_name='noms-ops-locations-failed',
+        to=email,
+        personalisation={
+            'errors': errors,
+            'feedback_url': feedback_url,
+        },
+        staff_email=True,
     )
