@@ -290,9 +290,6 @@ HMPPS_PRISON_API_BASE_URL = os.environ.get('HMPPS_PRISON_API_BASE_URL', '')
 TOKEN_RETRIEVAL_USERNAME = os.environ.get('TOKEN_RETRIEVAL_USERNAME', '_token_retrieval')
 TOKEN_RETRIEVAL_PASSWORD = os.environ.get('TOKEN_RETRIEVAL_PASSWORD', '_token_retrieval')
 
-CLOUD_PLATFORM_MIGRATION_MODE = os.environ.get('CLOUD_PLATFORM_MIGRATION_MODE', '')
-CLOUD_PLATFORM_MIGRATION_URL = os.environ.get('CLOUD_PLATFORM_MIGRATION_URL', '')
-
 # Feature toggle for copy changes relating to bank transfers
 BANK_TRANSFERS_ENABLED = bool(
     int(

@@ -58,6 +58,11 @@ urlpatterns = [
     ),
     url(r'^security/not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
     url(r'^security/faq/$', login_required(views.FAQView.as_view()), name='faq'),
+    url(
+        r'^policy-change/$',
+        login_required(views.PolicyChangeView.as_view()),
+        name='policy_change'
+    ),
 
     # credits
     url(
@@ -360,7 +365,7 @@ urlpatterns = [
     ),
     url(
         r'^security/checks/my-list/$',
-        fiu_security_test(views.MyListCheckView.as_view()),
+        fiu_security_test(views.MyCheckListView.as_view()),
         name='my_check_list',
     ),
     url(
@@ -390,7 +395,7 @@ urlpatterns = [
     ),
     url(
         r'^security/checks/history/$',
-        fiu_security_test(views.CreditsHistoryListView.as_view()),
+        fiu_security_test(views.CheckHistoryListView.as_view()),
         name='credits_history',
     ),
 
@@ -423,9 +428,4 @@ urlpatterns = [
         ),
         name='prisoner_list_legacy',
     ),
-    url(
-        r'^policy-change/$',
-        login_required(views.PolicyChangeView.as_view()),
-        name='policy_change'
-    )
 ]

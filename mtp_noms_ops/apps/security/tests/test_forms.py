@@ -7,7 +7,6 @@ from urllib.parse import parse_qs
 
 from django import forms
 from django.test import SimpleTestCase
-from django.contrib import messages
 from django.utils.timezone import make_aware
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
@@ -2575,7 +2574,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept_or_reject(), (True, ''))
+            self.assertEqual(form.accept_or_reject(), (True, None))
 
     def test_form_invalid(self):
         """
@@ -2647,7 +2646,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept_or_reject(), (False, ''))
+            self.assertEqual(form.accept_or_reject(), (False, None))
             self.assertDictEqual(
                 form.errors,
                 {'__all__': ['There was an error with your request.']},
@@ -2688,7 +2687,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept_or_reject(), (True, ''))
+            self.assertEqual(form.accept_or_reject(), (True, None))
 
             last_request_body = json.loads(rsps.calls[-1].request.body)
             self.assertDictEqual(
@@ -2806,7 +2805,7 @@ class AcceptOrRejectCheckFormTestCase(SimpleTestCase):
             )
 
             self.assertTrue(form.is_valid())
-            self.assertEqual(form.accept_or_reject(), (False, ''))
+            self.assertEqual(form.accept_or_reject(), (False, None))
             self.assertDictEqual(
                 form.errors,
                 {'__all__': ['There was an error with your request.']},
@@ -2879,8 +2878,8 @@ class AssignCheckToUserFormTestCase(SimpleTestCase):
             self.assertTrue(form.is_valid())
             self.assertEqual(form.assign_or_unassign(), True)
 
-    @mock.patch('django.contrib.messages.add_message')
-    def test_form_returns_error_if_check_already_assigned_to_other_user(self, mock_messages_add_message):
+    @mock.patch('django.contrib.messages.error')
+    def test_form_returns_error_if_check_already_assigned_to_other_user(self, mock_messages_error):
         """
         Test that the form returns an error if check is assigned to another user.
         """
@@ -2903,8 +2902,7 @@ class AssignCheckToUserFormTestCase(SimpleTestCase):
             form.is_valid()
 
             self.assertEqual(form.assign_or_unassign(), False)
-            mock_messages_add_message.assert_called_with(
+            mock_messages_error.assert_called_with(
                 self.request,
-                messages.ERROR,
                 _('Credit could not be added to your list.')
             )

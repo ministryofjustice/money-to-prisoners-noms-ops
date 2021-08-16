@@ -2688,7 +2688,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'actioned_at': None,
         'actioned_by': None,
         'assigned_to': 7,
-        'auto_accept_rule_state': None
+        'auto_accept_rule_state': None,
     }
 
     SAMPLE_CREDIT_BASE = {
@@ -2708,25 +2708,23 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'prisoner_profile': prisoner_id,
         'billing_address': {
             'debit_card_sender_details': 17
-        }
+        },
     }
 
     SAMPLE_CHECK = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
 
     SENDER_CREDIT = dict(
         SAMPLE_CREDIT_BASE,
-        **{
-            'security_check': SAMPLE_CHECK_BASE.copy(),
-            'intended_recipient': 'Mr G Melley',
-            'prisoner_name': 'Ms A. Nother Prisoner',
-            'prisoner_number': 'Number 6',
-            'amount': 1000000,
-            'prison': 'LEI',
-            'prison_name': 'HMP LEEDS',
-            'billing_address': {'line1': '102PF', 'city': 'London'},
-            'resolution': 'rejected',
-            'started_at': credit_created_date.isoformat()
-        }
+        security_check=SAMPLE_CHECK_BASE.copy(),
+        intended_recipient='Mr G Melley',
+        prisoner_name='Ms A. Nother Prisoner',
+        prisoner_number='Number 6',
+        amount=1000000,
+        prison='LEI',
+        prison_name='HMP LEEDS',
+        billing_address={'line1': '102PF', 'city': 'London'},
+        resolution='rejected',
+        started_at=credit_created_date.isoformat(),
     )
     SENDER_CREDIT['security_check']['description'] = ['Strict compliance check failed']
     SENDER_CREDIT['security_check']['actioned_by_name'] = 'Javert'
@@ -2743,19 +2741,17 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
 
     PRISONER_CREDIT = dict(
         SAMPLE_CREDIT_BASE,
-        **{
-            'security_check': SAMPLE_CHECK_BASE.copy(),
-            'amount': 10,
-            'card_expiry_date': '02/50',
-            'card_number_first_digits': '01199988199',
-            'card_number_last_digits': '7253',
-            'sender_email': 'someoneelse@example.com',
-            'sender_name': 'SOMEONE ELSE',
-            'prison': 'LEI',
-            'prison_name': 'HMP LEEDS',
-            'billing_address': {'line1': 'Somewhere else', 'city': 'London'},
-            'resolution': 'credited',
-        }
+        security_check=SAMPLE_CHECK_BASE.copy(),
+        amount=10,
+        card_expiry_date='02/50',
+        card_number_first_digits='01199988199',
+        card_number_last_digits='7253',
+        sender_email='someoneelse@example.com',
+        sender_name='SOMEONE ELSE',
+        prison='LEI',
+        prison_name='HMP LEEDS',
+        billing_address={'line1': 'Somewhere else', 'city': 'London'},
+        resolution='credited',
     )
     PRISONER_CREDIT['security_check']['description'] = ['Soft compliance check failed']
     PRISONER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
@@ -3060,35 +3056,31 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, 'Review <span class="govuk-visually-hidden">credit to Jean Valjean</span>')
 
 
-class CreditsHistoryListViewTestCase(BaseCheckViewTestCase):
+class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
     """
-    Tests related to CreditsHistoryListView.
+    Tests related to CheckHistoryListView.
     """
     SAMPLE_CHECK_WITH_ACTIONED_BY = dict(
         BaseCheckViewTestCase.SAMPLE_CHECK,
-        **{
-            'actioned_at': '2020-01-13 12:00:00+00',
-            'actioned_by': 1,
-            'decision_reason': 'Money issues',
-            'actioned_by_name': 'Barry Garlow',
-            'status': 'accepted'
-        }
+        actioned_at='2020-01-13 12:00:00+00',
+        actioned_by=1,
+        decision_reason='Money issues',
+        actioned_by_name='Barry Garlow',
+        status='accepted',
     )
 
     SAMPLE_CHECK_WITH_ACTIONED_BY['credit'].update(
-        {
-            'billing_address': {
-                'id': 21,
-                'line1': 'Studio 33',
-                'line2': 'Allen port',
-                'city': 'Gloverside',
-                'country': 'UK',
-                'postcode': 'S1 3HS',
-                'debit_card_sender_details': 17
-            },
-            'prison_name': 'Brixton Prison',
-            'prisoner_number': '24601',
-        }
+        billing_address={
+            'id': 21,
+            'line1': 'Studio 33',
+            'line2': 'Allen port',
+            'city': 'Gloverside',
+            'country': 'UK',
+            'postcode': 'S1 3HS',
+            'debit_card_sender_details': 17
+        },
+        prison_name='Brixton Prison',
+        prisoner_number='24601',
     )
 
     def test_cannot_access_view(self):
@@ -4684,7 +4676,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             self.assertContains(
                 response,
                 (
-                    'The auto-accept could not be created because an auto-accept '
+                    'The auto-accept could not be created because one '
                     'already exists for {sender_name} and {prisoner_number}'.format(
                         sender_name=self.SENDER_CHECK['credit']['sender_name'],
                         prisoner_number=self.SENDER_CHECK['credit']['prisoner_number']
@@ -4981,30 +4973,26 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         sender_credits = [
             dict(
                 self.SENDER_CREDIT,
-                **{
-                    'id': i,
-                    'security_check': dict(
-                        self.SENDER_CREDIT['security_check'],
-                        actioned_at=offset_isodatetime_by_ten_seconds(
-                            self.SENDER_CREDIT['security_check']['actioned_at'], i
-                        )
+                id=i,
+                security_check=dict(
+                    self.SENDER_CREDIT['security_check'],
+                    actioned_at=offset_isodatetime_by_ten_seconds(
+                        self.SENDER_CREDIT['security_check']['actioned_at'], i
                     )
-                }
+                )
             )
             for i in range(4)
         ]
         prisoner_credits = [
             dict(
                 self.PRISONER_CREDIT,
-                **{
-                    'id': i,
-                    'security_check': dict(
-                        self.PRISONER_CREDIT['security_check'],
-                        actioned_at=offset_isodatetime_by_ten_seconds(
-                            self.PRISONER_CREDIT['security_check']['actioned_at'], i
-                        )
+                id=i,
+                security_check=dict(
+                    self.PRISONER_CREDIT['security_check'],
+                    actioned_at=offset_isodatetime_by_ten_seconds(
+                        self.PRISONER_CREDIT['security_check']['actioned_at'], i
                     )
-                }
+                )
             )
             for i in range(4)
         ]
@@ -5637,11 +5625,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                     content
                 )
                 self.assertIn(
-                    f'Showing <b>1</b> to <b>{page_size}</b> of <b>{api_auto_accept_response_len}</b> auto accepts',
-                    content
-                )
-                self.assertIn(
-                    f'<b>{api_auto_accept_response_len}</b> auto accepts',
+                    f'{api_auto_accept_response_len} auto accepts',
                     content
                 )
 

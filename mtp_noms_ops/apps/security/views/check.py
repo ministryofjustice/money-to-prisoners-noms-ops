@@ -3,7 +3,7 @@ from typing import Optional
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic.edit import BaseFormView, FormView
 from mtp_common.api import retrieve_all_pages_for_path
 
@@ -12,7 +12,7 @@ from security.forms.check import (
     AutoAcceptListForm,
     AcceptOrRejectCheckForm,
     CheckListForm,
-    CreditsHistoryListForm,
+    CheckHistoryForm,
     AssignCheckToUserForm,
     UserCheckListForm
 )
@@ -24,34 +24,34 @@ class CheckListView(SecurityView):
     """
     View returning the checks in 'To action' (pending) status.
     """
-    title = gettext_lazy('Credits to action')
+    title = _('Credits to action')
     template_name = 'security/checks_list.html'
     form_class = CheckListForm
 
 
-class MyListCheckView(SecurityView):
+class MyCheckListView(SecurityView):
     """
     View returning the checks in 'To action' (pending) status assigned to current user
     """
-    title = gettext_lazy('My list')
+    title = _('My list')
     template_name = 'security/checks_list.html'
     form_class = UserCheckListForm
 
 
-class CreditsHistoryListView(SecurityView):
+class CheckHistoryListView(SecurityView):
     """
     View history of all accepted and rejected credits.
     """
-    title = gettext_lazy('Decision history')
+    title = _('Decision history')
     template_name = 'security/credits_history_list.html'
-    form_class = CreditsHistoryListForm
+    form_class = CheckHistoryForm
 
 
 class AutoAcceptRuleListView(SecurityView):
     """
     View history of all auto-accept rules
     """
-    title = gettext_lazy('Auto accepts')
+    title = _('Auto accepts')
     template_name = 'security/auto_accept_rule_list.html'
     form_class = AutoAcceptListForm
 
@@ -65,7 +65,7 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
     """
     View history of all auto-accept rules
     """
-    list_title = gettext_lazy('Auto accepts')
+    list_title = _('Auto accepts')
     template_name = 'security/auto_accept_rule.html'
     object_context_key = 'auto_accept_rule'
     id_kwarg_name = 'auto_accept_rule_id'
@@ -82,12 +82,10 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         }
 
     def get_title_for_object(self, detail_object):
-        return '{} {} {} {}'.format(
-            gettext_lazy('Review auto accept of credits from'),
-            get_abbreviated_cardholder_names(detail_object['debit_card_sender_details']['cardholder_names']),
-            gettext_lazy('to'),
-            detail_object['prisoner_profile']['prisoner_name']
-        )
+        return _('Review auto accept of credits from %(sender)s to %(prisoner)s') % {
+            'sender': get_abbreviated_cardholder_names(detail_object['debit_card_sender_details']['cardholder_names']),
+            'prisoner': detail_object['prisoner_profile']['prisoner_name'],
+        }
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
@@ -113,9 +111,9 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
 
     def get_breadcrumbs(self, list_url):
         return [
-            {'name': gettext_lazy('Home'), 'url': reverse('security:dashboard')},
+            {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.list_title, 'url': list_url},
-            {'name': gettext_lazy('Review')},
+            {'name': _('Review')},
         ]
 
     def get_object_for_template(self, obj):
@@ -126,11 +124,7 @@ class AutoAcceptRuleDetailView(SimpleSecurityDetailView, FormView):
         if not result:
             return self.form_invalid(form)
 
-        messages.add_message(
-            self.request,
-            messages.INFO,
-            gettext_lazy('The auto accept was stopped'),
-        )
+        messages.info(self.request, _('The auto accept was stopped'))
         return super().form_valid(form)
 
 
@@ -184,8 +178,8 @@ class AcceptOrRejectCheckView(FormView):
     """
     object_list_context_key = 'checks'
 
-    title = gettext_lazy('Review credit')
-    list_title = gettext_lazy('Credits to action')
+    title = _('Review credit')
+    list_title = _('Credits to action')
     id_kwarg_name = 'check_id'
     object_context_key = 'check'
     list_url = reverse_lazy('security:check_list')
@@ -246,7 +240,7 @@ class AcceptOrRejectCheckView(FormView):
             list_url = referrer_url
 
         context_data['breadcrumbs'] = [
-            {'name': gettext_lazy('Home'), 'url': reverse('security:dashboard')},
+            {'name': _('Home'), 'url': reverse('security:dashboard')},
             {'name': self.list_title, 'url': list_url},
             {'name': self.title}
         ]
@@ -261,13 +255,11 @@ class AcceptOrRejectCheckView(FormView):
             sender_response = retrieve_all_pages_for_path(
                 api_session,
                 f'/senders/{detail_object["credit"]["sender_profile"]}/credits/',
-                **{
-                    'exclude_credit__in': detail_object['credit']['id'],
-                    'security_check__isnull': False,
-                    'only_completed': False,
-                    'security_check__actioned_by__isnull': False,
-                    'include_checks': True
-                }
+                exclude_credit__in=detail_object['credit']['id'],
+                security_check__isnull=False,
+                only_completed=False,
+                security_check__actioned_by__isnull=False,
+                include_checks=True,
             )
         else:
             sender_response = []
@@ -278,17 +270,15 @@ class AcceptOrRejectCheckView(FormView):
             prisoner_response = retrieve_all_pages_for_path(
                 api_session,
                 f'/prisoners/{detail_object["credit"]["prisoner_profile"]}/credits/',
-                **{
-                    # Exclude any credits displayed as part of sender credits, to prevent duplication where
-                    # both prisoner and sender same as the credit in question
-                    'exclude_credit__in': ','.join(
-                        [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
-                    ),
-                    'security_check__isnull': False,
-                    'only_completed': False,
-                    'security_check__actioned_by__isnull': False,
-                    'include_checks': True
-                }
+                # Exclude any credits displayed as part of sender credits, to prevent duplication where
+                # both prisoner and sender same as the credit in question
+                exclude_credit__in=','.join(
+                    [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
+                ),
+                security_check__isnull=False,
+                only_completed=False,
+                security_check__actioned_by__isnull=False,
+                include_checks=True,
             )
         else:
             prisoner_response = []
@@ -303,26 +293,17 @@ class AcceptOrRejectCheckView(FormView):
     def form_valid(self, form):
         if self.request.method == 'POST':
             result, additional_info_message = form.accept_or_reject()
-
             if not result:
                 return self.form_invalid(form)
             if additional_info_message:
-                messages.add_message(
-                    self.request,
-                    messages.INFO,
-                    gettext_lazy(additional_info_message),
-                )
+                messages.info(self.request, additional_info_message)
 
             if form.data['fiu_action'] == 'accept':
-                ui_message = gettext_lazy('Credit accepted')
+                ui_message = _('Credit accepted')
             else:
-                ui_message = gettext_lazy('Credit rejected')
+                ui_message = _('Credit rejected')
+            messages.info(self.request, ui_message)
 
-            messages.add_message(
-                self.request,
-                messages.INFO,
-                gettext_lazy(ui_message),
-            )
             return HttpResponseRedirect(self.list_url)
 
         return super().form_valid(form)
