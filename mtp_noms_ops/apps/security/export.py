@@ -3,11 +3,12 @@ import re
 
 from django.http import HttpResponse
 from django.utils.dateparse import parse_datetime
+from mtp_common.utils import format_currency
 from openpyxl import Workbook
 
 from security.models import credit_sources, disbursement_methods
 from security.templatetags.security import (
-    currency, format_card_number, format_sort_code,
+    format_card_number, format_sort_code,
     format_resolution, format_disbursement_resolution,
     list_prison_names,
 )
@@ -80,7 +81,7 @@ class CreditListSerialiser(ObjectListSerialiser, object_type='credits'):
                 if record['source'] == 'bank_transfer' else record['received_at']
             ),
             'Date credited': record['credited_at'],
-            'Amount': currency(record['amount']),
+            'Amount': format_currency(record['amount']),
             'Prisoner number': record['prisoner_number'],
             'Prisoner name': record['prisoner_name'],
             'Prison': record['prison_name'],
@@ -128,7 +129,7 @@ class DisbursementListSerialiser(ObjectListSerialiser, object_type='disbursement
             'Date entered': record['created'],
             'Date confirmed': last_action_dates.get('confirmed', ''),
             'Date sent': last_action_dates.get('sent', ''),
-            'Amount': currency(record['amount']),
+            'Amount': format_currency(record['amount']),
             'Prisoner number': record['prisoner_number'],
             'Prisoner name': record['prisoner_name'],
             'Prison': record['prison_name'],
@@ -160,7 +161,7 @@ class SenderListSerialiser(ObjectListSerialiser, object_type='senders'):
     def serialise(self, record):
         serialised_record = {
             'Credits sent': record['credit_count'],
-            'Total amount sent': currency(record['credit_total']),
+            'Total amount sent': format_currency(record['credit_total']),
             'Prisoners sent to': record['prisoner_count'],
             'Prisons sent to': record['prison_count'],
         }
@@ -230,10 +231,10 @@ class PrisonerListSerialiser(ObjectListSerialiser, object_type='prisoners'):
             'Prisoner name': record['prisoner_name'],
             'Date of birth': record['prisoner_dob'],
             'Credits received': record['credit_count'],
-            'Total amount received': currency(record['credit_total']),
+            'Total amount received': format_currency(record['credit_total']),
             'Payment sources': record['sender_count'],
             'Disbursements sent': record['disbursement_count'],
-            'Total amount sent': currency(record['disbursement_total']),
+            'Total amount sent': format_currency(record['disbursement_total']),
             'Recipients': record['recipient_count'],
             'Current prison': current_prison,
             'All known prisons': list_prison_names(record['prisons']),

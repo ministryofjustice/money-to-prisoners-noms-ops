@@ -1,12 +1,12 @@
 from django.http import Http404
 from django.urls import reverse_lazy
 from django.utils.translation import gettext, gettext_lazy as _
+from mtp_common.utils import format_currency
 
 from security.forms.object_detail import (
     SendersDetailForm,
     PrisonersDetailForm, PrisonersDisbursementDetailForm,
 )
-from security.templatetags.security import currency as format_currency
 from security.utils import NameSet, convert_date_fields, sender_profile_name
 from security.views.object_base import SimpleSecurityDetailView, SecurityDetailView
 
