@@ -34,7 +34,7 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
         raise NotImplementedError(f'Cannot export {object_type}')
 
     api_session = get_api_session_with_session(user, session)
-    generated_at = timezone.now()
+    generated_at = timezone.localtime()
     object_list = convert_date_fields(
         retrieve_all_pages_for_path(api_session, endpoint_path, **filters)
     )
@@ -49,7 +49,7 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
         personalisation={
             'export_message': export_message,
             'export_description': striptags(export_description),
-            'generated_at': format_date(generated_at, 'd/m/Y H:I'),
+            'generated_at': format_date(generated_at, 'd/m/Y H:i'),
             'attachment': attachment,
         },
         staff_email=True,
