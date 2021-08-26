@@ -43,25 +43,6 @@ def genitive(name):
 
 
 @register.filter
-def currency(pence_value):
-    try:
-        return '£{:,.2f}'.format(pence_value / 100)
-    except TypeError:
-        return pence_value
-
-
-@register.filter
-def pence(pence_value):
-    try:
-        assert isinstance(pence_value, int)
-        if pence_value >= 100:
-            return currency(pence_value)
-        return '%dp' % pence_value
-    except AssertionError:
-        return pence_value
-
-
-@register.filter
 def format_sort_code(sort_code):
     if sort_code and len(sort_code) == 6:
         return '%s-%s-%s' % (sort_code[0:2], sort_code[2:4], sort_code[4:6])

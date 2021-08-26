@@ -24,6 +24,7 @@ from mtp_common.auth.api_client import get_request_token_url
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.security.checks import CHECK_REJECTION_TEXT_CATEGORY_LABELS, CHECK_REJECTION_BOOL_CATEGORY_LABELS
 from mtp_common.test_utils import silence_logger
+from mtp_common.test_utils.notify import NotifyMock, GOVUK_NOTIFY_TEST_API_KEY
 from openpyxl import load_workbook
 from parameterized import parameterized
 import responses
@@ -1083,6 +1084,7 @@ class ExportSecurityViewTestCaseMixin:
         )
         self.assertSpreadsheetEqual(response.content, expected_spreadsheet_content)
 
+    @override_settings(GOVUK_NOTIFY_API_KEY=GOVUK_NOTIFY_TEST_API_KEY)
     def test_email_export_some_data(self):
         """
         Test that the view sends the expected spreadsheet via email.
@@ -1099,7 +1101,7 @@ class ExportSecurityViewTestCaseMixin:
             f'{reverse(self.view_name)}?{qs}',
         )
 
-        with responses.RequestsMock() as rsps:
+        with NotifyMock() as rsps:
             self.login(rsps)
             mock_prison_response(rsps=rsps)
             rsps.add(
@@ -1115,8 +1117,10 @@ class ExportSecurityViewTestCaseMixin:
                 HTTP_REFERER=referer_url,
             )
             self.assertRedirects(response, referer_url)
+            self.assertEqual(len(mail.outbox), 0)
+            attachment = base64.b64decode(rsps.send_email_request_data[0]['personalisation']['attachment']['file'])
             self.assertSpreadsheetEqual(
-                mail.outbox[0].attachments[0][1],
+                attachment,
                 expected_spreadsheet_content,
                 msg='Emailed contents do not match expected',
             )
@@ -1151,6 +1155,7 @@ class ExportSecurityViewTestCaseMixin:
         )
         self.assertSpreadsheetEqual(response.content, expected_spreadsheet_content)
 
+    @override_settings(GOVUK_NOTIFY_API_KEY=GOVUK_NOTIFY_TEST_API_KEY)
     def test_email_export_no_data(self):
         """
         Test that the view sends the an empty spreadsheet via email.
@@ -1159,7 +1164,7 @@ class ExportSecurityViewTestCaseMixin:
             self.export_expected_xls_headers,
         ]
 
-        with responses.RequestsMock() as rsps:
+        with NotifyMock() as rsps:
             self.login(rsps)
             mock_prison_response(rsps=rsps)
 
@@ -1184,8 +1189,10 @@ class ExportSecurityViewTestCaseMixin:
                 HTTP_REFERER=referer_url,
             )
             self.assertRedirects(response, referer_url)
+            self.assertEqual(len(mail.outbox), 0)
+            attachment = base64.b64decode(rsps.send_email_request_data[0]['personalisation']['attachment']['file'])
             self.assertSpreadsheetEqual(
-                mail.outbox[0].attachments[0][1],
+                attachment,
                 expected_spreadsheet_content,
                 msg='Emailed contents do not match expected',
             )

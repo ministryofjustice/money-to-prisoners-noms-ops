@@ -157,7 +157,6 @@ class SecurityView(FormView):
                     endpoint_path=form.get_object_list_endpoint_path(),
                     filters=form.get_query_data(),
                     export_description=self.get_export_description(form),
-                    attachment_name=attachment_name,
                 )
                 messages.info(
                     self.request,
