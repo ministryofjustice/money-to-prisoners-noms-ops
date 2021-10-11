@@ -3,9 +3,20 @@
 {% load mtp_common %}
 {% load security %}
 
-
 {% block page_title %}{% if request.can_access_prisoner_location and not request.can_access_security %}{% trans 'Prisoner location admin' %}{% else %}{% trans 'Prisoner money intelligence' %}{% endif %}{% endblock %}
 
+{% block footer %}
+  {% if request.user.is_authenticated and footer_feedback_link %}
+    {% captureoutput as feedback_link %}
+      <a href="{{ footer_feedback_link }}" target="_blank">
+        {% trans 'Give feedback on Prisoner money intelligence (opens in a new tab)' %}
+      </a>
+    {% endcaptureoutput %}
+    {% include 'mtp_common/components/footer-feedback.html' with content=feedback_link %}
+  {% endif %}
+
+  {{ block.super }}
+{% endblock %}
 
 {% block body_end %}
   <script src="{% url 'js-i18n' %}?{{ APP_GIT_COMMIT_SHORT }}"></script>
