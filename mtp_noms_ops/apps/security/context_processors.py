@@ -1,5 +1,6 @@
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 
 from security.forms.object_list import PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
@@ -23,10 +24,8 @@ def initial_params(request):
 
 
 def common(_):
-    """
-    Context Processor for common / core logic, e.g. making some variable available in the templates.
-    """
     return {
+        'footer_feedback_link': settings.FOOTER_FEEDBACK_LINK,
         'REDIRECT_FIELD_NAME': REDIRECT_FIELD_NAME,
         'PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
     }
