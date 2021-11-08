@@ -5,8 +5,8 @@ from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.edit import BaseFormView, FormView
-from mtp_common.api import retrieve_all_pages_for_path
 
+from security.constants import SECURITY_FORMS_DEFAULT_PAGE_SIZE
 from security.forms.check import (
     AutoAcceptDetailForm,
     AutoAcceptListForm,
@@ -245,41 +245,53 @@ class AcceptOrRejectCheckView(FormView):
             {'name': self.title}
         ]
         context_data[self.object_context_key] = detail_object
-        context_data['related_credits'] = self._get_related_credits(api_session, context_data[self.object_context_key])
+        related_credits, likely_truncated = self.get_related_credits(api_session, context_data[self.object_context_key])
+        context_data['related_credits'] = related_credits
+        context_data['likely_truncated'] = likely_truncated
         return context_data
 
-    @staticmethod
-    def _get_related_credits(api_session, detail_object):
+    @classmethod
+    def get_related_credits(cls, api_session, detail_object):
+        likely_truncated = False
+
         # Get the credits from the same sender that were actioned by FIU
         if detail_object['credit']['sender_profile']:
-            sender_response = retrieve_all_pages_for_path(
-                api_session,
+            response = api_session.get(
                 f'/senders/{detail_object["credit"]["sender_profile"]}/credits/',
-                exclude_credit__in=detail_object['credit']['id'],
-                security_check__isnull=False,
-                only_completed=False,
-                security_check__actioned_by__isnull=False,
-                include_checks=True,
-            )
+                params=dict(
+                    limit=SECURITY_FORMS_DEFAULT_PAGE_SIZE, offset=0,
+                    exclude_credit__in=detail_object['credit']['id'],
+                    security_check__isnull=False,
+                    only_completed=False,
+                    security_check__actioned_by__isnull=False,
+                    include_checks=True,
+                ),
+            ).json()
+            sender_response = response.get('results') or []
+            likely_truncated |= response.get('count') and response['count'] > len(sender_response)
         else:
             sender_response = []
         sender_credits = convert_date_fields(sender_response, include_nested=True)
 
         # Get the credits to the same prisoner that were actioned by FIU
         if detail_object['credit']['prisoner_profile']:
-            prisoner_response = retrieve_all_pages_for_path(
-                api_session,
+            response = api_session.get(
                 f'/prisoners/{detail_object["credit"]["prisoner_profile"]}/credits/',
-                # Exclude any credits displayed as part of sender credits, to prevent duplication where
-                # both prisoner and sender same as the credit in question
-                exclude_credit__in=','.join(
-                    [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
+                params=dict(
+                    limit=SECURITY_FORMS_DEFAULT_PAGE_SIZE, offset=0,
+                    # Exclude any credits displayed as part of sender credits, to prevent duplication where
+                    # both prisoner and sender same as the credit in question
+                    exclude_credit__in=','.join(
+                        [str(detail_object['credit']['id'])] + [str(c['id']) for c in sender_credits]
+                    ),
+                    security_check__isnull=False,
+                    only_completed=False,
+                    security_check__actioned_by__isnull=False,
+                    include_checks=True,
                 ),
-                security_check__isnull=False,
-                only_completed=False,
-                security_check__actioned_by__isnull=False,
-                include_checks=True,
-            )
+            ).json()
+            prisoner_response = response.get('results') or []
+            likely_truncated |= response.get('count') and response['count'] > len(prisoner_response)
         else:
             prisoner_response = []
         prisoner_credits = convert_date_fields(prisoner_response, include_nested=True)
@@ -288,7 +300,7 @@ class AcceptOrRejectCheckView(FormView):
             prisoner_credits + sender_credits,
             key=lambda c: c['security_check']['actioned_at'],
             reverse=True
-        )
+        ), likely_truncated
 
     def form_valid(self, form):
         if self.request.method == 'POST':

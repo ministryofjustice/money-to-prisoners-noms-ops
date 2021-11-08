@@ -3449,7 +3449,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -3472,7 +3472,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -3532,7 +3532,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -3555,7 +3555,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -3660,7 +3660,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -3683,7 +3683,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -3825,7 +3825,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -3848,7 +3848,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -3945,7 +3945,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -3985,7 +3985,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -4105,7 +4105,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -4128,7 +4128,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -4209,7 +4209,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -4234,7 +4234,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', f'{self.credit_id},{sender_credit_response["id"]}'),
                             ('security_check__isnull', False),
@@ -4299,7 +4299,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -4322,7 +4322,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -4403,7 +4403,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -4428,7 +4428,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', f'{self.credit_id},{sender_credit_response["id"]}'),
                             ('security_check__isnull', False),
@@ -4822,7 +4822,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -4845,7 +4845,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -4908,7 +4908,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -4931,7 +4931,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -5010,17 +5010,11 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
         # We want to display the newest credits first
         expected_related_credits.reverse()
         mock_api_session = mock.MagicMock()
-        mock_api_session.configure_mock(**{
-            'get.return_value.json.return_value.get': mock.MagicMock(
-                side_effect=[
-                    4,
-                    sender_credits,
-                    4,
-                    prisoner_credits
-                ]
-            )
-        })
-        actual_related_credits = AcceptOrRejectCheckView()._get_related_credits(
+        mock_api_session.get().json.side_effect = [
+            {'results': sender_credits, 'count': len(sender_credits)},
+            {'results': prisoner_credits, 'count': len(prisoner_credits)},
+        ]
+        actual_related_credits, likely_truncated = AcceptOrRejectCheckView().get_related_credits(
             api_session=mock_api_session,
             detail_object={
                 'credit': {
@@ -5031,6 +5025,25 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             }
         )
         self.assertListEqual(expected_related_credits, actual_related_credits)
+        self.assertFalse(likely_truncated)
+
+    def test_credit_history_truncation(self):
+        mock_api_session = mock.MagicMock()
+        mock_api_session.get().json.side_effect = [
+            {'results': [], 'count': SECURITY_FORMS_DEFAULT_PAGE_SIZE * 5},
+            {'results': [], 'count': SECURITY_FORMS_DEFAULT_PAGE_SIZE * 5},
+        ]
+        actual_related_credits, likely_truncated = AcceptOrRejectCheckView().get_related_credits(
+            api_session=mock_api_session,
+            detail_object={
+                'credit': {
+                    'id': self.credit_id,
+                    'prisoner_profile': self.prisoner_id,
+                    'sender_profile': self.sender_id
+                }
+            }
+        )
+        self.assertTrue(likely_truncated)
 
 
 class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
@@ -5062,7 +5075,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -5084,7 +5097,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -5197,7 +5210,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -5219,7 +5232,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -5290,7 +5303,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -5312,7 +5325,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -5377,7 +5390,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -5399,7 +5412,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),
@@ -5506,7 +5519,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/senders/{sender_profile_id}/credits/?{querystring}'.format(
                         sender_profile_id=self.sender_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', self.credit_id),
                             ('security_check__isnull', False),
@@ -5528,7 +5541,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):
                     '/prisoners/{prisoner_profile_id}/credits/?{querystring}'.format(
                         prisoner_profile_id=self.prisoner_id,
                         querystring=urlencode([
-                            ('limit', 500),
+                            ('limit', SECURITY_FORMS_DEFAULT_PAGE_SIZE),
                             ('offset', 0),
                             ('exclude_credit__in', ','.join(map(str, ([self.credit_id] + list(range(response_len)))))),
                             ('security_check__isnull', False),

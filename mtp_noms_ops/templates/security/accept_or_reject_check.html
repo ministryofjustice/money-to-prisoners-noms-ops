@@ -180,6 +180,17 @@
           </tr>
         {% endfor %}
       </tbody>
+      {% if likely_truncated %}
+        <tfoot>
+          <tr>
+            <td colspan="5">
+              {% trans 'Please note:' %}
+              {% trans 'Only the latest credits are listed above.' %}
+              {% trans 'Click on the sender’s or prisoner’s name to see more.' %}
+            </td>
+          </tr>
+        </tfoot>
+      {% endif %}
     </table>
   </div>
 
