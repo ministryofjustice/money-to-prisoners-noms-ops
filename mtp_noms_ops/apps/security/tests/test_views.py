@@ -5014,7 +5014,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             {'results': sender_credits, 'count': len(sender_credits)},
             {'results': prisoner_credits, 'count': len(prisoner_credits)},
         ]
-        actual_related_credits = AcceptOrRejectCheckView()._get_related_credits(
+        actual_related_credits, likely_truncated = AcceptOrRejectCheckView().get_related_credits(
             api_session=mock_api_session,
             detail_object={
                 'credit': {
@@ -5025,6 +5025,25 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase, SecurityViewTestCas
             }
         )
         self.assertListEqual(expected_related_credits, actual_related_credits)
+        self.assertFalse(likely_truncated)
+
+    def test_credit_history_truncation(self):
+        mock_api_session = mock.MagicMock()
+        mock_api_session.get().json.side_effect = [
+            {'results': [], 'count': SECURITY_FORMS_DEFAULT_PAGE_SIZE * 5},
+            {'results': [], 'count': SECURITY_FORMS_DEFAULT_PAGE_SIZE * 5},
+        ]
+        actual_related_credits, likely_truncated = AcceptOrRejectCheckView().get_related_credits(
+            api_session=mock_api_session,
+            detail_object={
+                'credit': {
+                    'id': self.credit_id,
+                    'prisoner_profile': self.prisoner_id,
+                    'sender_profile': self.sender_id
+                }
+            }
+        )
+        self.assertTrue(likely_truncated)
 
 
 class CheckAssignViewTestCase(BaseCheckViewTestCase, SecurityViewTestCase):

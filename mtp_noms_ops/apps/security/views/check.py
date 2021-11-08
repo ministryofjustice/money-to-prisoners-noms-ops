@@ -245,11 +245,15 @@ class AcceptOrRejectCheckView(FormView):
             {'name': self.title}
         ]
         context_data[self.object_context_key] = detail_object
-        context_data['related_credits'] = self._get_related_credits(api_session, context_data[self.object_context_key])
+        related_credits, likely_truncated = self.get_related_credits(api_session, context_data[self.object_context_key])
+        context_data['related_credits'] = related_credits
+        context_data['likely_truncated'] = likely_truncated
         return context_data
 
-    @staticmethod
-    def _get_related_credits(api_session, detail_object):
+    @classmethod
+    def get_related_credits(cls, api_session, detail_object):
+        likely_truncated = False
+
         # Get the credits from the same sender that were actioned by FIU
         if detail_object['credit']['sender_profile']:
             response = api_session.get(
@@ -264,6 +268,7 @@ class AcceptOrRejectCheckView(FormView):
                 ),
             ).json()
             sender_response = response.get('results') or []
+            likely_truncated |= response.get('count') and response['count'] > len(sender_response)
         else:
             sender_response = []
         sender_credits = convert_date_fields(sender_response, include_nested=True)
@@ -286,6 +291,7 @@ class AcceptOrRejectCheckView(FormView):
                 ),
             ).json()
             prisoner_response = response.get('results') or []
+            likely_truncated |= response.get('count') and response['count'] > len(prisoner_response)
         else:
             prisoner_response = []
         prisoner_credits = convert_date_fields(prisoner_response, include_nested=True)
@@ -294,7 +300,7 @@ class AcceptOrRejectCheckView(FormView):
             prisoner_credits + sender_credits,
             key=lambda c: c['security_check']['actioned_at'],
             reverse=True
-        )
+        ), likely_truncated
 
     def form_valid(self, form):
         if self.request.method == 'POST':
