@@ -54,10 +54,7 @@ def update_locations(*, user, locations, context: Context):
             )
         session.post('/prisoner_locations/actions/delete_old/')
 
-        logger.info('%d prisoner locations updated successfully by %s', (
-            location_count,
-            user_description,
-        ), extra={
+        logger.info('%d prisoner locations updated successfully by %s', location_count, user_description, extra={
             'elk_fields': {
                 '@fields.prisoner_location_count': location_count,
                 '@fields.username': username,
