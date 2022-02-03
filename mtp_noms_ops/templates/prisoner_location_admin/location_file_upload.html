@@ -19,9 +19,20 @@
 
         {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
-        <p>
-          {% trans 'Run the ‘Electronic Credits and Prisoner Establishment Locations’ report in P-NOMIS, then upload the file on this page in CSV format (.csv)' %}
-        </p>
+        <ol class="govuk-list govuk-list--number">
+          <li>
+            {% blocktrans trimmed with report='MIS Electronic Credits and Prisoner Establishment Locations (inc POPs)' %}
+              Run the ‘{{ report }}’ report in P-NOMIS
+            {% endblocktrans %}
+            {# NB: This report is in the folder "Public Folders/NOMIS/Management Information Reports/MIS - HQ Reports/" #}
+          </li>
+          <li>
+            {% trans 'Export in CSV format (.csv)' %}
+          </li>
+          <li>
+            {% trans 'Upload the file on this page' %}
+          </li>
+        </ol>
 
         <div class="govuk-inset-text">
           <p>
