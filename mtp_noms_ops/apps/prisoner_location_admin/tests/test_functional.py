@@ -12,9 +12,9 @@ class PrisonerLocationAdminTestCase(FunctionalTestCase):
     """
     accessibility_scope_selector = '#content'
 
-    def load_test_data(self):
+    def load_test_data(self, command=None):
         with silence_logger(level=logging.WARNING):
-            super().load_test_data()
+            super().load_test_data(command=command)
 
     def login(self, *args, **kwargs):
         kwargs['url'] = self.live_server_url + '/en-gb/'

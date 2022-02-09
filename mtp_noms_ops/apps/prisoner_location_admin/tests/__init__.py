@@ -10,6 +10,7 @@ from mtp_common.auth.api_client import MoJOAuth2Session
 from mtp_common.auth.test_utils import generate_tokens
 
 from prisoner_location_admin import required_permissions
+from security.tests import api_url
 
 TEST_PRISONS = ['IXB', 'INP']
 
@@ -53,10 +54,24 @@ class PrisonerLocationUploadTestCase(SimpleTestCase):
         self.assertEqual(response.status_code, 200)
         return mock_api_client.authenticate.return_value
 
-    def setup_mock_get_authenticated_api_session(self, mock_api_client):
+    @classmethod
+    def setup_mock_get_authenticated_api_session(cls, mock_api_client):
         mock_session = MoJOAuth2Session()
         mock_session.token = generate_tokens()
         mock_api_client.get_authenticated_api_session.return_value = mock_session
+
+    @classmethod
+    def respond_to_upload_checks(cls, rsps):
+        from security.tests.test_forms import mock_prison_response
+
+        # indicates uploads are allowed
+        rsps.add(
+            rsps.GET,
+            api_url('/prisoner_locations/can-upload/'),
+            json={'can_upload': True},
+        )
+        # returns list of supported prisons
+        mock_prison_response(rsps)
 
 
 def get_csv_data_as_file(data, filename='example.csv'):

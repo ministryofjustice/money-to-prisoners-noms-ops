@@ -29,11 +29,6 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-    def get_supported_prisons(self):
-        session = get_api_session(self.request)
-        prison_list = PrisonList(session)
-        return set(prison['nomis_id'] for prison in prison_list.prisons)
-
     def clean_location_file(self):
         locations = []
         transfer_count = 0
@@ -47,7 +42,13 @@ class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
         except UnicodeDecodeError:
             raise forms.ValidationError(_('Can’t read CSV file'))
 
-        supported_prisons = self.get_supported_prisons()
+        session = get_api_session(self.request)
+
+        if not session.get('prisoner_locations/can-upload/').json().get('can_upload'):
+            raise forms.ValidationError(_('A report is being uploaded, please wait 10 minutes'))
+
+        prison_list = PrisonList(session)
+        supported_prisons = set(prison['nomis_id'] for prison in prison_list.prisons)
 
         first_row = True
         invalid_row = None

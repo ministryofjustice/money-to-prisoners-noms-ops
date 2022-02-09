@@ -28,9 +28,14 @@ def format_errors(error_list):
 
 @spoolable(pre_condition=settings.ASYNC_LOCATION_UPLOAD, body_params=('user', 'locations'))
 def update_locations(*, user, locations, context: Context):
+    """
+    Uploads locations in batches of settings.UPLOAD_REQUEST_PAGE_SIZE, because ~80k in one go is unreliable.
+    Uses uwsgi spooler because this takes a couple of minutes.
+    An email is sent to the uploader if there's an error.
+    """
     session = api_client.get_authenticated_api_session(
         settings.LOCATION_UPLOADER_USERNAME,
-        settings.LOCATION_UPLOADER_PASSWORD
+        settings.LOCATION_UPLOADER_PASSWORD,
     )
     username = user.user_data.get('username', 'Unknown')
     user_description = user.get_full_name()
@@ -41,7 +46,9 @@ def update_locations(*, user, locations, context: Context):
 
     errors = []
     location_count = len(locations)
+    logger.info('Starting upload of %d prisoner locations by %s', location_count, user_description)
     try:
+        logger.info('Deleting inactive prisoner locations (i.e. previous failed batches)')
         session.post('/prisoner_locations/actions/delete_inactive/')
         pages = int(math.ceil(location_count / settings.UPLOAD_REQUEST_PAGE_SIZE))
         for page in range(pages):
@@ -52,6 +59,7 @@ def update_locations(*, user, locations, context: Context):
                     (page + 1) * settings.UPLOAD_REQUEST_PAGE_SIZE
                 ]
             )
+        logger.info('Deleting old prisoner locations')
         session.post('/prisoner_locations/actions/delete_old/')
 
         logger.info('%d prisoner locations updated successfully by %s', location_count, user_description, extra={
