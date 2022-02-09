@@ -11,7 +11,6 @@ from mtp_common.auth.test_utils import generate_tokens
 
 from prisoner_location_admin import required_permissions
 from security.tests import api_url
-from security.tests.test_forms import mock_prison_response
 
 TEST_PRISONS = ['IXB', 'INP']
 
@@ -63,6 +62,8 @@ class PrisonerLocationUploadTestCase(SimpleTestCase):
 
     @classmethod
     def respond_to_upload_checks(cls, rsps):
+        from security.tests.test_forms import mock_prison_response
+
         # indicates uploads are allowed
         rsps.add(
             rsps.GET,
