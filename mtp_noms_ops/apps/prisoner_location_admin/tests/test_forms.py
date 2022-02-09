@@ -13,7 +13,6 @@ from prisoner_location_admin.tests import (
     get_csv_data_as_file,
 )
 from security.tests import api_url
-from security.tests.test_forms import mock_prison_response
 
 
 class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
@@ -38,7 +37,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         request = self.make_request(get_csv_data_as_file(file_data))
         with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
+            self.respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertTrue(form.is_valid())
 
@@ -47,7 +46,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         request = self.make_request(get_csv_data_as_file(file_data))
         with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
+            self.respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertTrue(form.is_valid())
 
@@ -58,7 +57,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         request = self.make_request(get_csv_data_as_file(file_data))
         with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
+            self.respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertFalse(form.is_valid())
 
@@ -70,7 +69,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
     def test_location_file_empty_file_invalid(self):
         request = self.make_request(get_csv_data_as_file(''))
         with responses.RequestsMock():
-            # does not load prison list
+            # does not load prison list or check whether upload is allowed
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertFalse(form.is_valid())
 
@@ -84,7 +83,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         request = self.make_request(get_csv_data_as_file(file_data, 'badfile.exe'))
         with responses.RequestsMock():
-            # does not load prison list
+            # does not load prison list or check whether upload is allowed
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertFalse(form.is_valid())
 
@@ -101,13 +100,32 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         request = self.make_request(get_csv_data_as_file(file_data))
         with responses.RequestsMock() as rsps:
-            mock_prison_response(rsps)
+            self.respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertFalse(form.is_valid())
 
         self.assertEqual(
             form.errors['location_file'],
             ['The uploaded report contains no valid prisoner locations']
+        )
+
+    def test_location_file_when_disallowed(self):
+        file_data, _ = generate_testable_location_data()
+
+        request = self.make_request(get_csv_data_as_file(file_data))
+        with responses.RequestsMock() as rsps:
+            # indicates uploads are NOT currently allowed
+            rsps.add(
+                rsps.GET,
+                api_url('/prisoner_locations/can-upload/'),
+                json={'can_upload': False},
+            )
+            form = LocationFileUploadForm(request.POST, request.FILES, request=request)
+            self.assertFalse(form.is_valid())
+
+        self.assertEqual(
+            form.errors['location_file'],
+            ['A report is being uploaded, please wait 10 minutes']
         )
 
     @mock.patch('prisoner_location_admin.tasks.api_client')
@@ -121,13 +139,13 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
             expected_data[30:40],
             expected_data[20:30],
             expected_data[10:20],
-            expected_data[0:10]
+            expected_data[0:10],
         ]
 
         request = self.make_request(get_csv_data_as_file(file_data))
 
         with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
-            mock_prison_response(rsps)
+            self.respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertTrue(form.is_valid())
 
@@ -169,7 +187,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
         request = self.make_request(get_csv_data_as_file(file_data))
 
         with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
-            mock_prison_response(rsps)
+            self.respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertTrue(form.is_valid())
 

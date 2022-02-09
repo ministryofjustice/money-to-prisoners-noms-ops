@@ -12,7 +12,6 @@ from prisoner_location_admin.tests import (
     get_csv_data_as_file,
 )
 from security.tests import api_url
-from security.tests.test_forms import mock_prison_response
 
 
 class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
@@ -72,7 +71,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         expected_calls = [expected_data]
 
         with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
-            mock_prison_response(rsps)
+            self.respond_to_upload_checks(rsps)
             rsps.add(
                 rsps.POST,
                 api_url('/prisoner_locations/actions/delete_inactive/')
@@ -114,7 +113,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         expected_calls = [expected_data]
 
         with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
-            mock_prison_response(rsps)
+            self.respond_to_upload_checks(rsps)
             rsps.add(
                 rsps.POST,
                 api_url('/prisoner_locations/actions/delete_inactive/')
@@ -160,7 +159,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         file_data, _ = generate_testable_location_data()
 
         with responses.RequestsMock() as rsps, silence_logger():
-            mock_prison_response(rsps)
+            self.respond_to_upload_checks(rsps)
             rsps.add(
                 rsps.POST,
                 api_url('/prisoner_locations/actions/delete_inactive/')
