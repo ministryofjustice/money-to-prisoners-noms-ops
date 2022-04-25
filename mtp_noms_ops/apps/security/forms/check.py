@@ -1,5 +1,4 @@
 import logging
-from functools import lru_cache
 
 from django import forms
 from django.contrib import messages
@@ -19,6 +18,8 @@ from security.forms.object_base import SecurityForm
 from security.utils import convert_date_fields, get_need_attention_date
 
 logger = logging.getLogger('mtp')
+
+_sentinel = object()
 
 
 class CheckListForm(SecurityForm):
@@ -279,24 +280,27 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
     def __init__(self, object_id, request, **kwargs):
         super().__init__(**kwargs)
         self.object_id = object_id
+        self._cached_object = _sentinel
         self.need_attention_date = get_need_attention_date()
         self.request = request
         self.data_payload = None
 
-    @lru_cache()
     def get_object(self):
         """
         Gets the check object
         :return: dict or None if not found
         """
+        if self._cached_object is not _sentinel:
+            return self._cached_object
         try:
             obj = self.session.get(self.get_object_endpoint_path()).json()
             convert_dates_obj = convert_date_fields(obj, include_nested=True)
             convert_dates_obj['needs_attention'] = convert_dates_obj['credit']['started_at'] < self.need_attention_date
-            return obj
+            self._cached_object = obj
         except RequestException as e:
             self._handle_request_exception(e, 'Check')
-            return None
+            self._cached_object = None
+        return self._cached_object
 
     def get_object_endpoint_path(self):
         return f'/security/checks/{self.object_id}/'
@@ -436,7 +440,7 @@ class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
             return self._handle_request_exception(e, 'Check')
         else:
             if fiu_action == 'accept' and self.cleaned_data.get('auto_accept_reason'):
-                # This shouldn't make another request due to the lru_cache decorator
+                # This shouldn't make another request due to caching
                 check = self.get_object()
                 check_auto_accept_rule_state = check.get('auto_accept_rule_state', {})
                 check_auto_accept_rule_id = None

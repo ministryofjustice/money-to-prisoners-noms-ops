@@ -97,8 +97,9 @@ def get_split_prison_names(prisons, split_at=3):
         prison_names: first `split_at` prison names in `prisons` as a comma separated string
         total_remaining: number of remaining prisons that were not included in `prison_names`
 
-    :param prisons: list of dicts with prison data
-    :split_at: number of prisons to be included in the prison_names join.
+    Args:
+        prisons (object): list of dicts with prison data
+        split_at (int): number of prisons to be included in the prison_names join.
     """
     return {
         'prison_names': list_prison_names(prisons[:split_at]),
@@ -261,7 +262,7 @@ def tag_for_security_check(check):
 
 @register.filter
 def find_rejection_reason(comment_set):
-    for comment in filter(lambda comment: comment['category'] == 'reject', comment_set):
+    for comment in filter(lambda c: c['category'] == 'reject', comment_set):
         return comment['comment']
     return ''
 
