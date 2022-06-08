@@ -76,6 +76,7 @@ INSTALLED_APPS += PROJECT_APPS
 WSGI_APPLICATION = 'mtp_noms_ops.wsgi.application'
 ROOT_URLCONF = 'mtp_noms_ops.urls'
 MIDDLEWARE = (
+    'mtp_common.metrics.middleware.RequestMetricsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
