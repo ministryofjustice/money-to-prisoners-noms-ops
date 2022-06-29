@@ -43,7 +43,7 @@
     {{ form.prison_selector.as_hidden }}
     {% include 'mtp_common/forms/field.html' with field=form.simple_search label_classes='govuk-!-font-size-27' only %}
     <div class="govuk-button-group">
-      <button type="submit" class="govuk-button" data-module="govuk-button" value="submit">{% blocktrans with object_name=view.object_name_plural %}Search {{ object_name }}{% endblocktrans %}</button>
+      <button type="submit" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true" value="submit">{% blocktrans with object_name=view.object_name_plural %}Search {{ object_name }}{% endblocktrans %}</button>
       <a href="{{ advanced_search_url }}" class="govuk-link">
         {% trans 'Advanced search' %}
       </a>

@@ -23,7 +23,7 @@
 
         {% block advanced_search_fields %}{% endblock advanced_search_fields %}
 
-        <button type="submit" class="govuk-button" data-module="govuk-button" value="submit">{% blocktrans with object_name=view.object_name_plural %}Search {{ object_name }}{% endblocktrans %}</button>
+        <button type="submit" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true" value="submit">{% blocktrans with object_name=view.object_name_plural %}Search {{ object_name }}{% endblocktrans %}</button>
       </div>
     </div>
 

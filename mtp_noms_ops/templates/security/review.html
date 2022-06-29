@@ -28,7 +28,7 @@
     {% csrf_token %}
 
     <div class="govuk-button-group govuk-!-display-none-print">
-      <button type="submit" name="submit" class="govuk-button" data-module="govuk-button" value="submit">{% trans 'Credits checked by security' %}</button>
+      <button type="submit" name="submit" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true" value="submit">{% trans 'Credits checked by security' %}</button>
       <a class="mtp-print-trigger mtp-form-analytics__click govuk-link" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print these credits' %}</a>
     </div>
 
@@ -90,14 +90,14 @@
     </div>
 
     <p class="govuk-!-display-none-print">
-      <button type="submit" name="submit" class="govuk-button" data-module="govuk-button" value="submit">{% trans 'Credits checked by security' %}</button>
+      <button type="submit" name="submit" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true" value="submit">{% trans 'Credits checked by security' %}</button>
     </p>
 
     {% dialoguebox html_id='confirm-checked' title=_('Have you checked these credits?') %}
       <p>{% trans 'These credits will be marked as checked in the digital cashbook.' %}</p>
       <p>{% trans 'You can view credits again in ‘Search all prison credits’.' %}</p>
       <br/>
-      <button type="submit" class="govuk-button govuk-!-margin-right-2" data-module="govuk-button" value="override">
+      <button type="submit" class="govuk-button govuk-!-margin-right-2" data-module="govuk-button" data-prevent-double-click="true" value="override">
         {% trans 'Yes, all credits checked' %}
       </button>
       <button type="button" class="govuk-button govuk-button--secondary {{ dialogue_close_class }}" data-module="govuk-button">

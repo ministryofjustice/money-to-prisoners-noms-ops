@@ -106,7 +106,7 @@
                   {% else %}
                     <form class="mtp-check-cell__list-form" action="{% url 'security:assign_check_then_list' check_id=check.id page=form.cleaned_data.page %}" method="post">
                       {% csrf_token %}
-                      <button type="submit" name="assignment" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="assign">
+                      <button type="submit" name="assignment" class="govuk-button govuk-button--secondary" data-module="govuk-button" data-prevent-double-click="true" value="assign">
                         {% blocktrans trimmed with credit_to=check.credit.prisoner_name %}
                           Add <span class="govuk-visually-hidden">credit to {{credit_to}}</span> to my list
                         {% endblocktrans %}
