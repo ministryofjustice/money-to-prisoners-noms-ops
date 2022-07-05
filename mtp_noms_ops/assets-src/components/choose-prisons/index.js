@@ -61,20 +61,20 @@ export var ChoosePrisons = {
           var errorSummaryTitle = $hiddenInput.data('autocomplete-error-summary');
           if (emptyErrorMsg) {
             $hiddenInput.data('visualInput').before(
-              '<span class="govuk-error-message">' + emptyErrorMsg + '</span>'
+              '<p class="govuk-error-message">' + emptyErrorMsg + '</p>'
             );
 
             $('.mtp-prison-selection').before(
               '<div class="govuk-error-summary" aria-labeledby="error-summary-title__prison-selection"' +
-              ' role="alert" tabindex="-1" data-module="govuk-error-summary">' +
+              ' role="alert" data-module="govuk-error-summary">' +
               '<h2 class="govuk-error-summary__title" id="error-summary-title__prison-selection">' +
               errorSummaryTitle +
               '</h2>' +
               '<div class="govuk-error-summary__body">' +
               '  <ul class="govuk-list govuk-error-summary__list">' +
-              '      <li class="mtp-error-summary__field-error">' +
-              '        <a href="#id_' + $hiddenInput.attr('name') + '-label">' + emptyErrorMsg + '</a>' +
-              '      </li>' +
+              '    <li class="mtp-error-summary__field-error">' +
+              '      <a href="#id_' + $hiddenInput.attr('name') + '-label">' + emptyErrorMsg + '</a>' +
+              '    </li>' +
               '  </ul>' +
               '</div>' +
               '</div>'
