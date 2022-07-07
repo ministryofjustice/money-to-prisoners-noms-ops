@@ -155,7 +155,7 @@ class SecurityView(FormView):
                     user=self.request.user,
                     session=self.request.session,
                     endpoint_path=form.get_object_list_endpoint_path(),
-                    filters=form.get_query_data(),
+                    filters=form.get_api_request_params(),
                     export_description=self.get_export_description(form),
                 )
                 messages.info(
