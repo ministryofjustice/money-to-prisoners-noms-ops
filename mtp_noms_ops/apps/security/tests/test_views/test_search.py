@@ -1,4 +1,5 @@
 import base64
+import datetime
 import json
 import re
 from unittest import mock
@@ -662,9 +663,30 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
                 msg='Emailed contents do not match expected',
             )
 
-    def test_invalid_params_redirect_to_form(self):
+    def test_invalid_export_redirects_to_form(self):
         """
         Test that in case of invalid form, the export view redirects to the list page without
+        taking any action.
+        """
+        # get realistic referer
+        qs = 'ordering=invalid'
+        response = self.client.get('/')
+        referer_url = response.wsgi_request.build_absolute_uri(
+            f'{reverse(self.view_name)}?{qs}',
+        )
+
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            mock_prison_response(rsps=rsps)
+            response = self.client.get(
+                f'{reverse(self.export_view_name)}?{qs}',
+                HTTP_REFERER=referer_url,
+            )
+            self.assertRedirects(response, referer_url)
+
+    def test_invalid_email_export_redirects_to_form(self):
+        """
+        Test that in case of invalid form, the email export view redirects to the list page without
         taking any action.
         """
         # get realistic referer
@@ -1389,6 +1411,38 @@ class CreditViewsV2TestCase(AbstractSecurityViewTestCase):
                 )
         self.assertEqual(response.status_code, 404)
 
+    @mock.patch('security.views.object_base.email_export_xlsx')
+    def test_email_export_uses_api_params(self, mocked_email_export_xlsx):
+        """
+        Calls to the mtp-api must adjust parameters (see form.get_api_request_params)
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            mock_prison_response(rsps=rsps)
+
+            # get realistic referer
+            qs = f'ordering={self.search_ordering}&advanced=True&' \
+                 'received_at__lt_0=8&received_at__lt_1=7&received_at__lt_2=2022'
+            response = self.client.get('/')
+            referer_url = response.wsgi_request.build_absolute_uri(
+                f'{reverse(self.view_name)}?{qs}',
+            )
+
+            self.client.get(
+                f'{reverse(self.export_email_view_name)}?{qs}',
+                HTTP_REFERER=referer_url,
+            )
+            mocked_email_export_xlsx.assert_called_once()
+            api_filters = mocked_email_export_xlsx.call_args.kwargs['filters']
+            # expect valid param to pass through
+            self.assertEqual(api_filters['ordering'], self.search_ordering)
+            # SearchFormV2Mixin removes this param
+            self.assertNotIn('advanced', api_filters)
+            # exclusive_date_params are incremented
+            # because the form presents an inclusive date range: [received_at__gte, received_at__lt]
+            # but the api needs an exclusive range: [received_at__gte, received_at__lt)
+            self.assertEqual(api_filters['received_at__lt'], datetime.date(2022, 7, 9))
+
 
 class DisbursementViewsV2TestCase(AbstractSecurityViewTestCase):
     """
@@ -1541,6 +1595,12 @@ class DisbursementViewsV2TestCase(AbstractSecurityViewTestCase):
         ],
     }
 
+    def get_api_object_list_response_data(self):
+        return [
+            self.bank_transfer_disbursement,
+            self.cheque_disbursement,
+        ]
+
     def _test_search_results_content(self, response, advanced=False):
         response_content = response.content.decode(response.charset)
         self.assertIn('2 disbursements', response_content)
@@ -1611,11 +1671,56 @@ class DisbursementViewsV2TestCase(AbstractSecurityViewTestCase):
         self.assertContains(response, 'jilly@mtp.local')
         self.assertContains(response, 'PRESENT')
 
-    def get_api_object_list_response_data(self):
-        return [
-            self.bank_transfer_disbursement,
-            self.cheque_disbursement,
-        ]
+    def test_detail_not_found(self):
+        disbursement_id = 999
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/disbursements/{disbursement_id}/'),
+                status=404,
+            )
+
+            with silence_logger('django.request'):
+                response = self.client.get(
+                    reverse(
+                        self.detail_view_name,
+                        kwargs={'disbursement_id': disbursement_id},
+                    ),
+                )
+        self.assertEqual(response.status_code, 404)
+
+    @mock.patch('security.views.object_base.email_export_xlsx')
+    def test_email_export_uses_api_params(self, mocked_email_export_xlsx):
+        """
+        Calls to the mtp-api must adjust parameters (see form.get_api_request_params)
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps)
+            mock_prison_response(rsps=rsps)
+
+            # get realistic referer
+            qs = f'ordering={self.search_ordering}&advanced=True&' \
+                 'created__lt_0=8&created__lt_1=7&created__lt_2=2022'
+            response = self.client.get('/')
+            referer_url = response.wsgi_request.build_absolute_uri(
+                f'{reverse(self.view_name)}?{qs}',
+            )
+
+            self.client.get(
+                f'{reverse(self.export_email_view_name)}?{qs}',
+                HTTP_REFERER=referer_url,
+            )
+            mocked_email_export_xlsx.assert_called_once()
+            api_filters = mocked_email_export_xlsx.call_args.kwargs['filters']
+            # expect valid param to pass through
+            self.assertEqual(api_filters['ordering'], self.search_ordering)
+            # SearchFormV2Mixin removes this param
+            self.assertNotIn('advanced', api_filters)
+            # exclusive_date_params are incremented
+            # because the form presents an inclusive date range: [created__gte, created__lt]
+            # but the api needs an exclusive range: [created__gte, created__lt)
+            self.assertEqual(api_filters['created__lt'], datetime.date(2022, 7, 9))
 
 
 del AbstractSecurityViewTestCase
