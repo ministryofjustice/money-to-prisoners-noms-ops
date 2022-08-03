@@ -229,6 +229,7 @@ if APPLICATIONINSIGHTS_CONNECTION_STRING:
         'class': 'mtp_common.application_insights.AppInsightsLogHandler',
     }
     LOGGING['loggers']['mtp']['handlers'].append('azure')
+    LOGGING['root']['handlers'].append('azure')
 
 # sentry exception handling
 if os.environ.get('SENTRY_DSN'):
