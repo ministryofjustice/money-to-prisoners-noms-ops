@@ -1,7 +1,5 @@
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.generic import RedirectView
-
 
 from mtp_noms_ops.utils import user_test
 from security import required_permissions, views
@@ -47,17 +45,17 @@ def fiu_security_test(view):
 app_name = 'security'
 urlpatterns = [
     url(
-        r'^security/$',
+        r'^$',
         security_test(views.DashboardView.as_view()),
         name='dashboard',
     ),
     url(
-        r'^security/confirm-hmpps-employee/$',
+        r'^confirm-hmpps-employee/$',
         login_required(views.HMPPSEmployeeView.as_view()),
         name='hmpps_employee',
     ),
-    url(r'^security/not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
-    url(r'^security/faq/$', login_required(views.FAQView.as_view()), name='faq'),
+    url(r'^not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
+    url(r'^faq/$', login_required(views.FAQView.as_view()), name='faq'),
     url(
         r'^policy-change/$',
         login_required(views.PolicyChangeView.as_view()),
@@ -111,7 +109,7 @@ urlpatterns = [
         name='credit_email_export',
     ),
     url(
-        r'^security/credits/(?P<credit_id>\d+)/$',
+        r'^credits/(?P<credit_id>\d+)/$',
         security_test(views.CreditDetailView.as_view()),
         name='credit_detail',
     ),
@@ -163,12 +161,12 @@ urlpatterns = [
         name='sender_email_export',
     ),
     url(
-        r'^security/senders/(?P<sender_id>\d+)/$',
+        r'^senders/(?P<sender_id>\d+)/$',
         security_test(views.SenderDetailView.as_view()),
         name='sender_detail',
     ),
     url(
-        r'^security/senders/(?P<sender_id>\d+)/export/$',
+        r'^senders/(?P<sender_id>\d+)/export/$',
         security_test(
             views.SenderDetailView.as_view(
                 view_type=views.ViewType.export_download,
@@ -177,7 +175,7 @@ urlpatterns = [
         name='sender_detail_export',
     ),
     url(
-        r'^security/senders/(?P<sender_id>\d+)/email-export/$',
+        r'^senders/(?P<sender_id>\d+)/email-export/$',
         security_test(
             views.SenderDetailView.as_view(
                 view_type=views.ViewType.export_email,
@@ -233,12 +231,12 @@ urlpatterns = [
         name='prisoner_email_export',
     ),
     url(
-        r'^security/prisoners/(?P<prisoner_id>\d+)/$',
+        r'^prisoners/(?P<prisoner_id>\d+)/$',
         security_test(views.PrisonerDetailView.as_view()),
         name='prisoner_detail',
     ),
     url(
-        r'^security/prisoners/(?P<prisoner_id>\d+)/export/$',
+        r'^prisoners/(?P<prisoner_id>\d+)/export/$',
         security_test(
             views.PrisonerDetailView.as_view(
                 view_type=views.ViewType.export_download,
@@ -247,7 +245,7 @@ urlpatterns = [
         name='prisoner_detail_export',
     ),
     url(
-        r'^security/prisoners/(?P<prisoner_id>\d+)/email-export/$',
+        r'^prisoners/(?P<prisoner_id>\d+)/email-export/$',
         security_test(
             views.PrisonerDetailView.as_view(
                 view_type=views.ViewType.export_email,
@@ -256,12 +254,12 @@ urlpatterns = [
         name='prisoner_detail_email_export',
     ),
     url(
-        r'^security/prisoners/(?P<prisoner_id>\d+)/disbursements/$',
+        r'^prisoners/(?P<prisoner_id>\d+)/disbursements/$',
         security_test(views.PrisonerDisbursementDetailView.as_view()),
         name='prisoner_disbursement_detail',
     ),
     url(
-        r'^security/prisoners/(?P<prisoner_id>\d+)/disbursements/export/$',
+        r'^prisoners/(?P<prisoner_id>\d+)/disbursements/export/$',
         security_test(
             views.PrisonerDisbursementDetailView.as_view(
                 view_type=views.ViewType.export_download,
@@ -270,7 +268,7 @@ urlpatterns = [
         name='prisoner_disbursement_detail_export',
     ),
     url(
-        r'^security/prisoners/(?P<prisoner_id>\d+)/disbursements/email-export/$',
+        r'^prisoners/(?P<prisoner_id>\d+)/disbursements/email-export/$',
         security_test(
             views.PrisonerDisbursementDetailView.as_view(
                 view_type=views.ViewType.export_email,
@@ -281,12 +279,12 @@ urlpatterns = [
 
     # async-loaded nomis info
     url(
-        r'^security/prisoner_image/(?P<prisoner_number>[A-Za-z0-9]*)/$',
+        r'^prisoner-image/(?P<prisoner_number>[A-Za-z0-9]*)/$',
         security_test(views.prisoner_image_view),
         name='prisoner_image',
     ),
     url(
-        r'^security/prisoner_nomis_info/(?P<prisoner_number>[A-Za-z0-9]*)/$',
+        r'^prisoner-info/(?P<prisoner_number>[A-Za-z0-9]*)/$',
         security_test(views.prisoner_nomis_info_view),
         name='prisoner_nomis_info',
     ),
@@ -338,94 +336,64 @@ urlpatterns = [
         name='disbursement_email_export',
     ),
     url(
-        r'^security/disbursements/(?P<disbursement_id>\d+)/$',
+        r'^disbursements/(?P<disbursement_id>\d+)/$',
         security_test(views.DisbursementDetailView.as_view()),
         name='disbursement_detail',
     ),
 
     # review credits
     url(
-        r'^security/review-credits/$',
+        r'^review-credits/$',
         security_test(views.ReviewCreditsView.as_view()),
         name='review_credits',
     ),
 
     # notifications
     url(
-        r'^security/notifications/$',
+        r'^notifications/$',
         security_test(views.NotificationListView.as_view()),
         name='notification_list',
     ),
 
     # checks
     url(
-        r'^security/checks/$',
+        r'^checks/$',
         fiu_security_test(views.CheckListView.as_view()),
         name='check_list',
     ),
     url(
-        r'^security/checks/my-list/$',
+        r'^checks/my-list/$',
         fiu_security_test(views.MyCheckListView.as_view()),
         name='my_check_list',
     ),
     url(
-        r'^security/checks/auto-accept-rules/$',
+        r'^checks/auto-accept-rules/$',
         fiu_security_test(views.AutoAcceptRuleListView.as_view()),
         name='auto_accept_rule_list',
     ),
     url(
-        r'^security/checks/auto-accept-rules/(?P<auto_accept_rule_id>\d+)/$',
+        r'^checks/auto-accept-rules/(?P<auto_accept_rule_id>\d+)/$',
         fiu_security_test(views.AutoAcceptRuleDetailView.as_view()),
         name='auto_accept_rule_detail',
     ),
     url(
-        r'^security/checks/(?P<check_id>\d+)/resolve/$',
+        r'^checks/(?P<check_id>\d+)/resolve/$',
         fiu_security_test(views.AcceptOrRejectCheckView.as_view()),
         name='resolve_check',
     ),
     url(
-        r'^security/checks/(?P<check_id>\d+)/assignment/list/(?P<page>\d+)/$',
+        r'^checks/(?P<check_id>\d+)/assignment/list/(?P<page>\d+)/$',
         fiu_security_test(views.CheckAssignView.as_view(redirect_to_list=True)),
         name='assign_check_then_list',
     ),
     url(
-        r'^security/checks/(?P<check_id>\d+)/assignment/$',
+        r'^checks/(?P<check_id>\d+)/assignment/$',
         fiu_security_test(views.CheckAssignView.as_view(redirect_to_list=False)),
         name='assign_check',
     ),
     url(
-        r'^security/checks/history/$',
+        r'^checks/history/$',
         fiu_security_test(views.CheckHistoryListView.as_view()),
         name='credits_history',
-    ),
-
-    # legacy views, they redirect to their v2 and should be safe to be removed eventually
-    url(
-        r'^security/credits/$',
-        security_test(
-            RedirectView.as_view(pattern_name='security:credit_list'),
-        ),
-        name='credit_list_legacy',
-    ),
-    url(
-        r'^security/disbursements/$',
-        security_test(
-            RedirectView.as_view(pattern_name='security:disbursement_list'),
-        ),
-        name='disbursement_list_legacy',
-    ),
-    url(
-        r'^security/senders/$',
-        security_test(
-            RedirectView.as_view(pattern_name='security:sender_list'),
-        ),
-        name='sender_list_legacy',
-    ),
-    url(
-        r'^security/prisoners/$',
-        security_test(
-            RedirectView.as_view(pattern_name='security:prisoner_list'),
-        ),
-        name='prisoner_list_legacy',
     ),
 ]
