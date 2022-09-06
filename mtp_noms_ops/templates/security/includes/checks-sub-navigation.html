@@ -22,7 +22,7 @@
     </li>
 
     <li class="mtp-sub-navigation__list-item {% if current_view == 'CheckHistoryListView' %}mtp-sub-navigation__list-item--current{% endif %}">
-      <a href="{% url 'security:credits_history' %}" class="mtp-sub-navigation__link">
+      <a href="{% url 'security:check_history' %}" class="mtp-sub-navigation__link">
         {% trans 'Decision history' %}
         {% if current_view == 'CheckHistoryListView' %}
           <span class="govuk-visually-hidden">{% trans '(current page)' %}</span>

@@ -14,7 +14,7 @@ from security.forms.check import (
     CheckListForm,
     CheckHistoryForm,
     AssignCheckToUserForm,
-    UserCheckListForm
+    UserCheckListForm,
 )
 from security.utils import convert_date_fields, get_abbreviated_cardholder_names
 from security.views.object_base import SecurityView, SimpleSecurityDetailView
@@ -25,7 +25,7 @@ class CheckListView(SecurityView):
     View returning the checks in 'To action' (pending) status.
     """
     title = _('Credits to action')
-    template_name = 'security/checks_list.html'
+    template_name = 'security/check_list.html'
     form_class = CheckListForm
 
 
@@ -34,7 +34,7 @@ class MyCheckListView(SecurityView):
     View returning the checks in 'To action' (pending) status assigned to current user
     """
     title = _('My list')
-    template_name = 'security/checks_list.html'
+    template_name = 'security/check_list.html'
     form_class = UserCheckListForm
 
 
@@ -43,7 +43,7 @@ class CheckHistoryListView(SecurityView):
     View history of all accepted and rejected credits.
     """
     title = _('Decision history')
-    template_name = 'security/credits_history_list.html'
+    template_name = 'security/check_history_list.html'
     form_class = CheckHistoryForm
 
 

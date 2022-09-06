@@ -394,6 +394,6 @@ urlpatterns = [
     url(
         r'^checks/history/$',
         fiu_security_test(views.CheckHistoryListView.as_view()),
-        name='credits_history',
+        name='check_history',
     ),
 ]

@@ -467,7 +467,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
         user_data = self.get_user_data(permissions=required_permissions)
         with responses.RequestsMock() as rsps:
             self.login(rsps=rsps, user_data=user_data)
-            response = self.client.get(reverse('security:credits_history'), follow=True)
+            response = self.client.get(reverse('security:check_history'), follow=True)
             self.assertRedirects(response, reverse('security:dashboard'))
 
     def test_view(self):
@@ -517,7 +517,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                 }
             )
 
-            response = self.client.get(reverse('security:credits_history'))
+            response = self.client.get(reverse('security:check_history'))
             self.assertContains(response, '123456******9876')
             self.assertContains(response, '02/20')
 
@@ -541,7 +541,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                     'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY],
                 },
             )
-            response = self.client.get(reverse('security:credits_history'))
+            response = self.client.get(reverse('security:check_history'))
             self.assertContains(response, '123456******9876')
             self.assertContains(response, '02/20')
             self.assertContains(response, 'Barry Garlow')
@@ -568,7 +568,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                     'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY],
                 },
             )
-            response = self.client.get(reverse('security:credits_history'))
+            response = self.client.get(reverse('security:check_history'))
 
             self.assertContains(response, 'No decision reason entered')
 
@@ -629,7 +629,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                 }
             )
 
-            response = self.client.get(reverse('security:credits_history'))
+            response = self.client.get(reverse('security:check_history'))
 
             self.assertContains(response, rejection_reason_full)
 
@@ -690,7 +690,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                 }
             )
 
-            response = self.client.get(reverse('security:credits_history'))
+            response = self.client.get(reverse('security:check_history'))
 
             self.assertContains(response, rejection_reason_value)
 
@@ -759,7 +759,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
             )
             response = self.client.get(
                 reverse(
-                    'security:credits_history',
+                    'security:check_history',
                 ),
             )
         self.assertEqual(response.status_code, 200)
