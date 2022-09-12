@@ -19,31 +19,6 @@ from security.tests.test_views import SAMPLE_PRISONS, mock_prison_response, no_s
 from security.views.object_base import SEARCH_FORM_SUBMITTED_INPUT_NAME
 
 
-class LegacyViewsRedirectTestCase(SecurityBaseTestCase):
-    """
-    Tests related to legacy views.
-    """
-
-    @responses.activate
-    def test_legacy_search_views_redirect_to_new_ones(self):
-        """
-        Test that legacy search views redirect to search views V2.
-        """
-        view_names = (
-            'security:credit_list',
-            'security:disbursement_list',
-            'security:sender_list',
-            'security:prisoner_list',
-        )
-        with responses.RequestsMock() as rsps:
-            self.login(rsps)
-            mock_prison_response(rsps=rsps)
-
-            for view_name in view_names:
-                response = self.client.get(reverse(f'{view_name}_legacy'))
-                self.assertRedirects(response, reverse(view_name))
-
-
 class AbstractSecurityViewTestCase(SecurityBaseTestCase):
     view_name = NotImplemented
     advanced_search_view_name = NotImplemented

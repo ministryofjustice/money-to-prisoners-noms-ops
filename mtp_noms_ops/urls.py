@@ -90,7 +90,7 @@ urlpatterns = i18n_patterns(
             'cancel_url': reverse_lazy('settings'),
         }, name='email_change'
     ),
-    url(r'^', include('security.urls', namespace='security')),
+    url(r'^security/', include('security.urls', namespace='security')),
 
     # Override mtp_common.user_admin's /users/new/ view
     url(r'^users/new/$', UserCreationView.as_view(), name='new-user'),
