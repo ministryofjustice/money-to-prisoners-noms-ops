@@ -1,3 +1,5 @@
+import io
+
 from django.template.defaultfilters import striptags
 from django.utils import timezone
 from django.utils.dateformat import format as format_date
@@ -5,7 +7,7 @@ from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.auth.api_client import get_api_session_with_session
 from mtp_common.spooling import spoolable
 from mtp_common.tasks import send_email
-from openpyxl.writer.excel import save_virtual_workbook
+from openpyxl.writer.excel import save_workbook
 
 from security.export import ObjectListSerialiser
 from security.utils import convert_date_fields
@@ -41,7 +43,9 @@ def email_export_xlsx(*, object_type, user, session, endpoint_path, filters, exp
 
     serialiser = ObjectListSerialiser.serialiser_for(object_type)
     workbook = serialiser.make_workbook(object_list)
-    attachment = save_virtual_workbook(workbook)
+    attachment = io.BytesIO()
+    save_workbook(workbook, attachment)
+    attachment = attachment.getvalue()
 
     send_email(
         template_name='noms-ops-export',
