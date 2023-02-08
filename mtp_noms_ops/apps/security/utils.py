@@ -1,4 +1,4 @@
-import collections
+import collections.abc
 import datetime
 import logging
 import re
@@ -92,7 +92,7 @@ def sender_profile_name(sender):
     return _('Unknown sender')
 
 
-class OrderedSet(collections.MutableSet):
+class OrderedSet(collections.abc.MutableSet):
     def __init__(self, iterable=None):
         super().__init__()
         self.item_list = []
