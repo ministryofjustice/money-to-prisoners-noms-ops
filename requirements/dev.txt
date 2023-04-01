@@ -4,4 +4,4 @@ money-to-prisoners-common[testing]~=14.2.0
 
 -r base.txt
 
-parameterized~=0.8.1
+parameterized~=0.9.0
