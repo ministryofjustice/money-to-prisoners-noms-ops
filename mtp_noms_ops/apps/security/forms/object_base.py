@@ -13,7 +13,6 @@ from django.utils.dateformat import format as date_format
 from django.utils.functional import cached_property
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _, override as override_locale
-from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.auth.api_client import get_api_session
 from mtp_common.auth.exceptions import HttpNotFoundError
@@ -93,7 +92,7 @@ class AmountPattern(enum.Enum):
         ]
 
 
-class SecurityForm(GARequestErrorReportingMixin, forms.Form):
+class SecurityForm(forms.Form):
     """
     Base form for security searches, always uses initial values as defaults
     """

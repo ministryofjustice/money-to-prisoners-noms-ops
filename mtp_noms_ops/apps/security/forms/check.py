@@ -4,7 +4,6 @@ from django import forms
 from django.contrib import messages
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
 from mtp_common.security.checks import (
     CHECK_REJECTION_TEXT_CATEGORY_LABELS,
@@ -180,7 +179,7 @@ class AutoAcceptListForm(SecurityForm):
         return object_list
 
 
-class AcceptOrRejectCheckForm(GARequestErrorReportingMixin, forms.Form):
+class AcceptOrRejectCheckForm(forms.Form):
     """
     CheckForm for accepting or rejecting a check.
     """
@@ -548,7 +547,7 @@ class AutoAcceptDetailForm(forms.Form):
         return True
 
 
-class AssignCheckToUserForm(GARequestErrorReportingMixin, forms.Form):
+class AssignCheckToUserForm(forms.Form):
     assignment = forms.ChoiceField(
         choices=[
             ('assign', _('Assign')),

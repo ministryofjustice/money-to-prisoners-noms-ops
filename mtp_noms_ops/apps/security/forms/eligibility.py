@@ -1,9 +1,8 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from form_error_reporting import GARequestErrorReportingMixin
 
 
-class HMPPSEmployeeForm(GARequestErrorReportingMixin, forms.Form):
+class HMPPSEmployeeForm(forms.Form):
     next = forms.CharField(required=False)
     confirmation = forms.ChoiceField(
         label=_('Are you a direct employee of HMPPS or a contracted prison and working in an intelligence function?'),
