@@ -3,12 +3,11 @@ import datetime
 from django import forms
 from django.utils import timezone
 from django.utils.functional import cached_property
-from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.api import retrieve_all_pages_for_path
 from mtp_common.auth.api_client import get_api_session
 
 
-class ReviewCreditsForm(GARequestErrorReportingMixin, forms.Form):
+class ReviewCreditsForm(forms.Form):
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.request = request

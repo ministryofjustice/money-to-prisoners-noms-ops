@@ -6,7 +6,6 @@ import re
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from form_error_reporting import GARequestErrorReportingMixin
 from mtp_common.auth.api_client import get_api_session
 
 from prisoner_location_admin.tasks import update_locations
@@ -19,7 +18,7 @@ DOB_PATTERN = re.compile(
 DATE_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
 
 
-class LocationFileUploadForm(GARequestErrorReportingMixin, forms.Form):
+class LocationFileUploadForm(forms.Form):
     location_file = forms.FileField(
         label=_('Location file'),
         error_messages={'required': _('Please choose a file')},
