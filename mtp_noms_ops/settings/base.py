@@ -272,6 +272,7 @@ OAUTHLIB_INSECURE_TRANSPORT = True
 
 ANALYTICS_REQUIRED = os.environ.get('ANALYTICS_REQUIRED', 'True') == 'True'
 GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', None)
+GA4_MEASUREMENT_ID = os.environ.get('GA4_MEASUREMENT_ID', None)
 
 ZENDESK_BASE_URL = 'https://ministryofjustice.zendesk.com'
 ZENDESK_API_USERNAME = os.environ.get('ZENDESK_API_USERNAME', '')

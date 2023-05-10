@@ -24,9 +24,11 @@ export var ChoosePrisons = {
     } else {
       currentPrisons = this.addedPrisons($hiddenInputs);
     }
-    Analytics.send(
-      'event', 'PrisonConfirmation', 'Change', currentPrisons
-    );
+    var eventCategory = 'PrisonConfirmation';
+    var eventAction = 'Change';
+    var eventLabel = currentPrisons;
+    Analytics.send('event', eventCategory, eventAction, eventLabel);
+    Analytics.ga4SendEvent(eventCategory, eventAction, eventLabel);
 
     this.setupInputs();
   },
@@ -80,12 +82,11 @@ export var ChoosePrisons = {
               '</div>'
             );
 
-            Analytics.send(
-              'event',
-              'security.forms.preferences.ChoosePrisonForm',
-              'new_prison',
-              emptyErrorMsg
-            );
+            var eventCategory = 'security.forms.preferences.ChoosePrisonForm';
+            var eventAction = 'new_prison';
+            var eventLabel = emptyErrorMsg;
+            Analytics.send('event', eventCategory, eventAction, eventLabel);
+            Analytics.ga4SendEvent(eventCategory, eventAction, eventLabel);
           }
           noSelection = true;
         }
@@ -102,9 +103,11 @@ export var ChoosePrisons = {
       } else {
         addedPrisons = self.addedPrisons($hiddenInputs);
       }
-      Analytics.send(
-        'event', 'PrisonConfirmation', 'Save', addedPrisons
-      );
+      var eventCategory = 'PrisonConfirmation';
+      var eventAction = 'Save';
+      var eventLabel = addedPrisons;
+      Analytics.send('event', eventCategory, eventAction, eventLabel);
+      Analytics.ga4SendEvent(eventCategory, eventAction, eventLabel);
       return true;
     });
   },
@@ -130,10 +133,11 @@ export var ChoosePrisons = {
       var $chosenPrisons = $form.find('input[name=prisons]:checked');
       var newPrisonsStr = self.addedPrisons($chosenPrisons);
 
+      var eventCategory = 'PrisonConfirmation';
+      var eventAction = 'Confirm';
       var eventLabel = $confirmButton.data('current-prisons') + ' > ' + newPrisonsStr;
-      Analytics.send(
-        'event', 'PrisonConfirmation', 'Confirm', eventLabel
-      );
+      Analytics.send('event', eventCategory, eventAction, eventLabel);
+      Analytics.ga4SendEvent(eventCategory, eventAction, eventLabel);
     });
   },
 
@@ -206,6 +210,3 @@ export var ChoosePrisons = {
     });
   }
 };
-
-
-
