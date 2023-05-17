@@ -9,7 +9,7 @@ import responses
 
 from prisoner_location_admin.tests import (
     PrisonerLocationUploadTestCase, generate_testable_location_data,
-    get_csv_data_as_file,
+    get_csv_data_as_file, respond_to_upload_checks, setup_mock_get_authenticated_api_session,
 )
 from security.tests import api_url
 
@@ -65,13 +65,13 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
     @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_upload(self, mock_api_client):
         self.login()
-        self.setup_mock_get_authenticated_api_session(mock_api_client)
+        setup_mock_get_authenticated_api_session(mock_api_client)
 
         file_data, expected_data = generate_testable_location_data()
         expected_calls = [expected_data]
 
         with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
-            self.respond_to_upload_checks(rsps)
+            respond_to_upload_checks(rsps)
             rsps.add(
                 rsps.POST,
                 api_url('/prisoner_locations/actions/delete_inactive/')
@@ -104,7 +104,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
     @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_with_ignored_prisons(self, mock_api_client):
         self.login()
-        self.setup_mock_get_authenticated_api_session(mock_api_client)
+        setup_mock_get_authenticated_api_session(mock_api_client)
 
         file_data, expected_data = generate_testable_location_data(length=20, extra_rows=[
             'A1234ZZ,Smith,John,2/9/1997,TRN',
@@ -113,7 +113,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         expected_calls = [expected_data]
 
         with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
-            self.respond_to_upload_checks(rsps)
+            respond_to_upload_checks(rsps)
             rsps.add(
                 rsps.POST,
                 api_url('/prisoner_locations/actions/delete_inactive/')
@@ -151,7 +151,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
     @mock.patch('prisoner_location_admin.tasks.api_client')
     def test_location_file_upload_api_error_displays_message(self, mock_api_client):
         self.login()
-        self.setup_mock_get_authenticated_api_session(mock_api_client)
+        setup_mock_get_authenticated_api_session(mock_api_client)
 
         api_error_message = 'prison not found'
         response_content = ('[{"prison": ["%s"]}]' % api_error_message).encode()
@@ -159,7 +159,7 @@ class PrisonerLocationAdminViewsTestCase(PrisonerLocationUploadTestCase):
         file_data, _ = generate_testable_location_data()
 
         with responses.RequestsMock() as rsps, silence_logger():
-            self.respond_to_upload_checks(rsps)
+            respond_to_upload_checks(rsps)
             rsps.add(
                 rsps.POST,
                 api_url('/prisoner_locations/actions/delete_inactive/')

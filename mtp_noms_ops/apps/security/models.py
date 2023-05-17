@@ -90,6 +90,7 @@ class PrisonList:
     def get_prisons(self, session):
         prisons = cache.get('PrisonList')
         if prisons is None:
+            # NB: must not exclude empty prisons because location report needs to work for new prisons
             prisons = retrieve_all_pages_for_path(session, '/prisons/')
             cache.set('PrisonList', prisons, timeout=60 * 15)
         return prisons

@@ -10,7 +10,7 @@ import responses
 from prisoner_location_admin.forms import LocationFileUploadForm
 from prisoner_location_admin.tests import (
     PrisonerLocationUploadTestCase, generate_testable_location_data,
-    get_csv_data_as_file,
+    get_csv_data_as_file, respond_to_upload_checks, setup_mock_get_authenticated_api_session,
 )
 from security.tests import api_url
 
@@ -37,7 +37,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         request = self.make_request(get_csv_data_as_file(file_data))
         with responses.RequestsMock() as rsps:
-            self.respond_to_upload_checks(rsps)
+            respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertTrue(form.is_valid())
 
@@ -46,7 +46,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         request = self.make_request(get_csv_data_as_file(file_data))
         with responses.RequestsMock() as rsps:
-            self.respond_to_upload_checks(rsps)
+            respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertTrue(form.is_valid())
 
@@ -57,7 +57,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         request = self.make_request(get_csv_data_as_file(file_data))
         with responses.RequestsMock() as rsps:
-            self.respond_to_upload_checks(rsps)
+            respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertFalse(form.is_valid())
 
@@ -100,7 +100,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
 
         request = self.make_request(get_csv_data_as_file(file_data))
         with responses.RequestsMock() as rsps:
-            self.respond_to_upload_checks(rsps)
+            respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertFalse(form.is_valid())
 
@@ -131,7 +131,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
     @mock.patch('prisoner_location_admin.tasks.api_client')
     @override_settings(UPLOAD_REQUEST_PAGE_SIZE=10)
     def test_location_file_batch_upload(self, mock_api_client):
-        self.setup_mock_get_authenticated_api_session(mock_api_client)
+        setup_mock_get_authenticated_api_session(mock_api_client)
 
         file_data, expected_data = generate_testable_location_data(length=50)
         expected_calls = [
@@ -145,7 +145,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
         request = self.make_request(get_csv_data_as_file(file_data))
 
         with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
-            self.respond_to_upload_checks(rsps)
+            respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertTrue(form.is_valid())
 
@@ -176,7 +176,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
     @mock.patch('prisoner_location_admin.tasks.api_client')
     @override_settings(UPLOAD_REQUEST_PAGE_SIZE=50)
     def test_location_file_with_ignored_prisons(self, mock_api_client):
-        self.setup_mock_get_authenticated_api_session(mock_api_client)
+        setup_mock_get_authenticated_api_session(mock_api_client)
 
         file_data, expected_data = generate_testable_location_data(length=20, extra_rows=[
             'A1234ZZ,Smith,John,2/9/1997,TRN',
@@ -187,7 +187,7 @@ class LocationFileUploadFormTestCase(PrisonerLocationUploadTestCase):
         request = self.make_request(get_csv_data_as_file(file_data))
 
         with responses.RequestsMock() as rsps, silence_logger(level=logging.WARNING):
-            self.respond_to_upload_checks(rsps)
+            respond_to_upload_checks(rsps)
             form = LocationFileUploadForm(request.POST, request.FILES, request=request)
             self.assertTrue(form.is_valid())
 
