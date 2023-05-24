@@ -68,8 +68,8 @@ class LoadLocationsFromOffenderSearchTestCase(SimpleTestCase):
             mock_get_uploading_user(rsps)
             mock_prison_response(rsps)
             mock_hmpps_auth_token(rsps)
-            mock_offender_search_response(rsps, 'IXB', 0)
-            mock_offender_search_response(rsps, 'INP', 0)
+            mock_offender_search_response(rsps, 'IXB', count_per_page=0)
+            mock_offender_search_response(rsps, 'INP', count_per_page=0)
 
             call_command('load_locations_from_offender_search')
 
@@ -86,8 +86,8 @@ class LoadLocationsFromOffenderSearchTestCase(SimpleTestCase):
             mock_get_uploading_user(rsps)
             mock_prison_response(rsps)
             mock_hmpps_auth_token(rsps)
-            mock_offender_search_response(rsps, 'IXB', 1)
-            mock_offender_search_response(rsps, 'INP', 0)
+            mock_offender_search_response(rsps, 'IXB', count_per_page=1)
+            mock_offender_search_response(rsps, 'INP', count_per_page=0)
 
             call_command('load_locations_from_offender_search')
 
@@ -116,8 +116,8 @@ class LoadLocationsFromOffenderSearchTestCase(SimpleTestCase):
             mock_get_uploading_user(rsps)
             mock_prison_response(rsps)
             mock_hmpps_auth_token(rsps)
-            mock_offender_search_response(rsps, 'IXB', 1)
-            mock_offender_search_response(rsps, 'INP', 1)
+            mock_offender_search_response(rsps, 'IXB', count_per_page=1)
+            mock_offender_search_response(rsps, 'INP', count_per_page=1)
 
             call_command('load_locations_from_offender_search')
 
@@ -141,8 +141,8 @@ class LoadLocationsFromOffenderSearchTestCase(SimpleTestCase):
             mock_get_uploading_user(rsps)
             mock_prison_response(rsps)
             mock_hmpps_auth_token(rsps)
-            mock_offender_search_response(rsps, 'IXB', 1, 2)
-            mock_offender_search_response(rsps, 'INP', 1, 2)
+            mock_offender_search_response(rsps, 'IXB', count_per_page=1, pages=2)
+            mock_offender_search_response(rsps, 'INP', count_per_page=1, pages=2)
 
             call_command('load_locations_from_offender_search')
 
@@ -165,8 +165,8 @@ class LoadLocationsFromOffenderSearchTestCase(SimpleTestCase):
             mock_get_uploading_user(rsps)
             mock_prison_response(rsps)
             mock_hmpps_auth_token(rsps)
-            mock_offender_search_response(rsps, 'IXB', 2, 3)
-            mock_offender_search_response(rsps, 'INP', 2, 2)
+            mock_offender_search_response(rsps, 'IXB', count_per_page=2, pages=3)
+            mock_offender_search_response(rsps, 'INP', count_per_page=2, pages=2)
 
             rsps.post(api_url('/prisoner_locations/actions/delete_inactive/'))
             rsps.post(api_url('/prisoner_locations/'))
@@ -191,8 +191,8 @@ class LoadLocationsFromOffenderSearchTestCase(SimpleTestCase):
             mock_get_uploading_user(rsps)
             mock_prison_response(rsps)
             mock_hmpps_auth_token(rsps)
-            mock_offender_search_response(rsps, 'IXB', 1)
-            mock_offender_search_response(rsps, 'INP', 1)
+            mock_offender_search_response(rsps, 'IXB', count_per_page=1)
+            mock_offender_search_response(rsps, 'INP', count_per_page=1)
 
             rsps.post(api_url('/prisoner_locations/actions/delete_inactive/'))
             rsps.post(
