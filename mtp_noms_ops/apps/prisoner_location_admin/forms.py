@@ -3,11 +3,13 @@ import csv
 from datetime import datetime
 import io
 import re
+import typing
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from mtp_common.auth.api_client import get_api_session
 
+from prisoner_location_admin.models import PrisonerLocation
 from prisoner_location_admin.tasks import update_locations
 from security.models import PrisonList
 
@@ -29,7 +31,7 @@ class LocationFileUploadForm(forms.Form):
         super().__init__(*args, **kwargs)
 
     def clean_location_file(self):
-        locations = []
+        locations: typing.List[PrisonerLocation] = []
         transfer_count = 0
         skipped_counts = collections.defaultdict(int)
 
@@ -77,12 +79,12 @@ class LocationFileUploadForm(forms.Form):
 
             dob = parse_dob(row[3])
 
-            locations.append({
-                'prisoner_number': row[0],
-                'prisoner_name': ' '.join([row[2], row[1]]),
-                'prisoner_dob': dob,
-                'prison': row[4],
-            })
+            locations.append(PrisonerLocation(
+                prisoner_number=row[0],
+                prisoner_name=' '.join([row[2], row[1]]),
+                prisoner_dob=dob,
+                prison=row[4],
+            ))
 
         if len(locations) == 0:
             raise forms.ValidationError(_('The uploaded report contains no valid prisoner locations'))
