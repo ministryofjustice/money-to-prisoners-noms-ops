@@ -27,7 +27,6 @@ export var ChoosePrisons = {
     var eventCategory = 'PrisonConfirmation';
     var eventAction = 'Change';
     var eventLabel = currentPrisons;
-    Analytics.send('event', eventCategory, eventAction, eventLabel);
     Analytics.ga4SendEvent(eventCategory, eventAction, eventLabel);
 
     this.setupInputs();
@@ -85,7 +84,6 @@ export var ChoosePrisons = {
             var eventCategory = 'security.forms.preferences.ChoosePrisonForm';
             var eventAction = 'new_prison';
             var eventLabel = emptyErrorMsg;
-            Analytics.send('event', eventCategory, eventAction, eventLabel);
             Analytics.ga4SendEvent(eventCategory, eventAction, eventLabel);
           }
           noSelection = true;
@@ -106,7 +104,6 @@ export var ChoosePrisons = {
       var eventCategory = 'PrisonConfirmation';
       var eventAction = 'Save';
       var eventLabel = addedPrisons;
-      Analytics.send('event', eventCategory, eventAction, eventLabel);
       Analytics.ga4SendEvent(eventCategory, eventAction, eventLabel);
       return true;
     });
@@ -136,7 +133,6 @@ export var ChoosePrisons = {
       var eventCategory = 'PrisonConfirmation';
       var eventAction = 'Confirm';
       var eventLabel = $confirmButton.data('current-prisons') + ' > ' + newPrisonsStr;
-      Analytics.send('event', eventCategory, eventAction, eventLabel);
       Analytics.ga4SendEvent(eventCategory, eventAction, eventLabel);
     });
   },
