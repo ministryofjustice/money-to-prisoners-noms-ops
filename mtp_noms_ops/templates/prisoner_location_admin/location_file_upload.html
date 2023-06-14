@@ -14,6 +14,20 @@
 
       {% notification_banners request %}
 
+      <div class="govuk-notification-banner mtp-notification-banner--warning" role="region" aria-labelledby="banner-not-required" data-module="govuk-notification-banner">
+        <div class="govuk-notification-banner__header">
+          <h2 class="govuk-notification-banner__title" id="banner-not-required">
+            Please note
+          </h2>
+        </div>
+        <div class="govuk-notification-banner__content">
+          <p class="govuk-notification-banner__heading">
+            Prisoner locations are now loaded automatically
+          </p>
+          You only need to upload a report here if there was a problem
+        </div>
+      </div>
+
       <form action="{% url 'location_file_upload' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
