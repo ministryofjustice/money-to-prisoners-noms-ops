@@ -31,12 +31,13 @@ class Command(BaseCommand):
             self.stdout.write('Prisoner location upload is not idempotent')
             try:
                 should_continue = is_first_instance()
-                self.stdout.write('Running on first instance so prisoner location upload will proceed')
             except StackException:
-                should_continue = True
-            if not should_continue:
-                self.stdout.write('Not running on first instance so prisoner location upload will be skipped')
+                self.stdout.write('Cannot determine if running on first instance so upload will be skipped')
                 return
+            if not should_continue:
+                self.stdout.write('Not running on first instance so upload will be skipped')
+                return
+            self.stdout.write('Running on first instance so upload will proceed')
 
         try:
             user = self.get_uploading_user()
