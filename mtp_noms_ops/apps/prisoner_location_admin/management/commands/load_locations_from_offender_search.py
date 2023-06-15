@@ -6,6 +6,7 @@ from django.core.management import BaseCommand
 from django.utils.functional import cached_property
 from mtp_common.auth import api_client, urljoin, MojUser
 from mtp_common.nomis import connector, request_retry
+from mtp_common.stack import StackException, is_first_instance
 import requests
 
 from prisoner_location_admin.models import PrisonerLocation
@@ -21,7 +22,22 @@ class Command(BaseCommand):
     """
     help = __doc__.strip().splitlines()[0]
 
+    def add_arguments(self, parser):
+        parser.add_argument('--scheduled', action='store_true')
+
     def handle(self, **options):
+        scheduled = options['scheduled']
+        if scheduled:
+            self.stdout.write('Prisoner location upload is not idempotent')
+            try:
+                should_continue = is_first_instance()
+                self.stdout.write('Running on first instance so prisoner location upload will proceed')
+            except StackException:
+                should_continue = True
+            if not should_continue:
+                self.stdout.write('Not running on first instance so prisoner location upload will be skipped')
+                return
+
         try:
             user = self.get_uploading_user()
             prison_ids = self.get_known_prison_ids()
