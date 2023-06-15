@@ -14,6 +14,20 @@
 
       {% notification_banners request %}
 
+      <div class="govuk-notification-banner mtp-notification-banner--warning" role="region" aria-labelledby="banner-not-required" data-module="govuk-notification-banner">
+        <div class="govuk-notification-banner__header">
+          <h2 class="govuk-notification-banner__title" id="banner-not-required">
+            Please note
+          </h2>
+        </div>
+        <div class="govuk-notification-banner__content">
+          <p class="govuk-notification-banner__heading">
+            Prisoner locations are now loaded automatically
+          </p>
+          You only need to upload a report here if there was a problem
+        </div>
+      </div>
+
       <form action="{% url 'location_file_upload' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
@@ -22,9 +36,13 @@
         <ol class="govuk-list govuk-list--number">
           <li>
             {% blocktrans trimmed with report='MIS Electronic Credits and Prisoner Establishment Locations (inc POPs)' %}
-              Run the ‘{{ report }}’ report in P-NOMIS
+              Run the ‘{{ report }}’ report in P-NOMIS.
             {% endblocktrans %}
-            {# NB: This report is in the folder "Public Folders/NOMIS/Management Information Reports/MIS - HQ Reports/" #}
+            <br />
+            <br />
+            {% blocktrans trimmed with path='Public Folders/NOMIS/Management Information Reports/MIS - HQ Reports/' %}
+              This report is in the folder ‘{{ path }}’.
+            {% endblocktrans %}
           </li>
           <li>
             {% trans 'Export in CSV format (.csv)' %}
@@ -35,11 +53,6 @@
         </ol>
 
         <div class="govuk-inset-text">
-          <p>
-            {% blocktrans trimmed %}
-              Ensure you use the full report <strong>including the private estate</strong>.
-            {% endblocktrans %}
-          </p>
           <p>{% trans 'Please note the uploaded prisoner locations will replace all those currently stored in the system.' %}</p>
         </div>
 
