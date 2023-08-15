@@ -271,7 +271,7 @@ LOGOUT_URL = 'logout'
 OAUTHLIB_INSECURE_TRANSPORT = True
 
 ANALYTICS_REQUIRED = os.environ.get('ANALYTICS_REQUIRED', 'True') == 'True'
-GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', None)
+GA4_MEASUREMENT_ID = os.environ.get('GA4_MEASUREMENT_ID', None)
 
 ZENDESK_BASE_URL = 'https://ministryofjustice.zendesk.com'
 ZENDESK_API_USERNAME = os.environ.get('ZENDESK_API_USERNAME', '')
@@ -308,6 +308,7 @@ HMPPS_CLIENT_ID = os.environ.get('HMPPS_CLIENT_ID', 'prisoner-money')
 HMPPS_CLIENT_SECRET = os.environ.get('HMPPS_CLIENT_SECRET', '')
 HMPPS_AUTH_BASE_URL = os.environ.get('HMPPS_AUTH_BASE_URL', '')
 HMPPS_PRISON_API_BASE_URL = os.environ.get('HMPPS_PRISON_API_BASE_URL', '')
+HMPPS_OFFENDER_SEARCH_BASE_URL = os.environ.get('HMPPS_OFFENDER_SEARCH_BASE_URL', '')
 
 TOKEN_RETRIEVAL_USERNAME = os.environ.get('TOKEN_RETRIEVAL_USERNAME', '_token_retrieval')
 TOKEN_RETRIEVAL_PASSWORD = os.environ.get('TOKEN_RETRIEVAL_PASSWORD', '_token_retrieval')

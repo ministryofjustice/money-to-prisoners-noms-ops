@@ -13,9 +13,7 @@ export var FormAnalytics = {
     var formId = $form.attr('id');
 
     function sendEvent (category, action, label) {
-      Analytics.send(
-        'event', category, action, label
-      );
+      Analytics.ga4SendEvent(category, action, label);
     }
 
     $form.on('submit', function () {
@@ -46,10 +44,8 @@ export var FormAnalytics = {
         sendEvent('form-link', eventDetails[0], eventDetails[1]);
 
         if (clickAsPageview) {
-          Analytics.rawSend(
-            'pageview',
-            $element.attr('href').split('?')[0]
-          );
+          var pageLocation = $element.attr('href').split('?')[0];
+          Analytics.ga4SendPageView(pageLocation);
         }
       }
     });
