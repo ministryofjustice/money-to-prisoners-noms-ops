@@ -1,9 +1,11 @@
 import collections
+import datetime
 import json
 from unittest import mock
 
 from django.core.management import call_command
 from django.test import SimpleTestCase, override_settings
+from django.utils import timezone
 from mtp_common.auth import MojUser
 from mtp_common.test_utils import silence_logger
 import responses
@@ -25,6 +27,114 @@ from security.tests.test_forms import mock_prison_response
     HMPPS_OFFENDER_SEARCH_BASE_URL='https://offender-search-dev.local',
 )
 class LoadLocationsFromOffenderSearchTestCase(SimpleTestCase):
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.update_locations')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.is_first_instance')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.timezone')
+    def test_runs_only_on_first_instance(self, mock_timezone, mock_is_first_instance, mock_update_locations):
+        mock_is_first_instance.return_value = False
+
+        with silence_logger(), responses.RequestsMock():
+            call_command('load_locations_from_offender_search', scheduled=True)
+
+        mock_timezone.now.assert_not_called()
+        mock_update_locations.assert_not_called()
+
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.update_locations')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.is_first_instance')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.timezone')
+    @override_settings(ENVIRONMENT='test')
+    def test_does_not_run_outside_office_hours_on_test(
+        self, mock_timezone, mock_is_first_instance, mock_update_locations,
+    ):
+        mock_is_first_instance.return_value = True
+        mock_timezone.now.return_value = timezone.make_aware(
+            datetime.datetime(2023, 10, 23, 7, 42)
+        )
+
+        with silence_logger(), responses.RequestsMock():
+            call_command('load_locations_from_offender_search', scheduled=True)
+
+        mock_timezone.now.assert_called_once()
+        mock_update_locations.assert_not_called()
+
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.api_client')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.update_locations')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.is_first_instance')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.timezone')
+    @override_settings(ENVIRONMENT='test')
+    def test_runs_in_office_hours_on_test(
+        self, mock_timezone, mock_is_first_instance, mock_update_locations, mock_api_client,
+    ):
+        mock_is_first_instance.return_value = True
+        mock_timezone.now.return_value = timezone.make_aware(
+            datetime.datetime(2023, 10, 23, 11, 42)
+        )
+        setup_mock_get_authenticated_api_session(mock_api_client)
+
+        with silence_logger(), responses.RequestsMock() as rsps:
+            mock_get_uploading_user(rsps)
+            mock_prison_response(rsps)
+            mock_hmpps_auth_token(rsps)
+            mock_offender_search_response(rsps, 'IXB', count_per_page=1)
+            mock_offender_search_response(rsps, 'INP', count_per_page=0)
+
+            call_command('load_locations_from_offender_search', scheduled=True)
+
+        mock_timezone.now.assert_called_once()
+        mock_update_locations.assert_called_once()
+
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.api_client')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.update_locations')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.is_first_instance')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.timezone')
+    @override_settings(ENVIRONMENT='prod')
+    def test_runs_outside_office_hours_on_prod(
+        self, mock_timezone, mock_is_first_instance, mock_update_locations, mock_api_client,
+    ):
+        mock_is_first_instance.return_value = True
+        mock_timezone.now.return_value = timezone.make_aware(
+            datetime.datetime(2023, 10, 23, 7, 42)
+        )
+        setup_mock_get_authenticated_api_session(mock_api_client)
+
+        with silence_logger(), responses.RequestsMock() as rsps:
+            mock_get_uploading_user(rsps)
+            mock_prison_response(rsps)
+            mock_hmpps_auth_token(rsps)
+            mock_offender_search_response(rsps, 'IXB', count_per_page=1)
+            mock_offender_search_response(rsps, 'INP', count_per_page=0)
+
+            call_command('load_locations_from_offender_search', scheduled=True)
+
+        mock_timezone.now.assert_not_called()
+        mock_update_locations.assert_called_once()
+
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.api_client')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.update_locations')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.is_first_instance')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.timezone')
+    @override_settings(ENVIRONMENT='prod')
+    def test_runs_in_office_hours_on_prod(
+        self, mock_timezone, mock_is_first_instance, mock_update_locations, mock_api_client,
+    ):
+        mock_is_first_instance.return_value = True
+        mock_timezone.now.return_value = timezone.make_aware(
+            datetime.datetime(2023, 10, 23, 11, 42)
+        )
+        setup_mock_get_authenticated_api_session(mock_api_client)
+
+        with silence_logger(), responses.RequestsMock() as rsps:
+            mock_get_uploading_user(rsps)
+            mock_prison_response(rsps)
+            mock_hmpps_auth_token(rsps)
+            mock_offender_search_response(rsps, 'IXB', count_per_page=1)
+            mock_offender_search_response(rsps, 'INP', count_per_page=0)
+
+            call_command('load_locations_from_offender_search', scheduled=True)
+
+        mock_timezone.now.assert_not_called()
+        mock_update_locations.assert_called_once()
+
     @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.update_locations')
     def test_mtp_auth_failure_does_not_throw_exception(self, mock_update_locations):
         with silence_logger(), responses.RequestsMock():
