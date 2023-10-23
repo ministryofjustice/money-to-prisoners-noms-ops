@@ -2835,7 +2835,7 @@ class AssignCheckToUserFormTestCase(SimpleTestCase):
             rsps.add(
                 rsps.PATCH,
                 api_url(f'/security/checks/{check_id}/'),
-                status=204,
+                status=200,
                 json={
                     'assigned_to': 5
                 }
@@ -2861,7 +2861,7 @@ class AssignCheckToUserFormTestCase(SimpleTestCase):
             rsps.add(
                 rsps.PATCH,
                 api_url(f'/security/checks/{check_id}/'),
-                status=204,
+                status=200,
                 json={
                     'assigned_to': None
                 }
