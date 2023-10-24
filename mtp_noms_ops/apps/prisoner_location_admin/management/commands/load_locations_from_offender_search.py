@@ -3,6 +3,7 @@ import typing
 
 from django.conf import settings
 from django.core.management import BaseCommand
+from django.utils import timezone
 from django.utils.functional import cached_property
 from mtp_common.auth import api_client, urljoin, MojUser
 from mtp_common.nomis import connector, request_retry
@@ -36,6 +37,9 @@ class Command(BaseCommand):
                 return
             if not should_continue:
                 self.stdout.write('Not running on first instance so upload will be skipped')
+                return
+            if settings.ENVIRONMENT != 'prod' and not in_office_hours():
+                self.stdout.write(f'Not running outside of office hours in {settings.ENVIRONMENT} environment')
                 return
             self.stdout.write('Running on first instance so upload will proceed')
 
@@ -140,3 +144,8 @@ def to_prisoner_location(offender: OffenderSearchPrisoner) -> PrisonerLocation:
         prisoner_dob=offender['dateOfBirth'],
         prison=offender['prisonId'],
     )
+
+
+def in_office_hours() -> bool:
+    now = timezone.now()
+    return now.weekday() < 5 and (9 <= now.hour <= 18)

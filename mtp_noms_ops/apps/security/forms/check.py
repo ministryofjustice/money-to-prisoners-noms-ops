@@ -580,7 +580,7 @@ class AssignCheckToUserForm(forms.Form):
             self.session.patch(
                 endpoint,
                 json={
-                    'assigned_to': user_id
+                    'assigned_to': user_id,
                 }
             )
             return True
