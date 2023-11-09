@@ -70,7 +70,6 @@ class CheckListForm(SecurityForm):
 
 
 class UserCheckListForm(CheckListForm):
-
     def get_api_request_params(self):
         return dict(
             super().get_api_request_params(),
