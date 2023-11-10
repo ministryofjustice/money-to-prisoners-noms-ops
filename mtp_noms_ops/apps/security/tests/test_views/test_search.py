@@ -198,9 +198,20 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
         """
         with responses.RequestsMock() as rsps:
             user_data = self.get_user_data(prisons=SAMPLE_PRISONS)
-
             self.login(rsps, user_data=user_data)
+
             mock_prison_response(rsps=rsps)
+
+            # mock empty response
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
+
             response = self.client.get(reverse(self.view_name))
 
         self.assertContains(
@@ -216,9 +227,19 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
         with responses.RequestsMock() as rsps:
             user_prisons = SAMPLE_PRISONS[:1]
             user_data = self.get_user_data(prisons=user_prisons)
-
             self.login(rsps, user_data=user_data)
+
             mock_prison_response(rsps=rsps)
+
+            # mock empty response
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
 
             url = (
                 f'{reverse(self.advanced_search_view_name)}'
@@ -241,7 +262,18 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps)
+
             mock_prison_response(rsps=rsps)
+
+            # mock empty response
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
 
             url = (
                 f'{reverse(self.advanced_search_view_name)}'
@@ -264,7 +296,18 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
             expected_prison_id = SAMPLE_PRISONS[1]['nomis_id']
 
             self.login(rsps)
+
             mock_prison_response(rsps=rsps)
+
+            # mock empty response
+            rsps.add(
+                rsps.GET,
+                api_url(self.api_list_path),
+                json={
+                    'count': 0,
+                    'results': [],
+                },
+            )
 
             url = (
                 f'{reverse(self.advanced_search_view_name)}'
@@ -290,7 +333,10 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps)
+
             mock_prison_response(rsps=rsps)
+
+            # mock empty response
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -319,7 +365,10 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
         """
         with responses.RequestsMock() as rsps:
             self.login(rsps)
+
             mock_prison_response(rsps=rsps)
+
+            # mock empty response
             rsps.add(
                 rsps.GET,
                 api_url(self.api_list_path),
@@ -328,6 +377,7 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
                     'results': [],
                 },
             )
+
             query_string = (
                 f'prison_selector={PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE}'
                 f'&advanced=True&ordering={self.search_ordering}'
