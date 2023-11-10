@@ -2401,10 +2401,13 @@ class CheckListFormTestCase(SimpleTestCase):
             ),
         )
 
-    def test_get_object_list(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_get_object_list(self, mock_get_need_attention_date):
         """
         Test that the form makes the right API call to get the list of checks.
         """
+        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 9, 9))
+
         with responses.RequestsMock() as rsps:
             rsps.add(
                 rsps.GET,
@@ -2425,12 +2428,32 @@ class CheckListFormTestCase(SimpleTestCase):
             self.assertTrue(form.is_valid())
             self.assertListEqual(form.get_object_list(), [])
 
-            api_call_made = rsps.calls[-1].request.url
+            checks_request, needs_attention_request, my_list_request = rsps.calls
+
             self.assertDictEqual(
-                parse_qs(api_call_made.split('?', 1)[1]),
+                parse_qs(checks_request.request.url.split('?', 1)[1]),
                 {
                     'offset': ['20'],
                     'limit': ['20'],
+                    'status': ['pending'],
+                    'credit_resolution': ['initial'],
+                },
+            )
+            self.assertDictEqual(
+                parse_qs(needs_attention_request.request.url.split('?', 1)[1]),
+                {
+                    'offset': ['0'],
+                    'limit': ['1'],
+                    'status': ['pending'],
+                    'credit_resolution': ['initial'],
+                    'started_at__lt': ['2019-07-09 09:00:00'],
+                },
+            )
+            self.assertDictEqual(
+                parse_qs(my_list_request.request.url.split('?', 1)[1]),
+                {
+                    'offset': ['0'],
+                    'limit': ['1'],
                     'status': ['pending'],
                     'credit_resolution': ['initial'],
                 },

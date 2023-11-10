@@ -4,7 +4,7 @@ import itertools
 import json
 import random
 from unittest import mock
-from urllib.parse import parse_qs, urlencode
+from urllib.parse import urlencode
 
 from dateutil import parser
 from django.conf import settings
@@ -16,7 +16,7 @@ from mtp_common.security.checks import CHECK_REJECTION_TEXT_CATEGORY_LABELS, CHE
 from mtp_common.test_utils import silence_logger
 from parameterized import parameterized
 import responses
-from responses.matchers import json_params_matcher
+from responses.matchers import json_params_matcher, query_param_matcher
 
 from security import required_permissions
 from security.constants import SECURITY_FORMS_DEFAULT_PAGE_SIZE, CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
@@ -151,10 +151,60 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         """
         return super().get_user_data(*args, permissions=permissions, **kwargs)
 
-    def mock_need_attention_count(self, rsps, count):
+    def mock_first_page_of_checks(self, rsps, count, *, only_mine=False):
+        query_params = {
+            # NB: must not overlap with mock_need_attention_count and mock_my_list_count
+            'status': 'pending',
+            'credit_resolution': 'initial',
+            'offset': '0',
+            'limit': '20',
+        }
+        if only_mine:
+            query_params['assigned_to'] = self.mock_user_pk
         rsps.add(
             rsps.GET,
             api_url('/security/checks/'),
+            match=[query_param_matcher(query_params, strict_match=True)],
+            json={
+                'count': count,
+                'results': [self.SAMPLE_CHECK] * count,
+            },
+        )
+
+    def mock_need_attention_count(self, rsps, need_attention_date: datetime.date, *, count=0, only_mine=False):
+        query_params = {
+            # NB: must not overlap with mock_my_list_count and mock_first_page_of_checks
+            'status': 'pending',
+            'credit_resolution': 'initial',
+            'started_at__lt': need_attention_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'offset': '0',
+            'limit': '1',
+        }
+        if only_mine:
+            query_params['assigned_to'] = self.mock_user_pk
+        rsps.add(
+            rsps.GET,
+            api_url('/security/checks/'),
+            match=[query_param_matcher(query_params, strict_match=True)],
+            json={
+                'count': count,
+                'results': [self.SAMPLE_CHECK] * count,
+            }
+        )
+
+    def mock_my_list_count(self, rsps, count=0):
+        query_params = {
+            # NB: must not overlap with mock_need_attention_count and mock_first_page_of_checks
+            'status': 'pending',
+            'credit_resolution': 'initial',
+            'assigned_to': self.mock_user_pk,
+            'offset': '0',
+            'limit': '1',
+        }
+        rsps.add(
+            rsps.GET,
+            api_url('/security/checks/'),
+            match=[query_param_matcher(query_params, strict_match=True)],
             json={
                 'count': count,
                 'results': [self.SAMPLE_CHECK] * count,
@@ -248,15 +298,9 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
-            self.mock_need_attention_count(rsps, 0)
-            rsps.add(
-                rsps.GET,
-                api_url('/security/checks/'),
-                json={
-                    'count': 1,
-                    'results': [self.SAMPLE_CHECK],
-                },
-            )
+            self.mock_first_page_of_checks(rsps, 1)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
+            self.mock_my_list_count(rsps)
 
             response = self.client.get(reverse('security:check_list'), follow=True)
             self.assertContains(response, '123456******9876')
@@ -278,15 +322,9 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
-            self.mock_need_attention_count(rsps, 2)
-            rsps.add(
-                rsps.GET,
-                api_url('/security/checks/'),
-                json={
-                    'count': 2,
-                    'results': [self.SAMPLE_CHECK, self.SAMPLE_CHECK],
-                },
-            )
+            self.mock_first_page_of_checks(rsps, 2)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value, count=2)
+            self.mock_my_list_count(rsps)
 
             response = self.client.get(reverse('security:check_list'), follow=True)
             self.assertContains(response, '123456******9876')
@@ -296,31 +334,18 @@ class CheckListViewTestCase(BaseCheckViewTestCase):
             self.assertIn('2 credits need attention', content)
             self.assertIn('This credit needs attention today!', content)
 
-    def test_calculation_of_date_before_which_checks_need_attention(self):
-        with responses.RequestsMock() as rsps:
-            self.login(rsps)
-            self.mock_need_attention_count(rsps, 0)
-            response = self.client.get(reverse('security:check_list'))
-            form = response.context['form']
-            api_call_made = rsps.calls[-3].request.url
-            parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
-            self.assertEqual(parsed_qs['started_at__lt'], [form.need_attention_date.strftime('%Y-%m-%d %H:%M:%S')])
-
-    def test_credit_row_has_review_link(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_credit_row_has_review_link(self, mock_get_need_attention_date):
         """
         Test that the view displays link to review a credit.
         """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 2, 9))
+
         with responses.RequestsMock() as rsps:
             self.login(rsps)
-            self.mock_need_attention_count(rsps, 0)
-            rsps.add(
-                rsps.GET,
-                api_url('/security/checks/'),
-                json={
-                    'count': 1,
-                    'results': [self.SAMPLE_CHECK],
-                },
-            )
+            self.mock_first_page_of_checks(rsps, 1)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value, count=2)
+            self.mock_my_list_count(rsps)
 
             response = self.client.get(reverse('security:check_list'), follow=True)
 
@@ -352,15 +377,9 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
-            self.mock_need_attention_count(rsps, 0)
-            rsps.add(
-                rsps.GET,
-                api_url('/security/checks/'),
-                json={
-                    'count': 1,
-                    'results': [self.SAMPLE_CHECK],
-                },
-            )
+            self.mock_first_page_of_checks(rsps, 1, only_mine=True)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value, only_mine=True)
+            self.mock_my_list_count(rsps, 1)
 
             response = self.client.get(reverse('security:my_check_list'), follow=True)
             self.assertContains(response, '123456******9876')
@@ -383,15 +402,9 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
-            self.mock_need_attention_count(rsps, 2)
-            rsps.add(
-                rsps.GET,
-                api_url('/security/checks/'),
-                json={
-                    'count': 2,
-                    'results': [self.SAMPLE_CHECK, self.SAMPLE_CHECK],
-                },
-            )
+            self.mock_first_page_of_checks(rsps, 2, only_mine=True)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value, count=2, only_mine=True)
+            self.mock_my_list_count(rsps, 2)
 
             response = self.client.get(reverse('security:my_check_list'), follow=True)
             self.assertContains(response, '123456******9876')
@@ -401,31 +414,18 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
             self.assertIn('2 credits need attention', content)
             self.assertIn('This credit needs attention today!', content)
 
-    def test_calculation_of_date_before_which_checks_need_attention(self):
-        with responses.RequestsMock() as rsps:
-            self.login(rsps)
-            self.mock_need_attention_count(rsps, 0)
-            response = self.client.get(reverse('security:my_check_list'))
-            form = response.context['form']
-            api_call_made = rsps.calls[-3].request.url
-            parsed_qs = parse_qs(api_call_made.split('?', 1)[1])
-            self.assertEqual(parsed_qs['started_at__lt'], [form.need_attention_date.strftime('%Y-%m-%d %H:%M:%S')])
-
-    def test_credit_row_has_review_link(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_credit_row_has_review_link(self, mock_get_need_attention_date):
         """
         Test that the view displays link to review a credit.
         """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 2, 9))
+
         with responses.RequestsMock() as rsps:
             self.login(rsps)
-            self.mock_need_attention_count(rsps, 0)
-            rsps.add(
-                rsps.GET,
-                api_url('/security/checks/'),
-                json={
-                    'count': 1,
-                    'results': [self.SAMPLE_CHECK],
-                },
-            )
+            self.mock_first_page_of_checks(rsps, 1, only_mine=True)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value, only_mine=True)
+            self.mock_my_list_count(rsps, 1)
 
             response = self.client.get(reverse('security:my_check_list'), follow=True)
 
@@ -486,11 +486,12 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                             ('actioned_by', True),
                             ('offset', 0),
                             ('limit', 20),
-                            ('ordering', '-created')
+                            ('ordering', '-created'),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 1,
                     'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY],
@@ -506,11 +507,12 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                             ('credit_resolution', 'initial'),
                             ('assigned_to', 5),
                             ('offset', 0),
-                            ('limit', 1)
+                            ('limit', 1),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 2,
                     'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY, self.SAMPLE_CHECK_WITH_ACTIONED_BY],
@@ -593,11 +595,12 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                             ('actioned_by', True),
                             ('offset', 0),
                             ('limit', 20),
-                            ('ordering', '-created')
+                            ('ordering', '-created'),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 1,
                     'results': [
@@ -618,11 +621,12 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                             ('credit_resolution', 'initial'),
                             ('assigned_to', 5),
                             ('offset', 0),
-                            ('limit', 1)
+                            ('limit', 1),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 2,
                     'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY, self.SAMPLE_CHECK_WITH_ACTIONED_BY],
@@ -654,11 +658,12 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                             ('actioned_by', True),
                             ('offset', 0),
                             ('limit', 20),
-                            ('ordering', '-created')
+                            ('ordering', '-created'),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 1,
                     'results': [
@@ -679,11 +684,12 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                             ('credit_resolution', 'initial'),
                             ('assigned_to', 5),
                             ('offset', 0),
-                            ('limit', 1)
+                            ('limit', 1),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 2,
                     'results': [self.SAMPLE_CHECK_WITH_ACTIONED_BY, self.SAMPLE_CHECK_WITH_ACTIONED_BY],
@@ -746,7 +752,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                             ('credit_resolution', 'initial'),
                             ('assigned_to', 5),
                             ('offset', 0),
-                            ('limit', 1)
+                            ('limit', 1),
                         ])
                     ),
                     trailing_slash=False
@@ -824,11 +830,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_sender_credit_list(response_len)),
@@ -847,11 +854,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_prisoner_credit_list(response_len))
@@ -869,6 +877,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -907,11 +916,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_sender_credit_list(response_len)),
@@ -930,11 +940,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_prisoner_credit_list(response_len))
@@ -952,6 +963,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 1, 'prev': None, 'next': None, 'results': [{
                     'debit_card_sender_details': self.SENDER_CHECK['credit']['billing_address'][
                         'debit_card_sender_details'
@@ -1035,11 +1047,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_sender_credit_list(response_len)),
@@ -1058,11 +1071,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_prisoner_credit_list(response_len))
@@ -1080,6 +1094,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 1, 'prev': None, 'next': None, 'results': [{
                     'debit_card_sender_details': self.SENDER_CHECK['credit']['billing_address'][
                         'debit_card_sender_details'
@@ -1165,6 +1180,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -1200,11 +1216,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_sender_credit_list(response_len))
@@ -1228,6 +1245,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_prisoner_credit_list(response_len))
@@ -1245,6 +1263,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -1320,11 +1339,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 2,
                     'results': [
@@ -1365,6 +1385,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 2,
                     'results': [
@@ -1399,6 +1420,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -1480,11 +1502,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_sender_credit_list(response_len)),
@@ -1503,11 +1526,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 1,
                     'results': [
@@ -1533,6 +1557,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -1584,11 +1609,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 1,
                     'results': [
@@ -1609,11 +1635,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_prisoner_credit_list(response_len)),
@@ -1631,6 +1658,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -1674,11 +1702,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_sender_credit_list(response_len)),
@@ -1697,11 +1726,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 1,
                     'results': [
@@ -1727,6 +1757,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -1778,11 +1809,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 1,
                     'results': [
@@ -1803,11 +1835,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_sender_credit_list(response_len)),
@@ -1825,6 +1858,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -1837,11 +1871,13 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
 
             self.assertContains(response, rejection_reason_value)
 
-    def test_accept_check(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_accept_check(self, mock_get_need_attention_date):
         """
         Test that if one tries to accept pending check, check marked as accepted
-
         """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
+
         check_id = 1
         payload_values = {
             'decision_reason': '',
@@ -1861,7 +1897,10 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                 ],
                 status=204,
             )
-            self.mock_need_attention_count(rsps, 0)
+            # for checks list after redirect:
+            self.mock_first_page_of_checks(rsps, 0)
+            self.mock_my_list_count(rsps)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
@@ -1875,13 +1914,16 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
             self.assertRedirects(response, reverse('security:check_list'))
             self.assertContains(response, 'Credit accepted')
 
-    def test_accept_check_without_reactivating_auto_accept(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_accept_check_without_reactivating_auto_accept(self, mock_get_need_attention_date):
         """
         Test that if one tries to accept pending check, check marked as accepted, without reactivating auto_accept
 
         We implicitly assert that no API call is made to the security/check/auto-accept endpoint even if
         check.auto_accept_rule populated
         """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
+
         check_id = 1
         auto_accept_rule_id = 35
         payload_values = {
@@ -1906,7 +1948,10 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                 ],
                 status=204,
             )
-            self.mock_need_attention_count(rsps, 0)
+            # for checks list after redirect:
+            self.mock_first_page_of_checks(rsps, 0)
+            self.mock_my_list_count(rsps)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
@@ -1920,13 +1965,16 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
             self.assertRedirects(response, reverse('security:check_list'))
             self.assertContains(response, 'Credit accepted')
 
-    def test_accept_check_with_auto_accept(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_accept_check_with_auto_accept(self, mock_get_need_attention_date):
         """
         Test that if one tries to accept pending check, check marked as accepted, and auto accept added in active state
 
         We assert that API call is made to POST security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
         populated
         """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
+
         check_id = 1
         payload_values = {
             'decision_reason': '',
@@ -1961,7 +2009,10 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                 ],
                 status=201
             )
-            self.mock_need_attention_count(rsps, 0)
+            # for checks list after redirect:
+            self.mock_first_page_of_checks(rsps, 0)
+            self.mock_my_list_count(rsps)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
@@ -1976,13 +2027,16 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
             self.assertRedirects(response, reverse('security:check_list'))
             self.assertContains(response, 'Credit accepted')
 
-    def test_accept_check_with_auto_accept_integrity_error(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_accept_check_with_auto_accept_integrity_error(self, mock_get_need_attention_date):
         """
         Test that if one tries to accept pending check, check marked as accepted, info message displayed
 
         We assert that API call is made to POST security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
         populated
         """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
+
         check_id = 1
         payload_values = {
             'decision_reason': '',
@@ -2023,7 +2077,10 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                     ]
                 }
             )
-            self.mock_need_attention_count(rsps, 0)
+            # for checks list after redirect:
+            self.mock_first_page_of_checks(rsps, 0)
+            self.mock_my_list_count(rsps)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
@@ -2048,14 +2105,16 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                 )
             )
 
-    def test_accept_check_when_reactivating_auto_accept(self):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_accept_check_when_reactivating_auto_accept(self, mock_get_need_attention_date):
         """
         Test that if one tries to accept pending check, check marked as accepted, and auto accept reactivated
 
         We assert that API call is made to PATCH security/check/auto-accept endpoint if cleaned_data.auto_accept_reason
         and check.auto_accept_rule populated
-
         """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
+
         check_id = 1
         auto_accept_rule_id = 35
         payload_values = {
@@ -2094,7 +2153,10 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                 ],
                 status=200,
             )
-            self.mock_need_attention_count(rsps, 0)
+            # for checks list after redirect:
+            self.mock_first_page_of_checks(rsps, 0)
+            self.mock_my_list_count(rsps)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
@@ -2112,11 +2174,14 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
     @parameterized.expand(
         generate_rejection_category_test_cases_text() + generate_rejection_category_test_cases_bool()
     )
-    def test_reject_check(self, rejection_field_key, rejection_field_value):
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_reject_check(self, rejection_field_key, rejection_field_value, mock_get_need_attention_date):
         """
         Test that if a pending check is rejected, the view redirects to the list of checks
         and a successful message is displayed.
         """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
+
         check_id = 1
         payload_values = {
             'decision_reason': 'iamfurtherdetails',
@@ -2137,7 +2202,10 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                 ],
                 status=204,
             )
-            self.mock_need_attention_count(rsps, 0)
+            # for checks list after redirect:
+            self.mock_first_page_of_checks(rsps, 0)
+            self.mock_my_list_count(rsps)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
 
             url = reverse('security:resolve_check', kwargs={'check_id': check_id})
             response = self.client.post(
@@ -2179,11 +2247,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_sender_credit_list(response_len))
@@ -2202,11 +2271,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_prisoner_credit_list(response_len)),
@@ -2224,6 +2294,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -2265,11 +2336,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_sender_credit_list(response_len)),
@@ -2288,11 +2360,12 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': response_len,
                     'results': list(self._get_prisoner_credit_list(response_len))
@@ -2310,6 +2383,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -2432,11 +2506,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2454,11 +2529,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2480,6 +2556,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -2567,11 +2644,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2589,11 +2667,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2615,6 +2694,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -2660,11 +2740,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2682,11 +2763,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2708,6 +2790,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -2747,11 +2830,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2769,11 +2853,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2795,6 +2880,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -2815,6 +2901,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
         check list view
         """
         mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 2, 9))
+
         check_id = 1
         with responses.RequestsMock() as rsps:
             self.login(rsps)
@@ -2826,7 +2913,10 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                     'That check is already assigned to Someone Else'
                 ]
             )
-            self.mock_need_attention_count(rsps, 1)
+            # for checks list after redirect:
+            self.mock_first_page_of_checks(rsps, 1)
+            self.mock_my_list_count(rsps, 1)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
 
             url = reverse('security:assign_check_then_list', kwargs={'check_id': check_id, 'page': 1})
 
@@ -2876,11 +2966,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2898,11 +2989,12 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                             ('security_check__isnull', False),
                             ('only_completed', False),
                             ('security_check__actioned_by__isnull', False),
-                            ('include_checks', True)
+                            ('include_checks', True),
                         ])
                     ),
                     trailing_slash=False
                 ),
+                match_querystring=True,
                 json={
                     'count': 0,
                 }
@@ -2919,6 +3011,7 @@ class CheckAssignViewTestCase(BaseCheckViewTestCase):
                         )
                     ))
                 ),
+                match_querystring=True,
                 json={'count': 0, 'prev': None, 'next': None, 'results': []}
             )
 
@@ -2966,7 +3059,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
-            self.mock_need_attention_count(rsps, 0)
+            self.mock_my_list_count(rsps)
             rsps.add(
                 rsps.GET,
                 api_url('/security/checks/auto-accept/'),
@@ -3014,7 +3107,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
 
         with responses.RequestsMock() as rsps:
             self.login(rsps)
-            self.mock_need_attention_count(rsps, 0)
+            self.mock_my_list_count(rsps)
             rsps.add(
                 rsps.GET,
                 '{}/security/checks/auto-accept/?{}'.format(
@@ -3023,7 +3116,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                         ('ordering', '-states__added_by__first_name'),
                         ('is_active', True),
                         ('offset', 0),
-                        ('limit', page_size)
+                        ('limit', page_size),
                     ])
                 ),
                 match_querystring=True,
@@ -3037,7 +3130,7 @@ class AutoAcceptListViewTestCase(BaseCheckViewTestCase):
                         ('ordering', '-states__added_by__first_name'),
                         ('is_active', True),
                         ('offset', 0),
-                        ('limit', page_size)
+                        ('limit', page_size),
                     ))
                 ),
                 follow=True
@@ -3144,7 +3237,7 @@ class AutoAcceptDetailViewTestCase(BaseCheckViewTestCase):
         deactivation_reason = 'Oops, butterfingers!'
         with responses.RequestsMock() as rsps:
             self.login(rsps)
-            self.mock_need_attention_count(rsps, 0)
+            self.mock_my_list_count(rsps)
             rsps.add(
                 rsps.GET,
                 '{}/security/checks/auto-accept/?{}'.format(
@@ -3153,7 +3246,7 @@ class AutoAcceptDetailViewTestCase(BaseCheckViewTestCase):
                         ('ordering', '-states__created'),
                         ('is_active', True),
                         ('offset', 0),
-                        ('limit', page_size)
+                        ('limit', page_size),
                     ])
                 ),
                 match_querystring=True,

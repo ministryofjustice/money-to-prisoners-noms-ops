@@ -49,6 +49,10 @@ class CheckListForm(SecurityForm):
         """
         Gets objects, converts datetimes found in them and looks up counts of urgent and assigned checks.
         """
+        object_list = convert_date_fields(super().get_object_list(), include_nested=True)
+        for check in object_list:
+            check['needs_attention'] = check['credit']['started_at'] < self.need_attention_date
+
         self.need_attention_count = self.session.get(self.get_object_list_endpoint_path(), params=dict(
             self.get_api_request_params(),
             started_at__lt=self.need_attention_date.strftime('%Y-%m-%d %H:%M:%S'),
@@ -61,10 +65,6 @@ class CheckListForm(SecurityForm):
             offset=0,
             limit=1,
         )).json()['count']
-
-        object_list = convert_date_fields(super().get_object_list(), include_nested=True)
-        for check in object_list:
-            check['needs_attention'] = check['credit']['started_at'] < self.need_attention_date
 
         return object_list
 

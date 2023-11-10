@@ -84,6 +84,7 @@ def temp_spreadsheet(data):
     CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}},
 )
 class SecurityBaseTestCase(SimpleTestCase):
+    mock_user_pk = 5
 
     def setUp(self):
         super().setUp()
@@ -101,7 +102,7 @@ class SecurityBaseTestCase(SimpleTestCase):
 
     def _login(self, rsps, follow=True, user_data=None):
         returned_user_data = user_data or self.get_user_data()
-        returned_user_data['pk'] = 5
+        returned_user_data['pk'] = self.mock_user_pk
         rsps.add(
             rsps.POST,
             get_request_token_url(),
