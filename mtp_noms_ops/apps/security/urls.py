@@ -401,4 +401,9 @@ urlpatterns = [
         fiu_security_test(views.MonitoredPartialEmailAddressListView.as_view()),
         name='monitored_email_addresses',
     ),
+    url(
+        r'^checks/monitored-email-addresses/remove/$',
+        fiu_security_test(views.MonitoredPartialEmailAddressDeleteView.as_view()),
+        name='delete_monitored_email_address',
+    ),
 ]

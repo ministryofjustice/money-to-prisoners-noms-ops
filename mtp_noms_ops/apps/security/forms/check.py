@@ -471,10 +471,10 @@ class AcceptOrRejectCheckForm(forms.Form):
                     except RequestException as e:
                         error_response = self._get_request_exception_payload(e)
                         if any(
-                                [
-                                    error_string == CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
-                                    for error_string in error_response.get('non_field_errors', [])
-                                ]
+                            [
+                                error_string == CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
+                                for error_string in error_response.get('non_field_errors', [])
+                            ]
                         ):
                             # TODO we happy that this check won't be linked to the existing auto-accept rule in the UI?
                             return (
@@ -493,7 +493,7 @@ class AcceptOrRejectCheckForm(forms.Form):
 
 
 class AutoAcceptDetailForm(forms.Form):
-    deactivation_reason = forms.CharField(label='Give reason why auto accept is to stop')
+    deactivation_reason = forms.CharField(label=_('Give reason why auto accept is to stop'))
 
     def __init__(self, object_id, request, **kwargs):
         super().__init__(**kwargs)

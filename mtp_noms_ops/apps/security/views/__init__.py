@@ -25,6 +25,7 @@ from .check import (  # noqa: F401
 )
 from .monitored_partial_email_address import (  # noqa: F401
     MonitoredPartialEmailAddressListView,
+    MonitoredPartialEmailAddressDeleteView,
 )
 from .views import (  # noqa: F401
     FAQView,

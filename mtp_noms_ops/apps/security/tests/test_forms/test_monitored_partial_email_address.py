@@ -5,10 +5,13 @@ from urllib.parse import parse_qs
 from django.test import SimpleTestCase
 from django.utils.timezone import make_aware
 from mtp_common.auth.test_utils import generate_tokens
+from mtp_common.test_utils import silence_logger
 import responses
 
-from security.forms.monitored_partial_email_address import MonitoredPartialEmailAddressListForm
-from security.tests import mock_empty_response
+from security.forms.monitored_partial_email_address import (
+    MonitoredPartialEmailAddressListForm, MonitoredPartialEmailAddressDeleteForm,
+)
+from security.tests import api_url, mock_empty_response
 
 
 class MonitoredPartialEmailAddressListFormTestCase(SimpleTestCase):
@@ -56,3 +59,40 @@ class MonitoredPartialEmailAddressListFormTestCase(SimpleTestCase):
                 'credit_resolution': ['initial'],
             },
         )
+
+
+class MonitoredPartialEmailAddressDeleteFormTestCase(SimpleTestCase):
+    def setUp(self):
+        super().setUp()
+        self.request = mock.MagicMock(
+            user=mock.MagicMock(
+                token=generate_tokens(),
+            ),
+        )
+
+    def test_delete_keyword(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.DELETE,
+                api_url('/security/monitored-email-addresses/cat%20and%2For%20dog/'),
+                status=204,
+                body=b'',
+            )
+
+            form = MonitoredPartialEmailAddressDeleteForm(self.request, data={'keyword': 'cat and/or dog'})
+            self.assertTrue(form.is_valid())
+            self.assertTrue(form.delete_keyword())
+
+    def test_error_response(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.DELETE,
+                api_url('/security/monitored-email-addresses/cat%20and%2For%20dog/'),
+                status=404,
+                body=b'',
+            )
+
+            form = MonitoredPartialEmailAddressDeleteForm(self.request, data={'keyword': 'cat and/or dog'})
+            self.assertTrue(form.is_valid())
+            with silence_logger():
+                self.assertFalse(form.delete_keyword())
