@@ -396,4 +396,9 @@ urlpatterns = [
         fiu_security_test(views.CheckHistoryListView.as_view()),
         name='check_history',
     ),
+    url(
+        r'^checks/monitored-email-addresses/$',
+        fiu_security_test(views.MonitoredPartialEmailAddressListView.as_view()),
+        name='monitored_email_addresses',
+    ),
 ]

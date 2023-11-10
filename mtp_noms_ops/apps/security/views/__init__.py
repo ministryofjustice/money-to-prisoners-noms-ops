@@ -23,6 +23,9 @@ from .check import (  # noqa: F401
     CheckAssignView,
     MyCheckListView,
 )
+from .monitored_partial_email_address import (  # noqa: F401
+    MonitoredPartialEmailAddressListView,
+)
 from .views import (  # noqa: F401
     FAQView,
     PolicyChangeView,

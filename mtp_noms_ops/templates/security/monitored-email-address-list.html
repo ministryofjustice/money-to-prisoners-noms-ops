@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+{% load security %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block before_content %}
+  {{ block.super }}
+  {% include 'security/includes/checks-sub-navigation.html' with current_view=view.get_class_name %}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <header>
+        <h1 class="govuk-heading-xl">{{ view.title }}</h1>
+      </header>
+
+      {% notification_banners request %}
+
+      <p>
+        {% trans 'Keywords can be full or partial email addresses with minimum 3 characters.' %}
+      </p>
+
+      {% if objects %}
+
+        <div class="mtp-table__container mtp-results-list mtp-monitored-partial-email-address-list">
+          <table class="mtp-table mtp-table--small">
+            <caption class="govuk-table__caption govuk-table__caption--m">
+              {% trans 'Keywords to monitor' %}
+            </caption>
+            <thead>
+              <tr class="govuk-visually-hidden">
+                <th scope="col">{% trans 'Keyword' %}</th>
+                <th class="govuk-!-display-none-print" scope="col">{% trans 'Actions' %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for keyword in objects %}
+                <tr>
+                  <td class="mtp-table__cell--compact">
+                    <strong>{{ keyword }}</strong>
+                  </td>
+                  <td class="mtp-table__cell--compact govuk-!-text-align-right">
+                    <a href="#">Remove</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mtp-page-list__container">
+          {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+
+          <p class="mtp-page-list__count">
+            {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+              {{ number }} keyword
+            {% plural %}
+              {{ number }} keywords
+            {% endblocktrans %}
+          </p>
+        </div>
+
+      {% else %}
+
+        <p>
+          {% trans 'You have not yet added any keywords.' %}
+        </p>
+
+      {% endif %}
+
+    </div>
+  </div>
+{% endblock %}
