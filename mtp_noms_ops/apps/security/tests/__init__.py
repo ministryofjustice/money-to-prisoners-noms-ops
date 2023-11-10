@@ -30,3 +30,14 @@ TEST_IMAGE_DATA = (
 
 def api_url(path):
     return urljoin(settings.API_URL, path)
+
+
+def mock_empty_response(rsps, path):
+    rsps.add(
+        rsps.GET,
+        api_url(path),
+        json={
+            'count': 0,
+            'results': [],
+        }
+    )

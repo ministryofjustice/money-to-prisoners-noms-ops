@@ -18,7 +18,7 @@ from prisoner_location_admin.tests import (
     random_dob, random_prisoner_name, random_prisoner_num,
 )
 from security.tests import api_url
-from security.tests.test_forms import mock_prison_response
+from security.tests.test_forms.test_search_forms import mock_prison_response
 
 
 @override_settings(
