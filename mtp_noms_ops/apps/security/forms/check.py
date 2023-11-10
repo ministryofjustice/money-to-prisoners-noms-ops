@@ -49,6 +49,10 @@ class CheckListForm(SecurityForm):
         """
         Gets objects, converts datetimes found in them and looks up counts of urgent and assigned checks.
         """
+        object_list = convert_date_fields(super().get_object_list(), include_nested=True)
+        for check in object_list:
+            check['needs_attention'] = check['credit']['started_at'] < self.need_attention_date
+
         self.need_attention_count = self.session.get(self.get_object_list_endpoint_path(), params=dict(
             self.get_api_request_params(),
             started_at__lt=self.need_attention_date.strftime('%Y-%m-%d %H:%M:%S'),
@@ -62,15 +66,10 @@ class CheckListForm(SecurityForm):
             limit=1,
         )).json()['count']
 
-        object_list = convert_date_fields(super().get_object_list(), include_nested=True)
-        for check in object_list:
-            check['needs_attention'] = check['credit']['started_at'] < self.need_attention_date
-
         return object_list
 
 
 class UserCheckListForm(CheckListForm):
-
     def get_api_request_params(self):
         return dict(
             super().get_api_request_params(),
@@ -78,7 +77,29 @@ class UserCheckListForm(CheckListForm):
         )
 
 
-class CheckHistoryForm(SecurityForm):
+class SecurityFormWithMyListCount(SecurityForm):
+    def __init__(self, request, **kwargs):
+        super().__init__(request, **kwargs)
+        self.my_list_count = 0
+
+    def get_object_list(self):
+        object_list = super().get_object_list()
+
+        self.my_list_count = self.session.get(self.get_check_list_endpoint_path(), params={
+            'status': 'pending',
+            'credit_resolution': 'initial',
+            'assigned_to': self.request.user.pk,
+            'offset': 0,
+            'limit': 1,
+        }).json()['count']
+
+        return object_list
+
+    def get_check_list_endpoint_path(self):
+        return '/security/checks/'
+
+
+class CheckHistoryForm(SecurityFormWithMyListCount):
     """
     List of security checks.
     """
@@ -93,10 +114,6 @@ class CheckHistoryForm(SecurityForm):
             ('-created', _('Date started (newest to oldest)')),
         ],
     )
-
-    def __init__(self, request, **kwargs):
-        super().__init__(request, **kwargs)
-        self.my_list_count = 0
 
     def get_api_request_params(self):
         """
@@ -114,18 +131,10 @@ class CheckHistoryForm(SecurityForm):
         """
         Gets objects, converts datetimes found in them.
         """
-        object_list = convert_date_fields(super().get_object_list(), include_nested=True)
-        self.my_list_count = self.session.get(self.get_object_list_endpoint_path(), params={
-            'status': 'pending',
-            'credit_resolution': 'initial',
-            'assigned_to': self.request.user.pk,
-            'offset': 0,
-            'limit': 1
-        }).json()['count']
-        return object_list
+        return convert_date_fields(super().get_object_list(), include_nested=True)
 
 
-class AutoAcceptListForm(SecurityForm):
+class AutoAcceptListForm(SecurityFormWithMyListCount):
     """
     List of AutoAccepts checks.
     """
@@ -141,10 +150,6 @@ class AutoAcceptListForm(SecurityForm):
         ],
     )
 
-    def __init__(self, request, **kwargs):
-        super().__init__(request, **kwargs)
-        self.my_list_count = 0
-
     def get_api_request_params(self):
         """
         Gets all checks where last associated state created has active = True
@@ -156,21 +161,11 @@ class AutoAcceptListForm(SecurityForm):
     def get_object_list_endpoint_path(self):
         return '/security/checks/auto-accept/'
 
-    def get_check_list_endpoint_path(self):
-        return '/security/checks/'
-
     def get_object_list(self):
         """
         Gets objects, converts datetimes found in them.
         """
         object_list = convert_date_fields(super().get_object_list(), include_nested=True)
-        self.my_list_count = self.session.get(self.get_check_list_endpoint_path(), params={
-            'status': 'pending',
-            'credit_resolution': 'initial',
-            'assigned_to': self.request.user.pk,
-            'offset': 0,
-            'limit': 1
-        }).json()['count']
         self.initial_index = ((self.cleaned_data.get('page', 1) - 1) * self.page_size) + 1
         self.final_index = min(
             self.cleaned_data.get('page', 1) * self.page_size,

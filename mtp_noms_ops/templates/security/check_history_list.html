@@ -27,6 +27,9 @@
 
   <div class="mtp-table__container mtp-results-list">
     <table class="mtp-table mtp-table--small">
+      <caption class=govuk-visually-hidden>
+        {% trans 'This is a table showing all previous credit decisions' %}
+      </caption>
       <thead>
         <tr>
           {% sortable_cell _('Date sent') form.cleaned_data 'created' %}

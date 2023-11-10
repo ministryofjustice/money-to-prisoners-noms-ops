@@ -18,7 +18,7 @@ from security import (
 )
 from security.constants import SECURITY_FORMS_DEFAULT_PAGE_SIZE
 from security.models import EmailNotifications
-from security.tests import api_url
+from security.tests import api_url, mock_empty_response
 from security.tests.test_views import SecurityBaseTestCase, SAMPLE_PRISONS, mock_prison_response, no_saved_searches
 
 
@@ -621,16 +621,8 @@ class NotificationsTestCase(SecurityBaseTestCase):
                 json={'count': 0, 'newest': None, 'oldest': None},
                 match_querystring=True
             )
-            rsps.add(
-                rsps.GET,
-                api_url('/monitored/'),
-                json={'count': 0},
-            )
-            rsps.add(
-                rsps.GET,
-                api_url('/events/'),
-                json={'count': 0, 'results': []},
-            )
+            mock_empty_response(rsps, '/monitored/')
+            mock_empty_response(rsps, '/events/')
             response = self.client.get(reverse('security:notification_list'))
         self.assertEqual(response.status_code, 200)
         response_content = response.content.decode(response.charset)
@@ -654,11 +646,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
                 api_url('/monitored/'),
                 json={'count': 3},
             )
-            rsps.add(
-                rsps.GET,
-                api_url('/events/'),
-                json={'count': 0, 'results': []},
-            )
+            mock_empty_response(rsps, '/events/')
             response = self.client.get(reverse('security:notification_list'))
         self.assertEqual(response.status_code, 200)
         response_content = response.content.decode(response.charset)
@@ -677,11 +665,7 @@ class NotificationsTestCase(SecurityBaseTestCase):
                 json={'count': 1, 'newest': '2019-07-15', 'oldest': '2019-07-15'},
                 match_querystring=True
             )
-            rsps.add(
-                rsps.GET,
-                api_url('/monitored/'),
-                json={'count': 0},
-            )
+            mock_empty_response(rsps, '/monitored/')
             rsps.add(
                 rsps.GET,
                 api_url('/events/'),

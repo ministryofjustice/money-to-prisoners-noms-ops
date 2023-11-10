@@ -62,7 +62,7 @@ def setup_mock_get_authenticated_api_session(mock_api_client):
 
 
 def respond_to_upload_checks(rsps):
-    from security.tests.test_forms import mock_prison_response
+    from security.tests.test_forms.test_search_forms import mock_prison_response
 
     # indicates uploads are allowed
     rsps.add(
