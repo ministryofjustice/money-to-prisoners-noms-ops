@@ -1,20 +1,21 @@
-import datetime
 from unittest import mock
 from urllib.parse import parse_qs
 
 from django.test import SimpleTestCase
-from django.utils.timezone import make_aware
 from mtp_common.auth.test_utils import generate_tokens
 from mtp_common.test_utils import silence_logger
 import responses
+from responses.matchers import json_params_matcher
 
 from security.forms.monitored_partial_email_address import (
-    MonitoredPartialEmailAddressListForm, MonitoredPartialEmailAddressDeleteForm,
+    MonitoredPartialEmailAddressListForm,
+    MonitoredPartialEmailAddressAddForm,
+    MonitoredPartialEmailAddressDeleteForm,
 )
 from security.tests import api_url, mock_empty_response
 
 
-class MonitoredPartialEmailAddressListFormTestCase(SimpleTestCase):
+class MonitoredPartialEmailAddressBaseTestCase(SimpleTestCase):
     def setUp(self):
         super().setUp()
         self.request = mock.MagicMock(
@@ -23,10 +24,9 @@ class MonitoredPartialEmailAddressListFormTestCase(SimpleTestCase):
             ),
         )
 
-    @mock.patch('security.forms.check.get_need_attention_date')
-    def test_get_object_list(self, mock_get_need_attention_date):
-        mock_get_need_attention_date.return_value = make_aware(datetime.datetime(2019, 7, 9, 9))
 
+class MonitoredPartialEmailAddressListFormTestCase(MonitoredPartialEmailAddressBaseTestCase):
+    def test_get_object_list(self):
         with responses.RequestsMock() as rsps:
             mock_empty_response(rsps, '/security/checks/')
             mock_empty_response(rsps, '/security/monitored-email-addresses/')
@@ -61,15 +61,42 @@ class MonitoredPartialEmailAddressListFormTestCase(SimpleTestCase):
         )
 
 
-class MonitoredPartialEmailAddressDeleteFormTestCase(SimpleTestCase):
-    def setUp(self):
-        super().setUp()
-        self.request = mock.MagicMock(
-            user=mock.MagicMock(
-                token=generate_tokens(),
-            ),
-        )
+class MonitoredPartialEmailAddressAddFormTestCase(MonitoredPartialEmailAddressBaseTestCase):
+    def test_add_keyword(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.POST,
+                api_url('/security/monitored-email-addresses/'),
+                match=[json_params_matcher(params='Mouse')],
+                status=201,
+                body=b'mouse',
+            )
 
+            form = MonitoredPartialEmailAddressAddForm(self.request, data={'keyword': 'Mouse '})
+            self.assertTrue(form.is_valid())
+            self.assertTrue(form.add_keyword())
+
+    def test_invalid_form(self):
+        with responses.RequestsMock():
+            form = MonitoredPartialEmailAddressAddForm(self.request, data={'keyword': 'M'})
+            self.assertFalse(form.is_valid())
+
+    def test_error_response(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                rsps.POST,
+                api_url('/security/monitored-email-addresses/'),
+                status=400,
+                json={'keyword': ['Keyword already exists.']},
+            )
+
+            form = MonitoredPartialEmailAddressAddForm(self.request, data={'keyword': 'mouse'})
+            self.assertTrue(form.is_valid())
+            with silence_logger():
+                self.assertFalse(form.add_keyword())
+
+
+class MonitoredPartialEmailAddressDeleteFormTestCase(MonitoredPartialEmailAddressBaseTestCase):
     def test_delete_keyword(self):
         with responses.RequestsMock() as rsps:
             rsps.add(
