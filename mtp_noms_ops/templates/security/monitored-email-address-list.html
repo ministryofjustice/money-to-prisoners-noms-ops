@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% load mtp_common %}
-{% load security %}
 
 {% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
 
@@ -79,6 +78,12 @@
         </p>
 
       {% endif %}
+
+      <p>
+        <a class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button" href="{% url 'security:add_monitored_email_address' %}">
+          {% trans 'Add keyword' %}
+        </a>
+      </p>
 
     </div>
   </div>

@@ -402,6 +402,11 @@ urlpatterns = [
         name='monitored_email_addresses',
     ),
     url(
+        r'^checks/monitored-email-addresses/add/$',
+        fiu_security_test(views.MonitoredPartialEmailAddressAddView.as_view()),
+        name='add_monitored_email_address',
+    ),
+    url(
         r'^checks/monitored-email-addresses/remove/$',
         fiu_security_test(views.MonitoredPartialEmailAddressDeleteView.as_view()),
         name='delete_monitored_email_address',
