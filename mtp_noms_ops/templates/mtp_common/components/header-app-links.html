@@ -26,7 +26,7 @@
         </li>
         {% if request.can_manage_security_checks %}
           <li>
-            {% include 'mtp_common/components/header-app-link.html' with view_name='security:check_list' subview_names='security:my_check_list security:check_history security:resolve_check security:auto_accept_rule_list security:auto_accept_rule_detail' link_text=_('Credits to action') %}
+            {% include 'mtp_common/components/header-app-link.html' with view_name='security:check_list' subview_names='security:my_check_list security:check_history security:resolve_check security:auto_accept_rule_list security:auto_accept_rule_detail security:monitored_email_addresses' link_text=_('Credits to action') %}
           </li>
         {% endif %}
       {% elif request.can_access_prisoner_location %}

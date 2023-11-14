@@ -39,5 +39,14 @@
       </a>
     </li>
 
+    <li class="mtp-sub-navigation__list-item {% if current_view == 'MonitoredPartialEmailAddressListView' %}mtp-sub-navigation__list-item--current{% endif %}">
+      <a href="{% url 'security:monitored_email_addresses' %}" class="mtp-sub-navigation__link">
+        {% trans 'Monitored email addresses' %}
+        {% if current_view == 'MonitoredPartialEmailAddressListView' %}
+          <span class="govuk-visually-hidden">{% trans '(current page)' %}</span>
+        {% endif %}
+      </a>
+    </li>
+
   </ul>
 </nav>

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load mtp_common %}
+
+{% block page_title %}{{ view.title }} – {{ block.super }}{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
+
+      <header>
+        <h1 class="govuk-heading-xl">{{ view.title }}</h1>
+      </header>
+
+      {% notification_banners request %}
+
+      <form action="{% url 'security:add_monitored_email_address' %}" method="post" novalidate>
+        {% include 'mtp_common/forms/field.html' with field=form.keyword input_classes='govuk-input--width-10' %}
+
+        {% csrf_token %}
+
+        <div class="govuk-button-group">
+          <button type="submit" class="govuk-button" data-module="govuk-button" data-prevent-double-click="true">
+            {% trans 'Save' %}
+          </button>
+          <a href="{% url 'security:monitored_email_addresses' %}" class="govuk-link">
+            {% trans 'Cancel' %}
+          </a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+{% endblock %}
