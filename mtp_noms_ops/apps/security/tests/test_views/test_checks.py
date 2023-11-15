@@ -58,9 +58,9 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
 
     credit_created_date = timezone.localtime()
 
-    SAMPLE_CHECK_BASE = {
+    SAMPLE_CHECK_BASE: dict = {
         'id': 1,
-        'description': 'lorem ipsum',
+        'description': ['lorem ipsum'],
         'rules': ['RULE1', 'RULE2'],
         'status': 'pending',
         'actioned_at': None,
@@ -69,7 +69,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'auto_accept_rule_state': None,
     }
 
-    SAMPLE_CREDIT_BASE = {
+    SAMPLE_CREDIT_BASE: dict = {
         'id': 1,
         'amount': 1000,
         'card_expiry_date': '02/20',
@@ -89,9 +89,9 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         },
     }
 
-    SAMPLE_CHECK = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
+    SAMPLE_CHECK: dict = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
 
-    SENDER_CREDIT = dict(
+    SENDER_CREDIT: dict = dict(
         SAMPLE_CREDIT_BASE,
         security_check=SAMPLE_CHECK_BASE.copy(),
         intended_recipient='Mr G Melley',
@@ -109,15 +109,15 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
     SENDER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
     SENDER_CREDIT['security_check']['status'] = 'rejected'
 
-    SENDER_CHECK = copy.deepcopy(SAMPLE_CHECK)
+    SENDER_CHECK: dict = copy.deepcopy(SAMPLE_CHECK)
     SENDER_CHECK['credit']['sender_profile'] = sender_id
     SENDER_CHECK['credit']['prisoner_profile'] = prisoner_id
     SENDER_CHECK['credit']['id'] = credit_id
     SENDER_CHECK['credit']['billing_address'] = {'debit_card_sender_details': 42}
 
-    SENDER_CHECK_REJECTED = dict(SENDER_CHECK, status='rejected')
+    SENDER_CHECK_REJECTED: dict = dict(SENDER_CHECK, status='rejected')
 
-    PRISONER_CREDIT = dict(
+    PRISONER_CREDIT: dict = dict(
         SAMPLE_CREDIT_BASE,
         security_check=SAMPLE_CHECK_BASE.copy(),
         amount=10,
@@ -438,7 +438,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
     """
     Tests related to CheckHistoryListView.
     """
-    SAMPLE_CHECK_WITH_ACTIONED_BY = dict(
+    SAMPLE_CHECK_WITH_ACTIONED_BY: dict = dict(
         BaseCheckViewTestCase.SAMPLE_CHECK,
         actioned_at='2020-01-13 12:00:00+00',
         actioned_by=1,
