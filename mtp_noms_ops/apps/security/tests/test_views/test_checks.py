@@ -522,14 +522,15 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
             )
 
             response = self.client.get(reverse('security:check_history'))
-            self.assertContains(response, '123456******9876')
-            self.assertContains(response, '02/20')
 
-            content = response.content.decode()
+        self.assertContains(response, '123456******9876')
+        self.assertContains(response, '02/20')
 
-            self.assertIn('24601', content)
-            self.assertIn('1 credit', content)
-            self.assertIn('My list (2)', content)
+        content = response.content.decode()
+
+        self.assertIn('24601', content)
+        self.assertIn('1 credit', content)
+        self.assertIn('My list (2)', content)
 
     def test_view_contains_relevant_data(self):
         """
@@ -546,15 +547,16 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                 },
             )
             response = self.client.get(reverse('security:check_history'))
-            self.assertContains(response, '123456******9876')
-            self.assertContains(response, '02/20')
-            self.assertContains(response, 'Barry Garlow')
-            self.assertContains(response, 'Money issues')
-            self.assertContains(response, 'S1 3HS')
-            self.assertContains(response, '24601')
-            self.assertContains(response, 'Accepted')
-            self.assertContains(response, 'Brixton Prison')
-            self.assertContains(response, 'Decision details:')
+
+        self.assertContains(response, '123456******9876')
+        self.assertContains(response, '02/20')
+        self.assertContains(response, 'Barry Garlow')
+        self.assertContains(response, 'Money issues')
+        self.assertContains(response, 'S1 3HS')
+        self.assertContains(response, '24601')
+        self.assertContains(response, 'Accepted')
+        self.assertContains(response, 'Brixton Prison')
+        self.assertContains(response, 'Decision details:')
 
     def test_view_does_not_display_decision_if_none(self):
         """
@@ -574,7 +576,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
             )
             response = self.client.get(reverse('security:check_history'))
 
-            self.assertContains(response, 'No decision reason entered')
+        self.assertContains(response, 'No decision reason entered')
 
     @parameterized.expand(
         CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
@@ -637,7 +639,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
 
             response = self.client.get(reverse('security:check_history'))
 
-            self.assertContains(response, rejection_reason_full)
+        self.assertContains(response, rejection_reason_full)
 
     @parameterized.expand(
         generate_rejection_category_test_cases_text()
@@ -700,7 +702,46 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
 
             response = self.client.get(reverse('security:check_history'))
 
-            self.assertContains(response, rejection_reason_value)
+        self.assertContains(response, rejection_reason_value)
+
+    def test_view_shows_removed_rejection_reason_descriptions(self):
+        """
+        Test that rejection reasons which are no longer used are still displayable in history
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('started_at__gte', '2020-01-02T12:00:00'),
+                            ('actioned_by', True),
+                            ('offset', 0),
+                            ('limit', 20),
+                            ('ordering', '-created'),
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                match_querystring=True,
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.SENDER_CHECK_REJECTED,
+                            rejection_reasons={'fiu_investigation_id': 'ABC123000ABC'}
+                        )
+                    ]
+                }
+            )
+            self.mock_my_list_count(rsps, 0)
+
+            response = self.client.get(reverse('security:check_history'))
+
+        self.assertContains(response, 'Associated FIU investigation')
+        self.assertContains(response, 'ABC123000ABC')
 
     def test_view_includes_matching_credit_history_including_active_auto_accept(self):
         """
