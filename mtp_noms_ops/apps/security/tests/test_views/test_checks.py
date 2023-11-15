@@ -12,14 +12,16 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from mtp_common.auth import urljoin
-from mtp_common.security.checks import CHECK_REJECTION_TEXT_CATEGORY_LABELS, CHECK_REJECTION_BOOL_CATEGORY_LABELS
 from mtp_common.test_utils import silence_logger
 from parameterized import parameterized
 import responses
 from responses.matchers import json_params_matcher, query_param_matcher
 
 from security import required_permissions
-from security.constants import SECURITY_FORMS_DEFAULT_PAGE_SIZE, CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
+from security.constants import (
+    SECURITY_FORMS_DEFAULT_PAGE_SIZE, CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR,
+    CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS, CURRENT_CHECK_REJECTION_TEXT_CATEGORY_LABELS,
+)
 from security.tests import api_url
 from security.tests.test_views import SecurityBaseTestCase
 from security.views.check import AcceptOrRejectCheckView
@@ -35,14 +37,14 @@ def offset_isodatetime_by_ten_seconds(isodatetime, offset_multiplier=1):
 def generate_rejection_category_test_cases_text():
     return [
         (text_category, f'User-entered {text_category} text')
-        for text_category in CHECK_REJECTION_TEXT_CATEGORY_LABELS
+        for text_category in CURRENT_CHECK_REJECTION_TEXT_CATEGORY_LABELS
     ]
 
 
 def generate_rejection_category_test_cases_bool():
     return [
         (text_category, True)
-        for text_category in CHECK_REJECTION_BOOL_CATEGORY_LABELS
+        for text_category in CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS
     ]
 
 
@@ -575,7 +577,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, 'No decision reason entered')
 
     @parameterized.expand(
-        CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
+        CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated(
         self, rejection_reason_key, rejection_reason_full
@@ -1472,7 +1474,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
         )
 
     @parameterized.expand(
-        CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
+        CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated_for_prisoner_check(
         self, rejection_reason_key, rejection_reason_full
@@ -1571,7 +1573,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, rejection_reason_full)
 
     @parameterized.expand(
-        CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
+        CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated_for_sender_check(
         self, rejection_reason_key, rejection_reason_full

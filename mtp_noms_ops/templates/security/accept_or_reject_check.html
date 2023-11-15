@@ -248,14 +248,10 @@
           {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_paying_multiple_prisoners small=True only %}
           {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_multiple_cards small=True only %}
           {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_linked_other_prisoners small=True only %}
-          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_known_email small=True only %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_monitored_partial_email small=True only %}
           {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.payment_source_unidentified small=True only %}
           {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.prisoner_multiple_payments_payment_sources small=True only %}
-
-          {% captureoutput as conditional_content %}
-            {% include 'mtp_common/forms/field.html' with field=form.fiu_investigation_id only %}
-          {% endcaptureoutput %}
-          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.has_fiu_investigation_id conditional_content=conditional_content small=True only %}
+          {% include 'security/forms/checkbox-single-field-with-conditional.html' with field=form.fraud small=True only %}
 
           {% captureoutput as conditional_content %}
             {% include 'mtp_common/forms/field.html' with field=form.intelligence_report_id only %}

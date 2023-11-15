@@ -5,14 +5,13 @@ from django.contrib import messages
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from mtp_common.auth.api_client import get_api_session
-from mtp_common.security.checks import (
-    CHECK_REJECTION_TEXT_CATEGORY_LABELS,
-    CHECK_REJECTION_BOOL_CATEGORY_LABELS,
-    CHECK_REJECTION_CATEGORIES,
-)
 from requests.exceptions import RequestException
 
-from security.constants import CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
+from security.constants import (
+    CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR,
+    CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS, CURRENT_CHECK_REJECTION_TEXT_CATEGORY_LABELS,
+    CURRENT_CHECK_REJECTION_CATEGORIES,
+)
 from security.forms.object_base import SecurityForm
 from security.utils import convert_date_fields, get_need_attention_date
 
@@ -198,17 +197,9 @@ class AcceptOrRejectCheckForm(forms.Form):
         required=False,
         label=_('Give further details (optional)'),
     )
-    has_fiu_investigation_id = forms.BooleanField(
-        required=False,
-        label=CHECK_REJECTION_TEXT_CATEGORY_LABELS['fiu_investigation_id'],
-    )
-    fiu_investigation_id = forms.CharField(
-        required=False,
-        label=_('Give FIU reference'),
-    )
     has_intelligence_report_id = forms.BooleanField(
         required=False,
-        label=CHECK_REJECTION_TEXT_CATEGORY_LABELS['intelligence_report_id'],
+        label=CURRENT_CHECK_REJECTION_TEXT_CATEGORY_LABELS['intelligence_report_id'],
     )
     intelligence_report_id = forms.CharField(
         required=False,
@@ -216,7 +207,7 @@ class AcceptOrRejectCheckForm(forms.Form):
     )
     has_other_reason = forms.BooleanField(
         required=False,
-        label=CHECK_REJECTION_TEXT_CATEGORY_LABELS['other_reason'],
+        label=CURRENT_CHECK_REJECTION_TEXT_CATEGORY_LABELS['other_reason'],
     )
     other_reason = forms.CharField(
         required=False,
@@ -224,34 +215,37 @@ class AcceptOrRejectCheckForm(forms.Form):
     )
     payment_source_paying_multiple_prisoners = forms.BooleanField(
         required=False,
-        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_paying_multiple_prisoners'],
+        label=CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_paying_multiple_prisoners'],
     )
     payment_source_multiple_cards = forms.BooleanField(
         required=False,
-        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_multiple_cards'],
+        label=CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_multiple_cards'],
     )
     payment_source_linked_other_prisoners = forms.BooleanField(
         required=False,
-        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_linked_other_prisoners'],
+        label=CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_linked_other_prisoners'],
     )
-    payment_source_known_email = forms.BooleanField(
+    payment_source_monitored_partial_email = forms.BooleanField(
         required=False,
-        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_known_email'],
+        label=CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_monitored_partial_email'],
     )
     payment_source_unidentified = forms.BooleanField(
         required=False,
-        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_unidentified'],
+        label=CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS['payment_source_unidentified'],
     )
     prisoner_multiple_payments_payment_sources = forms.BooleanField(
         required=False,
-        label=CHECK_REJECTION_BOOL_CATEGORY_LABELS['prisoner_multiple_payments_payment_sources'],
+        label=CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS['prisoner_multiple_payments_payment_sources'],
+    )
+    fraud = forms.BooleanField(
+        required=False,
+        label=CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS['fraud'],
     )
 
     # conditional fields that are hidden behind checkboxes are not required by default
     # however if the checkbox is checked they are required
     conditional_fields = {
         'auto_accept': ['auto_accept_reason'],
-        'has_fiu_investigation_id': ['fiu_investigation_id'],
         'has_intelligence_report_id': ['intelligence_report_id'],
         'has_other_reason': ['other_reason'],
     }
@@ -306,7 +300,7 @@ class AcceptOrRejectCheckForm(forms.Form):
     def is_reject_reason_populated(self):
         return any(
             self.cleaned_data.get(rejection_field)
-            for rejection_field in CHECK_REJECTION_CATEGORIES
+            for rejection_field in CURRENT_CHECK_REJECTION_CATEGORIES
         )
 
     def clean(self):
@@ -366,7 +360,7 @@ class AcceptOrRejectCheckForm(forms.Form):
                 self.data_payload['rejection_reasons'] = dict(
                     (rejection_reason_key, rejection_reason_value)
                     for rejection_reason_key, rejection_reason_value in self.cleaned_data.items()
-                    if rejection_reason_value and rejection_reason_key in CHECK_REJECTION_CATEGORIES
+                    if rejection_reason_value and rejection_reason_key in CURRENT_CHECK_REJECTION_CATEGORIES
                 )
         return super().clean()
 
