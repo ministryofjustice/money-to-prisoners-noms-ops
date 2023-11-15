@@ -80,6 +80,8 @@
             {{ check.credit.sender_name }}
             <br/>
             {{ check.credit|format_card_number }} &nbsp; {{ check.credit.card_expiry_date }}
+            <br/>
+            {{ check.credit.sender_email }}
           </td>
           <td>
             {{ check.credit.prisoner_name }}
