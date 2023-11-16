@@ -162,7 +162,7 @@
                 <strong>{% trans 'Reason for automatically accepting' %}:</strong> {{ credit.security_check.auto_accept_rule_state.reason }}
               {% else %}
                 <strong>{% trans 'Decision details' %}:</strong>
-                {{ credit.security_check | format_security_check_rejection_reasons }}
+                {{ credit.security_check|format_security_check_rejection_reasons }}
                 {% if credit.security_check.decision_reason %}
                   {% if credit.security_check.rejection_reasons %}
                     {% trans 'Further details' %}:
@@ -280,7 +280,7 @@
         </p>
         <p>
           <strong>{% trans 'Decision details' %}:</strong>
-          {{ check | format_security_check_rejection_reasons }}
+          {{ check|format_security_check_rejection_reasons }}
           {% if check.decision_reason %}
             {% trans 'Further details' %}: {{ check.decision_reason }}
           {% elif not check.rejection_reasons %}
