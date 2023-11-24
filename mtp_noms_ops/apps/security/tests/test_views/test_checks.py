@@ -12,14 +12,16 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from mtp_common.auth import urljoin
-from mtp_common.security.checks import CHECK_REJECTION_TEXT_CATEGORY_LABELS, CHECK_REJECTION_BOOL_CATEGORY_LABELS
 from mtp_common.test_utils import silence_logger
 from parameterized import parameterized
 import responses
 from responses.matchers import json_params_matcher, query_param_matcher
 
 from security import required_permissions
-from security.constants import SECURITY_FORMS_DEFAULT_PAGE_SIZE, CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR
+from security.constants import (
+    SECURITY_FORMS_DEFAULT_PAGE_SIZE, CHECK_AUTO_ACCEPT_UNIQUE_CONSTRAINT_ERROR,
+    CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS, CURRENT_CHECK_REJECTION_TEXT_CATEGORY_LABELS,
+)
 from security.tests import api_url
 from security.tests.test_views import SecurityBaseTestCase
 from security.views.check import AcceptOrRejectCheckView
@@ -35,14 +37,14 @@ def offset_isodatetime_by_ten_seconds(isodatetime, offset_multiplier=1):
 def generate_rejection_category_test_cases_text():
     return [
         (text_category, f'User-entered {text_category} text')
-        for text_category in CHECK_REJECTION_TEXT_CATEGORY_LABELS
+        for text_category in CURRENT_CHECK_REJECTION_TEXT_CATEGORY_LABELS
     ]
 
 
 def generate_rejection_category_test_cases_bool():
     return [
         (text_category, True)
-        for text_category in CHECK_REJECTION_BOOL_CATEGORY_LABELS
+        for text_category in CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS
     ]
 
 
@@ -56,9 +58,9 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
 
     credit_created_date = timezone.localtime()
 
-    SAMPLE_CHECK_BASE = {
+    SAMPLE_CHECK_BASE: dict = {
         'id': 1,
-        'description': 'lorem ipsum',
+        'description': ['lorem ipsum'],
         'rules': ['RULE1', 'RULE2'],
         'status': 'pending',
         'actioned_at': None,
@@ -67,7 +69,7 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         'auto_accept_rule_state': None,
     }
 
-    SAMPLE_CREDIT_BASE = {
+    SAMPLE_CREDIT_BASE: dict = {
         'id': 1,
         'amount': 1000,
         'card_expiry_date': '02/20',
@@ -87,9 +89,9 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
         },
     }
 
-    SAMPLE_CHECK = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
+    SAMPLE_CHECK: dict = dict(SAMPLE_CHECK_BASE, credit=SAMPLE_CREDIT_BASE)
 
-    SENDER_CREDIT = dict(
+    SENDER_CREDIT: dict = dict(
         SAMPLE_CREDIT_BASE,
         security_check=SAMPLE_CHECK_BASE.copy(),
         intended_recipient='Mr G Melley',
@@ -107,15 +109,15 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
     SENDER_CREDIT['security_check']['actioned_at'] = credit_created_date.isoformat()
     SENDER_CREDIT['security_check']['status'] = 'rejected'
 
-    SENDER_CHECK = copy.deepcopy(SAMPLE_CHECK)
+    SENDER_CHECK: dict = copy.deepcopy(SAMPLE_CHECK)
     SENDER_CHECK['credit']['sender_profile'] = sender_id
     SENDER_CHECK['credit']['prisoner_profile'] = prisoner_id
     SENDER_CHECK['credit']['id'] = credit_id
     SENDER_CHECK['credit']['billing_address'] = {'debit_card_sender_details': 42}
 
-    SENDER_CHECK_REJECTED = dict(SENDER_CHECK, status='rejected')
+    SENDER_CHECK_REJECTED: dict = dict(SENDER_CHECK, status='rejected')
 
-    PRISONER_CREDIT = dict(
+    PRISONER_CREDIT: dict = dict(
         SAMPLE_CREDIT_BASE,
         security_check=SAMPLE_CHECK_BASE.copy(),
         amount=10,
@@ -436,7 +438,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
     """
     Tests related to CheckHistoryListView.
     """
-    SAMPLE_CHECK_WITH_ACTIONED_BY = dict(
+    SAMPLE_CHECK_WITH_ACTIONED_BY: dict = dict(
         BaseCheckViewTestCase.SAMPLE_CHECK,
         actioned_at='2020-01-13 12:00:00+00',
         actioned_by=1,
@@ -520,14 +522,15 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
             )
 
             response = self.client.get(reverse('security:check_history'))
-            self.assertContains(response, '123456******9876')
-            self.assertContains(response, '02/20')
 
-            content = response.content.decode()
+        self.assertContains(response, '123456******9876')
+        self.assertContains(response, '02/20')
 
-            self.assertIn('24601', content)
-            self.assertIn('1 credit', content)
-            self.assertIn('My list (2)', content)
+        content = response.content.decode()
+
+        self.assertIn('24601', content)
+        self.assertIn('1 credit', content)
+        self.assertIn('My list (2)', content)
 
     def test_view_contains_relevant_data(self):
         """
@@ -544,15 +547,16 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
                 },
             )
             response = self.client.get(reverse('security:check_history'))
-            self.assertContains(response, '123456******9876')
-            self.assertContains(response, '02/20')
-            self.assertContains(response, 'Barry Garlow')
-            self.assertContains(response, 'Money issues')
-            self.assertContains(response, 'S1 3HS')
-            self.assertContains(response, '24601')
-            self.assertContains(response, 'Accepted')
-            self.assertContains(response, 'Brixton Prison')
-            self.assertContains(response, 'Decision details:')
+
+        self.assertContains(response, '123456******9876')
+        self.assertContains(response, '02/20')
+        self.assertContains(response, 'Barry Garlow')
+        self.assertContains(response, 'Money issues')
+        self.assertContains(response, 'S1 3HS')
+        self.assertContains(response, '24601')
+        self.assertContains(response, 'Accepted')
+        self.assertContains(response, 'Brixton Prison')
+        self.assertContains(response, 'Decision details:')
 
     def test_view_does_not_display_decision_if_none(self):
         """
@@ -572,10 +576,10 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
             )
             response = self.client.get(reverse('security:check_history'))
 
-            self.assertContains(response, 'No decision reason entered')
+        self.assertContains(response, 'No decision reason entered')
 
     @parameterized.expand(
-        CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
+        CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated(
         self, rejection_reason_key, rejection_reason_full
@@ -635,7 +639,7 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
 
             response = self.client.get(reverse('security:check_history'))
 
-            self.assertContains(response, rejection_reason_full)
+        self.assertContains(response, rejection_reason_full)
 
     @parameterized.expand(
         generate_rejection_category_test_cases_text()
@@ -698,7 +702,46 @@ class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
 
             response = self.client.get(reverse('security:check_history'))
 
-            self.assertContains(response, rejection_reason_value)
+        self.assertContains(response, rejection_reason_value)
+
+    def test_view_shows_removed_rejection_reason_descriptions(self):
+        """
+        Test that rejection reasons which are no longer used are still displayable in history
+        """
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                urljoin(
+                    settings.API_URL,
+                    '/security/checks/?{querystring}'.format(
+                        querystring=urlencode([
+                            ('started_at__gte', '2020-01-02T12:00:00'),
+                            ('actioned_by', True),
+                            ('offset', 0),
+                            ('limit', 20),
+                            ('ordering', '-created'),
+                        ])
+                    ),
+                    trailing_slash=False
+                ),
+                match_querystring=True,
+                json={
+                    'count': 1,
+                    'results': [
+                        dict(
+                            self.SENDER_CHECK_REJECTED,
+                            rejection_reasons={'fiu_investigation_id': 'ABC123000ABC'}
+                        )
+                    ]
+                }
+            )
+            self.mock_my_list_count(rsps, 0)
+
+            response = self.client.get(reverse('security:check_history'))
+
+        self.assertContains(response, 'Associated FIU investigation')
+        self.assertContains(response, 'ABC123000ABC')
 
     def test_view_includes_matching_credit_history_including_active_auto_accept(self):
         """
@@ -1472,7 +1515,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
         )
 
     @parameterized.expand(
-        CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
+        CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated_for_prisoner_check(
         self, rejection_reason_key, rejection_reason_full
@@ -1571,7 +1614,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
             self.assertContains(response, rejection_reason_full)
 
     @parameterized.expand(
-        CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
+        CURRENT_CHECK_REJECTION_BOOL_CATEGORY_LABELS.items()
     )
     def test_credit_history_row_has_reason_checkbox_populated_for_sender_check(
         self, rejection_reason_key, rejection_reason_full
