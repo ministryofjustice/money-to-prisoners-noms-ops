@@ -23,7 +23,7 @@
 
         {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
-        {% include 'security/forms/job-title-fieldset.html' with field=form.job_title %}
+        {% include 'security/forms/job-title-fieldset.html' with field=form.job_title choices_with_conditional_fields='Other' %}
         {% include 'mtp_common/forms/radio-field.html' with field=form.prison_estate label_classes='govuk-fieldset__legend--l' only %}
         {% include 'mtp_common/forms/textarea.html' with field=form.tasks label_classes='govuk-label--l' only %}
 
