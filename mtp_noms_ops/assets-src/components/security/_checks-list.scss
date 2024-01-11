@@ -14,6 +14,8 @@
 
   .govuk-button {
     margin-bottom: govuk-spacing(3);
+    text-wrap: avoid;
+    text-wrap: nowrap;
 
     @include govuk-media-query($until: tablet) {
       width: auto;
@@ -36,4 +38,11 @@
 
 .mtp-check-cell__list-form {
   display: inline-block;
+}
+
+.mtp-tag--with-actor {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 5px;
 }

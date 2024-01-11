@@ -142,14 +142,15 @@
               {{ credit.amount|currency }}
             </td>
             <td>
-              {{ credit.security_check|tag_for_security_check }}
-              <br />
-              {% trans 'by' %}
-              {% if credit.security_check.auto_accept_rule_state and credit.security_check.auto_accept_rule_state.active %}
-                {{ credit.security_check.auto_accept_rule_state.added_by.first_name }} {{ credit.security_check.auto_accept_rule_state.added_by.last_name }}
-              {% else %}
-                {{ credit.security_check.actioned_by_name }}
-              {% endif %}
+              <span class="mtp-tag--with-actor">
+                {{ credit.security_check|tag_for_security_check }}
+                {% trans 'by' %}
+                {% if credit.security_check.auto_accept_rule_state and credit.security_check.auto_accept_rule_state.active %}
+                  {{ credit.security_check.auto_accept_rule_state.added_by.first_name }} {{ credit.security_check.auto_accept_rule_state.added_by.last_name }}
+                {% else %}
+                  {{ credit.security_check.actioned_by_name }}
+                {% endif %}
+              </span>
             </td>
           </tr>
           <tr class="mtp-check-description-row">

@@ -15,20 +15,20 @@
     </div>
   </div>
 
-  {% include 'security/forms/amount-pattern-fieldset.html' with field=form.amount_pattern %}
+  {% include 'security/forms/amount-pattern-fieldset.html' with field=form.amount_pattern choices_with_conditional_fields='exact pence' %}
 
   <div class="govuk-heading-l">{% trans 'Recipient' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.recipient_name input_classes='govuk-input--width-20' %}
   {% include 'mtp_common/forms/field.html' with field=form.recipient_email input_classes='govuk-input--width-20' %}
   {% include 'mtp_common/forms/field.html' with field=form.postcode input_classes='govuk-input--width-5' %}
 
-  {% include 'security/forms/payment-method-fieldset.html' with field=form.payment_method label_classes='govuk-fieldset__legend--m' %}
+  {% include 'security/forms/payment-method-fieldset.html' with field=form.payment_method label_classes='govuk-fieldset__legend--m' choices_with_conditional_fields='bank_transfer online' %}
 
   <div class="govuk-heading-l">{% trans 'Prisoner' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_number input_classes='govuk-input--width-10 mtp-input--prisoner-number' %}
   {% include 'mtp_common/forms/field.html' with field=form.prisoner_name input_classes='govuk-input--width-20' %}
 
-  {% include 'security/forms/prison-selector-fieldset.html' with field=form.prison_selector %}
+  {% include 'security/forms/prison-selector-fieldset.html' with field=form.prison_selector choices_with_conditional_fields='exact' %}
 
   <div class="govuk-heading-l">{% trans 'Invoice number' %}</div>
   {% include 'mtp_common/forms/field.html' with field=form.invoice_number input_classes='govuk-input--width-10' %}
