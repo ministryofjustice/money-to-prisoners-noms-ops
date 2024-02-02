@@ -114,7 +114,7 @@ class ChangePrisonForm(ApiForm):
                     if action == 'remove':
                         removed_item = key[14:]
                         kwargs['data'] = kwargs['data'].copy()
-                        del kwargs['data'][removed_item]
+                        del kwargs['data'][removed_item]  # noqa: B038 because iterating over different item in kwargs
 
         if self.action == 'all':
             kwargs['data'] = kwargs['data'].copy()
