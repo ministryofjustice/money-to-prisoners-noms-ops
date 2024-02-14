@@ -9,7 +9,8 @@
   {% if request.user.is_authenticated and footer_feedback_link %}
     {% captureoutput as feedback_link %}
       <a href="{{ footer_feedback_link }}" target="_blank">
-        {% trans 'Give feedback on Prisoner money intelligence (opens in a new tab)' %}
+        {% trans 'Give feedback on Prisoner money intelligence' %}
+        ({% trans 'opens in a new tab' %})
       </a>
     {% endcaptureoutput %}
     {% include 'mtp_common/components/footer-feedback.html' with content=feedback_link %}

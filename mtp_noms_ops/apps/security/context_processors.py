@@ -28,4 +28,5 @@ def common(_):
         'footer_feedback_link': settings.FOOTER_FEEDBACK_LINK,
         'REDIRECT_FIELD_NAME': REDIRECT_FIELD_NAME,
         'PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE': PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
+        'DPS': settings.DPS,
     }

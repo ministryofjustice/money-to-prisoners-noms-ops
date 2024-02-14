@@ -16,6 +16,10 @@
         <h1 class="govuk-heading-xl govuk-!-margin-bottom-1">{{ prisoner.prisoner_name|default:_('Unknown prisoner') }}</h1>
         {% if prisoner.prisoner_number %}
           <span class="govuk-heading-l govuk-!-margin-bottom-3">{{ prisoner.prisoner_number }}</span>
+          <a class="govuk-!-display-none-print" href="{{ DPS }}prisoner/{{ prisoner.prisoner_number }}" target="_blank">
+            {% trans 'View profile on DPS' %}
+            ({% trans 'opens in a new tab' %})
+          </a>
         {% endif %}
       </header>
 

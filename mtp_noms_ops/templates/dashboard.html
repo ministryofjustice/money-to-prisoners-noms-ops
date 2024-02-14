@@ -23,6 +23,10 @@
 
   {% if link_cards %}
     {% card_group link_cards %}
+
+    <p class="govuk-!-margin-bottom-9">
+      {% trans 'Data older than 7 years is automatically deleted.' %}
+    </p>
   {% endif %}
 
   {% if saved_search_cards %}
