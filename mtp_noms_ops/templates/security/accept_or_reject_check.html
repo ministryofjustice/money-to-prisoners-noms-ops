@@ -202,6 +202,8 @@
       {% csrf_token %}
       {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
+      <input type="hidden" name="redirect_url" value="{{ form.redirect_url.value }}" />
+
       {% if check.status == 'pending' %}
 
         <h2 class="govuk-heading-l">{% trans 'Accept or reject this credit' %}</h2>

@@ -179,6 +179,11 @@ class AcceptOrRejectCheckForm(forms.Form):
     """
     fiu_action = forms.CharField(max_length=10)
 
+    redirect_url = forms.CharField(
+        required=False,
+        label=_('Redirect URL'),
+    )
+
     accept_further_details = forms.CharField(
         required=False,
         label=_('Give further details (optional)'),

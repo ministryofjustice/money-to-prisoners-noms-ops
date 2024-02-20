@@ -95,7 +95,7 @@
           </td>
           <td>
             <div class="mtp-check-cell__actions">
-              <a class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button" href="{% url 'security:resolve_check' check_id=check.id %}">{% trans 'Review' %} <span class="govuk-visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
+              <a class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button" href="{% url 'security:resolve_check' check_id=check.id %}?redirect_url={{ request.get_full_path }}">{% trans 'Review' %} <span class="govuk-visually-hidden">{% trans 'credit to' %} {{ check.credit.prisoner_name }}</span></a>
               {% if view.get_class_name == 'CheckListView' %}
                 <span class="mtp-check-cell__list-status">
                   {% if check.assigned_to == form.request.user.pk %}
