@@ -320,7 +320,7 @@ class AcceptOrRejectCheckView(FormView):
                 ui_message = _('Credit rejected')
             messages.info(self.request, ui_message)
 
-            redirect_url = self.request.POST.get('redirect_url', self.list_url)
+            redirect_url = form.cleaned_data['redirect_url']
             if not is_safe_url(
                 url=redirect_url,
                 allowed_hosts={self.request.get_host()},
