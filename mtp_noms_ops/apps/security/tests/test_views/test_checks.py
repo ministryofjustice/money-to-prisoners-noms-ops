@@ -173,6 +173,27 @@ class BaseCheckViewTestCase(SecurityBaseTestCase):
             },
         )
 
+    def mock_nth_page_of_checks(self, rsps, page, count, *, only_mine=False):
+        query_params = {
+            # NB: must not overlap with mock_need_attention_count and mock_my_list_count
+            'status': 'pending',
+            'credit_resolution': 'initial',
+            'offset': (page - 1) * SECURITY_FORMS_DEFAULT_PAGE_SIZE,
+            'limit': SECURITY_FORMS_DEFAULT_PAGE_SIZE,
+        }
+        if only_mine:
+            query_params['assigned_to'] = self.mock_user_pk
+
+        rsps.add(
+            rsps.GET,
+            api_url('/security/checks/'),
+            match=[query_param_matcher(query_params, strict_match=True)],
+            json={
+                'count': count,
+                'results': [self.SAMPLE_CHECK] * count,
+            },
+        )
+
     def mock_need_attention_count(self, rsps, need_attention_date: datetime.date, *, count=0, only_mine=False):
         query_params = {
             # NB: must not overlap with mock_my_list_count and mock_first_page_of_checks
@@ -432,6 +453,7 @@ class MyCheckListViewTestCase(BaseCheckViewTestCase):
             response = self.client.get(reverse('security:my_check_list'), follow=True)
 
             self.assertContains(response, 'Review <span class="govuk-visually-hidden">credit to Jean Valjean</span>')
+            self.assertContains(response, '?redirect_url=/en-gb/security/checks/my-list/')
 
 
 class CheckHistoryListViewTestCase(BaseCheckViewTestCase):
@@ -1917,7 +1939,54 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
     @mock.patch('security.forms.check.get_need_attention_date')
     def test_accept_check(self, mock_get_need_attention_date):
         """
-        Test that if one tries to accept pending check, check marked as accepted
+        Test that if one tries to accept pending check, check marked as accepted, redirects to where user was
+        """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
+
+        check_id = 1
+        payload_values = {
+            'decision_reason': '',
+        }
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/accept/'),
+                match=[
+                    json_params_matcher(payload_values)
+                ],
+                status=204,
+            )
+            # for checks list after redirect:
+            self.mock_nth_page_of_checks(rsps, 5, 0)
+            self.mock_my_list_count(rsps)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            redirect_url = reverse('security:check_list') + '?page=5'
+            response = self.client.post(
+                url,
+                data={
+                    'fiu_action': 'accept',
+                    'redirect_url': redirect_url,
+                },
+                follow=True
+            )
+
+            self.assertRedirects(response, redirect_url)
+            self.assertContains(response, 'Credit accepted')
+
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_accept_check_invalid_redirect(self, mock_get_need_attention_date):
+        """
+        Test that if one tries to accept pending check, check marked as accepted, redirects user to checks list
+
+        The `redirect_url` provided wasn't safe, redirecting to list of checks by default.
         """
         mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
 
@@ -1950,6 +2019,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                 url,
                 data={
                     'fiu_action': 'accept',
+                    'redirect_url': 'https://www.example.com/not-safe',
                 },
                 follow=True
             )
@@ -2220,8 +2290,67 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
     @mock.patch('security.forms.check.get_need_attention_date')
     def test_reject_check(self, rejection_field_key, rejection_field_value, mock_get_need_attention_date):
         """
-        Test that if a pending check is rejected, the view redirects to the list of checks
+        Test that if a pending check is rejected, the view redirects user where they were
         and a successful message is displayed.
+        """
+        mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
+
+        check_id = 1
+        payload_values = {
+            'decision_reason': 'iamfurtherdetails',
+            'rejection_reasons': {rejection_field_key: rejection_field_value}
+        }
+        with responses.RequestsMock() as rsps:
+            self.login(rsps=rsps)
+            rsps.add(
+                rsps.GET,
+                api_url(f'/security/checks/{check_id}/'),
+                json=self.SENDER_CHECK
+            )
+            rsps.add(
+                rsps.POST,
+                api_url(f'/security/checks/{check_id}/reject/'),
+                match=[
+                    json_params_matcher(payload_values)
+                ],
+                status=204,
+            )
+            # for checks list after redirect:
+            self.mock_nth_page_of_checks(rsps, 5, 0)
+            self.mock_my_list_count(rsps)
+            self.mock_need_attention_count(rsps, mock_get_need_attention_date.return_value)
+
+            url = reverse('security:resolve_check', kwargs={'check_id': check_id})
+            redirect_url = reverse('security:check_list') + '?page=5'
+            response = self.client.post(
+                url,
+                data={
+                    'reject_further_details': 'iamfurtherdetails',
+                    rejection_field_key: rejection_field_value,
+                    'fiu_action': 'reject',
+                    'redirect_url': redirect_url,
+                },
+                follow=True,
+            )
+
+            self.assertRedirects(response, redirect_url)
+            self.assertContains(response, 'Credit rejected')
+
+    @parameterized.expand(
+        generate_rejection_category_test_cases_text() + generate_rejection_category_test_cases_bool()
+    )
+    @mock.patch('security.forms.check.get_need_attention_date')
+    def test_reject_check_invalid_redirect(
+        self,
+        rejection_field_key,
+        rejection_field_value,
+        mock_get_need_attention_date
+    ):
+        """
+        Test that if a pending check is rejected, the view redirects user to checks list
+        and a successful message is displayed.
+
+        The `redirect_url` provided wasn't safe, redirecting to list of checks by default.
         """
         mock_get_need_attention_date.return_value = timezone.make_aware(datetime.datetime(2019, 7, 9, 9))
 
@@ -2257,6 +2386,7 @@ class AcceptOrRejectCheckViewTestCase(BaseCheckViewTestCase):
                     'reject_further_details': 'iamfurtherdetails',
                     rejection_field_key: rejection_field_value,
                     'fiu_action': 'reject',
+                    'redirect_url': 'https://www.example.com/not-safe',
                 },
                 follow=True,
             )

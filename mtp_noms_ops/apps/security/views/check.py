@@ -3,6 +3,7 @@ from typing import Optional
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
+from django.utils.http import is_safe_url
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.edit import BaseFormView, FormView
 
@@ -192,6 +193,9 @@ class AcceptOrRejectCheckView(FormView):
             {
                 'request': self.request,
                 'object_id': self.kwargs[self.id_kwarg_name],
+                'initial': {
+                    'redirect_url': self.request.GET.get('redirect_url', ''),
+                },
             },
         )
         return form_kwargs
@@ -316,6 +320,13 @@ class AcceptOrRejectCheckView(FormView):
                 ui_message = _('Credit rejected')
             messages.info(self.request, ui_message)
 
-            return HttpResponseRedirect(self.list_url)
+            redirect_url = form.cleaned_data['redirect_url']
+            if not is_safe_url(
+                url=redirect_url,
+                allowed_hosts={self.request.get_host()},
+                require_https=self.request.is_secure(),
+            ):
+                redirect_url = self.list_url
+            return HttpResponseRedirect(redirect_url)
 
         return super().form_valid(form)
