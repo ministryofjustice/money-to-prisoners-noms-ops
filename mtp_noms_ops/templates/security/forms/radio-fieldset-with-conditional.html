@@ -16,7 +16,7 @@
 
             {% with choice_slug=choice|slugify %}
               <div class="govuk-radios__item">
-                <input id="{{ field.id_for_label }}-{{ choice_slug }}" class="govuk-radios__input" type="radio" name="{{ field.html_name }}" value="{{ choice }}" {% if choice == initial %}checked{% endif %} {% if choice in choices_with_conditional_fields %}data-aria-controls="{{ field.id_for_label }}-{{ choice_slug }}-conditional"{% endif %} />
+                <input id="{{ field.id_for_label }}-{{ choice_slug }}" class="govuk-radios__input" type="radio" name="{{ field.html_name }}" value="{{ choice }}" {% if choice == initial %}checked{% endif %} {% if choice and choice in choices_with_conditional_fields %}data-aria-controls="{{ field.id_for_label }}-{{ choice_slug }}-conditional"{% endif %} />
                 <label for="{{ field.id_for_label }}-{{ choice_slug }}" id="{{ field.id_for_label }}-{{ choice_slug }}-label" class="govuk-label govuk-radios__label">
                   {% block radio_label %}{{ label }}{% endblock %}
                 </label>

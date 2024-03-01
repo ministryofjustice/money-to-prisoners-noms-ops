@@ -4,11 +4,11 @@
 {% block conditional_fields %}
   {% if choice == 'exact' %}
     <div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="{{ field.id_for_label }}-{{ choice_slug }}-conditional">
-      {% include 'mtp_common/forms/amount-field.html' with field=form.amount_exact only %}
+      {% include 'mtp_common/forms/amount-field.html' with field=form.amount_exact label_classes='govuk-visually-hidden' only %}
     </div>
   {% elif choice == 'pence' %}
     <div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="{{ field.id_for_label }}-{{ choice_slug }}-conditional">
-      {% include 'mtp_common/forms/field.html' with field=form.amount_pence input_classes='govuk-input--width-2' only %}
+      {% include 'mtp_common/forms/field.html' with field=form.amount_pence input_classes='govuk-input--width-2' label_classes='govuk-visually-hidden' only %}
     </div>
   {% endif %}
 {% endblock %}
