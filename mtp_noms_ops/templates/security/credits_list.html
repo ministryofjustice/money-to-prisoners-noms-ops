@@ -95,21 +95,21 @@
       </div>
     {% endif %}
 
-  {% if is_search_results %}
-    <p>
-    {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button">{% trans 'Start new search' %}</a>
-    {% endwith%}
-    </p>
-
-    {% if all_prisons_simple_search_link %}
-    <p>
-      <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print mtp-form-analytics__click" data-click-track="all-prisons-simple-search,credits">
-        {% trans 'See results from all prisons' %}
-      </a>
-    </p>
+    {% if is_search_results %}
+      <p>
+        {% with search_form_item=breadcrumbs|slice:":-1"|last %}
+          <a href="{{ search_form_item.url }}" class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button">{% trans 'Start new search' %}</a>
+        {% endwith%}
+      </p>
+  
+      {% if all_prisons_simple_search_link %}
+        <p>
+          <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print mtp-form-analytics__click" data-click-track="all-prisons-simple-search,credits">
+            {% trans 'See results from all prisons' %}
+          </a>
+        </p>
+      {% endif %}
     {% endif %}
-  {% endif %}
   </form>
 
 {% endblock %}
