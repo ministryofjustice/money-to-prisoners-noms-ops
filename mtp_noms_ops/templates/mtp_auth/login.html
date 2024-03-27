@@ -8,20 +8,20 @@
 
 {% block main %}
   <main id="main-content" role="main">
-  
+
     <div class="mtp-masthead govuk-!-margin-bottom-9">
       <div class="govuk-width-container">
-  
+
         <div class="govuk-grid-row">
           {% language_switch %}
         </div>
-  
+
         <div class="govuk-grid-row govuk-!-margin-top-9 govuk-!-margin-bottom-6">
           <header class="govuk-grid-column-two-thirds">
             <h1 class="govuk-heading-xl">
               {% trans 'Monitor prisoner money' %}
             </h1>
-  
+
             <aside>
               <p>
                 {% blocktrans trimmed %}
@@ -33,18 +33,18 @@
               </p>
             </aside>
           </header>
-  
+
           <div class="govuk-grid-column-one-third">
             <img alt="{% trans 'Prisoner money intelligence' %}" src="{% static 'images/landing-noms-ops.png' %}" srcset="{% static 'images/landing-noms-ops@2x.png' %} 2x"/>
           </div>
         </div>
-  
+
       </div>
     </div>
-  
+
     <div class="govuk-width-container govuk-!-margin-bottom-9">
       {% notification_banners request 'noms_ops_login' %}
-  
+
       <div class="govuk-grid-row">
         <section class="govuk-grid-column-one-half">
           <h2 class="govuk-heading-m">{% trans 'Request an account' %}</h2>
@@ -57,29 +57,29 @@
               {% trans 'Request an account' %}
             </a>
           </p>
-  
+
           <p>
             <a href="{% url 'faq' %}">{% trans 'Get help' %}</a> if you're having difficulties getting an account or signing in.
           </p>
         </section>
-  
+
         <section class="govuk-grid-column-one-half">
           <h2 class="govuk-heading-m">{% trans 'Sign in' %}</h2>
-  
+
           {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
-  
+
           <form action="{{ app_path }}" method="post">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}">
-  
+
             {% include 'mtp_common/forms/field.html' with field=form.username input_classes='govuk-input--width-10' only %}
-            {% include 'mtp_common/forms/field.html' with field=form.password input_classes='govuk-input--width-10' only %}
-  
+            {% include 'mtp_common/forms/password-field.html' with field=form.password only %}
+
             <button type="submit" class="govuk-button" data-module="govuk-button" name="signin">{% trans 'Sign in' %}</button>
           </form>
-  
+
           <p><a href="{% url 'reset_password' %}">{% trans 'Forgotten your password?' %}</a></p>
-  
+
         </section>
       </div>
     </div>
