@@ -7,11 +7,11 @@ from .object_detail import (  # noqa: F401
 )
 from .object_base import ViewType  # noqa: F401
 from .object_list import (  # noqa: F401
-    SenderListViewV2,
-    PrisonerListViewV2,
-    PrisonerDisbursementListViewV2,
-    CreditListViewV2,
-    DisbursementListViewV2,
+    SenderListView,
+    PrisonerListView,
+    PrisonerDisbursementListView,
+    CreditListView,
+    DisbursementListView,
     NotificationListView,
 )
 from .review import ReviewCreditsView  # noqa: F401

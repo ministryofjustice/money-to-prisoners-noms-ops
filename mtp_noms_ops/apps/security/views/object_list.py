@@ -2,18 +2,18 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from security.forms.object_list import (
-    SendersFormV2,
-    PrisonersFormV2,
-    CreditsFormV2,
-    DisbursementsFormV2,
+    SendersForm,
+    PrisonersForm,
+    CreditsForm,
+    DisbursementsForm,
     NotificationsForm,
 )
 from security.views.object_base import SecurityView, ViewType
 
 
-class SecuritySearchViewV2(SecurityView):
+class SecuritySearchView(SecurityView):
     """
-    Base class for all Search Views V2.
+    Base class for all Search Views.
     """
 
     def get_context_data(self, **kwargs):
@@ -44,12 +44,12 @@ class SecuritySearchViewV2(SecurityView):
         }
 
 
-class CreditListViewV2(SecuritySearchViewV2):
+class CreditListView(SecuritySearchView):
     """
-    Credit list/search view V2
+    Credit list/search view
     """
     title = _('Credits')
-    form_class = CreditsFormV2
+    form_class = CreditsForm
     template_name = 'security/credits_list.html'
     advanced_search_template_name = 'security/credits_advanced_search.html'
     search_results_view = 'security:credit_search_results'
@@ -60,12 +60,12 @@ class CreditListViewV2(SecuritySearchViewV2):
     object_name_plural = _('credits')
 
 
-class DisbursementListViewV2(SecuritySearchViewV2):
+class DisbursementListView(SecuritySearchView):
     """
-    Disbursement list/search view V2
+    Disbursement list/search view
     """
     title = _('Disbursements')
-    form_class = DisbursementsFormV2
+    form_class = DisbursementsForm
     template_name = 'security/disbursements_list.html'
     advanced_search_template_name = 'security/disbursements_advanced_search.html'
     search_results_view = 'security:disbursement_search_results'
@@ -76,12 +76,12 @@ class DisbursementListViewV2(SecuritySearchViewV2):
     object_name_plural = _('disbursements')
 
 
-class SenderListViewV2(SecuritySearchViewV2):
+class SenderListView(SecuritySearchView):
     """
-    Sender list/search view V2.
+    Sender list/search view
     """
     title = _('Payment sources')
-    form_class = SendersFormV2
+    form_class = SendersForm
     template_name = 'security/senders_list.html'
     advanced_search_template_name = 'security/senders_advanced_search.html'
     search_results_view = 'security:sender_search_results'
@@ -95,12 +95,12 @@ class SenderListViewV2(SecuritySearchViewV2):
         return reverse('security:sender_detail', kwargs={'sender_id': sender['id']})
 
 
-class PrisonerListViewV2(SecuritySearchViewV2):
+class PrisonerListView(SecuritySearchView):
     """
-    Prisoner list/search view V2.
+    Prisoner list/search view
     """
     title = _('Prisoners')
-    form_class = PrisonersFormV2
+    form_class = PrisonersForm
     template_name = 'security/prisoners_list.html'
     advanced_search_template_name = 'security/prisoners_advanced_search.html'
     search_results_view = 'security:prisoner_search_results'
@@ -114,7 +114,7 @@ class PrisonerListViewV2(SecuritySearchViewV2):
         return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner['id']})
 
 
-class PrisonerDisbursementListViewV2(PrisonerListViewV2):
+class PrisonerDisbursementListView(PrisonerListView):
     template_name = 'security/prisoners_list-disbursements.html'
 
     def url_for_single_result(self, prisoner):

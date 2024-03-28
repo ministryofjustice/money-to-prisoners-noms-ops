@@ -30,9 +30,9 @@ PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE = 'mine'
 END_DATE_BEFORE_START_DATE_ERROR_MSG = _('Must be after the start date.')
 
 
-class SearchFormV2Mixin(forms.Form):
+class SearchFormMixin(forms.Form):
     """
-    Mixin for SearchForm V2.
+    Mixin for SearchForm
     """
     # indicates whether the form was used in advanced search
     advanced = forms.BooleanField(initial=False, required=False)
@@ -51,7 +51,7 @@ class SearchFormV2Mixin(forms.Form):
 
 class PrisonSelectorSearchFormMixin(forms.Form):
     """
-    Mixin with prison fields for search V2.
+    Mixin with prison fields for search
 
     prison_selector can be one of:
     - all: all prisons
@@ -385,14 +385,14 @@ class PaymentMethodSearchFormMixin(forms.Form):
         return self._clean_payment_method_fields(cleaned_data)
 
 
-class SendersFormV2(
-    SearchFormV2Mixin,
+class SendersForm(
+    SearchFormMixin,
     PrisonSelectorSearchFormMixin,
     PaymentMethodSearchFormMixin,
     SecurityForm,
 ):
     """
-    Search Form for Senders V2.
+    Search Form for Senders
     """
     ordering = forms.ChoiceField(
         label=_('Order by'),
@@ -479,9 +479,9 @@ class SendersFormV2(
         return self._clean_sender_fields(cleaned_data)
 
 
-class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, SecurityForm):
+class PrisonersForm(SearchFormMixin, PrisonSelectorSearchFormMixin, SecurityForm):
     """
-    Search Form for Prisoners V2.
+    Search Form for Prisoners
     """
     ordering = forms.ChoiceField(
         label=_('Order by'),
@@ -554,15 +554,15 @@ class PrisonersFormV2(SearchFormV2Mixin, PrisonSelectorSearchFormMixin, Security
         return query_data
 
 
-class CreditsFormV2(
-    SearchFormV2Mixin,
+class CreditsForm(
+    SearchFormMixin,
     AmountSearchFormMixin,
     PrisonSelectorSearchFormMixin,
     PaymentMethodSearchFormMixin,
     SecurityForm,
 ):
     """
-    Search Form for Credits V2.
+    Search Form for Credits
     """
     ordering = forms.ChoiceField(
         label=_('Order by'),
@@ -731,15 +731,15 @@ class CreditsFormV2(
         return self._clean_sender_fields(cleaned_data)
 
 
-class DisbursementsFormV2(
-    SearchFormV2Mixin,
+class DisbursementsForm(
+    SearchFormMixin,
     AmountSearchFormMixin,
     PrisonSelectorSearchFormMixin,
     PaymentMethodSearchFormMixin,
     SecurityForm,
 ):
     """
-    Search Form for Disbursements V2.
+    Search Form for Disbursements
     """
     ordering = forms.ChoiceField(
         label=_('Order by'),

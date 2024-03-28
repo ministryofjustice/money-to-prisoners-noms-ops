@@ -649,9 +649,9 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
             self.assertRedirects(response, referer_url)
 
 
-class SenderViewsV2TestCase(AbstractSecurityViewTestCase):
+class SenderViewsTestCase(AbstractSecurityViewTestCase):
     """
-    Test case related to sender search V2 and detail views.
+    Test case related to sender search and detail views.
     """
     view_name = 'security:sender_list'
     advanced_search_view_name = 'security:sender_advanced_search'
@@ -850,9 +850,9 @@ class SenderViewsV2TestCase(AbstractSecurityViewTestCase):
         self.assertContains(response, 'non-field-error')
 
 
-class PrisonerViewsV2TestCase(AbstractSecurityViewTestCase):
+class PrisonerViewsTestCase(AbstractSecurityViewTestCase):
     """
-    Test case related to prisoner search V2 and detail views.
+    Test case related to prisoner search and detail views.
     """
     view_name = 'security:prisoner_list'
     advanced_search_view_name = 'security:prisoner_advanced_search'
@@ -1134,9 +1134,9 @@ class PrisonerViewsV2TestCase(AbstractSecurityViewTestCase):
                 )
 
 
-class CreditViewsV2TestCase(AbstractSecurityViewTestCase):
+class CreditViewsTestCase(AbstractSecurityViewTestCase):
     """
-    Test case related to credit search V2 and detail views.
+    Test case related to credit search and detail views.
     """
     view_name = 'security:credit_list'
     advanced_search_view_name = 'security:credit_advanced_search'
@@ -1397,7 +1397,7 @@ class CreditViewsV2TestCase(AbstractSecurityViewTestCase):
             api_filters = mocked_email_export_xlsx.call_args.kwargs['filters']
             # expect valid param to pass through
             self.assertEqual(api_filters['ordering'], self.search_ordering)
-            # SearchFormV2Mixin removes this param
+            # SearchFormMixin removes this param
             self.assertNotIn('advanced', api_filters)
             # exclusive_date_params are incremented
             # because the form presents an inclusive date range: [received_at__gte, received_at__lt]
@@ -1405,9 +1405,9 @@ class CreditViewsV2TestCase(AbstractSecurityViewTestCase):
             self.assertEqual(api_filters['received_at__lt'], datetime.date(2022, 7, 9))
 
 
-class DisbursementViewsV2TestCase(AbstractSecurityViewTestCase):
+class DisbursementViewsTestCase(AbstractSecurityViewTestCase):
     """
-    Test case related to disbursement search V2 and detail views.
+    Test case related to disbursement search and detail views.
     """
     view_name = 'security:disbursement_list'
     advanced_search_view_name = 'security:disbursement_advanced_search'
@@ -1676,7 +1676,7 @@ class DisbursementViewsV2TestCase(AbstractSecurityViewTestCase):
             api_filters = mocked_email_export_xlsx.call_args.kwargs['filters']
             # expect valid param to pass through
             self.assertEqual(api_filters['ordering'], self.search_ordering)
-            # SearchFormV2Mixin removes this param
+            # SearchFormMixin removes this param
             self.assertNotIn('advanced', api_filters)
             # exclusive_date_params are incremented
             # because the form presents an inclusive date range: [created__gte, created__lt]
