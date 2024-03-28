@@ -213,6 +213,15 @@ urlpatterns = [
         name='prisoner_search_results',
     ),
     url(
+        r'^prisoners/search-results/disbursements/$',
+        security_test(
+            views.PrisonerDisbursementListViewV2.as_view(
+                view_type=views.ViewType.search_results,
+            ),
+        ),
+        name='prisoner_disbursement_search_results',
+    ),
+    url(
         r'^prisoners/export/$',
         security_test(
             views.PrisonerListViewV2.as_view(

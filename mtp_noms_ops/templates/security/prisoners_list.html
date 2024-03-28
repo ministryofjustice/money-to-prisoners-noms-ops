@@ -13,161 +13,88 @@
       </div>
     </div>
 
-    {% if form.is_valid and prisoners %}{% setup_highlight %}
-      {% tabbedpanel cookie_name='mtp-tab-prisoners-results' collapsable=False tab_label=_('View credits or disbursements') css_class='govuk-grey' %}
+    {% if form.is_valid and prisoners %}
+      {% include 'security/includes/prisoners-sub-navigation.html' with current_view=view.get_class_name %}
 
-        {% paneltab name='credits' title=_('Credits') %}
-          <div class="mtp-table__container mtp-results-list">
-            <div class="mtp-results-list-actions">
-              <div class="mtp-results-list-actions__links govuk-!-display-none-print">
-                <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
-                &nbsp;
-                {% url 'security:prisoner_export' as export_view %}
-                {% url 'security:prisoner_email_export' as email_export_view %}
-                {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many prisoners to download.') %}
-              </div>
-            </div>
+      <div class="mtp-table__container mtp-results-list">
+        <div class="mtp-results-list-actions">
+          <div class="mtp-results-list-actions__links govuk-!-display-none-print">
+            <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
+            &nbsp;
+            {% url 'security:prisoner_export' as export_view %}
+            {% url 'security:prisoner_email_export' as email_export_view %}
+            {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many prisoners to download.') %}
+          </div>
+        </div>
 
-            <table class="mtp-table mtp-table--small">
-              <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
-              <thead>
+        {% setup_highlight %}
+
+        {% block object_list %}
+          <h2 class="govuk-heading-l mtp-!-display-print-only">{% trans 'Credits received' %}</h2>
+          
+          <table class="mtp-table mtp-table--small">
+            <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
+            <thead>
+            <tr>
+              <th scope="col">{% trans 'Prisoner' %}</th>
+              {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
+                <th scope="col">{% trans 'Prison' %}</th>
+              {% endif %}
+              {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' cell_classes='govuk-table__header--numeric' %}
+              {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' cell_classes='govuk-table__header--numeric' %}
+              {% sortable_cell _('Amount of credits') form.cleaned_data 'credit_total' cell_classes='govuk-table__header--numeric' %}
+              <th class="govuk-table__header--numeric govuk-!-display-none-print" scope="col">{% trans 'Details' %}</th>
+            </tr>
+            </thead>
+            <tbody>
+              {% for prisoner in prisoners %}
                 <tr>
-                  <th scope="col">{% trans 'Prisoner' %}</th>
+                  <td>
+                    {% search_highlight prisoner.prisoner_name default=_('Unknown prisoner') %}
+                    <br/>
+                    {% search_highlight prisoner.prisoner_number %}
+                  </td>
                   {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-                    <th scope="col">{% trans 'Prison' %}</th>
-                  {% endif %}
-                  {% sortable_cell _('Credits received') form.cleaned_data 'credit_count' cell_classes='govuk-table__header--numeric' %}
-                  {% sortable_cell _('Payment sources') form.cleaned_data 'sender_count' cell_classes='govuk-table__header--numeric' %}
-                  {% sortable_cell _('Amount of credits') form.cleaned_data 'credit_total' cell_classes='govuk-table__header--numeric' %}
-                  <th class="govuk-table__header--numeric govuk-!-display-none-print" scope="col">{% trans 'Details' %}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for prisoner in prisoners %}
-                  <tr>
-                    <td>
-                      {% search_highlight prisoner.prisoner_name default=_('Unknown prisoner') %}
-                      <br/>
-                      {% search_highlight prisoner.prisoner_number %}
-                    </td>
-                    {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
                     <td>{{ prisoner.current_prison.name|default:"-" }}</td>
-                    {% endif %}
-                    <td class="govuk-table__cell--numeric">
-                      <span class="mtp-sortable-cell--pad">
+                  {% endif %}
+                  <td class="govuk-table__cell--numeric">
+                    <span class="mtp-sortable-cell--pad">
                       {{ prisoner.credit_count }}
-                      </span>
-                    </td>
-                    <td class="govuk-table__cell--numeric">
-                      <span class="mtp-sortable-cell--pad">
+                    </span>
+                  </td>
+                  <td class="govuk-table__cell--numeric">
+                    <span class="mtp-sortable-cell--pad">
                       {{ prisoner.sender_count }}
-                      </span>
-                    </td>
-                    <td class="govuk-table__cell--numeric">
-                      <span class="mtp-sortable-cell--pad">
-                        {{ prisoner.credit_total|currency }}
-                      </span>
-                    </td>
-                    <td class="govuk-table__cell--numeric govuk-!-display-none-print">
-                      <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}">
-                        {% trans 'View details' %}
-                      </a>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="mtp-page-list__container">
-            {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
-
-            <p class="mtp-page-list__count">
-              {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
-                {{ number }} prisoner
-              {% plural %}
-                {{ number }} prisoners
-              {% endblocktrans %}
-            </p>
-          </div>
-        {% endpaneltab %}
-
-        {% paneltab name='disbursements' title=_('Disbursements') %}
-          <div class="mtp-table__container mtp-results-list">
-            <div class="mtp-results-list-actions">
-              <div class="mtp-results-list-actions__links govuk-!-display-none-print">
-                <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
-                &nbsp;
-                {% url 'security:prisoner_export' as export_view %}
-                {% url 'security:prisoner_email_export' as email_export_view %}
-                {% include 'security/includes/export-dialogue.html' with export_message=_('There are too many prisoners to download.') %}
-              </div>
-            </div>
-
-            <table class="mtp-table mtp-table--small">
-              <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
-              <thead>
-                <tr>
-                  <th scope="col">{% trans 'Prisoner' %}</th>
-                  {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-                    <th scope="col">{% trans 'Prison' %}</th>
-                  {% endif %}
-                  {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='govuk-table__header--numeric' %}
-                  {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' cell_classes='govuk-table__header--numeric' %}
-                  {% sortable_cell _('Amount of disbursements	') form.cleaned_data 'disbursement_total' cell_classes='govuk-table__header--numeric' %}
-                  <th class="govuk-table__header--numeric govuk-!-display-none-print" scope="col">{% trans 'Details' %}</th>
+                    </span>
+                  </td>
+                  <td class="govuk-table__cell--numeric">
+                    <span class="mtp-sortable-cell--pad">
+                      {{ prisoner.credit_total|currency }}
+                    </span>
+                  </td>
+                  <td class="govuk-table__cell--numeric govuk-!-display-none-print">
+                    <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}">
+                      {% trans 'View details' %}
+                    </a>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {% for prisoner in prisoners %}
-                  <tr>
-                    <td>
-                      {% search_highlight prisoner.prisoner_name default=_('Unknown prisoner') %}
-                      <br/>
-                      {% search_highlight prisoner.prisoner_number %}
-                    </td>
-                    {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-                    <td>{{ prisoner.current_prison.name|default:"-" }}</td>
-                    {% endif %}
-                    <td class="govuk-table__cell--numeric">
-                      <span class="mtp-sortable-cell--pad">
-                      {{ prisoner.recipient_count }}
-                      </span>
-                    </td>
-                    <td class="govuk-table__cell--numeric">
-                      <span class="mtp-sortable-cell--pad">
-                      {{ prisoner.disbursement_count }}
-                      </span>
-                    </td>
-                    <td class="govuk-table__cell--numeric">
-                      <span class="mtp-sortable-cell--pad">
-                        {{ prisoner.disbursement_total|currency }}
-                      </span>
-                    </td>
-                    <td class="govuk-table__cell--numeric govuk-!-display-none-print">
-                      <a href="{% url 'security:prisoner_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}">
-                        {% trans 'View details' %}
-                      </a>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endblock %}
+      </div>
 
-          <div class="mtp-page-list__container">
-            {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
+      <div class="mtp-page-list__container">
+        {% page_list page=form.cleaned_data.page page_count=form.page_count query_string=form.query_string %}
 
-            <p class="mtp-page-list__count">
-              {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
-                {{ number }} prisoner
-              {% plural %}
-                {{ number }} prisoners
-              {% endblocktrans %}
-            </p>
-          </div>
-        {% endpaneltab %}
-      {% endtabbedpanel %}
+        <p class="mtp-page-list__count">
+          {% blocktrans trimmed count count=form.total_count with number=form.total_count|separate_thousands %}
+            {{ number }} prisoner
+          {% plural %}
+            {{ number }} prisoners
+          {% endblocktrans %}
+        </p>
+      </div>
     {% endif %}
 
     {% if is_search_results %}

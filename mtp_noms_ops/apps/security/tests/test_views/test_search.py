@@ -1,5 +1,6 @@
 import base64
 import datetime
+import contextlib
 import json
 import re
 from unittest import mock
@@ -893,6 +894,7 @@ class PrisonerViewsV2TestCase(AbstractSecurityViewTestCase):
             'Jim Halls, JAMES HALLS',
         ],
     ]
+    expected_total_amount = '310.00'  # A1409AE credits total
 
     def get_api_object_list_response_data(self):
         return [self.prisoner_profile]
@@ -901,12 +903,29 @@ class PrisonerViewsV2TestCase(AbstractSecurityViewTestCase):
         response_content = response.content.decode(response.charset)
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('A1409AE', response_content)
-        self.assertIn('310.00', response_content)
+        self.assertIn(self.expected_total_amount, response_content)
 
         if advanced:
             self.assertIn('Prison PRN', response_content)
         else:
             self.assertNotIn('Prison PRN', response_content)
+
+    @classmethod
+    @contextlib.contextmanager
+    def disbursements_view(cls):
+        with (
+            mock.patch.object(cls, 'search_results_view_name', 'security:prisoner_disbursement_search_results'),
+            mock.patch.object(cls, 'expected_total_amount', '290.00'),
+        ):
+            yield
+
+    def test_displays_simple_search_results_with_disbursements(self):
+        with self.disbursements_view():
+            self.test_displays_simple_search_results()
+
+    def test_displays_advanced_search_results_with_disbursements(self):
+        with self.disbursements_view():
+            self.test_displays_advanced_search_results()
 
     def test_detail_view(self):
         prisoner_id = 9

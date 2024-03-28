@@ -114,6 +114,13 @@ class PrisonerListViewV2(SecuritySearchViewV2):
         return reverse('security:prisoner_detail', kwargs={'prisoner_id': prisoner['id']})
 
 
+class PrisonerDisbursementListViewV2(PrisonerListViewV2):
+    template_name = 'security/prisoners_list-disbursements.html'
+
+    def url_for_single_result(self, prisoner):
+        return reverse('security:prisoner_disbursement_detail', kwargs={'prisoner_id': prisoner['id']})
+
+
 class NotificationListView(SecurityView):
     """
     Notification event view
