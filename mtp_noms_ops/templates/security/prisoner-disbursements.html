@@ -19,25 +19,27 @@
     </div>
   </div>
 
-  <table class="mtp-table mtp-table--small">
-    <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
-    <thead>
-      <tr>
-        {% include 'security/includes/disbursement-header-row.html' %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for disbursement in disbursements %}
+  <div class="mtp-table__container">
+    <table class="mtp-table mtp-table--small">
+      <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
+      <thead>
         <tr>
-          {% include 'security/includes/disbursement-row.html' %}
+          {% include 'security/includes/disbursement-header-row.html' %}
         </tr>
-      {% empty %}
-        <tr>
-          <td colspan="7">{% trans 'No matching disbursements found' %}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for disbursement in disbursements %}
+          <tr>
+            {% include 'security/includes/disbursement-row.html' %}
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">{% trans 'No matching disbursements found' %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}
 
 {% block list_object_count %}

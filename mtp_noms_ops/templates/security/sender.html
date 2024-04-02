@@ -98,7 +98,7 @@
     {% include 'govuk-frontend/components/error-summary.html' with form=form only %}
 
     {% if form.is_valid %}
-      <div class="mtp-table__container mtp-results-list">
+      <div class="mtp-results-list">
         <h2 class="govuk-heading-l">{% trans 'Credits sent' %}</h2>
 
         <div class="mtp-results-list-actions govuk-inset-text">
@@ -115,25 +115,27 @@
           </div>
         </div>
 
-        <table class="mtp-table mtp-table--small">
-          <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
-          <thead>
-            <tr>
-              {% include 'security/includes/credit-header-row.html' with link_prisoner=True %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for credit in credits %}
+        <div class="mtp-table__container">
+          <table class="mtp-table mtp-table--small">
+            <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
+            <thead>
               <tr>
-                {% include 'security/includes/credit-row.html' with link_prisoner=True %}
+                {% include 'security/includes/credit-header-row.html' with link_prisoner=True %}
               </tr>
-            {% empty %}
-              <tr>
-                <td colspan="7">{% trans 'No matching credits found' %}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for credit in credits %}
+                <tr>
+                  {% include 'security/includes/credit-row.html' with link_prisoner=True %}
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7">{% trans 'No matching credits found' %}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="mtp-page-list__container">

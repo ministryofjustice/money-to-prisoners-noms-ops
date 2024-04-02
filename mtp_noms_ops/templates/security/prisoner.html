@@ -75,7 +75,7 @@
     {% if form.is_valid %}
       {% include 'security/includes/prisoner-sub-navigation.html' with current_view=view.get_class_name %}
 
-      <div id="result-list" class="mtp-table__container mtp-results-list">
+      <div id="result-list" class="mtp-results-list">
         {% block object_list %}
           <h2 class="govuk-heading-l mtp-!-display-print-only">{% trans 'Credits received' %}</h2>
 
@@ -93,25 +93,27 @@
             </div>
           </div>
 
-          <table class="mtp-table mtp-table--small">
-            <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
-            <thead>
-              <tr>
-                {% include 'security/includes/credit-header-row.html' %}
-              </tr>
-            </thead>
-            <tbody>
-              {% for credit in credits %}
+          <div class="mtp-table__container">
+            <table class="mtp-table mtp-table--small">
+              <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
+              <thead>
                 <tr>
-                  {% include 'security/includes/credit-row.html' with link_sender=True %}
+                  {% include 'security/includes/credit-header-row.html' %}
                 </tr>
-              {% empty %}
-                <tr>
-                  <td colspan="7">{% trans 'No matching credits found' %}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {% for credit in credits %}
+                  <tr>
+                    {% include 'security/includes/credit-row.html' with link_sender=True %}
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="7">{% trans 'No matching credits found' %}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% endblock %}
       </div>
 

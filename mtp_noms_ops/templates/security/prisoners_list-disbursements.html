@@ -5,54 +5,56 @@
 
 {% block object_list %}
   <h2 class="govuk-heading-l mtp-!-display-print-only">{% trans 'Disbursements sent' %}</h2>
-  
-  <table class="mtp-table mtp-table--small">
-    <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
-    <thead>
-      <tr>
-        <th scope="col">{% trans 'Prisoner' %}</th>
-        {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-          <th scope="col">{% trans 'Prison' %}</th>
-        {% endif %}
-        {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='govuk-table__header--numeric' %}
-        {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' cell_classes='govuk-table__header--numeric' %}
-        {% sortable_cell _('Amount of disbursements	') form.cleaned_data 'disbursement_total' cell_classes='govuk-table__header--numeric' %}
-        <th class="govuk-table__header--numeric govuk-!-display-none-print" scope="col">{% trans 'Details' %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for prisoner in prisoners %}
+
+  <div class="mtp-table__container">
+    <table class="mtp-table mtp-table--small">
+      <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
+      <thead>
         <tr>
-          <td>
-            {% search_highlight prisoner.prisoner_name default=_('Unknown prisoner') %}
-            <br/>
-            {% search_highlight prisoner.prisoner_number %}
-          </td>
+          <th scope="col">{% trans 'Prisoner' %}</th>
           {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-            <td>{{ prisoner.current_prison.name|default:"-" }}</td>
+            <th scope="col">{% trans 'Prison' %}</th>
           {% endif %}
-          <td class="govuk-table__cell--numeric">
-            <span class="mtp-sortable-cell--pad">
-              {{ prisoner.recipient_count }}
-            </span>
-          </td>
-          <td class="govuk-table__cell--numeric">
-            <span class="mtp-sortable-cell--pad">
-              {{ prisoner.disbursement_count }}
-            </span>
-          </td>
-          <td class="govuk-table__cell--numeric">
-            <span class="mtp-sortable-cell--pad">
-              {{ prisoner.disbursement_total|currency }}
-            </span>
-          </td>
-          <td class="govuk-table__cell--numeric govuk-!-display-none-print">
-            <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}">
-              {% trans 'View details' %}
-            </a>
-          </td>
+          {% sortable_cell _('Recipients') form.cleaned_data 'recipient_count' cell_classes='govuk-table__header--numeric' %}
+          {% sortable_cell _('Disbursements sent') form.cleaned_data 'disbursement_count' cell_classes='govuk-table__header--numeric' %}
+          {% sortable_cell _('Amount of disbursements	') form.cleaned_data 'disbursement_total' cell_classes='govuk-table__header--numeric' %}
+          <th class="govuk-table__header--numeric govuk-!-display-none-print" scope="col">{% trans 'Details' %}</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for prisoner in prisoners %}
+          <tr>
+            <td>
+              {% search_highlight prisoner.prisoner_name default=_('Unknown prisoner') %}
+              <br/>
+              {% search_highlight prisoner.prisoner_number %}
+            </td>
+            {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
+              <td>{{ prisoner.current_prison.name|default:"-" }}</td>
+            {% endif %}
+            <td class="govuk-table__cell--numeric">
+              <span class="mtp-sortable-cell--pad">
+                {{ prisoner.recipient_count }}
+              </span>
+            </td>
+            <td class="govuk-table__cell--numeric">
+              <span class="mtp-sortable-cell--pad">
+                {{ prisoner.disbursement_count }}
+              </span>
+            </td>
+            <td class="govuk-table__cell--numeric">
+              <span class="mtp-sortable-cell--pad">
+                {{ prisoner.disbursement_total|currency }}
+              </span>
+            </td>
+            <td class="govuk-table__cell--numeric govuk-!-display-none-print">
+              <a href="{% url 'security:prisoner_disbursement_detail' prisoner.id %}" title="{% trans 'View prisoner details' %}">
+                {% trans 'View details' %}
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}
