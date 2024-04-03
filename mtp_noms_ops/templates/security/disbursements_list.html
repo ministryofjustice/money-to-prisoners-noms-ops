@@ -14,8 +14,8 @@
       </div>
     </div>
 
-    {% if form.is_valid and disbursements %}{% setup_highlight %}
-      <div class="mtp-table__container mtp-results-list">
+    {% if form.is_valid and disbursements %}
+      <div class="mtp-results-list">
         <div class="mtp-results-list-actions">
           <div class="mtp-results-list-actions__links govuk-!-display-none-print">
             <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -26,60 +26,63 @@
           </div>
         </div>
 
-        <table class="mtp-table mtp-table--small">
-          <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
-          <thead>
-            <tr>
-              {% sortable_cell _('Date entered') form.cleaned_data 'created' %}
-              <th scope="col">{% trans 'Prisoner (from)' %}</th>
-              <th scope="col">{% trans 'Recipient (to)' %}</th>
-              {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-                <th scope="col">{% trans 'Prison' %}</th>
-              {% endif %}
-              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
-              <th class="govuk-table__header--numeric" scope="col">{% trans 'Details' %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for disbursement in disbursements %}
+        {% setup_highlight %}
+        <div class="mtp-table__container">
+          <table class="mtp-table mtp-table--small">
+            <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
+            <thead>
               <tr>
-                <td class="mtp-table__cell--numeric-left">
-                  {{ disbursement.created|date:'j F Y' }}
-                </td>
-
-                <td>
-                  {{ disbursement.prisoner_name|default:_('Unknown prisoner') }}
-                  <br/>
-                  {% search_highlight disbursement.prisoner_number %}
-                </td>
-
-                <td>
-                  {% search_highlight disbursement.recipient_first_name %} {% search_highlight  disbursement.recipient_last_name %}
-                  <br/>
-                  {{ disbursement.recipient_email|default:_('Email not provided') }}
-                </td>
-
+                {% sortable_cell _('Date entered') form.cleaned_data 'created' %}
+                <th scope="col">{% trans 'Prisoner (from)' %}</th>
+                <th scope="col">{% trans 'Recipient (to)' %}</th>
                 {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-                <td>{{ disbursement.prison_name }}</td>
+                  <th scope="col">{% trans 'Prison' %}</th>
                 {% endif %}
-
-                <td class="govuk-table__cell--numeric">
-                  <span class="mtp-sortable-cell--pad">
-                    {{ disbursement.amount|currency }}
-                  </span>
-                </td>
-
-                <td class="govuk-table__cell--numeric">
-                  {{ disbursement.resolution|format_disbursement_resolution }}
-                  <br />
-                  <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="govuk-!-display-none-print">
-                    {% trans 'View details' %}
-                  </a>
-                </td>
+                {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
+                <th class="govuk-table__header--numeric" scope="col">{% trans 'Details' %}</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for disbursement in disbursements %}
+                <tr>
+                  <td class="mtp-table__cell--numeric-left">
+                    {{ disbursement.created|date:'j F Y' }}
+                  </td>
+  
+                  <td>
+                    {{ disbursement.prisoner_name|default:_('Unknown prisoner') }}
+                    <br/>
+                    {% search_highlight disbursement.prisoner_number %}
+                  </td>
+  
+                  <td>
+                    {% search_highlight disbursement.recipient_first_name %} {% search_highlight  disbursement.recipient_last_name %}
+                    <br/>
+                    {{ disbursement.recipient_email|default:_('Email not provided') }}
+                  </td>
+  
+                  {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
+                  <td>{{ disbursement.prison_name }}</td>
+                  {% endif %}
+  
+                  <td class="govuk-table__cell--numeric">
+                    <span class="mtp-sortable-cell--pad">
+                      {{ disbursement.amount|currency }}
+                    </span>
+                  </td>
+  
+                  <td class="govuk-table__cell--numeric">
+                    {{ disbursement.resolution|format_disbursement_resolution }}
+                    <br />
+                    <a href="{% url 'security:disbursement_detail' disbursement_id=disbursement.id %}" aria-label="{% trans 'View disbursement details' %}" class="govuk-!-display-none-print">
+                      {% trans 'View details' %}
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="mtp-page-list__container">

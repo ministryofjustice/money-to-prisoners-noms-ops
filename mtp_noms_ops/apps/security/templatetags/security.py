@@ -314,7 +314,7 @@ def setup_highlight(context):
     Template tag that can be used to optimise the highlight logic by caching the compiled reex pattern.
     """
     # warm up cache
-    _ = _get_cached_search_terms_re(context)
+    _get_cached_search_terms_re(context)
     return ''
 
 

@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<nav class="mtp-sub-navigation mtp-sub-navigation--light govuk-clearfix govuk-!-margin-bottom-3 govuk-!-display-none-print" aria-label="{% trans 'View credits or disbursements' %}">
+  <ul class="mtp-sub-navigation__list mtp-sub-navigation__list--padded">
+
+    <li class="mtp-sub-navigation__list-item {% if current_view == 'PrisonerListView' %}mtp-sub-navigation__list-item--current{% endif %}">
+      <a href="{% url 'security:prisoner_search_results' %}?{{ form.query_string }}" class="mtp-sub-navigation__link">
+        {% trans 'Credits received' %}
+        {% if current_view == 'PrisonerListView' %}
+          <span class="govuk-visually-hidden">{% trans '(current page)' %}</span>
+        {% endif %}
+      </a>
+    </li>
+
+    <li class="mtp-sub-navigation__list-item {% if current_view == 'PrisonerDisbursementListView' %}mtp-sub-navigation__list-item--current{% endif %}">
+      <a href="{% url 'security:prisoner_disbursement_search_results' %}?{{ form.query_string }}" class="mtp-sub-navigation__link">
+        {% trans 'Disbursements sent' %}
+        {% if current_view == 'PrisonerDisbursementListView' %}
+          <span class="govuk-visually-hidden">{% trans '(current page)' %}</span>
+        {% endif %}
+      </a>
+    </li>
+
+  </ul>
+</nav>

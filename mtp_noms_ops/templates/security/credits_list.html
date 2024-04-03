@@ -14,8 +14,8 @@
       </div>
     </div>
 
-    {% if form.is_valid and credits %}{% setup_highlight %}
-      <div class="mtp-table__container mtp-results-list">
+    {% if form.is_valid and credits %}
+      <div class="mtp-results-list">
         <div class="mtp-results-list-actions">
           <div class="mtp-results-list-actions__links govuk-!-display-none-print">
             <a class="mtp-print-trigger mtp-form-analytics__click" href="#print-dialog" data-click-track="print-{{ view.get_class_name }},{{ view.get_used_request_params|join:'&' }}">{% trans 'Print' %}</a>
@@ -26,60 +26,63 @@
           </div>
         </div>
 
-        <table class="mtp-table mtp-table--small">
-          <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
-          <thead>
-            <tr>
-              {% sortable_cell _('Date received') form.cleaned_data 'received_at' %}
-              <th scope="col">{% trans 'Payment source (from)' %}</th>
-              <th scope="col">{% trans 'Prisoner (to)' %}</th>
-              {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-                <th scope="col">{% trans 'Prison' %}</th>
-              {% endif %}
-              {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
-              <th class="govuk-table__header--numeric" scope="col">{% trans 'Details' %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for credit in credits %}
+        {% setup_highlight %}
+        <div class="mtp-table__container">
+          <table class="mtp-table mtp-table--small">
+            <caption class="govuk-visually-hidden">{{ form.search_description.description }}</caption>
+            <thead>
               <tr>
-                <td class="mtp-table__cell--numeric-left">
-                  {{ credit.received_at|date:'j F Y' }}
-                </td>
-
-                <td>
-                  {% search_highlight credit.sender_name default=_('Sender details not recorded') %}
-                  <br/>
-                  {% search_highlight credit.sender_email default=_('Email not provided') %}
-                </td>
-
-                <td>
-                  {{ credit.prisoner_name|default:_('Unknown prisoner') }}
-                  <br/>
-                  {% search_highlight credit.prisoner_number %}
-                </td>
-
+                {% sortable_cell _('Date received') form.cleaned_data 'received_at' %}
+                <th scope="col">{% trans 'Payment source (from)' %}</th>
+                <th scope="col">{% trans 'Prisoner (to)' %}</th>
                 {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
-                <td>{{ credit.prison_name }}</td>
+                  <th scope="col">{% trans 'Prison' %}</th>
                 {% endif %}
-
-                <td class="govuk-table__cell--numeric">
-                  <span class="mtp-sortable-cell--pad">
-                    {{ credit.amount|currency }}
-                  </span>
-                </td>
-
-                <td class="govuk-table__cell--numeric">
-                  {{ credit.resolution|format_resolution }}
-                  <br />
-                  <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}" class="govuk-!-display-none-print">
-                    {% trans 'View details' %}
-                  </a>
-                </td>
+                {% sortable_cell _('Amount') form.cleaned_data 'amount' cell_classes='govuk-table__header--numeric' %}
+                <th class="govuk-table__header--numeric" scope="col">{% trans 'Details' %}</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for credit in credits %}
+                <tr>
+                  <td class="mtp-table__cell--numeric-left">
+                    {{ credit.received_at|date:'j F Y' }}
+                  </td>
+  
+                  <td>
+                    {% search_highlight credit.sender_name default=_('Sender details not recorded') %}
+                    <br/>
+                    {% search_highlight credit.sender_email default=_('Email not provided') %}
+                  </td>
+  
+                  <td>
+                    {{ credit.prisoner_name|default:_('Unknown prisoner') }}
+                    <br/>
+                    {% search_highlight credit.prisoner_number %}
+                  </td>
+  
+                  {% if is_advanced_search_results or is_all_prisons_simple_search_results %}
+                  <td>{{ credit.prison_name }}</td>
+                  {% endif %}
+  
+                  <td class="govuk-table__cell--numeric">
+                    <span class="mtp-sortable-cell--pad">
+                      {{ credit.amount|currency }}
+                    </span>
+                  </td>
+  
+                  <td class="govuk-table__cell--numeric">
+                    {{ credit.resolution|format_resolution }}
+                    <br />
+                    <a href="{% url 'security:credit_detail' credit_id=credit.id %}" aria-label="{% trans 'View credit details' %}" class="govuk-!-display-none-print">
+                      {% trans 'View details' %}
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="mtp-page-list__container">
@@ -95,21 +98,21 @@
       </div>
     {% endif %}
 
-  {% if is_search_results %}
-    <p>
-    {% with search_form_item=breadcrumbs|slice:":-1"|last %}
-      <a href="{{ search_form_item.url }}" class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button">{% trans 'Start new search' %}</a>
-    {% endwith%}
-    </p>
-
-    {% if all_prisons_simple_search_link %}
-    <p>
-      <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print mtp-form-analytics__click" data-click-track="all-prisons-simple-search,credits">
-        {% trans 'See results from all prisons' %}
-      </a>
-    </p>
+    {% if is_search_results %}
+      <p>
+        {% with search_form_item=breadcrumbs|slice:":-1"|last %}
+          <a href="{{ search_form_item.url }}" class="govuk-button govuk-!-display-none-print" data-module="govuk-button" role="button">{% trans 'Start new search' %}</a>
+        {% endwith%}
+      </p>
+  
+      {% if all_prisons_simple_search_link %}
+        <p>
+          <a href="{{ all_prisons_simple_search_link }}" class="govuk-!-display-none-print mtp-form-analytics__click" data-click-track="all-prisons-simple-search,credits">
+            {% trans 'See results from all prisons' %}
+          </a>
+        </p>
+      {% endif %}
     {% endif %}
-  {% endif %}
   </form>
 
 {% endblock %}

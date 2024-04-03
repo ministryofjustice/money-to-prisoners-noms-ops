@@ -89,15 +89,3 @@
     }
   }
 }
-
-.mtp-results-profile__toggle {
-  @include govuk-clearfix;
-
-  h2 {
-    float: left;
-  }
-
-  aside {
-    float: right;
-  }
-}

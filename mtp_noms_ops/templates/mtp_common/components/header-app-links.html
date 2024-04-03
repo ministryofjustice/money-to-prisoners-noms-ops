@@ -10,7 +10,7 @@
           </li>
         {% endif %}
         <li>
-          {% include 'mtp_common/components/header-app-link.html' with view_name='security:prisoner_list' params=initial_params subview_names='security:prisoner_list_legacy security:prisoner_detail security:prisoner_disbursement_detail security:prisoner_search_results security:prisoner_advanced_search' link_text=_('Prisoners') %}
+          {% include 'mtp_common/components/header-app-link.html' with view_name='security:prisoner_list' params=initial_params subview_names='security:prisoner_list_legacy security:prisoner_detail security:prisoner_disbursement_detail security:prisoner_search_results security:prisoner_disbursement_search_results security:prisoner_advanced_search' link_text=_('Prisoners') %}
         </li>
         <li>
           {% include 'mtp_common/components/header-app-link.html' with view_name='security:sender_list' params=initial_params subview_names='security:sender_list_legacy security:sender_detail security:sender_search_results security:sender_advanced_search' link_text=_('Payment sources') %}

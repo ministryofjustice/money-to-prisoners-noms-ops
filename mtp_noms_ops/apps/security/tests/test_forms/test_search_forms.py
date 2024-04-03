@@ -11,13 +11,13 @@ import responses
 from security.forms.object_base import AmountPattern, SecurityForm
 from security.forms.object_list import (
     AmountSearchFormMixin,
-    CreditsFormV2,
-    DisbursementsFormV2,
+    CreditsForm,
+    DisbursementsForm,
     PaymentMethodSearchFormMixin,
     PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE,
-    PrisonersFormV2,
+    PrisonersForm,
     PrisonSelectorSearchFormMixin,
-    SendersFormV2,
+    SendersForm,
 )
 from security.models import PaymentMethod
 from security.tests import api_url, mock_empty_response
@@ -1047,12 +1047,12 @@ class SecurityFormTestCase(SimpleTestCase):
             self.assertEqual(form.query_string, '')
 
 
-class SenderFormV2TestCase(SecurityFormTestCase):
+class SenderFormTestCase(SecurityFormTestCase):
     """
-    Tests related to the SenderFormV2.
+    Tests related to the SenderForm
     """
 
-    form_class = SendersFormV2
+    form_class = SendersForm
     api_list_path = '/senders/'
 
     def test_blank_form(self):
@@ -1363,11 +1363,11 @@ class SenderFormV2TestCase(SecurityFormTestCase):
             self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
-class PrisonerFormV2TestCase(SecurityFormTestCase):
+class PrisonerFormTestCase(SecurityFormTestCase):
     """
-    Tests related to the PrisonersFormV2.
+    Tests related to the PrisonersForm
     """
-    form_class = PrisonersFormV2
+    form_class = PrisonersForm
     api_list_path = '/prisoners/'
 
     def test_blank_form(self):
@@ -1574,11 +1574,11 @@ class PrisonerFormV2TestCase(SecurityFormTestCase):
             self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
-class CreditFormV2TestCase(SecurityFormTestCase):
+class CreditFormTestCase(SecurityFormTestCase):
     """
-    Tests related to the CreditFormV2.
+    Tests related to the CreditForm
     """
-    form_class = CreditsFormV2
+    form_class = CreditsForm
     api_list_path = '/credits/'
 
     def test_blank_form(self):
@@ -1979,11 +1979,11 @@ class CreditFormV2TestCase(SecurityFormTestCase):
             self.assertDictEqual(form.errors, scenario.expected_errors)
 
 
-class DisbursementFormV2TestCase(SecurityFormTestCase):
+class DisbursementFormTestCase(SecurityFormTestCase):
     """
-    Tests related to the DisbursementsFormV2.
+    Tests related to the DisbursementsForm
     """
-    form_class = DisbursementsFormV2
+    form_class = DisbursementsForm
     api_list_path = '/disbursements/'
 
     def test_blank_form(self):

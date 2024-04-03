@@ -1,5 +1,6 @@
 import base64
 import datetime
+import contextlib
 import json
 import re
 from unittest import mock
@@ -648,9 +649,9 @@ class AbstractSecurityViewTestCase(SecurityBaseTestCase):
             self.assertRedirects(response, referer_url)
 
 
-class SenderViewsV2TestCase(AbstractSecurityViewTestCase):
+class SenderViewsTestCase(AbstractSecurityViewTestCase):
     """
-    Test case related to sender search V2 and detail views.
+    Test case related to sender search and detail views.
     """
     view_name = 'security:sender_list'
     advanced_search_view_name = 'security:sender_advanced_search'
@@ -849,9 +850,9 @@ class SenderViewsV2TestCase(AbstractSecurityViewTestCase):
         self.assertContains(response, 'non-field-error')
 
 
-class PrisonerViewsV2TestCase(AbstractSecurityViewTestCase):
+class PrisonerViewsTestCase(AbstractSecurityViewTestCase):
     """
-    Test case related to prisoner search V2 and detail views.
+    Test case related to prisoner search and detail views.
     """
     view_name = 'security:prisoner_list'
     advanced_search_view_name = 'security:prisoner_advanced_search'
@@ -893,6 +894,7 @@ class PrisonerViewsV2TestCase(AbstractSecurityViewTestCase):
             'Jim Halls, JAMES HALLS',
         ],
     ]
+    expected_total_amount = '310.00'  # A1409AE credits total
 
     def get_api_object_list_response_data(self):
         return [self.prisoner_profile]
@@ -901,12 +903,29 @@ class PrisonerViewsV2TestCase(AbstractSecurityViewTestCase):
         response_content = response.content.decode(response.charset)
         self.assertIn('JAMES HALLS', response_content)
         self.assertIn('A1409AE', response_content)
-        self.assertIn('310.00', response_content)
+        self.assertIn(self.expected_total_amount, response_content)
 
         if advanced:
             self.assertIn('Prison PRN', response_content)
         else:
             self.assertNotIn('Prison PRN', response_content)
+
+    @classmethod
+    @contextlib.contextmanager
+    def disbursements_view(cls):
+        with (
+            mock.patch.object(cls, 'search_results_view_name', 'security:prisoner_disbursement_search_results'),
+            mock.patch.object(cls, 'expected_total_amount', '290.00'),
+        ):
+            yield
+
+    def test_displays_simple_search_results_with_disbursements(self):
+        with self.disbursements_view():
+            self.test_displays_simple_search_results()
+
+    def test_displays_advanced_search_results_with_disbursements(self):
+        with self.disbursements_view():
+            self.test_displays_advanced_search_results()
 
     def test_detail_view(self):
         prisoner_id = 9
@@ -1115,9 +1134,9 @@ class PrisonerViewsV2TestCase(AbstractSecurityViewTestCase):
                 )
 
 
-class CreditViewsV2TestCase(AbstractSecurityViewTestCase):
+class CreditViewsTestCase(AbstractSecurityViewTestCase):
     """
-    Test case related to credit search V2 and detail views.
+    Test case related to credit search and detail views.
     """
     view_name = 'security:credit_list'
     advanced_search_view_name = 'security:credit_advanced_search'
@@ -1378,7 +1397,7 @@ class CreditViewsV2TestCase(AbstractSecurityViewTestCase):
             api_filters = mocked_email_export_xlsx.call_args.kwargs['filters']
             # expect valid param to pass through
             self.assertEqual(api_filters['ordering'], self.search_ordering)
-            # SearchFormV2Mixin removes this param
+            # SearchFormMixin removes this param
             self.assertNotIn('advanced', api_filters)
             # exclusive_date_params are incremented
             # because the form presents an inclusive date range: [received_at__gte, received_at__lt]
@@ -1386,9 +1405,9 @@ class CreditViewsV2TestCase(AbstractSecurityViewTestCase):
             self.assertEqual(api_filters['received_at__lt'], datetime.date(2022, 7, 9))
 
 
-class DisbursementViewsV2TestCase(AbstractSecurityViewTestCase):
+class DisbursementViewsTestCase(AbstractSecurityViewTestCase):
     """
-    Test case related to disbursement search V2 and detail views.
+    Test case related to disbursement search and detail views.
     """
     view_name = 'security:disbursement_list'
     advanced_search_view_name = 'security:disbursement_advanced_search'
@@ -1657,7 +1676,7 @@ class DisbursementViewsV2TestCase(AbstractSecurityViewTestCase):
             api_filters = mocked_email_export_xlsx.call_args.kwargs['filters']
             # expect valid param to pass through
             self.assertEqual(api_filters['ordering'], self.search_ordering)
-            # SearchFormV2Mixin removes this param
+            # SearchFormMixin removes this param
             self.assertNotIn('advanced', api_filters)
             # exclusive_date_params are incremented
             # because the form presents an inclusive date range: [created__gte, created__lt]
