@@ -39,7 +39,7 @@ export var FormAnalytics = {
       // send click event, e.g. for print or export
       var $element = $(this);
       var eventDetails = $element.data('click-track').split(',');
-      var clickAsPageview = !!$element.data('click-as-pageview');
+      var clickAsPageview = Boolean($element.data('click-as-pageview'));
       if (eventDetails.length === 2) {
         sendEvent('form-link', eventDetails[0], eventDetails[1]);
 
