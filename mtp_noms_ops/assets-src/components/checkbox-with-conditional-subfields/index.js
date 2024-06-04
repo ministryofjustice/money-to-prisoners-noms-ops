@@ -12,7 +12,6 @@ export var CheckboxWithConditionalSubfields = {
           // find all fields in conditional content
           var $subfields = $('input, textarea', $conditionalContent[0]);
 
-          // eslint-disable-next-line no-inner-declarations
           function updateSubfields () {
             if ($checkbox.prop('checked')) {
               // if containing checkbox is checked, make subfields required
