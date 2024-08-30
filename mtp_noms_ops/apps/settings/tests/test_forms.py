@@ -24,7 +24,7 @@ class JobInformationFormTestCase(SimpleTestCase):
         })
 
         self.assertTrue(form.is_valid())
-        self.assertDictContainsSubset({'job_title_or_other': 'The Gaffer'}, form.cleaned_data)
+        self.assertEqual(form.cleaned_data.get('job_title_or_other'), 'The Gaffer')
 
     def test_form_returns_job_title_or_other_in_cleaned_data_if_other_not_selected(self):
         form = JobInformationForm({
@@ -35,7 +35,7 @@ class JobInformationFormTestCase(SimpleTestCase):
         })
 
         self.assertTrue(form.is_valid())
-        self.assertDictContainsSubset({'job_title_or_other': 'Intelligence officer'}, form.cleaned_data)
+        self.assertEqual(form.cleaned_data.get('job_title_or_other'), 'Intelligence officer')
 
     def test_form_invalid_with_no_data(self):
         form = JobInformationForm({
