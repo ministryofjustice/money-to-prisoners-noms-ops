@@ -1,5 +1,5 @@
-from django.conf.urls import url
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import re_path
 
 from mtp_noms_ops.utils import user_test
 from security import required_permissions, views
@@ -44,26 +44,26 @@ def fiu_security_test(view):
 
 app_name = 'security'
 urlpatterns = [
-    url(
+    re_path(
         r'^$',
         security_test(views.DashboardView.as_view()),
         name='dashboard',
     ),
-    url(
+    re_path(
         r'^confirm-hmpps-employee/$',
         login_required(views.HMPPSEmployeeView.as_view()),
         name='hmpps_employee',
     ),
-    url(r'^not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
-    url(r'^faq/$', login_required(views.FAQView.as_view()), name='faq'),
-    url(
+    re_path(r'^not-employee/$', views.NotHMPPSEmployeeView.as_view(), name='not_hmpps_employee'),
+    re_path(r'^faq/$', login_required(views.FAQView.as_view()), name='faq'),
+    re_path(
         r'^policy-change/$',
         login_required(views.PolicyChangeView.as_view()),
         name='policy_change'
     ),
 
     # credits
-    url(
+    re_path(
         r'^credits/$',
         security_test(
             views.CreditListView.as_view(
@@ -72,7 +72,7 @@ urlpatterns = [
         ),
         name='credit_list',
     ),
-    url(
+    re_path(
         r'^credits/advanced-search/$',
         security_test(
             views.CreditListView.as_view(
@@ -81,7 +81,7 @@ urlpatterns = [
         ),
         name='credit_advanced_search',
     ),
-    url(
+    re_path(
         r'^credits/search-results/$',
         security_test(
             views.CreditListView.as_view(
@@ -90,7 +90,7 @@ urlpatterns = [
         ),
         name='credit_search_results',
     ),
-    url(
+    re_path(
         r'^credits/export/$',
         security_test(
             views.CreditListView.as_view(
@@ -99,7 +99,7 @@ urlpatterns = [
         ),
         name='credit_export',
     ),
-    url(
+    re_path(
         r'^credits/email-export/$',
         security_test(
             views.CreditListView.as_view(
@@ -108,14 +108,14 @@ urlpatterns = [
         ),
         name='credit_email_export',
     ),
-    url(
+    re_path(
         r'^credits/(?P<credit_id>\d+)/$',
         security_test(views.CreditDetailView.as_view()),
         name='credit_detail',
     ),
 
     # senders
-    url(
+    re_path(
         r'^senders/$',
         security_test(
             views.SenderListView.as_view(
@@ -124,7 +124,7 @@ urlpatterns = [
         ),
         name='sender_list',
     ),
-    url(
+    re_path(
         r'^senders/advanced-search/$',
         security_test(
             views.SenderListView.as_view(
@@ -133,7 +133,7 @@ urlpatterns = [
         ),
         name='sender_advanced_search',
     ),
-    url(
+    re_path(
         r'^senders/search-results/$',
         security_test(
             views.SenderListView.as_view(
@@ -142,7 +142,7 @@ urlpatterns = [
         ),
         name='sender_search_results',
     ),
-    url(
+    re_path(
         r'^senders/export/$',
         security_test(
             views.SenderListView.as_view(
@@ -151,7 +151,7 @@ urlpatterns = [
         ),
         name='sender_export',
     ),
-    url(
+    re_path(
         r'^senders/email-export/$',
         security_test(
             views.SenderListView.as_view(
@@ -160,12 +160,12 @@ urlpatterns = [
         ),
         name='sender_email_export',
     ),
-    url(
+    re_path(
         r'^senders/(?P<sender_id>\d+)/$',
         security_test(views.SenderDetailView.as_view()),
         name='sender_detail',
     ),
-    url(
+    re_path(
         r'^senders/(?P<sender_id>\d+)/export/$',
         security_test(
             views.SenderDetailView.as_view(
@@ -174,7 +174,7 @@ urlpatterns = [
         ),
         name='sender_detail_export',
     ),
-    url(
+    re_path(
         r'^senders/(?P<sender_id>\d+)/email-export/$',
         security_test(
             views.SenderDetailView.as_view(
@@ -185,7 +185,7 @@ urlpatterns = [
     ),
 
     # prisoners
-    url(
+    re_path(
         r'^prisoners/$',
         security_test(
             views.PrisonerListView.as_view(
@@ -194,7 +194,7 @@ urlpatterns = [
         ),
         name='prisoner_list',
     ),
-    url(
+    re_path(
         r'^prisoners/advanced-search/$',
         security_test(
             views.PrisonerListView.as_view(
@@ -203,7 +203,7 @@ urlpatterns = [
         ),
         name='prisoner_advanced_search',
     ),
-    url(
+    re_path(
         r'^prisoners/search-results/$',
         security_test(
             views.PrisonerListView.as_view(
@@ -212,7 +212,7 @@ urlpatterns = [
         ),
         name='prisoner_search_results',
     ),
-    url(
+    re_path(
         r'^prisoners/search-results/disbursements/$',
         security_test(
             views.PrisonerDisbursementListView.as_view(
@@ -221,7 +221,7 @@ urlpatterns = [
         ),
         name='prisoner_disbursement_search_results',
     ),
-    url(
+    re_path(
         r'^prisoners/export/$',
         security_test(
             views.PrisonerListView.as_view(
@@ -230,7 +230,7 @@ urlpatterns = [
         ),
         name='prisoner_export'
     ),
-    url(
+    re_path(
         r'^prisoners/email-export/$',
         security_test(
             views.PrisonerListView.as_view(
@@ -239,12 +239,12 @@ urlpatterns = [
         ),
         name='prisoner_email_export',
     ),
-    url(
+    re_path(
         r'^prisoners/(?P<prisoner_id>\d+)/$',
         security_test(views.PrisonerDetailView.as_view()),
         name='prisoner_detail',
     ),
-    url(
+    re_path(
         r'^prisoners/(?P<prisoner_id>\d+)/export/$',
         security_test(
             views.PrisonerDetailView.as_view(
@@ -253,7 +253,7 @@ urlpatterns = [
         ),
         name='prisoner_detail_export',
     ),
-    url(
+    re_path(
         r'^prisoners/(?P<prisoner_id>\d+)/email-export/$',
         security_test(
             views.PrisonerDetailView.as_view(
@@ -262,12 +262,12 @@ urlpatterns = [
         ),
         name='prisoner_detail_email_export',
     ),
-    url(
+    re_path(
         r'^prisoners/(?P<prisoner_id>\d+)/disbursements/$',
         security_test(views.PrisonerDisbursementDetailView.as_view()),
         name='prisoner_disbursement_detail',
     ),
-    url(
+    re_path(
         r'^prisoners/(?P<prisoner_id>\d+)/disbursements/export/$',
         security_test(
             views.PrisonerDisbursementDetailView.as_view(
@@ -276,7 +276,7 @@ urlpatterns = [
         ),
         name='prisoner_disbursement_detail_export',
     ),
-    url(
+    re_path(
         r'^prisoners/(?P<prisoner_id>\d+)/disbursements/email-export/$',
         security_test(
             views.PrisonerDisbursementDetailView.as_view(
@@ -287,19 +287,19 @@ urlpatterns = [
     ),
 
     # async-loaded nomis info
-    url(
+    re_path(
         r'^prisoner-image/(?P<prisoner_number>[A-Za-z0-9]*)/$',
         security_test(views.prisoner_image_view),
         name='prisoner_image',
     ),
-    url(
+    re_path(
         r'^prisoner-info/(?P<prisoner_number>[A-Za-z0-9]*)/$',
         security_test(views.prisoner_nomis_info_view),
         name='prisoner_nomis_info',
     ),
 
     # disbursements
-    url(
+    re_path(
         r'^disbursements/$',
         security_test(
             views.DisbursementListView.as_view(
@@ -308,7 +308,7 @@ urlpatterns = [
         ),
         name='disbursement_list',
     ),
-    url(
+    re_path(
         r'^disbursements/advanced-search/$',
         security_test(
             views.DisbursementListView.as_view(
@@ -317,7 +317,7 @@ urlpatterns = [
         ),
         name='disbursement_advanced_search',
     ),
-    url(
+    re_path(
         r'^disbursements/search-results/$',
         security_test(
             views.DisbursementListView.as_view(
@@ -326,7 +326,7 @@ urlpatterns = [
         ),
         name='disbursement_search_results',
     ),
-    url(
+    re_path(
         r'^disbursements/export/$',
         security_test(
             views.DisbursementListView.as_view(
@@ -335,7 +335,7 @@ urlpatterns = [
         ),
         name='disbursement_export',
     ),
-    url(
+    re_path(
         r'^disbursements/email-export/$',
         security_test(
             views.DisbursementListView.as_view(
@@ -344,78 +344,78 @@ urlpatterns = [
         ),
         name='disbursement_email_export',
     ),
-    url(
+    re_path(
         r'^disbursements/(?P<disbursement_id>\d+)/$',
         security_test(views.DisbursementDetailView.as_view()),
         name='disbursement_detail',
     ),
 
     # review credits
-    url(
+    re_path(
         r'^review-credits/$',
         security_test(views.ReviewCreditsView.as_view()),
         name='review_credits',
     ),
 
     # notifications
-    url(
+    re_path(
         r'^notifications/$',
         security_test(views.NotificationListView.as_view()),
         name='notification_list',
     ),
 
     # checks
-    url(
+    re_path(
         r'^checks/$',
         fiu_security_test(views.CheckListView.as_view()),
         name='check_list',
     ),
-    url(
+    re_path(
         r'^checks/my-list/$',
         fiu_security_test(views.MyCheckListView.as_view()),
         name='my_check_list',
     ),
-    url(
+    re_path(
         r'^checks/auto-accept-rules/$',
         fiu_security_test(views.AutoAcceptRuleListView.as_view()),
         name='auto_accept_rule_list',
     ),
-    url(
+    re_path(
         r'^checks/auto-accept-rules/(?P<auto_accept_rule_id>\d+)/$',
         fiu_security_test(views.AutoAcceptRuleDetailView.as_view()),
         name='auto_accept_rule_detail',
     ),
-    url(
+    re_path(
         r'^checks/(?P<check_id>\d+)/resolve/$',
         fiu_security_test(views.AcceptOrRejectCheckView.as_view()),
         name='resolve_check',
     ),
-    url(
+    re_path(
         r'^checks/(?P<check_id>\d+)/assignment/list/(?P<page>\d+)/$',
         fiu_security_test(views.CheckAssignView.as_view(redirect_to_list=True)),
         name='assign_check_then_list',
     ),
-    url(
+    re_path(
         r'^checks/(?P<check_id>\d+)/assignment/$',
         fiu_security_test(views.CheckAssignView.as_view(redirect_to_list=False)),
         name='assign_check',
     ),
-    url(
+    re_path(
         r'^checks/history/$',
         fiu_security_test(views.CheckHistoryListView.as_view()),
         name='check_history',
     ),
-    url(
+    re_path(
         r'^checks/monitored-email-addresses/$',
         fiu_security_test(views.MonitoredPartialEmailAddressListView.as_view()),
         name='monitored_email_addresses',
     ),
-    url(
+    re_path(
         r'^checks/monitored-email-addresses/add/$',
         fiu_security_test(views.MonitoredPartialEmailAddressAddView.as_view()),
         name='add_monitored_email_address',
     ),
-    url(
+    re_path(
         r'^checks/monitored-email-addresses/remove/$',
         fiu_security_test(views.MonitoredPartialEmailAddressDeleteView.as_view()),
         name='delete_monitored_email_address',
