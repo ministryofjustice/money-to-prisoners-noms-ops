@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateformat import format as date_format
 from django.utils.functional import cached_property
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from mtp_common.analytics import genericised_pageview
@@ -247,7 +247,7 @@ class SecurityView(FormView):
         if referer:
             referer = unquote(referer)  # HTTP_REFERER may be encoded.
 
-        if not is_safe_url(
+        if not url_has_allowed_host_and_scheme(
             url=referer,
             allowed_hosts={self.request.get_host()},
             require_https=self.request.is_secure(),
