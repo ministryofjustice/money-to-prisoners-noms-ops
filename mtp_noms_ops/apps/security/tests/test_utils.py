@@ -138,11 +138,11 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
         """
         objs = [
             {
-                'started_at': '2019-07-01',
+                'started_at': '2019-07-01T00:30:00+01:00',  # BST at boundary
                 'received_at': '2019-07-02T10:00:00Z',  # utc
-                'credited_at': '2019-07-03',
+                'credited_at': '2019-07-03T10:00:00+01:00',  # BST
                 'refunded_at': '2019-07-04T11:01:00+01:00',  # BST+1
-                'created': '2019-07-05',
+                'created': '2019-07-05T10:02:00Z',
                 'triggered_at': '2019-07-06T10:02:00Z',
             }
         ]
@@ -150,11 +150,11 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
         self.assertEqual(
             converted_objects[0],
             {
-                'started_at': datetime.date(2019, 7, 1),
+                'started_at': localtime(datetime.datetime(2019, 6, 30, 23, 30, tzinfo=utc)),
                 'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
-                'credited_at': datetime.date(2019, 7, 3),
+                'credited_at': localtime(datetime.datetime(2019, 7, 3, 9, 0, tzinfo=utc)),
                 'refunded_at': make_aware(datetime.datetime(2019, 7, 4, 11, 1)),
-                'created': datetime.date(2019, 7, 5),
+                'created': localtime(datetime.datetime(2019, 7, 5, 10, 2, tzinfo=utc)),
                 'triggered_at': localtime(datetime.datetime(2019, 7, 6, 10, 2, tzinfo=utc)),
             },
         )
@@ -164,21 +164,21 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
         Test that the function converts dates and datetimes correctly when the input arg is an object.
         """
         obj = {
-            'started_at': '2019-07-01',
+            'started_at': '2019-07-01T00:30:00+01:00',  # BST at boundary
             'received_at': '2019-07-02T10:00:00Z',  # utc
-            'credited_at': '2019-07-03',
+            'credited_at': '2019-07-03T10:00:00+01:00',  # BST
             'refunded_at': '2019-07-04T11:01:00+01:00',  # BST+1
-            'created': '2019-07-05',
+            'created': '2019-07-05T10:02:00Z',
             'triggered_at': '2019-07-06T10:02:00Z',
         }
         self.assertEqual(
             convert_date_fields(obj),
             {
-                'started_at': datetime.date(2019, 7, 1),
+                'started_at': localtime(datetime.datetime(2019, 6, 30, 23, 30, tzinfo=utc)),
                 'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
-                'credited_at': datetime.date(2019, 7, 3),
+                'credited_at': localtime(datetime.datetime(2019, 7, 3, 9, 0, tzinfo=utc)),
                 'refunded_at': make_aware(datetime.datetime(2019, 7, 4, 11, 1)),
-                'created': datetime.date(2019, 7, 5),
+                'created': localtime(datetime.datetime(2019, 7, 5, 10, 2, tzinfo=utc)),
                 'triggered_at': localtime(datetime.datetime(2019, 7, 6, 10, 2, tzinfo=utc)),
             },
         )
@@ -190,7 +190,7 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
         objs = [
             {
                 'field': {
-                    'started_at': '2019-07-01',
+                    'started_at': '2019-07-01T02:00:00+01:00',  # bst
                     'received_at': '2019-07-02T10:00:00Z',  # utc
                 },
             }
@@ -200,7 +200,7 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
             converted_objects[0],
             {
                 'field': {
-                    'started_at': datetime.date(2019, 7, 1),
+                    'started_at': localtime(datetime.datetime(2019, 7, 1, 1, 0, tzinfo=utc)),
                     'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
                 },
             },
@@ -209,7 +209,7 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
     def test_handles_timezone_aware_and_naive_datetimes(self):
         objs = [{
             # dates in BST
-            'started_at': '2021-05-07',
+            'started_at': '2021-07-30T00:30:00+01:00',  # BST at boundary
             'received_at': '2021-05-07T12:00:00',  # naive so assumed Europe/London (i.e. BST)
             'credited_at': '2021-05-07T12:00:00Z',  # 12pm UTC is 1pm in Europe/London (i.e. BST)
             'refunded_at': '2021-05-07T12:00:00+01:00',  # explicit time zone
@@ -222,7 +222,7 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
         self.assertEqual(
             converted_objects[0],
             {
-                'started_at': datetime.date(2021, 5, 7),
+                'started_at': make_aware(datetime.datetime(2021, 7, 30, 0, 30)),
                 'received_at': make_aware(datetime.datetime(2021, 5, 7, 12)),
                 'credited_at': make_aware(datetime.datetime(2021, 5, 7, 13)),
                 'refunded_at': make_aware(datetime.datetime(2021, 5, 7, 12)),
