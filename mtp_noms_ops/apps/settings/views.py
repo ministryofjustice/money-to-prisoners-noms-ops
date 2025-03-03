@@ -1,7 +1,7 @@
 from urllib.parse import urlencode
 
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.contrib.auth.views import SuccessURLAllowedHostsMixin
+from django.contrib.auth.views import RedirectURLMixin
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -81,7 +81,7 @@ class ConfirmPrisonsView(FormView):
         return self.success_url
 
 
-class ChangePrisonsView(SuccessURLAllowedHostsMixin, FormView):
+class ChangePrisonsView(RedirectURLMixin, FormView):
     title = _('Change prisons')
     template_name = 'settings/confirm-prisons-change.html'
     form_class = ChangePrisonForm
@@ -154,7 +154,7 @@ class ConfirmPrisonsConfirmationView(TemplateView):
         return context
 
 
-class JobInformationView(SuccessURLAllowedHostsMixin, FormView):
+class JobInformationView(RedirectURLMixin, FormView):
     title = _('Help us improve this service')
     template_name = 'settings/job-information.html'
     form_class = JobInformationForm
