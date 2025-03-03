@@ -3,7 +3,6 @@ import csv
 from datetime import datetime
 import io
 import re
-import typing
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
@@ -31,7 +30,7 @@ class LocationFileUploadForm(forms.Form):
         super().__init__(*args, **kwargs)
 
     def clean_location_file(self):
-        locations: typing.List[PrisonerLocation] = []
+        locations: list[PrisonerLocation] = []
         transfer_count = 0
         skipped_counts = collections.defaultdict(int)
 

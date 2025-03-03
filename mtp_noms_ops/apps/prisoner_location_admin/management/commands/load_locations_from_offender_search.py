@@ -73,15 +73,15 @@ class Command(BaseCommand):
         self.stdout.write(f'Starting prisoner location update as {user.username}')
         return user
 
-    def get_known_prison_ids(self) -> typing.List[str]:
+    def get_known_prison_ids(self) -> list[str]:
         prison_list = PrisonList(self.session)
         prison_ids = [prison['nomis_id'] for prison in prison_list.prisons]
 
         self.stdout.write(f'{len(prison_ids)} prisons with active prisoner locations')
         return prison_ids
 
-    def search_for_offenders(self, prison_ids: typing.List[str]) -> typing.List[PrisonerLocation]:
-        locations: typing.List[PrisonerLocation] = []
+    def search_for_offenders(self, prison_ids: list[str]) -> list[PrisonerLocation]:
+        locations: list[PrisonerLocation] = []
 
         headers = connector.build_request_api_headers()
         for prison_id in prison_ids:
@@ -131,7 +131,7 @@ class OffenderSearchPrisoner(typing.TypedDict):
 
 
 class OffenderSearchPrisonerList(typing.TypedDict):
-    content: typing.List[OffenderSearchPrisoner]
+    content: list[OffenderSearchPrisoner]
     totalElements: int  # noqa: N815
     last: bool
 
