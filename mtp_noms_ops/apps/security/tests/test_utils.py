@@ -1,9 +1,9 @@
-import datetime
+from datetime import date, datetime, timezone
 import unittest
 
 from unittest import mock
 
-from django.utils.timezone import localtime, make_aware, utc
+from django.utils.timezone import localtime, make_aware
 from mtp_common.test_utils import silence_logger
 
 from security.templatetags.security import genitive, format_sort_code, check_description
@@ -121,10 +121,10 @@ class GetNeedAttentionDateTestCase(unittest.TestCase):
     that would be 3 days ago, inclusively
     """
     @mock.patch('security.utils.timezone', mock.MagicMock(
-        localtime=mock.MagicMock(return_value=make_aware(datetime.datetime(2019, 7, 3, 9)))
+        localtime=mock.MagicMock(return_value=make_aware(datetime(2019, 7, 3, 9)))
     ))
     def test_returns_date_3_days_ago_inclusively(self):
-        self.assertEqual(get_need_attention_date(), make_aware(datetime.datetime(2019, 7, 1)))
+        self.assertEqual(get_need_attention_date(), make_aware(datetime(2019, 7, 1)))
 
 
 class ConvertDateFieldsTestCase(unittest.TestCase):
@@ -150,12 +150,12 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
         self.assertEqual(
             converted_objects[0],
             {
-                'started_at': localtime(datetime.datetime(2019, 6, 30, 23, 30, tzinfo=utc)),
-                'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
-                'credited_at': localtime(datetime.datetime(2019, 7, 3, 9, 0, tzinfo=utc)),
-                'refunded_at': make_aware(datetime.datetime(2019, 7, 4, 11, 1)),
-                'created': localtime(datetime.datetime(2019, 7, 5, 10, 2, tzinfo=utc)),
-                'triggered_at': localtime(datetime.datetime(2019, 7, 6, 10, 2, tzinfo=utc)),
+                'started_at': localtime(datetime(2019, 6, 30, 23, 30, tzinfo=timezone.utc)),
+                'received_at': localtime(datetime(2019, 7, 2, 10, 0, tzinfo=timezone.utc)),
+                'credited_at': localtime(datetime(2019, 7, 3, 9, 0, tzinfo=timezone.utc)),
+                'refunded_at': make_aware(datetime(2019, 7, 4, 11, 1)),
+                'created': localtime(datetime(2019, 7, 5, 10, 2, tzinfo=timezone.utc)),
+                'triggered_at': localtime(datetime(2019, 7, 6, 10, 2, tzinfo=timezone.utc)),
             },
         )
 
@@ -174,12 +174,12 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
         self.assertEqual(
             convert_date_fields(obj),
             {
-                'started_at': localtime(datetime.datetime(2019, 6, 30, 23, 30, tzinfo=utc)),
-                'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
-                'credited_at': localtime(datetime.datetime(2019, 7, 3, 9, 0, tzinfo=utc)),
-                'refunded_at': make_aware(datetime.datetime(2019, 7, 4, 11, 1)),
-                'created': localtime(datetime.datetime(2019, 7, 5, 10, 2, tzinfo=utc)),
-                'triggered_at': localtime(datetime.datetime(2019, 7, 6, 10, 2, tzinfo=utc)),
+                'started_at': localtime(datetime(2019, 6, 30, 23, 30, tzinfo=timezone.utc)),
+                'received_at': localtime(datetime(2019, 7, 2, 10, 0, tzinfo=timezone.utc)),
+                'credited_at': localtime(datetime(2019, 7, 3, 9, 0, tzinfo=timezone.utc)),
+                'refunded_at': make_aware(datetime(2019, 7, 4, 11, 1)),
+                'created': localtime(datetime(2019, 7, 5, 10, 2, tzinfo=timezone.utc)),
+                'triggered_at': localtime(datetime(2019, 7, 6, 10, 2, tzinfo=timezone.utc)),
             },
         )
 
@@ -200,8 +200,8 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
             converted_objects[0],
             {
                 'field': {
-                    'started_at': localtime(datetime.datetime(2019, 7, 1, 1, 0, tzinfo=utc)),
-                    'received_at': localtime(datetime.datetime(2019, 7, 2, 10, 0, tzinfo=utc)),
+                    'started_at': localtime(datetime(2019, 7, 1, 1, 0, tzinfo=timezone.utc)),
+                    'received_at': localtime(datetime(2019, 7, 2, 10, 0, tzinfo=timezone.utc)),
                 },
             },
         )
@@ -222,13 +222,13 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
         self.assertEqual(
             converted_objects[0],
             {
-                'started_at': make_aware(datetime.datetime(2021, 7, 30, 0, 30)),
-                'received_at': make_aware(datetime.datetime(2021, 5, 7, 12)),
-                'credited_at': make_aware(datetime.datetime(2021, 5, 7, 13)),
-                'refunded_at': make_aware(datetime.datetime(2021, 5, 7, 12)),
-                'created': make_aware(datetime.datetime(2021, 3, 1)),
-                'triggered_at': make_aware(datetime.datetime(2021, 3, 1)),
-                'actioned_at': make_aware(datetime.datetime(2021, 3, 1)),
+                'started_at': make_aware(datetime(2021, 7, 30, 0, 30)),
+                'received_at': make_aware(datetime(2021, 5, 7, 12)),
+                'credited_at': make_aware(datetime(2021, 5, 7, 13)),
+                'refunded_at': make_aware(datetime(2021, 5, 7, 12)),
+                'created': make_aware(datetime(2021, 3, 1)),
+                'triggered_at': make_aware(datetime(2021, 3, 1)),
+                'actioned_at': make_aware(datetime(2021, 3, 1)),
             },
         )
 
@@ -241,7 +241,7 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
                 'started_at': 1,
                 'received_at': ['date'],
                 'credited_at': {'key': 'value'},
-                'refunded_at': datetime.date(2019, 7, 1),
+                'refunded_at': date(2019, 7, 1),
             }
         ]
         converted_objects = convert_date_fields(objs)
@@ -251,7 +251,7 @@ class ConvertDateFieldsTestCase(unittest.TestCase):
                 'started_at': 1,
                 'received_at': ['date'],
                 'credited_at': {'key': 'value'},
-                'refunded_at': datetime.date(2019, 7, 1),
+                'refunded_at': date(2019, 7, 1),
             }
         )
 
