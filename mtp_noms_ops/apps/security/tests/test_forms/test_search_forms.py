@@ -462,7 +462,7 @@ class PrisonSelectorSearchFormMixinTestCase(SimpleTestCase):
         scenarios = [
             ValidationScenario(
                 {'prison_selector': PrisonSelectorSearchFormMixin.PRISON_SELECTOR_EXACT_PRISON_CHOICE_VALUE},
-                {'prison': ['This field is required.']},
+                {'prison': ['This field is required']},
             ),
             ValidationScenario(
                 {
@@ -1329,7 +1329,7 @@ class SenderFormTestCase(SecurityFormTestCase):
                     'payment_method': PaymentMethod.online.name,
                     'card_number_last_digits': '12345',
                 },
-                {'card_number_last_digits': ['Ensure this value has at most 4 characters (it has 5).']},
+                {'card_number_last_digits': ['You’ve entered too many characters']},
             ),
             ValidationScenario(
                 {
@@ -1912,7 +1912,7 @@ class CreditFormTestCase(SecurityFormTestCase):
                     'payment_method': PaymentMethod.online.name,
                     'card_number_last_digits': '12345',
                 },
-                {'card_number_last_digits': ['Ensure this value has at most 4 characters (it has 5).']},
+                {'card_number_last_digits': ['You’ve entered too many characters']},
             ),
             ValidationScenario(
                 {'sender_ip_address': '256.0.0.1'},
