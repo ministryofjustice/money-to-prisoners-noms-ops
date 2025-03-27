@@ -4,7 +4,7 @@ import logging
 import re
 
 from django.utils import timezone
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.translation import gettext_lazy as _
 from mtp_common.auth import USER_DATA_SESSION_KEY
 from mtp_common.auth.api_client import get_api_session
@@ -38,6 +38,7 @@ def convert_date_fields(object_list, include_nested=False):
     supported yet.
     """
     fields = ('started_at', 'received_at', 'credited_at', 'refunded_at', 'created', 'triggered_at', 'actioned_at')
+    parsers = (parse_datetime, parse_date)
 
     def convert(obj):
         if include_nested:
@@ -56,20 +57,21 @@ def convert_date_fields(object_list, include_nested=False):
             value = obj.get(field)
             if not value or not isinstance(value, str):
                 continue
+            for parser in parsers:
+                try:
+                    new_value = parser(value)
+                    if not new_value:
+                        continue
 
-            try:
-                new_value = parse_datetime(value)
-
-                if isinstance(new_value, datetime.datetime):
-                    if timezone.is_aware(new_value):
-                        new_value = timezone.localtime(new_value)
-                    else:
-                        new_value = timezone.make_aware(new_value)
-
-                if new_value:
+                    if isinstance(new_value, datetime.datetime):
+                        if timezone.is_aware(new_value):
+                            new_value = timezone.localtime(new_value)
+                        else:
+                            new_value = timezone.make_aware(new_value)
                     obj[field] = new_value
-            except (ValueError, TypeError):
-                logger.exception('Failed to convert date fields in object list')
+                    break
+                except (ValueError, TypeError):
+                    logger.exception('Failed to convert date fields in object list')
         return obj
 
     if isinstance(object_list, dict):
