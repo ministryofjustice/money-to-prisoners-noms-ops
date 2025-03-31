@@ -38,7 +38,6 @@ def convert_date_fields(object_list, include_nested=False):
     supported yet.
     """
     fields = ('started_at', 'received_at', 'credited_at', 'refunded_at', 'created', 'triggered_at', 'actioned_at')
-    parsers = (parse_datetime, parse_date)
 
     def convert(obj):
         if include_nested:
@@ -57,21 +56,20 @@ def convert_date_fields(object_list, include_nested=False):
             value = obj.get(field)
             if not value or not isinstance(value, str):
                 continue
-            for parser in parsers:
-                try:
-                    new_value = parser(value)
-                    if not new_value:
-                        continue
+            parser = parse_datetime if 'T' in value else parse_date
+            try:
+                new_value = parser(value)
+                if not new_value:
+                    continue
 
-                    if isinstance(new_value, datetime.datetime):
-                        if timezone.is_aware(new_value):
-                            new_value = timezone.localtime(new_value)
-                        else:
-                            new_value = timezone.make_aware(new_value)
-                    obj[field] = new_value
-                    break
-                except (ValueError, TypeError):
-                    logger.exception('Failed to convert date fields in object list')
+                if isinstance(new_value, datetime.datetime):
+                    if timezone.is_aware(new_value):
+                        new_value = timezone.localtime(new_value)
+                    else:
+                        new_value = timezone.make_aware(new_value)
+                obj[field] = new_value
+            except (ValueError, TypeError):
+                logger.exception('Failed to convert date fields in object list')
         return obj
 
     if isinstance(object_list, dict):

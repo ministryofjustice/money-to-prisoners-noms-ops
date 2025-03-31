@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, time, timezone as tz
 
 from django import forms
 from django.utils import timezone
@@ -28,8 +28,7 @@ class ReviewCreditsForm(forms.Form):
         ]
         return retrieve_all_pages_for_path(
             self.session, '/credits/', valid=True, reviewed=False, prison=prisons, resolution='pending',
-            received_at__lt=datetime.datetime.combine(timezone.now().date(),
-                                                      datetime.time(0, 0, 0, tzinfo=timezone.utc))
+            received_at__lt=datetime.combine(timezone.now().date(), time(0, 0, 0, tzinfo=tz.utc))
         )
 
     def review(self):

@@ -3,7 +3,7 @@ from typing import Optional
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.edit import BaseFormView, FormView
 
@@ -321,7 +321,7 @@ class AcceptOrRejectCheckView(FormView):
             messages.info(self.request, ui_message)
 
             redirect_url = form.cleaned_data['redirect_url']
-            if not is_safe_url(
+            if not url_has_allowed_host_and_scheme(
                 url=redirect_url,
                 allowed_hosts={self.request.get_host()},
                 require_https=self.request.is_secure(),

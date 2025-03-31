@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from mtp_common.auth.api_client import get_api_session
@@ -40,7 +40,7 @@ class HMPPSEmployeeView(FormView):
         if confirmation == 'yes':
             save_user_flags(self.request, hmpps_employee_flag, api_session)
             success_url = form.cleaned_data['next']
-            if success_url and is_safe_url(success_url, allowed_hosts=self.request.get_host()):
+            if success_url and url_has_allowed_host_and_scheme(success_url, allowed_hosts=self.request.get_host()):
                 self.success_url = success_url
             return super().form_valid(form)
         else:

@@ -1,10 +1,10 @@
 from urllib.parse import urlencode
 
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.contrib.auth.views import SuccessURLAllowedHostsMixin
+from django.contrib.auth.views import RedirectURLMixin
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from mtp_common.auth.api_client import get_api_session
@@ -81,7 +81,7 @@ class ConfirmPrisonsView(FormView):
         return self.success_url
 
 
-class ChangePrisonsView(SuccessURLAllowedHostsMixin, FormView):
+class ChangePrisonsView(RedirectURLMixin, FormView):
     title = _('Change prisons')
     template_name = 'settings/confirm-prisons-change.html'
     form_class = ChangePrisonForm
@@ -93,7 +93,7 @@ class ChangePrisonsView(SuccessURLAllowedHostsMixin, FormView):
         """
         if REDIRECT_FIELD_NAME in self.request.GET:
             next_page = self.request.GET[REDIRECT_FIELD_NAME]
-            url_is_safe = is_safe_url(
+            url_is_safe = url_has_allowed_host_and_scheme(
                 url=next_page,
                 allowed_hosts=self.get_success_url_allowed_hosts(),
                 require_https=self.request.is_secure(),
@@ -154,7 +154,7 @@ class ConfirmPrisonsConfirmationView(TemplateView):
         return context
 
 
-class JobInformationView(SuccessURLAllowedHostsMixin, FormView):
+class JobInformationView(RedirectURLMixin, FormView):
     title = _('Help us improve this service')
     template_name = 'settings/job-information.html'
     form_class = JobInformationForm
@@ -166,7 +166,7 @@ class JobInformationView(SuccessURLAllowedHostsMixin, FormView):
     def get_success_url(self):
         if REDIRECT_FIELD_NAME in self.request.GET:
             next_page = self.request.GET[REDIRECT_FIELD_NAME]
-            url_is_safe = is_safe_url(
+            url_is_safe = url_has_allowed_host_and_scheme(
                 url=next_page,
                 allowed_hosts=self.get_success_url_allowed_hosts(),
                 require_https=self.request.is_secure(),

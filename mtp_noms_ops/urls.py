@@ -1,10 +1,9 @@
 from django.conf import settings
-from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
-from django.urls import reverse, reverse_lazy
+from django.urls import include, reverse, reverse_lazy, re_path
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
 from django.views.generic import RedirectView
@@ -38,89 +37,89 @@ def root_view(request):
 # NB: API settings has certain Noms Ops URLs which will need to be updated
 # if they change: settings, feedback, and notifications
 urlpatterns = i18n_patterns(
-    url(r'^$', root_view, name='root'),
-    url(r'^prisoner-location/', include('prisoner_location_admin.urls')),
-    url(r'^settings/', include('settings.urls')),
+    re_path(r'^$', root_view, name='root'),
+    re_path(r'^prisoner-location/', include('prisoner_location_admin.urls')),
+    re_path(r'^settings/', include('settings.urls')),
 
-    url(r'^faq/', FAQView.as_view(), name='faq'),
-    url(r'^feedback/', include('feedback.urls')),
+    re_path(r'^faq/', FAQView.as_view(), name='faq'),
+    re_path(r'^feedback/', include('feedback.urls')),
 
-    url(r'^', include('mtp_auth.urls')),
+    re_path(r'^', include('mtp_auth.urls')),
 
-    url(r'^login/$', login_view, name='login'),
-    url(
+    re_path(r'^login/$', login_view, name='login'),
+    re_path(
         r'^logout/$', auth_views.logout, {
             'template_name': 'mtp_auth/login.html',
             'next_page': reverse_lazy('login'),
         }, name='logout'
     ),
-    url(
+    re_path(
         r'^password_change/$', auth_views.password_change, {
             'template_name': 'mtp_common/auth/password_change.html',
             'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='password_change'
     ),
-    url(
+    re_path(
         r'^create_password/$', auth_views.password_change_with_code, {
             'template_name': 'mtp_common/auth/password_change_with_code.html',
             'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='password_change_with_code'
     ),
-    url(
+    re_path(
         r'^password_change_done/$', auth_views.password_change_done, {
             'template_name': 'mtp_common/auth/password_change_done.html',
             'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='password_change_done'
     ),
-    url(
+    re_path(
         r'^reset-password/$', auth_views.reset_password, {
             'password_change_url': reverse_lazy('password_change_with_code'),
             'template_name': 'mtp_common/auth/reset-password.html',
             'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='reset_password'
     ),
-    url(
+    re_path(
         r'^reset-password-done/$', auth_views.reset_password_done, {
             'template_name': 'mtp_common/auth/reset-password-done.html',
             'cancel_url': reverse_lazy(settings.LOGIN_REDIRECT_URL),
         }, name='reset_password_done'
     ),
-    url(
+    re_path(
         r'^email_change/$', auth_views.email_change, {
             'cancel_url': reverse_lazy('settings'),
         }, name='email_change'
     ),
-    url(r'^security/', include('security.urls', namespace='security')),
+    re_path(r'^security/', include('security.urls', namespace='security')),
 
     # Override mtp_common.user_admin's /users/new/ view
-    url(r'^users/new/$', UserCreationView.as_view(), name='new-user'),
+    re_path(r'^users/new/$', UserCreationView.as_view(), name='new-user'),
     # Override mtp_common.user_admin's /users/{ID}/edit/ view
-    url(r'^users/(?P<username>[^/]+)/edit/$', UserUpdateView.as_view(), name='edit-user'),
-    url(r'^', include('mtp_common.user_admin.urls')),
-    url(
+    re_path(r'^users/(?P<username>[^/]+)/edit/$', UserUpdateView.as_view(), name='edit-user'),
+    re_path(r'^', include('mtp_common.user_admin.urls')),
+    re_path(
         r'^users/request/(?P<account_request>\d+)/accept/$',
         AcceptRequestView.as_view(),
         name='accept-request'
     ),
 
-    url(r'^js-i18n.js$', cache_control(public=True, max_age=86400)(JavaScriptCatalog.as_view()), name='js-i18n'),
+    re_path(r'^js-i18n.js$', cache_control(public=True, max_age=86400)(JavaScriptCatalog.as_view()), name='js-i18n'),
 
-    url(r'^404.html$', lambda request: TemplateResponse(request, 'mtp_common/errors/404.html', status=404)),
-    url(r'^500.html$', lambda request: TemplateResponse(request, 'mtp_common/errors/500.html', status=500)),
+    re_path(r'^404.html$', lambda request: TemplateResponse(request, 'mtp_common/errors/404.html', status=404)),
+    re_path(r'^500.html$', lambda request: TemplateResponse(request, 'mtp_common/errors/500.html', status=500)),
 )
 
 urlpatterns += [
-    url(r'^ping.json$', PingJsonView.as_view(
+    re_path(r'^ping.json$', PingJsonView.as_view(
         build_date_key='APP_BUILD_DATE',
         commit_id_key='APP_GIT_COMMIT',
         version_number_key='APP_BUILD_TAG',
     ), name='ping_json'),
-    url(r'^healthcheck.json$', HealthcheckView.as_view(), name='healthcheck_json'),
-    url(r'^metrics.txt$', metrics_view, name='prometheus_metrics'),
+    re_path(r'^healthcheck.json$', HealthcheckView.as_view(), name='healthcheck_json'),
+    re_path(r'^metrics.txt$', metrics_view, name='prometheus_metrics'),
 
-    url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'images/favicon.ico', permanent=True)),
-    url(r'^robots.txt$', lambda request: HttpResponse('User-agent: *\nDisallow: /', content_type='text/plain')),
-    url(r'^\.well-known/security\.txt$', RedirectView.as_view(
+    re_path(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'images/favicon.ico', permanent=True)),
+    re_path(r'^robots.txt$', lambda request: HttpResponse('User-agent: *\nDisallow: /', content_type='text/plain')),
+    re_path(r'^\.well-known/security\.txt$', RedirectView.as_view(
         url='https://security-guidance.service.justice.gov.uk/.well-known/security.txt',
         permanent=True,
     )),
