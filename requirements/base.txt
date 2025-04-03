@@ -1,5 +1,5 @@
 # Dependencies needed for all environments
 
-money-to-prisoners-common~=19.0.1
+money-to-prisoners-common~=19.1.0
 
 openpyxl~=3.1
