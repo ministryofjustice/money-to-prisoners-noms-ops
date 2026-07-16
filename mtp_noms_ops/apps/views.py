@@ -13,7 +13,7 @@ class FAQView(TemplateView):
 
         context['breadcrumbs_back'] = reverse_lazy('login')
         context['cashbook_url'] = settings.CASHBOOK_URL
-        context['reset_password_url'] = settings.SERVICENOW_PASSWORD_RESET_URL
+        context['reset_password_url'] = reverse_lazy('reset_password')
         context['sign_up_url'] = reverse_lazy('sign-up')
 
         return context
