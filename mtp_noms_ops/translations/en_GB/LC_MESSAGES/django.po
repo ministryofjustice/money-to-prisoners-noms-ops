@@ -1064,3 +1064,12 @@ msgstr ""
 #: utils.py:48
 msgid "Go to the homepage"
 msgstr ""
+
+#: templates/faq.html:49
+#, python-format
+msgid "To change your username, <a href=\"%(servicenow_password_reset_url)s\">contact us</a>."
+msgstr ""
+
+#: templates/faq.html:59
+msgid "Contact us"
+msgstr ""
