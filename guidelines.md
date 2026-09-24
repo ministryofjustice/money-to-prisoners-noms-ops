@@ -79,4 +79,5 @@ The application interacts with HMPPS APIs using **HMPPS Auth** (OAuth2 client cr
   - Follow PEP8 and Django coding conventions.
   - Linting can be checked via `./run.py lint`.
 - **Docker**:
-  - A Docker environment is available for local testing that mirrors production: `./run.py local_docker`.
+  - `docker compose up` runs this app from your checkout with the database and API; add `--profile full` for the other apps.
+    See [Running locally with Docker](README.md#running-locally-with-docker).
