@@ -38,6 +38,9 @@ class Command(BaseCommand):
             if not should_continue:
                 self.stdout.write('Not running on first instance so upload will be skipped')
                 return
+            if settings.ENVIRONMENT == 'parity':
+                self.stdout.write(f'Not running in {settings.ENVIRONMENT} environment')
+                return
             if settings.ENVIRONMENT != 'prod' and not in_office_hours():
                 self.stdout.write(f'Not running outside of office hours in {settings.ENVIRONMENT} environment')
                 return

@@ -42,6 +42,26 @@ class LoadLocationsFromOffenderSearchTestCase(SimpleTestCase):
     @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.update_locations')
     @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.is_first_instance')
     @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.timezone')
+    @override_settings(ENVIRONMENT='parity')
+    def test_does_not_run_in_parity(
+        self, mock_timezone, mock_is_first_instance, mock_update_locations,
+    ):
+        mock_is_first_instance.return_value = True
+        mock_timezone.now.return_value = timezone.make_aware(
+            # well within office hours, to prove the parity check is unconditional
+            datetime.datetime(2023, 10, 23, 11, 42)
+        )
+
+        with silence_logger(), responses.RequestsMock():
+            call_command('load_locations_from_offender_search', scheduled=True)
+
+        # the parity check short-circuits before the office-hours check even runs
+        mock_timezone.now.assert_not_called()
+        mock_update_locations.assert_not_called()
+
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.update_locations')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.is_first_instance')
+    @mock.patch('prisoner_location_admin.management.commands.load_locations_from_offender_search.timezone')
     @override_settings(ENVIRONMENT='test')
     def test_does_not_run_outside_office_hours_on_test(
         self, mock_timezone, mock_is_first_instance, mock_update_locations,
