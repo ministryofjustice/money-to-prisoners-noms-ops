@@ -11,6 +11,7 @@ from django.test import override_settings
 from django.urls import reverse
 from mtp_common.test_utils import silence_logger
 from mtp_common.test_utils.notify import NotifyMock, GOVUK_NOTIFY_TEST_API_KEY
+from requests.exceptions import HTTPError
 import responses
 
 from security.forms.object_list import PrisonSelectorSearchFormMixin, PRISON_SELECTOR_USER_PRISONS_CHOICE_VALUE
@@ -1057,6 +1058,33 @@ class PrisonerViewsTestCase(AbstractSecurityViewTestCase):
             follow=False
         )
         self.assertRedirects(response, '/static/images/placeholder-image.png', fetch_redirect_response=False)
+
+    @responses.activate
+    @mock.patch('security.views.nomis.can_access_prisoner_search', mock.Mock(return_value=True))
+    def test_nomis_info_shows_cell_location_from_prisoner_search(self):
+        self.login(responses, follow=False)
+        scenarios = [
+            ({'nomis_id': 'BXI', 'name': 'Brixton (HMP)', 'cell_location': 'H-2-001'}, {'housing_location': 'H-2-001'}),
+            ({'nomis_id': 'OUT', 'name': 'Outside'}, {}),
+            (None, {}),
+            (HTTPError(response=mock.Mock(status_code=404)), {}),
+        ]
+        for location, expected_data in scenarios:
+            with self.subTest(location=location), \
+                    mock.patch('security.views.nomis.get_location') as mock_get_location, \
+                    silence_logger():
+                if isinstance(location, Exception):
+                    mock_get_location.side_effect = location
+                else:
+                    mock_get_location.return_value = location
+                response = self.client.get(
+                    reverse(
+                        'security:prisoner_nomis_info',
+                        kwargs={'prisoner_number': self.prisoner_profile['prisoner_number']}
+                    )
+                )
+                mock_get_location.assert_called_once_with(self.prisoner_profile['prisoner_number'])
+                self.assertEqual(response.json(), expected_data)
 
     @responses.activate
     def test_display_pinned_profile(self):
