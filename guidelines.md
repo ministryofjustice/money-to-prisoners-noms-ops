@@ -21,8 +21,8 @@ The application interacts with HMPPS APIs using **HMPPS Auth** (OAuth2 client cr
 
 - **HMPPS Prison API (NOMIS)**:
   - `GET /api/v1/offenders/{prisoner_number}/image`: Fetches prisoner photographs for security profiles.
-  - `GET /api/v1/offenders/{prisoner_number}/location`: Retrieves real-time housing location within a prison.
-- **HMPPS Offender Search API**:
+- **HMPPS Prisoner Search** (formerly Offender Search, `HMPPS_OFFENDER_SEARCH_BASE_URL`):
+  - `GET /prisoner/{prisoner_number}`: Retrieves the prisoner's current cell location for security profiles.
   - `GET /prison/{prison_id}/prisoners`: Used by management commands to bulk-load prisoner location data for accurate fund matching.
 
 ### Key Project Apps
